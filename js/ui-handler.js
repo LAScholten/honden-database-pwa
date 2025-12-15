@@ -208,6 +208,3 @@ class UIHandler {
         this.modules.data.showAlert(message, 'info');
     }
 }
-
-// Maak globale instantie
-const ui = new UIHandler();
