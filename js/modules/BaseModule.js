@@ -7,12 +7,10 @@ class BaseModule {
     constructor() {
         this.db = db;
         this.auth = auth;
-        this.ui = ui;
     }
     
     showProgress(message) {
-        this.hideProgress();
-        
+        // Directe implementatie
         const progressHTML = `
             <div class="modal-backdrop show" style="opacity: 0.8;"></div>
             <div class="progress-modal">
