@@ -1,5 +1,4 @@
-.DS_Store
-Thumbs.db
-node_modules/
-.vscode/
-*.log
+_site/
+.sass-cache/
+.jekyll-cache/
+.jekyll-metadata
