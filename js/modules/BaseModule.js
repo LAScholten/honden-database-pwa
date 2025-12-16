@@ -7,6 +7,13 @@ class BaseModule {
     constructor() {
         this.db = db;
         this.auth = auth;
+        this.currentLang = localStorage.getItem('appLanguage') || 'nl';
+    }
+    
+    t(key) {
+        // Elke module heeft zijn eigen translations
+        // Deze methode wordt overschreven in de child classes
+        return key;
     }
     
     showProgress(message) {
