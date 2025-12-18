@@ -13,10 +13,14 @@ class UIHandler {
         this.modules = {
             data: new DataManager(),
             dog: new DogManager(),
+            search: new SearchManager(),  // NIEUW: SearchManager toegevoegd
             photo: new PhotoManager(),
             breeding: new BreedingManager(),
             private: new PrivateInfoManager()
         };
+        
+        // Maak modules beschikbaar voor andere modules indien nodig
+        this.dogManager = this.modules.dog;
         
         // Voeg CSS toe voor styling
         this.addStyles();
@@ -66,6 +70,41 @@ class UIHandler {
             .photo-thumbnail img:hover {
                 transform: scale(1.05);
             }
+            
+            /* Dropdown zoekveld styling */
+            .search-dropdown {
+                position: relative;
+            }
+            
+            .search-dropdown .dropdown-menu {
+                max-height: 300px;
+                overflow-y: auto;
+                width: 100%;
+            }
+            
+            .search-dropdown .dropdown-item {
+                cursor: pointer;
+            }
+            
+            .search-dropdown .dropdown-item:hover {
+                background-color: #f8f9fa;
+            }
+            
+            .search-dropdown .dropdown-item:active {
+                background-color: #0d6efd;
+                color: white;
+            }
+            
+            /* Parent zoekveld styling */
+            .parent-search-field {
+                position: relative;
+            }
+            
+            .parent-search-field .dropdown-menu {
+                max-height: 300px;
+                overflow-y: auto;
+                width: 100%;
+            }
         `;
         
         const style = document.createElement('style');
@@ -95,7 +134,7 @@ class UIHandler {
                 break;
                 
             case 'search':
-                modalHTML = this.modules.dog.getSearchModalHTML();
+                modalHTML = this.modules.search.getModalHTML();  // NIEUW: SearchManager gebruikt
                 modalId = 'searchModal';
                 break;
                 
@@ -165,7 +204,7 @@ class UIHandler {
                     break;
                     
                 case 'search':
-                    this.modules.dog.setupSearchEvents();
+                    this.modules.search.setupEvents();  // NIEUW: SearchManager events
                     break;
                     
                 case 'photos':
@@ -246,4 +285,99 @@ class UIHandler {
             }, duration);
         }
     }
+    
+    // ========== MODULE COMMUNICATIE ==========
+    
+    /**
+     * Roep een functie aan op een specifieke module
+     * @param {string} moduleName - Naam van de module ('dog', 'search', 'photo', etc.)
+     * @param {string} functionName - Naam van de functie om aan te roepen
+     * @param {...any} args - Argumenten voor de functie
+     */
+    callModuleFunction(moduleName, functionName, ...args) {
+        if (this.modules[moduleName] && typeof this.modules[moduleName][functionName] === 'function') {
+            return this.modules[moduleName][functionName](...args);
+        } else {
+            console.error(`Functie ${functionName} bestaat niet in module ${moduleName}`);
+            return null;
+        }
+    }
+    
+    /**
+     * Toon hond details vanuit een andere module (bijv. SearchManager)
+     * @param {number} hondId - ID van de hond
+     */
+    showDogDetails(hondId) {
+        if (this.modules.dog && typeof this.modules.dog.viewDogDetails === 'function') {
+            this.modules.dog.viewDogDetails(hondId);
+        }
+    }
+    
+    /**
+     * Bewerk een hond vanuit een andere module
+     * @param {number} hondId - ID van de hond
+     */
+    editDog(hondId) {
+        if (this.modules.dog && typeof this.modules.dog.editDog === 'function') {
+            this.modules.dog.editDog(hondId);
+        }
+    }
+    
+    /**
+     * Update taal voor alle modules
+     * @param {string} lang - Taalcode ('nl', 'en', 'de')
+     */
+    updateLanguageForAllModules(lang) {
+        // Update taal in localStorage
+        localStorage.setItem('appLanguage', lang);
+        
+        // Update taal in alle modules
+        Object.values(this.modules).forEach(module => {
+            if (module.updateLanguage) {
+                module.updateLanguage(lang);
+            }
+        });
+        
+        // Herlaad huidige modal als die open is
+        if (this.currentModal) {
+            const modalElement = document.getElementById(this.currentModal);
+            if (modalElement) {
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                if (modal) {
+                    modal.hide();
+                    setTimeout(() => {
+                        const modalType = this.getModalTypeById(this.currentModal);
+                        if (modalType) {
+                            this.showModal(modalType);
+                        }
+                    }, 300);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Bepaal modal type op basis van modal ID
+     * @param {string} modalId - ID van de modal
+     * @returns {string|null} Modal type of null
+     */
+    getModalTypeById(modalId) {
+        switch (modalId) {
+            case 'dataManagementModal': return 'data';
+            case 'addDogModal': return 'addDog';
+            case 'editDogModal': return 'addDog';
+            case 'searchModal': return 'search';
+            case 'photoGalleryModal': return 'photos';
+            case 'breedingPlanModal': return 'breeding';
+            case 'privateInfoModal': return 'private';
+            default: return null;
+        }
+    }
 }
+
+// Maak UIHandler beschikbaar voor andere modules
+const uiHandler = new UIHandler();
+
+// Maak ook de dogManager beschikbaar via window voor SearchManager
+window.uiHandler = uiHandler;
+window.dogManager = uiHandler.modules.dog;
