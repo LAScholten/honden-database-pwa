@@ -301,6 +301,7 @@ class HondenDatabase {
             size: foto.size || 0,
             type: foto.type || 'image/jpeg',
             uploadedAt: new Date().toISOString(),
+            description: foto.description || '',
             geuploadDoor: window.auth?.getCurrentUser()?.username || 'unknown'
         };
         
@@ -337,6 +338,19 @@ class HondenDatabase {
             const request = store.delete(fotoId);
             
             request.onsuccess = () => resolve();
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async getAllFotos() {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['fotos'], 'readonly');
+            const store = transaction.objectStore('fotos');
+            const request = store.getAll();
+            
+            request.onsuccess = () => resolve(request.result);
             request.onerror = () => reject(request.error);
         });
     }
@@ -388,6 +402,19 @@ class HondenDatabase {
             const request = index.get(stamboomnr);
             
             request.onsuccess = () => resolve(request.result || null);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async getAllPriveInfo() {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['priveInfo'], 'readonly');
+            const store = transaction.objectStore('priveInfo');
+            const request = store.getAll();
+            
+            request.onsuccess = () => resolve(request.result);
             request.onerror = () => reject(request.error);
         });
     }
@@ -519,32 +546,6 @@ class HondenDatabase {
         });
     }
 
-    async getAllFotos() {
-        await this.init();
-        
-        return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction(['fotos'], 'readonly');
-            const store = transaction.objectStore('fotos');
-            const request = store.getAll();
-            
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
-        });
-    }
-
-    async getAllPriveInfo() {
-        await this.init();
-        
-        return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction(['priveInfo'], 'readonly');
-            const store = transaction.objectStore('priveInfo');
-            const request = store.getAll();
-            
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
-        });
-    }
-
     async getStatistieken() {
         await this.init();
         
@@ -631,4 +632,17 @@ class HondenDatabase {
     }
 }
 
+// Maak database globaal beschikbaar
+console.log('Database initialiseren...');
 const db = new HondenDatabase();
+window.db = db;
+
+// Initialiseer database wanneer DOM geladen is
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        await db.init();
+        console.log('Database klaar voor gebruik');
+    } catch (error) {
+        console.error('Database initialisatie mislukt:', error);
+    }
+});

@@ -7,10 +7,12 @@ class UIHandler {
     constructor() {
         console.log('UIHandler initialiseren...');
         
-        // Wacht tot de auth geladen is
-        setTimeout(() => {
+        // Wacht tot DOM geladen is
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.initialize());
+        } else {
             this.initialize();
-        }, 100);
+        }
     }
     
     async initialize() {
@@ -24,26 +26,35 @@ class UIHandler {
                 return;
             }
             
-            // Wacht op auth initialisatie
-            if (window.auth.isInitializing) {
-                console.log('Wachten op auth initialisatie...');
-                await this.waitForAuth();
+            // Controleer of gebruiker ingelogd is
+            if (!window.auth.isAuthenticated()) {
+                console.log('Gebruiker niet geauthenticeerd, terug naar login');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Controleer of database beschikbaar is
+            if (!window.db) {
+                console.error('Database niet gevonden!');
+                this.showDatabaseError();
+                return;
+            }
+            
+            // Wacht op database initialisatie
+            if (!window.db.isInitialized) {
+                console.log('Wachten op database initialisatie...');
+                await window.db.init();
             }
             
             this.db = window.db;
             this.auth = window.auth;
             
-            console.log('Auth status:', {
+            console.log('UIHandler status:', {
                 isAuthenticated: this.auth.isAuthenticated(),
                 isAdmin: this.auth.isAdmin(),
-                currentUser: this.auth.getCurrentUser()
+                currentUser: this.auth.getCurrentUser(),
+                databaseReady: this.db.isInitialized
             });
-            
-            if (!this.auth.isAuthenticated()) {
-                console.log('Gebruiker niet geauthenticeerd, terug naar login');
-                window.location.href = 'index.html';
-                return;
-            }
             
             this.currentModal = null;
             
@@ -65,19 +76,6 @@ class UIHandler {
             console.error('Fout bij initialiseren UIHandler:', error);
             this.showInitializationError();
         }
-    }
-    
-    waitForAuth() {
-        return new Promise((resolve) => {
-            const checkAuth = () => {
-                if (window.auth && !window.auth.isInitializing) {
-                    resolve();
-                } else {
-                    setTimeout(checkAuth, 100);
-                }
-            };
-            checkAuth();
-        });
     }
     
     initializeModules() {
@@ -199,14 +197,8 @@ class UIHandler {
                 break;
                 
             case 'search':
-                // Voor zoeken gebruiken we de DogManager's zoekfunctie
-                // of een aparte SearchManager als die bestaat
-                if (this.modules.search) {
-                    modalHTML = this.modules.search.getModalHTML();
-                } else {
-                    // Fallback naar eenvoudig zoekscherm
-                    modalHTML = this.getSimpleSearchModalHTML();
-                }
+                // Simpel zoekscherm (tijdelijk tot SearchManager klaar is)
+                modalHTML = this.getSimpleSearchModalHTML();
                 modalId = 'searchModal';
                 break;
                 
@@ -241,19 +233,22 @@ class UIHandler {
                 title: "Hond Zoeken",
                 placeholder: "Typ hond naam...",
                 search: "Zoeken",
-                close: "Sluiten"
+                close: "Sluiten",
+                info: "Typ de naam van een hond om te zoeken. Alle honden met deze naam worden getoond."
             },
             en: {
                 title: "Search Dog",
                 placeholder: "Type dog name...",
                 search: "Search",
-                close: "Close"
+                close: "Close",
+                info: "Type a dog's name to search. All dogs with this name will be shown."
             },
             de: {
                 title: "Hund suchen",
                 placeholder: "Hundenamen eingeben...",
                 search: "Suchen",
-                close: "Schließen"
+                close: "Schließen",
+                info: "Geben Sie einen Hundenamen ein, um zu suchen. Alle Hunde mit diesem Namen werden angezeigt."
             }
         };
         
@@ -272,13 +267,13 @@ class UIHandler {
                         <div class="modal-body">
                             <div class="alert alert-info mb-4">
                                 <i class="bi bi-info-circle"></i>
-                                Typ de naam van een hond om te zoeken. Alle honden met deze naam worden getoond.
+                                ${t.info}
                             </div>
                             
                             <div class="card mb-4">
                                 <div class="card-body">
                                     <div class="mb-3">
-                                        <label for="simpleSearchInput" class="form-label">Naam hond</label>
+                                        <label for="simpleSearchInput" class="form-label">${t.title}</label>
                                         <input type="text" class="form-control" id="simpleSearchInput" 
                                                placeholder="${t.placeholder}">
                                     </div>
@@ -399,7 +394,7 @@ class UIHandler {
             } catch (error) {
                 console.error(`Fout bij instellen events voor ${modalType}:`, error);
             }
-        }, 300); // Meer delay om DOM te laten laden
+        }, 300);
     }
     
     setupSimpleSearchEvents() {
@@ -429,10 +424,14 @@ class UIHandler {
         this.showProgress('Zoeken...');
         
         try {
+            if (!this.db || !this.db.getHonden) {
+                throw new Error('Database niet beschikbaar');
+            }
+            
             const honden = await this.db.getHonden();
             const results = honden.filter(hond => 
                 hond.naam.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                hond.stamboomnr.toLowerCase().includes(searchTerm.toLowerCase())
+                (hond.stamboomnr && hond.stamboomnr.toLowerCase().includes(searchTerm.toLowerCase()))
             );
             
             this.hideProgress();
@@ -441,6 +440,7 @@ class UIHandler {
         } catch (error) {
             this.hideProgress();
             this.showAlert(`Zoeken mislukt: ${error.message}`, 'danger');
+            console.error('Search error:', error);
         }
     }
     
@@ -692,6 +692,29 @@ class UIHandler {
                 padding: 2px 8px;
                 margin-left: 10px;
             }
+            
+            .search-dropdown {
+                position: relative;
+            }
+            
+            .search-dropdown .dropdown-menu {
+                max-height: 300px;
+                overflow-y: auto;
+                width: 100%;
+            }
+            
+            .search-dropdown .dropdown-item {
+                cursor: pointer;
+            }
+            
+            .search-dropdown .dropdown-item:hover {
+                background-color: #f8f9fa;
+            }
+            
+            .search-dropdown .dropdown-item:active {
+                background-color: #0d6efd;
+                color: white;
+            }
         `;
         
         const style = document.createElement('style');
@@ -718,6 +741,25 @@ class UIHandler {
         }
     }
     
+    showDatabaseError() {
+        const appContent = document.getElementById('appContent');
+        if (appContent) {
+            appContent.innerHTML = `
+                <div class="alert alert-danger">
+                    <h4 class="alert-heading">Database fout</h4>
+                    <p>Er is een probleem met de database module. Controleer of:</p>
+                    <ul>
+                        <li>De database.js correct is geladen</li>
+                        <li>Er voldoende browser storage beschikbaar is</li>
+                        <li>Er geen JavaScript errors zijn in de console</li>
+                    </ul>
+                    <hr>
+                    <button onclick="window.location.reload()" class="btn btn-danger">Pagina vernieuwen</button>
+                </div>
+            `;
+        }
+    }
+    
     showInitializationError() {
         const appContent = document.getElementById('appContent');
         if (appContent) {
@@ -739,11 +781,4 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Maak globale UIHandler beschikbaar
     window.uiHandler = new UIHandler();
-    
-    // Maak modules beschikbaar voor debugging
-    setTimeout(() => {
-        if (window.uiHandler && window.uiHandler.modules) {
-            console.log('Modules beschikbaar:', Object.keys(window.uiHandler.modules));
-        }
-    }, 1000);
 });
