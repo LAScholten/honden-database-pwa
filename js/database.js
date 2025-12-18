@@ -5,8 +5,8 @@
 
 class HondenDatabase {
     constructor() {
-        this.dbName = 'HondenDatabase_v2';
-        this.version = 2;
+        this.dbName = 'HondenDatabase_v3'; // Versie verhoogd naar v3 voor nieuwe structuur
+        this.version = 3; // Versie verhoogd voor schema wijzigingen
         this.db = null;
         this.isInitialized = false;
     }
@@ -34,31 +34,62 @@ class HondenDatabase {
             request.onupgradeneeded = (event) => {
                 console.log('Database upgrade nodig naar versie:', this.version);
                 const db = event.target.result;
-                this.createStores(db);
+                this.createStores(db, event.oldVersion);
             };
         });
     }
 
-    createStores(db) {
-        // Store 1: Honden data
+    createStores(db, oldVersion) {
+        // Verwijder oude stores als we upgraden van v2 naar v3
+        if (oldVersion < 3) {
+            try {
+                if (db.objectStoreNames.contains('honden')) {
+                    db.deleteObjectStore('honden');
+                    console.log('Oude honden store verwijderd');
+                }
+                if (db.objectStoreNames.contains('fotos')) {
+                    db.deleteObjectStore('fotos');
+                    console.log('Oude fotos store verwijderd');
+                }
+                if (db.objectStoreNames.contains('priveInfo')) {
+                    db.deleteObjectStore('priveInfo');
+                    console.log('Oude priveInfo store verwijderd');
+                }
+            } catch (error) {
+                console.log('Fout bij verwijderen oude stores:', error);
+            }
+        }
+        
+        // Store 1: Honden data met nieuwe velden structuur
         if (!db.objectStoreNames.contains('honden')) {
-            console.log('Creëer honden store');
+            console.log('Creëer nieuwe honden store met alle velden');
             const hondenStore = db.createObjectStore('honden', { 
                 keyPath: 'id', 
                 autoIncrement: true 
             });
             
+            // Indices voor snelle zoekopdrachten
             hondenStore.createIndex('naam', 'naam', { unique: false });
+            hondenStore.createIndex('stamboomnr', 'stamboomnr', { unique: true });
             hondenStore.createIndex('ras', 'ras', { unique: false });
-            hondenStore.createIndex('chipnummer', 'chipnummer', { unique: true });
-            hondenStore.createIndex('geboortedatum', 'geboortedatum', { unique: false });
             hondenStore.createIndex('geslacht', 'geslacht', { unique: false });
-            hondenStore.createIndex('eigenaar', 'eigenaar', { unique: false });
+            hondenStore.createIndex('vader', 'vader', { unique: false });
+            hondenStore.createIndex('moeder', 'moeder', { unique: false });
+            hondenStore.createIndex('geboortedatum', 'geboortedatum', { unique: false });
+            hondenStore.createIndex('overlijdensdatum', 'overlijdensdatum', { unique: false });
+            hondenStore.createIndex('heupdysplasie', 'heupdysplasie', { unique: false });
+            hondenStore.createIndex('elleboogdysplasie', 'elleboogdysplasie', { unique: false });
+            hondenStore.createIndex('patella', 'patella', { unique: false });
+            hondenStore.createIndex('ogen', 'ogen', { unique: false });
+            hondenStore.createIndex('dandyWalker', 'dandyWalker', { unique: false });
+            hondenStore.createIndex('schildklier', 'schildklier', { unique: false });
+            hondenStore.createIndex('land', 'land', { unique: false });
+            hondenStore.createIndex('postcode', 'postcode', { unique: false });
             hondenStore.createIndex('createdAt', 'createdAt', { unique: false });
             hondenStore.createIndex('updatedAt', 'updatedAt', { unique: false });
         }
         
-        // Store 2: Foto's
+        // Store 2: Foto's (voor elke hond)
         if (!db.objectStoreNames.contains('fotos')) {
             console.log('Creëer fotos store');
             const fotoStore = db.createObjectStore('fotos', { 
@@ -66,10 +97,9 @@ class HondenDatabase {
                 autoIncrement: true 
             });
             
-            fotoStore.createIndex('hondId', 'hondId', { unique: false });
-            fotoStore.createIndex('datum', 'datum', { unique: false });
-            fotoStore.createIndex('type', 'type', { unique: false });
-            fotoStore.createIndex('isThumbnail', 'isThumbnail', { unique: false });
+            fotoStore.createIndex('stamboomnr', 'stamboomnr', { unique: false });
+            fotoStore.createIndex('uploadedAt', 'uploadedAt', { unique: false });
+            fotoStore.createIndex('filename', 'filename', { unique: false });
         }
         
         // Store 3: Privé informatie
@@ -80,7 +110,7 @@ class HondenDatabase {
                 autoIncrement: true 
             });
             
-            priveStore.createIndex('hondId', 'hondId', { unique: true });
+            priveStore.createIndex('stamboomnr', 'stamboomnr', { unique: true });
             priveStore.createIndex('laatstGewijzigd', 'laatstGewijzigd', { unique: false });
         }
         
@@ -92,11 +122,30 @@ class HondenDatabase {
     async voegHondToe(hond) {
         await this.init();
         
+        // Zorg dat alle velden aanwezig zijn met standaard waarden
         const hondMetData = {
-            ...hond,
+            naam: hond.naam || '',
+            stamboomnr: hond.stamboomnr || '',
+            ras: hond.ras || '',
+            geslacht: hond.geslacht || '',
+            vader: hond.vader || '',
+            moeder: hond.moeder || '',
+            geboortedatum: hond.geboortedatum || '',
+            overlijdensdatum: hond.overlijdensdatum || '',
+            heupdysplasie: hond.heupdysplasie || '',
+            elleboogdysplasie: hond.elleboogdysplasie || '',
+            patella: hond.patella || '',
+            ogen: hond.ogen || '',
+            ogenVerklaring: hond.ogenVerklaring || '',
+            dandyWalker: hond.dandyWalker || '',
+            schildklier: hond.schildklier || '',
+            schildklierVerklaring: hond.schildklierVerklaring || '',
+            land: hond.land || '',
+            postcode: hond.postcode || '',
+            opmerkingen: hond.opmerkingen || '',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
-            createdBy: auth.getCurrentUser()?.username || 'unknown'
+            createdBy: window.auth?.getCurrentUser()?.username || 'unknown'
         };
         
         return new Promise((resolve, reject) => {
@@ -146,9 +195,10 @@ class HondenDatabase {
                     
                     let match = true;
                     for (const [key, value] of Object.entries(criteria)) {
-                        if (value && hond[key]) {
+                        if (value && hond[key] !== undefined && hond[key] !== null) {
                             if (typeof value === 'string') {
-                                if (!hond[key].toLowerCase().includes(value.toLowerCase())) {
+                                // Zoeken op gedeeltelijke overeenkomst voor tekstvelden
+                                if (!hond[key].toString().toLowerCase().includes(value.toLowerCase())) {
                                     match = false;
                                     break;
                                 }
@@ -189,8 +239,13 @@ class HondenDatabase {
                     ...existingHond,
                     ...updateData,
                     updatedAt: new Date().toISOString(),
-                    updatedBy: auth.getCurrentUser()?.username || 'unknown'
+                    updatedBy: window.auth?.getCurrentUser()?.username || 'unknown'
                 };
+                
+                // Zorg ervoor dat verplichte velden niet leeg zijn
+                updatedHond.naam = updatedHond.naam || existingHond.naam;
+                updatedHond.stamboomnr = updatedHond.stamboomnr || existingHond.stamboomnr;
+                updatedHond.ras = updatedHond.ras || existingHond.ras;
                 
                 const putRequest = store.put(updatedHond);
                 putRequest.onsuccess = () => {
@@ -220,15 +275,33 @@ class HondenDatabase {
         });
     }
 
+    async getHondByStamboomnr(stamboomnr) {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['honden'], 'readonly');
+            const store = transaction.objectStore('honden');
+            const index = store.index('stamboomnr');
+            const request = index.get(stamboomnr);
+            
+            request.onsuccess = () => resolve(request.result || null);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
     // ========== FOTO OPERATIES ==========
 
     async voegFotoToe(foto) {
         await this.init();
         
         const fotoMetData = {
-            ...foto,
-            uploadDatum: new Date().toISOString(),
-            geuploadDoor: auth.getCurrentUser()?.username || 'unknown'
+            stamboomnr: foto.stamboomnr || '',
+            data: foto.data || '',
+            filename: foto.filename || 'onbekend.jpg',
+            size: foto.size || 0,
+            type: foto.type || 'image/jpeg',
+            uploadedAt: new Date().toISOString(),
+            geuploadDoor: window.auth?.getCurrentUser()?.username || 'unknown'
         };
         
         return new Promise((resolve, reject) => {
@@ -241,14 +314,14 @@ class HondenDatabase {
         });
     }
 
-    async getFotosVoorHond(hondId) {
+    async getFotosVoorStamboomnr(stamboomnr) {
         await this.init();
         
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['fotos'], 'readonly');
             const store = transaction.objectStore('fotos');
-            const index = store.index('hondId');
-            const request = index.getAll(hondId);
+            const index = store.index('stamboomnr');
+            const request = index.getAll(stamboomnr);
             
             request.onsuccess = () => resolve(request.result);
             request.onerror = () => reject(request.error);
@@ -276,15 +349,15 @@ class HondenDatabase {
         const infoMetData = {
             ...priveInfo,
             laatstGewijzigd: new Date().toISOString(),
-            gewijzigdDoor: auth.getCurrentUser()?.username || 'unknown'
+            gewijzigdDoor: window.auth?.getCurrentUser()?.username || 'unknown'
         };
         
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['priveInfo'], 'readwrite');
             const store = transaction.objectStore('priveInfo');
-            const index = store.index('hondId');
+            const index = store.index('stamboomnr');
             
-            const getRequest = index.get(infoMetData.hondId);
+            const getRequest = index.get(infoMetData.stamboomnr);
             
             getRequest.onsuccess = () => {
                 const existingInfo = getRequest.result;
@@ -305,14 +378,14 @@ class HondenDatabase {
         });
     }
 
-    async getPriveInfoVoorHond(hondId) {
+    async getPriveInfoVoorStamboomnr(stamboomnr) {
         await this.init();
         
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['priveInfo'], 'readonly');
             const store = transaction.objectStore('priveInfo');
-            const index = store.index('hondId');
-            const request = index.get(hondId);
+            const index = store.index('stamboomnr');
+            const request = index.get(stamboomnr);
             
             request.onsuccess = () => resolve(request.result || null);
             request.onerror = () => reject(request.error);
@@ -328,7 +401,7 @@ class HondenDatabase {
             metadata: {
                 exportType: type,
                 exportDatum: new Date().toISOString(),
-                exportDoor: auth.getCurrentUser()?.username || 'unknown',
+                exportDoor: window.auth?.getCurrentUser()?.username || 'unknown',
                 versie: this.version,
                 databaseNaam: this.dbName
             },
@@ -366,15 +439,17 @@ class HondenDatabase {
         if (importData.honden && Array.isArray(importData.honden)) {
             for (const hond of importData.honden) {
                 try {
-                    const bestaandeHonden = await this.getHonden();
-                    const bestaandeHond = bestaandeHonden.find(h => h.chipnummer === hond.chipnummer);
+                    // Controleer of hond al bestaat op basis van stamboomnr
+                    const bestaandeHond = await this.getHondByStamboomnr(hond.stamboomnr);
                     
-                    if (bestaandeHond) {
+                    if (bestaandeHond && overschrijven) {
                         await this.updateHond(bestaandeHond.id, hond);
                         resultaat.honden.bijgewerkt++;
-                    } else {
+                    } else if (!bestaandeHond) {
                         await this.voegHondToe(hond);
                         resultaat.honden.toegevoegd++;
+                    } else {
+                        resultaat.honden.overgeslagen++;
                     }
                 } catch (error) {
                     console.error('Fout bij importeren hond:', error);
@@ -386,12 +461,13 @@ class HondenDatabase {
         if (importData.fotos && Array.isArray(importData.fotos)) {
             for (const foto of importData.fotos) {
                 try {
-                    const honden = await this.getHonden();
-                    const hondBestaat = honden.some(h => h.id === foto.hondId);
+                    const hondBestaat = await this.getHondByStamboomnr(foto.stamboomnr);
                     
                     if (hondBestaat || opties.forceerFotos) {
                         await this.voegFotoToe(foto);
                         resultaat.fotos.toegevoegd++;
+                    } else {
+                        console.log(`Foto overgeslagen: Hond met stamboomnr ${foto.stamboomnr} niet gevonden`);
                     }
                 } catch (error) {
                     console.error('Fout bij importeren foto:', error);
@@ -423,7 +499,7 @@ class HondenDatabase {
     async wisAlleData() {
         await this.init();
         
-        if (!auth.isAdmin()) {
+        if (!window.auth?.isAdmin?.()) {
             throw new Error('Alleen administrators mogen alle data wissen');
         }
         
@@ -497,7 +573,7 @@ class HondenDatabase {
             this.getAllPriveInfo()
         ]);
         
-        const avgHondSize = 500;
+        const avgHondSize = 1000; // Meer velden = grotere records
         const avgFotoSize = 50000;
         const avgPriveSize = 1000;
         
@@ -509,6 +585,49 @@ class HondenDatabase {
         if (totalBytes < 1024) return totalBytes + ' B';
         if (totalBytes < 1048576) return (totalBytes / 1024).toFixed(1) + ' KB';
         return (totalBytes / 1048576).toFixed(1) + ' MB';
+    }
+
+    // ========== BACKUP EN HERSTEL ==========
+
+    async maakBackup() {
+        const backupData = await this.exportData('all');
+        const backupString = JSON.stringify(backupData, null, 2);
+        const backupDatum = new Date().toISOString().replace(/[:.]/g, '-');
+        const backupNaam = `honden-backup-${backupDatum}.json`;
+        
+        return {
+            data: backupString,
+            naam: backupNaam,
+            datum: backupDatum,
+            aantallen: {
+                honden: backupData.honden.length,
+                fotos: backupData.fotos.length,
+                priveInfo: backupData.priveInfo.length
+            }
+        };
+    }
+
+    async herstelVanBackup(backupString) {
+        try {
+            const backupData = JSON.parse(backupString);
+            
+            if (!backupData.metadata || !backupData.honden) {
+                throw new Error('Ongeldig backup formaat');
+            }
+            
+            // Wis eerst alle bestaande data
+            await this.wisAlleData();
+            
+            // Importeer de backup data
+            const resultaat = await this.importData(backupData, true);
+            
+            console.log('Backup herstel voltooid:', resultaat);
+            return resultaat;
+            
+        } catch (error) {
+            console.error('Fout bij herstel van backup:', error);
+            throw error;
+        }
     }
 }
 
