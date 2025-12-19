@@ -116,12 +116,12 @@ class UIHandler {
         
         // Menu knoppen - met fallback voor als ze niet bestaan
         const buttonConfigs = [
+            { id: 'dataManagementBtn', modal: 'data', adminOnly: true },
             { id: 'addDogBtn', modal: 'addDog', adminOnly: true },
-            { id: 'searchDogBtn', modal: 'search', adminOnly: false },
+            { id: 'searchBtn', modal: 'search', adminOnly: false },
             { id: 'photoGalleryBtn', modal: 'photos', adminOnly: false },
             { id: 'breedingPlanBtn', modal: 'breeding', adminOnly: true },
-            { id: 'privateInfoBtn', modal: 'private', adminOnly: true },
-            { id: 'dataManagementBtn', modal: 'data', adminOnly: true }
+            { id: 'privateInfoBtn', modal: 'private', adminOnly: true }
         ];
         
         buttonConfigs.forEach(config => {
