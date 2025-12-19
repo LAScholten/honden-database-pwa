@@ -141,38 +141,59 @@ function setupApplicationEvents() {
         });
     }
     
-    // Menu knoppen
+    // Delegated event listener voor alle knoppen
     document.addEventListener('click', function(e) {
         // Hond toevoegen knop
-        if (e.target.closest('#addDogBtn') || (e.target.id === 'addDogBtn')) {
+        if (e.target.id === 'addDogBtn' || e.target.closest('#addDogBtn')) {
             e.preventDefault();
-            if (dogManager) {
-                showDogAddModal();
-            } else {
-                showError('DogManager niet beschikbaar. Herlaad de pagina.');
-            }
+            console.log('Hond toevoegen knop geklikt');
+            showDogAddModal();
         }
         
-        // Hond zoeken knop
-        if (e.target.closest('#searchDogBtn') || (e.target.id === 'searchDogBtn')) {
+        // Hond zoeken knop (ook als de knop in dashboard of menu staat)
+        if (e.target.id === 'searchDogBtn' || e.target.closest('#searchDogBtn')) {
             e.preventDefault();
-            if (searchManager) {
-                showSearchModal();
-            } else {
-                showError('SearchManager niet beschikbaar. Herlaad de pagina.');
-            }
+            console.log('Hond zoeken knop geklikt');
+            showSearchModal();
         }
         
         // Privé info knop
-        if (e.target.closest('#privateInfoBtn') || (e.target.id === 'privateInfoBtn')) {
+        if (e.target.id === 'privateInfoBtn' || e.target.closest('#privateInfoBtn')) {
             e.preventDefault();
-            if (privateInfoManager) {
-                showPrivateInfoModal();
-            } else {
-                showError('PrivateInfoManager niet beschikbaar. Herlaad de pagina.');
-            }
+            console.log('Privé info knop geklikt');
+            showPrivateInfoModal();
         }
     });
+    
+    // Ook event listeners toevoegen aan bestaande knoppen als die al bestaan
+    setTimeout(() => {
+        const addDogBtn = document.getElementById('addDogBtn');
+        if (addDogBtn && !addDogBtn.hasAttribute('data-event-bound')) {
+            addDogBtn.setAttribute('data-event-bound', 'true');
+            addDogBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                showDogAddModal();
+            });
+        }
+        
+        const searchDogBtn = document.getElementById('searchDogBtn');
+        if (searchDogBtn && !searchDogBtn.hasAttribute('data-event-bound')) {
+            searchDogBtn.setAttribute('data-event-bound', 'true');
+            searchDogBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSearchModal();
+            });
+        }
+        
+        const privateInfoBtn = document.getElementById('privateInfoBtn');
+        if (privateInfoBtn && !privateInfoBtn.hasAttribute('data-event-bound')) {
+            privateInfoBtn.setAttribute('data-event-bound', 'true');
+            privateInfoBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                showPrivateInfoModal();
+            });
+        }
+    }, 500);
 }
 
 /**
@@ -180,9 +201,12 @@ function setupApplicationEvents() {
  */
 function showDogAddModal() {
     if (!dogManager) {
-        showError('DogManager niet beschikbaar');
+        showError('DogManager niet beschikbaar. Herlaad de pagina en controleer de console.');
+        console.error('DogManager is niet beschikbaar. Controleer of DogManager.js correct is ingeladen.');
         return;
     }
+    
+    console.log('Toon hond toevoegen modal...');
     
     // Controleer of modal al bestaat
     let modal = document.getElementById('addDogModal');
@@ -221,9 +245,12 @@ function showDogAddModal() {
  */
 function showSearchModal() {
     if (!searchManager) {
-        showError('SearchManager niet beschikbaar');
+        showError('SearchManager niet beschikbaar. Herlaad de pagina en controleer de console.');
+        console.error('SearchManager is niet beschikbaar. Controleer of SearchManager.js correct is ingeladen.');
         return;
     }
+    
+    console.log('Toon zoekmodal...');
     
     // Controleer of modal al bestaat
     let modal = document.getElementById('searchModal');
@@ -348,6 +375,24 @@ function loadMainContent() {
                 </div>
             </div>
         `;
+        
+        // Voeg direct event listeners toe aan nieuwe knoppen
+        setTimeout(() => {
+            const addDogBtn = document.getElementById('addDogBtn');
+            if (addDogBtn) {
+                addDogBtn.addEventListener('click', showDogAddModal);
+            }
+            
+            const searchDogBtn = document.getElementById('searchDogBtn');
+            if (searchDogBtn) {
+                searchDogBtn.addEventListener('click', showSearchModal);
+            }
+            
+            const privateInfoBtn = document.getElementById('privateInfoBtn');
+            if (privateInfoBtn) {
+                privateInfoBtn.addEventListener('click', showPrivateInfoModal);
+            }
+        }, 100);
     }
 }
 
