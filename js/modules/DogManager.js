@@ -8,12 +8,14 @@ class DogManager extends BaseModule {
         super();
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';
         this.lastBreeds = JSON.parse(localStorage.getItem('lastBreeds') || '[]');
+        this.currentSearchResults = []; // Houdt huidige zoekresultaten bij
         this.translations = {
             nl: {
                 // Modal titels
                 newDog: "Nieuwe Hond Toevoegen",
                 editDog: "Hond Bewerken",
                 searchDog: "Hond Zoeken",
+                searchResults: "Zoekresultaten",
                 
                 // Form velden
                 name: "Naam",
@@ -90,15 +92,17 @@ class DogManager extends BaseModule {
                 enterCountry: "Voer land in...",
                 search: "Zoeken",
                 reset: "Reset",
-                enterCriteria: "Voer zoekcriteria in en klik op zoeken",
+                enterCriteria: "Voer minstens een hondennaam in en klik op zoeken",
                 
                 // Resultaten
-                searchResults: "Zoekresultaten",
                 found: "gevonden",
                 exportResults: "Exporteer",
                 actions: "Acties",
                 view: "Bekijken",
                 edit: "Bewerken",
+                deleteResult: "Verwijderen",
+                showAllResults: "Toon alle resultaten",
+                closeResults: "Sluit resultaten",
                 
                 // Details
                 details: "Details",
@@ -108,6 +112,8 @@ class DogManager extends BaseModule {
                 pedigreeInfo: "Stamboom informatie",
                 createdAt: "Aangemaakt",
                 updatedAt: "Laatst bijgewerkt",
+                backToSearch: "Terug naar zoeken",
+                noResultsFound: "Geen resultaten gevonden",
                 
                 // Alerts
                 adminOnly: "Alleen administrators mogen honden toevoegen/bewerken",
@@ -119,7 +125,7 @@ class DogManager extends BaseModule {
                 addFailed: "Fout bij toevoegen hond: ",
                 updateFailed: "Fout bij bijwerken hond: ",
                 deleteFailed: "Fout bij verwijderen hond: ",
-                enterCriteriaError: "Voer minstens één zoekcriterium in",
+                enterCriteriaError: "Voer minstens een hondennaam in",
                 searching: "Zoeken...",
                 searchFailed: "Zoeken mislukt: ",
                 resetForm: "Zoekformulier gereset",
@@ -135,6 +141,7 @@ class DogManager extends BaseModule {
                 newDog: "Add New Dog",
                 editDog: "Edit Dog",
                 searchDog: "Search Dog",
+                searchResults: "Search Results",
                 
                 // Form fields
                 name: "Name",
@@ -211,15 +218,17 @@ class DogManager extends BaseModule {
                 enterCountry: "Enter country...",
                 search: "Search",
                 reset: "Reset",
-                enterCriteria: "Enter search criteria and click search",
+                enterCriteria: "Enter at least a dog name and click search",
                 
                 // Results
-                searchResults: "Search Results",
                 found: "found",
                 exportResults: "Export",
                 actions: "Actions",
                 view: "View",
                 edit: "Edit",
+                deleteResult: "Delete",
+                showAllResults: "Show all results",
+                closeResults: "Close results",
                 
                 // Details
                 details: "Details",
@@ -229,6 +238,8 @@ class DogManager extends BaseModule {
                 pedigreeInfo: "Pedigree Information",
                 createdAt: "Created",
                 updatedAt: "Last updated",
+                backToSearch: "Back to search",
+                noResultsFound: "No results found",
                 
                 // Alerts
                 adminOnly: "Only administrators can add/edit dogs",
@@ -240,7 +251,7 @@ class DogManager extends BaseModule {
                 addFailed: "Error adding dog: ",
                 updateFailed: "Error updating dog: ",
                 deleteFailed: "Error deleting dog: ",
-                enterCriteriaError: "Enter at least one search criterion",
+                enterCriteriaError: "Enter at least a dog name",
                 searching: "Searching...",
                 searchFailed: "Search failed: ",
                 resetForm: "Search form reset",
@@ -256,6 +267,7 @@ class DogManager extends BaseModule {
                 newDog: "Neuen Hund hinzufügen",
                 editDog: "Hund bearbeiten",
                 searchDog: "Hund suchen",
+                searchResults: "Suchergebnisse",
                 
                 // Formular Felder
                 name: "Name",
@@ -332,15 +344,17 @@ class DogManager extends BaseModule {
                 enterCountry: "Land eingeben...",
                 search: "Suchen",
                 reset: "Zurücksetzen",
-                enterCriteria: "Suchkriterien eingeben und auf Suchen klicken",
+                enterCriteria: "Geben Sie mindestens einen Hundenamen ein und klicken Sie auf Suchen",
                 
                 // Ergebnisse
-                searchResults: "Suchergebnisse",
                 found: "gefunden",
                 exportResults: "Exportieren",
                 actions: "Aktionen",
                 view: "Ansehen",
                 edit: "Bearbeiten",
+                deleteResult: "Löschen",
+                showAllResults: "Alle Ergebnisse anzeigen",
+                closeResults: "Ergebnisse schließen",
                 
                 // Details
                 details: "Details",
@@ -350,6 +364,8 @@ class DogManager extends BaseModule {
                 pedigreeInfo: "Stammbaum Information",
                 createdAt: "Erstellt",
                 updatedAt: "Zuletzt aktualisiert",
+                backToSearch: "Zurück zur Suche",
+                noResultsFound: "Keine Ergebnisse gefunden",
                 
                 // Meldungen
                 adminOnly: "Nur Administratoren können Hunde hinzufügen/bearbeiten",
@@ -361,7 +377,7 @@ class DogManager extends BaseModule {
                 addFailed: "Fehler beim Hinzufügen des Hundes: ",
                 updateFailed: "Fehler beim Aktualisieren des Hundes: ",
                 deleteFailed: "Fehler beim Löschen des Hundes: ",
-                enterCriteriaError: "Geben Sie mindestens ein Suchkriterium ein",
+                enterCriteriaError: "Geben Sie mindestens einen Hundenamen ein",
                 searching: "Suche läuft...",
                 searchFailed: "Suche fehlgeschlagen: ",
                 resetForm: "Suchformular zurückgesetzt",
@@ -645,7 +661,7 @@ class DogManager extends BaseModule {
         
         return `
             <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-xl">
+                <div class="modal-dialog modal-lg">
                     <div class="modal-content">
                         <div class="modal-header bg-info text-white">
                             <h5 class="modal-title" id="searchModalLabel">
@@ -656,22 +672,22 @@ class DogManager extends BaseModule {
                         <div class="modal-body">
                             <div class="card mb-4">
                                 <div class="card-body">
+                                    <h6 class="mb-3">${t('searchDog')}</h6>
                                     <div class="row g-3">
-                                        <div class="col-md-3">
-                                            <label for="searchNaam" class="form-label">${t('searchName')}</label>
-                                            <input type="text" class="form-control" id="searchNaam" placeholder="${t('enterName')}">
+                                        <div class="col-md-6">
+                                            <label for="searchNaam" class="form-label">${t('searchName')} *</label>
+                                            <input type="text" class="form-control" id="searchNaam" placeholder="${t('enterName')}" required>
+                                            <div class="form-text">Voer (een deel van) de hondennaam in</div>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-6">
                                             <label for="searchStamboomnr" class="form-label">${t('searchPedigree')}</label>
                                             <input type="text" class="form-control" id="searchStamboomnr" placeholder="${t('enterPedigree')}">
+                                            <div class="form-text">Optioneel: stamboomnummer</div>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-6">
                                             <label for="searchRas" class="form-label">${t('searchBreed')}</label>
                                             <input type="text" class="form-control" id="searchRas" placeholder="${t('enterBreed')}">
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label for="searchLand" class="form-label">${t('searchCountry')}</label>
-                                            <input type="text" class="form-control" id="searchLand" placeholder="${t('enterCountry')}">
+                                            <div class="form-text">Optioneel: ras</div>
                                         </div>
                                         <div class="col-md-6">
                                             <label for="searchGeslacht" class="form-label">${t('searchGender')}</label>
@@ -682,8 +698,8 @@ class DogManager extends BaseModule {
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="mt-3">
-                                        <button class="btn btn-info" id="searchBtn">
+                                    <div class="mt-4">
+                                        <button class="btn btn-info btn-lg" id="searchBtn">
                                             <i class="bi bi-search"></i> ${t('search')}
                                         </button>
                                         <button class="btn btn-secondary" id="resetSearchBtn">
@@ -693,11 +709,9 @@ class DogManager extends BaseModule {
                                 </div>
                             </div>
                             
-                            <div id="searchResultsContainer">
-                                <div class="text-center py-5">
-                                    <i class="bi bi-search display-1 text-muted"></i>
-                                    <p class="mt-3 text-muted">${t('enterCriteria')}</p>
-                                </div>
+                            <!-- Resultaten container blijft leeg - wordt gevuld na zoeken -->
+                            <div id="searchResultsContainer" style="display: none;">
+                                <!-- Resultaten worden hier ingevoegd -->
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -705,6 +719,40 @@ class DogManager extends BaseModule {
                         </div>
                     </div>
                 </div>
+            </div>
+        `;
+    }
+    
+    getResultsPageHTML() {
+        const t = this.t.bind(this);
+        
+        return `
+            <div class="container-fluid mt-3">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>
+                        <i class="bi bi-search"></i> ${t('searchResults')}
+                        <span class="badge bg-info fs-6">${this.currentSearchResults.length} ${t('found')}</span>
+                    </h2>
+                    <div>
+                        <button class="btn btn-outline-secondary" id="backToSearchBtn">
+                            <i class="bi bi-arrow-left"></i> ${t('backToSearch')}
+                        </button>
+                        <button class="btn btn-outline-info" id="exportResultsBtn">
+                            <i class="bi bi-download"></i> ${t('exportResults')}
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="row" id="searchResultsGrid">
+                    <!-- Resultaten worden hier ingevoegd -->
+                </div>
+                
+                ${this.currentSearchResults.length === 0 ? `
+                <div class="text-center py-5">
+                    <i class="bi bi-search display-1 text-muted"></i>
+                    <h4 class="mt-3 text-muted">${t('noResultsFound')}</h4>
+                </div>
+                ` : ''}
             </div>
         `;
     }
@@ -774,6 +822,272 @@ class DogManager extends BaseModule {
             resetBtn.addEventListener('click', () => {
                 this.resetSearchForm();
             });
+        }
+    }
+    
+    async performSearch() {
+        const naam = document.getElementById('searchNaam').value.trim();
+        
+        if (!naam) {
+            this.showError(this.t('enterCriteriaError'));
+            return;
+        }
+        
+        this.showProgress(this.t('searching'));
+        
+        try {
+            // Verzamel alle zoekcriteria
+            const criteria = {
+                naam: naam,
+                stamboomnr: document.getElementById('searchStamboomnr').value.trim(),
+                ras: document.getElementById('searchRas').value.trim(),
+                geslacht: document.getElementById('searchGeslacht').value
+            };
+            
+            // Verwijder lege velden
+            Object.keys(criteria).forEach(key => {
+                if (!criteria[key]) delete criteria[key];
+            });
+            
+            // Voer zoekopdracht uit
+            const results = await this.db.zoekHonden(criteria);
+            this.currentSearchResults = results;
+            
+            this.hideProgress();
+            
+            if (results.length === 0) {
+                this.showInfo(this.t('noDogsFound'));
+                return;
+            }
+            
+            // Sluit de zoekmodal
+            const searchModal = bootstrap.Modal.getInstance(document.getElementById('searchModal'));
+            if (searchModal) {
+                searchModal.hide();
+            }
+            
+            // Toon de resultaten in een nieuw tabblad/container
+            this.showSearchResultsPage();
+            
+        } catch (error) {
+            this.hideProgress();
+            this.showError(`${this.t('searchFailed')}${error.message}`);
+        }
+    }
+    
+    showSearchResultsPage() {
+        const t = this.t.bind(this);
+        
+        // Haal de hoofdcontent container op
+        const mainContent = document.getElementById('mainContent');
+        if (!mainContent) return;
+        
+        // Genereer de resultaten pagina HTML
+        const html = this.getResultsPageHTML();
+        mainContent.innerHTML = html;
+        
+        // Toon de resultaten
+        this.displaySearchResultsGrid();
+        
+        // Event listeners voor resultaten pagina
+        const backBtn = document.getElementById('backToSearchBtn');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                this.showMainContent();
+            });
+        }
+        
+        const exportBtn = document.getElementById('exportResultsBtn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => {
+                this.exportSearchResults(this.currentSearchResults);
+            });
+        }
+    }
+    
+    displaySearchResultsGrid() {
+        const t = this.t.bind(this);
+        const container = document.getElementById('searchResultsGrid');
+        if (!container) return;
+        
+        if (this.currentSearchResults.length === 0) {
+            container.innerHTML = `
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-search display-1 text-muted"></i>
+                    <h4 class="mt-3 text-muted">${t('noResultsFound')}</h4>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '';
+        
+        this.currentSearchResults.forEach(hond => {
+            const genderText = hond.geslacht === 'reuen' ? t('male') : 
+                             hond.geslacht === 'teven' ? t('female') : 'Onbekend';
+            
+            html += `
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-dog"></i> ${hond.naam}
+                                </h5>
+                                <span class="badge bg-${hond.geslacht === 'reuen' ? 'primary' : 'danger'}">
+                                    ${genderText}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <strong><i class="bi bi-tag"></i> ${t('breed')}:</strong>
+                                ${hond.ras || 'Onbekend'}
+                            </div>
+                            <div class="mb-2">
+                                <strong><i class="bi bi-hash"></i> ${t('pedigreeNumber')}:</strong>
+                                ${hond.stamboomnr ? `<code>${hond.stamboomnr}</code>` : 'Niet bekend'}
+                            </div>
+                            ${hond.geboortedatum ? `
+                            <div class="mb-2">
+                                <strong><i class="bi bi-calendar"></i> ${t('birthDate')}:</strong>
+                                ${new Date(hond.geboortedatum).toLocaleDateString(this.currentLang)}
+                            </div>
+                            ` : ''}
+                            ${hond.land ? `
+                            <div class="mb-2">
+                                <strong><i class="bi bi-globe"></i> ${t('country')}:</strong>
+                                ${hond.land}
+                            </div>
+                            ` : ''}
+                            ${hond.vader || hond.moeder ? `
+                            <div class="mt-3">
+                                <strong><i class="bi bi-diagram-3"></i> ${t('pedigreeInfo')}:</strong>
+                                <div class="small">
+                                    ${hond.vader ? `${t('father')}: ${hond.vader}<br>` : ''}
+                                    ${hond.moeder ? `${t('mother')}: ${hond.moeder}` : ''}
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                        <div class="card-footer bg-white">
+                            <div class="d-flex justify-content-between">
+                                <button class="btn btn-sm btn-outline-primary view-dog-btn" data-id="${hond.id}">
+                                    <i class="bi bi-eye"></i> ${t('view')}
+                                </button>
+                                ${this.auth.isAdmin() ? `
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-outline-warning edit-dog-btn" data-id="${hond.id}">
+                                        <i class="bi bi-pencil"></i> ${t('edit')}
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger delete-dog-btn" data-id="${hond.id}" data-name="${hond.naam}">
+                                        <i class="bi bi-trash"></i> ${t('deleteResult')}
+                                    </button>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+        
+        // Event listeners voor knoppen
+        this.setupResultsPageEvents();
+    }
+    
+    setupResultsPageEvents() {
+        // View knoppen
+        document.querySelectorAll('.view-dog-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const hondId = e.target.closest('.view-dog-btn').dataset.id;
+                this.viewDogDetails(hondId);
+            });
+        });
+        
+        // Edit knoppen
+        document.querySelectorAll('.edit-dog-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const hondId = e.target.closest('.edit-dog-btn').dataset.id;
+                this.editDog(hondId);
+            });
+        });
+        
+        // Delete knoppen
+        document.querySelectorAll('.delete-dog-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const hondId = e.target.closest('.delete-dog-btn').dataset.id;
+                const hondNaam = e.target.closest('.delete-dog-btn').dataset.name;
+                this.deleteDogDirect(hondId, hondNaam);
+            });
+        });
+    }
+    
+    async deleteDogDirect(hondId, hondNaam) {
+        if (!this.auth.isAdmin()) {
+            this.showError(this.t('adminOnly'));
+            return;
+        }
+        
+        if (!confirm(`${this.t('confirmDelete')}\n\n"${hondNaam}"`)) {
+            return;
+        }
+        
+        this.showProgress("Hond verwijderen...");
+        
+        try {
+            // Verwijder ook gerelateerde foto's
+            const hond = await this.getHondById(parseInt(hondId));
+            if (hond && hond.stamboomnr) {
+                const fotos = await this.db.getFotosVoorStamboomnr(hond.stamboomnr);
+                for (const foto of fotos) {
+                    try {
+                        await this.db.verwijderFoto(foto.id);
+                    } catch (fotoError) {
+                        console.log(`Foto ${foto.id} kon niet verwijderd worden:`, fotoError);
+                    }
+                }
+            }
+            
+            // Verwijder de hond
+            await this.db.verwijderHond(parseInt(hondId));
+            this.hideProgress();
+            this.showSuccess(`${hondNaam} ${this.t('dogDeleted').toLowerCase()}`);
+            
+            // Vernieuw de resultaten
+            setTimeout(() => {
+                // Verwijder de hond uit huidige resultaten
+                this.currentSearchResults = this.currentSearchResults.filter(h => h.id !== parseInt(hondId));
+                this.displaySearchResultsGrid();
+            }, 500);
+            
+        } catch (error) {
+            this.hideProgress();
+            this.showError(`${this.t('deleteFailed')}${error.message}`);
+        }
+    }
+    
+    resetSearchForm() {
+        document.getElementById('searchNaam').value = '';
+        document.getElementById('searchStamboomnr').value = '';
+        document.getElementById('searchRas').value = '';
+        document.getElementById('searchGeslacht').value = '';
+        
+        const resultsContainer = document.getElementById('searchResultsContainer');
+        if (resultsContainer) {
+            resultsContainer.innerHTML = '';
+            resultsContainer.style.display = 'none';
+        }
+        
+        this.showSuccess(this.t('resetForm'));
+    }
+    
+    showMainContent() {
+        // Laad de hoofdcontent opnieuw
+        if (typeof loadMainContent === 'function') {
+            loadMainContent();
         }
     }
     
@@ -862,13 +1176,15 @@ class DogManager extends BaseModule {
         }
         
         const dogId = document.getElementById('dogId').value;
+        const dogName = document.getElementById('dogName').value;
+        
         if (!dogId) return;
         
-        if (!confirm(this.t('confirmDelete'))) {
+        if (!confirm(`${this.t('confirmDelete')}\n\n"${dogName}"`)) {
             return;
         }
         
-        this.showProgress("Verwijderen...");
+        this.showProgress("Hond verwijderen...");
         
         try {
             await this.db.verwijderHond(parseInt(dogId));
@@ -918,156 +1234,6 @@ class DogManager extends BaseModule {
             });
         } catch (error) {
             this.showError(`${this.t('photoError')}${error.message}`);
-        }
-    }
-    
-    async performSearch() {
-        const criteria = {
-            naam: document.getElementById('searchNaam').value.trim(),
-            stamboomnr: document.getElementById('searchStamboomnr').value.trim(),
-            ras: document.getElementById('searchRas').value.trim(),
-            land: document.getElementById('searchLand').value.trim(),
-            geslacht: document.getElementById('searchGeslacht').value
-        };
-        
-        Object.keys(criteria).forEach(key => {
-            if (!criteria[key]) delete criteria[key];
-        });
-        
-        if (Object.keys(criteria).length === 0) {
-            this.showError(this.t('enterCriteriaError'));
-            return;
-        }
-        
-        this.showProgress(this.t('searching'));
-        
-        try {
-            const results = await this.db.zoekHonden(criteria);
-            this.hideProgress();
-            this.displaySearchResults(results);
-            
-        } catch (error) {
-            this.hideProgress();
-            this.showError(`${this.t('searchFailed')}${error.message}`);
-        }
-    }
-    
-    resetSearchForm() {
-        document.getElementById('searchNaam').value = '';
-        document.getElementById('searchStamboomnr').value = '';
-        document.getElementById('searchRas').value = '';
-        document.getElementById('searchLand').value = '';
-        document.getElementById('searchGeslacht').value = '';
-        
-        const resultsContainer = document.getElementById('searchResultsContainer');
-        if (resultsContainer) {
-            resultsContainer.innerHTML = `
-                <div class="text-center py-5">
-                    <i class="bi bi-search display-1 text-muted"></i>
-                    <p class="mt-3 text-muted">${this.t('enterCriteria')}</p>
-                </div>
-            `;
-        }
-        
-        this.showSuccess(this.t('resetForm'));
-    }
-    
-    displaySearchResults(results) {
-        const t = this.t.bind(this);
-        const container = document.getElementById('searchResultsContainer');
-        if (!container) return;
-        
-        if (results.length === 0) {
-            container.innerHTML = `
-                <div class="text-center py-5">
-                    <i class="bi bi-search display-1 text-muted"></i>
-                    <p class="mt-3 text-muted">${t('noDogsFound')}</p>
-                </div>
-            `;
-            return;
-        }
-        
-        let html = `
-            <div class="card">
-                <div class="card-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h6 class="mb-0">${t('searchResults')} (${results.length} ${t('found')})</h6>
-                        <button class="btn btn-sm btn-outline-info" id="exportSearchResultsBtn">
-                            <i class="bi bi-download"></i> ${t('exportResults')}
-                        </button>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>${t('name')}</th>
-                                    <th>${t('breed')}</th>
-                                    <th>${t('pedigreeNumber')}</th>
-                                    <th>${t('gender')}</th>
-                                    <th>${t('country')}</th>
-                                    <th>${t('actions')}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-        `;
-        
-        results.forEach(hond => {
-            const genderText = hond.geslacht === 'reuen' ? t('male') : 
-                             hond.geslacht === 'teven' ? t('female') : '-';
-            
-            html += `
-                <tr>
-                    <td><strong>${hond.naam}</strong></td>
-                    <td>${hond.ras || '-'}</td>
-                    <td><code>${hond.stamboomnr || '-'}</code></td>
-                    <td>${genderText}</td>
-                    <td>${hond.land || '-'}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary view-dog-btn" data-id="${hond.id}">
-                            <i class="bi bi-eye"></i> ${t('view')}
-                        </button>
-                        ${this.auth.isAdmin() ? `
-                        <button class="btn btn-sm btn-outline-warning edit-dog-btn" data-id="${hond.id}">
-                            <i class="bi bi-pencil"></i> ${t('edit')}
-                        </button>
-                        ` : ''}
-                    </td>
-                </tr>
-            `;
-        });
-        
-        html += `
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        container.innerHTML = html;
-        
-        // Event listeners voor knoppen
-        document.querySelectorAll('.view-dog-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const hondId = e.target.closest('.view-dog-btn').dataset.id;
-                this.viewDogDetails(hondId);
-            });
-        });
-        
-        document.querySelectorAll('.edit-dog-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const hondId = e.target.closest('.edit-dog-btn').dataset.id;
-                this.editDog(hondId);
-            });
-        });
-        
-        const exportBtn = document.getElementById('exportSearchResultsBtn');
-        if (exportBtn) {
-            exportBtn.addEventListener('click', () => {
-                this.exportSearchResults(results);
-            });
         }
     }
     
@@ -1282,5 +1448,27 @@ class DogManager extends BaseModule {
         } catch (error) {
             this.showError(`${this.t('exportFailed')}${error.message}`);
         }
+    }
+    
+    async getHondById(hondId) {
+        try {
+            const honden = await this.db.getHonden();
+            return honden.find(h => h.id === hondId);
+        } catch (error) {
+            console.error('Fout bij ophalen hond:', error);
+            return null;
+        }
+    }
+    
+    // Helper method voor bestandsdownload
+    downloadFile(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 }
