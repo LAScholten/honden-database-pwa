@@ -23,12 +23,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Setup PWA installatie
         setupPWAInstallation();
         
-        // Initialiseer database en managers
-        await initializeApplication();
-        
-        // Setup applicatie events
-        setupApplicationEvents();
-        
         // Toon welkomstbericht
         console.log('Hondendatabase PWA is klaar voor gebruik!');
         
@@ -40,395 +34,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         showError('Fout bij initialiseren van de applicatie. Probeer de pagina te verversen.');
     }
 });
-
-/**
- * Initialiseer de hele applicatie
- */
-async function initializeApplication() {
-    console.log('Applicatie initialiseren...');
-    
-    try {
-        // Controleer of database bestaat
-        if (typeof db === 'undefined') {
-            throw new Error('Database niet geladen. Controleer of database.js correct is ingeladen.');
-        }
-        
-        // Initialiseer database
-        await db.init();
-        console.log('✅ Database geïnitialiseerd');
-        
-        // Controleer of BaseModule bestaat
-        if (typeof BaseModule === 'undefined') {
-            console.warn('BaseModule niet gevonden. Sommige functionaliteit werkt mogelijk niet.');
-        }
-        
-        // Initialiseer auth manager als die er is
-        if (typeof AuthManager !== 'undefined' && !window.auth) {
-            window.auth = new AuthManager();
-            await window.auth.init();
-            console.log('✅ AuthManager geïnitialiseerd');
-        }
-        
-        // Initialiseer managers in de juiste volgorde
-        await initializeManagers();
-        
-        // Initialiseer UIHandler als die beschikbaar is
-        if (typeof UIHandler !== 'undefined') {
-            const uiHandler = new UIHandler();
-            window.uiHandler = uiHandler;
-            
-            // Wacht even zodat DOM volledig geladen is
-            setTimeout(() => {
-                uiHandler.init();
-                console.log('✅ UIHandler geïnitialiseerd');
-            }, 100);
-        } else {
-            console.warn('⚠️ UIHandler niet beschikbaar. Basis UI functionaliteit wordt gebruikt.');
-            setupBasicUI();
-        }
-        
-    } catch (error) {
-        console.error('Fout bij initialiseren applicatie:', error);
-        throw error;
-    }
-}
-
-/**
- * Initialiseer alle managers
- */
-async function initializeManagers() {
-    console.log('Initialiseren managers...');
-    
-    // Maak managers aan als de klassen beschikbaar zijn
-    if (typeof DogManager !== 'undefined') {
-        window.dogManager = new DogManager();
-        console.log('✅ DogManager geïnitialiseerd');
-    } else {
-        console.warn('⚠️ DogManager niet beschikbaar');
-    }
-    
-    if (typeof SearchManager !== 'undefined') {
-        window.searchManager = new SearchManager();
-        console.log('✅ SearchManager geïnitialiseerd');
-    } else {
-        console.warn('⚠️ SearchManager niet beschikbaar');
-    }
-    
-    if (typeof PrivateInfoManager !== 'undefined') {
-        window.privateInfoManager = new PrivateInfoManager();
-        console.log('✅ PrivateInfoManager geïnitialiseerd');
-    } else {
-        console.warn('⚠️ PrivateInfoManager niet beschikbaar');
-    }
-    
-    // Controleer of alle managers beschikbaar zijn
-    if (!window.dogManager || !window.searchManager) {
-        console.warn('⚠️ Niet alle managers zijn beschikbaar. Controleer of bestanden correct zijn ingeladen.');
-    }
-}
-
-/**
- * Setup basis UI als UIHandler niet beschikbaar is
- */
-function setupBasicUI() {
-    console.log('Setup basis UI...');
-    
-    // Taal switcher
-    const languageSwitcher = document.getElementById('languageSwitcher');
-    if (languageSwitcher) {
-        languageSwitcher.addEventListener('change', function(e) {
-            const selectedLang = e.target.value;
-            localStorage.setItem('appLanguage', selectedLang);
-            
-            // Update managers
-            if (window.dogManager) window.dogManager.updateLanguage(selectedLang);
-            if (window.searchManager) window.searchManager.updateLanguage(selectedLang);
-            if (window.privateInfoManager) window.privateInfoManager.updateLanguage(selectedLang);
-            
-            // Herlaad pagina
-            window.location.reload();
-        });
-    }
-    
-    // Basis event delegation voor menu knoppen
-    document.addEventListener('click', function(e) {
-        // Hond toevoegen knop
-        if (e.target.id === 'addDogBtn' || e.target.closest('#addDogBtn')) {
-            e.preventDefault();
-            showBasicAddDogModal();
-        }
-        
-        // Hond zoeken knop
-        if (e.target.id === 'searchDogBtn' || e.target.closest('#searchDogBtn')) {
-            e.preventDefault();
-            showBasicSearchModal();
-        }
-        
-        // Privé info knop
-        if (e.target.id === 'privateInfoBtn' || e.target.closest('#privateInfoBtn')) {
-            e.preventDefault();
-            showBasicPrivateInfoModal();
-        }
-    });
-}
-
-/**
- * Basis modal functies voor als UIHandler niet beschikbaar is
- */
-function showBasicAddDogModal() {
-    if (!window.dogManager) {
-        showError('DogManager niet beschikbaar. Herlaad de pagina.');
-        return;
-    }
-    
-    // Verwijder bestaande modal
-    const existingModal = document.getElementById('addDogModal');
-    if (existingModal) existingModal.remove();
-    
-    // Genereer modal HTML
-    const modalHTML = window.dogManager.getModalHTML();
-    const modalsContainer = getModalsContainer();
-    modalsContainer.insertAdjacentHTML('beforeend', modalHTML);
-    
-    // Toon modal
-    const modalElement = document.getElementById('addDogModal');
-    if (modalElement) {
-        const modal = new bootstrap.Modal(modalElement);
-        modal.show();
-        
-        // Setup events
-        window.dogManager.setupEvents();
-        
-        // Cleanup
-        modalElement.addEventListener('hidden.bs.modal', () => {
-            modalElement.remove();
-        });
-    }
-}
-
-function showBasicSearchModal() {
-    if (!window.searchManager) {
-        showError('SearchManager niet beschikbaar. Herlaad de pagina.');
-        return;
-    }
-    
-    // Verwijder bestaande modal
-    const existingModal = document.getElementById('searchModal');
-    if (existingModal) existingModal.remove();
-    
-    // Genereer modal HTML
-    const modalHTML = window.searchManager.getSearchModalHTML();
-    const modalsContainer = getModalsContainer();
-    modalsContainer.insertAdjacentHTML('beforeend', modalHTML);
-    
-    // Toon modal
-    const modalElement = document.getElementById('searchModal');
-    if (modalElement) {
-        const modal = new bootstrap.Modal(modalElement);
-        modal.show();
-        
-        // Setup events
-        window.searchManager.setupSearchEvents();
-        
-        // Cleanup
-        modalElement.addEventListener('hidden.bs.modal', () => {
-            modalElement.remove();
-        });
-    }
-}
-
-function showBasicPrivateInfoModal() {
-    if (!window.privateInfoManager) {
-        showError('PrivateInfoManager niet beschikbaar. Herlaad de pagina.');
-        return;
-    }
-    
-    // Verwijder bestaande modal
-    const existingModal = document.getElementById('privateInfoModal');
-    if (existingModal) existingModal.remove();
-    
-    // Genereer modal HTML
-    const modalHTML = window.privateInfoManager.getModalHTML();
-    const modalsContainer = getModalsContainer();
-    modalsContainer.insertAdjacentHTML('beforeend', modalHTML);
-    
-    // Toon modal
-    const modalElement = document.getElementById('privateInfoModal');
-    if (modalElement) {
-        const modal = new bootstrap.Modal(modalElement);
-        modal.show();
-        
-        // Setup events en laad data
-        window.privateInfoManager.setupEvents();
-        window.privateInfoManager.loadPrivateInfoData();
-        
-        // Cleanup
-        modalElement.addEventListener('hidden.bs.modal', () => {
-            modalElement.remove();
-        });
-    }
-}
-
-/**
- * Helper om modals container te krijgen
- */
-function getModalsContainer() {
-    let container = document.getElementById('modalsContainer');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'modalsContainer';
-        document.body.appendChild(container);
-    }
-    return container;
-}
-
-/**
- * Setup applicatie events
- */
-function setupApplicationEvents() {
-    console.log('Setup applicatie events...');
-    
-    // Laad dashboard bij start
-    loadDashboard();
-    
-    // Hash change listener voor SPA navigatie
-    window.addEventListener('hashchange', handleHashChange);
-    
-    // Initial hash handling
-    handleHashChange();
-}
-
-/**
- * Laad dashboard
- */
-function loadDashboard() {
-    const mainContent = document.getElementById('mainContent');
-    if (mainContent) {
-        mainContent.innerHTML = `
-            <div class="container-fluid mt-3">
-                <h2><i class="bi bi-speedometer2"></i> Dashboard</h2>
-                <div class="row mt-4">
-                    <div class="col-md-4 mb-4">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <i class="bi bi-plus-circle display-4 text-primary mb-3"></i>
-                                <h5 class="card-title">Hond Toevoegen</h5>
-                                <p class="card-text">Voeg een nieuwe hond toe aan de database</p>
-                                <button class="btn btn-primary" id="addDogBtn">
-                                    <i class="bi bi-plus-circle"></i> Toevoegen
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-4">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <i class="bi bi-search display-4 text-info mb-3"></i>
-                                <h5 class="card-title">Hond Zoeken</h5>
-                                <p class="card-text">Zoek honden in de database</p>
-                                <button class="btn btn-info" id="searchDogBtn">
-                                    <i class="bi bi-search"></i> Zoeken
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-4">
-                        <div class="card text-center">
-                            <div class="card-body">
-                                <i class="bi bi-lock display-4 text-dark mb-3"></i>
-                                <h5 class="card-title">Privé Informatie</h5>
-                                <p class="card-text">Vertrouwelijke informatie over honden</p>
-                                <button class="btn btn-dark" id="privateInfoBtn">
-                                    <i class="bi bi-lock"></i> Openen
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-}
-
-/**
- * Handle hash change voor SPA navigatie
- */
-function handleHashChange() {
-    const hash = window.location.hash.substring(1);
-    
-    switch(hash) {
-        case 'dashboard':
-            loadDashboard();
-            break;
-        case 'add-dog':
-            if (window.uiHandler) {
-                window.uiHandler.showAddDogModal();
-            } else {
-                showBasicAddDogModal();
-            }
-            break;
-        case 'search-dog':
-            if (window.uiHandler) {
-                window.uiHandler.showSearchModal();
-            } else {
-                showBasicSearchModal();
-            }
-            break;
-        case 'private-info':
-            if (window.uiHandler) {
-                window.uiHandler.showPrivateInfoModal();
-            } else {
-                showBasicPrivateInfoModal();
-            }
-            break;
-        default:
-            // Doe niets voor onbekende hash
-            break;
-    }
-}
-
-/**
- * Laad hoofdcontent (voor SearchManager terug knop)
- */
-function loadMainContent() {
-    window.location.hash = '#dashboard';
-    loadDashboard();
-}
-
-// Exporteer loadMainContent voor SearchManager
-window.loadMainContent = loadMainContent;
-
-/**
- * Toon foutmelding in UI
- */
-function showError(message) {
-    const errorHTML = `
-        <div class="alert alert-danger alert-dismissible fade show m-3" role="alert">
-            <i class="bi bi-exclamation-octagon me-2"></i>
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    `;
-    
-    const container = document.querySelector('.container') || document.body;
-    container.insertAdjacentHTML('afterbegin', errorHTML);
-}
-
-/**
- * Toon succesmelding in UI
- */
-function showSuccess(message) {
-    const successHTML = `
-        <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
-            <i class="bi bi-check-circle me-2"></i>
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    `;
-    
-    const container = document.querySelector('.container') || document.body;
-    container.insertAdjacentHTML('afterbegin', successHTML);
-}
 
 /**
  * Registreer Service Worker voor offline functionaliteit
@@ -446,7 +51,7 @@ async function registerServiceWorker() {
             
             const registration = await navigator.serviceWorker.register('./sw.js', {
                 scope: './',
-                updateViaCache: 'none'
+                updateViaCache: 'none' // Altijd SW van netwerk halen
             });
             
             console.log('Service Worker geregistreerd met scope:', registration.scope);
@@ -465,11 +70,14 @@ async function registerServiceWorker() {
                     console.log('Service Worker status:', newWorker.state);
                     
                     if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        // Nieuwe update beschikbaar
                         showUpdateNotification(registration);
                     }
                     
                     if (newWorker.state === 'activated') {
                         console.log('Nieuwe Service Worker geactiveerd');
+                        // Optioneel: pagina herladen om nieuwe SW te gebruiken
+                        // window.location.reload();
                     }
                 });
             });
@@ -477,6 +85,7 @@ async function registerServiceWorker() {
             // Luister voor controller change
             navigator.serviceWorker.addEventListener('controllerchange', () => {
                 console.log('Nieuwe Service Worker heeft controle over pagina');
+                // Optioneel: update UI of toon melding
             });
             
             return registration;
@@ -484,10 +93,12 @@ async function registerServiceWorker() {
         } catch (error) {
             console.error('Service Worker registratie mislukt:', error);
             
+            // Toon gebruikersvriendelijke melding
             if (error.message.includes('MIME type') || error.message.includes('script')) {
                 console.warn('Service Worker MIME type probleem. Controleer server configuratie.');
             }
             
+            // Probeer de pagina toch te laten werken zonder SW
             return null;
         }
     } else {
@@ -500,6 +111,7 @@ async function registerServiceWorker() {
  * Toon update notificatie en vraag om te herladen
  */
 function showUpdateNotification(registration) {
+    // Controleer of we al een notificatie hebben
     if (document.getElementById('updateNotification')) return;
     
     const notificationHTML = `
@@ -520,17 +132,22 @@ function showUpdateNotification(registration) {
         </div>
     `;
     
+    // Voeg notificatie toe bovenaan de pagina
     const container = document.querySelector('.container') || document.body;
     container.insertAdjacentHTML('afterbegin', notificationHTML);
     
+    // Setup herlaad knop
     document.getElementById('reloadPageBtn').addEventListener('click', () => {
         if (registration && registration.waiting) {
+            // Stuur skip waiting bericht naar SW
             registration.waiting.postMessage({ type: 'SKIP_WAITING' });
         }
         
+        // Herlaad de pagina
         window.location.reload();
     });
     
+    // Auto-verberg na 30 seconden
     setTimeout(() => {
         const notif = document.getElementById('updateNotification');
         if (notif) {
@@ -579,17 +196,36 @@ function showBrowserError(message) {
         </div>
     `;
     
+    // Vervang volledige body inhoud
     document.body.innerHTML = errorHTML;
+}
+
+/**
+ * Toon algemene foutmelding
+ */
+function showError(message) {
+    const errorHTML = `
+        <div class="alert alert-danger alert-dismissible fade show m-3" role="alert">
+            <i class="bi bi-exclamation-octagon me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    const container = document.querySelector('.container') || document.body;
+    container.insertAdjacentHTML('afterbegin', errorHTML);
 }
 
 /**
  * Controleer internet connectie
  */
 function checkInternetConnection() {
+    // Initial check
     if (!navigator.onLine) {
         showOfflineNotification();
     }
     
+    // Luister naar connectivity changes
     window.addEventListener('online', () => {
         console.log('Apparaat is weer online');
         showOnlineNotification();
@@ -623,8 +259,11 @@ function showOfflineNotification() {
             </div>
         `;
         
+        // Toon bovenaan de pagina
         const container = document.querySelector('.container') || document.body;
         container.insertAdjacentElement('afterbegin', notification);
+        
+        // Auto-verberg niet - blijf tonen zolang offline
     }
 }
 
@@ -648,6 +287,7 @@ function showOnlineNotification() {
     const container = document.querySelector('.container') || document.body;
     container.insertAdjacentHTML('afterbegin', notificationHTML);
     
+    // Auto-verberg na 5 seconden
     setTimeout(() => {
         const notif = document.getElementById('onlineNotification');
         if (notif) {
@@ -676,11 +316,16 @@ function setupPWAInstallation() {
     let installBtn;
     
     window.addEventListener('beforeinstallprompt', (e) => {
+        // Voorkom dat de browser de install prompt toont
         e.preventDefault();
+        // Bewaar het event voor later gebruik
         deferredPrompt = e;
+        
+        // Toon installatie knop
         showInstallButton();
     });
     
+    // Track of de app al geïnstalleerd is
     window.addEventListener('appinstalled', (evt) => {
         console.log('PWA succesvol geïnstalleerd');
         if (installBtn) {
@@ -690,12 +335,14 @@ function setupPWAInstallation() {
     });
     
     function showInstallButton() {
+        // Controleer of app al geïnstalleerd is
         if (window.matchMedia('(display-mode: standalone)').matches || 
             window.navigator.standalone === true) {
             console.log('App is al geïnstalleerd');
             return;
         }
         
+        // Controleer of knop al bestaat
         if (document.getElementById('installPWAButton')) {
             return;
         }
@@ -711,7 +358,10 @@ function setupPWAInstallation() {
             if (!deferredPrompt) return;
             
             try {
+                // Toon de install prompt
                 deferredPrompt.prompt();
+                
+                // Wacht op gebruiker reactie
                 const { outcome } = await deferredPrompt.userChoice;
                 console.log(`Gebruiker keuze: ${outcome}`);
                 
@@ -732,11 +382,13 @@ function setupPWAInstallation() {
                 showError('Installatie mislukt. Probeer het opnieuw.');
             }
             
+            // Reset de prompt
             deferredPrompt = null;
         });
         
         document.body.appendChild(installBtn);
         
+        // Verberg knop na 24 uur (cookie gebruiken voor persistentie)
         setTimeout(() => {
             if (installBtn && installBtn.parentNode) {
                 installBtn.remove();
@@ -766,12 +418,6 @@ function showAppInfo() {
             serviceWorker: navigator.serviceWorker ? 'Ondersteund' : 'Niet ondersteund',
             localStorage: 'Ondersteund',
             online: navigator.onLine ? 'Online' : 'Offline'
-        },
-        managers: {
-            dogManager: window.dogManager ? '✅ Geladen' : '❌ Niet geladen',
-            searchManager: window.searchManager ? '✅ Geladen' : '❌ Niet geladen',
-            privateInfoManager: window.privateInfoManager ? '✅ Geladen' : '❌ Niet geladen',
-            uiHandler: window.uiHandler ? '✅ Geladen' : '❌ Niet geladen'
         }
     };
     
@@ -779,6 +425,7 @@ function showAppInfo() {
     console.table(info);
     console.groupEnd();
     
+    // Toon ook in debug mode
     if (window.location.hash === '#debug') {
         const debugInfo = document.createElement('div');
         debugInfo.className = 'card mt-3';
@@ -817,29 +464,39 @@ export {
 };
 
 // ========== MODAL FIX VOOR ALLE MODALS ==========
+// Dit is de ENIGE toevoeging aan je bestand
 
 (function() {
     console.log('Modal fix installeren...');
     
+    // Wacht tot DOM en Bootstrap geladen zijn
     document.addEventListener('DOMContentLoaded', function() {
+        // Wacht tot Bootstrap beschikbaar is
         const checkBootstrap = setInterval(function() {
             if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
                 clearInterval(checkBootstrap);
                 
+                // Patch Bootstrap's hide() methode
                 const originalHide = bootstrap.Modal.prototype.hide;
                 bootstrap.Modal.prototype.hide = function() {
                     const modal = this._element;
                     
+                    // VERWIJDER FOCUS VOOR ALLE MODALS
                     if (modal) {
+                        // Verwijder focus van close button
                         const focused = modal.querySelector(':focus');
                         if (focused) {
                             focused.blur();
                         }
                         
+                        // Forceer focus op body
                         document.body.focus();
+                        
+                        // Verwijder aria-hidden
                         modal.removeAttribute('aria-hidden');
                     }
                     
+                    // Roep originele hide aan
                     return originalHide.call(this);
                 };
                 

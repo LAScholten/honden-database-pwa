@@ -1,6 +1,6 @@
 /**
  * Hond Management Module
- * Beheert toevoegen en bewerken van honden
+ * Beheert toevoegen, zoeken en bewerken van honden
  */
 
 class DogManager extends BaseModule {
@@ -13,6 +13,7 @@ class DogManager extends BaseModule {
                 // Modal titels
                 newDog: "Nieuwe Hond Toevoegen",
                 editDog: "Hond Bewerken",
+                searchDog: "Hond Zoeken",
                 
                 // Form velden
                 name: "Naam",
@@ -76,6 +77,38 @@ class DogManager extends BaseModule {
                 delete: "Verwijderen",
                 choose: "Kies...",
                 
+                // Zoek velden
+                searchName: "Naam",
+                searchPedigree: "Stamboomnummer",
+                searchBreed: "Ras",
+                searchCountry: "Land",
+                searchGender: "Geslacht",
+                allGenders: "Alle geslachten",
+                enterName: "Voer naam in...",
+                enterPedigree: "Voer stamboomnummer in...",
+                enterBreed: "Voer ras in...",
+                enterCountry: "Voer land in...",
+                search: "Zoeken",
+                reset: "Reset",
+                enterCriteria: "Voer zoekcriteria in en klik op zoeken",
+                
+                // Resultaten
+                searchResults: "Zoekresultaten",
+                found: "gevonden",
+                exportResults: "Exporteer",
+                actions: "Acties",
+                view: "Bekijken",
+                edit: "Bewerken",
+                
+                // Details
+                details: "Details",
+                dogInfo: "Hond Informatie",
+                healthInfo: "Gezondheidsinformatie",
+                locationInfo: "Locatie informatie",
+                pedigreeInfo: "Stamboom informatie",
+                createdAt: "Aangemaakt",
+                updatedAt: "Laatst bijgewerkt",
+                
                 // Alerts
                 adminOnly: "Alleen administrators mogen honden toevoegen/bewerken",
                 fieldsRequired: "Naam, stamboomnummer en ras zijn verplichte velden",
@@ -86,7 +119,14 @@ class DogManager extends BaseModule {
                 addFailed: "Fout bij toevoegen hond: ",
                 updateFailed: "Fout bij bijwerken hond: ",
                 deleteFailed: "Fout bij verwijderen hond: ",
+                enterCriteriaError: "Voer minstens één zoekcriterium in",
+                searching: "Zoeken...",
+                searchFailed: "Zoeken mislukt: ",
+                resetForm: "Zoekformulier gereset",
+                noDogsFound: "Geen honden gevonden met de opgegeven criteria",
                 confirmDelete: "Weet u zeker dat u deze hond wilt verwijderen?",
+                exportSearch: "Zoekresultaten geëxporteerd!",
+                exportFailed: "Export mislukt: ",
                 photoAdded: "Foto toegevoegd",
                 photoError: "Fout bij uploaden foto: "
             },
@@ -94,6 +134,7 @@ class DogManager extends BaseModule {
                 // Modal titles
                 newDog: "Add New Dog",
                 editDog: "Edit Dog",
+                searchDog: "Search Dog",
                 
                 // Form fields
                 name: "Name",
@@ -157,6 +198,38 @@ class DogManager extends BaseModule {
                 delete: "Delete",
                 choose: "Choose...",
                 
+                // Search fields
+                searchName: "Name",
+                searchPedigree: "Pedigree number",
+                searchBreed: "Breed",
+                searchCountry: "Country",
+                searchGender: "Gender",
+                allGenders: "All genders",
+                enterName: "Enter name...",
+                enterPedigree: "Enter pedigree number...",
+                enterBreed: "Enter breed...",
+                enterCountry: "Enter country...",
+                search: "Search",
+                reset: "Reset",
+                enterCriteria: "Enter search criteria and click search",
+                
+                // Results
+                searchResults: "Search Results",
+                found: "found",
+                exportResults: "Export",
+                actions: "Actions",
+                view: "View",
+                edit: "Edit",
+                
+                // Details
+                details: "Details",
+                dogInfo: "Dog Information",
+                healthInfo: "Health Information",
+                locationInfo: "Location Information",
+                pedigreeInfo: "Pedigree Information",
+                createdAt: "Created",
+                updatedAt: "Last updated",
+                
                 // Alerts
                 adminOnly: "Only administrators can add/edit dogs",
                 fieldsRequired: "Name, pedigree number and breed are required fields",
@@ -167,7 +240,14 @@ class DogManager extends BaseModule {
                 addFailed: "Error adding dog: ",
                 updateFailed: "Error updating dog: ",
                 deleteFailed: "Error deleting dog: ",
+                enterCriteriaError: "Enter at least one search criterion",
+                searching: "Searching...",
+                searchFailed: "Search failed: ",
+                resetForm: "Search form reset",
+                noDogsFound: "No dogs found with the specified criteria",
                 confirmDelete: "Are you sure you want to delete this dog?",
+                exportSearch: "Search results exported!",
+                exportFailed: "Export failed: ",
                 photoAdded: "Photo added",
                 photoError: "Error uploading photo: "
             },
@@ -175,6 +255,7 @@ class DogManager extends BaseModule {
                 // Modal Titel
                 newDog: "Neuen Hund hinzufügen",
                 editDog: "Hund bearbeiten",
+                searchDog: "Hund suchen",
                 
                 // Formular Felder
                 name: "Name",
@@ -238,6 +319,38 @@ class DogManager extends BaseModule {
                 delete: "Löschen",
                 choose: "Wählen...",
                 
+                // Suchfelder
+                searchName: "Name",
+                searchPedigree: "Stammbaum-Nummer",
+                searchBreed: "Rasse",
+                searchCountry: "Land",
+                searchGender: "Geschlecht",
+                allGenders: "Alle Geschlechter",
+                enterName: "Name eingeben...",
+                enterPedigree: "Stammbaum-Nummer eingeben...",
+                enterBreed: "Rasse eingeben...",
+                enterCountry: "Land eingeben...",
+                search: "Suchen",
+                reset: "Zurücksetzen",
+                enterCriteria: "Suchkriterien eingeben und auf Suchen klicken",
+                
+                // Ergebnisse
+                searchResults: "Suchergebnisse",
+                found: "gefunden",
+                exportResults: "Exportieren",
+                actions: "Aktionen",
+                view: "Ansehen",
+                edit: "Bearbeiten",
+                
+                // Details
+                details: "Details",
+                dogInfo: "Hund Information",
+                healthInfo: "Gesundheitsinformation",
+                locationInfo: "Standort Information",
+                pedigreeInfo: "Stammbaum Information",
+                createdAt: "Erstellt",
+                updatedAt: "Zuletzt aktualisiert",
+                
                 // Meldungen
                 adminOnly: "Nur Administratoren können Hunde hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer und Rasse sind Pflichtfelder",
@@ -248,7 +361,14 @@ class DogManager extends BaseModule {
                 addFailed: "Fehler beim Hinzufügen des Hundes: ",
                 updateFailed: "Fehler beim Aktualisieren des Hundes: ",
                 deleteFailed: "Fehler beim Löschen des Hundes: ",
+                enterCriteriaError: "Geben Sie mindestens ein Suchkriterium ein",
+                searching: "Suche läuft...",
+                searchFailed: "Suche fehlgeschlagen: ",
+                resetForm: "Suchformular zurückgesetzt",
+                noDogsFound: "Keine Hunde mit den angegebenen Kriterien gefunden",
                 confirmDelete: "Sind Sie sicher, dass Sie diesen Hund löschen möchten?",
+                exportSearch: "Suchergebnisse exportiert!",
+                exportFailed: "Export fehlgeschlagen: ",
                 photoAdded: "Foto hinzugefügt",
                 photoError: "Fehler beim Hochladen des Fotos: "
             }
@@ -520,6 +640,75 @@ class DogManager extends BaseModule {
         `;
     }
     
+    getSearchModalHTML() {
+        const t = this.t.bind(this);
+        
+        return `
+            <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header bg-info text-white">
+                            <h5 class="modal-title" id="searchModalLabel">
+                                <i class="bi bi-search"></i> ${t('searchDog')}
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <label for="searchNaam" class="form-label">${t('searchName')}</label>
+                                            <input type="text" class="form-control" id="searchNaam" placeholder="${t('enterName')}">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="searchStamboomnr" class="form-label">${t('searchPedigree')}</label>
+                                            <input type="text" class="form-control" id="searchStamboomnr" placeholder="${t('enterPedigree')}">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="searchRas" class="form-label">${t('searchBreed')}</label>
+                                            <input type="text" class="form-control" id="searchRas" placeholder="${t('enterBreed')}">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="searchLand" class="form-label">${t('searchCountry')}</label>
+                                            <input type="text" class="form-control" id="searchLand" placeholder="${t('enterCountry')}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="searchGeslacht" class="form-label">${t('searchGender')}</label>
+                                            <select class="form-select" id="searchGeslacht">
+                                                <option value="">${t('allGenders')}</option>
+                                                <option value="reuen">${t('male')}</option>
+                                                <option value="teven">${t('female')}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <button class="btn btn-info" id="searchBtn">
+                                            <i class="bi bi-search"></i> ${t('search')}
+                                        </button>
+                                        <button class="btn btn-secondary" id="resetSearchBtn">
+                                            <i class="bi bi-arrow-clockwise"></i> ${t('reset')}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="searchResultsContainer">
+                                <div class="text-center py-5">
+                                    <i class="bi bi-search display-1 text-muted"></i>
+                                    <p class="mt-3 text-muted">${t('enterCriteria')}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
     setupEvents() {
         // Event listeners voor formulier
         const saveBtn = document.getElementById('saveDogBtn');
@@ -570,6 +759,22 @@ class DogManager extends BaseModule {
                 }
             });
         });
+    }
+    
+    setupSearchEvents() {
+        const searchBtn = document.getElementById('searchBtn');
+        if (searchBtn) {
+            searchBtn.addEventListener('click', () => {
+                this.performSearch();
+            });
+        }
+        
+        const resetBtn = document.getElementById('resetSearchBtn');
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                this.resetSearchForm();
+            });
+        }
     }
     
     async saveDog(formType) {
@@ -657,15 +862,13 @@ class DogManager extends BaseModule {
         }
         
         const dogId = document.getElementById('dogId').value;
-        const dogName = document.getElementById('dogName').value;
-        
         if (!dogId) return;
         
-        if (!confirm(`${this.t('confirmDelete')}\n\n"${dogName}"`)) {
+        if (!confirm(this.t('confirmDelete'))) {
             return;
         }
         
-        this.showProgress("Hond verwijderen...");
+        this.showProgress("Verwijderen...");
         
         try {
             await this.db.verwijderHond(parseInt(dogId));
@@ -718,6 +921,316 @@ class DogManager extends BaseModule {
         }
     }
     
+    async performSearch() {
+        const criteria = {
+            naam: document.getElementById('searchNaam').value.trim(),
+            stamboomnr: document.getElementById('searchStamboomnr').value.trim(),
+            ras: document.getElementById('searchRas').value.trim(),
+            land: document.getElementById('searchLand').value.trim(),
+            geslacht: document.getElementById('searchGeslacht').value
+        };
+        
+        Object.keys(criteria).forEach(key => {
+            if (!criteria[key]) delete criteria[key];
+        });
+        
+        if (Object.keys(criteria).length === 0) {
+            this.showError(this.t('enterCriteriaError'));
+            return;
+        }
+        
+        this.showProgress(this.t('searching'));
+        
+        try {
+            const results = await this.db.zoekHonden(criteria);
+            this.hideProgress();
+            this.displaySearchResults(results);
+            
+        } catch (error) {
+            this.hideProgress();
+            this.showError(`${this.t('searchFailed')}${error.message}`);
+        }
+    }
+    
+    resetSearchForm() {
+        document.getElementById('searchNaam').value = '';
+        document.getElementById('searchStamboomnr').value = '';
+        document.getElementById('searchRas').value = '';
+        document.getElementById('searchLand').value = '';
+        document.getElementById('searchGeslacht').value = '';
+        
+        const resultsContainer = document.getElementById('searchResultsContainer');
+        if (resultsContainer) {
+            resultsContainer.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="bi bi-search display-1 text-muted"></i>
+                    <p class="mt-3 text-muted">${this.t('enterCriteria')}</p>
+                </div>
+            `;
+        }
+        
+        this.showSuccess(this.t('resetForm'));
+    }
+    
+    displaySearchResults(results) {
+        const t = this.t.bind(this);
+        const container = document.getElementById('searchResultsContainer');
+        if (!container) return;
+        
+        if (results.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="bi bi-search display-1 text-muted"></i>
+                    <p class="mt-3 text-muted">${t('noDogsFound')}</p>
+                </div>
+            `;
+            return;
+        }
+        
+        let html = `
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">${t('searchResults')} (${results.length} ${t('found')})</h6>
+                        <button class="btn btn-sm btn-outline-info" id="exportSearchResultsBtn">
+                            <i class="bi bi-download"></i> ${t('exportResults')}
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>${t('name')}</th>
+                                    <th>${t('breed')}</th>
+                                    <th>${t('pedigreeNumber')}</th>
+                                    <th>${t('gender')}</th>
+                                    <th>${t('country')}</th>
+                                    <th>${t('actions')}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+        `;
+        
+        results.forEach(hond => {
+            const genderText = hond.geslacht === 'reuen' ? t('male') : 
+                             hond.geslacht === 'teven' ? t('female') : '-';
+            
+            html += `
+                <tr>
+                    <td><strong>${hond.naam}</strong></td>
+                    <td>${hond.ras || '-'}</td>
+                    <td><code>${hond.stamboomnr || '-'}</code></td>
+                    <td>${genderText}</td>
+                    <td>${hond.land || '-'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary view-dog-btn" data-id="${hond.id}">
+                            <i class="bi bi-eye"></i> ${t('view')}
+                        </button>
+                        ${this.auth.isAdmin() ? `
+                        <button class="btn btn-sm btn-outline-warning edit-dog-btn" data-id="${hond.id}">
+                            <i class="bi bi-pencil"></i> ${t('edit')}
+                        </button>
+                        ` : ''}
+                    </td>
+                </tr>
+            `;
+        });
+        
+        html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = html;
+        
+        // Event listeners voor knoppen
+        document.querySelectorAll('.view-dog-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const hondId = e.target.closest('.view-dog-btn').dataset.id;
+                this.viewDogDetails(hondId);
+            });
+        });
+        
+        document.querySelectorAll('.edit-dog-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const hondId = e.target.closest('.edit-dog-btn').dataset.id;
+                this.editDog(hondId);
+            });
+        });
+        
+        const exportBtn = document.getElementById('exportSearchResultsBtn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => {
+                this.exportSearchResults(results);
+            });
+        }
+    }
+    
+    async viewDogDetails(hondId) {
+        const t = this.t.bind(this);
+        
+        try {
+            const honden = await this.db.getHonden();
+            const hond = honden.find(h => h.id === parseInt(hondId));
+            
+            if (!hond) {
+                this.showError('Hond niet gevonden');
+                return;
+            }
+            
+            const genderText = hond.geslacht === 'reuen' ? t('male') : 
+                             hond.geslacht === 'teven' ? t('female') : '-';
+            
+            const html = `
+                <div class="modal fade" id="viewDogModal" tabindex="-1" aria-labelledby="viewDogModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-info text-white">
+                                <h5 class="modal-title" id="viewDogModalLabel">
+                                    <i class="bi bi-eye"></i> ${hond.naam} - ${t('details')}
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="border-bottom pb-2">${t('dogInfo')}</h6>
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <th style="width: 40%">${t('name')}:</th>
+                                                <td>${hond.naam}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>${t('breed')}:</th>
+                                                <td>${hond.ras || '-'}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>${t('pedigreeNumber')}:</th>
+                                                <td><code>${hond.stamboomnr || '-'}</code></td>
+                                            </tr>
+                                            <tr>
+                                                <th>${t('gender')}:</th>
+                                                <td>${genderText}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>${t('birthDate')}:</th>
+                                                <td>${hond.geboortedatum ? new Date(hond.geboortedatum).toLocaleDateString(this.currentLang) : '-'}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>${t('deathDate')}:</th>
+                                                <td>${hond.overlijdensdatum ? new Date(hond.overlijdensdatum).toLocaleDateString(this.currentLang) : '-'}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>${t('country')}:</th>
+                                                <td>${hond.land || '-'}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>${t('zipCode')}:</th>
+                                                <td>${hond.postcode || '-'}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="border-bottom pb-2">${t('pedigreeInfo')}</h6>
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <th style="width: 40%">${t('father')}:</th>
+                                                <td>${hond.vader || '-'}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>${t('mother')}:</th>
+                                                <td>${hond.moeder || '-'}</td>
+                                            </tr>
+                                        </table>
+                                        
+                                        <h6 class="border-bottom pb-2 mt-4">${t('locationInfo')}</h6>
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <th>${t('createdAt')}:</th>
+                                                <td>${new Date(hond.createdAt).toLocaleString(this.currentLang)}</td>
+                                            </tr>
+                                            <tr>
+                                                <th>${t('updatedAt')}:</th>
+                                                <td>${new Date(hond.updatedAt).toLocaleString(this.currentLang)}</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mt-4">
+                                    <div class="col-12">
+                                        <h6 class="border-bottom pb-2">${t('healthInfo')}</h6>
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <strong>${t('hipDysplasia')}:</strong><br>
+                                                ${hond.heupdysplasie || '-'}
+                                            </div>
+                                            <div class="col-md-3">
+                                                <strong>${t('elbowDysplasia')}:</strong><br>
+                                                ${hond.elleboogdysplasie || '-'}
+                                            </div>
+                                            <div class="col-md-3">
+                                                <strong>${t('patellaLuxation')}:</strong><br>
+                                                ${hond.patella || '-'}
+                                            </div>
+                                            <div class="col-md-3">
+                                                <strong>${t('eyes')}:</strong><br>
+                                                ${hond.ogen || '-'}
+                                                ${hond.ogenVerklaring ? ` (${hond.ogenVerklaring})` : ''}
+                                            </div>
+                                        </div>
+                                        <div class="row mt-3">
+                                            <div class="col-md-6">
+                                                <strong>${t('dandyWalker')}:</strong><br>
+                                                ${hond.dandyWalker || '-'}
+                                            </div>
+                                            <div class="col-md-6">
+                                                <strong>${t('thyroid')}:</strong><br>
+                                                ${hond.schildklier || '-'}
+                                                ${hond.schildklierVerklaring ? ` (${hond.schildklierVerklaring})` : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                ${hond.opmerkingen ? `
+                                <div class="mt-4">
+                                    <h6 class="border-bottom pb-2">${t('remarks')}</h6>
+                                    <div class="bg-light p-3 rounded">
+                                        ${hond.opmerkingen}
+                                    </div>
+                                </div>
+                                ` : ''}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const container = document.getElementById('modalsContainer');
+            container.insertAdjacentHTML('beforeend', html);
+            
+            const modalElement = document.getElementById('viewDogModal');
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+            
+            modalElement.addEventListener('hidden.bs.modal', () => {
+                modalElement.remove();
+            });
+            
+        } catch (error) {
+            this.showError(`Fout bij laden hond details: ${error.message}`);
+        }
+    }
+    
     async editDog(hondId) {
         if (!this.auth.isAdmin()) {
             this.showError(this.t('adminOnly'));
@@ -752,25 +1265,22 @@ class DogManager extends BaseModule {
         }
     }
     
-    async getHondById(hondId) {
-        try {
-            const honden = await this.db.getHonden();
-            return honden.find(h => h.id === hondId);
-        } catch (error) {
-            console.error('Fout bij ophalen hond:', error);
-            return null;
+    async exportSearchResults(results) {
+        if (!results || results.length === 0) {
+            this.showError('Geen resultaten om te exporteren');
+            return;
         }
-    }
-    
-    // Helper method voor bestandsdownload
-    downloadFile(blob, filename) {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        
+        try {
+            const jsonString = JSON.stringify(results, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const filename = `honden-export-${new Date().toISOString().split('T')[0]}.json`;
+            
+            this.downloadFile(blob, filename);
+            this.showSuccess(this.t('exportSearch'));
+            
+        } catch (error) {
+            this.showError(`${this.t('exportFailed')}${error.message}`);
+        }
     }
 }
