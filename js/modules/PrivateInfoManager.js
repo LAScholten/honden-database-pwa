@@ -125,26 +125,26 @@ class PrivateInfoManager extends BaseModule {
                 restore: "Wiederherstellen",
                 
                 // Meldungen
-                selectDogFirst: "Wählen Sie zuerst einen Hund",
+                selectDogFirst: "Wählen Sie zuerst een Hund",
                 loadingInfo: "Private Info wird geladen...",
-                noInfoFound: "Keine privaten Informationen für diesen Hund gefunden. Sie können neue Informationen hinzufügen.",
-                loadFailed: "Laden fehlgeschlagen: ",
-                dogNotFound: "Hund nicht in der Datenbank gefunden",
-                dogSelectionRequired: "Wählen Sie einen Hund aus der Liste",
-                savingInfo: "Private Info wird gespeichert...",
-                saveSuccess: "Private Informationen erfolgreich gespeichert!",
-                saveFailed: "Speichern fehlgeschlagen: ",
-                clearConfirm: "Sind Sie sicher, dass Sie alle Notizen löschen möchten? Dies wird nicht automatisch gespeichert.",
-                fieldsCleared: "Notizen gelöscht. Vergessen Sie nicht zu speichern, wenn Sie die Änderungen behalten möchten.",
-                makingBackup: "Backup wird erstellt...",
-                backupSuccess: "Backup erfolgreich erstellt!",
-                backupFailed: "Backup fehlgeschlagen: ",
-                invalidBackup: "Ungültige Backup-Datei",
-                restoreConfirm: "Sind Sie sicher, dass Sie dieses Backup wiederherstellen möchten?",
-                restoring: "Backup wird wiederhergestellt...",
-                restoreSuccess: "Backup erfolgreich wiederhergestellt!",
-                restoreFailed: "Wiederherstellung fehlgeschlagen: ",
-                backupReadError: "Fehler beim Lesen der Backup-Datei"
+                noInfoFound: "Geen privé informatie gevonden voor deze hond. U kunt nieuwe informatie toevoegen.",
+                loadFailed: "Laden mislukt: ",
+                dogNotFound: "Hond niet gevonden in database",
+                dogSelectionRequired: "Selecteer een hond uit de lijst",
+                savingInfo: "Privé info opslaan...",
+                saveSuccess: "Privé informatie succesvol opgeslagen!",
+                saveFailed: "Opslaan mislukt: ",
+                clearConfirm: "Weet je zeker dat je alle notities wilt wissen? Dit wordt niet automatisch opgeslagen.",
+                fieldsCleared: "Notities gewist. Vergeet niet op te slaan als je de wijzigingen wilt bewaren.",
+                makingBackup: "Backup maken...",
+                backupSuccess: "Backup succesvol gemaakt!",
+                backupFailed: "Backup mislukt: ",
+                invalidBackup: "Ongeldig backup bestand",
+                restoreConfirm: "Weet je zeker dat je deze backup wilt herstellen?",
+                restoring: "Backup herstellen...",
+                restoreSuccess: "Backup succesvol hersteld!",
+                restoreFailed: "Herstellen mislukt: ",
+                backupReadError: "Fout bij lezen backup bestand"
             }
         };
     }
@@ -361,14 +361,14 @@ class PrivateInfoManager extends BaseModule {
             const query = input.value.toLowerCase().trim();
             dropdown.innerHTML = '';
             
-            if (query.length < 2) {
+            if (query.length < 1) {
                 dropdown.style.display = 'none';
                 return;
             }
             
+            // Zoek alleen op hondennaam
             const filteredHonden = this.hondenCache.filter(hond => 
-                hond.naam.toLowerCase().includes(query) || 
-                (hond.stamboomnr && hond.stamboomnr.toLowerCase().includes(query))
+                hond.naam.toLowerCase().includes(query)
             );
             
             if (filteredHonden.length === 0) {
@@ -431,10 +431,61 @@ class PrivateInfoManager extends BaseModule {
             }
         });
         
-        // Toon dropdown bij focus (als er al tekst staat)
+        // Toon dropdown bij focus - toon alle honden wanneer gefocust
         input.addEventListener('focus', () => {
-            if (input.value.length >= 2) {
-                input.dispatchEvent(new Event('input'));
+            dropdown.innerHTML = '';
+            
+            const allHonden = this.hondenCache;
+            
+            if (allHonden.length === 0) {
+                dropdown.innerHTML = `
+                    <div class="autocomplete-item p-2 text-muted">
+                        ${this.t('dogNotFound')}
+                    </div>
+                `;
+            } else {
+                allHonden.forEach(hond => {
+                    const item = document.createElement('div');
+                    item.className = 'autocomplete-item p-2 border-bottom hover-bg-light';
+                    item.style.cursor = 'pointer';
+                    item.innerHTML = `
+                        <div class="fw-bold">${hond.naam}</div>
+                        <small class="text-muted">
+                            ${hond.stamboomnr || 'Geen stamboomnr'} | 
+                            ${hond.ras || 'Onbekend ras'}
+                        </small>
+                    `;
+                    
+                    item.addEventListener('click', () => {
+                        input.value = hond.naam;
+                        document.getElementById('selectedHondId').value = hond.id;
+                        document.getElementById('selectedStamboomnr').value = hond.stamboomnr || '';
+                        
+                        const infoDiv = document.getElementById('selectedHondInfo');
+                        if (infoDiv) {
+                            infoDiv.innerHTML = `
+                                <span class="text-success">
+                                    <i class="bi bi-check-circle"></i> Geselecteerd: 
+                                    ${hond.stamboomnr ? hond.stamboomnr + ' | ' : ''}
+                                    ${hond.ras ? hond.ras + ' | ' : ''}
+                                    Geb: ${hond.geboortedatum || 'onbekend'}
+                                </span>
+                            `;
+                        }
+                        
+                        dropdown.style.display = 'none';
+                    });
+                    
+                    dropdown.appendChild(item);
+                });
+            }
+            
+            if (allHonden.length > 0) {
+                dropdown.style.display = 'block';
+                const inputRect = input.getBoundingClientRect();
+                dropdown.style.width = inputRect.width + 'px';
+                dropdown.style.top = (inputRect.bottom + window.scrollY) + 'px';
+                dropdown.style.left = inputRect.left + 'px';
             }
         });
     }
@@ -450,10 +501,9 @@ class PrivateInfoManager extends BaseModule {
             return;
         }
         
-        // Verifieer dat de ingevoerde hond bestaat in cache
+        // Zoek de hond in de cache
         const selectedHond = this.hondenCache.find(h => 
-            h.id.toString() === selectedHondId && 
-            h.naam.toLowerCase() === hondInput.value.trim().toLowerCase()
+            h.id.toString() === selectedHondId
         );
         
         if (!selectedHond) {
@@ -466,7 +516,7 @@ class PrivateInfoManager extends BaseModule {
         this.showProgress(t('loadingInfo'));
         
         try {
-            // Gebruik stamboomnr voor privé info opslag (zoals in database)
+            // Gebruik stamboomnr voor privé info opslag
             this.currentPriveInfo = await this.db.getPriveInfoVoorStamboomnr(selectedStamboomnr);
             
             this.hideProgress();
@@ -611,8 +661,7 @@ class PrivateInfoManager extends BaseModule {
                 return {
                     stamboomnr: info.stamboomnr,
                     privateNotes: info.privateNotes || '',
-                    hondNaam: hond ? hond.naam : 'Onbekend',
-                    hondChipnummer: hond ? hond.chipnummer : 'Onbekend'
+                    hondNaam: hond ? hond.naam : 'Onbekend'
                 };
             });
             
