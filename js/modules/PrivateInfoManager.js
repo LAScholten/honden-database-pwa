@@ -9,6 +9,7 @@ class PrivateInfoManager extends BaseModule {
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';
         this.currentHondId = null;
         this.currentPriveInfo = null;
+        this.hondenCache = []; // Cache voor honden voor autocomplete
         this.translations = {
             nl: {
                 // Modal titels
@@ -20,6 +21,7 @@ class PrivateInfoManager extends BaseModule {
                 selectDog: "Selecteer Hond",
                 dog: "Hond",
                 chooseDog: "Kies een hond...",
+                typeDogName: "Typ hondennaam...",
                 loadInfo: "Info Laden",
                 
                 // Beveiligingsinfo
@@ -38,6 +40,7 @@ class PrivateInfoManager extends BaseModule {
                 noInfoFound: "Geen privé informatie gevonden voor deze hond. U kunt nieuwe informatie toevoegen.",
                 loadFailed: "Laden mislukt: ",
                 dogNotFound: "Hond niet gevonden in database",
+                dogSelectionRequired: "Selecteer een hond uit de lijst",
                 savingInfo: "Privé info opslaan...",
                 saveSuccess: "Privé informatie succesvol opgeslagen!",
                 saveFailed: "Opslaan mislukt: ",
@@ -63,6 +66,7 @@ class PrivateInfoManager extends BaseModule {
                 selectDog: "Select Dog",
                 dog: "Dog",
                 chooseDog: "Choose a dog...",
+                typeDogName: "Type dog name...",
                 loadInfo: "Load Info",
                 
                 // Security info
@@ -81,6 +85,7 @@ class PrivateInfoManager extends BaseModule {
                 noInfoFound: "No private information found for this dog. You can add new information.",
                 loadFailed: "Loading failed: ",
                 dogNotFound: "Dog not found in database",
+                dogSelectionRequired: "Select a dog from the list",
                 savingInfo: "Saving private info...",
                 saveSuccess: "Private information successfully saved!",
                 saveFailed: "Save failed: ",
@@ -106,6 +111,7 @@ class PrivateInfoManager extends BaseModule {
                 selectDog: "Hund auswählen",
                 dog: "Hund",
                 chooseDog: "Wählen Sie einen Hund...",
+                typeDogName: "Hundename eingeben...",
                 loadInfo: "Info Laden",
                 
                 // Sicherheitsinfo
@@ -124,6 +130,7 @@ class PrivateInfoManager extends BaseModule {
                 noInfoFound: "Keine privaten Informationen für diesen Hund gefunden. Sie können neue Informationen hinzufügen.",
                 loadFailed: "Laden fehlgeschlagen: ",
                 dogNotFound: "Hund nicht in der Datenbank gefunden",
+                dogSelectionRequired: "Wählen Sie einen Hund aus der Liste",
                 savingInfo: "Private Info wird gespeichert...",
                 saveSuccess: "Private Informationen erfolgreich gespeichert!",
                 saveFailed: "Speichern fehlgeschlagen: ",
@@ -150,6 +157,7 @@ class PrivateInfoManager extends BaseModule {
         this.currentLang = lang;
         if (document.getElementById('privateInfoModal')) {
             this.loadPrivateInfoData();
+            this.setupAutocomplete();
             if (this.currentHondId) {
                 this.loadPrivateInfoForDog();
             }
@@ -178,10 +186,13 @@ class PrivateInfoManager extends BaseModule {
                                         </div>
                                         <div class="card-body">
                                             <div class="mb-3">
-                                                <label for="privateHondSelect" class="form-label">${t('dog')}</label>
-                                                <select class="form-select" id="privateHondSelect">
-                                                    <option value="">${t('chooseDog')}</option>
-                                                </select>
+                                                <label for="privateHondInput" class="form-label">${t('dog')}</label>
+                                                <input type="text" class="form-control" id="privateHondInput" 
+                                                    placeholder="${t('typeDogName')}" autocomplete="off">
+                                                <div class="autocomplete-dropdown" id="hondAutocomplete"></div>
+                                                <input type="hidden" id="selectedHondId">
+                                                <input type="hidden" id="selectedStamboomnr">
+                                                <div class="small text-muted mt-1" id="selectedHondInfo"></div>
                                             </div>
                                             <button class="btn btn-dark w-100" id="loadPrivateInfoBtn">
                                                 <i class="bi bi-eye"></i> ${t('loadInfo')}
@@ -198,6 +209,7 @@ class PrivateInfoManager extends BaseModule {
                                         <div class="card-body">
                                             <div class="small">
                                                 <p><i class="bi bi-check-circle text-success"></i> ${t('privateStorage')}</p>
+                                                <p><i class="bi bi-link-45deg"></i> ${this.getPermissionInfo()}</p>
                                             </div>
                                             <div class="mt-3">
                                                 <button class="btn btn-outline-dark btn-sm" id="backupPrivateInfoBtn">
@@ -220,14 +232,14 @@ class PrivateInfoManager extends BaseModule {
                                     <div id="privateInfoForm">
                                         <div class="mb-3">
                                             <textarea class="form-control" id="privateNotes" rows="12" 
-                                                placeholder="${t('notesPlaceholder')}"></textarea>
+                                                placeholder="${t('notesPlaceholder')}" ${this.getTextareaPermission()}></textarea>
                                         </div>
                                         
                                         <div class="d-flex justify-content-between">
-                                            <button class="btn btn-secondary" id="clearPrivateInfoBtn">
+                                            <button class="btn btn-secondary" id="clearPrivateInfoBtn" ${this.getClearButtonPermission()}>
                                                 <i class="bi bi-x-circle"></i> ${t('clear')}
                                             </button>
-                                            <button class="btn btn-dark" id="savePrivateInfoBtn">
+                                            <button class="btn btn-dark" id="savePrivateInfoBtn" ${this.getSaveButtonPermission()}>
                                                 <i class="bi bi-save"></i> ${t('save')}
                                             </button>
                                         </div>
@@ -242,6 +254,39 @@ class PrivateInfoManager extends BaseModule {
                 </div>
             </div>
         `;
+    }
+    
+    // Permissie controle functies
+    getPermissionInfo() {
+        const user = window.auth?.getCurrentUser();
+        if (!user) return "Login vereist voor toegang tot privé informatie";
+        
+        if (user.permissions?.includes('private_full')) {
+            return "U heeft volledige toegang tot privé informatie";
+        } else if (user.permissions?.includes('private_view')) {
+            return "U heeft alleen leestoegang tot privé informatie";
+        } else if (user.permissions?.includes('private_none')) {
+            return "U heeft geen toegang tot privé informatie";
+        }
+        return "Toegangsrechten worden gecontroleerd...";
+    }
+    
+    getTextareaPermission() {
+        const user = window.auth?.getCurrentUser();
+        if (!user || !user.permissions) return "disabled";
+        
+        if (user.permissions.includes('private_full')) {
+            return "";
+        }
+        return "disabled";
+    }
+    
+    getClearButtonPermission() {
+        return this.getTextareaPermission(); //zelfde als textarea
+    }
+    
+    getSaveButtonPermission() {
+        return this.getTextareaPermission(); //zelfde als textarea
     }
     
     setupEvents() {
@@ -279,51 +324,150 @@ class PrivateInfoManager extends BaseModule {
                 this.restorePrivateInfo();
             });
         }
+        
+        this.setupAutocomplete();
     }
     
     async loadPrivateInfoData() {
-        const t = this.t.bind(this);
-        
         try {
-            const honden = await this.db.getHonden();
-            const hondSelect = document.getElementById('privateHondSelect');
-            if (hondSelect) {
-                hondSelect.innerHTML = `<option value="">${t('chooseDog')}</option>`;
-                honden.forEach(hond => {
-                    const option = document.createElement('option');
-                    option.value = hond.id;
-                    option.textContent = `${hond.naam} (${hond.chipnummer})`;
-                    hondSelect.appendChild(option);
+            this.hondenCache = await this.db.getHonden();
+            this.setupAutocomplete();
+        } catch (error) {
+            console.error('Fout bij laden honden data:', error);
+        }
+    }
+    
+    setupAutocomplete() {
+        const input = document.getElementById('privateHondInput');
+        const dropdown = document.getElementById('hondAutocomplete');
+        
+        if (!input || !dropdown) return;
+        
+        // Stijl voor dropdown
+        dropdown.style.cssText = `
+            position: absolute;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            width: calc(100% - 2px);
+            margin-top: -1px;
+        `;
+        
+        input.addEventListener('input', () => {
+            const query = input.value.toLowerCase().trim();
+            dropdown.innerHTML = '';
+            
+            if (query.length < 2) {
+                dropdown.style.display = 'none';
+                return;
+            }
+            
+            const filteredHonden = this.hondenCache.filter(hond => 
+                hond.naam.toLowerCase().includes(query) || 
+                (hond.stamboomnr && hond.stamboomnr.toLowerCase().includes(query))
+            );
+            
+            if (filteredHonden.length === 0) {
+                dropdown.innerHTML = `
+                    <div class="autocomplete-item p-2 text-muted">
+                        ${this.t('dogNotFound')}
+                    </div>
+                `;
+            } else {
+                filteredHonden.forEach(hond => {
+                    const item = document.createElement('div');
+                    item.className = 'autocomplete-item p-2 border-bottom hover-bg-light';
+                    item.style.cursor = 'pointer';
+                    item.innerHTML = `
+                        <div class="fw-bold">${hond.naam}</div>
+                        <small class="text-muted">
+                            ${hond.stamboomnr || 'Geen stamboomnr'} | 
+                            ${hond.ras || 'Onbekend ras'} | 
+                            ${hond.geslacht || 'Onbekend'}
+                        </small>
+                    `;
+                    
+                    item.addEventListener('click', () => {
+                        input.value = hond.naam;
+                        document.getElementById('selectedHondId').value = hond.id;
+                        document.getElementById('selectedStamboomnr').value = hond.stamboomnr || '';
+                        
+                        const infoDiv = document.getElementById('selectedHondInfo');
+                        if (infoDiv) {
+                            infoDiv.innerHTML = `
+                                <span class="text-success">
+                                    <i class="bi bi-check-circle"></i> Geselecteerd: 
+                                    ${hond.stamboomnr ? hond.stamboomnr + ' | ' : ''}
+                                    ${hond.ras ? hond.ras + ' | ' : ''}
+                                    Geb: ${hond.geboortedatum || 'onbekend'}
+                                </span>
+                            `;
+                        }
+                        
+                        dropdown.style.display = 'none';
+                    });
+                    
+                    dropdown.appendChild(item);
                 });
             }
             
-        } catch (error) {
-            console.error('Fout bij laden privé info data:', error);
-        }
+            if (filteredHonden.length > 0) {
+                dropdown.style.display = 'block';
+                const inputRect = input.getBoundingClientRect();
+                dropdown.style.width = inputRect.width + 'px';
+                dropdown.style.top = (inputRect.bottom + window.scrollY) + 'px';
+                dropdown.style.left = inputRect.left + 'px';
+            }
+        });
+        
+        // Verberg dropdown bij klik buiten
+        document.addEventListener('click', (e) => {
+            if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+        
+        // Toon dropdown bij focus (als er al tekst staat)
+        input.addEventListener('focus', () => {
+            if (input.value.length >= 2) {
+                input.dispatchEvent(new Event('input'));
+            }
+        });
     }
     
     async loadPrivateInfoForDog() {
         const t = this.t.bind(this);
-        const hondId = document.getElementById('privateHondSelect').value;
+        const hondInput = document.getElementById('privateHondInput');
+        const selectedHondId = document.getElementById('selectedHondId').value;
+        const selectedStamboomnr = document.getElementById('selectedStamboomnr').value;
         
-        if (!hondId) {
+        if (!hondInput.value.trim() || !selectedHondId) {
             this.showError(t('selectDogFirst'));
             return;
         }
         
-        this.currentHondId = parseInt(hondId);
+        // Verifieer dat de ingevoerde hond bestaat in cache
+        const selectedHond = this.hondenCache.find(h => 
+            h.id.toString() === selectedHondId && 
+            h.naam.toLowerCase() === hondInput.value.trim().toLowerCase()
+        );
+        
+        if (!selectedHond) {
+            this.showError(t('dogSelectionRequired'));
+            return;
+        }
+        
+        this.currentHondId = parseInt(selectedHondId);
         
         this.showProgress(t('loadingInfo'));
         
         try {
-            this.currentPriveInfo = await this.db.getPriveInfoVoorHond(this.currentHondId);
-            
-            const honden = await this.db.getHonden();
-            const selectedHond = honden.find(h => h.id === this.currentHondId);
-            
-            if (!selectedHond) {
-                throw new Error(t('dogNotFound'));
-            }
+            // Gebruik stamboomnr voor privé info opslag (zoals in database)
+            this.currentPriveInfo = await this.db.getPriveInfoVoorStamboomnr(selectedStamboomnr);
             
             this.hideProgress();
             this.displayPrivateInfo();
@@ -343,24 +487,52 @@ class PrivateInfoManager extends BaseModule {
     }
     
     displayPrivateInfo() {
-        document.getElementById('privateNotes').value = '';
+        const notesTextarea = document.getElementById('privateNotes');
+        if (!notesTextarea) return;
+        
+        notesTextarea.value = '';
         
         if (this.currentPriveInfo) {
-            document.getElementById('privateNotes').value = this.currentPriveInfo.privateNotes || '';
+            notesTextarea.value = this.currentPriveInfo.privateNotes || '';
+        }
+        
+        // Update permissions na laden
+        const user = window.auth?.getCurrentUser();
+        if (user && user.permissions) {
+            if (!user.permissions.includes('private_full')) {
+                notesTextarea.setAttribute('disabled', 'disabled');
+                document.getElementById('clearPrivateInfoBtn').setAttribute('disabled', 'disabled');
+                document.getElementById('savePrivateInfoBtn').setAttribute('disabled', 'disabled');
+            }
         }
     }
     
     updatePrivateInfoHeader(hond) {
         const modalTitle = document.querySelector('#privateInfoModal .modal-title');
         if (modalTitle && hond) {
-            modalTitle.innerHTML = `<i class="bi bi-lock"></i> ${this.t('privateInfo')} - ${hond.naam}`;
+            modalTitle.innerHTML = `
+                <i class="bi bi-lock"></i> ${this.t('privateInfo')} - 
+                ${hond.naam} 
+                <small class="text-muted">(${hond.stamboomnr || 'Geen stamboomnr'})</small>
+            `;
         }
     }
     
     async savePrivateInfo() {
         const t = this.t.bind(this);
         
-        if (!this.currentHondId) {
+        // Controleer permissions
+        const user = window.auth?.getCurrentUser();
+        if (!user || !user.permissions?.includes('private_full')) {
+            this.showError("U heeft geen rechten om privé informatie op te slaan");
+            return;
+        }
+        
+        const hondInput = document.getElementById('privateHondInput');
+        const selectedHondId = document.getElementById('selectedHondId').value;
+        const selectedStamboomnr = document.getElementById('selectedStamboomnr').value;
+        
+        if (!hondInput.value.trim() || !selectedHondId) {
             this.showError(t('selectDogFirst'));
             return;
         }
@@ -368,8 +540,18 @@ class PrivateInfoManager extends BaseModule {
         this.showProgress(t('savingInfo'));
         
         try {
+            // Verifieer dat de hond nog steeds bestaat
+            const selectedHond = this.hondenCache.find(h => 
+                h.id.toString() === selectedHondId && 
+                h.stamboomnr === selectedStamboomnr
+            );
+            
+            if (!selectedHond) {
+                throw new Error(t('dogNotFound'));
+            }
+            
             const priveInfo = {
-                hondId: this.currentHondId,
+                stamboomnr: selectedStamboomnr,
                 privateNotes: document.getElementById('privateNotes').value.trim(),
                 vertrouwelijk: true
             };
@@ -379,7 +561,9 @@ class PrivateInfoManager extends BaseModule {
             this.hideProgress();
             this.showSuccess(t('saveSuccess'));
             
-            await this.loadPrivateInfoForDog();
+            // Herlaad de info na opslaan
+            this.currentPriveInfo = await this.db.getPriveInfoVoorStamboomnr(selectedStamboomnr);
+            this.displayPrivateInfo();
             
         } catch (error) {
             this.hideProgress();
@@ -389,6 +573,13 @@ class PrivateInfoManager extends BaseModule {
     
     clearPrivateInfo() {
         const t = this.t.bind(this);
+        
+        // Controleer permissions
+        const user = window.auth?.getCurrentUser();
+        if (!user || !user.permissions?.includes('private_full')) {
+            this.showError("U heeft geen rechten om privé informatie te wissen");
+            return;
+        }
         
         if (!confirm(t('clearConfirm'))) {
             return;
@@ -401,6 +592,14 @@ class PrivateInfoManager extends BaseModule {
     
     async backupPrivateInfo() {
         const t = this.t.bind(this);
+        
+        // Controleer permissions
+        const user = window.auth?.getCurrentUser();
+        if (!user || !user.permissions?.includes('private_full')) {
+            this.showError("U heeft geen rechten om backups te maken");
+            return;
+        }
+        
         this.showProgress(t('makingBackup'));
         
         try {
@@ -408,9 +607,9 @@ class PrivateInfoManager extends BaseModule {
             const honden = await this.db.getHonden();
             
             const enrichedData = allPriveInfo.map(info => {
-                const hond = honden.find(h => h.id === info.hondId);
+                const hond = honden.find(h => h.stamboomnr === info.stamboomnr);
                 return {
-                    hondId: info.hondId,
+                    stamboomnr: info.stamboomnr,
                     privateNotes: info.privateNotes || '',
                     hondNaam: hond ? hond.naam : 'Onbekend',
                     hondChipnummer: hond ? hond.chipnummer : 'Onbekend'
@@ -440,6 +639,13 @@ class PrivateInfoManager extends BaseModule {
     async restorePrivateInfo() {
         const t = this.t.bind(this);
         
+        // Controleer permissions
+        const user = window.auth?.getCurrentUser();
+        if (!user || !user.permissions?.includes('private_full')) {
+            this.showError("U heeft geen rechten om backups te herstellen");
+            return;
+        }
+        
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = '.json';
@@ -465,7 +671,7 @@ class PrivateInfoManager extends BaseModule {
                     this.showProgress(t('restoring'));
                     
                     const priveInfoData = backupData.data.map(item => ({
-                        hondId: item.hondId,
+                        stamboomnr: item.stamboomnr,
                         privateNotes: item.privateNotes || '',
                         vertrouwelijk: true
                     }));
@@ -475,8 +681,15 @@ class PrivateInfoManager extends BaseModule {
                     
                     for (const info of priveInfoData) {
                         try {
-                            await this.db.bewaarPriveInfo(info);
-                            successCount++;
+                            // Verifieer dat de hond bestaat voordat we privé info toevoegen
+                            const hond = await this.db.getHondByStamboomnr(info.stamboomnr);
+                            if (hond) {
+                                await this.db.bewaarPriveInfo(info);
+                                successCount++;
+                            } else {
+                                console.warn(`Hond met stamboomnr ${info.stamboomnr} niet gevonden, overslaan...`);
+                                errorCount++;
+                            }
                         } catch (error) {
                             console.error('Fout bij importeren privé info:', error);
                             errorCount++;
@@ -486,7 +699,7 @@ class PrivateInfoManager extends BaseModule {
                     this.hideProgress();
                     
                     if (errorCount > 0) {
-                        this.showSuccess(`${successCount} records hersteld, ${errorCount} mislukt`);
+                        this.showInfo(`${successCount} records hersteld, ${errorCount} mislukt`);
                     } else {
                         this.showSuccess(t('restoreSuccess'));
                     }
@@ -505,5 +718,17 @@ class PrivateInfoManager extends BaseModule {
         };
         
         input.click();
+    }
+    
+    // Helper method voor bestandsdownload
+    downloadFile(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 }

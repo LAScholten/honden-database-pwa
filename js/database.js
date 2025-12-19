@@ -5,8 +5,8 @@
 
 class HondenDatabase {
     constructor() {
-        this.dbName = 'HondenDatabase_v3'; // Versie verhoogd naar v3 voor nieuwe structuur
-        this.version = 3; // Versie verhoogd voor schema wijzigingen
+        this.dbName = 'HondenDatabase_v3';
+        this.version = 3;
         this.db = null;
         this.isInitialized = false;
     }
@@ -60,15 +60,14 @@ class HondenDatabase {
             }
         }
         
-        // Store 1: Honden data met nieuwe velden structuur
+        // Store 1: Honden data
         if (!db.objectStoreNames.contains('honden')) {
-            console.log('Creëer nieuwe honden store met alle velden');
+            console.log('Creëer nieuwe honden store');
             const hondenStore = db.createObjectStore('honden', { 
                 keyPath: 'id', 
                 autoIncrement: true 
             });
             
-            // Indices voor snelle zoekopdrachten
             hondenStore.createIndex('naam', 'naam', { unique: false });
             hondenStore.createIndex('stamboomnr', 'stamboomnr', { unique: true });
             hondenStore.createIndex('ras', 'ras', { unique: false });
@@ -89,7 +88,7 @@ class HondenDatabase {
             hondenStore.createIndex('updatedAt', 'updatedAt', { unique: false });
         }
         
-        // Store 2: Foto's (voor elke hond)
+        // Store 2: Foto's
         if (!db.objectStoreNames.contains('fotos')) {
             console.log('Creëer fotos store');
             const fotoStore = db.createObjectStore('fotos', { 
@@ -122,7 +121,6 @@ class HondenDatabase {
     async voegHondToe(hond) {
         await this.init();
         
-        // Zorg dat alle velden aanwezig zijn met standaard waarden
         const hondMetData = {
             naam: hond.naam || '',
             stamboomnr: hond.stamboomnr || '',
@@ -197,7 +195,6 @@ class HondenDatabase {
                     for (const [key, value] of Object.entries(criteria)) {
                         if (value && hond[key] !== undefined && hond[key] !== null) {
                             if (typeof value === 'string') {
-                                // Zoeken op gedeeltelijke overeenkomst voor tekstvelden
                                 if (!hond[key].toString().toLowerCase().includes(value.toLowerCase())) {
                                     match = false;
                                     break;
@@ -241,11 +238,6 @@ class HondenDatabase {
                     updatedAt: new Date().toISOString(),
                     updatedBy: window.auth?.getCurrentUser()?.username || 'unknown'
                 };
-                
-                // Zorg ervoor dat verplichte velden niet leeg zijn
-                updatedHond.naam = updatedHond.naam || existingHond.naam;
-                updatedHond.stamboomnr = updatedHond.stamboomnr || existingHond.stamboomnr;
-                updatedHond.ras = updatedHond.ras || existingHond.ras;
                 
                 const putRequest = store.put(updatedHond);
                 putRequest.onsuccess = () => {
@@ -346,10 +338,22 @@ class HondenDatabase {
     async bewaarPriveInfo(priveInfo) {
         await this.init();
         
+        // Controleer of gebruiker toegang heeft tot privé info
+        const user = window.auth?.getCurrentUser();
+        if (!user) {
+            throw new Error('Gebruiker niet ingelogd');
+        }
+        
+        if (user.permissions && !user.permissions.includes('private_full')) {
+            throw new Error('Geen rechten om privé informatie op te slaan');
+        }
+        
         const infoMetData = {
-            ...priveInfo,
+            stamboomnr: priveInfo.stamboomnr || '',
+            privateNotes: priveInfo.privateNotes || '',
+            vertrouwelijk: true,
             laatstGewijzigd: new Date().toISOString(),
-            gewijzigdDoor: window.auth?.getCurrentUser()?.username || 'unknown'
+            gewijzigdDoor: user.username || 'unknown'
         };
         
         return new Promise((resolve, reject) => {
@@ -381,13 +385,36 @@ class HondenDatabase {
     async getPriveInfoVoorStamboomnr(stamboomnr) {
         await this.init();
         
+        // Controleer of gebruiker toegang heeft tot privé info
+        const user = window.auth?.getCurrentUser();
+        if (!user) {
+            throw new Error('Gebruiker niet ingelogd');
+        }
+        
+        if (user.permissions && user.permissions.includes('private_none')) {
+            throw new Error('Geen toegang tot privé informatie');
+        }
+        
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['priveInfo'], 'readonly');
             const store = transaction.objectStore('priveInfo');
             const index = store.index('stamboomnr');
             const request = index.get(stamboomnr);
             
-            request.onsuccess = () => resolve(request.result || null);
+            request.onsuccess = () => {
+                const result = request.result;
+                // Als gebruiker alleen leestoegang heeft, retourneren we alleen viewable data
+                if (result && user.permissions && user.permissions.includes('private_view') && !user.permissions.includes('private_full')) {
+                    // Retourneer alleen basis info zonder gevoelige details
+                    resolve({
+                        stamboomnr: result.stamboomnr,
+                        laatstGewijzigd: result.laatstGewijzigd,
+                        heeftPriveInfo: result.privateNotes ? true : false
+                    });
+                } else {
+                    resolve(result || null);
+                }
+            };
             request.onerror = () => reject(request.error);
         });
     }
@@ -397,11 +424,16 @@ class HondenDatabase {
     async exportData(type = 'all') {
         await this.init();
         
+        const user = window.auth?.getCurrentUser();
+        if (!user || !user.permissions?.includes('private_full')) {
+            throw new Error('Geen rechten om data te exporteren');
+        }
+        
         const exportData = {
             metadata: {
                 exportType: type,
                 exportDatum: new Date().toISOString(),
-                exportDoor: window.auth?.getCurrentUser()?.username || 'unknown',
+                exportDoor: user.username || 'unknown',
                 versie: this.version,
                 databaseNaam: this.dbName
             },
@@ -429,6 +461,11 @@ class HondenDatabase {
     async importData(importData, overschrijven = false, opties = {}) {
         await this.init();
         
+        const user = window.auth?.getCurrentUser();
+        if (!user || !user.permissions?.includes('private_full')) {
+            throw new Error('Geen rechten om data te importeren');
+        }
+        
         const resultaat = {
             honden: { toegevoegd: 0, bijgewerkt: 0, overgeslagen: 0, fouten: 0 },
             fotos: { toegevoegd: 0, fouten: 0 },
@@ -439,7 +476,6 @@ class HondenDatabase {
         if (importData.honden && Array.isArray(importData.honden)) {
             for (const hond of importData.honden) {
                 try {
-                    // Controleer of hond al bestaat op basis van stamboomnr
                     const bestaandeHond = await this.getHondByStamboomnr(hond.stamboomnr);
                     
                     if (bestaandeHond && overschrijven) {
@@ -479,8 +515,15 @@ class HondenDatabase {
         if (importData.priveInfo && Array.isArray(importData.priveInfo)) {
             for (const info of importData.priveInfo) {
                 try {
-                    await this.bewaarPriveInfo(info);
-                    resultaat.priveInfo.bijgewerkt++;
+                    // Controleer of de hond bestaat voordat we privé info toevoegen
+                    const hondBestaat = await this.getHondByStamboomnr(info.stamboomnr);
+                    if (hondBestaat) {
+                        await this.bewaarPriveInfo(info);
+                        resultaat.priveInfo.bijgewerkt++;
+                    } else {
+                        console.log(`Privé info overgeslagen: Hond met stamboomnr ${info.stamboomnr} niet gevonden`);
+                        resultaat.priveInfo.fouten++;
+                    }
                 } catch (error) {
                     console.error('Fout bij importeren privé info:', error);
                     resultaat.priveInfo.fouten++;
@@ -499,7 +542,8 @@ class HondenDatabase {
     async wisAlleData() {
         await this.init();
         
-        if (!window.auth?.isAdmin?.()) {
+        const user = window.auth?.getCurrentUser();
+        if (!user || !user.isAdmin?.()) {
             throw new Error('Alleen administrators mogen alle data wissen');
         }
         
@@ -535,6 +579,11 @@ class HondenDatabase {
     async getAllPriveInfo() {
         await this.init();
         
+        const user = window.auth?.getCurrentUser();
+        if (!user || !user.permissions?.includes('private_full')) {
+            throw new Error('Geen rechten om alle privé informatie op te halen');
+        }
+        
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['priveInfo'], 'readonly');
             const store = transaction.objectStore('priveInfo');
@@ -548,16 +597,26 @@ class HondenDatabase {
     async getStatistieken() {
         await this.init();
         
-        const [honden, fotos, priveInfo] = await Promise.all([
+        const [honden, fotos] = await Promise.all([
             this.getHonden(),
-            this.getAllFotos(),
-            this.getAllPriveInfo()
+            this.getAllFotos()
         ]);
+        
+        // Voor privé info: alleen tellen als gebruiker toegang heeft
+        let priveInfoCount = 0;
+        try {
+            if (window.auth?.getCurrentUser()?.permissions?.includes('private_full')) {
+                const priveInfo = await this.getAllPriveInfo();
+                priveInfoCount = priveInfo.length;
+            }
+        } catch (error) {
+            console.log('Geen toegang tot privé info statistieken');
+        }
         
         return {
             totaalHonden: honden.length,
             totaalFotos: fotos.length,
-            totaalPriveInfo: priveInfo.length,
+            totaalPriveInfo: priveInfoCount,
             laatsteUpdate: honden.reduce((latest, hond) => {
                 const hondDatum = new Date(hond.updatedAt || hond.createdAt);
                 return hondDatum > latest ? hondDatum : latest;
@@ -567,20 +626,29 @@ class HondenDatabase {
     }
 
     async berekenDatabaseGrootte() {
-        const [honden, fotos, priveInfo] = await Promise.all([
+        const [honden, fotos] = await Promise.all([
             this.getHonden(),
-            this.getAllFotos(),
-            this.getAllPriveInfo()
+            this.getAllFotos()
         ]);
         
-        const avgHondSize = 1000; // Meer velden = grotere records
+        let priveInfoCount = 0;
+        try {
+            if (window.auth?.getCurrentUser()?.permissions?.includes('private_full')) {
+                const priveInfo = await this.getAllPriveInfo();
+                priveInfoCount = priveInfo.length;
+            }
+        } catch (error) {
+            // Geen toegang, gebruik standaard
+        }
+        
+        const avgHondSize = 1000;
         const avgFotoSize = 50000;
         const avgPriveSize = 1000;
         
         const totalBytes = 
             (honden.length * avgHondSize) +
             (fotos.length * avgFotoSize) +
-            (priveInfo.length * avgPriveSize);
+            (priveInfoCount * avgPriveSize);
         
         if (totalBytes < 1024) return totalBytes + ' B';
         if (totalBytes < 1048576) return (totalBytes / 1024).toFixed(1) + ' KB';
@@ -590,6 +658,11 @@ class HondenDatabase {
     // ========== BACKUP EN HERSTEL ==========
 
     async maakBackup() {
+        const user = window.auth?.getCurrentUser();
+        if (!user || !user.permissions?.includes('private_full')) {
+            throw new Error('Geen rechten om backup te maken');
+        }
+        
         const backupData = await this.exportData('all');
         const backupString = JSON.stringify(backupData, null, 2);
         const backupDatum = new Date().toISOString().replace(/[:.]/g, '-');
@@ -608,6 +681,11 @@ class HondenDatabase {
     }
 
     async herstelVanBackup(backupString) {
+        const user = window.auth?.getCurrentUser();
+        if (!user || !user.isAdmin?.()) {
+            throw new Error('Alleen administrators mogen backups herstellen');
+        }
+        
         try {
             const backupData = JSON.parse(backupString);
             
