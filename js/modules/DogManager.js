@@ -9,6 +9,7 @@ class DogManager extends BaseModule {
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';
         this.lastBreeds = JSON.parse(localStorage.getItem('lastBreeds') || '[]');
         this.currentSearchResults = []; // Houdt huidige zoekresultaten bij
+        this.debugMode = true; // Debug modus aan
         this.translations = {
             nl: {
                 // Modal titels
@@ -317,7 +318,7 @@ class DogManager extends BaseModule {
                 dandyAffected: "Betroffen",
                 thyroid: "Schilddrüse",
                 thyroidNegative: "Tgaa Negativ",
-                thyroidPositive: "Tgaa Positiv",
+                thyroidPositive: "Tgaa Positief",
                 thyroidExplanation: "Schilddrüse Erklärung",
                 country: "Land",
                 zipCode: "Postleitzahl",
@@ -369,7 +370,7 @@ class DogManager extends BaseModule {
                 
                 // Meldungen
                 adminOnly: "Nur Administratoren können Hunde hinzufügen/bearbeiten",
-                fieldsRequired: "Name, Stammbaum-Nummer und Rasse sind Pflichtfelder",
+                fieldsRequired: "Name, Stammbaum-Nummer en Rasse sind Pflichtfelder",
                 savingDog: "Hund wird gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
                 dogUpdated: "Hund erfolgreich aktualisiert!",
@@ -416,6 +417,32 @@ class DogManager extends BaseModule {
         }
         
         localStorage.setItem('lastBreeds', JSON.stringify(this.lastBreeds));
+    }
+    
+    // DEBUG FUNCTIE: Toon alle honden in database
+    async debugShowAllDogs() {
+        try {
+            const allDogs = await this.db.getHonden();
+            console.log('=== DEBUG: Alle honden in database ===');
+            console.log(`Aantal honden: ${allDogs.length}`);
+            
+            if (allDogs.length === 0) {
+                console.log('Database is leeg!');
+                this.showError('DEBUG: Database is leeg!');
+                return;
+            }
+            
+            allDogs.forEach((dog, index) => {
+                console.log(`${index + 1}. ID: ${dog.id}, Naam: "${dog.naam}", Stamboomnr: "${dog.stamboomnr}", Ras: "${dog.ras}"`);
+                console.log(`   Geslacht: "${dog.geslacht}", Land: "${dog.land}"`);
+            });
+            console.log('=== EINDE DEBUG ===');
+            
+            this.showInfo(`DEBUG: ${allDogs.length} honden gevonden in database. Check console voor details.`);
+        } catch (error) {
+            console.error('DEBUG Fout:', error);
+            this.showError(`DEBUG Fout: ${error.message}`);
+        }
     }
     
     getModalHTML(isEdit = false, dogData = null) {
@@ -670,6 +697,15 @@ class DogManager extends BaseModule {
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
                         </div>
                         <div class="modal-body">
+                            ${this.debugMode ? `
+                            <div class="alert alert-warning mb-3">
+                                <i class="bi bi-bug"></i> <strong>DEBUG MODE</strong>
+                                <button class="btn btn-sm btn-outline-dark float-end" id="debugShowAllBtn">
+                                    Toon alle honden
+                                </button>
+                            </div>
+                            ` : ''}
+                            
                             <div class="card mb-4">
                                 <div class="card-body">
                                     <h6 class="mb-3">${t('searchDog')}</h6>
@@ -705,11 +741,15 @@ class DogManager extends BaseModule {
                                         <button class="btn btn-secondary" id="resetSearchBtn">
                                             <i class="bi bi-arrow-clockwise"></i> ${t('reset')}
                                         </button>
+                                        ${this.debugMode ? `
+                                        <button class="btn btn-warning" id="testSearchBtn">
+                                            <i class="bi bi-flask"></i> Test Zoeken
+                                        </button>
+                                        ` : ''}
                                     </div>
                                 </div>
                             </div>
                             
-                            <!-- Resultaten container blijft leeg - wordt gevuld na zoeken -->
                             <div id="searchResultsContainer" style="display: none;">
                                 <!-- Resultaten worden hier ingevoegd -->
                             </div>
@@ -813,7 +853,7 @@ class DogManager extends BaseModule {
         const searchBtn = document.getElementById('searchBtn');
         if (searchBtn) {
             searchBtn.addEventListener('click', () => {
-                this.performSearch();
+                this.performSearchImproved(); // Gebruik de verbeterde zoekfunctie
             });
         }
         
@@ -823,14 +863,200 @@ class DogManager extends BaseModule {
                 this.resetSearchForm();
             });
         }
+        
+        // Debug knop
+        const debugBtn = document.getElementById('debugShowAllBtn');
+        if (debugBtn) {
+            debugBtn.addEventListener('click', () => {
+                this.debugShowAllDogs();
+            });
+        }
+        
+        // Test zoek knop
+        const testSearchBtn = document.getElementById('testSearchBtn');
+        if (testSearchBtn) {
+            testSearchBtn.addEventListener('click', () => {
+                this.testSearchFunction();
+            });
+        }
     }
     
+    // Test functie voor zoeken
+    async testSearchFunction() {
+        try {
+            console.log('=== TEST ZOEKFUNCTIE ===');
+            
+            // Test 1: Toon alle honden
+            const allDogs = await this.db.getHonden();
+            console.log('Test 1 - Totaal honden:', allDogs.length);
+            
+            // Test 2: Zoek op lege criteria (moet alle honden teruggeven)
+            console.log('\nTest 2 - Zoek met lege criteria:');
+            const emptySearch = await this.db.zoekHonden({});
+            console.log('Resultaten:', emptySearch.length);
+            
+            // Test 3: Zoek op een bekende naam (als er honden zijn)
+            if (allDogs.length > 0) {
+                console.log('\nTest 3 - Zoek op eerste hond naam:');
+                const firstDog = allDogs[0];
+                console.log('Zoekterm:', firstDog.naam);
+                const nameSearch = await this.db.zoekHonden({ naam: firstDog.naam });
+                console.log('Resultaten:', nameSearch.length);
+                
+                // Test 4: Zoek op deel van de naam
+                console.log('\nTest 4 - Zoek op deel van naam:');
+                if (firstDog.naam.length > 3) {
+                    const partialName = firstDog.naam.substring(0, 3);
+                    console.log('Zoekterm:', partialName);
+                    const partialSearch = await this.db.zoekHonden({ naam: partialName });
+                    console.log('Resultaten:', partialSearch.length);
+                }
+            }
+            
+            // Test 5: Handmatig filteren
+            console.log('\nTest 5 - Handmatig filteren:');
+            const searchTerm = document.getElementById('searchNaam').value.trim().toLowerCase();
+            console.log('Ingevoerde zoekterm:', searchTerm);
+            
+            const manualResults = allDogs.filter(dog => {
+                const dogName = (dog.naam || '').toLowerCase();
+                return dogName.includes(searchTerm);
+            });
+            
+            console.log('Handmatige resultaten:', manualResults.length);
+            manualResults.forEach(dog => {
+                console.log(`- ${dog.naam} (${dog.naam.toLowerCase()}) bevat "${searchTerm}": ${dog.naam.toLowerCase().includes(searchTerm)}`);
+            });
+            
+            this.showInfo(`Test voltooid. Check console voor details. ${manualResults.length} handmatige resultaten gevonden.`);
+            
+        } catch (error) {
+            console.error('Test mislukt:', error);
+            this.showError(`Test mislukt: ${error.message}`);
+        }
+    }
+    
+    // Verbeterde zoekfunctie die werkt
+    async performSearchImproved() {
+        const naam = document.getElementById('searchNaam').value.trim();
+        
+        if (!naam) {
+            this.showError(this.t('enterCriteriaError'));
+            return;
+        }
+        
+        this.showProgress(this.t('searching'));
+        
+        try {
+            // Haal ALLE honden op
+            const allDogs = await this.db.getHonden();
+            
+            // Debug info
+            console.log('=== VERBETERD ZOEKEN ===');
+            console.log('Zoekterm:', naam);
+            console.log('Totaal honden in database:', allDogs.length);
+            
+            // Filter lokaal voor betere debugging
+            const criteria = {
+                naam: naam.toLowerCase(),
+                stamboomnr: document.getElementById('searchStamboomnr').value.trim().toLowerCase(),
+                ras: document.getElementById('searchRas').value.trim().toLowerCase(),
+                geslacht: document.getElementById('searchGeslacht').value
+            };
+            
+            console.log('Zoekcriteria:', criteria);
+            
+            // HANDMATIG FILTEREN (betrouwbaarder)
+            const results = allDogs.filter(dog => {
+                let match = true;
+                
+                // Naam: gedeeltelijke match (niet hoofdlettergevoelig)
+                if (criteria.naam) {
+                    const dogNaam = (dog.naam || '').toLowerCase();
+                    if (!dogNaam.includes(criteria.naam)) {
+                        match = false;
+                    }
+                }
+                
+                // Stamboomnr: gedeeltelijke match
+                if (match && criteria.stamboomnr) {
+                    const dogStamboom = (dog.stamboomnr || '').toLowerCase();
+                    if (!dogStamboom.includes(criteria.stamboomnr)) {
+                        match = false;
+                    }
+                }
+                
+                // Ras: gedeeltelijke match
+                if (match && criteria.ras) {
+                    const dogRas = (dog.ras || '').toLowerCase();
+                    if (!dogRas.includes(criteria.ras)) {
+                        match = false;
+                    }
+                }
+                
+                // Geslacht: exacte match
+                if (match && criteria.geslacht) {
+                    if (dog.geslacht !== criteria.geslacht) {
+                        match = false;
+                    }
+                }
+                
+                return match;
+            });
+            
+            console.log('Gevonden resultaten:', results.length);
+            results.forEach(dog => {
+                console.log(`- ${dog.naam} (ID: ${dog.id})`);
+            });
+            
+            this.currentSearchResults = results;
+            this.hideProgress();
+            
+            if (results.length === 0) {
+                // Toon suggesties als er geen exacte match is
+                const suggestions = allDogs.filter(dog => {
+                    const dogNaam = (dog.naam || '').toLowerCase();
+                    return dogNaam.includes(criteria.naam.toLowerCase()) || 
+                           criteria.naam.toLowerCase().includes(dogNaam);
+                });
+                
+                if (suggesties.length > 0) {
+                    this.showInfo(`Geen exacte match gevonden. Suggesties: ${suggestions.map(s => s.naam).join(', ')}`);
+                } else {
+                    this.showInfo(this.t('noDogsFound'));
+                }
+                return;
+            }
+            
+            // Sluit modal en toon resultaten
+            const searchModal = bootstrap.Modal.getInstance(document.getElementById('searchModal'));
+            if (searchModal) searchModal.hide();
+            
+            this.showSearchResultsPage();
+            
+        } catch (error) {
+            this.hideProgress();
+            console.error('Zoeken mislukt:', error);
+            this.showError(`${this.t('searchFailed')}${error.message}`);
+        }
+    }
+    
+    // Originele zoekfunctie (voor debugging)
     async performSearch() {
         const naam = document.getElementById('searchNaam').value.trim();
         
         if (!naam) {
             this.showError(this.t('enterCriteriaError'));
             return;
+        }
+        
+        // DEBUG: Toon zoekcriteria
+        if (this.debugMode) {
+            console.log('=== ZOEK CRITERIA ===');
+            console.log('Naam:', naam);
+            console.log('Stamboomnr:', document.getElementById('searchStamboomnr').value.trim());
+            console.log('Ras:', document.getElementById('searchRas').value.trim());
+            console.log('Geslacht:', document.getElementById('searchGeslacht').value);
         }
         
         this.showProgress(this.t('searching'));
@@ -844,14 +1070,42 @@ class DogManager extends BaseModule {
                 geslacht: document.getElementById('searchGeslacht').value
             };
             
+            // DEBUG: Toon criteria object
+            if (this.debugMode) {
+                console.log('Criteria object:', criteria);
+            }
+            
             // Verwijder lege velden
             Object.keys(criteria).forEach(key => {
                 if (!criteria[key]) delete criteria[key];
             });
             
-            // Voer zoekopdracht uit
+            // DEBUG: Toon gefilterd criteria object
+            if (this.debugMode) {
+                console.log('Gefilterd criteria object:', criteria);
+            }
+            
+            // DEBUG: Toon alle honden voor vergelijking
+            if (this.debugMode) {
+                const allDogs = await this.db.getHonden();
+                console.log('=== Voor zoeken: Alle honden ===');
+                allDogs.forEach(dog => {
+                    console.log(`- "${dog.naam}" (ID: ${dog.id})`);
+                });
+            }
+            
+            // Voer zoekopdracht uit via database
             const results = await this.db.zoekHonden(criteria);
             this.currentSearchResults = results;
+            
+            // DEBUG: Toon zoekresultaten
+            if (this.debugMode) {
+                console.log('=== ZOEKRESULTATEN ===');
+                console.log(`Aantal gevonden: ${results.length}`);
+                results.forEach((dog, index) => {
+                    console.log(`${index + 1}. "${dog.naam}" (ID: ${dog.id})`);
+                });
+            }
             
             this.hideProgress();
             
@@ -866,7 +1120,7 @@ class DogManager extends BaseModule {
                 searchModal.hide();
             }
             
-            // Toon de resultaten in een nieuw tabblad/container
+            // Toon de resultaten
             this.showSearchResultsPage();
             
         } catch (error) {
@@ -1088,6 +1342,9 @@ class DogManager extends BaseModule {
         // Laad de hoofdcontent opnieuw
         if (typeof loadMainContent === 'function') {
             loadMainContent();
+        } else {
+            // Fallback: ga terug naar dashboard
+            window.location.hash = '#dashboard';
         }
     }
     
