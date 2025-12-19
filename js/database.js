@@ -1,4 +1,4 @@
-//**
+/**
  * IndexedDB Database Manager voor Hondendatabase
  * Beheert 3 gescheiden databases: Honden, Foto's, Privé Info
  */

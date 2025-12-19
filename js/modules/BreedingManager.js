@@ -6,73 +6,308 @@
 class BreedingManager extends BaseModule {
     constructor() {
         super();
+        this.currentLang = localStorage.getItem('appLanguage') || 'nl';
         this.breedingPlans = [];
+        this.translations = {
+            nl: {
+                // Modal titels
+                breedingPlan: "Fok Planning",
+                breedingInfo: "Maak en beheer fokplannen voor uw honden. Plan dekkingen, nesten en geboortes.",
+                
+                // Nieuw fokplan
+                newBreedingPlan: "Nieuw Fokplan",
+                mother: "Moeder",
+                motherRequired: "Moeder *",
+                selectMother: "Selecteer teef...",
+                father: "Vader",
+                fatherRequired: "Vader *",
+                selectFather: "Selecteer reu...",
+                expectedBirthDate: "Geboortedatum verwacht",
+                expectedLitterSize: "Verwachte nestgrootte",
+                notes: "Opmerkingen",
+                extraNotes: "Extra notities over het fokplan...",
+                saveBreedingPlan: "Fokplan Opslaan",
+                
+                // Actieve plannen
+                activeBreedingPlans: "Actieve Fokplannen",
+                activePlans: "Actieve plannen",
+                nextBirth: "Volgende geboorte",
+                totalLittersYear: "Totaal nesten dit jaar",
+                successRate: "Succesratio",
+                none: "Geen",
+                
+                // Overzicht
+                breedingPlanOverview: "Fokplan Overzicht",
+                date: "Datum",
+                status: "Status",
+                litterSize: "Nestgrootte",
+                actions: "Acties",
+                noPlans: "Nog geen fokplannen aangemaakt",
+                
+                // Status labels
+                planned: "Gepland",
+                inProgress: "Lopend",
+                completed: "Voltooid",
+                cancelled: "Geannuleerd",
+                unknown: "Onbekend",
+                
+                // Details modal
+                breedingPlanDetails: "Fokplan Details",
+                motherDetails: "Moeder",
+                fatherDetails: "Vader",
+                planDetails: "Plan Details",
+                actualLitterSize: "Werkelijke nestgrootte",
+                completionDate: "Voltooiingsdatum",
+                createdOn: "Aangemaakt op",
+                createdBy: "Aangemaakt door",
+                updateStatus: "Status Bijwerken",
+                
+                // Status update
+                updateStatusTitle: "Status Bijwerken",
+                newStatus: "Nieuwe Status",
+                confirmUpdate: "Bijwerken",
+                
+                // Alerts
+                selectBoth: "Selecteer zowel moeder als vader",
+                sameDog: "Moeder en vader kunnen niet dezelfde hond zijn",
+                motherMustBeFemale: "Moeder moet een teef zijn",
+                fatherMustBeMale: "Vader moet een reu zijn",
+                savingPlan: "Fokplan opslaan...",
+                planSaved: "Fokplan succesvol opgeslagen!",
+                saveFailed: "Fout bij opslaan fokplan: ",
+                dogNotFound: "Hond niet gevonden in database",
+                deleteConfirm: "Weet je zeker dat je dit fokplan wilt verwijderen?",
+                deleteSuccess: "Fokplan verwijderd!",
+                deleteFailed: "Verwijderen mislukt: ",
+                planNotFound: "Fokplan niet gevonden",
+                statusUpdated: "Status bijgewerkt!"
+            },
+            en: {
+                // Modal titles
+                breedingPlan: "Breeding Plan",
+                breedingInfo: "Create and manage breeding plans for your dogs. Plan matings, litters and births.",
+                
+                // New breeding plan
+                newBreedingPlan: "New Breeding Plan",
+                mother: "Mother",
+                motherRequired: "Mother *",
+                selectMother: "Select female...",
+                father: "Father",
+                fatherRequired: "Father *",
+                selectFather: "Select male...",
+                expectedBirthDate: "Expected birth date",
+                expectedLitterSize: "Expected litter size",
+                notes: "Notes",
+                extraNotes: "Extra notes about the breeding plan...",
+                saveBreedingPlan: "Save Breeding Plan",
+                
+                // Active plans
+                activeBreedingPlans: "Active Breeding Plans",
+                activePlans: "Active plans",
+                nextBirth: "Next birth",
+                totalLittersYear: "Total litters this year",
+                successRate: "Success rate",
+                none: "None",
+                
+                // Overview
+                breedingPlanOverview: "Breeding Plan Overview",
+                date: "Date",
+                status: "Status",
+                litterSize: "Litter size",
+                actions: "Actions",
+                noPlans: "No breeding plans created yet",
+                
+                // Status labels
+                planned: "Planned",
+                inProgress: "In Progress",
+                completed: "Completed",
+                cancelled: "Cancelled",
+                unknown: "Unknown",
+                
+                // Details modal
+                breedingPlanDetails: "Breeding Plan Details",
+                motherDetails: "Mother",
+                fatherDetails: "Father",
+                planDetails: "Plan Details",
+                actualLitterSize: "Actual litter size",
+                completionDate: "Completion date",
+                createdOn: "Created on",
+                createdBy: "Created by",
+                updateStatus: "Update Status",
+                
+                // Status update
+                updateStatusTitle: "Update Status",
+                newStatus: "New Status",
+                confirmUpdate: "Update",
+                
+                // Alerts
+                selectBoth: "Select both mother and father",
+                sameDog: "Mother and father cannot be the same dog",
+                motherMustBeFemale: "Mother must be a female",
+                fatherMustBeMale: "Father must be a male",
+                savingPlan: "Saving breeding plan...",
+                planSaved: "Breeding plan successfully saved!",
+                saveFailed: "Error saving breeding plan: ",
+                dogNotFound: "Dog not found in database",
+                deleteConfirm: "Are you sure you want to delete this breeding plan?",
+                deleteSuccess: "Breeding plan deleted!",
+                deleteFailed: "Delete failed: ",
+                planNotFound: "Breeding plan not found",
+                statusUpdated: "Status updated!"
+            },
+            de: {
+                // Modal Titel
+                breedingPlan: "Zuchtplanung",
+                breedingInfo: "Erstellen und verwalten Sie Zuchtpläne für Ihre Hunde. Planen Sie Deckungen, Würfe und Geburten.",
+                
+                // Neuer Zuchtplan
+                newBreedingPlan: "Neuer Zuchtplan",
+                mother: "Mutter",
+                motherRequired: "Mutter *",
+                selectMother: "Hündin auswählen...",
+                father: "Vater",
+                fatherRequired: "Vater *",
+                selectFather: "Rüde auswählen...",
+                expectedBirthDate: "Erwartetes Geburtsdatum",
+                expectedLitterSize: "Erwartete Wurfgröße",
+                notes: "Notizen",
+                extraNotes: "Zusätzliche Notizen zum Zuchtplan...",
+                saveBreedingPlan: "Zuchtplan speichern",
+                
+                // Aktive Pläne
+                activeBreedingPlans: "Aktive Zuchtpläne",
+                activePlans: "Aktive Pläne",
+                nextBirth: "Nächste Geburt",
+                totalLittersYear: "Würfe dieses Jahr",
+                successRate: "Erfolgsrate",
+                none: "Keine",
+                
+                // Übersicht
+                breedingPlanOverview: "Zuchtplan Übersicht",
+                date: "Datum",
+                status: "Status",
+                litterSize: "Wurfgröße",
+                actions: "Aktionen",
+                noPlans: "Noch keine Zuchtpläne erstellt",
+                
+                // Status Labels
+                planned: "Geplant",
+                inProgress: "Laufend",
+                completed: "Abgeschlossen",
+                cancelled: "Abgebrochen",
+                unknown: "Unbekannt",
+                
+                // Details Modal
+                breedingPlanDetails: "Zuchtplan Details",
+                motherDetails: "Mutter",
+                fatherDetails: "Vater",
+                planDetails: "Plan Details",
+                actualLitterSize: "Tatsächliche Wurfgröße",
+                completionDate: "Abschlussdatum",
+                createdOn: "Erstellt am",
+                createdBy: "Erstellt von",
+                updateStatus: "Status aktualisieren",
+                
+                // Status Update
+                updateStatusTitle: "Status aktualisieren",
+                newStatus: "Neuer Status",
+                confirmUpdate: "Aktualisieren",
+                
+                // Meldungen
+                selectBoth: "Wählen Sie sowohl Mutter als auch Vater",
+                sameDog: "Mutter und Vater können nicht derselbe Hund sein",
+                motherMustBeFemale: "Mutter muss eine Hündin sein",
+                fatherMustBeMale: "Vater muss ein Rüde sein",
+                savingPlan: "Zuchtplan wird gespeichert...",
+                planSaved: "Zuchtplan erfolgreich gespeichert!",
+                saveFailed: "Fehler beim Speichern des Zuchtplans: ",
+                dogNotFound: "Hund nicht in der Datenbank gefunden",
+                deleteConfirm: "Sind Sie sicher, dass Sie diesen Zuchtplan löschen möchten?",
+                deleteSuccess: "Zuchtplan gelöscht!",
+                deleteFailed: "Löschen fehlgeschlagen: ",
+                planNotFound: "Zuchtplan nicht gefunden",
+                statusUpdated: "Status aktualisiert!"
+            }
+        };
+    }
+    
+    t(key) {
+        return this.translations[this.currentLang][key] || key;
+    }
+    
+    updateLanguage(lang) {
+        this.currentLang = lang;
+        if (document.getElementById('breedingPlanModal')) {
+            this.loadBreedingData();
+        }
     }
     
     getModalHTML() {
+        const t = this.t.bind(this);
+        
         return `
             <div class="modal fade" id="breedingPlanModal" tabindex="-1" aria-labelledby="breedingPlanModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-xl">
                     <div class="modal-content">
                         <div class="modal-header bg-purple text-white">
                             <h5 class="modal-title" id="breedingPlanModalLabel">
-                                <i class="bi bi-calendar-heart"></i> Fok Planning
+                                <i class="bi bi-calendar-heart"></i> ${t('breedingPlan')}
                             </h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
                         </div>
                         <div class="modal-body">
                             <div class="alert alert-info mb-4">
                                 <i class="bi bi-info-circle"></i>
-                                Maak en beheer fokplannen voor uw honden. Plan dekkingen, nesten en geboortes.
+                                ${t('breedingInfo')}
                             </div>
                             
                             <div class="row mb-4">
                                 <div class="col-md-6">
                                     <div class="card">
                                         <div class="card-header bg-purple text-white">
-                                            <h6 class="mb-0"><i class="bi bi-plus-circle"></i> Nieuw Fokplan</h6>
+                                            <h6 class="mb-0"><i class="bi bi-plus-circle"></i> ${t('newBreedingPlan')}</h6>
                                         </div>
                                         <div class="card-body">
                                             <div class="row g-3">
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
-                                                        <label for="breedingMother" class="form-label">Moeder *</label>
+                                                        <label for="breedingMother" class="form-label">${t('motherRequired')}</label>
                                                         <select class="form-select" id="breedingMother" required>
-                                                            <option value="">Selecteer teef...</option>
+                                                            <option value="">${t('selectMother')}</option>
                                                             <!-- Teven opties worden hier ingeladen -->
                                                         </select>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
-                                                        <label for="breedingFather" class="form-label">Vader *</label>
+                                                        <label for="breedingFather" class="form-label">${t('fatherRequired')}</label>
                                                         <select class="form-select" id="breedingFather" required>
-                                                            <option value="">Selecteer reu...</option>
+                                                            <option value="">${t('selectFather')}</option>
                                                             <!-- Reuen opties worden hier ingeladen -->
                                                         </select>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
-                                                        <label for="breedingDate" class="form-label">Geboortedatum verwacht</label>
+                                                        <label for="breedingDate" class="form-label">${t('expectedBirthDate')}</label>
                                                         <input type="date" class="form-control" id="breedingDate">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
-                                                        <label for="breedingLitterSize" class="form-label">Verwachte nestgrootte</label>
+                                                        <label for="breedingLitterSize" class="form-label">${t('expectedLitterSize')}</label>
                                                         <input type="number" class="form-control" id="breedingLitterSize" min="1" max="20">
                                                     </div>
                                                 </div>
                                                 <div class="col-12">
                                                     <div class="mb-3">
-                                                        <label for="breedingNotes" class="form-label">Opmerkingen</label>
-                                                        <textarea class="form-control" id="breedingNotes" rows="2" placeholder="Extra notities over het fokplan..."></textarea>
+                                                        <label for="breedingNotes" class="form-label">${t('notes')}</label>
+                                                        <textarea class="form-control" id="breedingNotes" rows="2" placeholder="${t('extraNotes')}"></textarea>
                                                     </div>
                                                 </div>
                                             </div>
                                             <button class="btn btn-purple w-100" id="saveBreedingPlanBtn">
-                                                <i class="bi bi-save"></i> Fokplan Opslaan
+                                                <i class="bi bi-save"></i> ${t('saveBreedingPlan')}
                                             </button>
                                         </div>
                                     </div>
@@ -81,25 +316,25 @@ class BreedingManager extends BaseModule {
                                 <div class="col-md-6">
                                     <div class="card">
                                         <div class="card-header">
-                                            <h6 class="mb-0"><i class="bi bi-calendar-check"></i> Actieve Fokplannen</h6>
+                                            <h6 class="mb-0"><i class="bi bi-calendar-check"></i> ${t('activeBreedingPlans')}</h6>
                                         </div>
                                         <div class="card-body">
                                             <div class="text-center">
                                                 <div class="display-4 text-purple mb-2" id="activeBreedingPlans">0</div>
-                                                <div class="text-muted">Actieve plannen</div>
+                                                <div class="text-muted">${t('activePlans')}</div>
                                             </div>
                                             <hr>
                                             <div class="small">
                                                 <div class="d-flex justify-content-between mb-2">
-                                                    <span>Volgende geboorte:</span>
-                                                    <span id="nextBreedingDate">Geen</span>
+                                                    <span>${t('nextBirth')}:</span>
+                                                    <span id="nextBreedingDate">${t('none')}</span>
                                                 </div>
                                                 <div class="d-flex justify-content-between mb-2">
-                                                    <span>Totaal nesten dit jaar:</span>
+                                                    <span>${t('totalLittersYear')}:</span>
                                                     <span id="totalLittersYear">0</span>
                                                 </div>
                                                 <div class="d-flex justify-content-between">
-                                                    <span>Succesratio:</span>
+                                                    <span>${t('successRate')}:</span>
                                                     <span id="breedingSuccessRate">0%</span>
                                                 </div>
                                             </div>
@@ -110,26 +345,26 @@ class BreedingManager extends BaseModule {
                             
                             <div class="card">
                                 <div class="card-header">
-                                    <h6 class="mb-0"><i class="bi bi-list-check"></i> Fokplan Overzicht</h6>
+                                    <h6 class="mb-0"><i class="bi bi-list-check"></i> ${t('breedingPlanOverview')}</h6>
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
                                         <table class="table table-hover">
                                             <thead>
                                                 <tr>
-                                                    <th>Moeder</th>
-                                                    <th>Vader</th>
-                                                    <th>Datum</th>
-                                                    <th>Status</th>
-                                                    <th>Nestgrootte</th>
-                                                    <th>Acties</th>
+                                                    <th>${t('mother')}</th>
+                                                    <th>${t('father')}</th>
+                                                    <th>${t('date')}</th>
+                                                    <th>${t('status')}</th>
+                                                    <th>${t('litterSize')}</th>
+                                                    <th>${t('actions')}</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="breedingPlansTable">
                                                 <tr>
                                                     <td colspan="6" class="text-center py-4">
                                                         <i class="bi bi-calendar-x text-muted"></i>
-                                                        <p class="mt-2 text-muted">Nog geen fokplannen aangemaakt</p>
+                                                        <p class="mt-2 text-muted">${t('noPlans')}</p>
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -157,14 +392,15 @@ class BreedingManager extends BaseModule {
     }
     
     async loadBreedingData() {
+        const t = this.t.bind(this);
+        
         try {
-            // Laad honden voor dropdowns
             const honden = await this.db.getHonden();
             const motherSelect = document.getElementById('breedingMother');
             const fatherSelect = document.getElementById('breedingFather');
             
             if (motherSelect) {
-                motherSelect.innerHTML = '<option value="">Selecteer teef...</option>';
+                motherSelect.innerHTML = `<option value="">${t('selectMother')}</option>`;
                 honden.filter(h => h.geslacht === 'teven').forEach(hond => {
                     const option = document.createElement('option');
                     option.value = hond.id;
@@ -174,7 +410,7 @@ class BreedingManager extends BaseModule {
             }
             
             if (fatherSelect) {
-                fatherSelect.innerHTML = '<option value="">Selecteer reu...</option>';
+                fatherSelect.innerHTML = `<option value="">${t('selectFather')}</option>`;
                 honden.filter(h => h.geslacht === 'reuen').forEach(hond => {
                     const option = document.createElement('option');
                     option.value = hond.id;
@@ -183,7 +419,6 @@ class BreedingManager extends BaseModule {
                 });
             }
             
-            // Laad bestaande fokplannen
             await this.loadBreedingPlans();
             
         } catch (error) {
@@ -193,14 +428,10 @@ class BreedingManager extends BaseModule {
     
     async loadBreedingPlans() {
         try {
-            // Laad fokplannen uit localStorage (tijdelijke oplossing)
             const savedPlans = localStorage.getItem('breedingPlans');
             this.breedingPlans = savedPlans ? JSON.parse(savedPlans) : [];
             
-            // Update statistieken
             await this.updateBreedingStats();
-            
-            // Toon overzicht
             this.displayBreedingPlans();
             
         } catch (error) {
@@ -209,6 +440,7 @@ class BreedingManager extends BaseModule {
     }
     
     async updateBreedingStats() {
+        const t = this.t.bind(this);
         const activePlansElement = document.getElementById('activeBreedingPlans');
         const nextBreedingDateElement = document.getElementById('nextBreedingDate');
         const totalLittersYearElement = document.getElementById('totalLittersYear');
@@ -216,24 +448,21 @@ class BreedingManager extends BaseModule {
         
         if (!this.breedingPlans || this.breedingPlans.length === 0) {
             if (activePlansElement) activePlansElement.textContent = '0';
-            if (nextBreedingDateElement) nextBreedingDateElement.textContent = 'Geen';
+            if (nextBreedingDateElement) nextBreedingDateElement.textContent = t('none');
             if (totalLittersYearElement) totalLittersYearElement.textContent = '0';
             if (breedingSuccessRateElement) breedingSuccessRateElement.textContent = '0%';
             return;
         }
         
-        // Bereken statistieken
         const currentYear = new Date().getFullYear();
         const currentDate = new Date();
         
-        // Actieve plannen (toekomstige of lopende)
         const activePlans = this.breedingPlans.filter(plan => {
             if (!plan.expectedDate) return false;
             const planDate = new Date(plan.expectedDate);
             return planDate >= currentDate || plan.status === 'in-progress';
         });
         
-        // Volgende geboortedatum
         let nextDate = null;
         this.breedingPlans.forEach(plan => {
             if (plan.expectedDate && plan.status === 'planned') {
@@ -244,30 +473,28 @@ class BreedingManager extends BaseModule {
             }
         });
         
-        // Nesten dit jaar
         const littersThisYear = this.breedingPlans.filter(plan => {
             if (!plan.completedDate) return false;
             const completedDate = new Date(plan.completedDate);
             return completedDate.getFullYear() === currentYear;
         }).length;
         
-        // Succesratio (afgeronde plannen vs geannuleerd)
         const completedPlans = this.breedingPlans.filter(p => p.status === 'completed');
         const cancelledPlans = this.breedingPlans.filter(p => p.status === 'cancelled');
         const totalEnded = completedPlans.length + cancelledPlans.length;
         const successRate = totalEnded > 0 ? Math.round((completedPlans.length / totalEnded) * 100) : 0;
         
-        // Update UI
         if (activePlansElement) activePlansElement.textContent = activePlans.length;
         if (nextBreedingDateElement) {
             nextBreedingDateElement.textContent = nextDate ? 
-                nextDate.toLocaleDateString('nl-NL') : 'Geen';
+                nextDate.toLocaleDateString(this.currentLang) : t('none');
         }
         if (totalLittersYearElement) totalLittersYearElement.textContent = littersThisYear;
         if (breedingSuccessRateElement) breedingSuccessRateElement.textContent = `${successRate}%`;
     }
     
     async saveBreedingPlan() {
+        const t = this.t.bind(this);
         const motherId = document.getElementById('breedingMother').value;
         const fatherId = document.getElementById('breedingFather').value;
         const expectedDate = document.getElementById('breedingDate').value;
@@ -275,38 +502,35 @@ class BreedingManager extends BaseModule {
         const notes = document.getElementById('breedingNotes').value.trim();
         
         if (!motherId || !fatherId) {
-            this.showError('Selecteer zowel moeder als vader');
+            this.showError(t('selectBoth'));
             return;
         }
         
         if (motherId === fatherId) {
-            this.showError('Moeder en vader kunnen niet dezelfde hond zijn');
+            this.showError(t('sameDog'));
             return;
         }
         
-        this.showProgress('Fokplan opslaan...');
+        this.showProgress(t('savingPlan'));
         
         try {
-            // Laad honden voor namen
             const honden = await this.db.getHonden();
             const mother = honden.find(h => h.id === parseInt(motherId));
             const father = honden.find(h => h.id === parseInt(fatherId));
             
             if (!mother || !father) {
-                throw new Error('Hond niet gevonden in database');
+                throw new Error(t('dogNotFound'));
             }
             
-            // Valideer geslachten
             if (mother.geslacht !== 'teven') {
-                throw new Error('Moeder moet een teef zijn');
+                throw new Error(t('motherMustBeFemale'));
             }
             if (father.geslacht !== 'reuen') {
-                throw new Error('Vader moet een reu zijn');
+                throw new Error(t('fatherMustBeMale'));
             }
             
-            // Maak nieuw fokplan
             const newPlan = {
-                id: Date.now(), // Tijdelijke ID
+                id: Date.now(),
                 motherId: parseInt(motherId),
                 motherName: mother.naam,
                 fatherId: parseInt(fatherId),
@@ -319,32 +543,28 @@ class BreedingManager extends BaseModule {
                 createdBy: this.auth.getCurrentUser()?.username || 'unknown'
             };
             
-            // Voeg toe aan lijst
             this.breedingPlans.push(newPlan);
-            
-            // Sla op in localStorage
             localStorage.setItem('breedingPlans', JSON.stringify(this.breedingPlans));
             
             this.hideProgress();
-            this.showSuccess('Fokplan succesvol opgeslagen!');
+            this.showSuccess(t('planSaved'));
             
-            // Formulier resetten
             document.getElementById('breedingMother').value = '';
             document.getElementById('breedingFather').value = '';
             document.getElementById('breedingDate').value = '';
             document.getElementById('breedingLitterSize').value = '';
             document.getElementById('breedingNotes').value = '';
             
-            // Herlaad data
             await this.loadBreedingData();
             
         } catch (error) {
             this.hideProgress();
-            this.showError(`Fout bij opslaan fokplan: ${error.message}`);
+            this.showError(`${t('saveFailed')}${error.message}`);
         }
     }
     
     displayBreedingPlans() {
+        const t = this.t.bind(this);
         const tableBody = document.getElementById('breedingPlansTable');
         if (!tableBody) return;
         
@@ -353,7 +573,7 @@ class BreedingManager extends BaseModule {
                 <tr>
                     <td colspan="6" class="text-center py-4">
                         <i class="bi bi-calendar-x text-muted"></i>
-                        <p class="mt-2 text-muted">Nog geen fokplannen aangemaakt</p>
+                        <p class="mt-2 text-muted">${t('noPlans')}</p>
                     </td>
                 </tr>
             `;
@@ -365,13 +585,13 @@ class BreedingManager extends BaseModule {
         this.breedingPlans.sort((a, b) => {
             const dateA = a.expectedDate ? new Date(a.expectedDate) : new Date(0);
             const dateB = b.expectedDate ? new Date(b.expectedDate) : new Date(0);
-            return dateB - dateA; // Nieuwste eerst
+            return dateB - dateA;
         });
         
         this.breedingPlans.forEach(plan => {
             const statusBadge = this.getStatusBadge(plan.status);
             const dateDisplay = plan.expectedDate ? 
-                new Date(plan.expectedDate).toLocaleDateString('nl-NL') : 'Niet gepland';
+                new Date(plan.expectedDate).toLocaleDateString(this.currentLang) : t('notPlanned');
             
             html += `
                 <tr>
@@ -385,13 +605,13 @@ class BreedingManager extends BaseModule {
                     <td>${plan.litterSize || '-'}</td>
                     <td>
                         <button class="btn btn-sm btn-outline-info view-plan-btn" data-id="${plan.id}">
-                            <i class="bi bi-eye"></i>
+                            <i class="bi bi-eye"></i> ${t('view')}
                         </button>
                         <button class="btn btn-sm btn-outline-warning edit-plan-btn" data-id="${plan.id}">
-                            <i class="bi bi-pencil"></i>
+                            <i class="bi bi-pencil"></i> ${t('edit')}
                         </button>
                         <button class="btn btn-sm btn-outline-danger delete-plan-btn" data-id="${plan.id}">
-                            <i class="bi bi-trash"></i>
+                            <i class="bi bi-trash"></i> ${t('delete')}
                         </button>
                     </td>
                 </tr>
@@ -399,20 +619,19 @@ class BreedingManager extends BaseModule {
         });
         
         tableBody.innerHTML = html;
-        
-        // Voeg event listeners toe
         this.setupPlanActionListeners();
     }
     
     getStatusBadge(status) {
+        const t = this.t.bind(this);
         const badges = {
-            'planned': '<span class="badge bg-primary">Gepland</span>',
-            'in-progress': '<span class="badge bg-warning">Lopend</span>',
-            'completed': '<span class="badge bg-success">Voltooid</span>',
-            'cancelled': '<span class="badge bg-danger">Geannuleerd</span>'
+            'planned': `<span class="badge bg-primary">${t('planned')}</span>`,
+            'in-progress': `<span class="badge bg-warning">${t('inProgress')}</span>`,
+            'completed': `<span class="badge bg-success">${t('completed')}</span>`,
+            'cancelled': `<span class="badge bg-danger">${t('cancelled')}</span>`
         };
         
-        return badges[status] || '<span class="badge bg-secondary">Onbekend</span>';
+        return badges[status] || `<span class="badge bg-secondary">${t('unknown')}</span>`;
     }
     
     setupPlanActionListeners() {
@@ -439,14 +658,14 @@ class BreedingManager extends BaseModule {
     }
     
     async viewBreedingPlan(planId) {
+        const t = this.t.bind(this);
         const plan = this.breedingPlans.find(p => p.id === planId);
         
         if (!plan) {
-            this.showError('Fokplan niet gevonden');
+            this.showError(t('planNotFound'));
             return;
         }
         
-        // Laad hond details
         const honden = await this.db.getHonden();
         const mother = honden.find(h => h.id === plan.motherId);
         const father = honden.find(h => h.id === plan.fatherId);
@@ -457,7 +676,7 @@ class BreedingManager extends BaseModule {
                     <div class="modal-content">
                         <div class="modal-header bg-purple text-white">
                             <h5 class="modal-title" id="viewBreedingPlanModalLabel">
-                                <i class="bi bi-calendar-heart"></i> Fokplan Details
+                                <i class="bi bi-calendar-heart"></i> ${t('breedingPlanDetails')}
                             </h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
                         </div>
@@ -466,36 +685,36 @@ class BreedingManager extends BaseModule {
                                 <div class="col-md-6">
                                     <div class="card">
                                         <div class="card-header">
-                                            <h6 class="mb-0">Moeder</h6>
+                                            <h6 class="mb-0">${t('motherDetails')}</h6>
                                         </div>
                                         <div class="card-body">
                                             <h5>${plan.motherName}</h5>
                                             ${mother ? `
                                                 <div class="small">
-                                                    <div><strong>Ras:</strong> ${mother.ras || '-'}</div>
-                                                    <div><strong>Chipnummer:</strong> ${mother.chipnummer || '-'}</div>
-                                                    <div><strong>Geboortedatum:</strong> ${mother.geboortedatum ? 
-                                                        new Date(mother.geboortedatum).toLocaleDateString('nl-NL') : '-'}</div>
+                                                    <div><strong>${t('breed')}:</strong> ${mother.ras || '-'}</div>
+                                                    <div><strong>${t('chipNumber')}:</strong> ${mother.chipnummer || '-'}</div>
+                                                    <div><strong>${t('birthDate')}:</strong> ${mother.geboortedatum ? 
+                                                        new Date(mother.geboortedatum).toLocaleDateString(this.currentLang) : '-'}</div>
                                                 </div>
-                                            ` : '<p class="text-muted">Hond niet gevonden in database</p>'}
+                                            ` : `<p class="text-muted">${t('dogNotFound')}</p>`}
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="card">
                                         <div class="card-header">
-                                            <h6 class="mb-0">Vader</h6>
+                                            <h6 class="mb-0">${t('fatherDetails')}</h6>
                                         </div>
                                         <div class="card-body">
                                             <h5>${plan.fatherName}</h5>
                                             ${father ? `
                                                 <div class="small">
-                                                    <div><strong>Ras:</strong> ${father.ras || '-'}</div>
-                                                    <div><strong>Chipnummer:</strong> ${father.chipnummer || '-'}</div>
-                                                    <div><strong>Geboortedatum:</strong> ${father.geboortedatum ? 
-                                                        new Date(father.geboortedatum).toLocaleDateString('nl-NL') : '-'}</div>
+                                                    <div><strong>${t('breed')}:</strong> ${father.ras || '-'}</div>
+                                                    <div><strong>${t('chipNumber')}:</strong> ${father.chipnummer || '-'}</div>
+                                                    <div><strong>${t('birthDate')}:</strong> ${father.geboortedatum ? 
+                                                        new Date(father.geboortedatum).toLocaleDateString(this.currentLang) : '-'}</div>
                                                 </div>
-                                            ` : '<p class="text-muted">Hond niet gevonden in database</p>'}
+                                            ` : `<p class="text-muted">${t('dogNotFound')}</p>`}
                                         </div>
                                     </div>
                                 </div>
@@ -503,36 +722,36 @@ class BreedingManager extends BaseModule {
                             
                             <div class="card">
                                 <div class="card-header">
-                                    <h6 class="mb-0">Plan Details</h6>
+                                    <h6 class="mb-0">${t('planDetails')}</h6>
                                 </div>
                                 <div class="card-body">
                                     <table class="table table-sm">
                                         <tr>
-                                            <th style="width: 40%">Status:</th>
+                                            <th style="width: 40%">${t('status')}:</th>
                                             <td>${this.getStatusBadge(plan.status)}</td>
                                         </tr>
                                         <tr>
-                                            <th>Verwachte geboortedatum:</th>
+                                            <th>${t('expectedBirthDate')}:</th>
                                             <td>${plan.expectedDate ? 
-                                                new Date(plan.expectedDate).toLocaleDateString('nl-NL') : 'Niet gepland'}</td>
+                                                new Date(plan.expectedDate).toLocaleDateString(this.currentLang) : t('notPlanned')}</td>
                                         </tr>
                                         <tr>
-                                            <th>Verwachte nestgrootte:</th>
-                                            <td>${plan.litterSize || 'Onbekend'}</td>
+                                            <th>${t('expectedLitterSize')}:</th>
+                                            <td>${plan.litterSize || t('unknown')}</td>
                                         </tr>
                                         <tr>
-                                            <th>Aangemaakt op:</th>
-                                            <td>${new Date(plan.createdAt).toLocaleString('nl-NL')}</td>
+                                            <th>${t('createdOn')}:</th>
+                                            <td>${new Date(plan.createdAt).toLocaleString(this.currentLang)}</td>
                                         </tr>
                                         <tr>
-                                            <th>Aangemaakt door:</th>
+                                            <th>${t('createdBy')}:</th>
                                             <td>${plan.createdBy}</td>
                                         </tr>
                                     </table>
                                     
                                     ${plan.notes ? `
                                     <div class="mt-3">
-                                        <h6>Opmerkingen</h6>
+                                        <h6>${t('notes')}</h6>
                                         <div class="bg-light p-3 rounded">
                                             ${plan.notes}
                                         </div>
@@ -544,7 +763,7 @@ class BreedingManager extends BaseModule {
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
                             <button type="button" class="btn btn-purple" id="updatePlanStatusBtn" data-id="${plan.id}">
-                                Status Bijwerken
+                                ${t('updateStatus')}
                             </button>
                         </div>
                     </div>
@@ -552,7 +771,6 @@ class BreedingManager extends BaseModule {
             </div>
         `;
         
-        // Toon modal
         const container = document.getElementById('modalsContainer');
         container.insertAdjacentHTML('beforeend', html);
         
@@ -560,7 +778,6 @@ class BreedingManager extends BaseModule {
         const modal = new bootstrap.Modal(modalElement);
         modal.show();
         
-        // Voeg event listener voor status update toe
         const updateBtn = document.getElementById('updatePlanStatusBtn');
         if (updateBtn) {
             updateBtn.addEventListener('click', () => {
@@ -569,17 +786,17 @@ class BreedingManager extends BaseModule {
             });
         }
         
-        // Cleanup na sluiten
         modalElement.addEventListener('hidden.bs.modal', () => {
             modalElement.remove();
         });
     }
     
     async updatePlanStatus(planId) {
+        const t = this.t.bind(this);
         const plan = this.breedingPlans.find(p => p.id === planId);
         
         if (!plan) {
-            this.showError('Fokplan niet gevonden');
+            this.showError(t('planNotFound'));
             return;
         }
         
@@ -588,42 +805,41 @@ class BreedingManager extends BaseModule {
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header bg-warning">
-                            <h5 class="modal-title">Status Bijwerken</h5>
+                            <h5 class="modal-title">${t('updateStatusTitle')}</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label class="form-label">Nieuwe Status</label>
+                                <label class="form-label">${t('newStatus')}</label>
                                 <select class="form-select" id="newPlanStatus">
-                                    <option value="planned" ${plan.status === 'planned' ? 'selected' : ''}>Gepland</option>
-                                    <option value="in-progress" ${plan.status === 'in-progress' ? 'selected' : ''}>Lopend</option>
-                                    <option value="completed" ${plan.status === 'completed' ? 'selected' : ''}>Voltooid</option>
-                                    <option value="cancelled" ${plan.status === 'cancelled' ? 'selected' : ''}>Geannuleerd</option>
+                                    <option value="planned" ${plan.status === 'planned' ? 'selected' : ''}>${t('planned')}</option>
+                                    <option value="in-progress" ${plan.status === 'in-progress' ? 'selected' : ''}>${t('inProgress')}</option>
+                                    <option value="completed" ${plan.status === 'completed' ? 'selected' : ''}>${t('completed')}</option>
+                                    <option value="cancelled" ${plan.status === 'cancelled' ? 'selected' : ''}>${t('cancelled')}</option>
                                 </select>
                             </div>
                             ${plan.status === 'completed' ? `
                             <div class="mb-3">
-                                <label class="form-label">Werkelijke nestgrootte</label>
+                                <label class="form-label">${t('actualLitterSize')}</label>
                                 <input type="number" class="form-control" id="actualLitterSize" 
                                        value="${plan.actualLitterSize || ''}" min="0" max="20">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">Voltooiingsdatum</label>
+                                <label class="form-label">${t('completionDate')}</label>
                                 <input type="date" class="form-control" id="completionDate" 
                                        value="${new Date().toISOString().split('T')[0]}">
                             </div>
                             ` : ''}
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuleren</button>
-                            <button type="button" class="btn btn-warning" id="confirmStatusUpdateBtn" data-id="${planId}">Bijwerken</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${t('cancel')}</button>
+                            <button type="button" class="btn btn-warning" id="confirmStatusUpdateBtn" data-id="${planId}">${t('confirmUpdate')}</button>
                         </div>
                     </div>
                 </div>
             </div>
         `;
         
-        // Toom modal
         const container = document.getElementById('modalsContainer');
         container.insertAdjacentHTML('beforeend', html);
         
@@ -631,13 +847,10 @@ class BreedingManager extends BaseModule {
         const modal = new bootstrap.Modal(modalElement);
         modal.show();
         
-        // Voeg event listener toe
         const confirmBtn = document.getElementById('confirmStatusUpdateBtn');
         if (confirmBtn) {
             confirmBtn.addEventListener('click', () => {
                 const newStatus = document.getElementById('newPlanStatus').value;
-                
-                // Update plan
                 plan.status = newStatus;
                 
                 if (newStatus === 'completed') {
@@ -645,18 +858,14 @@ class BreedingManager extends BaseModule {
                     plan.completedDate = document.getElementById('completionDate').value || new Date().toISOString();
                 }
                 
-                // Sla op
                 localStorage.setItem('breedingPlans', JSON.stringify(this.breedingPlans));
                 
                 modal.hide();
-                this.showSuccess('Status bijgewerkt!');
-                
-                // Herlaad data
+                this.showSuccess(t('statusUpdated'));
                 this.loadBreedingData();
             });
         }
         
-        // Cleanup
         modalElement.addEventListener('hidden.bs.modal', () => {
             modalElement.remove();
         });
@@ -667,24 +876,21 @@ class BreedingManager extends BaseModule {
     }
     
     async deleteBreedingPlan(planId) {
-        if (!confirm('Weet je zeker dat je dit fokplan wilt verwijderen?')) {
+        const t = this.t.bind(this);
+        
+        if (!confirm(t('deleteConfirm'))) {
             return;
         }
         
         try {
-            // Verwijder plan
             this.breedingPlans = this.breedingPlans.filter(p => p.id !== planId);
-            
-            // Sla op
             localStorage.setItem('breedingPlans', JSON.stringify(this.breedingPlans));
             
-            this.showSuccess('Fokplan verwijderd!');
-            
-            // Herlaad data
+            this.showSuccess(t('deleteSuccess'));
             await this.loadBreedingData();
             
         } catch (error) {
-            this.showError(`Verwijderen mislukt: ${error.message}`);
+            this.showError(`${t('deleteFailed')}${error.message}`);
         }
     }
 }
