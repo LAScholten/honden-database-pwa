@@ -934,4 +934,8 @@ class DogManager extends BaseModule {
             this.showError(`${this.t('photoError')}${error.message}`);
         }
     }
+
+// Global export
+if (typeof window !== 'undefined') {
+    window.DogManager = DogManager;
 }

@@ -98,4 +98,8 @@ class BaseModule {
         
         return csvRows.join('\n');
     }
+
+// Global export
+if (typeof window !== 'undefined') {
+    window.BaseModule = BaseModule;
 }

@@ -287,4 +287,8 @@ class SearchManager extends BaseModule {
             this.showError(`Fout bij laden hond: ${error.message}`);
         }
     }
+
+// Global export
+if (typeof window !== 'undefined') {
+    window.SearchManager = SearchManager;
 }

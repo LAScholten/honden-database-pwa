@@ -736,4 +736,8 @@ class PrivateInfoManager extends BaseModule {
             lastBackupElement.textContent = t('noBackup');
         }
     }
+
+// Global export
+if (typeof window !== 'undefined') {
+    window.PrivateInfoManager = PrivateInfoManager;
 }

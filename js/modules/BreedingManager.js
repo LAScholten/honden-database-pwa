@@ -893,4 +893,8 @@ class BreedingManager extends BaseModule {
             this.showError(`${t('deleteFailed')}${error.message}`);
         }
     }
+
+// Global export
+if (typeof window !== 'undefined') {
+    window.BreedingManager = BreedingManager;
 }

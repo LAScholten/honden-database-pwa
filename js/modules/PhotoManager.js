@@ -767,4 +767,8 @@ class PhotoManager extends BaseModule {
             this.showError(`${t('deleteFailed')}${error.message}`);
         }
     }
+
+// Global export
+if (typeof window !== 'undefined') {
+    window.PhotoManager = PhotoManager;
 }
