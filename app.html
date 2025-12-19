@@ -16,36 +16,72 @@
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
+    
+    <!-- BELANGRIJK: Bootstrap Configuratie OVERRIDE - moet VÓÓR Bootstrap JS -->
+    <script>
+        // Forceer veilige Bootstrap modal instellingen
+        window.bootstrapModalConfig = {
+            backdrop: 'static',    // Voorkom dat klikken buiten modal sluit
+            keyboard: false,       // Voorkom ESC toets (veroorzaakt focus problemen)
+            focus: false           // Zet focus trapping UIT (oorzaak van aria-hidden errors)
+        };
+        
+        // Bootstrap patch die draait zodra Bootstrap laadt
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wacht tot Bootstrap geladen is
+            const checkBootstrap = setInterval(function() {
+                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    clearInterval(checkBootstrap);
+                    
+                    // APPLICEER MODAL PATCHES
+                    
+                    // 1. Patch Modal.Default config
+                    bootstrap.Modal.Default = {
+                        ...bootstrap.Modal.Default,
+                        ...window.bootstrapModalConfig
+                    };
+                    
+                    // 2. Patch hide() methode om focus te verwijderen
+                    const originalHide = bootstrap.Modal.prototype.hide;
+                    bootstrap.Modal.prototype.hide = function() {
+                        // Verwijder focus VOORDAT modal sluit
+                        if (this._element) {
+                            const focused = this._element.querySelector(':focus');
+                            if (focused) {
+                                focused.blur();
+                            }
+                            document.body.focus();
+                        }
+                        return originalHide.call(this);
+                    };
+                    
+                    // 3. Patch _showElement om aria-hidden te verwijderen
+                    const originalShowElement = bootstrap.Modal.prototype._showElement;
+                    bootstrap.Modal.prototype._showElement = function() {
+                        this._element.removeAttribute('aria-hidden');
+                        return originalShowElement.call(this);
+                    };
+                    
+                    console.log('✅ Bootstrap Modal patches toegepast');
+                }
+            }, 100);
+        });
+    </script>
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
-                <i class="bi bi-database"></i> <span class="app-text" data-key="appTitle">Hondendatabase PWA</span>
+                <i class="bi bi-database"></i> Hondendatabase PWA
             </a>
             <div class="d-flex align-items-center">
-                <!-- Taal selector in navigatie -->
-                <div class="me-3">
-                    <div class="btn-group btn-group-sm">
-                        <button class="btn btn-outline-light app-lang-btn active" data-lang="nl" title="Nederlands">
-                            🇳🇱
-                        </button>
-                        <button class="btn btn-outline-light app-lang-btn" data-lang="en" title="English">
-                            🇬🇧
-                        </button>
-                        <button class="btn btn-outline-light app-lang-btn" data-lang="de" title="Deutsch">
-                            🇩🇪
-                        </button>
-                    </div>
-                </div>
-                
                 <span class="text-white me-3">
                     <i class="bi bi-person-circle"></i> 
                     <span id="currentUser">Gebruiker</span>
                 </span>
                 <button class="btn btn-outline-light btn-sm" id="logoutBtn">
-                    <i class="bi bi-box-arrow-right"></i> <span class="app-text" data-key="logout">Uitloggen</span>
+                    <i class="bi bi-box-arrow-right"></i> Uitloggen
                 </button>
             </div>
         </div>
@@ -58,26 +94,26 @@
             <div class="col-lg-3 col-md-4 mb-4">
                 <div class="card">
                     <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="bi bi-menu-button"></i> <span class="app-text" data-key="menu">Menu</span></h5>
+                        <h5 class="mb-0"><i class="bi bi-menu-button"></i> Menu</h5>
                     </div>
                     <div class="list-group list-group-flush">
                         <button class="list-group-item list-group-item-action" id="dataManagementBtn">
-                            <i class="bi bi-database-gear"></i> <span class="app-text" data-key="dataManagement">Data Beheer</span>
+                            <i class="bi bi-database-gear"></i> Data Beheer
                         </button>
                         <button class="list-group-item list-group-item-action" id="addDogBtn">
-                            <i class="bi bi-plus-circle"></i> <span class="app-text" data-key="newDog">Nieuwe Hond</span>
+                            <i class="bi bi-plus-circle"></i> Nieuwe Hond
                         </button>
                         <button class="list-group-item list-group-item-action" id="searchBtn">
-                            <i class="bi bi-search"></i> <span class="app-text" data-key="searchDog">Hond Zoeken</span>
+                            <i class="bi bi-search"></i> Hond Zoeken
                         </button>
                         <button class="list-group-item list-group-item-action" id="photoGalleryBtn">
-                            <i class="bi bi-images"></i> <span class="app-text" data-key="photoGallery">Foto Galerij</span>
+                            <i class="bi bi-images"></i> Foto Galerij
                         </button>
                         <button class="list-group-item list-group-item-action" id="breedingPlanBtn">
-                            <i class="bi bi-calendar-heart"></i> <span class="app-text" data-key="breedingPlan">Fok Planning</span>
+                            <i class="bi bi-calendar-heart"></i> Fok Planning
                         </button>
                         <button class="list-group-item list-group-item-action" id="privateInfoBtn">
-                            <i class="bi bi-lock"></i> <span class="app-text" data-key="privateInfo">Privé Informatie</span>
+                            <i class="bi bi-lock"></i> Privé Informatie
                         </button>
                     </div>
                 </div>
@@ -85,22 +121,22 @@
                 <!-- Quick Stats -->
                 <div class="card mt-4">
                     <div class="card-header bg-info text-white">
-                        <h6 class="mb-0"><i class="bi bi-speedometer2"></i> <span class="app-text" data-key="quickOverview">Snel Overzicht</span></h6>
+                        <h6 class="mb-0"><i class="bi bi-speedometer2"></i> Snel Overzicht</h6>
                     </div>
                     <div class="card-body">
                         <div class="row text-center">
                             <div class="col-6 mb-3">
                                 <div class="display-6 text-primary" id="quickStatsHonden">0</div>
-                                <div class="text-muted small app-text" data-key="dogs">Honden</div>
+                                <div class="text-muted small">Honden</div>
                             </div>
                             <div class="col-6 mb-3">
                                 <div class="display-6 text-success" id="quickStatsFotos">0</div>
-                                <div class="text-muted small app-text" data-key="photos">Foto's</div>
+                                <div class="text-muted small">Foto's</div>
                             </div>
                         </div>
                         <div class="text-center">
                             <button class="btn btn-sm btn-outline-info" id="refreshStatsBtn">
-                                <i class="bi bi-arrow-clockwise"></i> <span class="app-text" data-key="refresh">Vernieuwen</span>
+                                <i class="bi bi-arrow-clockwise"></i> Vernieuwen
                             </button>
                         </div>
                     </div>
@@ -111,26 +147,26 @@
             <div class="col-lg-9 col-md-8">
                 <div class="card">
                     <div class="card-header bg-light">
-                        <h4 class="mb-0"><i class="bi bi-house-door"></i> <span class="app-text" data-key="dashboard">Dashboard</span></h4>
+                        <h4 class="mb-0"><i class="bi bi-house-door"></i> Dashboard</h4>
                     </div>
                     <div class="card-body">
                         <div class="alert alert-success">
-                            <h5><i class="bi bi-check-circle"></i> <span class="app-text" data-key="welcomeTitle">Welkom bij de Hondendatabase PWA</span></h5>
-                            <p class="app-text" data-key="welcomeText">Kies een optie uit het menu om te beginnen. De applicatie werkt volledig offline.</p>
+                            <h5><i class="bi bi-check-circle"></i> Welkom bij de Hondendatabase PWA</h5>
+                            <p>Kies een optie uit het menu om te beginnen. De applicatie werkt volledig offline.</p>
                         </div>
                         
                         <div class="row mt-4">
                             <div class="col-md-6">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5><i class="bi bi-info-circle text-primary"></i> <span class="app-text" data-key="aboutApp">Over deze App</span></h5>
-                                        <p class="app-text" data-key="appDescription">Deze PWA (Progressive Web App) slaat alle data lokaal op in uw browser. U kunt:</p>
+                                        <h5><i class="bi bi-info-circle text-primary"></i> Over deze App</h5>
+                                        <p>Deze PWA (Progressive Web App) slaat alle data lokaal op in uw browser. U kunt:</p>
                                         <ul>
-                                            <li class="app-text" data-key="feature1">Honden toevoegen en beheren</li>
-                                            <li class="app-text" data-key="feature2">Foto's uploaden en bekijken</li>
-                                            <li class="app-text" data-key="feature3">Fokplannen maken</li>
-                                            <li class="app-text" data-key="feature4">Privé informatie bewaren</li>
-                                            <li class="app-text" data-key="feature5">Data importeren/exporteren</li>
+                                            <li>Honden toevoegen en beheren</li>
+                                            <li>Foto's uploaden en bekijken</li>
+                                            <li>Fokplannen maken</li>
+                                            <li>Privé informatie bewaren</li>
+                                            <li>Data importeren/exporteren</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -138,15 +174,15 @@
                             <div class="col-md-6">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5><i class="bi bi-shield-check text-success"></i> <span class="app-text" data-key="security">Beveiliging</span></h5>
-                                        <p class="app-text" data-key="roleBasedAccess">De app gebruikt rol-gebaseerde toegang:</p>
+                                        <h5><i class="bi bi-shield-check text-success"></i> Beveiliging</h5>
+                                        <p>De app gebruikt rol-gebaseerde toegang:</p>
                                         <div class="alert alert-warning">
-                                            <strong class="app-text" data-key="adminRole">Administrator (admin/admin123)</strong><br>
-                                            <span class="app-text" data-key="adminRights">Volledige rechten, inclusief nieuwe honden toevoegen.</span>
+                                            <strong>Administrator (admin/admin123)</strong><br>
+                                            Volledige rechten, inclusief nieuwe honden toevoegen.
                                         </div>
                                         <div class="alert alert-info">
-                                            <strong class="app-text" data-key="userRole">Gebruiker (user/user123)</strong><br>
-                                            <span class="app-text" data-key="userRights">Kan data importeren/exporteren en bewerken, maar geen nieuwe honden toevoegen.</span>
+                                            <strong>Gebruiker (user/user123)</strong><br>
+                                            Kan data importeren/exporteren en bewerken, maar geen nieuwe honden toevoegen.
                                         </div>
                                     </div>
                                 </div>
@@ -162,7 +198,52 @@
     <div id="modalsContainer"></div>
     
     <!-- Scripts -->
-    <!-- Bootstrap JS -->
+    
+    <!-- Main modal fix JS (MOET voor alle andere scripts) -->
+    <script>
+        // EMERGENCY MODAL FIX - draait onmiddellijk
+        (function() {
+            console.log('🚀 Emergency modal fix loading...');
+            
+            // Fix voor Bootstrap aria-hidden bug
+            function fixModalAttributes() {
+                document.querySelectorAll('.modal').forEach(modal => {
+                    // Verwijder tabindex (veroorzaakt focus problemen)
+                    modal.removeAttribute('tabindex');
+                    
+                    // Voeg data-bs-backdrop toe als die niet bestaat
+                    if (!modal.hasAttribute('data-bs-backdrop')) {
+                        modal.setAttribute('data-bs-backdrop', 'static');
+                    }
+                    
+                    // Voeg data-bs-keyboard=false toe
+                    if (!modal.hasAttribute('data-bs-keyboard')) {
+                        modal.setAttribute('data-bs-keyboard', 'false');
+                    }
+                });
+            }
+            
+            // Luister voor modal sluiting om focus te fixen
+            document.addEventListener('hide.bs.modal', function(event) {
+                const modal = event.target;
+                const focused = modal.querySelector(':focus');
+                if (focused) {
+                    focused.blur();
+                }
+            });
+            
+            // Voer fixes uit zodra DOM ready is
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', fixModalAttributes);
+            } else {
+                fixModalAttributes();
+            }
+            
+            console.log('✅ Emergency modal fix geïnstalleerd');
+        })();
+    </script>
+    
+    <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <!-- Core Modules -->
@@ -182,151 +263,11 @@
     <!-- Main UI Handler -->
     <script src="js/ui-handler.js"></script>
     
+    <!-- Main modal fix (uitgebreid) -->
+    <script src="js/main.js"></script>
+    
     <!-- App Initialization -->
     <script>
-        // Laad taal uit localStorage
-        const appLanguage = localStorage.getItem('appLanguage') || 'nl';
-        
-        // Taal vertalingen voor app.html
-        const appTranslations = {
-            nl: {
-                appTitle: "Hondendatabase PWA",
-                logout: "Uitloggen",
-                menu: "Menu",
-                dataManagement: "Data Beheer",
-                newDog: "Nieuwe Hond",
-                searchDog: "Hond Zoeken",
-                photoGallery: "Foto Galerij",
-                breedingPlan: "Fok Planning",
-                privateInfo: "Privé Informatie",
-                quickOverview: "Snel Overzicht",
-                dogs: "Honden",
-                photos: "Foto's",
-                refresh: "Vernieuwen",
-                dashboard: "Dashboard",
-                welcomeTitle: "Welkom bij de Hondendatabase PWA",
-                welcomeText: "Kies een optie uit het menu om te beginnen. De applicatie werkt volledig offline.",
-                aboutApp: "Over deze App",
-                appDescription: "Deze PWA (Progressive Web App) slaat alle data lokaal op in uw browser. U kunt:",
-                feature1: "Honden toevoegen en beheren",
-                feature2: "Foto's uploaden en bekijken",
-                feature3: "Fokplannen maken",
-                feature4: "Privé informatie bewaren",
-                feature5: "Data importeren/exporteren",
-                security: "Beveiliging",
-                roleBasedAccess: "De app gebruikt rol-gebaseerde toegang:",
-                adminRole: "Administrator (admin/admin123)",
-                adminRights: "Volledige rechten, inclusief nieuwe honden toevoegen.",
-                userRole: "Gebruiker (user/user123)",
-                userRights: "Kan data importeren/exporteren en bewerken, maar geen nieuwe honden toevoegen."
-            },
-            en: {
-                appTitle: "Dog Database PWA",
-                logout: "Logout",
-                menu: "Menu",
-                dataManagement: "Data Management",
-                newDog: "New Dog",
-                searchDog: "Search Dog",
-                photoGallery: "Photo Gallery",
-                breedingPlan: "Breeding Plan",
-                privateInfo: "Private Information",
-                quickOverview: "Quick Overview",
-                dogs: "Dogs",
-                photos: "Photos",
-                refresh: "Refresh",
-                dashboard: "Dashboard",
-                welcomeTitle: "Welcome to the Dog Database PWA",
-                welcomeText: "Choose an option from the menu to start. The application works completely offline.",
-                aboutApp: "About this App",
-                appDescription: "This PWA (Progressive Web App) stores all data locally in your browser. You can:",
-                feature1: "Add and manage dogs",
-                feature2: "Upload and view photos",
-                feature3: "Create breeding plans",
-                feature4: "Store private information",
-                feature5: "Import/Export data",
-                security: "Security",
-                roleBasedAccess: "The app uses role-based access:",
-                adminRole: "Administrator (admin/admin123)",
-                adminRights: "Full rights, including adding new dogs.",
-                userRole: "User (user/user123)",
-                userRights: "Can import/export and edit data, but cannot add new dogs."
-            },
-            de: {
-                appTitle: "Hundedatenbank PWA",
-                logout: "Abmelden",
-                menu: "Menü",
-                dataManagement: "Datenverwaltung",
-                newDog: "Neuer Hund",
-                searchDog: "Hund suchen",
-                photoGallery: "Foto Galerie",
-                breedingPlan: "Zuchtplanung",
-                privateInfo: "Private Informationen",
-                quickOverview: "Schnellübersicht",
-                dogs: "Hunde",
-                photos: "Fotos",
-                refresh: "Aktualisieren",
-                dashboard: "Dashboard",
-                welcomeTitle: "Willkommen bei der Hundedatenbank PWA",
-                welcomeText: "Wählen Sie eine Option aus dem Menü, um zu beginnen. Die Anwendung funktioniert vollständig offline.",
-                aboutApp: "Über diese App",
-                appDescription: "Diese PWA (Progressive Web App) speichert alle Daten lokal in Ihrem Browser. Sie können:",
-                feature1: "Hunde hinzufügen und verwalten",
-                feature2: "Fotos hochladen und ansehen",
-                feature3: "Zuchtpläne erstellen",
-                feature4: "Private Informationen speichern",
-                feature5: "Daten importieren/exportieren",
-                security: "Sicherheit",
-                roleBasedAccess: "Die App verwendet rollenbasierte Zugriffe:",
-                adminRole: "Administrator (admin/admin123)",
-                adminRights: "Volle Rechte, einschließlich neuer Hunde hinzufügen.",
-                userRole: "Benutzer (user/user123)",
-                userRights: "Kann Daten importieren/exportieren und bearbeiten, aber keine neuen Hunde hinzufügen."
-            }
-        };
-
-        // Pagina tekst vertalen
-        function translateAppPage(lang) {
-            const elements = document.querySelectorAll('.app-text');
-            elements.forEach(element => {
-                const key = element.getAttribute('data-key');
-                if (appTranslations[lang] && appTranslations[lang][key]) {
-                    element.textContent = appTranslations[lang][key];
-                }
-            });
-            
-            // Update actieve vlag
-            document.querySelectorAll('.app-lang-btn').forEach(btn => {
-                if (btn.getAttribute('data-lang') === lang) {
-                    btn.classList.add('active');
-                    btn.classList.remove('btn-outline-light');
-                    btn.classList.add('btn-light');
-                } else {
-                    btn.classList.remove('active', 'btn-light');
-                    btn.classList.add('btn-outline-light');
-                }
-            });
-            
-            // Update HTML lang attribuut
-            document.documentElement.lang = lang;
-            
-            // Update pagina titel
-            const titles = {
-                nl: "Hondendatabase PWA",
-                en: "Dog Database PWA",
-                de: "Hundedatenbank PWA"
-            };
-            document.title = titles[lang] || titles.nl;
-        }
-
-        // Event listeners voor vlaggetjes in app
-        document.querySelectorAll('.app-lang-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const lang = this.getAttribute('data-lang');
-                localStorage.setItem('appLanguage', lang);
-                translateAppPage(lang);
-            });
-        });
-
         // Controleer of gebruiker is ingelogd
         if (!auth.isLoggedIn()) {
             window.location.href = 'index.html';
@@ -334,9 +275,6 @@
         
         // Initialiseer UI Handler - MOET HIER STAAN
         const ui = new UIHandler();
-        
-        // Initialiseer taal
-        translateAppPage(appLanguage);
         
         // Toon huidige gebruiker
         document.getElementById('currentUser').textContent = 
@@ -396,15 +334,35 @@
             }
         });
         
-        // Service Worker registratie voor PWA
+        // Service Worker cleanup (belangrijk voor 404 errors)
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then(registration => {
-                    console.log('ServiceWorker geregistreerd:', registration.scope);
-                }).catch(error => {
-                    console.log('ServiceWorker registratie mislukt:', error);
+            // Verwijder eerst alle bestaande SWs
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                registrations.forEach(registration => {
+                    registration.unregister();
                 });
             });
+            
+            // Registreer alleen als sw.js bestaat (voor PWA)
+            setTimeout(() => {
+                fetch('sw.js')
+                    .then(response => {
+                        if (response.ok) {
+                            navigator.serviceWorker.register('sw.js')
+                                .then(registration => {
+                                    console.log('ServiceWorker geregistreerd:', registration.scope);
+                                })
+                                .catch(error => {
+                                    console.log('ServiceWorker registratie mislukt:', error);
+                                });
+                        } else {
+                            console.log('sw.js niet gevonden - PWA zonder Service Worker');
+                        }
+                    })
+                    .catch(() => {
+                        console.log('sw.js niet bereikbaar');
+                    });
+            }, 1000);
         }
     </script>
 </body>
