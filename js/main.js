@@ -3,11 +3,6 @@
  * Registreer Service Worker en initialiseer applicatie
  */
 
-// Maak globale variabelen voor managers
-let dogManager = null;
-let searchManager = null;
-let privateInfoManager = null;
-
 // Wacht tot DOM volledig geladen is
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('Hondendatabase PWA initialiseren...');
@@ -29,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         setupPWAInstallation();
         
         // Initialiseer database en managers
-        await initializeManagers();
+        await initializeApplication();
         
         // Setup applicatie events
         setupApplicationEvents();
@@ -47,10 +42,10 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 /**
- * Initialiseer alle managers
+ * Initialiseer de hele applicatie
  */
-async function initializeManagers() {
-    console.log('Initialiseren managers...');
+async function initializeApplication() {
+    console.log('Applicatie initialiseren...');
     
     try {
         // Controleer of database bestaat
@@ -64,7 +59,7 @@ async function initializeManagers() {
         
         // Controleer of BaseModule bestaat
         if (typeof BaseModule === 'undefined') {
-            throw new Error('BaseModule niet gevonden!');
+            console.warn('BaseModule niet gevonden. Sommige functionaliteit werkt mogelijk niet.');
         }
         
         // Initialiseer auth manager als die er is
@@ -74,55 +69,69 @@ async function initializeManagers() {
             console.log('✅ AuthManager geïnitialiseerd');
         }
         
-        // Maak managers aan
-        if (typeof DogManager !== 'undefined') {
-            dogManager = new DogManager();
-            window.dogManager = dogManager;
-            console.log('✅ DogManager geïnitialiseerd');
-        }
+        // Initialiseer managers in de juiste volgorde
+        await initializeManagers();
         
-        if (typeof SearchManager !== 'undefined') {
-            searchManager = new SearchManager();
-            window.searchManager = searchManager;
-            console.log('✅ SearchManager geïnitialiseerd');
-        }
-        
-        if (typeof PrivateInfoManager !== 'undefined') {
-            privateInfoManager = new PrivateInfoManager();
-            window.privateInfoManager = privateInfoManager;
-            console.log('✅ PrivateInfoManager geïnitialiseerd');
-        }
-        
-        // Controleer of alle managers beschikbaar zijn
-        if (!dogManager || !searchManager) {
-            console.warn('⚠️ Niet alle managers zijn beschikbaar. Controleer of bestanden correct zijn ingeladen.');
+        // Initialiseer UIHandler als die beschikbaar is
+        if (typeof UIHandler !== 'undefined') {
+            const uiHandler = new UIHandler();
+            window.uiHandler = uiHandler;
             
-            // Probeer opnieuw te laden als managers niet beschikbaar zijn
+            // Wacht even zodat DOM volledig geladen is
             setTimeout(() => {
-                if (typeof DogManager !== 'undefined' && !dogManager) {
-                    dogManager = new DogManager();
-                    window.dogManager = dogManager;
-                    console.log('✅ DogManager opnieuw geïnitialiseerd');
-                }
-                if (typeof SearchManager !== 'undefined' && !searchManager) {
-                    searchManager = new SearchManager();
-                    window.searchManager = searchManager;
-                    console.log('✅ SearchManager opnieuw geïnitialiseerd');
-                }
-            }, 1000);
+                uiHandler.init();
+                console.log('✅ UIHandler geïnitialiseerd');
+            }, 100);
+        } else {
+            console.warn('⚠️ UIHandler niet beschikbaar. Basis UI functionaliteit wordt gebruikt.');
+            setupBasicUI();
         }
         
     } catch (error) {
-        console.error('Fout bij initialiseren managers:', error);
+        console.error('Fout bij initialiseren applicatie:', error);
         throw error;
     }
 }
 
 /**
- * Setup applicatie events
+ * Initialiseer alle managers
  */
-function setupApplicationEvents() {
-    console.log('Setup applicatie events...');
+async function initializeManagers() {
+    console.log('Initialiseren managers...');
+    
+    // Maak managers aan als de klassen beschikbaar zijn
+    if (typeof DogManager !== 'undefined') {
+        window.dogManager = new DogManager();
+        console.log('✅ DogManager geïnitialiseerd');
+    } else {
+        console.warn('⚠️ DogManager niet beschikbaar');
+    }
+    
+    if (typeof SearchManager !== 'undefined') {
+        window.searchManager = new SearchManager();
+        console.log('✅ SearchManager geïnitialiseerd');
+    } else {
+        console.warn('⚠️ SearchManager niet beschikbaar');
+    }
+    
+    if (typeof PrivateInfoManager !== 'undefined') {
+        window.privateInfoManager = new PrivateInfoManager();
+        console.log('✅ PrivateInfoManager geïnitialiseerd');
+    } else {
+        console.warn('⚠️ PrivateInfoManager niet beschikbaar');
+    }
+    
+    // Controleer of alle managers beschikbaar zijn
+    if (!window.dogManager || !window.searchManager) {
+        console.warn('⚠️ Niet alle managers zijn beschikbaar. Controleer of bestanden correct zijn ingeladen.');
+    }
+}
+
+/**
+ * Setup basis UI als UIHandler niet beschikbaar is
+ */
+function setupBasicUI() {
+    console.log('Setup basis UI...');
     
     // Taal switcher
     const languageSwitcher = document.getElementById('languageSwitcher');
@@ -131,207 +140,170 @@ function setupApplicationEvents() {
             const selectedLang = e.target.value;
             localStorage.setItem('appLanguage', selectedLang);
             
-            // Update alle managers
-            if (dogManager) dogManager.updateLanguage(selectedLang);
-            if (searchManager) searchManager.updateLanguage(selectedLang);
-            if (privateInfoManager) privateInfoManager.updateLanguage(selectedLang);
+            // Update managers
+            if (window.dogManager) window.dogManager.updateLanguage(selectedLang);
+            if (window.searchManager) window.searchManager.updateLanguage(selectedLang);
+            if (window.privateInfoManager) window.privateInfoManager.updateLanguage(selectedLang);
             
-            // Herlaad pagina om taalwijziging door te voeren
+            // Herlaad pagina
             window.location.reload();
         });
     }
     
-    // Delegated event listener voor alle knoppen
+    // Basis event delegation voor menu knoppen
     document.addEventListener('click', function(e) {
         // Hond toevoegen knop
         if (e.target.id === 'addDogBtn' || e.target.closest('#addDogBtn')) {
             e.preventDefault();
-            console.log('Hond toevoegen knop geklikt');
-            showDogAddModal();
+            showBasicAddDogModal();
         }
         
-        // Hond zoeken knop (ook als de knop in dashboard of menu staat)
+        // Hond zoeken knop
         if (e.target.id === 'searchDogBtn' || e.target.closest('#searchDogBtn')) {
             e.preventDefault();
-            console.log('Hond zoeken knop geklikt');
-            showSearchModal();
+            showBasicSearchModal();
         }
         
         // Privé info knop
         if (e.target.id === 'privateInfoBtn' || e.target.closest('#privateInfoBtn')) {
             e.preventDefault();
-            console.log('Privé info knop geklikt');
-            showPrivateInfoModal();
+            showBasicPrivateInfoModal();
         }
     });
-    
-    // Ook event listeners toevoegen aan bestaande knoppen als die al bestaan
-    setTimeout(() => {
-        const addDogBtn = document.getElementById('addDogBtn');
-        if (addDogBtn && !addDogBtn.hasAttribute('data-event-bound')) {
-            addDogBtn.setAttribute('data-event-bound', 'true');
-            addDogBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                showDogAddModal();
-            });
-        }
-        
-        const searchDogBtn = document.getElementById('searchDogBtn');
-        if (searchDogBtn && !searchDogBtn.hasAttribute('data-event-bound')) {
-            searchDogBtn.setAttribute('data-event-bound', 'true');
-            searchDogBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                showSearchModal();
-            });
-        }
-        
-        const privateInfoBtn = document.getElementById('privateInfoBtn');
-        if (privateInfoBtn && !privateInfoBtn.hasAttribute('data-event-bound')) {
-            privateInfoBtn.setAttribute('data-event-bound', 'true');
-            privateInfoBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                showPrivateInfoModal();
-            });
-        }
-    }, 500);
 }
 
 /**
- * Toon hond toevoegen modal
+ * Basis modal functies voor als UIHandler niet beschikbaar is
  */
-function showDogAddModal() {
-    if (!dogManager) {
-        showError('DogManager niet beschikbaar. Herlaad de pagina en controleer de console.');
-        console.error('DogManager is niet beschikbaar. Controleer of DogManager.js correct is ingeladen.');
+function showBasicAddDogModal() {
+    if (!window.dogManager) {
+        showError('DogManager niet beschikbaar. Herlaad de pagina.');
         return;
     }
     
-    console.log('Toon hond toevoegen modal...');
-    
-    // Controleer of modal al bestaat
-    let modal = document.getElementById('addDogModal');
-    if (modal) {
-        modal.remove();
-    }
+    // Verwijder bestaande modal
+    const existingModal = document.getElementById('addDogModal');
+    if (existingModal) existingModal.remove();
     
     // Genereer modal HTML
-    const modalHTML = dogManager.getModalHTML();
-    const modalsContainer = document.getElementById('modalsContainer');
-    if (!modalsContainer) {
-        // Maak container aan als die er niet is
-        const container = document.createElement('div');
-        container.id = 'modalsContainer';
-        document.body.appendChild(container);
-    }
-    
-    document.getElementById('modalsContainer').insertAdjacentHTML('beforeend', modalHTML);
+    const modalHTML = window.dogManager.getModalHTML();
+    const modalsContainer = getModalsContainer();
+    modalsContainer.insertAdjacentHTML('beforeend', modalHTML);
     
     // Toon modal
     const modalElement = document.getElementById('addDogModal');
-    const bsModal = new bootstrap.Modal(modalElement);
-    bsModal.show();
-    
-    // Setup events voor deze modal
-    dogManager.setupEvents();
-    
-    // Cleanup bij sluiten
-    modalElement.addEventListener('hidden.bs.modal', function() {
-        modalElement.remove();
-    });
+    if (modalElement) {
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+        
+        // Setup events
+        window.dogManager.setupEvents();
+        
+        // Cleanup
+        modalElement.addEventListener('hidden.bs.modal', () => {
+            modalElement.remove();
+        });
+    }
 }
 
-/**
- * Toon zoekmodal
- */
-function showSearchModal() {
-    if (!searchManager) {
-        showError('SearchManager niet beschikbaar. Herlaad de pagina en controleer de console.');
-        console.error('SearchManager is niet beschikbaar. Controleer of SearchManager.js correct is ingeladen.');
+function showBasicSearchModal() {
+    if (!window.searchManager) {
+        showError('SearchManager niet beschikbaar. Herlaad de pagina.');
         return;
     }
     
-    console.log('Toon zoekmodal...');
-    
-    // Controleer of modal al bestaat
-    let modal = document.getElementById('searchModal');
-    if (modal) {
-        modal.remove();
-    }
+    // Verwijder bestaande modal
+    const existingModal = document.getElementById('searchModal');
+    if (existingModal) existingModal.remove();
     
     // Genereer modal HTML
-    const modalHTML = searchManager.getSearchModalHTML();
-    const modalsContainer = document.getElementById('modalsContainer');
-    if (!modalsContainer) {
-        const container = document.createElement('div');
-        container.id = 'modalsContainer';
-        document.body.appendChild(container);
-    }
-    
-    document.getElementById('modalsContainer').insertAdjacentHTML('beforeend', modalHTML);
+    const modalHTML = window.searchManager.getSearchModalHTML();
+    const modalsContainer = getModalsContainer();
+    modalsContainer.insertAdjacentHTML('beforeend', modalHTML);
     
     // Toon modal
     const modalElement = document.getElementById('searchModal');
-    const bsModal = new bootstrap.Modal(modalElement);
-    bsModal.show();
-    
-    // Setup events voor deze modal
-    searchManager.setupSearchEvents();
-    
-    // Cleanup bij sluiten
-    modalElement.addEventListener('hidden.bs.modal', function() {
-        modalElement.remove();
-    });
+    if (modalElement) {
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+        
+        // Setup events
+        window.searchManager.setupSearchEvents();
+        
+        // Cleanup
+        modalElement.addEventListener('hidden.bs.modal', () => {
+            modalElement.remove();
+        });
+    }
 }
 
-/**
- * Toon privé info modal
- */
-function showPrivateInfoModal() {
-    if (!privateInfoManager) {
-        showError('PrivateInfoManager niet beschikbaar');
+function showBasicPrivateInfoModal() {
+    if (!window.privateInfoManager) {
+        showError('PrivateInfoManager niet beschikbaar. Herlaad de pagina.');
         return;
     }
     
-    // Controleer of modal al bestaat
-    let modal = document.getElementById('privateInfoModal');
-    if (modal) {
-        modal.remove();
-    }
+    // Verwijder bestaande modal
+    const existingModal = document.getElementById('privateInfoModal');
+    if (existingModal) existingModal.remove();
     
     // Genereer modal HTML
-    const modalHTML = privateInfoManager.getModalHTML();
-    const modalsContainer = document.getElementById('modalsContainer');
-    if (!modalsContainer) {
-        const container = document.createElement('div');
-        container.id = 'modalsContainer';
-        document.body.appendChild(container);
-    }
-    
-    document.getElementById('modalsContainer').insertAdjacentHTML('beforeend', modalHTML);
+    const modalHTML = window.privateInfoManager.getModalHTML();
+    const modalsContainer = getModalsContainer();
+    modalsContainer.insertAdjacentHTML('beforeend', modalHTML);
     
     // Toon modal
     const modalElement = document.getElementById('privateInfoModal');
-    const bsModal = new bootstrap.Modal(modalElement);
-    bsModal.show();
-    
-    // Setup events en laad data
-    privateInfoManager.setupEvents();
-    privateInfoManager.loadPrivateInfoData();
-    
-    // Cleanup bij sluiten
-    modalElement.addEventListener('hidden.bs.modal', function() {
-        modalElement.remove();
-    });
+    if (modalElement) {
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+        
+        // Setup events en laad data
+        window.privateInfoManager.setupEvents();
+        window.privateInfoManager.loadPrivateInfoData();
+        
+        // Cleanup
+        modalElement.addEventListener('hidden.bs.modal', () => {
+            modalElement.remove();
+        });
+    }
 }
 
 /**
- * Laad hoofdcontent (voor SearchManager terug knop)
+ * Helper om modals container te krijgen
  */
-function loadMainContent() {
-    // Dit wordt aangeroepen door SearchManager's terug knop
+function getModalsContainer() {
+    let container = document.getElementById('modalsContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'modalsContainer';
+        document.body.appendChild(container);
+    }
+    return container;
+}
+
+/**
+ * Setup applicatie events
+ */
+function setupApplicationEvents() {
+    console.log('Setup applicatie events...');
+    
+    // Laad dashboard bij start
+    loadDashboard();
+    
+    // Hash change listener voor SPA navigatie
+    window.addEventListener('hashchange', handleHashChange);
+    
+    // Initial hash handling
+    handleHashChange();
+}
+
+/**
+ * Laad dashboard
+ */
+function loadDashboard() {
     const mainContent = document.getElementById('mainContent');
     if (mainContent) {
-        // Herlaad standaard dashboard
         mainContent.innerHTML = `
             <div class="container-fluid mt-3">
                 <h2><i class="bi bi-speedometer2"></i> Dashboard</h2>
@@ -375,26 +347,56 @@ function loadMainContent() {
                 </div>
             </div>
         `;
-        
-        // Voeg direct event listeners toe aan nieuwe knoppen
-        setTimeout(() => {
-            const addDogBtn = document.getElementById('addDogBtn');
-            if (addDogBtn) {
-                addDogBtn.addEventListener('click', showDogAddModal);
-            }
-            
-            const searchDogBtn = document.getElementById('searchDogBtn');
-            if (searchDogBtn) {
-                searchDogBtn.addEventListener('click', showSearchModal);
-            }
-            
-            const privateInfoBtn = document.getElementById('privateInfoBtn');
-            if (privateInfoBtn) {
-                privateInfoBtn.addEventListener('click', showPrivateInfoModal);
-            }
-        }, 100);
     }
 }
+
+/**
+ * Handle hash change voor SPA navigatie
+ */
+function handleHashChange() {
+    const hash = window.location.hash.substring(1);
+    
+    switch(hash) {
+        case 'dashboard':
+            loadDashboard();
+            break;
+        case 'add-dog':
+            if (window.uiHandler) {
+                window.uiHandler.showAddDogModal();
+            } else {
+                showBasicAddDogModal();
+            }
+            break;
+        case 'search-dog':
+            if (window.uiHandler) {
+                window.uiHandler.showSearchModal();
+            } else {
+                showBasicSearchModal();
+            }
+            break;
+        case 'private-info':
+            if (window.uiHandler) {
+                window.uiHandler.showPrivateInfoModal();
+            } else {
+                showBasicPrivateInfoModal();
+            }
+            break;
+        default:
+            // Doe niets voor onbekende hash
+            break;
+    }
+}
+
+/**
+ * Laad hoofdcontent (voor SearchManager terug knop)
+ */
+function loadMainContent() {
+    window.location.hash = '#dashboard';
+    loadDashboard();
+}
+
+// Exporteer loadMainContent voor SearchManager
+window.loadMainContent = loadMainContent;
 
 /**
  * Toon foutmelding in UI
@@ -412,8 +414,21 @@ function showError(message) {
     container.insertAdjacentHTML('afterbegin', errorHTML);
 }
 
-// Exporteer loadMainContent voor SearchManager
-window.loadMainContent = loadMainContent;
+/**
+ * Toon succesmelding in UI
+ */
+function showSuccess(message) {
+    const successHTML = `
+        <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    const container = document.querySelector('.container') || document.body;
+    container.insertAdjacentHTML('afterbegin', successHTML);
+}
 
 /**
  * Registreer Service Worker voor offline functionaliteit
@@ -431,7 +446,7 @@ async function registerServiceWorker() {
             
             const registration = await navigator.serviceWorker.register('./sw.js', {
                 scope: './',
-                updateViaCache: 'none' // Altijd SW van netwerk halen
+                updateViaCache: 'none'
             });
             
             console.log('Service Worker geregistreerd met scope:', registration.scope);
@@ -450,14 +465,11 @@ async function registerServiceWorker() {
                     console.log('Service Worker status:', newWorker.state);
                     
                     if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        // Nieuwe update beschikbaar
                         showUpdateNotification(registration);
                     }
                     
                     if (newWorker.state === 'activated') {
                         console.log('Nieuwe Service Worker geactiveerd');
-                        // Optioneel: pagina herladen om nieuwe SW te gebruiken
-                        // window.location.reload();
                     }
                 });
             });
@@ -465,7 +477,6 @@ async function registerServiceWorker() {
             // Luister voor controller change
             navigator.serviceWorker.addEventListener('controllerchange', () => {
                 console.log('Nieuwe Service Worker heeft controle over pagina');
-                // Optioneel: update UI of toon melding
             });
             
             return registration;
@@ -473,12 +484,10 @@ async function registerServiceWorker() {
         } catch (error) {
             console.error('Service Worker registratie mislukt:', error);
             
-            // Toon gebruikersvriendelijke melding
             if (error.message.includes('MIME type') || error.message.includes('script')) {
                 console.warn('Service Worker MIME type probleem. Controleer server configuratie.');
             }
             
-            // Probeer de pagina toch te laten werken zonder SW
             return null;
         }
     } else {
@@ -491,7 +500,6 @@ async function registerServiceWorker() {
  * Toon update notificatie en vraag om te herladen
  */
 function showUpdateNotification(registration) {
-    // Controleer of we al een notificatie hebben
     if (document.getElementById('updateNotification')) return;
     
     const notificationHTML = `
@@ -512,22 +520,17 @@ function showUpdateNotification(registration) {
         </div>
     `;
     
-    // Voeg notificatie toe bovenaan de pagina
     const container = document.querySelector('.container') || document.body;
     container.insertAdjacentHTML('afterbegin', notificationHTML);
     
-    // Setup herlaad knop
     document.getElementById('reloadPageBtn').addEventListener('click', () => {
         if (registration && registration.waiting) {
-            // Stuur skip waiting bericht naar SW
             registration.waiting.postMessage({ type: 'SKIP_WAITING' });
         }
         
-        // Herlaad de pagina
         window.location.reload();
     });
     
-    // Auto-verberg na 30 seconden
     setTimeout(() => {
         const notif = document.getElementById('updateNotification');
         if (notif) {
@@ -576,7 +579,6 @@ function showBrowserError(message) {
         </div>
     `;
     
-    // Vervang volledige body inhoud
     document.body.innerHTML = errorHTML;
 }
 
@@ -584,12 +586,10 @@ function showBrowserError(message) {
  * Controleer internet connectie
  */
 function checkInternetConnection() {
-    // Initial check
     if (!navigator.onLine) {
         showOfflineNotification();
     }
     
-    // Luister naar connectivity changes
     window.addEventListener('online', () => {
         console.log('Apparaat is weer online');
         showOnlineNotification();
@@ -623,11 +623,8 @@ function showOfflineNotification() {
             </div>
         `;
         
-        // Toon bovenaan de pagina
         const container = document.querySelector('.container') || document.body;
         container.insertAdjacentElement('afterbegin', notification);
-        
-        // Auto-verberg niet - blijf tonen zolang offline
     }
 }
 
@@ -651,7 +648,6 @@ function showOnlineNotification() {
     const container = document.querySelector('.container') || document.body;
     container.insertAdjacentHTML('afterbegin', notificationHTML);
     
-    // Auto-verberg na 5 seconden
     setTimeout(() => {
         const notif = document.getElementById('onlineNotification');
         if (notif) {
@@ -680,16 +676,11 @@ function setupPWAInstallation() {
     let installBtn;
     
     window.addEventListener('beforeinstallprompt', (e) => {
-        // Voorkom dat de browser de install prompt toont
         e.preventDefault();
-        // Bewaar het event voor later gebruik
         deferredPrompt = e;
-        
-        // Toon installatie knop
         showInstallButton();
     });
     
-    // Track of de app al geïnstalleerd is
     window.addEventListener('appinstalled', (evt) => {
         console.log('PWA succesvol geïnstalleerd');
         if (installBtn) {
@@ -699,14 +690,12 @@ function setupPWAInstallation() {
     });
     
     function showInstallButton() {
-        // Controleer of app al geïnstalleerd is
         if (window.matchMedia('(display-mode: standalone)').matches || 
             window.navigator.standalone === true) {
             console.log('App is al geïnstalleerd');
             return;
         }
         
-        // Controleer of knop al bestaat
         if (document.getElementById('installPWAButton')) {
             return;
         }
@@ -722,10 +711,7 @@ function setupPWAInstallation() {
             if (!deferredPrompt) return;
             
             try {
-                // Toon de install prompt
                 deferredPrompt.prompt();
-                
-                // Wacht op gebruiker reactie
                 const { outcome } = await deferredPrompt.userChoice;
                 console.log(`Gebruiker keuze: ${outcome}`);
                 
@@ -746,13 +732,11 @@ function setupPWAInstallation() {
                 showError('Installatie mislukt. Probeer het opnieuw.');
             }
             
-            // Reset de prompt
             deferredPrompt = null;
         });
         
         document.body.appendChild(installBtn);
         
-        // Verberg knop na 24 uur (cookie gebruiken voor persistentie)
         setTimeout(() => {
             if (installBtn && installBtn.parentNode) {
                 installBtn.remove();
@@ -784,9 +768,10 @@ function showAppInfo() {
             online: navigator.onLine ? 'Online' : 'Offline'
         },
         managers: {
-            dogManager: dogManager ? '✅ Geladen' : '❌ Niet geladen',
-            searchManager: searchManager ? '✅ Geladen' : '❌ Niet geladen',
-            privateInfoManager: privateInfoManager ? '✅ Geladen' : '❌ Niet geladen'
+            dogManager: window.dogManager ? '✅ Geladen' : '❌ Niet geladen',
+            searchManager: window.searchManager ? '✅ Geladen' : '❌ Niet geladen',
+            privateInfoManager: window.privateInfoManager ? '✅ Geladen' : '❌ Niet geladen',
+            uiHandler: window.uiHandler ? '✅ Geladen' : '❌ Niet geladen'
         }
     };
     
@@ -794,7 +779,6 @@ function showAppInfo() {
     console.table(info);
     console.groupEnd();
     
-    // Toon ook in debug mode
     if (window.location.hash === '#debug') {
         const debugInfo = document.createElement('div');
         debugInfo.className = 'card mt-3';
@@ -833,39 +817,29 @@ export {
 };
 
 // ========== MODAL FIX VOOR ALLE MODALS ==========
-// Dit is de ENIGE toevoeging aan je bestand
 
 (function() {
     console.log('Modal fix installeren...');
     
-    // Wacht tot DOM en Bootstrap geladen zijn
     document.addEventListener('DOMContentLoaded', function() {
-        // Wacht tot Bootstrap beschikbaar is
         const checkBootstrap = setInterval(function() {
             if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
                 clearInterval(checkBootstrap);
                 
-                // Patch Bootstrap's hide() methode
                 const originalHide = bootstrap.Modal.prototype.hide;
                 bootstrap.Modal.prototype.hide = function() {
                     const modal = this._element;
                     
-                    // VERWIJDER FOCUS VOOR ALLE MODALS
                     if (modal) {
-                        // Verwijder focus van close button
                         const focused = modal.querySelector(':focus');
                         if (focused) {
                             focused.blur();
                         }
                         
-                        // Forceer focus op body
                         document.body.focus();
-                        
-                        // Verwijder aria-hidden
                         modal.removeAttribute('aria-hidden');
                     }
                     
-                    // Roep originele hide aan
                     return originalHide.call(this);
                 };
                 
