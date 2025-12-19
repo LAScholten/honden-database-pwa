@@ -1,4 +1,51 @@
 /**
+ * EMERGENCY FIX VOOR BOOTSTRAP MODAL ARIA-HIDDEN PROBLEEM
+ * Deze fix moet als ALLEREERSTE uitgevoerd worden
+ */
+
+// 1. Patch Bootstrap Modal _showElement() methode
+if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+    const originalShowElement = bootstrap.Modal.prototype._showElement;
+    bootstrap.Modal.prototype._showElement = function() {
+        // Roep originele functie aan
+        originalShowElement.call(this);
+        
+        // Verwijder aria-hidden attribute direct na show
+        setTimeout(() => {
+            if (this._element && this._element.classList.contains('show')) {
+                this._element.removeAttribute('aria-hidden');
+            }
+        }, 10);
+    };
+}
+
+// 2. Patch Bootstrap Modal hide() methode
+if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+    const originalHide = bootstrap.Modal.prototype.hide;
+    bootstrap.Modal.prototype.hide = function() {
+        // Verwijder focus van ALLE elementen in modal
+        if (this._element) {
+            const focusedElement = this._element.querySelector(':focus');
+            if (focusedElement) {
+                focusedElement.blur();
+            }
+            
+            // Forceer focus op body
+            document.body.focus();
+            
+            // Zet aria-hidden pas na hide
+            setTimeout(() => {
+                if (this._element && !this._element.classList.contains('show')) {
+                    this._element.setAttribute('aria-hidden', 'true');
+                }
+            }, 100);
+        }
+        
+        return originalHide.call(this);
+    };
+}
+
+/**
  * Hoofd initialisatie bestand voor Hondendatabase
  * ZONDER Service Worker
  */
@@ -38,34 +85,59 @@ document.addEventListener('DOMContentLoaded', async function() {
 function installModalFixes() {
     console.log('Modal fixes geïnstalleerd');
     
-    // 1. Patch Bootstrap Modal prototype voor focus management
-    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        const originalHide = bootstrap.Modal.prototype.hide;
-        bootstrap.Modal.prototype.hide = function() {
-            // Verwijder focus van elementen in deze modal
-            if (this._element) {
-                const focused = this._element.querySelector(':focus');
-                if (focused) {
-                    focused.blur();
-                }
-            }
-            return originalHide.call(this);
-        };
-    }
+    // 1. Fix voor alle bestaande modals op de pagina
+    document.querySelectorAll('.modal').forEach(modal => {
+        // Verwijder problematische attributes
+        modal.removeAttribute('tabindex');
+        modal.removeAttribute('aria-hidden');
+        
+        // Voeg inert attribute toe (modern alternatief)
+        if ('inert' in HTMLElement.prototype) {
+            modal.inert = true;
+        }
+    });
     
-    // 2. Luister naar modal events
+    // 2. Patch voor modal show events
+    document.addEventListener('show.bs.modal', function(event) {
+        const modal = event.target;
+        // Verwijder aria-hidden wanneer modal getoond wordt
+        modal.removeAttribute('aria-hidden');
+        
+        // Verwijder inert wanneer modal getoond wordt
+        if ('inert' in HTMLElement.prototype) {
+            modal.inert = false;
+        }
+    });
+    
+    document.addEventListener('shown.bs.modal', function(event) {
+        const modal = event.target;
+        // Zorg dat focus niet op close button blijft
+        setTimeout(() => {
+            const closeBtn = modal.querySelector('.btn-close');
+            if (closeBtn && document.activeElement === closeBtn) {
+                closeBtn.blur();
+            }
+        }, 50);
+    });
+    
     document.addEventListener('hide.bs.modal', function(event) {
         const modal = event.target;
+        // Verwijder focus van modal elementen
         const focused = modal.querySelector(':focus');
         if (focused) {
             focused.blur();
+        }
+        
+        // Zet inert terug
+        if ('inert' in HTMLElement.prototype) {
+            modal.inert = true;
         }
     });
     
     document.addEventListener('hidden.bs.modal', function(event) {
         const modal = event.target;
         
-        // Verwijder aria-hidden attribute (laat Bootstrap dit doen)
+        // Zet aria-hidden="true" alleen als modal echt verborgen is
         setTimeout(() => {
             if (!modal.classList.contains('show')) {
                 modal.setAttribute('aria-hidden', 'true');
@@ -148,25 +220,41 @@ function addEmergencyCleanupButton() {
 function emergencyModalCleanup() {
     console.log('Emergency modal cleanup uitgevoerd');
     
-    // 1. Sluit alle modals
-    const modals = document.querySelectorAll('.modal');
+    // 1. Verwijder focus van alles
+    document.activeElement.blur();
+    document.body.focus();
+    
+    // 2. Sluit alle modals
+    const modals = document.querySelectorAll('.modal.show');
     modals.forEach(modal => {
-        if (modal.classList.contains('show')) {
-            const bsModal = bootstrap.Modal.getInstance(modal);
-            if (bsModal) {
-                bsModal.hide();
-            } else {
-                modal.style.display = 'none';
-                modal.classList.remove('show');
-            }
+        const bsModal = bootstrap.Modal.getInstance(modal);
+        if (bsModal) {
+            bsModal.hide();
+        } else {
+            modal.style.display = 'none';
+            modal.classList.remove('show');
         }
     });
     
-    // 2. Forceer cleanup
+    // 3. Forceer cleanup
     setTimeout(() => {
-        cleanupModalBackdrops();
-        alert('Modals zijn gefixt. Scherm zou nu normaal moeten werken.');
-    }, 100);
+        // Verwijder alle backdrops
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+            backdrop.remove();
+        });
+        
+        // Reset body
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        
+        // Verwijder aria-hidden van alle modals
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.removeAttribute('aria-hidden');
+        });
+        
+        console.log('Emergency cleanup voltooid');
+    }, 150);
 }
 
 /**
