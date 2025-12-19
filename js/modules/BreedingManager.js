@@ -895,6 +895,8 @@ class BreedingManager extends BaseModule {
     }
 
 
+
+// Global export
 if (typeof window !== 'undefined') {
     window.BreedingManager = BreedingManager;
 }

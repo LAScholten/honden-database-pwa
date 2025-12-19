@@ -577,6 +577,8 @@ class DataManager extends BaseModule {
     }
 
 
+
+// Global export
 if (typeof window !== 'undefined') {
     window.DataManager = DataManager;
 }

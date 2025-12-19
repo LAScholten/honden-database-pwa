@@ -936,6 +936,8 @@ class DogManager extends BaseModule {
     }
 
 
+
+// Global export
 if (typeof window !== 'undefined') {
     window.DogManager = DogManager;
 }

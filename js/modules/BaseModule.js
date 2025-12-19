@@ -169,9 +169,9 @@ class BaseModule {
     }
 }
 
-if (typeof window !== 'undefined') {
-    window.BaseModule = BaseModule;
-}
+// GLOBALE EXPORT - DIT MOET ALLEEN AAN HET EINDE STAAN
+
+// Global export
 if (typeof window !== 'undefined') {
     window.BaseModule = BaseModule;
 }

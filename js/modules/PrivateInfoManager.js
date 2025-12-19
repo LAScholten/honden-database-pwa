@@ -738,6 +738,8 @@ class PrivateInfoManager extends BaseModule {
     }
 
 
+
+// Global export
 if (typeof window !== 'undefined') {
     window.PrivateInfoManager = PrivateInfoManager;
 }
