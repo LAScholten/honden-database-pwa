@@ -1,312 +1,252 @@
 /**
- * EMERGENCY FIX VOOR BOOTSTRAP MODAL ARIA-HIDDEN PROBLEEM
- * Deze fix moet als ALLEREERSTE uitgevoerd worden
+ * Hoofd initialisatie bestand voor Hondendatabase
+ * MET DEFINITIEVE MODAL FIX
  */
 
-// 1. Patch Bootstrap Modal _showElement() methode
-if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+// EERSTE: Bootstrap Modal PATCH - moet voor ALLES
+(function() {
+    if (typeof bootstrap === 'undefined' || !bootstrap.Modal) return;
+    
+    console.log('Bootstrap Modal patch geïnstalleerd');
+    
+    // 1. Patch de _showElement methode
     const originalShowElement = bootstrap.Modal.prototype._showElement;
     bootstrap.Modal.prototype._showElement = function() {
-        // Roep originele functie aan
-        originalShowElement.call(this);
+        // Zet aria-hidden op false VOORDAT modal getoond wordt
+        this._element.removeAttribute('aria-hidden');
+        this._element.setAttribute('aria-modal', 'true');
         
-        // Verwijder aria-hidden attribute direct na show
-        setTimeout(() => {
-            if (this._element && this._element.classList.contains('show')) {
-                this._element.removeAttribute('aria-hidden');
-            }
-        }, 10);
+        return originalShowElement.call(this);
     };
-}
-
-// 2. Patch Bootstrap Modal hide() methode
-if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+    
+    // 2. Patch de hide methode
     const originalHide = bootstrap.Modal.prototype.hide;
     bootstrap.Modal.prototype.hide = function() {
-        // Verwijder focus van ALLE elementen in modal
+        // Verwijder focus van ALLES in de modal
         if (this._element) {
-            const focusedElement = this._element.querySelector(':focus');
-            if (focusedElement) {
-                focusedElement.blur();
+            const focused = this._element.querySelector(':focus');
+            if (focused) {
+                focused.blur();
             }
-            
-            // Forceer focus op body
             document.body.focus();
-            
-            // Zet aria-hidden pas na hide
-            setTimeout(() => {
-                if (this._element && !this._element.classList.contains('show')) {
-                    this._element.setAttribute('aria-hidden', 'true');
-                }
-            }, 100);
         }
         
         return originalHide.call(this);
     };
-}
-
-/**
- * Hoofd initialisatie bestand voor Hondendatabase
- * ZONDER Service Worker
- */
+    
+    // 3. Patch de _enforceFocus methode (dit zorgt voor focus problemen)
+    const originalEnforceFocus = bootstrap.Modal.prototype._enforceFocus;
+    bootstrap.Modal.prototype._enforceFocus = function() {
+        // Alleen uitvoeren als modal echt getoond wordt
+        if (this._element && this._element.classList.contains('show')) {
+            return originalEnforceFocus.call(this);
+        }
+    };
+})();
 
 // Wacht tot DOM volledig geladen is
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', function() {
     console.log('Hondendatabase initialiseren...');
     
-    // FIX VOOR MODAL PROBLEEM - moet als eerste!
+    // INSTALLEER MODAL FIXES
     installModalFixes();
     
-    // Controleer of we in een browser zijn die IndexedDB ondersteunt
+    // Controleer browser compatibiliteit
     if (!window.indexedDB) {
         showBrowserError('Uw browser ondersteunt geen IndexedDB. Deze applicatie vereist een moderne browser zoals Chrome, Firefox of Edge.');
         return;
     }
     
-    try {
-        // Start connectivity monitoring
-        checkInternetConnection();
-        
-        // Setup PWA installatie
-        setupPWAInstallation();
-        
-        // Toon welkomstbericht
-        console.log('Hondendatabase is klaar voor gebruik!');
-        
-    } catch (error) {
-        console.error('Initialisatie mislukt:', error);
-        showError('Fout bij initialiseren van de applicatie. Probeer de pagina te verversen.');
-    }
+    // Start functionaliteit
+    initApp();
 });
 
 /**
- * COMPLETE FIX voor Bootstrap modal problemen
+ * Installeer modal fixes
  */
 function installModalFixes() {
-    console.log('Modal fixes geïnstalleerd');
+    console.log('Installeer modal fixes');
     
-    // 1. Fix voor alle bestaande modals op de pagina
+    // 1. Verwijder aria-hidden van alle modals bij startup
     document.querySelectorAll('.modal').forEach(modal => {
-        // Verwijder problematische attributes
-        modal.removeAttribute('tabindex');
         modal.removeAttribute('aria-hidden');
+        modal.removeAttribute('tabindex');
         
-        // Voeg inert attribute toe (modern alternatief)
-        if ('inert' in HTMLElement.prototype) {
-            modal.inert = true;
+        // Voeg data-bs-backdrop="static" toe om backdrop problemen te voorkomen
+        if (!modal.hasAttribute('data-bs-backdrop')) {
+            modal.setAttribute('data-bs-backdrop', 'static');
         }
     });
     
-    // 2. Patch voor modal show events
+    // 2. Luister naar modal events
     document.addEventListener('show.bs.modal', function(event) {
         const modal = event.target;
-        // Verwijder aria-hidden wanneer modal getoond wordt
-        modal.removeAttribute('aria-hidden');
+        console.log('Modal wordt getoond:', modal.id);
         
-        // Verwijder inert wanneer modal getoond wordt
-        if ('inert' in HTMLElement.prototype) {
-            modal.inert = false;
-        }
+        // Zet aria-hidden op false
+        modal.removeAttribute('aria-hidden');
+        modal.setAttribute('aria-modal', 'true');
     });
     
     document.addEventListener('shown.bs.modal', function(event) {
         const modal = event.target;
+        console.log('Modal getoond:', modal.id);
+        
         // Zorg dat focus niet op close button blijft
         setTimeout(() => {
             const closeBtn = modal.querySelector('.btn-close');
             if (closeBtn && document.activeElement === closeBtn) {
                 closeBtn.blur();
+                // Zet focus op eerste focusable element of modal zelf
+                const firstInput = modal.querySelector('input, button, textarea, select');
+                if (firstInput) {
+                    firstInput.focus();
+                }
             }
-        }, 50);
+        }, 100);
     });
     
     document.addEventListener('hide.bs.modal', function(event) {
         const modal = event.target;
-        // Verwijder focus van modal elementen
+        console.log('Modal wordt verborgen:', modal.id);
+        
+        // Verwijder focus
         const focused = modal.querySelector(':focus');
         if (focused) {
             focused.blur();
-        }
-        
-        // Zet inert terug
-        if ('inert' in HTMLElement.prototype) {
-            modal.inert = true;
         }
     });
     
     document.addEventListener('hidden.bs.modal', function(event) {
         const modal = event.target;
+        console.log('Modal verborgen:', modal.id);
         
-        // Zet aria-hidden="true" alleen als modal echt verborgen is
+        // Zet aria-hidden pas NA verbergen
         setTimeout(() => {
             if (!modal.classList.contains('show')) {
                 modal.setAttribute('aria-hidden', 'true');
+                modal.removeAttribute('aria-modal');
             }
-        }, 10);
+        }, 50);
         
-        // Cleanup backdrops en body classes
+        // CLEANUP: Verwijder overbodige backdrops
         cleanupModalBackdrops();
     });
     
-    // 3. Noodknop voor emergency cleanup
-    addEmergencyCleanupButton();
+    // 3. Voeg emergency cleanup knop toe
+    addEmergencyButton();
 }
 
 /**
- * Cleanup modal backdrops en body classes
+ * Cleanup modal backdrops
  */
 function cleanupModalBackdrops() {
-    const openModals = document.querySelectorAll('.modal.show');
-    const backdrops = document.querySelectorAll('.modal-backdrop');
-    
-    if (openModals.length === 0 && backdrops.length > 0) {
-        // Verwijder alle backdrops
-        backdrops.forEach(backdrop => {
-            backdrop.remove();
-        });
+    setTimeout(() => {
+        const openModals = document.querySelectorAll('.modal.show');
+        const backdrops = document.querySelectorAll('.modal-backdrop');
         
-        // Reset body
-        document.body.classList.remove('modal-open');
-        document.body.style.overflow = '';
-        document.body.style.paddingRight = '';
-    } else if (backdrops.length > openModals.length) {
+        console.log(`Cleanup: ${openModals.length} modals open, ${backdrops.length} backdrops`);
+        
+        // Verwijder backdrops als er geen modals open zijn
+        if (openModals.length === 0 && backdrops.length > 0) {
+            backdrops.forEach(backdrop => {
+                backdrop.remove();
+            });
+            
+            // Reset body styles
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        }
+        
         // Verwijder extra backdrops
-        const extras = backdrops.length - openModals.length;
-        for (let i = 0; i < extras; i++) {
-            if (backdrops[i]) {
-                backdrops[i].remove();
+        if (backdrops.length > openModals.length) {
+            const extras = backdrops.length - openModals.length;
+            for (let i = 0; i < extras; i++) {
+                if (backdrops[i]) {
+                    backdrops[i].remove();
+                }
             }
         }
-    }
+    }, 100);
 }
 
 /**
- * Noodknop voor emergency modal cleanup
+ * Voeg emergency button toe
  */
-function addEmergencyCleanupButton() {
+function addEmergencyButton() {
     const btn = document.createElement('button');
-    btn.id = 'emergencyModalFix';
-    btn.innerHTML = '🔄 Fix Screen';
+    btn.id = 'emergencyFixBtn';
+    btn.innerHTML = '🚨 Fix';
+    btn.title = 'Klik als scherm vastzit';
     btn.style.cssText = `
         position: fixed;
         bottom: 20px;
         left: 20px;
-        z-index: 9999;
+        z-index: 99999;
         background: #dc3545;
         color: white;
         border: none;
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        font-size: 20px;
+        border-radius: 5px;
+        padding: 8px 15px;
+        font-size: 14px;
         cursor: pointer;
         box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         display: none;
+        font-weight: bold;
     `;
     
-    btn.addEventListener('click', emergencyModalCleanup);
-    document.body.appendChild(btn);
-    
-    // Toon knop als er modals open zijn
-    setInterval(() => {
-        const hasOpenModals = document.querySelectorAll('.modal.show').length > 0;
-        btn.style.display = hasOpenModals ? 'block' : 'none';
-    }, 1000);
-}
-
-/**
- * Emergency modal cleanup
- */
-function emergencyModalCleanup() {
-    console.log('Emergency modal cleanup uitgevoerd');
-    
-    // 1. Verwijder focus van alles
-    document.activeElement.blur();
-    document.body.focus();
-    
-    // 2. Sluit alle modals
-    const modals = document.querySelectorAll('.modal.show');
-    modals.forEach(modal => {
-        const bsModal = bootstrap.Modal.getInstance(modal);
-        if (bsModal) {
-            bsModal.hide();
-        } else {
-            modal.style.display = 'none';
-            modal.classList.remove('show');
-        }
-    });
-    
-    // 3. Forceer cleanup
-    setTimeout(() => {
-        // Verwijder alle backdrops
+    btn.addEventListener('click', function() {
+        console.log('EMERGENCY FIX geactiveerd');
+        
+        // 1. Verwijder alle backdrops
         document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
             backdrop.remove();
         });
         
-        // Reset body
+        // 2. Sluit alle modals
+        document.querySelectorAll('.modal.show').forEach(modal => {
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+            
+            const bsModal = bootstrap.Modal.getInstance(modal);
+            if (bsModal) {
+                bsModal.hide();
+            }
+        });
+        
+        // 3. Reset body
         document.body.classList.remove('modal-open');
         document.body.style.overflow = '';
         document.body.style.paddingRight = '';
         
-        // Verwijder aria-hidden van alle modals
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.removeAttribute('aria-hidden');
-        });
+        // 4. Forceer reflow
+        document.body.offsetHeight;
         
-        console.log('Emergency cleanup voltooid');
-    }, 150);
+        alert('Emergency fix uitgevoerd! Scherm zou nu moeten werken.');
+    });
+    
+    document.body.appendChild(btn);
+    
+    // Toon knop als er modals open zijn
+    setInterval(() => {
+        const hasModals = document.querySelectorAll('.modal.show').length > 0;
+        btn.style.display = hasModals ? 'block' : 'none';
+    }, 500);
 }
 
 /**
- * Toon browser compatibiliteit fout
+ * Initialiseer app
  */
-function showBrowserError(message) {
-    const errorHTML = `
-        <div class="container mt-5">
-            <div class="alert alert-danger">
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-exclamation-triangle-fill me-3 fs-1"></i>
-                    <div>
-                        <h4 class="alert-heading">Browser Compatibiliteit</h4>
-                        <p class="mb-3">${message}</p>
-                        <div class="mb-3">
-                            <strong>Ondersteunde browsers:</strong><br>
-                            <div class="row mt-2">
-                                <div class="col-md-6">
-                                    <i class="bi bi-browser-chrome text-primary"></i> Chrome 54+<br>
-                                    <i class="bi bi-browser-firefox text-warning"></i> Firefox 52+<br>
-                                    <i class="bi bi-browser-edge text-primary"></i> Edge 79+
-                                </div>
-                                <div class="col-md-6">
-                                    <i class="bi bi-browser-safari text-primary"></i> Safari 11.1+<br>
-                                    <i class="bi bi-browser-opera text-danger"></i> Opera 41+<br>
-                                    <i class="bi bi-phone"></i> Moderne mobiele browsers
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    document.body.innerHTML = errorHTML;
-}
-
-/**
- * Toon algemene foutmelding
- */
-function showError(message) {
-    const errorHTML = `
-        <div class="alert alert-danger alert-dismissible fade show m-3" role="alert">
-            <i class="bi bi-exclamation-octagon me-2"></i>
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    `;
-    
-    const container = document.querySelector('.container') || document.body;
-    container.insertAdjacentHTML('afterbegin', errorHTML);
+function initApp() {
+    try {
+        checkInternetConnection();
+        setupPWAInstallation();
+        console.log('Hondendatabase is klaar voor gebruik!');
+    } catch (error) {
+        console.error('Initialisatie mislukt:', error);
+        showError('Fout bij initialiseren van de applicatie. Probeer de pagina te verversen.');
+    }
 }
 
 /**
@@ -333,26 +273,22 @@ function checkInternetConnection() {
  * Toon offline notificatie
  */
 function showOfflineNotification() {
-    let notification = document.getElementById('offlineNotification');
-    
-    if (!notification) {
-        notification = document.createElement('div');
-        notification.id = 'offlineNotification';
-        notification.className = 'alert alert-warning alert-dismissible fade show m-3';
-        notification.innerHTML = `
-            <div class="d-flex align-items-center">
-                <i class="bi bi-wifi-off me-2 fs-5"></i>
-                <div class="flex-grow-1">
-                    <strong>Offline modus</strong>
-                    <p class="mb-0">U werkt momenteel zonder internetverbinding.</p>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    const notification = document.createElement('div');
+    notification.id = 'offlineNotification';
+    notification.className = 'alert alert-warning alert-dismissible fade show m-3';
+    notification.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="bi bi-wifi-off me-2"></i>
+            <div class="flex-grow-1">
+                <strong>Offline modus</strong>
+                <p class="mb-0">U werkt zonder internetverbinding.</p>
             </div>
-        `;
-        
-        const container = document.querySelector('.container') || document.body;
-        container.insertAdjacentElement('afterbegin', notification);
-    }
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    const container = document.querySelector('.container') || document.body;
+    container.insertAdjacentElement('afterbegin', notification);
 }
 
 /**
@@ -362,10 +298,10 @@ function showOnlineNotification() {
     const notificationHTML = `
         <div id="onlineNotification" class="alert alert-success alert-dismissible fade show m-3">
             <div class="d-flex align-items-center">
-                <i class="bi bi-wifi me-2 fs-5"></i>
+                <i class="bi bi-wifi me-2"></i>
                 <div class="flex-grow-1">
                     <strong>Weer online!</strong>
-                    <p class="mb-0">Uw internetverbinding is hersteld.</p>
+                    <p class="mb-0">Internetverbinding hersteld.</p>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
@@ -447,7 +383,39 @@ function setupPWAInstallation() {
     }
 }
 
-// CLEANUP: Verwijder alle Service Workers
+/**
+ * Toon browser fout
+ */
+function showBrowserError(message) {
+    const errorHTML = `
+        <div class="container mt-5">
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                ${message}
+            </div>
+        </div>
+    `;
+    
+    document.body.innerHTML = errorHTML;
+}
+
+/**
+ * Toon algemene fout
+ */
+function showError(message) {
+    const errorHTML = `
+        <div class="alert alert-danger alert-dismissible fade show m-3">
+            <i class="bi bi-exclamation-octagon me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    const container = document.querySelector('.container') || document.body;
+    container.insertAdjacentHTML('afterbegin', errorHTML);
+}
+
+// CLEANUP: Verwijder Service Workers
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.getRegistrations().then(registrations => {
         registrations.forEach(registration => {
@@ -457,9 +425,8 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// Exporteer functies
+// Export
 export {
     checkInternetConnection,
-    setupPWAInstallation,
-    emergencyModalCleanup
+    setupPWAInstallation
 };
