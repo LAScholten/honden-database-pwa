@@ -535,8 +535,8 @@ class UIHandler {
         if (welcomeElement && window.auth) {
             const user = window.auth.getCurrentUser();
             if (user) {
-                const role = user.role === 'admin' ? 'Administrator' : 'Gebruiker';
-                welcomeElement.textContent = `Welkom, ${user.username} (${role})`;
+                const roleText = user.role === 'admin' ? 'Administrator' : 'Gebruiker';
+                welcomeElement.textContent = `Welkom, ${user.username} (${roleText})`;
             }
         }
     }

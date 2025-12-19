@@ -288,7 +288,7 @@ class SearchManager extends BaseModule {
         }
     }
 
-// Global export
+
 if (typeof window !== 'undefined') {
     window.SearchManager = SearchManager;
 }

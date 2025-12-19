@@ -768,7 +768,7 @@ class PhotoManager extends BaseModule {
         }
     }
 
-// Global export
+
 if (typeof window !== 'undefined') {
     window.PhotoManager = PhotoManager;
 }
