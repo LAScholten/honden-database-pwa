@@ -62,7 +62,7 @@ class PhotoManager extends BaseModule {
                 loadFailed: "Laden mislukt: ",
                 deleteConfirm: "Weet je zeker dat je deze foto wilt verwijderen? Dit kan niet ongedaan worden gemaakt.",
                 deleting: "Foto verwijderen...",
-                deleteSuccess: "Foto succesvol verwijderd!",
+                deleteSuccess: "Foto succesvol verwijderen!",
                 deleteFailed: "Verwijderen mislukt: ",
                 photoNotFound: "Foto niet gevonden",
                 loadDetailsFailed: "Fout bij laden foto details: "
@@ -306,6 +306,67 @@ class PhotoManager extends BaseModule {
         }
         
         this.setupDogSearch();
+        
+        // FIX: Voeg modal close fix toe
+        this.fixPhotoModalClose();
+    }
+    
+    /**
+     * Specifieke fix voor foto gallery modal
+     */
+    fixPhotoModalClose() {
+        const modalElement = document.getElementById('photoGalleryModal');
+        if (!modalElement) return;
+        
+        console.log('PhotoManager: Modal fixes geïnstalleerd');
+        
+        // Luister naar modal sluiten
+        modalElement.addEventListener('hide.bs.modal', () => {
+            // Verwijder focus van close button
+            const closeBtn = modalElement.querySelector('.btn-close:focus');
+            if (closeBtn) {
+                closeBtn.blur();
+            }
+            
+            // Verwijder focus van andere elementen
+            const focused = modalElement.querySelector(':focus');
+            if (focused) {
+                focused.blur();
+            }
+        });
+        
+        modalElement.addEventListener('hidden.bs.modal', () => {
+            console.log('Photo gallery modal gesloten');
+            
+            // Forceer cleanup van backdrops
+            setTimeout(() => {
+                this.cleanupModalAfterClose();
+            }, 50);
+        });
+    }
+    
+    /**
+     * Cleanup na modal sluiten
+     */
+    cleanupModalAfterClose() {
+        const openModals = document.querySelectorAll('.modal.show');
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        
+        console.log(`Cleanup: ${openModals.length} modals open, ${backdrops.length} backdrops`);
+        
+        if (openModals.length === 0 && backdrops.length > 0) {
+            // Verwijder alle backdrops
+            backdrops.forEach(backdrop => {
+                backdrop.remove();
+            });
+            
+            // Reset body
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            
+            console.log('PhotoManager: Modal cleanup uitgevoerd');
+        }
     }
     
     setupDogSearch() {
@@ -728,6 +789,10 @@ class PhotoManager extends BaseModule {
         
         const modalElement = document.getElementById('photoGalleryViewModal');
         const modal = new bootstrap.Modal(modalElement);
+        
+        // FIX: Voeg modal close fix toe voor deze modal
+        this.fixPhotoViewModalClose(modalElement);
+        
         modal.show();
         
         // Update titel bij carousel slide
@@ -744,6 +809,26 @@ class PhotoManager extends BaseModule {
         
         modalElement.addEventListener('hidden.bs.modal', () => {
             modalElement.remove();
+        });
+    }
+    
+    /**
+     * Fix voor photo view modal
+     */
+    fixPhotoViewModalClose(modalElement) {
+        if (!modalElement) return;
+        
+        modalElement.addEventListener('hide.bs.modal', () => {
+            const closeBtn = modalElement.querySelector('.btn-close:focus');
+            if (closeBtn) {
+                closeBtn.blur();
+            }
+        });
+        
+        modalElement.addEventListener('hidden.bs.modal', () => {
+            setTimeout(() => {
+                this.cleanupModalAfterClose();
+            }, 50);
         });
     }
     

@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     console.log('Hondendatabase initialiseren...');
     
     // FIX VOOR MODAL PROBLEEM - moet als eerste!
-    fixModalIssues();
+    installModalFixes();
     
     // Controleer of we in een browser zijn die IndexedDB ondersteunt
     if (!window.indexedDB) {
@@ -33,73 +33,140 @@ document.addEventListener('DOMContentLoaded', async function() {
 });
 
 /**
- * FIX voor Bootstrap modal problemen (scherm donker en vast)
+ * COMPLETE FIX voor Bootstrap modal problemen
  */
-function fixModalIssues() {
+function installModalFixes() {
     console.log('Modal fixes geïnstalleerd');
     
-    // 1. Luister naar modal sluiting
+    // 1. Patch Bootstrap Modal prototype voor focus management
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        const originalHide = bootstrap.Modal.prototype.hide;
+        bootstrap.Modal.prototype.hide = function() {
+            // Verwijder focus van elementen in deze modal
+            if (this._element) {
+                const focused = this._element.querySelector(':focus');
+                if (focused) {
+                    focused.blur();
+                }
+            }
+            return originalHide.call(this);
+        };
+    }
+    
+    // 2. Luister naar modal events
+    document.addEventListener('hide.bs.modal', function(event) {
+        const modal = event.target;
+        const focused = modal.querySelector(':focus');
+        if (focused) {
+            focused.blur();
+        }
+    });
+    
     document.addEventListener('hidden.bs.modal', function(event) {
-        console.log('Modal gesloten:', event.target.id);
+        const modal = event.target;
         
-        // Verwijder alle backdrops behalve de laatste als er meerdere modals zijn
-        const backdrops = document.querySelectorAll('.modal-backdrop');
-        const openModals = document.querySelectorAll('.modal.show');
+        // Verwijder aria-hidden attribute (laat Bootstrap dit doen)
+        setTimeout(() => {
+            if (!modal.classList.contains('show')) {
+                modal.setAttribute('aria-hidden', 'true');
+            }
+        }, 10);
         
-        if (openModals.length === 0 && backdrops.length > 0) {
-            // Laatste backdrop verwijderen
-            backdrops[backdrops.length - 1].remove();
-            
-            // Body classes resetten
-            document.body.classList.remove('modal-open');
-            document.body.style.overflow = '';
-            document.body.style.paddingRight = '';
-        }
+        // Cleanup backdrops en body classes
+        cleanupModalBackdrops();
     });
     
-    // 2. Forceer cleanup als er iets misgaat
-    document.addEventListener('keydown', function(event) {
-        // Ctrl+Shift+M voor emergency modal cleanup
-        if (event.ctrlKey && event.shiftKey && event.key === 'M') {
-            emergencyModalCleanup();
-        }
-    });
-    
-    // 3. Zorg dat modals goed sluiten bij page unload
-    window.addEventListener('beforeunload', function() {
-        const modals = document.querySelectorAll('.modal.show');
-        modals.forEach(modal => {
-            const bsModal = bootstrap.Modal.getInstance(modal);
-            if (bsModal) bsModal.hide();
-        });
-    });
+    // 3. Noodknop voor emergency cleanup
+    addEmergencyCleanupButton();
 }
 
 /**
- * Noodoplossing voor vastzittende modals
+ * Cleanup modal backdrops en body classes
+ */
+function cleanupModalBackdrops() {
+    const openModals = document.querySelectorAll('.modal.show');
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    
+    if (openModals.length === 0 && backdrops.length > 0) {
+        // Verwijder alle backdrops
+        backdrops.forEach(backdrop => {
+            backdrop.remove();
+        });
+        
+        // Reset body
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+    } else if (backdrops.length > openModals.length) {
+        // Verwijder extra backdrops
+        const extras = backdrops.length - openModals.length;
+        for (let i = 0; i < extras; i++) {
+            if (backdrops[i]) {
+                backdrops[i].remove();
+            }
+        }
+    }
+}
+
+/**
+ * Noodknop voor emergency modal cleanup
+ */
+function addEmergencyCleanupButton() {
+    const btn = document.createElement('button');
+    btn.id = 'emergencyModalFix';
+    btn.innerHTML = '🔄 Fix Screen';
+    btn.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        z-index: 9999;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        display: none;
+    `;
+    
+    btn.addEventListener('click', emergencyModalCleanup);
+    document.body.appendChild(btn);
+    
+    // Toon knop als er modals open zijn
+    setInterval(() => {
+        const hasOpenModals = document.querySelectorAll('.modal.show').length > 0;
+        btn.style.display = hasOpenModals ? 'block' : 'none';
+    }, 1000);
+}
+
+/**
+ * Emergency modal cleanup
  */
 function emergencyModalCleanup() {
     console.log('Emergency modal cleanup uitgevoerd');
     
-    // 1. Verberg alle modals
+    // 1. Sluit alle modals
     const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
-        modal.style.display = 'none';
-        modal.classList.remove('show');
+        if (modal.classList.contains('show')) {
+            const bsModal = bootstrap.Modal.getInstance(modal);
+            if (bsModal) {
+                bsModal.hide();
+            } else {
+                modal.style.display = 'none';
+                modal.classList.remove('show');
+            }
+        }
     });
     
-    // 2. Verwijder alle backdrops
-    const backdrops = document.querySelectorAll('.modal-backdrop');
-    backdrops.forEach(backdrop => {
-        backdrop.remove();
-    });
-    
-    // 3. Reset body
-    document.body.classList.remove('modal-open');
-    document.body.style.overflow = '';
-    document.body.style.paddingRight = '';
-    
-    alert('Modals zijn gefixt. Scherm zou nu normaal moeten werken.');
+    // 2. Forceer cleanup
+    setTimeout(() => {
+        cleanupModalBackdrops();
+        alert('Modals zijn gefixt. Scherm zou nu normaal moeten werken.');
+    }, 100);
 }
 
 /**
