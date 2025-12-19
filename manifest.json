@@ -2,7 +2,7 @@
   "name": "Hondendatabase",
   "short_name": "HondenDB",
   "description": "Interactieve hondendatabase applicatie",
-  "start_url": "./index.html",
+  "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0d6efd",
@@ -56,13 +56,13 @@
       "name": "Zoek Hond",
       "short_name": "Zoeken",
       "description": "Zoek een hond in de database",
-      "url": "./app.html?action=search"
+      "url": "/app.html?action=search"
     },
     {
       "name": "Nieuwe Hond",
       "short_name": "Toevoegen",
       "description": "Voeg een nieuwe hond toe",
-      "url": "./app.html?action=addDog"
+      "url": "/app.html?action=addDog"
     }
   ]
 }
