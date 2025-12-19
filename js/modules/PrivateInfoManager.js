@@ -9,7 +9,8 @@ class PrivateInfoManager extends BaseModule {
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';
         this.currentHondId = null;
         this.currentPriveInfo = null;
-        this.hondenCache = []; // Cache voor honden voor autocomplete
+        this.allDogs = []; // Alle honden uit dezelfde database als PhotoManager
+        this.filteredDogs = []; // Gefilterde honden voor dropdown
         this.translations = {
             nl: {
                 // Modal titels
@@ -54,7 +55,8 @@ class PrivateInfoManager extends BaseModule {
                 restoring: "Backup herstellen...",
                 restoreSuccess: "Backup succesvol hersteld!",
                 restoreFailed: "Herstellen mislukt: ",
-                backupReadError: "Fout bij lezen backup bestand"
+                backupReadError: "Fout bij lezen backup bestand",
+                noDogsFound: "Geen honden gevonden"
             },
             en: {
                 // Modal titles
@@ -99,7 +101,8 @@ class PrivateInfoManager extends BaseModule {
                 restoring: "Restoring backup...",
                 restoreSuccess: "Backup successfully restored!",
                 restoreFailed: "Restore failed: ",
-                backupReadError: "Error reading backup file"
+                backupReadError: "Error reading backup file",
+                noDogsFound: "No dogs found"
             },
             de: {
                 // Modal Titel
@@ -144,7 +147,8 @@ class PrivateInfoManager extends BaseModule {
                 restoring: "Backup herstellen...",
                 restoreSuccess: "Backup succesvol hersteld!",
                 restoreFailed: "Herstellen mislukt: ",
-                backupReadError: "Fout bij lezen backup bestand"
+                backupReadError: "Fout bij lezen backup bestand",
+                noDogsFound: "Keine Hunde gefunden"
             }
         };
     }
@@ -186,13 +190,17 @@ class PrivateInfoManager extends BaseModule {
                                         </div>
                                         <div class="card-body">
                                             <div class="mb-3">
-                                                <label for="privateHondInput" class="form-label">${t('dog')}</label>
-                                                <input type="text" class="form-control" id="privateHondInput" 
-                                                    placeholder="${t('typeDogName')}" autocomplete="off">
-                                                <div class="autocomplete-dropdown" id="hondAutocomplete"></div>
-                                                <input type="hidden" id="selectedHondId">
-                                                <input type="hidden" id="selectedStamboomnr">
-                                                <div class="small text-muted mt-1" id="selectedHondInfo"></div>
+                                                <label for="privateHondSearch" class="form-label">${t('dog')}</label>
+                                                <div class="dropdown">
+                                                    <input type="text" class="form-control" id="privateHondSearch" 
+                                                        placeholder="${t('typeDogName')}" autocomplete="off">
+                                                    <div class="dropdown-menu w-100" id="dogDropdownMenu" style="max-height: 300px; overflow-y: auto;">
+                                                        <div class="dropdown-item text-muted">${t('loadingInfo')}</div>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" id="selectedDogId">
+                                                <input type="hidden" id="selectedDogStamboomnr">
+                                                <div class="small text-muted mt-1" id="selectedDogInfo"></div>
                                             </div>
                                             <button class="btn btn-dark w-100" id="loadPrivateInfoBtn">
                                                 <i class="bi bi-eye"></i> ${t('loadInfo')}
@@ -330,7 +338,9 @@ class PrivateInfoManager extends BaseModule {
     
     async loadPrivateInfoData() {
         try {
-            this.hondenCache = await this.db.getHonden();
+            // Haal honden uit dezelfde database als PhotoManager
+            this.allDogs = await this.db.getHonden();
+            this.allDogs.sort((a, b) => a.naam.localeCompare(b.naam));
             this.setupAutocomplete();
         } catch (error) {
             console.error('Fout bij laden honden data:', error);
@@ -338,190 +348,155 @@ class PrivateInfoManager extends BaseModule {
     }
     
     setupAutocomplete() {
-        const input = document.getElementById('privateHondInput');
-        const dropdown = document.getElementById('hondAutocomplete');
+        const searchInput = document.getElementById('privateHondSearch');
+        const dropdownMenu = document.getElementById('dogDropdownMenu');
         
-        if (!input || !dropdown) return;
+        if (!searchInput || !dropdownMenu) return;
         
-        // Stijl voor dropdown
-        dropdown.style.cssText = `
-            position: absolute;
-            background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 0.375rem;
-            max-height: 300px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: none;
-            width: calc(100% - 2px);
-            margin-top: -1px;
-        `;
-        
-        input.addEventListener('input', () => {
-            const query = input.value.toLowerCase().trim();
-            dropdown.innerHTML = '';
-            
-            if (query.length < 1) {
-                dropdown.style.display = 'none';
-                return;
-            }
-            
-            // Zoek alleen op hondennaam
-            const filteredHonden = this.hondenCache.filter(hond => 
-                hond.naam.toLowerCase().includes(query)
-            );
-            
-            if (filteredHonden.length === 0) {
-                dropdown.innerHTML = `
-                    <div class="autocomplete-item p-2 text-muted">
-                        ${this.t('dogNotFound')}
-                    </div>
-                `;
-            } else {
-                filteredHonden.forEach(hond => {
-                    const item = document.createElement('div');
-                    item.className = 'autocomplete-item p-2 border-bottom hover-bg-light';
-                    item.style.cursor = 'pointer';
-                    item.innerHTML = `
-                        <div class="fw-bold">${hond.naam}</div>
-                        <small class="text-muted">
-                            ${hond.stamboomnr || 'Geen stamboomnr'} | 
-                            ${hond.ras || 'Onbekend ras'} | 
-                            ${hond.geslacht || 'Onbekend'}
-                        </small>
-                    `;
-                    
-                    item.addEventListener('click', () => {
-                        input.value = hond.naam;
-                        document.getElementById('selectedHondId').value = hond.id;
-                        document.getElementById('selectedStamboomnr').value = hond.stamboomnr || '';
-                        
-                        const infoDiv = document.getElementById('selectedHondInfo');
-                        if (infoDiv) {
-                            infoDiv.innerHTML = `
-                                <span class="text-success">
-                                    <i class="bi bi-check-circle"></i> Geselecteerd: 
-                                    ${hond.stamboomnr ? hond.stamboomnr + ' | ' : ''}
-                                    ${hond.ras ? hond.ras + ' | ' : ''}
-                                    Geb: ${hond.geboortedatum || 'onbekend'}
-                                </span>
-                            `;
-                        }
-                        
-                        dropdown.style.display = 'none';
-                    });
-                    
-                    dropdown.appendChild(item);
-                });
-            }
-            
-            if (filteredHonden.length > 0) {
-                dropdown.style.display = 'block';
-                const inputRect = input.getBoundingClientRect();
-                dropdown.style.width = inputRect.width + 'px';
-                dropdown.style.top = (inputRect.bottom + window.scrollY) + 'px';
-                dropdown.style.left = inputRect.left + 'px';
-            }
+        // Toon dropdown bij focus - precies zoals PhotoManager
+        searchInput.addEventListener('focus', () => {
+            this.filterDogs('');
+            dropdownMenu.classList.add('show');
         });
         
-        // Verberg dropdown bij klik buiten
+        // Filter honden bij elke toetsaanslag - precies zoals PhotoManager
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            this.filterDogs(searchTerm);
+            dropdownMenu.classList.add('show');
+        });
+        
+        // Verberg dropdown bij klik buiten - precies zoals PhotoManager
         document.addEventListener('click', (e) => {
-            if (!input.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.style.display = 'none';
+            if (!searchInput.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                dropdownMenu.classList.remove('show');
             }
         });
         
-        // Toon dropdown bij focus - toon alle honden wanneer gefocust
-        input.addEventListener('focus', () => {
-            dropdown.innerHTML = '';
-            
-            const allHonden = this.hondenCache;
-            
-            if (allHonden.length === 0) {
-                dropdown.innerHTML = `
-                    <div class="autocomplete-item p-2 text-muted">
-                        ${this.t('dogNotFound')}
-                    </div>
-                `;
-            } else {
-                allHonden.forEach(hond => {
-                    const item = document.createElement('div');
-                    item.className = 'autocomplete-item p-2 border-bottom hover-bg-light';
-                    item.style.cursor = 'pointer';
-                    item.innerHTML = `
-                        <div class="fw-bold">${hond.naam}</div>
-                        <small class="text-muted">
-                            ${hond.stamboomnr || 'Geen stamboomnr'} | 
-                            ${hond.ras || 'Onbekend ras'}
-                        </small>
-                    `;
-                    
-                    item.addEventListener('click', () => {
-                        input.value = hond.naam;
-                        document.getElementById('selectedHondId').value = hond.id;
-                        document.getElementById('selectedStamboomnr').value = hond.stamboomnr || '';
-                        
-                        const infoDiv = document.getElementById('selectedHondInfo');
-                        if (infoDiv) {
-                            infoDiv.innerHTML = `
-                                <span class="text-success">
-                                    <i class="bi bi-check-circle"></i> Geselecteerd: 
-                                    ${hond.stamboomnr ? hond.stamboomnr + ' | ' : ''}
-                                    ${hond.ras ? hond.ras + ' | ' : ''}
-                                    Geb: ${hond.geboortedatum || 'onbekend'}
-                                </span>
-                            `;
-                        }
-                        
-                        dropdown.style.display = 'none';
-                    });
-                    
-                    dropdown.appendChild(item);
-                });
+        // Toon alle honden bij eerste klik - precies zoals PhotoManager
+        searchInput.addEventListener('click', () => {
+            if (dropdownMenu.children.length === 1 && dropdownMenu.children[0].classList.contains('text-muted')) {
+                this.filterDogs('');
             }
-            
-            if (allHonden.length > 0) {
-                dropdown.style.display = 'block';
-                const inputRect = input.getBoundingClientRect();
-                dropdown.style.width = inputRect.width + 'px';
-                dropdown.style.top = (inputRect.bottom + window.scrollY) + 'px';
-                dropdown.style.left = inputRect.left + 'px';
-            }
+            dropdownMenu.classList.add('show');
         });
+    }
+    
+    async filterDogs(searchTerm = '') {
+        const dropdownMenu = document.getElementById('dogDropdownMenu');
+        if (!dropdownMenu) return;
+        
+        if (!this.allDogs || this.allDogs.length === 0) {
+            await this.loadPrivateInfoData();
+        }
+        
+        // Zoek op naam, ras en stamboomnr - precies zoals PhotoManager
+        this.filteredDogs = this.allDogs.filter(dog => {
+            const dogName = dog.naam.toLowerCase();
+            const dogBreed = dog.ras ? dog.ras.toLowerCase() : '';
+            const pedigree = dog.stamboomnr ? dog.stamboomnr.toLowerCase() : '';
+            
+            return dogName.includes(searchTerm) || 
+                   dogBreed.includes(searchTerm) ||
+                   pedigree.includes(searchTerm);
+        });
+        
+        this.updateDropdownMenu();
+    }
+    
+    updateDropdownMenu() {
+        const dropdownMenu = document.getElementById('dogDropdownMenu');
+        const t = this.t.bind(this);
+        
+        if (!dropdownMenu) return;
+        
+        dropdownMenu.innerHTML = '';
+        
+        if (this.filteredDogs.length === 0) {
+            dropdownMenu.innerHTML = `
+                <div class="dropdown-item text-muted">
+                    ${t('noDogsFound')}
+                </div>
+            `;
+            return;
+        }
+        
+        this.filteredDogs.forEach(dog => {
+            const item = document.createElement('a');
+            item.className = 'dropdown-item';
+            item.href = '#';
+            item.innerHTML = `
+                <div>
+                    <strong>${dog.naam}</strong>
+                    <div class="small text-muted">
+                        ${dog.ras || ''} • ${dog.stamboomnr || ''}
+                    </div>
+                </div>
+            `;
+            
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.selectDog(dog);
+                dropdownMenu.classList.remove('show');
+            });
+            
+            dropdownMenu.appendChild(item);
+        });
+    }
+    
+    selectDog(dog) {
+        const searchInput = document.getElementById('privateHondSearch');
+        const dogIdInput = document.getElementById('selectedDogId');
+        const stamboomnrInput = document.getElementById('selectedDogStamboomnr');
+        const infoDiv = document.getElementById('selectedDogInfo');
+        
+        if (searchInput) {
+            searchInput.value = dog.naam;
+        }
+        if (dogIdInput) {
+            dogIdInput.value = dog.id;
+        }
+        if (stamboomnrInput) {
+            stamboomnrInput.value = dog.stamboomnr || '';
+        }
+        if (infoDiv) {
+            infoDiv.innerHTML = `
+                <span class="text-success">
+                    <i class="bi bi-check-circle"></i> Geselecteerd: 
+                    ${dog.stamboomnr ? dog.stamboomnr + ' | ' : ''}
+                    ${dog.ras ? dog.ras + ' | ' : ''}
+                    Geb: ${dog.geboortedatum || 'onbekend'}
+                </span>
+            `;
+        }
     }
     
     async loadPrivateInfoForDog() {
         const t = this.t.bind(this);
-        const hondInput = document.getElementById('privateHondInput');
-        const selectedHondId = document.getElementById('selectedHondId').value;
-        const selectedStamboomnr = document.getElementById('selectedStamboomnr').value;
+        const dogId = document.getElementById('selectedDogId').value;
+        const stamboomnr = document.getElementById('selectedDogStamboomnr').value;
         
-        if (!hondInput.value.trim() || !selectedHondId) {
+        if (!dogId || !stamboomnr) {
             this.showError(t('selectDogFirst'));
             return;
         }
         
-        // Zoek de hond in de cache
-        const selectedHond = this.hondenCache.find(h => 
-            h.id.toString() === selectedHondId
-        );
-        
-        if (!selectedHond) {
-            this.showError(t('dogSelectionRequired'));
-            return;
-        }
-        
-        this.currentHondId = parseInt(selectedHondId);
+        this.currentHondId = parseInt(dogId);
         
         this.showProgress(t('loadingInfo'));
         
         try {
-            // Gebruik stamboomnr voor privé info opslag
-            this.currentPriveInfo = await this.db.getPriveInfoVoorStamboomnr(selectedStamboomnr);
+            // Gebruik stamboomnr voor privé info opslag in PRIVÉ DATABASE
+            this.currentPriveInfo = await this.db.getPriveInfoVoorStamboomnr(stamboomnr);
             
             this.hideProgress();
             this.displayPrivateInfo();
-            this.updatePrivateInfoHeader(selectedHond);
+            
+            // Update header met de geselecteerde hond
+            const selectedDog = this.allDogs.find(d => d.id.toString() === dogId);
+            if (selectedDog) {
+                this.updatePrivateInfoHeader(selectedDog);
+            }
             
         } catch (error) {
             this.hideProgress();
@@ -557,13 +532,13 @@ class PrivateInfoManager extends BaseModule {
         }
     }
     
-    updatePrivateInfoHeader(hond) {
+    updatePrivateInfoHeader(dog) {
         const modalTitle = document.querySelector('#privateInfoModal .modal-title');
-        if (modalTitle && hond) {
+        if (modalTitle && dog) {
             modalTitle.innerHTML = `
                 <i class="bi bi-lock"></i> ${this.t('privateInfo')} - 
-                ${hond.naam} 
-                <small class="text-muted">(${hond.stamboomnr || 'Geen stamboomnr'})</small>
+                ${dog.naam} 
+                <small class="text-muted">(${dog.stamboomnr || 'Geen stamboomnr'})</small>
             `;
         }
     }
@@ -578,11 +553,10 @@ class PrivateInfoManager extends BaseModule {
             return;
         }
         
-        const hondInput = document.getElementById('privateHondInput');
-        const selectedHondId = document.getElementById('selectedHondId').value;
-        const selectedStamboomnr = document.getElementById('selectedStamboomnr').value;
+        const dogId = document.getElementById('selectedDogId').value;
+        const stamboomnr = document.getElementById('selectedDogStamboomnr').value;
         
-        if (!hondInput.value.trim() || !selectedHondId) {
+        if (!dogId || !stamboomnr) {
             this.showError(t('selectDogFirst'));
             return;
         }
@@ -590,29 +564,20 @@ class PrivateInfoManager extends BaseModule {
         this.showProgress(t('savingInfo'));
         
         try {
-            // Verifieer dat de hond nog steeds bestaat
-            const selectedHond = this.hondenCache.find(h => 
-                h.id.toString() === selectedHondId && 
-                h.stamboomnr === selectedStamboomnr
-            );
-            
-            if (!selectedHond) {
-                throw new Error(t('dogNotFound'));
-            }
-            
             const priveInfo = {
-                stamboomnr: selectedStamboomnr,
+                stamboomnr: stamboomnr,
                 privateNotes: document.getElementById('privateNotes').value.trim(),
                 vertrouwelijk: true
             };
             
+            // Opslaan in PRIVÉ DATABASE
             await this.db.bewaarPriveInfo(priveInfo);
             
             this.hideProgress();
             this.showSuccess(t('saveSuccess'));
             
             // Herlaad de info na opslaan
-            this.currentPriveInfo = await this.db.getPriveInfoVoorStamboomnr(selectedStamboomnr);
+            this.currentPriveInfo = await this.db.getPriveInfoVoorStamboomnr(stamboomnr);
             this.displayPrivateInfo();
             
         } catch (error) {
@@ -654,21 +619,11 @@ class PrivateInfoManager extends BaseModule {
         
         try {
             const allPriveInfo = await this.db.getAllPriveInfo();
-            const honden = await this.db.getHonden();
-            
-            const enrichedData = allPriveInfo.map(info => {
-                const hond = honden.find(h => h.stamboomnr === info.stamboomnr);
-                return {
-                    stamboomnr: info.stamboomnr,
-                    privateNotes: info.privateNotes || '',
-                    hondNaam: hond ? hond.naam : 'Onbekend'
-                };
-            });
             
             const backupData = {
                 backupDatum: new Date().toISOString(),
-                aantalRecords: enrichedData.length,
-                data: enrichedData
+                aantalRecords: allPriveInfo.length,
+                data: allPriveInfo
             };
             
             const jsonString = JSON.stringify(backupData, null, 2);
@@ -719,26 +674,14 @@ class PrivateInfoManager extends BaseModule {
                     
                     this.showProgress(t('restoring'));
                     
-                    const priveInfoData = backupData.data.map(item => ({
-                        stamboomnr: item.stamboomnr,
-                        privateNotes: item.privateNotes || '',
-                        vertrouwelijk: true
-                    }));
-                    
                     let successCount = 0;
                     let errorCount = 0;
                     
-                    for (const info of priveInfoData) {
+                    for (const info of backupData.data) {
                         try {
-                            // Verifieer dat de hond bestaat voordat we privé info toevoegen
-                            const hond = await this.db.getHondByStamboomnr(info.stamboomnr);
-                            if (hond) {
-                                await this.db.bewaarPriveInfo(info);
-                                successCount++;
-                            } else {
-                                console.warn(`Hond met stamboomnr ${info.stamboomnr} niet gevonden, overslaan...`);
-                                errorCount++;
-                            }
+                            // Opslaan in PRIVÉ DATABASE
+                            await this.db.bewaarPriveInfo(info);
+                            successCount++;
                         } catch (error) {
                             console.error('Fout bij importeren privé info:', error);
                             errorCount++;
