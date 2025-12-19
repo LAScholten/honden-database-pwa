@@ -7,15 +7,16 @@ class UIHandler {
         console.log('UIHandler initialiseren...');
         this.currentModal = null;
         this.modules = {};
+        this.initialized = false;
         this.initialize();
     }
     
     async initialize() {
+        if (this.initialized) return;
+        
         try {
             console.log('1. Authenticatie controleren...');
-            // Gebruik isAuthenticated() - dit is belangrijk!
             if (!window.auth || !window.auth.isAuthenticated()) {
-                console.warn('Niet geauthenticeerd, redirect naar login');
                 window.location.href = 'index.html';
                 return;
             }
@@ -32,6 +33,7 @@ class UIHandler {
             console.log('5. Welkomstbericht tonen...');
             this.showWelcomeMessage();
             
+            this.initialized = true;
             console.log('✅ UIHandler klaar');
             
         } catch (error) {
@@ -53,37 +55,60 @@ class UIHandler {
     }
     
     async initializeModules() {
-        // LAAD DE MODULES OP DEZELFDE MANIER ALS SEARCHMANAGER
-        const moduleDefinitions = [
-            { name: 'data', className: 'DataManager', file: 'DataManager.js' },
-            { name: 'dog', className: 'DogManager', file: 'DogManager.js' },
-            { name: 'photo', className: 'PhotoManager', file: 'PhotoManager.js' },
-            { name: 'breeding', className: 'BreedingManager', file: 'BreedingManager.js' },
-            { name: 'private', className: 'PrivateInfoManager', file: 'PrivateInfoManager.js' }
+        // Wacht even zodat alle scripts geladen zijn
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Module mapping - controleer welke klassen bestaan
+        const modulesToLoad = [
+            { key: 'data', className: 'DataManager' },
+            { key: 'dog', className: 'DogManager' },
+            { key: 'photo', className: 'PhotoManager' },
+            { key: 'breeding', className: 'BreedingManager' },
+            { key: 'private', className: 'PrivateInfoManager' },
+            { key: 'search', className: 'SearchManager' }
         ];
         
-        for (const moduleDef of moduleDefinitions) {
-            try {
-                // Controleer of de klasse bestaat in window object
-                if (window[moduleDef.className] && typeof window[moduleDef.className] === 'function') {
-                    const ModuleClass = window[moduleDef.className];
-                    const module = new ModuleClass();
-                    
-                    // Inject dependencies
-                    if (window.db) module.db = window.db;
-                    if (window.auth) module.auth = window.auth;
-                    module.uiHandler = this;
-                    
-                    this.modules[moduleDef.name] = module;
-                    console.log(`✅ Module ${moduleDef.name} geladen`);
-                } else {
-                    console.warn(`⚠ ${moduleDef.className} niet gevonden in window object`);
-                    this.modules[moduleDef.name] = this.createFallbackModule(moduleDef.name);
-                }
-            } catch (error) {
-                console.error(`❌ Fout bij laden ${moduleDef.name}:`, error);
-                this.modules[moduleDef.name] = this.createFallbackModule(moduleDef.name);
+        for (const moduleDef of modulesToLoad) {
+            await this.loadModule(moduleDef.key, moduleDef.className);
+        }
+    }
+    
+    async loadModule(key, className) {
+        try {
+            // Wacht tot de klasse beschikbaar is in window
+            let attempts = 0;
+            const maxAttempts = 10;
+            
+            while (attempts < maxAttempts && !window[className]) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+                attempts++;
             }
+            
+            if (window[className] && typeof window[className] === 'function') {
+                const ModuleClass = window[className];
+                const module = new ModuleClass();
+                
+                // Inject dependencies
+                if (window.db) module.db = window.db;
+                if (window.auth) module.auth = window.auth;
+                if (!module.uiHandler) module.uiHandler = this;
+                
+                this.modules[key] = module;
+                console.log(`✅ Module ${key} (${className}) geladen`);
+                
+                // Special case voor search
+                if (key === 'search' && module.loadSearchData) {
+                    await module.loadSearchData();
+                }
+                
+            } else {
+                console.warn(`⚠ ${className} niet gevonden, gebruik fallback`);
+                this.modules[key] = this.createFallbackModule(key);
+            }
+            
+        } catch (error) {
+            console.error(`❌ Fout bij laden ${key}:`, error);
+            this.modules[key] = this.createFallbackModule(key);
         }
     }
     
@@ -91,18 +116,18 @@ class UIHandler {
         return {
             name: name,
             getModalHTML: () => this.getFallbackModalHTML(name),
-            setupEvents: () => console.log(`Fallback events voor ${name}`),
+            setupEvents: () => {},
             showError: (msg) => this.showAlert(msg, 'danger'),
             showSuccess: (msg) => this.showAlert(msg, 'success'),
-            showProgress: (msg) => console.log(`Progress: ${msg}`),
-            hideProgress: () => console.log('Progress verborgen')
+            showProgress: () => {},
+            hideProgress: () => {}
         };
     }
     
     setupUI() {
         console.log('UI knoppen instellen...');
         
-        // DEZE KNOP ID's MOETEN OVEREEENKOMEN MET app.html
+        // KNOP CONFIGURATIE - exact zoals in app.html
         const buttonConfigs = [
             { id: 'dataManagementBtn', modal: 'data', adminOnly: true },
             { id: 'addDogBtn', modal: 'dog', adminOnly: true },
@@ -112,14 +137,25 @@ class UIHandler {
             { id: 'privateInfoBtn', modal: 'private', adminOnly: true }
         ];
         
+        // Verwijder eerst alle bestaande event listeners
+        buttonConfigs.forEach(config => {
+            const button = document.getElementById(config.id);
+            if (button) {
+                const newButton = button.cloneNode(true);
+                button.parentNode.replaceChild(newButton, button);
+            }
+        });
+        
+        // Voeg nieuwe event listeners toe
         buttonConfigs.forEach(config => {
             const button = document.getElementById(config.id);
             if (button) {
                 button.addEventListener('click', (e) => {
                     e.preventDefault();
+                    e.stopPropagation();
+                    
                     console.log(`Knop: ${config.id}, Modal: ${config.modal}`);
                     
-                    // Admin check
                     if (config.adminOnly && !window.auth.isAdmin()) {
                         this.showAlert('Alleen administrators hebben toegang tot deze functie', 'warning');
                         return;
@@ -129,14 +165,17 @@ class UIHandler {
                 });
                 console.log(`✅ Knop ${config.id} ingesteld`);
             } else {
-                console.warn(`⚠ Knop ${config.id} niet gevonden in DOM`);
+                console.warn(`⚠ Knop ${config.id} niet gevonden`);
             }
         });
         
         // Logout knop
         const logoutBtn = document.getElementById('logoutBtn');
         if (logoutBtn) {
-            logoutBtn.addEventListener('click', (e) => {
+            const newLogoutBtn = logoutBtn.cloneNode(true);
+            logoutBtn.parentNode.replaceChild(newLogoutBtn, logoutBtn);
+            
+            newLogoutBtn.addEventListener('click', (e) => {
                 e.preventDefault();
                 window.auth.logout();
             });
@@ -149,45 +188,48 @@ class UIHandler {
     showModal(modalType) {
         console.log(`Toon modal: ${modalType}`);
         
+        // Voorkom dubbele modals
+        if (this.currentModal === modalType) {
+            console.log('Modal is al open');
+            return;
+        }
+        
         // Verwijder huidige modal
         this.hideCurrentModal();
         
-        // Kies de juiste modal HTML
+        // Haal modal HTML op
         let modalHTML = '';
         let modalId = '';
         
-        switch (modalType) {
-            case 'data':
-                modalHTML = this.modules.data ? this.modules.data.getModalHTML() : this.getFallbackModalHTML('data');
-                modalId = 'dataManagementModal';
-                break;
-            case 'dog':
-                modalHTML = this.modules.dog ? this.modules.dog.getModalHTML() : this.getFallbackModalHTML('dog');
-                modalId = 'addDogModal';
-                break;
-            case 'search':
-                modalHTML = this.getSearchModalHTML();
-                modalId = 'searchModal';
-                break;
-            case 'photo':
-                modalHTML = this.modules.photo ? this.modules.photo.getModalHTML() : this.getFallbackModalHTML('photo');
-                modalId = 'photoGalleryModal';
-                break;
-            case 'breeding':
-                modalHTML = this.modules.breeding ? this.modules.breeding.getModalHTML() : this.getFallbackModalHTML('breeding');
-                modalId = 'breedingPlanModal';
-                break;
-            case 'private':
-                modalHTML = this.modules.private ? this.modules.private.getModalHTML() : this.getFallbackModalHTML('private');
-                modalId = 'privateInfoModal';
-                break;
-            default:
+        if (modalType === 'search') {
+            // Gebruik SearchManager voor zoeken
+            modalHTML = this.modules.search ? this.modules.search.getModalHTML() : this.getSearchModalHTML();
+            modalId = 'searchModal';
+        } else {
+            // Gebruik andere modules
+            const module = this.modules[modalType];
+            if (module && module.getModalHTML) {
+                modalHTML = module.getModalHTML();
+                modalId = this.getModalIdForType(modalType);
+            } else {
                 modalHTML = this.getFallbackModalHTML(modalType);
-                modalId = 'fallbackModal';
+                modalId = `${modalType}Modal`;
+            }
         }
         
         // Inject de modal
         this.injectModal(modalHTML, modalId, modalType);
+    }
+    
+    getModalIdForType(modalType) {
+        const modalIds = {
+            'data': 'dataManagementModal',
+            'dog': 'addDogModal',
+            'photo': 'photoGalleryModal',
+            'breeding': 'breedingPlanModal',
+            'private': 'privateInfoModal'
+        };
+        return modalIds[modalType] || `${modalType}Modal`;
     }
     
     injectModal(html, modalId, modalType) {
@@ -197,6 +239,10 @@ class UIHandler {
             return;
         }
         
+        // Verwijder alle bestaande modals
+        container.innerHTML = '';
+        
+        // Voeg nieuwe modal toe
         container.innerHTML = html;
         
         const modalElement = document.getElementById(modalId);
@@ -205,52 +251,63 @@ class UIHandler {
             
             modalElement.addEventListener('hidden.bs.modal', () => {
                 this.currentModal = null;
+                container.innerHTML = '';
                 console.log(`Modal ${modalId} gesloten`);
             });
             
             modal.show();
-            this.currentModal = modalId;
+            this.currentModal = modalType;
             
-            // Setup events voor deze modal
+            // Setup events
             setTimeout(() => {
-                this.setupModalEvents(modalType);
+                this.setupModalEvents(modalType, modalElement);
             }, 100);
             
             console.log(`✅ Modal ${modalId} getoond`);
         } else {
-            console.error(`❌ Modal element ${modalId} niet gevonden na injectie`);
+            console.error(`❌ Modal element ${modalId} niet gevonden`);
         }
     }
     
-    setupModalEvents(modalType) {
-        if (modalType === 'search') {
-            this.setupSearchEvents();
-        } else if (this.modules[modalType] && this.modules[modalType].setupEvents) {
+    setupModalEvents(modalType, modalElement) {
+        // Sluit knop event
+        const closeBtn = modalElement.querySelector('.btn-secondary[data-bs-dismiss="modal"]');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                this.hideCurrentModal();
+            });
+        }
+        
+        // Specifieke module events
+        const module = this.modules[modalType];
+        if (module && module.setupEvents) {
             try {
-                this.modules[modalType].setupEvents();
+                module.setupEvents();
                 console.log(`✅ Events voor ${modalType} ingesteld`);
             } catch (error) {
                 console.error(`❌ Fout bij events voor ${modalType}:`, error);
             }
         }
+        
+        // Special case voor search
+        if (modalType === 'search') {
+            this.setupSearchEvents();
+        }
     }
     
-    // ========== SEARCH FUNCTIONALITEIT (WERKT AL) ==========
-    
+    // SEARCH FUNCTIONALITEIT
     getSearchModalHTML() {
         return `
-            <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+            <div class="modal fade" id="searchModal" tabindex="-1">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
                         <div class="modal-header bg-info text-white">
-                            <h5 class="modal-title" id="searchModalLabel">
-                                <i class="bi bi-search"></i> Hond Zoeken
-                            </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
+                            <h5 class="modal-title"><i class="bi bi-search"></i> Hond Zoeken</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
                             <div class="mb-3">
-                                <label for="searchInput" class="form-label">Zoek op naam:</label>
+                                <label>Zoek op naam:</label>
                                 <input type="text" class="form-control" id="searchInput" placeholder="Bijv. 'Max' of 'Bella'">
                             </div>
                             <button class="btn btn-info w-100 mb-4" id="searchButton">
@@ -277,8 +334,15 @@ class UIHandler {
         const searchInput = document.getElementById('searchInput');
         
         if (searchBtn && searchInput) {
-            searchBtn.addEventListener('click', async () => {
-                const term = searchInput.value.trim();
+            // Verwijder oude listeners
+            const newSearchBtn = searchBtn.cloneNode(true);
+            const newSearchInput = searchInput.cloneNode(true);
+            searchBtn.parentNode.replaceChild(newSearchBtn, searchBtn);
+            searchInput.parentNode.replaceChild(newSearchInput, searchInput);
+            
+            // Voeg nieuwe listeners toe
+            newSearchBtn.addEventListener('click', async () => {
+                const term = newSearchInput.value.trim();
                 if (!term) {
                     this.showAlert('Voer een zoekterm in', 'warning');
                     return;
@@ -287,9 +351,9 @@ class UIHandler {
                 await this.performSearch(term);
             });
             
-            searchInput.addEventListener('keypress', (e) => {
+            newSearchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
-                    searchBtn.click();
+                    newSearchBtn.click();
                 }
             });
             
@@ -380,7 +444,10 @@ class UIHandler {
         
         // Event listeners voor bekijk knoppen
         document.querySelectorAll('.view-dog-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+            
+            newBtn.addEventListener('click', (e) => {
                 const dogId = e.target.closest('.view-dog-btn').dataset.id;
                 this.viewDogDetails(dogId);
             });
@@ -395,10 +462,8 @@ class UIHandler {
         }
     }
     
-    // ========== BASIS UI FUNCTIES ==========
-    
+    // BASIS UI FUNCTIES
     showProgress(message) {
-        // Verwijder bestaande progress
         this.hideProgress();
         
         const html = `
@@ -419,11 +484,13 @@ class UIHandler {
         backdrops.forEach(backdrop => backdrop.remove());
         
         const spinners = document.querySelectorAll('.spinner-border');
-        spinners.forEach(spinner => spinner.parentElement?.parentElement?.remove());
+        spinners.forEach(spinner => {
+            const parent = spinner.parentElement?.parentElement;
+            if (parent) parent.remove();
+        });
     }
     
     showAlert(message, type = 'info', duration = 5000) {
-        // Verwijder bestaande alerts
         document.querySelectorAll('.ui-alert').forEach(alert => alert.remove());
         
         const html = `
@@ -433,9 +500,7 @@ class UIHandler {
                         <strong class="me-auto">Melding</strong>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
                     </div>
-                    <div class="toast-body">
-                        ${message}
-                    </div>
+                    <div class="toast-body">${message}</div>
                 </div>
             </div>
         `;
@@ -451,15 +516,18 @@ class UIHandler {
     
     hideCurrentModal() {
         if (this.currentModal) {
-            const modalElement = document.getElementById(this.currentModal);
+            const modalId = this.getModalIdForType(this.currentModal);
+            const modalElement = document.getElementById(modalId);
             if (modalElement) {
                 const modal = bootstrap.Modal.getInstance(modalElement);
-                if (modal) {
-                    modal.hide();
-                }
+                if (modal) modal.hide();
                 modalElement.remove();
             }
             this.currentModal = null;
+            
+            // Clear modals container
+            const container = document.getElementById('modalsContainer');
+            if (container) container.innerHTML = '';
         }
     }
     
@@ -488,13 +556,6 @@ class UIHandler {
                                 <i class="bi bi-exclamation-triangle"></i>
                                 De <strong>${name}</strong> module is niet beschikbaar.
                             </div>
-                            <p>Mogelijke oorzaken:</p>
-                            <ul>
-                                <li>JavaScript bestand niet geladen</li>
-                                <li>Module klasse niet gevonden</li>
-                                <li>Syntax fout in module</li>
-                            </ul>
-                            <p class="mb-0">Controleer de browser console voor details.</p>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
@@ -506,35 +567,27 @@ class UIHandler {
     }
 }
 
-// Start de UIHandler wanneer DOM geladen is
+// Start de UIHandler
 document.addEventListener('DOMContentLoaded', function() {
     console.log('=== DOM Geladen ===');
     
-    // Controleer Bootstrap
     if (typeof bootstrap === 'undefined') {
-        console.error('Bootstrap niet geladen!');
         document.body.innerHTML = `
             <div class="container mt-5">
                 <div class="alert alert-danger">
                     <h4>Bootstrap niet geladen!</h4>
-                    <p>Controleer of bootstrap.bundle.min.js correct is ingeladen.</p>
                 </div>
             </div>
         `;
         return;
     }
     
-    // Controleer authenticatie - gebruik isAuthenticated()
     if (!window.auth || !window.auth.isAuthenticated()) {
-        console.warn('Niet ingelogd, redirect naar login');
         window.location.href = 'index.html';
         return;
     }
     
-    // Initialiseer UIHandler
     window.uiHandler = new UIHandler();
-    
-    // Globale helper
     window.showAlert = (msg, type) => {
         if (window.uiHandler) window.uiHandler.showAlert(msg, type);
     };
