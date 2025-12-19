@@ -1,11 +1,10 @@
 /**
- * Main UI Handler - Robuuste versie
- * Werkt zelfs als modules niet perfect geïnitialiseerd zijn
+ * Main UI Handler - Complete werkende versie
  */
 
 class UIHandler {
     constructor() {
-        console.log('=== UIHandler Initialisatie Start ===');
+        console.log('UIHandler initialiseren...');
         this.currentModal = null;
         this.modules = {};
         this.initialize();
@@ -13,113 +12,102 @@ class UIHandler {
     
     async initialize() {
         try {
-            console.log('1. Controleer authenticatie...');
+            console.log('1. Authenticatie controleren...');
+            // Gebruik isAuthenticated() - dit is belangrijk!
             if (!window.auth || !window.auth.isAuthenticated()) {
                 console.warn('Niet geauthenticeerd, redirect naar login');
                 window.location.href = 'index.html';
                 return;
             }
             
-            console.log('2. Controleer database...');
-            if (!window.db) {
-                console.error('Database niet beschikbaar, probeer te herinitialiseren');
-                await this.initializeDatabase();
-            }
+            console.log('2. Database initialiseren...');
+            await this.initializeDatabase();
             
-            console.log('3. Initialiseer modules...');
-            this.initializeModules();
+            console.log('3. Modules laden...');
+            await this.initializeModules();
             
-            console.log('4. Setup UI...');
+            console.log('4. UI instellen...');
             this.setupUI();
             
-            console.log('5. Toon welkomstbericht...');
+            console.log('5. Welkomstbericht tonen...');
             this.showWelcomeMessage();
             
-            console.log('=== UIHandler Initialisatie Voltooid ===');
+            console.log('✅ UIHandler klaar');
             
         } catch (error) {
-            console.error('Fout bij UIHandler initialisatie:', error);
-            this.showEmergencyUI();
+            console.error('❌ Fout bij initialisatie:', error);
+            this.showAlert('Applicatie kon niet starten: ' + error.message, 'danger');
         }
     }
     
     async initializeDatabase() {
-        // Probeer database te herinitialiseren
-        if (typeof HondenDatabase !== 'undefined') {
-            window.db = new HondenDatabase();
-            try {
+        if (!window.db) {
+            if (typeof HondenDatabase !== 'undefined') {
+                window.db = new HondenDatabase();
                 await window.db.init();
-                console.log('Database herinitialisatie succesvol');
-            } catch (error) {
-                console.error('Database herinitialisatie mislukt:', error);
-                throw new Error('Database kon niet geïnitialiseerd worden');
+                console.log('Database geïnitialiseerd');
+            } else {
+                throw new Error('Database klasse niet gevonden');
             }
-        } else {
-            throw new Error('Database klasse niet gevonden');
         }
     }
     
-    initializeModules() {
-        console.log('Module initialisatie start');
+    async initializeModules() {
+        // LAAD DE MODULES OP DEZELFDE MANIER ALS SEARCHMANAGER
+        const moduleDefinitions = [
+            { name: 'data', className: 'DataManager', file: 'DataManager.js' },
+            { name: 'dog', className: 'DogManager', file: 'DogManager.js' },
+            { name: 'photo', className: 'PhotoManager', file: 'PhotoManager.js' },
+            { name: 'breeding', className: 'BreedingManager', file: 'BreedingManager.js' },
+            { name: 'private', className: 'PrivateInfoManager', file: 'PrivateInfoManager.js' }
+        ];
         
-        // Probeer elke module te laden, maar faal zachtjes
-        const moduleClasses = {
-            data: window.DataManager,
-            dog: window.DogManager,
-            photo: window.PhotoManager,
-            breeding: window.BreedingManager,
-            private: window.PrivateInfoManager
-        };
-        
-        this.modules = {};
-        
-        Object.entries(moduleClasses).forEach(([name, ModuleClass]) => {
+        for (const moduleDef of moduleDefinitions) {
             try {
-                if (ModuleClass && typeof ModuleClass === 'function') {
+                // Controleer of de klasse bestaat in window object
+                if (window[moduleDef.className] && typeof window[moduleDef.className] === 'function') {
+                    const ModuleClass = window[moduleDef.className];
                     const module = new ModuleClass();
                     
-                    // Inject dependencies als ze bestaan
+                    // Inject dependencies
                     if (window.db) module.db = window.db;
                     if (window.auth) module.auth = window.auth;
                     module.uiHandler = this;
                     
-                    this.modules[name] = module;
-                    console.log(`✓ Module ${name} geladen`);
+                    this.modules[moduleDef.name] = module;
+                    console.log(`✅ Module ${moduleDef.name} geladen`);
                 } else {
-                    console.warn(`⚠ Module ${name} klasse niet gevonden`);
-                    this.modules[name] = this.createFallbackModule(name);
+                    console.warn(`⚠ ${moduleDef.className} niet gevonden in window object`);
+                    this.modules[moduleDef.name] = this.createFallbackModule(moduleDef.name);
                 }
             } catch (error) {
-                console.error(`✗ Fout bij laden module ${name}:`, error);
-                this.modules[name] = this.createFallbackModule(name);
+                console.error(`❌ Fout bij laden ${moduleDef.name}:`, error);
+                this.modules[moduleDef.name] = this.createFallbackModule(moduleDef.name);
             }
-        });
-        
-        console.log('Module initialisatie voltooid:', Object.keys(this.modules));
+        }
     }
     
     createFallbackModule(name) {
-        // Creëer een fallback module met basis functionaliteit
         return {
             name: name,
             getModalHTML: () => this.getFallbackModalHTML(name),
             setupEvents: () => console.log(`Fallback events voor ${name}`),
             showError: (msg) => this.showAlert(msg, 'danger'),
             showSuccess: (msg) => this.showAlert(msg, 'success'),
-            showProgress: (msg) => this.showProgress(msg),
-            hideProgress: () => this.hideProgress()
+            showProgress: (msg) => console.log(`Progress: ${msg}`),
+            hideProgress: () => console.log('Progress verborgen')
         };
     }
     
     setupUI() {
-        console.log('UI setup start');
+        console.log('UI knoppen instellen...');
         
-        // Menu knoppen - met fallback voor als ze niet bestaan
+        // DEZE KNOP ID's MOETEN OVEREEENKOMEN MET app.html
         const buttonConfigs = [
             { id: 'dataManagementBtn', modal: 'data', adminOnly: true },
-            { id: 'addDogBtn', modal: 'addDog', adminOnly: true },
+            { id: 'addDogBtn', modal: 'dog', adminOnly: true },
             { id: 'searchBtn', modal: 'search', adminOnly: false },
-            { id: 'photoGalleryBtn', modal: 'photos', adminOnly: false },
+            { id: 'photoGalleryBtn', modal: 'photo', adminOnly: false },
             { id: 'breedingPlanBtn', modal: 'breeding', adminOnly: true },
             { id: 'privateInfoBtn', modal: 'private', adminOnly: true }
         ];
@@ -131,14 +119,15 @@ class UIHandler {
                     e.preventDefault();
                     console.log(`Knop: ${config.id}, Modal: ${config.modal}`);
                     
-                    if (config.adminOnly && window.auth && !window.auth.isAdmin()) {
-                        this.showAlert('Alleen administrators hebben toegang tot deze functie', 'danger');
+                    // Admin check
+                    if (config.adminOnly && !window.auth.isAdmin()) {
+                        this.showAlert('Alleen administrators hebben toegang tot deze functie', 'warning');
                         return;
                     }
                     
                     this.showModal(config.modal);
                 });
-                console.log(`✓ Knop ${config.id} ingesteld`);
+                console.log(`✅ Knop ${config.id} ingesteld`);
             } else {
                 console.warn(`⚠ Knop ${config.id} niet gevonden in DOM`);
             }
@@ -149,86 +138,62 @@ class UIHandler {
         if (logoutBtn) {
             logoutBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                if (window.auth) {
-                    window.auth.logout();
-                } else {
-                    window.location.href = 'index.html';
-                }
+                window.auth.logout();
             });
+            console.log('✅ Logout knop ingesteld');
         }
         
-        // Taal switcher
-        const languageSelect = document.getElementById('languageSelect');
-        if (languageSelect) {
-            languageSelect.addEventListener('change', (e) => {
-                const lang = e.target.value;
-                localStorage.setItem('appLanguage', lang);
-                this.showAlert(`Taal gewijzigd naar ${lang}`, 'info');
-                // Herlaad pagina voor taalwijziging
-                setTimeout(() => location.reload(), 1000);
-            });
-        }
-        
-        console.log('UI setup voltooid');
+        console.log('✅ UI setup voltooid');
     }
     
     showModal(modalType) {
         console.log(`Toon modal: ${modalType}`);
         
-        // Verwijder eerst eventuele open modal
+        // Verwijder huidige modal
         this.hideCurrentModal();
         
+        // Kies de juiste modal HTML
         let modalHTML = '';
         let modalId = '';
         
-        // Kies de juiste modal HTML
         switch (modalType) {
             case 'data':
-                modalHTML = this.modules.data ? this.modules.data.getModalHTML() : this.getDataModalHTML();
+                modalHTML = this.modules.data ? this.modules.data.getModalHTML() : this.getFallbackModalHTML('data');
                 modalId = 'dataManagementModal';
                 break;
-                
-            case 'addDog':
-                modalHTML = this.modules.dog ? this.modules.dog.getModalHTML() : this.getAddDogModalHTML();
+            case 'dog':
+                modalHTML = this.modules.dog ? this.modules.dog.getModalHTML() : this.getFallbackModalHTML('dog');
                 modalId = 'addDogModal';
                 break;
-                
             case 'search':
-                modalHTML = this.getSearchModalHTML(); // Eenvoudige search
+                modalHTML = this.getSearchModalHTML();
                 modalId = 'searchModal';
                 break;
-                
-            case 'photos':
-                modalHTML = this.modules.photo ? this.modules.photo.getModalHTML() : this.getPhotoModalHTML();
+            case 'photo':
+                modalHTML = this.modules.photo ? this.modules.photo.getModalHTML() : this.getFallbackModalHTML('photo');
                 modalId = 'photoGalleryModal';
                 break;
-                
             case 'breeding':
-                modalHTML = this.modules.breeding ? this.modules.breeding.getModalHTML() : this.getBreedingModalHTML();
+                modalHTML = this.modules.breeding ? this.modules.breeding.getModalHTML() : this.getFallbackModalHTML('breeding');
                 modalId = 'breedingPlanModal';
                 break;
-                
             case 'private':
-                modalHTML = this.modules.private ? this.modules.private.getModalHTML() : this.getPrivateModalHTML();
+                modalHTML = this.modules.private ? this.modules.private.getModalHTML() : this.getFallbackModalHTML('private');
                 modalId = 'privateInfoModal';
                 break;
-                
             default:
                 modalHTML = this.getFallbackModalHTML(modalType);
                 modalId = 'fallbackModal';
         }
         
-        // Inject modal
+        // Inject de modal
         this.injectModal(modalHTML, modalId, modalType);
     }
     
     injectModal(html, modalId, modalType) {
-        console.log(`Inject modal: ${modalId}`);
-        
         const container = document.getElementById('modalsContainer');
         if (!container) {
             console.error('Modals container niet gevonden!');
-            this.showAlert('Kan modal niet tonen - technische fout', 'danger');
             return;
         }
         
@@ -247,86 +212,50 @@ class UIHandler {
             this.currentModal = modalId;
             
             // Setup events voor deze modal
-            setTimeout(() => this.setupModalEvents(modalType), 100);
+            setTimeout(() => {
+                this.setupModalEvents(modalType);
+            }, 100);
+            
+            console.log(`✅ Modal ${modalId} getoond`);
         } else {
-            console.error(`Modal element ${modalId} niet gevonden na injectie`);
-            this.showAlert('Kan modal niet openen', 'danger');
+            console.error(`❌ Modal element ${modalId} niet gevonden na injectie`);
         }
     }
     
     setupModalEvents(modalType) {
-        console.log(`Setup events voor: ${modalType}`);
-        
-        // Basis events voor alle modals
-        const closeBtn = document.querySelector(`#${this.currentModal} .btn-secondary`);
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
-                this.hideCurrentModal();
-            });
-        }
-        
-        // Specifieke events per modal type
-        switch (modalType) {
-            case 'search':
-                this.setupSearchEvents();
-                break;
-                
-            case 'photos':
-                if (this.modules.photo && this.modules.photo.setupEvents) {
-                    try {
-                        this.modules.photo.setupEvents();
-                        // Probeer foto's te laden
-                        setTimeout(() => {
-                            if (this.modules.photo.loadPhotosData) {
-                                this.modules.photo.loadPhotosData();
-                            }
-                        }, 200);
-                    } catch (error) {
-                        console.error('Fout bij photo events:', error);
-                    }
-                }
-                break;
-                
-            default:
-                // Probeer module events
-                if (this.modules[modalType] && this.modules[modalType].setupEvents) {
-                    try {
-                        this.modules[modalType].setupEvents();
-                    } catch (error) {
-                        console.error(`Fout bij ${modalType} events:`, error);
-                    }
-                }
+        if (modalType === 'search') {
+            this.setupSearchEvents();
+        } else if (this.modules[modalType] && this.modules[modalType].setupEvents) {
+            try {
+                this.modules[modalType].setupEvents();
+                console.log(`✅ Events voor ${modalType} ingesteld`);
+            } catch (error) {
+                console.error(`❌ Fout bij events voor ${modalType}:`, error);
+            }
         }
     }
     
-    // ========== MODAL TEMPLATES ==========
+    // ========== SEARCH FUNCTIONALITEIT (WERKT AL) ==========
     
     getSearchModalHTML() {
         return `
-            <div class="modal fade" id="searchModal" tabindex="-1">
+            <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
                         <div class="modal-header bg-info text-white">
-                            <h5 class="modal-title">
+                            <h5 class="modal-title" id="searchModalLabel">
                                 <i class="bi bi-search"></i> Hond Zoeken
                             </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
                         </div>
                         <div class="modal-body">
-                            <div class="alert alert-info">
-                                Typ de naam van een hond om te zoeken. Resultaten verschijnen hieronder.
-                            </div>
-                            
                             <div class="mb-3">
-                                <label>Zoek op naam:</label>
-                                <input type="text" class="form-control" id="searchInput" 
-                                       placeholder="Bijv. 'Max' of 'Bella'">
+                                <label for="searchInput" class="form-label">Zoek op naam:</label>
+                                <input type="text" class="form-control" id="searchInput" placeholder="Bijv. 'Max' of 'Bella'">
                             </div>
-                            
                             <button class="btn btn-info w-100 mb-4" id="searchButton">
                                 <i class="bi bi-search"></i> Zoeken
                             </button>
-                            
                             <div id="searchResults">
                                 <div class="text-center text-muted py-4">
                                     <i class="bi bi-search display-6"></i>
@@ -351,7 +280,7 @@ class UIHandler {
             searchBtn.addEventListener('click', async () => {
                 const term = searchInput.value.trim();
                 if (!term) {
-                    this.showAlert('Voer een zoekterm in', 'warning', 3000);
+                    this.showAlert('Voer een zoekterm in', 'warning');
                     return;
                 }
                 
@@ -363,6 +292,8 @@ class UIHandler {
                     searchBtn.click();
                 }
             });
+            
+            console.log('✅ Search events ingesteld');
         }
     }
     
@@ -430,7 +361,7 @@ class UIHandler {
                     <td>${dog.ras || '-'}</td>
                     <td>
                         <button class="btn btn-sm btn-outline-info view-dog-btn" data-id="${dog.id}">
-                            <i class="bi bi-eye"></i>
+                            <i class="bi bi-eye"></i> Bekijk
                         </button>
                     </td>
                 </tr>
@@ -447,7 +378,7 @@ class UIHandler {
         
         container.innerHTML = html;
         
-        // Add event listeners
+        // Event listeners voor bekijk knoppen
         document.querySelectorAll('.view-dog-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const dogId = e.target.closest('.view-dog-btn').dataset.id;
@@ -464,16 +395,19 @@ class UIHandler {
         }
     }
     
-    // ========== BASIC UI FUNCTIONS ==========
+    // ========== BASIS UI FUNCTIES ==========
     
     showProgress(message) {
+        // Verwijder bestaande progress
         this.hideProgress();
         
         const html = `
-            <div class="modal-backdrop show" style="opacity: 0.8;"></div>
-            <div class="progress-modal">
-                <div class="spinner-border text-primary"></div>
-                <div class="mt-2">${message}</div>
+            <div class="modal-backdrop show" style="opacity: 0.5; z-index: 1040;"></div>
+            <div class="position-fixed top-50 start-50 translate-middle" style="z-index: 1041;">
+                <div class="d-flex flex-column align-items-center">
+                    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+                    <div class="mt-2 text-white bg-dark p-2 rounded">${message}</div>
+                </div>
             </div>
         `;
         
@@ -481,15 +415,15 @@ class UIHandler {
     }
     
     hideProgress() {
-        const backdrop = document.querySelector('.modal-backdrop');
-        if (backdrop) backdrop.remove();
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(backdrop => backdrop.remove());
         
-        const progress = document.querySelector('.progress-modal');
-        if (progress) progress.remove();
+        const spinners = document.querySelectorAll('.spinner-border');
+        spinners.forEach(spinner => spinner.parentElement?.parentElement?.remove());
     }
     
     showAlert(message, type = 'info', duration = 5000) {
-        // Remove existing alerts
+        // Verwijder bestaande alerts
         document.querySelectorAll('.ui-alert').forEach(alert => alert.remove());
         
         const html = `
@@ -540,34 +474,9 @@ class UIHandler {
         }
     }
     
-    showEmergencyUI() {
-        const appContent = document.getElementById('appContent');
-        if (appContent) {
-            appContent.innerHTML = `
-                <div class="alert alert-danger">
-                    <h4><i class="bi bi-exclamation-triangle"></i> Kritieke Fout</h4>
-                    <p>De applicatie kon niet correct starten. Mogelijke oorzaken:</p>
-                    <ul>
-                        <li>JavaScript bestanden niet geladen</li>
-                        <li>Browser incompatibiliteit</li>
-                        <li>Database problemen</li>
-                    </ul>
-                    <div class="mt-3">
-                        <button class="btn btn-danger me-2" onclick="location.reload()">
-                            <i class="bi bi-arrow-clockwise"></i> Herladen
-                        </button>
-                        <button class="btn btn-outline-danger" onclick="window.auth.logout()">
-                            <i class="bi bi-box-arrow-right"></i> Uitloggen
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-    }
-    
-    getFallbackModalHTML(moduleName) {
+    getFallbackModalHTML(name) {
         return `
-            <div class="modal fade" id="fallbackModal" tabindex="-1">
+            <div class="modal fade" id="${name}Modal" tabindex="-1">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header bg-warning">
@@ -577,14 +486,15 @@ class UIHandler {
                         <div class="modal-body">
                             <div class="alert alert-warning">
                                 <i class="bi bi-exclamation-triangle"></i>
-                                De <strong>${moduleName}</strong> module is niet beschikbaar.
+                                De <strong>${name}</strong> module is niet beschikbaar.
                             </div>
-                            <p>Dit kan komen door:</p>
+                            <p>Mogelijke oorzaken:</p>
                             <ul>
-                                <li>JavaScript fout in de module</li>
-                                <li>Bestand niet correct geladen</li>
-                                <li>Browser compatibiliteit probleem</li>
+                                <li>JavaScript bestand niet geladen</li>
+                                <li>Module klasse niet gevonden</li>
+                                <li>Syntax fout in module</li>
                             </ul>
+                            <p class="mb-0">Controleer de browser console voor details.</p>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
@@ -596,11 +506,11 @@ class UIHandler {
     }
 }
 
-// Laad UIHandler wanneer DOM klaar is
+// Start de UIHandler wanneer DOM geladen is
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('=== DOM Geladen - Start UIHandler ===');
+    console.log('=== DOM Geladen ===');
     
-    // Controleer of Bootstrap beschikbaar is
+    // Controleer Bootstrap
     if (typeof bootstrap === 'undefined') {
         console.error('Bootstrap niet geladen!');
         document.body.innerHTML = `
@@ -614,63 +524,20 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
-    // Controleer of gebruiker ingelogd is
+    // Controleer authenticatie - gebruik isAuthenticated()
     if (!window.auth || !window.auth.isAuthenticated()) {
         console.warn('Niet ingelogd, redirect naar login');
         window.location.href = 'index.html';
         return;
     }
     
-    // Start UIHandler
+    // Initialiseer UIHandler
     window.uiHandler = new UIHandler();
     
-    // Global helper functies
+    // Globale helper
     window.showAlert = (msg, type) => {
         if (window.uiHandler) window.uiHandler.showAlert(msg, type);
     };
     
     console.log('=== UIHandler Gestart ===');
-});
-
-// Add emergency styles
-document.addEventListener('DOMContentLoaded', function() {
-    const style = document.createElement('style');
-    style.textContent = `
-        .progress-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.2);
-            z-index: 9999;
-            text-align: center;
-        }
-        
-        .progress-modal .spinner-border {
-            width: 3rem;
-            height: 3rem;
-        }
-        
-        .ui-alert {
-            animation: slideIn 0.3s ease;
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
-        }
-        
-        .menu-btn {
-            transition: all 0.3s ease;
-        }
-        
-        .menu-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-    `;
-    document.head.appendChild(style);
 });
