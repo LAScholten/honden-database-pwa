@@ -1,298 +1,249 @@
 /**
- * UI Handler - Werkende versie
+ * Main UI Handler
+ * Coördineert alle modules en toont de juiste modals
  */
 
 class UIHandler {
     constructor() {
-        console.log('UIHandler gestart');
+        this.db = db;
+        this.auth = auth;
         this.currentModal = null;
-        this.init();
+        
+        // Initialiseer modules
+        this.modules = {
+            data: new DataManager(),
+            dog: new DogManager(),
+            photo: new PhotoManager(),
+            breeding: new BreedingManager(),
+            private: new PrivateInfoManager()
+        };
+        
+        // Voeg CSS toe voor styling
+        this.addStyles();
     }
     
-    async init() {
-        try {
-            // Check auth
-            if (!window.auth || !window.auth.isAuthenticated()) {
-                window.location.href = 'index.html';
-                return;
+    addStyles() {
+        const progressCSS = `
+            .progress-modal {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 2rem;
+                border-radius: 10px;
+                box-shadow: 0 0 30px rgba(0,0,0,0.3);
+                z-index: 9999;
+                text-align: center;
+                min-width: 200px;
             }
             
-            // Init database
-            if (!window.db && window.HondenDatabase) {
-                window.db = new HondenDatabase();
-                await window.db.init();
+            .progress-modal .spinner-border {
+                width: 3rem;
+                height: 3rem;
             }
             
-            // Setup UI
-            this.setupButtons();
-            this.updateWelcomeMessage();
-            this.loadStats();
+            .bg-purple {
+                background-color: #6f42c1 !important;
+            }
             
-        } catch (error) {
-            console.error('Init error:', error);
-        }
+            .btn-purple {
+                background-color: #6f42c1;
+                border-color: #6f42c1;
+                color: white;
+            }
+            
+            .btn-purple:hover {
+                background-color: #5a32a3;
+                border-color: #5a32a3;
+                color: white;
+            }
+            
+            .photo-thumbnail img {
+                transition: transform 0.3s ease;
+            }
+            
+            .photo-thumbnail img:hover {
+                transform: scale(1.05);
+            }
+        `;
+        
+        const style = document.createElement('style');
+        style.textContent = progressCSS;
+        document.head.appendChild(style);
     }
     
-    setupButtons() {
-        // Button configuration
-        const buttons = [
-            { id: 'dataManagementBtn', modal: 'data', admin: true },
-            { id: 'addDogBtn', modal: 'dog', admin: true },
-            { id: 'searchBtn', modal: 'search', admin: false },
-            { id: 'photoGalleryBtn', modal: 'photo', admin: false },
-            { id: 'breedingPlanBtn', modal: 'breeding', admin: true },
-            { id: 'privateInfoBtn', modal: 'private', admin: true }
-        ];
-        
-        buttons.forEach(btn => {
-            const element = document.getElementById(btn.id);
-            if (element) {
-                element.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    
-                    if (btn.admin && !window.auth.isAdmin()) {
-                        alert('Alleen administrators hebben toegang');
-                        return;
-                    }
-                    
-                    this.openModal(btn.modal);
-                });
-            }
-        });
-        
-        // Logout button
-        const logoutBtn = document.getElementById('logoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                window.auth.logout();
-            });
-        }
-    }
+    // ========== MODAL MANAGEMENT ==========
     
-    openModal(type) {
-        console.log(`Open modal: ${type}`);
-        
-        // Close current modal
-        this.closeModal();
-        
-        // Get modal HTML based on type
-        let html = '';
+    showModal(modalType) {
+        let modalHTML = '';
         let modalId = '';
         
-        if (type === 'search') {
-            html = this.getSearchModalHTML();
-            modalId = 'searchModal';
-        } else {
-            html = this.getBasicModalHTML(type);
-            modalId = type + 'Modal';
-        }
-        
-        // Inject modal
-        const container = document.getElementById('modalsContainer');
-        if (container) {
-            container.innerHTML = html;
-            
-            // Show modal
-            const modalElement = document.getElementById(modalId);
-            if (modalElement) {
-                const modal = new bootstrap.Modal(modalElement);
-                modal.show();
-                this.currentModal = modal;
+        switch (modalType) {
+            case 'data':
+                modalHTML = this.modules.data.getModalHTML();
+                modalId = 'dataManagementModal';
+                break;
                 
-                // Setup search events if needed
-                if (type === 'search') {
-                    this.setupSearchEvents();
-                }
-            }
-        }
-    }
-    
-    getSearchModalHTML() {
-        return `
-            <div class="modal fade" id="searchModal" tabindex="-1">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header bg-info text-white">
-                            <h5 class="modal-title"><i class="bi bi-search"></i> Hond Zoeken</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label>Zoek op naam:</label>
-                                <input type="text" class="form-control" id="searchInput" placeholder="Bijv. 'Max' of 'Bella'">
-                            </div>
-                            <button class="btn btn-info w-100 mb-4" id="searchButton">
-                                <i class="bi bi-search"></i> Zoeken
-                            </button>
-                            <div id="searchResults">
-                                <div class="text-center text-muted py-4">
-                                    <i class="bi bi-search display-6"></i>
-                                    <p class="mt-2">Voer een zoekterm in</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-    
-    setupSearchEvents() {
-        const searchBtn = document.getElementById('searchButton');
-        const searchInput = document.getElementById('searchInput');
-        
-        if (searchBtn && searchInput) {
-            searchBtn.addEventListener('click', async () => {
-                const term = searchInput.value.trim();
-                if (!term) {
-                    alert('Voer een zoekterm in');
+            case 'addDog':
+                if (!this.auth.isAdmin()) {
+                    this.modules.dog.showError('Alleen administrators mogen nieuwe honden toevoegen');
                     return;
                 }
+                modalHTML = this.modules.dog.getModalHTML();
+                modalId = 'addDogModal';
+                break;
                 
-                await this.performSearch(term);
-            });
-        }
-    }
-    
-    async performSearch(term) {
-        try {
-            if (!window.db) return;
-            
-            const allDogs = await window.db.getHonden();
-            const results = allDogs.filter(dog => 
-                dog.naam && dog.naam.toLowerCase().includes(term.toLowerCase())
-            );
-            
-            this.displaySearchResults(results);
-            
-        } catch (error) {
-            console.error('Search error:', error);
-            alert('Zoeken mislukt');
-        }
-    }
-    
-    displaySearchResults(results) {
-        const container = document.getElementById('searchResults');
-        if (!container) return;
-        
-        if (results.length === 0) {
-            container.innerHTML = `
-                <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-triangle"></i>
-                    Geen honden gevonden met deze zoekterm.
-                </div>
-            `;
-            return;
+            case 'search':
+                modalHTML = this.modules.dog.getSearchModalHTML();
+                modalId = 'searchModal';
+                break;
+                
+            case 'photos':
+                modalHTML = this.modules.photo.getModalHTML();
+                modalId = 'photoGalleryModal';
+                break;
+                
+            case 'breeding':
+                modalHTML = this.modules.breeding.getModalHTML();
+                modalId = 'breedingPlanModal';
+                break;
+                
+            case 'private':
+                modalHTML = this.modules.private.getModalHTML();
+                modalId = 'privateInfoModal';
+                break;
+                
+            default:
+                console.error('Onbekend modal type:', modalType);
+                return;
         }
         
-        let html = `
-            <div class="card">
-                <div class="card-header">
-                    <strong>${results.length} hond(en) gevonden:</strong>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>Naam</th>
-                                    <th>Stamboomnr</th>
-                                    <th>Ras</th>
-                                    <th>Acties</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-        `;
-        
-        results.forEach(dog => {
-            html += `
-                <tr>
-                    <td>${dog.naam || '-'}</td>
-                    <td><code>${dog.stamboomnr || '-'}</code></td>
-                    <td>${dog.ras || '-'}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-info view-dog-btn" data-id="${dog.id}">
-                            <i class="bi bi-eye"></i>
-                        </button>
-                    </td>
-                </tr>
-            `;
-        });
-        
-        html += `
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        container.innerHTML = html;
+        this.injectModal(modalHTML, modalId);
+        this.setupModalEvents(modalType);
     }
     
-    getBasicModalHTML(name) {
-        return `
-            <div class="modal fade" id="${name}Modal" tabindex="-1">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">${name}</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p>Deze functionaliteit wordt momenteel geladen...</p>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-    
-    closeModal() {
+    injectModal(html, modalId) {
+        // Verwijder bestaande modal
         if (this.currentModal) {
-            this.currentModal.hide();
-            this.currentModal = null;
-        }
-    }
-    
-    updateWelcomeMessage() {
-        const user = window.auth.getCurrentUser();
-        if (user) {
-            const welcomeElement = document.getElementById('welcomeMessage');
-            if (welcomeElement) {
-                const roleText = user.role === 'admin' ? 'Administrator' : 'Gebruiker';
-                welcomeElement.textContent = `Welkom, ${user.username} (${roleText})`;
+            const existingModal = document.getElementById(this.currentModal);
+            if (existingModal) {
+                const modalInstance = bootstrap.Modal.getInstance(existingModal);
+                if (modalInstance) modalInstance.hide();
+                existingModal.remove();
             }
         }
+        
+        // Voeg nieuwe modal toe
+        const container = document.getElementById('modalsContainer');
+        container.innerHTML = html;
+        
+        // Toon modal
+        const modalElement = document.getElementById(modalId);
+        if (modalElement) {
+            const modal = new bootstrap.Modal(modalElement);
+            modal.show();
+            
+            modalElement.addEventListener('hidden.bs.modal', () => {
+                this.currentModal = null;
+            });
+            
+            this.currentModal = modalId;
+        }
     }
     
-    async loadStats() {
-        try {
-            if (!window.db) return;
+    setupModalEvents(modalType) {
+        setTimeout(() => {
+            switch (modalType) {
+                case 'data':
+                    this.modules.data.setupEvents();
+                    this.modules.data.loadDatabaseStats();
+                    break;
+                    
+                case 'addDog':
+                    this.modules.dog.setupEvents();
+                    break;
+                    
+                case 'search':
+                    this.modules.dog.setupSearchEvents();
+                    break;
+                    
+                case 'photos':
+                    this.modules.photo.setupEvents();
+                    this.modules.photo.loadPhotosData();
+                    break;
+                    
+                case 'breeding':
+                    this.modules.breeding.setupEvents();
+                    this.modules.breeding.loadBreedingData();
+                    break;
+                    
+                case 'private':
+                    this.modules.private.setupEvents();
+                    this.modules.private.loadPrivateInfoData();
+                    break;
+            }
+        }, 100); // Kleine delay om DOM te laten laden
+    }
+    
+    // ========== ALGEMENE FUNCTIES ==========
+    
+    showProgress(message) {
+        // Directe implementatie zonder module dependency
+        this.hideProgress();
+        
+        const progressHTML = `
+            <div class="modal-backdrop show" style="opacity: 0.8;"></div>
+            <div class="progress-modal">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Laden...</span>
+                </div>
+                <div class="mt-3">${message}</div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', progressHTML);
+    }
+    
+    hideProgress() {
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) backdrop.remove();
+        
+        const progressModal = document.querySelector('.progress-modal');
+        if (progressModal) progressModal.remove();
+    }
+    
+    showSuccess(message) {
+        this.showAlert(message, 'success');
+    }
+    
+    showError(message) {
+        this.showAlert(message, 'danger');
+    }
+    
+    showInfo(message) {
+        this.showAlert(message, 'info');
+    }
+    
+    showAlert(message, type, duration = 5000) {
+        const alertHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Sluiten"></button>
+            </div>
+        `;
+        
+        const modalBody = document.querySelector('.modal-body');
+        if (modalBody) {
+            modalBody.insertAdjacentHTML('afterbegin', alertHTML);
             
-            const stats = await window.db.getStatistieken();
-            document.getElementById('quickStatsHonden').textContent = stats.totaalHonden;
-            document.getElementById('quickStatsFotos').textContent = stats.totaalFotos;
-            
-        } catch (error) {
-            console.error('Stats error:', error);
+            setTimeout(() => {
+                const alert = modalBody.querySelector('.alert');
+                if (alert) {
+                    alert.classList.remove('show');
+                    setTimeout(() => alert.remove(), 150);
+                }
+            }, duration);
         }
     }
 }
-
-// Start UIHandler
-document.addEventListener('DOMContentLoaded', function() {
-    if (!window.auth || !window.auth.isAuthenticated()) {
-        window.location.href = 'index.html';
-        return;
-    }
-    
-    window.uiHandler = new UIHandler();
-});
