@@ -361,7 +361,7 @@ class PrivateInfoManager extends BaseModule {
             dropdownMenu.classList.add('show');
         });
         
-        // Filter honden bij elke toetsaanslag
+        // Filter honden bij elke toetsaanslag - ALLEEN OP NAAM
         searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
             this.filterDogs(searchTerm);
@@ -405,14 +405,11 @@ class PrivateInfoManager extends BaseModule {
         if (!searchTerm.trim()) {
             this.filteredDogs = [...this.allDogs];
         } else {
+            // ALLEEN ZOEKEN OP NAAM VAN DE HOND
             this.filteredDogs = this.allDogs.filter(dog => {
                 const dogName = dog.naam.toLowerCase();
-                const dogBreed = dog.ras ? dog.ras.toLowerCase() : '';
-                const pedigree = dog.stamboomnr ? dog.stamboomnr.toLowerCase() : '';
-                
-                return dogName.includes(searchTerm) || 
-                       dogBreed.includes(searchTerm) ||
-                       pedigree.includes(searchTerm);
+                return dogName.includes(searchTerm);
+                // RAS EN STAMBOOMNR WORDEN NIET MEER GEZIEN!
             });
         }
         
