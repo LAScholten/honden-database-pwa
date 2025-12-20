@@ -1,6 +1,6 @@
 /**
  * Privé Informatie Module
- * Beheert vertrouwelijke informatie over honden
+ * Beheert vertrouwelijke informatie over honden - Alleen lokaal opgeslagen
  */
 
 class PrivateInfoManager extends BaseModule {
@@ -27,7 +27,8 @@ class PrivateInfoManager extends BaseModule {
                 
                 // Beveiligingsinfo
                 securityInfo: "Beveiligingsinfo",
-                privateStorage: "Alle informatie wordt privaat opgeslagen in uw browser",
+                privateStorage: "Alle informatie wordt alleen lokaal opgeslagen in uw browser",
+                privateNote: "Deze notities zijn alleen zichtbaar voor u en worden niet gedeeld",
                 
                 // Knoppen
                 clear: "Wissen",
@@ -45,7 +46,7 @@ class PrivateInfoManager extends BaseModule {
                 savingInfo: "Privé info opslaan...",
                 saveSuccess: "Privé informatie succesvol opgeslagen!",
                 saveFailed: "Opslaan mislukt: ",
-                clearConfirm: "Weet je zeker dat je alle notities wilt wissen? Dit wordt niet automatisch opgeslagen.",
+                clearConfirm: "Weet je zeker dat je alle notities wilt wissen?",
                 fieldsCleared: "Notities gewist. Vergeet niet op te slaan als je de wijzigingen wilt bewaren.",
                 makingBackup: "Backup maken...",
                 backupSuccess: "Backup succesvol gemaakt!",
@@ -74,7 +75,8 @@ class PrivateInfoManager extends BaseModule {
                 
                 // Security info
                 securityInfo: "Security Info",
-                privateStorage: "All information is privately stored in your browser",
+                privateStorage: "All information is stored locally in your browser only",
+                privateNote: "These notes are only visible to you and are not shared",
                 
                 // Buttons
                 clear: "Clear",
@@ -92,7 +94,7 @@ class PrivateInfoManager extends BaseModule {
                 savingInfo: "Saving private info...",
                 saveSuccess: "Private information successfully saved!",
                 saveFailed: "Save failed: ",
-                clearConfirm: "Are you sure you want to clear all notes? This will not be automatically saved.",
+                clearConfirm: "Are you sure you want to clear all notes?",
                 fieldsCleared: "Notes cleared. Don't forget to save if you want to keep the changes.",
                 makingBackup: "Making backup...",
                 backupSuccess: "Backup successfully created!",
@@ -121,7 +123,8 @@ class PrivateInfoManager extends BaseModule {
                 
                 // Sicherheitsinfo
                 securityInfo: "Sicherheitsinfo",
-                privateStorage: "Alle Informationen werden privat in Ihrem Browser gespeichert",
+                privateStorage: "Alle Informationen werden nur lokal in Ihrem Browser gespeichert",
+                privateNote: "Diese Notizen sind nur für Sie sichtbar und werden nicht geteilt",
                 
                 // Knöpfe
                 clear: "Löschen",
@@ -130,26 +133,26 @@ class PrivateInfoManager extends BaseModule {
                 restore: "Wiederherstellen",
                 
                 // Meldungen
-                selectDogFirst: "Wählen Sie zuerst een Hund",
+                selectDogFirst: "Wählen Sie zuerst einen Hund",
                 loadingInfo: "Private Info wird geladen...",
-                noInfoFound: "Geen privé informatie gevonden voor deze hond. U kunt nieuwe informatie toevoegen.",
-                loadFailed: "Laden mislukt: ",
-                dogNotFound: "Hond niet gevonden in database",
-                dogSelectionRequired: "Selecteer een hond uit de lijst",
-                savingInfo: "Privé info opslaan...",
-                saveSuccess: "Privé informatie succesvol opgeslagen!",
-                saveFailed: "Opslaan mislukt: ",
-                clearConfirm: "Weet je zeker dat je alle notities wilt wissen? Dit wordt niet automatisch opgeslagen.",
-                fieldsCleared: "Notities gewist. Vergeet niet op te slaan als je de wijzigingen wilt bewaren.",
-                makingBackup: "Backup maken...",
-                backupSuccess: "Backup succesvol gemaakt!",
-                backupFailed: "Backup mislukt: ",
-                invalidBackup: "Ongeldig backup bestand",
-                restoreConfirm: "Weet je zeker dat je deze backup wilt herstellen?",
-                restoring: "Backup herstellen...",
-                restoreSuccess: "Backup succesvol hersteld!",
-                restoreFailed: "Herstellen mislukt: ",
-                backupReadError: "Fout bij lezen backup bestand",
+                noInfoFound: "Keine privaten Informationen für diesen Hund gefunden. Sie können neue Informationen hinzufügen.",
+                loadFailed: "Laden fehlgeschlagen: ",
+                dogNotFound: "Hund nicht in der Datenbank gefunden",
+                dogSelectionRequired: "Wählen Sie einen Hund aus der Liste",
+                savingInfo: "Private Info wird gespeichert...",
+                saveSuccess: "Private Informationen erfolgreich gespeichert!",
+                saveFailed: "Speichern fehlgeschlagen: ",
+                clearConfirm: "Sind Sie sicher, dass Sie alle Notizen löschen möchten?",
+                fieldsCleared: "Notizen gelöscht. Vergessen Sie nicht zu speichern, wenn Sie die Änderungen behalten möchten.",
+                makingBackup: "Backup wird erstellt...",
+                backupSuccess: "Backup erfolgreich erstellt!",
+                backupFailed: "Backup fehlgeschlagen: ",
+                invalidBackup: "Ungültige Backup-Datei",
+                restoreConfirm: "Sind Sie sicher, dass Sie dieses Backup wiederherstellen möchten?",
+                restoring: "Backup wird wiederhergestellt...",
+                restoreSuccess: "Backup erfolgreich wiederhergestellt!",
+                restoreFailed: "Wiederherstellen fehlgeschlagen: ",
+                backupReadError: "Fehler beim Lesen der Backup-Datei",
                 noDogsFound: "Keine Hunde gefunden",
                 loadingPhotos: "Fotos laden..."
             }
@@ -220,7 +223,7 @@ class PrivateInfoManager extends BaseModule {
                                         <div class="card-body">
                                             <div class="small">
                                                 <p><i class="bi bi-check-circle text-success"></i> ${t('privateStorage')}</p>
-                                                <p><i class="bi bi-link-45deg"></i> ${this.getPermissionInfo()}</p>
+                                                <p><i class="bi bi-person-check text-info"></i> ${t('privateNote')}</p>
                                             </div>
                                             <div class="mt-3">
                                                 <button class="btn btn-outline-dark btn-sm" id="backupPrivateInfoBtn">
@@ -243,14 +246,14 @@ class PrivateInfoManager extends BaseModule {
                                     <div id="privateInfoForm">
                                         <div class="mb-3">
                                             <textarea class="form-control" id="privateNotes" rows="12" 
-                                                placeholder="${t('notesPlaceholder')}" ${this.getTextareaPermission()}></textarea>
+                                                placeholder="${t('notesPlaceholder')}"></textarea>
                                         </div>
                                         
                                         <div class="d-flex justify-content-between">
-                                            <button class="btn btn-secondary" id="clearPrivateInfoBtn" ${this.getClearButtonPermission()}>
+                                            <button class="btn btn-secondary" id="clearPrivateInfoBtn">
                                                 <i class="bi bi-x-circle"></i> ${t('clear')}
                                             </button>
-                                            <button class="btn btn-dark" id="savePrivateInfoBtn" ${this.getSaveButtonPermission()}>
+                                            <button class="btn btn-dark" id="savePrivateInfoBtn">
                                                 <i class="bi bi-save"></i> ${t('save')}
                                             </button>
                                         </div>
@@ -265,39 +268,6 @@ class PrivateInfoManager extends BaseModule {
                 </div>
             </div>
         `;
-    }
-    
-    // Permissie controle functies - GECORRIGEERDE VERSIE
-    getPermissionInfo() {
-        const user = window.auth?.getCurrentUser();
-        if (!user) return "Login vereist voor toegang tot privé informatie";
-        
-        if (user.permissions?.includes('private_full')) {
-            return "U heeft volledige toegang tot privé informatie";
-        } else if (user.permissions?.includes('private_view')) {
-            return "U heeft alleen leestoegang tot privé informatie";
-        } else if (user.permissions?.includes('private_none')) {
-            return "U heeft geen toegang tot privé informatie";
-        }
-        return "Toegangsrechten worden gecontroleerd...";
-    }
-    
-    getTextareaPermission() {
-        const user = window.auth?.getCurrentUser();
-        if (!user || !user.permissions) return "disabled";
-        
-        if (user.permissions.includes('private_full')) {
-            return ""; // Lege string betekent niet disabled
-        }
-        return "disabled"; // Dit is het HTML attribuut
-    }
-    
-    getClearButtonPermission() {
-        return this.getTextareaPermission(); //zelfde als textarea
-    }
-    
-    getSaveButtonPermission() {
-        return this.getTextareaPermission(); //zelfde als textarea
     }
     
     setupEvents() {
@@ -409,7 +379,6 @@ class PrivateInfoManager extends BaseModule {
             this.filteredDogs = this.allDogs.filter(dog => {
                 const dogName = dog.naam.toLowerCase();
                 return dogName.includes(searchTerm);
-                // RAS EN STAMBOOMNR WORDEN NIET MEER GEZIEN!
             });
         }
         
@@ -481,41 +450,6 @@ class PrivateInfoManager extends BaseModule {
                 </span>
             `;
         }
-        
-        // Controleer permissies en update velden
-        this.updatePermissionsForSelectedDog();
-    }
-    
-    updatePermissionsForSelectedDog() {
-        const user = window.auth?.getCurrentUser();
-        const notesTextarea = document.getElementById('privateNotes');
-        const clearBtn = document.getElementById('clearPrivateInfoBtn');
-        const saveBtn = document.getElementById('savePrivateInfoBtn');
-        
-        if (!user || !user.permissions) {
-            // Geen gebruiker gevonden, alles uitschakelen
-            if (notesTextarea) notesTextarea.setAttribute('disabled', 'disabled');
-            if (clearBtn) clearBtn.setAttribute('disabled', 'disabled');
-            if (saveBtn) saveBtn.setAttribute('disabled', 'disabled');
-            return;
-        }
-        
-        if (user.permissions.includes('private_full')) {
-            // Volledige toegang
-            if (notesTextarea) notesTextarea.removeAttribute('disabled');
-            if (clearBtn) clearBtn.removeAttribute('disabled');
-            if (saveBtn) saveBtn.removeAttribute('disabled');
-        } else if (user.permissions.includes('private_view')) {
-            // Alleen leestoegang
-            if (notesTextarea) notesTextarea.setAttribute('disabled', 'disabled');
-            if (clearBtn) clearBtn.setAttribute('disabled', 'disabled');
-            if (saveBtn) saveBtn.setAttribute('disabled', 'disabled');
-        } else {
-            // Geen toegang
-            if (notesTextarea) notesTextarea.setAttribute('disabled', 'disabled');
-            if (clearBtn) clearBtn.setAttribute('disabled', 'disabled');
-            if (saveBtn) saveBtn.setAttribute('disabled', 'disabled');
-        }
     }
     
     async loadPrivateInfoForDog() {
@@ -533,18 +467,8 @@ class PrivateInfoManager extends BaseModule {
         this.showProgress(t('loadingInfo'));
         
         try {
-            // Controleer eerst of gebruiker toegang heeft
-            const user = window.auth?.getCurrentUser();
-            if (!user || !user.permissions) {
-                throw new Error("Geen toegang: gebruiker niet ingelogd");
-            }
-            
-            if (!user.permissions.includes('private_full') && !user.permissions.includes('private_view')) {
-                throw new Error("Geen toegang: onvoldoende rechten");
-            }
-            
-            // Haal privé info uit PRIVÉ DATABASE
-            this.currentPriveInfo = await this.db.getPriveInfoVoorStamboomnr(stamboomnr);
+            // Haal privé info uit LOKALE OPSLAG (niet uit server database)
+            this.currentPriveInfo = await this.getLocalPrivateInfo(stamboomnr);
             
             this.hideProgress();
             this.displayPrivateInfo();
@@ -562,13 +486,21 @@ class PrivateInfoManager extends BaseModule {
                 this.currentPriveInfo = null;
                 this.displayPrivateInfo();
                 this.showInfo(t('noInfoFound'));
-            } else if (error.message.includes('Geen toegang')) {
-                this.showError(error.message);
-                this.disableAllFields();
             } else {
                 this.showError(`${t('loadFailed')}${error.message}`);
             }
         }
+    }
+    
+    async getLocalPrivateInfo(stamboomnr) {
+        // Haal privé info uit localStorage (lokaal opgeslagen)
+        const privateInfoKey = `private_info_${stamboomnr}`;
+        const savedInfo = localStorage.getItem(privateInfoKey);
+        
+        if (savedInfo) {
+            return JSON.parse(savedInfo);
+        }
+        return null;
     }
     
     displayPrivateInfo() {
@@ -581,18 +513,8 @@ class PrivateInfoManager extends BaseModule {
             notesTextarea.value = this.currentPriveInfo.privateNotes || '';
         }
         
-        // Update permissions na laden
-        this.updatePermissionsForSelectedDog();
-    }
-    
-    disableAllFields() {
-        const notesTextarea = document.getElementById('privateNotes');
-        const clearBtn = document.getElementById('clearPrivateInfoBtn');
-        const saveBtn = document.getElementById('savePrivateInfoBtn');
-        
-        if (notesTextarea) notesTextarea.setAttribute('disabled', 'disabled');
-        if (clearBtn) clearBtn.setAttribute('disabled', 'disabled');
-        if (saveBtn) saveBtn.setAttribute('disabled', 'disabled');
+        // Zorg ervoor dat textarea altijd beschikbaar is
+        notesTextarea.removeAttribute('disabled');
     }
     
     updatePrivateInfoHeader(dog) {
@@ -609,13 +531,6 @@ class PrivateInfoManager extends BaseModule {
     async savePrivateInfo() {
         const t = this.t.bind(this);
         
-        // Controleer permissions
-        const user = window.auth?.getCurrentUser();
-        if (!user || !user.permissions?.includes('private_full')) {
-            this.showError("U heeft geen rechten om privé informatie op te slaan");
-            return;
-        }
-        
         const dogId = document.getElementById('selectedDogId').value;
         const stamboomnr = document.getElementById('selectedDogStamboomnr').value;
         
@@ -630,17 +545,18 @@ class PrivateInfoManager extends BaseModule {
             const priveInfo = {
                 stamboomnr: stamboomnr,
                 privateNotes: document.getElementById('privateNotes').value.trim(),
-                vertrouwelijk: true
+                savedAt: new Date().toISOString(),
+                hondId: dogId
             };
             
-            // Opslaan in PRIVÉ DATABASE
-            await this.db.bewaarPriveInfo(priveInfo);
+            // Opslaan in LOKALE OPSLAG (localStorage)
+            await this.saveLocalPrivateInfo(stamboomnr, priveInfo);
             
             this.hideProgress();
             this.showSuccess(t('saveSuccess'));
             
             // Herlaad de info na opslaan
-            this.currentPriveInfo = await this.db.getPriveInfoVoorStamboomnr(stamboomnr);
+            this.currentPriveInfo = await this.getLocalPrivateInfo(stamboomnr);
             this.displayPrivateInfo();
             
         } catch (error) {
@@ -649,15 +565,17 @@ class PrivateInfoManager extends BaseModule {
         }
     }
     
+    async saveLocalPrivateInfo(stamboomnr, priveInfo) {
+        // Sla privé info op in localStorage (lokaal opgeslagen)
+        const privateInfoKey = `private_info_${stamboomnr}`;
+        localStorage.setItem(privateInfoKey, JSON.stringify(priveInfo));
+        
+        // Update ook in-memory cache
+        this.currentPriveInfo = priveInfo;
+    }
+    
     clearPrivateInfo() {
         const t = this.t.bind(this);
-        
-        // Controleer permissions
-        const user = window.auth?.getCurrentUser();
-        if (!user || !user.permissions?.includes('private_full')) {
-            this.showError("U heeft geen rechten om privé informatie te wissen");
-            return;
-        }
         
         if (!confirm(t('clearConfirm'))) {
             return;
@@ -671,27 +589,22 @@ class PrivateInfoManager extends BaseModule {
     async backupPrivateInfo() {
         const t = this.t.bind(this);
         
-        // Controleer permissions
-        const user = window.auth?.getCurrentUser();
-        if (!user || !user.permissions?.includes('private_full')) {
-            this.showError("U heeft geen rechten om backups te maken");
-            return;
-        }
-        
         this.showProgress(t('makingBackup'));
         
         try {
-            const allPriveInfo = await this.db.getAllPriveInfo();
+            // Haal alle privé info op uit localStorage
+            const allPriveInfo = this.getAllLocalPrivateInfo();
             
             const backupData = {
                 backupDatum: new Date().toISOString(),
                 aantalRecords: allPriveInfo.length,
+                appNaam: "Honden Registratie Prive Info",
                 data: allPriveInfo
             };
             
             const jsonString = JSON.stringify(backupData, null, 2);
             const blob = new Blob([jsonString], { type: 'application/json' });
-            const filename = `prive-info-backup-${new Date().toISOString().split('T')[0]}.json`;
+            const filename = `honden-prive-info-backup-${new Date().toISOString().split('T')[0]}.json`;
             
             this.downloadFile(blob, filename);
             this.hideProgress();
@@ -703,15 +616,29 @@ class PrivateInfoManager extends BaseModule {
         }
     }
     
+    getAllLocalPrivateInfo() {
+        // Haal alle privé info op uit localStorage
+        const allPrivateInfo = [];
+        const keys = Object.keys(localStorage);
+        
+        keys.forEach(key => {
+            if (key.startsWith('private_info_')) {
+                try {
+                    const info = JSON.parse(localStorage.getItem(key));
+                    if (info && info.stamboomnr) {
+                        allPrivateInfo.push(info);
+                    }
+                } catch (error) {
+                    console.error(`Fout bij lezen van ${key}:`, error);
+                }
+            }
+        });
+        
+        return allPrivateInfo;
+    }
+    
     async restorePrivateInfo() {
         const t = this.t.bind(this);
-        
-        // Controleer permissions
-        const user = window.auth?.getCurrentUser();
-        if (!user || !user.permissions?.includes('private_full')) {
-            this.showError("U heeft geen rechten om backups te herstellen");
-            return;
-        }
         
         const input = document.createElement('input');
         input.type = 'file';
@@ -737,24 +664,19 @@ class PrivateInfoManager extends BaseModule {
                     
                     this.showProgress(t('restoring'));
                     
-                    const priveInfoData = backupData.data.map(item => ({
-                        stamboomnr: item.stamboomnr,
-                        privateNotes: item.privateNotes || '',
-                        vertrouwelijk: true
-                    }));
+                    const priveInfoData = backupData.data;
                     
                     let successCount = 0;
                     let errorCount = 0;
                     
                     for (const info of priveInfoData) {
                         try {
-                            // Verifieer dat de hond bestaat voordat we privé info toevoegen
-                            const hond = await this.db.getHondByStamboomnr(info.stamboomnr);
-                            if (hond) {
-                                await this.db.bewaarPriveInfo(info);
+                            if (info.stamboomnr) {
+                                // Opslaan in localStorage
+                                const privateInfoKey = `private_info_${info.stamboomnr}`;
+                                localStorage.setItem(privateInfoKey, JSON.stringify(info));
                                 successCount++;
                             } else {
-                                console.warn(`Hond met stamboomnr ${info.stamboomnr} niet gevonden, overslaan...`);
                                 errorCount++;
                             }
                         } catch (error) {
@@ -769,6 +691,15 @@ class PrivateInfoManager extends BaseModule {
                         this.showInfo(`${successCount} records hersteld, ${errorCount} mislukt`);
                     } else {
                         this.showSuccess(t('restoreSuccess'));
+                    }
+                    
+                    // Herlaad eventueel huidige info als we die hebben geopend
+                    if (this.currentHondId) {
+                        const stamboomnr = document.getElementById('selectedDogStamboomnr').value;
+                        if (stamboomnr) {
+                            this.currentPriveInfo = await this.getLocalPrivateInfo(stamboomnr);
+                            this.displayPrivateInfo();
+                        }
                     }
                     
                 } catch (error) {
@@ -801,7 +732,7 @@ class PrivateInfoManager extends BaseModule {
     
     // Helper methoden voor notificaties
     showProgress(message) {
-        // Implementeer een progress indicator zoals een spinner of toast
+        // Implementeer een progress indicator
         console.log('Progress:', message);
         // Voorbeeld: this.showToast(message, 'info');
     }
