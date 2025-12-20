@@ -166,7 +166,7 @@ class PhotoManager extends BaseModule {
                 // Meldungen
                 selectDogFirst: "Wählen Sie zuerst einen Hund",
                 selectPhotoFirst: "Wählen Sie zuerst ein Foto",
-                fileTooLarge: "Datei ist zu groß (maximal 5MB)",
+                fileTooLarge: "Datei ist zu groot (maximal 5MB)",
                 invalidType: "Ungültiger Dateityp. Nur JPG, PNG und GIF sind erlaubt",
                 uploading: "Foto wird hochgeladen...",
                 uploadSuccess: "Foto erfolgreich hochgeladen!",
@@ -178,7 +178,7 @@ class PhotoManager extends BaseModule {
                 deleting: "Foto wird gelöscht...",
                 deleteSuccess: "Foto erfolgreich gelöscht!",
                 deleteFailed: "Löschen fehlgeschlagen: ",
-                photoNotFound: "Foto nicht gefunden",
+                photoNotFound: "Foto nicht gefonden",
                 loadDetailsFailed: "Fehler beim Laden der Fotodetails: "
             }
         };
@@ -412,14 +412,11 @@ class PhotoManager extends BaseModule {
             await this.loadDogsData();
         }
         
+        // ALLEEN ZOEKEN OP NAAM VAN DE HOND
         this.filteredDogs = this.allDogs.filter(dog => {
             const dogName = dog.naam.toLowerCase();
-            const dogBreed = dog.ras ? dog.ras.toLowerCase() : '';
-            const pedigree = dog.stamboomnr ? dog.stamboomnr.toLowerCase() : '';
-            
-            return dogName.includes(searchTerm) || 
-                   dogBreed.includes(searchTerm) ||
-                   pedigree.includes(searchTerm);
+            // ALLEEN OP NAAM ZOEKEN - GEEN RAS OF STAMBOOMNR MEER
+            return dogName.includes(searchTerm);
         });
         
         this.updateDropdownMenu();
