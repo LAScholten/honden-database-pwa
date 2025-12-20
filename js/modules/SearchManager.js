@@ -1,6 +1,6 @@
 /**
  * Search Manager Module
- * Beheert het zoeken naar honden met autocomplete functionaliteit
+ * Beheert het zoeken naar honden met real-time filtering op naam
  */
 
 class SearchManager extends BaseModule {
@@ -19,6 +19,7 @@ class SearchManager extends BaseModule {
                 searchName: "Zoek op hond naam",
                 searchPlaceholder: "Typ hond naam...",
                 noDogsFound: "Geen honden gevonden",
+                typeToSearch: "Begin met typen om te zoeken",
                 
                 // Resultaten
                 searchResults: "Zoekresultaten",
@@ -35,6 +36,9 @@ class SearchManager extends BaseModule {
                 father: "Vader",
                 mother: "Moeder",
                 parentsUnknown: "Onbekend",
+                male: "Reu",
+                female: "Teef",
+                unknown: "Onbekend",
                 
                 // Alerts
                 loading: "Honden laden...",
@@ -49,6 +53,7 @@ class SearchManager extends BaseModule {
                 searchName: "Search by dog name",
                 searchPlaceholder: "Type dog name...",
                 noDogsFound: "No dogs found",
+                typeToSearch: "Start typing to search",
                 
                 // Results
                 searchResults: "Search Results",
@@ -65,6 +70,9 @@ class SearchManager extends BaseModule {
                 father: "Father",
                 mother: "Mother",
                 parentsUnknown: "Unknown",
+                male: "Male",
+                female: "Female",
+                unknown: "Unknown",
                 
                 // Alerts
                 loading: "Loading dogs...",
@@ -79,6 +87,7 @@ class SearchManager extends BaseModule {
                 searchName: "Nach Hundenamen suchen",
                 searchPlaceholder: "Hundenamen eingeben...",
                 noDogsFound: "Keine Hunde gefunden",
+                typeToSearch: "Beginnen Sie mit der Eingabe, um zu suchen",
                 
                 // Ergebnisse
                 searchResults: "Suchergebnisse",
@@ -95,6 +104,9 @@ class SearchManager extends BaseModule {
                 father: "Vater",
                 mother: "Mutter",
                 parentsUnknown: "Unbekannt",
+                male: "Rüde",
+                female: "Hündin",
+                unknown: "Unbekannt",
                 
                 // Meldungen
                 loading: "Hunde laden...",
@@ -137,18 +149,17 @@ class SearchManager extends BaseModule {
                                 <div class="card-body">
                                     <div class="mb-3">
                                         <label for="searchNameInput" class="form-label">${t('searchName')}</label>
-                                        <input type="text" class="form-control" id="searchNameInput" 
+                                        <input type="text" class="form-control search-input" id="searchNameInput" 
                                                placeholder="${t('searchPlaceholder')}" autocomplete="off">
-                                        <div class="form-text">Begin te typen om honden te vinden</div>
+                                        <div class="form-text">Zoekt alleen op hondennaam, vanaf 1 letter</div>
                                     </div>
-                                    <div id="autocompleteDropdown" class="autocomplete-dropdown" style="display: none;"></div>
                                 </div>
                             </div>
                             
                             <div id="searchResultsContainer">
                                 <div class="text-center py-5">
                                     <i class="bi bi-search display-1 text-muted"></i>
-                                    <p class="mt-3 text-muted">${t('searchPlaceholder')}</p>
+                                    <p class="mt-3 text-muted">${t('typeToSearch')}</p>
                                 </div>
                             </div>
                         </div>
@@ -160,44 +171,71 @@ class SearchManager extends BaseModule {
             </div>
             
             <style>
-                .autocomplete-dropdown {
-                    position: absolute;
-                    background: white;
-                    border: 1px solid #ddd;
-                    border-radius: 4px;
-                    max-height: 200px;
-                    overflow-y: auto;
-                    width: calc(100% - 30px);
-                    z-index: 1000;
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                .search-input {
+                    font-size: 1.1rem;
+                    padding: 12px;
+                    border: 2px solid #dee2e6;
+                    transition: all 0.3s;
                 }
                 
-                .autocomplete-item {
-                    padding: 10px;
+                .search-input:focus {
+                    border-color: #0d6efd;
+                    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+                }
+                
+                .dog-result-card {
                     cursor: pointer;
-                    border-bottom: 1px solid #f0f0f0;
+                    transition: all 0.2s;
+                    border: 1px solid #dee2e6;
+                    margin-bottom: 10px;
                 }
                 
-                .autocomplete-item:hover {
-                    background-color: #f8f9fa;
-                }
-                
-                .autocomplete-item .dog-name {
-                    font-weight: bold;
-                }
-                
-                .autocomplete-item .dog-info {
-                    font-size: 0.85em;
-                    color: #666;
-                }
-                
-                .dog-details-card {
-                    transition: transform 0.2s;
-                }
-                
-                .dog-details-card:hover {
+                .dog-result-card:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                    border-color: #0d6efd;
+                }
+                
+                .dog-result-card .card-body {
+                    padding: 15px;
+                }
+                
+                .dog-name {
+                    font-size: 1.2rem;
+                    font-weight: bold;
+                    color: #0d6efd;
+                }
+                
+                .dog-info {
+                    color: #6c757d;
+                    font-size: 0.9rem;
+                }
+                
+                .dog-badge {
+                    font-size: 0.8rem;
+                    padding: 4px 8px;
+                }
+                
+                .search-stats {
+                    font-size: 0.9rem;
+                    color: #6c757d;
+                    margin-bottom: 15px;
+                }
+                
+                .back-btn {
+                    margin-bottom: 20px;
+                }
+                
+                .details-section {
+                    background: #f8f9fa;
+                    border-radius: 8px;
+                    padding: 15px;
+                    margin-bottom: 15px;
+                }
+                
+                .parents-info {
+                    background: #e8f4fd;
+                    border-left: 4px solid #0d6efd;
                 }
             </style>
         `;
@@ -218,88 +256,24 @@ class SearchManager extends BaseModule {
             }
         });
         
-        // Filter honden bij elke toetsaanslag met autocomplete
+        // Filter honden bij ELKE toetsaanslag (vanaf 1 letter)
         searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase().trim();
             
-            // Toon autocomplete dropdown
-            this.showAutocomplete(searchTerm);
-            
-            // Filter honden voor resultaten
-            if (searchTerm.length >= 2) {
-                this.filterDogs(searchTerm);
+            if (searchTerm.length >= 1) {
+                this.filterDogsByName(searchTerm);
             } else {
                 this.showInitialView();
             }
         });
         
-        // Klik buiten de autocomplete dropdown om te verbergen
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('#autocompleteDropdown') && !e.target.closest('#searchNameInput')) {
-                this.hideAutocomplete();
+        // Enter toets om eerste resultaat te selecteren
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && this.filteredDogs.length > 0) {
+                e.preventDefault();
+                this.showDogDetails(this.filteredDogs[0]);
             }
         });
-    }
-    
-    showAutocomplete(searchTerm) {
-        const dropdown = document.getElementById('autocompleteDropdown');
-        if (!dropdown) return;
-        
-        if (!searchTerm || searchTerm.length < 2) {
-            dropdown.style.display = 'none';
-            return;
-        }
-        
-        // Filter honden voor autocomplete
-        const suggestions = this.allDogs.filter(dog => {
-            const dogName = dog.naam.toLowerCase();
-            const dogBreed = dog.ras ? dog.ras.toLowerCase() : '';
-            const pedigree = dog.stamboomnr ? dog.stamboomnr.toLowerCase() : '';
-            
-            return dogName.includes(searchTerm) || 
-                   dogBreed.includes(searchTerm) ||
-                   pedigree.includes(searchTerm);
-        }).slice(0, 10); // Max 10 suggesties
-        
-        if (suggestions.length === 0) {
-            dropdown.style.display = 'none';
-            return;
-        }
-        
-        let html = '';
-        suggestions.forEach(dog => {
-            html += `
-                <div class="autocomplete-item" data-id="${dog.id}">
-                    <div class="dog-name">${dog.naam}</div>
-                    <div class="dog-info">
-                        ${dog.ras || 'Onbekend ras'} | ${dog.stamboomnr || 'Geen stamboom'}
-                    </div>
-                </div>
-            `;
-        });
-        
-        dropdown.innerHTML = html;
-        dropdown.style.display = 'block';
-        
-        // Event listeners voor autocomplete items
-        dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                const dogId = item.getAttribute('data-id');
-                const dog = this.allDogs.find(d => d.id === parseInt(dogId));
-                if (dog) {
-                    document.getElementById('searchNameInput').value = dog.naam;
-                    this.hideAutocomplete();
-                    this.showDogDetails(dog);
-                }
-            });
-        });
-    }
-    
-    hideAutocomplete() {
-        const dropdown = document.getElementById('autocompleteDropdown');
-        if (dropdown) {
-            dropdown.style.display = 'none';
-        }
     }
     
     showInitialView() {
@@ -309,8 +283,7 @@ class SearchManager extends BaseModule {
         container.innerHTML = `
             <div class="text-center py-5">
                 <i class="bi bi-search display-1 text-muted"></i>
-                <p class="mt-3 text-muted">${t('searchPlaceholder')}</p>
-                <small class="text-muted">Typ minstens 2 letters om te zoeken</small>
+                <p class="mt-3 text-muted">${t('typeToSearch')}</p>
             </div>
         `;
     }
@@ -331,15 +304,13 @@ class SearchManager extends BaseModule {
         }
     }
     
-    filterDogs(searchTerm = '') {
+    filterDogsByName(searchTerm = '') {
+        // Zoek ALLEEN op naam (NIET op ras of stamboomnummer)
         this.filteredDogs = this.allDogs.filter(dog => {
-            const dogName = dog.naam.toLowerCase();
-            const dogBreed = dog.ras ? dog.ras.toLowerCase() : '';
-            const pedigree = dog.stamboomnr ? dog.stamboomnr.toLowerCase() : '';
+            const dogName = dog.naam ? dog.naam.toLowerCase() : '';
             
-            return dogName.includes(searchTerm) || 
-                   dogBreed.includes(searchTerm) ||
-                   pedigree.includes(searchTerm);
+            // Check of de naam de zoekterm bevat
+            return dogName.includes(searchTerm);
         });
         
         this.displaySearchResults();
@@ -355,64 +326,59 @@ class SearchManager extends BaseModule {
                 <div class="text-center py-5">
                     <i class="bi bi-search display-1 text-muted"></i>
                     <p class="mt-3 text-muted">${t('noDogsFound')}</p>
+                    <small class="text-muted">Geen honden gevonden met deze naam</small>
                 </div>
             `;
             return;
         }
         
         let html = `
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0">${t('searchResults')} (${this.filteredDogs.length} ${t('found')})</h6>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>${t('name')}</th>
-                                    <th>${t('pedigreeNumber')}</th>
-                                    <th>${t('breed')}</th>
-                                    <th>${t('gender')}</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody>
+            <div class="search-stats">
+                <strong>${t('searchResults')}:</strong> ${this.filteredDogs.length} ${t('found')}
+            </div>
+            
+            <div class="row">
         `;
         
         this.filteredDogs.forEach(dog => {
             const genderText = dog.geslacht === 'reuen' ? t('male') : 
-                             dog.geslacht === 'teven' ? t('female') : '-';
+                             dog.geslacht === 'teven' ? t('female') : t('unknown');
+            const genderClass = dog.geslacht === 'reuen' ? 'bg-primary' : 
+                              dog.geslacht === 'teven' ? 'bg-danger' : 'bg-secondary';
             
             html += `
-                <tr>
-                    <td><strong>${dog.naam}</strong></td>
-                    <td><code>${dog.stamboomnr || '-'}</code></td>
-                    <td>${dog.ras || '-'}</td>
-                    <td>${genderText}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary view-dog-btn" data-id="${dog.id}">
-                            <i class="bi bi-eye"></i> ${t('view')}
-                        </button>
-                    </td>
-                </tr>
+                <div class="col-md-6 mb-3">
+                    <div class="card dog-result-card" data-id="${dog.id}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="dog-name">${dog.naam}</div>
+                                    <div class="dog-info mt-2">
+                                        <div><strong>${t('breed')}:</strong> ${dog.ras || '-'}</div>
+                                        <div><strong>${t('pedigreeNumber')}:</strong> ${dog.stamboomnr || '-'}</div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="badge ${genderClass} dog-badge">${genderText}</span>
+                                </div>
+                            </div>
+                            <div class="mt-3 text-end">
+                                <small class="text-muted">Klik om details te zien</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             `;
         });
         
-        html += `
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        `;
+        html += `</div>`;
         
         container.innerHTML = html;
         
-        // Event listeners voor view knoppen
-        document.querySelectorAll('.view-dog-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const hondId = e.target.closest('.view-dog-btn').dataset.id;
+        // Event listeners voor ALLE hond kaarten
+        document.querySelectorAll('.dog-result-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const hondId = card.getAttribute('data-id');
                 this.viewDog(hondId);
             });
         });
@@ -442,14 +408,18 @@ class SearchManager extends BaseModule {
         if (!container) return;
         
         // Zoek ouders in database
-        let fatherInfo = t('parentsUnknown');
-        let motherInfo = t('parentsUnknown');
+        let fatherInfo = { naam: t('parentsUnknown'), stamboomnr: '' };
+        let motherInfo = { naam: t('parentsUnknown'), stamboomnr: '' };
         
         if (dog.vaderId) {
             try {
                 const father = this.allDogs.find(d => d.id === dog.vaderId);
                 if (father) {
-                    fatherInfo = `${father.naam} (${father.stamboomnr || 'Geen stamboom'})`;
+                    fatherInfo = { 
+                        naam: father.naam, 
+                        stamboomnr: father.stamboomnr || 'Geen stamboom',
+                        id: father.id
+                    };
                 }
             } catch (error) {
                 console.error('Fout bij laden vader:', error);
@@ -460,7 +430,11 @@ class SearchManager extends BaseModule {
             try {
                 const mother = this.allDogs.find(d => d.id === dog.moederId);
                 if (mother) {
-                    motherInfo = `${mother.naam} (${mother.stamboomnr || 'Geen stamboom'})`;
+                    motherInfo = { 
+                        naam: mother.naam, 
+                        stamboomnr: mother.stamboomnr || 'Geen stamboom',
+                        id: mother.id
+                    };
                 }
             } catch (error) {
                 console.error('Fout bij laden moeder:', error);
@@ -470,7 +444,7 @@ class SearchManager extends BaseModule {
         const html = `
             <div class="row">
                 <div class="col-12 mb-3">
-                    <button class="btn btn-sm btn-outline-secondary mb-3" id="backToSearchBtn">
+                    <button class="btn btn-sm btn-outline-secondary back-btn" id="backToSearchBtn">
                         <i class="bi bi-arrow-left"></i> Terug naar zoeken
                     </button>
                 </div>
@@ -480,7 +454,7 @@ class SearchManager extends BaseModule {
                 <div class="col-md-8">
                     <div class="card dog-details-card">
                         <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">${t('dogDetails')}</h5>
+                            <h5 class="mb-0">${t('dogDetails')}: ${dog.naam}</h5>
                         </div>
                         <div class="card-body">
                             <div class="row mb-4">
@@ -488,7 +462,7 @@ class SearchManager extends BaseModule {
                                     <h4><strong>${dog.naam}</strong></h4>
                                     <div class="mb-2">
                                         <span class="badge bg-info">${dog.ras || 'Onbekend ras'}</span>
-                                        <span class="badge bg-secondary ms-2">${dog.geslacht || 'Onbekend'}</span>
+                                        <span class="badge bg-secondary ms-2">${dog.geslacht === 'reuen' ? t('male') : dog.geslacht === 'teven' ? t('female') : t('unknown')}</span>
                                     </div>
                                 </div>
                                 <div class="col-md-6 text-end">
@@ -498,29 +472,31 @@ class SearchManager extends BaseModule {
                             
                             <div class="row">
                                 <div class="col-md-6">
-                                    <div class="card">
+                                    <div class="card parents-info">
                                         <div class="card-header bg-light">
                                             <h6 class="mb-0">${t('father')}</h6>
                                         </div>
                                         <div class="card-body">
-                                            <p class="mb-0">${fatherInfo}</p>
+                                            <p class="mb-0">${fatherInfo.naam}</p>
+                                            ${fatherInfo.stamboomnr ? `<small class="text-muted">${fatherInfo.stamboomnr}</small>` : ''}
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="card">
+                                    <div class="card parents-info">
                                         <div class="card-header bg-light">
                                             <h6 class="mb-0">${t('mother')}</h6>
                                         </div>
                                         <div class="card-body">
-                                            <p class="mb-0">${motherInfo}</p>
+                                            <p class="mb-0">${motherInfo.naam}</p>
+                                            ${motherInfo.stamboomnr ? `<small class="text-muted">${motherInfo.stamboomnr}</small>` : ''}
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             
                             ${dog.opmerkingen ? `
-                            <div class="mt-4">
+                            <div class="mt-4 details-section">
                                 <h6>Opmerkingen:</h6>
                                 <p class="text-muted">${dog.opmerkingen}</p>
                             </div>
@@ -568,8 +544,8 @@ class SearchManager extends BaseModule {
         // Event listener voor terug knop
         document.getElementById('backToSearchBtn').addEventListener('click', () => {
             const searchTerm = document.getElementById('searchNameInput').value;
-            if (searchTerm && searchTerm.length >= 2) {
-                this.filterDogs(searchTerm.toLowerCase());
+            if (searchTerm && searchTerm.length >= 1) {
+                this.filterDogsByName(searchTerm.toLowerCase());
             } else {
                 this.showInitialView();
             }
