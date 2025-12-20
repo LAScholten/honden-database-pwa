@@ -289,7 +289,7 @@
                 security: "Sicherheit",
                 roleBasedAccess: "Die App verwendet rollenbasierte Zugriffe:",
                 adminRole: "Administrator (admin/admin123)",
-                adminRights: "Volle Rechte, einschließlich neuer Hunde hinzufügen.",
+                adminRights: "Volle Rechte, inclusief nieuwe honden toevoegen.",
                 userRole: "Benutzer (user/user123)",
                 userRights: "Kann Daten importieren/exportieren und bearbeiten, aber keine neuen Hunde hinzufügen."
             }
@@ -343,8 +343,8 @@
             window.location.href = 'index.html';
         }
         
-        // Initialiseer UI Handler - MOET HIER STAAN
-        const ui = new UIHandler();
+        // **FIX: We moeten wachten tot de UIHandler geladen is voordat we deze initialiseren**
+        // Dit gebeurt automatisch door het script tag
         
         // Initialiseer taal
         translateAppPage(appLanguage);
@@ -353,54 +353,63 @@
         document.getElementById('currentUser').textContent = 
             `${auth.getCurrentUser().username} (${auth.isAdmin() ? 'Admin' : 'Gebruiker'})`;
         
-        // Event Listeners voor menu knoppen
-        document.getElementById('dataManagementBtn').addEventListener('click', () => {
-            ui.showModal('data');
+        // **BELANGRIJK: We moeten wachten tot de pagina volledig geladen is**
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialiseer UI Handler
+            const ui = new UIHandler();
+            window.appUI = ui; // Maak globaal beschikbaar voor debugging
+            
+            // Event Listeners voor menu knoppen
+            document.getElementById('dataManagementBtn').addEventListener('click', () => {
+                ui.showModal('data');
+            });
+            
+            document.getElementById('addDogBtn').addEventListener('click', () => {
+                ui.showModal('addDog');
+            });
+            
+            document.getElementById('editDogDataBtn').addEventListener('click', () => {
+                ui.showModal('editDogData');
+            });
+            
+            document.getElementById('searchBtn').addEventListener('click', () => {
+                ui.showModal('search');
+            });
+            
+            document.getElementById('photoGalleryBtn').addEventListener('click', () => {
+                ui.showModal('photos');
+            });
+            
+            document.getElementById('breedingPlanBtn').addEventListener('click', () => {
+                ui.showModal('breeding');
+            });
+            
+            document.getElementById('privateInfoBtn').addEventListener('click', () => {
+                ui.showModal('private');
+            });
+            
+            // Uitloggen
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                auth.logout();
+            });
+            
+            // Vernieuw statistieken
+            document.getElementById('refreshStatsBtn').addEventListener('click', async () => {
+                try {
+                    const stats = await db.getStatistieken();
+                    document.getElementById('quickStatsHonden').textContent = stats.totaalHonden;
+                    document.getElementById('quickStatsFotos').textContent = stats.totaalFotos;
+                    ui.showSuccess('Statistieken vernieuwd!');
+                } catch (error) {
+                    ui.showError('Fout bij laden statistieken');
+                }
+            });
+            
+            // Laad initiële statistieken
+            loadInitialStats();
         });
         
-        document.getElementById('addDogBtn').addEventListener('click', () => {
-            ui.showModal('addDog');
-        });
-        
-        document.getElementById('editDogDataBtn').addEventListener('click', () => {
-            ui.showModal('editDogData');
-        });
-        
-        document.getElementById('searchBtn').addEventListener('click', () => {
-            ui.showModal('search');
-        });
-        
-        document.getElementById('photoGalleryBtn').addEventListener('click', () => {
-            ui.showModal('photos');
-        });
-        
-        document.getElementById('breedingPlanBtn').addEventListener('click', () => {
-            ui.showModal('breeding');
-        });
-        
-        document.getElementById('privateInfoBtn').addEventListener('click', () => {
-            ui.showModal('private');
-        });
-        
-        // Uitloggen
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            auth.logout();
-        });
-        
-        // Vernieuw statistieken
-        document.getElementById('refreshStatsBtn').addEventListener('click', async () => {
-            try {
-                const stats = await db.getStatistieken();
-                document.getElementById('quickStatsHonden').textContent = stats.totaalHonden;
-                document.getElementById('quickStatsFotos').textContent = stats.totaalFotos;
-                ui.showSuccess('Statistieken vernieuwd!');
-            } catch (error) {
-                ui.showError('Fout bij laden statistieken');
-            }
-        });
-        
-        // Laad initiële statistieken
-        window.addEventListener('load', async () => {
+        async function loadInitialStats() {
             try {
                 await db.init();
                 const stats = await db.getStatistieken();
@@ -409,7 +418,7 @@
             } catch (error) {
                 console.error('Fout bij initialiseren:', error);
             }
-        });
+        }
         
         // Service Worker registratie voor PWA
         if ('serviceWorker' in navigator) {
@@ -443,6 +452,22 @@
                 }
             }, 100);
         });
+        
+        // **NOODFIX: Directe event listener als backup**
+        setTimeout(() => {
+            const editBtn = document.getElementById('editDogDataBtn');
+            if (editBtn) {
+                editBtn.addEventListener('click', function() {
+                    console.log('Noodfix: editDogDataBtn geklikt');
+                    // Controleer of UIHandler bestaat
+                    if (window.appUI) {
+                        window.appUI.showModal('editDogData');
+                    } else {
+                        alert('Module nog niet beschikbaar. UIHandler niet gevonden.');
+                    }
+                });
+            }
+        }, 1000);
     </script>
 </body>
 </html>

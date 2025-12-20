@@ -13,6 +13,7 @@ class UIHandler {
         this.modules = {
             data: new DataManager(),
             dog: new DogManager(),
+            editDogData: new DogDataManager(), // Nieuwe module toegevoegd
             photo: new PhotoManager(),
             breeding: new BreedingManager(),
             private: new PrivateInfoManager()
@@ -94,6 +95,11 @@ class UIHandler {
                 modalId = 'addDogModal';
                 break;
                 
+            case 'editDogData': // Nieuwe case toegevoegd
+                modalHTML = this.modules.editDogData.getModalHTML();
+                modalId = 'dogDataModal';
+                break;
+                
             case 'search':
                 modalHTML = this.modules.dog.getSearchModalHTML();
                 modalId = 'searchModal';
@@ -116,6 +122,7 @@ class UIHandler {
                 
             default:
                 console.error('Onbekend modal type:', modalType);
+                this.showError(`Modal type '${modalType}' niet herkend. Beschikbare modules: ${Object.keys(this.modules).join(', ')}`);
                 return;
         }
         
@@ -149,39 +156,56 @@ class UIHandler {
             });
             
             this.currentModal = modalId;
+        } else {
+            console.error('Modal element niet gevonden:', modalId);
+            this.showError(`Kon modal '${modalId}' niet laden. Probeer opnieuw.`);
         }
     }
     
     setupModalEvents(modalType) {
         setTimeout(() => {
-            switch (modalType) {
-                case 'data':
-                    this.modules.data.setupEvents();
-                    this.modules.data.loadDatabaseStats();
-                    break;
-                    
-                case 'addDog':
-                    this.modules.dog.setupEvents();
-                    break;
-                    
-                case 'search':
-                    this.modules.dog.setupSearchEvents();
-                    break;
-                    
-                case 'photos':
-                    this.modules.photo.setupEvents();
-                    this.modules.photo.loadPhotosData();
-                    break;
-                    
-                case 'breeding':
-                    this.modules.breeding.setupEvents();
-                    this.modules.breeding.loadBreedingData();
-                    break;
-                    
-                case 'private':
-                    this.modules.private.setupEvents();
-                    this.modules.private.loadPrivateInfoData();
-                    break;
+            try {
+                switch (modalType) {
+                    case 'data':
+                        this.modules.data.setupEvents();
+                        this.modules.data.loadDatabaseStats();
+                        break;
+                        
+                    case 'addDog':
+                        this.modules.dog.setupEvents();
+                        break;
+                        
+                    case 'editDogData': // Nieuwe case toegevoegd
+                        if (this.modules.editDogData.setupEvents) {
+                            this.modules.editDogData.setupEvents();
+                        } else {
+                            // Fallback voor placeholder module zonder setupEvents
+                            console.log('DogDataManager gebruikt placeholder functionaliteit');
+                        }
+                        break;
+                        
+                    case 'search':
+                        this.modules.dog.setupSearchEvents();
+                        break;
+                        
+                    case 'photos':
+                        this.modules.photo.setupEvents();
+                        this.modules.photo.loadPhotosData();
+                        break;
+                        
+                    case 'breeding':
+                        this.modules.breeding.setupEvents();
+                        this.modules.breeding.loadBreedingData();
+                        break;
+                        
+                    case 'private':
+                        this.modules.private.setupEvents();
+                        this.modules.private.loadPrivateInfoData();
+                        break;
+                }
+            } catch (error) {
+                console.error(`Fout bij setup events voor ${modalType}:`, error);
+                this.showError(`Fout bij laden van ${modalType}: ${error.message}`);
             }
         }, 100); // Kleine delay om DOM te laten laden
     }
