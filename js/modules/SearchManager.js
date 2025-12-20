@@ -30,6 +30,12 @@ class SearchManager extends BaseModule {
                 view: "Bekijken",
                 close: "Sluiten",
                 
+                // Honden details
+                dogDetails: "Hond Details",
+                father: "Vader",
+                mother: "Moeder",
+                parentsUnknown: "Onbekend",
+                
                 // Alerts
                 loading: "Honden laden...",
                 loadFailed: "Laden mislukt: "
@@ -54,6 +60,12 @@ class SearchManager extends BaseModule {
                 view: "View",
                 close: "Close",
                 
+                // Dog details
+                dogDetails: "Dog Details",
+                father: "Father",
+                mother: "Mother",
+                parentsUnknown: "Unknown",
+                
                 // Alerts
                 loading: "Loading dogs...",
                 loadFailed: "Loading failed: "
@@ -77,6 +89,12 @@ class SearchManager extends BaseModule {
                 gender: "Geschlecht",
                 view: "Ansehen",
                 close: "Schließen",
+                
+                // Hundedetails
+                dogDetails: "Hund Details",
+                father: "Vater",
+                mother: "Mutter",
+                parentsUnknown: "Unbekannt",
                 
                 // Meldungen
                 loading: "Hunde laden...",
@@ -121,7 +139,9 @@ class SearchManager extends BaseModule {
                                         <label for="searchNameInput" class="form-label">${t('searchName')}</label>
                                         <input type="text" class="form-control" id="searchNameInput" 
                                                placeholder="${t('searchPlaceholder')}" autocomplete="off">
+                                        <div class="form-text">Begin te typen om honden te vinden</div>
                                     </div>
+                                    <div id="autocompleteDropdown" class="autocomplete-dropdown" style="display: none;"></div>
                                 </div>
                             </div>
                             
@@ -138,6 +158,48 @@ class SearchManager extends BaseModule {
                     </div>
                 </div>
             </div>
+            
+            <style>
+                .autocomplete-dropdown {
+                    position: absolute;
+                    background: white;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    max-height: 200px;
+                    overflow-y: auto;
+                    width: calc(100% - 30px);
+                    z-index: 1000;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                }
+                
+                .autocomplete-item {
+                    padding: 10px;
+                    cursor: pointer;
+                    border-bottom: 1px solid #f0f0f0;
+                }
+                
+                .autocomplete-item:hover {
+                    background-color: #f8f9fa;
+                }
+                
+                .autocomplete-item .dog-name {
+                    font-weight: bold;
+                }
+                
+                .autocomplete-item .dog-info {
+                    font-size: 0.85em;
+                    color: #666;
+                }
+                
+                .dog-details-card {
+                    transition: transform 0.2s;
+                }
+                
+                .dog-details-card:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                }
+            </style>
         `;
     }
     
@@ -149,19 +211,108 @@ class SearchManager extends BaseModule {
         const searchInput = document.getElementById('searchNameInput');
         if (!searchInput) return;
         
-        // Filter honden bij elke toetsaanslag
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase().trim();
-            this.filterDogs(searchTerm);
-        });
-        
-        // Bij focus, laad alle honden als nog niet geladen
+        // Laad alle honden bij focus
         searchInput.addEventListener('focus', async () => {
             if (this.allDogs.length === 0) {
                 await this.loadSearchData();
             }
-            this.filterDogs('');
         });
+        
+        // Filter honden bij elke toetsaanslag met autocomplete
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            
+            // Toon autocomplete dropdown
+            this.showAutocomplete(searchTerm);
+            
+            // Filter honden voor resultaten
+            if (searchTerm.length >= 2) {
+                this.filterDogs(searchTerm);
+            } else {
+                this.showInitialView();
+            }
+        });
+        
+        // Klik buiten de autocomplete dropdown om te verbergen
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#autocompleteDropdown') && !e.target.closest('#searchNameInput')) {
+                this.hideAutocomplete();
+            }
+        });
+    }
+    
+    showAutocomplete(searchTerm) {
+        const dropdown = document.getElementById('autocompleteDropdown');
+        if (!dropdown) return;
+        
+        if (!searchTerm || searchTerm.length < 2) {
+            dropdown.style.display = 'none';
+            return;
+        }
+        
+        // Filter honden voor autocomplete
+        const suggestions = this.allDogs.filter(dog => {
+            const dogName = dog.naam.toLowerCase();
+            const dogBreed = dog.ras ? dog.ras.toLowerCase() : '';
+            const pedigree = dog.stamboomnr ? dog.stamboomnr.toLowerCase() : '';
+            
+            return dogName.includes(searchTerm) || 
+                   dogBreed.includes(searchTerm) ||
+                   pedigree.includes(searchTerm);
+        }).slice(0, 10); // Max 10 suggesties
+        
+        if (suggestions.length === 0) {
+            dropdown.style.display = 'none';
+            return;
+        }
+        
+        let html = '';
+        suggestions.forEach(dog => {
+            html += `
+                <div class="autocomplete-item" data-id="${dog.id}">
+                    <div class="dog-name">${dog.naam}</div>
+                    <div class="dog-info">
+                        ${dog.ras || 'Onbekend ras'} | ${dog.stamboomnr || 'Geen stamboom'}
+                    </div>
+                </div>
+            `;
+        });
+        
+        dropdown.innerHTML = html;
+        dropdown.style.display = 'block';
+        
+        // Event listeners voor autocomplete items
+        dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                const dogId = item.getAttribute('data-id');
+                const dog = this.allDogs.find(d => d.id === parseInt(dogId));
+                if (dog) {
+                    document.getElementById('searchNameInput').value = dog.naam;
+                    this.hideAutocomplete();
+                    this.showDogDetails(dog);
+                }
+            });
+        });
+    }
+    
+    hideAutocomplete() {
+        const dropdown = document.getElementById('autocompleteDropdown');
+        if (dropdown) {
+            dropdown.style.display = 'none';
+        }
+    }
+    
+    showInitialView() {
+        const container = document.getElementById('searchResultsContainer');
+        const t = this.t.bind(this);
+        
+        container.innerHTML = `
+            <div class="text-center py-5">
+                <i class="bi bi-search display-1 text-muted"></i>
+                <p class="mt-3 text-muted">${t('searchPlaceholder')}</p>
+                <small class="text-muted">Typ minstens 2 letters om te zoeken</small>
+            </div>
+        `;
     }
     
     async loadSearchData() {
@@ -172,8 +323,7 @@ class SearchManager extends BaseModule {
             this.allDogs.sort((a, b) => a.naam.localeCompare(b.naam));
             this.hideProgress();
             
-            // Toon alle honden bij eerste keer laden
-            this.filterDogs('');
+            console.log(`${this.allDogs.length} honden geladen voor zoeken`);
             
         } catch (error) {
             this.hideProgress();
@@ -278,17 +428,154 @@ class SearchManager extends BaseModule {
                 return;
             }
             
-            // Roep de view functie van DogManager aan
-            if (window.uiHandler && window.uiHandler.dogManager) {
-                window.uiHandler.dogManager.viewDogDetails(hondId);
-            }
+            this.showDogDetails(hond);
             
         } catch (error) {
             this.showError(`Fout bij laden hond: ${error.message}`);
         }
     }
-
-
+    
+    async showDogDetails(dog) {
+        const t = this.t.bind(this);
+        const container = document.getElementById('searchResultsContainer');
+        
+        if (!container) return;
+        
+        // Zoek ouders in database
+        let fatherInfo = t('parentsUnknown');
+        let motherInfo = t('parentsUnknown');
+        
+        if (dog.vaderId) {
+            try {
+                const father = this.allDogs.find(d => d.id === dog.vaderId);
+                if (father) {
+                    fatherInfo = `${father.naam} (${father.stamboomnr || 'Geen stamboom'})`;
+                }
+            } catch (error) {
+                console.error('Fout bij laden vader:', error);
+            }
+        }
+        
+        if (dog.moederId) {
+            try {
+                const mother = this.allDogs.find(d => d.id === dog.moederId);
+                if (mother) {
+                    motherInfo = `${mother.naam} (${mother.stamboomnr || 'Geen stamboom'})`;
+                }
+            } catch (error) {
+                console.error('Fout bij laden moeder:', error);
+            }
+        }
+        
+        const html = `
+            <div class="row">
+                <div class="col-12 mb-3">
+                    <button class="btn btn-sm btn-outline-secondary mb-3" id="backToSearchBtn">
+                        <i class="bi bi-arrow-left"></i> Terug naar zoeken
+                    </button>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card dog-details-card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">${t('dogDetails')}</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <h4><strong>${dog.naam}</strong></h4>
+                                    <div class="mb-2">
+                                        <span class="badge bg-info">${dog.ras || 'Onbekend ras'}</span>
+                                        <span class="badge bg-secondary ms-2">${dog.geslacht || 'Onbekend'}</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <h5><code>${dog.stamboomnr || 'Geen stamboomnummer'}</code></h5>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">${t('father')}</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="mb-0">${fatherInfo}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">${t('mother')}</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="mb-0">${motherInfo}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            ${dog.opmerkingen ? `
+                            <div class="mt-4">
+                                <h6>Opmerkingen:</h6>
+                                <p class="text-muted">${dog.opmerkingen}</p>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Extra informatie</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                ${dog.geboortedatum ? `
+                                <li class="mb-2">
+                                    <strong>Geboortedatum:</strong><br>
+                                    ${dog.geboortedatum}
+                                </li>
+                                ` : ''}
+                                
+                                ${dog.kleur ? `
+                                <li class="mb-2">
+                                    <strong>Kleur:</strong><br>
+                                    ${dog.kleur}
+                                </li>
+                                ` : ''}
+                                
+                                ${dog.chipnummer ? `
+                                <li class="mb-2">
+                                    <strong>Chipnummer:</strong><br>
+                                    <code>${dog.chipnummer}</code>
+                                </li>
+                                ` : ''}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        container.innerHTML = html;
+        
+        // Event listener voor terug knop
+        document.getElementById('backToSearchBtn').addEventListener('click', () => {
+            const searchTerm = document.getElementById('searchNameInput').value;
+            if (searchTerm && searchTerm.length >= 2) {
+                this.filterDogs(searchTerm.toLowerCase());
+            } else {
+                this.showInitialView();
+            }
+        });
+    }
+}
 
 // Global export
 if (typeof window !== 'undefined') {
