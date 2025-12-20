@@ -61,25 +61,25 @@
                         <h5 class="mb-0"><i class="bi bi-menu-button"></i> <span class="app-text" data-key="menu">Menu</span></h5>
                     </div>
                     <div class="list-group list-group-flush">
-                        <button class="list-group-item list-group-item-action" id="dataManagementBtn">
+                        <button class="list-group-item list-group-item-action menu-btn" data-module="data">
                             <i class="bi bi-database-gear"></i> <span class="app-text" data-key="dataManagement">Data Beheer</span>
                         </button>
-                        <button class="list-group-item list-group-item-action" id="addDogBtn">
+                        <button class="list-group-item list-group-item-action menu-btn" data-module="addDog">
                             <i class="bi bi-plus-circle"></i> <span class="app-text" data-key="newDog">Nieuwe Hond</span>
                         </button>
-                        <button class="list-group-item list-group-item-action" id="editDogDataBtn">
+                        <button class="list-group-item list-group-item-action menu-btn" data-module="editDogData">
                             <i class="bi bi-pencil-square"></i> <span class="app-text" data-key="editDogData">Data Hond Bewerken</span>
                         </button>
-                        <button class="list-group-item list-group-item-action" id="searchBtn">
+                        <button class="list-group-item list-group-item-action menu-btn" data-module="search">
                             <i class="bi bi-search"></i> <span class="app-text" data-key="searchDog">Hond Zoeken</span>
                         </button>
-                        <button class="list-group-item list-group-item-action" id="photoGalleryBtn">
+                        <button class="list-group-item list-group-item-action menu-btn" data-module="photos">
                             <i class="bi bi-images"></i> <span class="app-text" data-key="photoGallery">Foto Galerij</span>
                         </button>
-                        <button class="list-group-item list-group-item-action" id="breedingPlanBtn">
+                        <button class="list-group-item list-group-item-action menu-btn" data-module="breeding">
                             <i class="bi bi-calendar-heart"></i> <span class="app-text" data-key="breedingPlan">Fok Planning</span>
                         </button>
-                        <button class="list-group-item list-group-item-action" id="privateInfoBtn">
+                        <button class="list-group-item list-group-item-action menu-btn" data-module="private">
                             <i class="bi bi-lock"></i> <span class="app-text" data-key="privateInfo">Privé Informatie</span>
                         </button>
                     </div>
@@ -189,125 +189,234 @@
     
     <!-- App Initialization -->
     <script>
-        // Laad taal uit localStorage
-        const appLanguage = localStorage.getItem('appLanguage') || 'nl';
+        // Controleer of gebruiker is ingelogd
+        if (!auth.isLoggedIn()) {
+            window.location.href = 'index.html';
+        }
         
-        // Taal vertalingen voor app.html
-        const appTranslations = {
-            nl: {
-                appTitle: "Hondendatabase PWA",
-                logout: "Uitloggen",
-                menu: "Menu",
-                dataManagement: "Data Beheer",
-                newDog: "Nieuwe Hond",
-                editDogData: "Data Hond Bewerken",
-                searchDog: "Hond Zoeken",
-                photoGallery: "Foto Galerij",
-                breedingPlan: "Fok Planning",
-                privateInfo: "Privé Informatie",
-                quickOverview: "Snel Overzicht",
-                dogs: "Honden",
-                photos: "Foto's",
-                refresh: "Vernieuwen",
-                dashboard: "Dashboard",
-                welcomeTitle: "Welkom bij de Hondendatabase PWA",
-                welcomeText: "Kies een optie uit het menu om te beginnen. De applicatie werkt volledig offline.",
-                aboutApp: "Over deze App",
-                appDescription: "Deze PWA (Progressive Web App) slaat alle data lokaal op in uw browser. U kunt:",
-                feature1: "Honden toevoegen en beheren",
-                feature2: "Data van honden bewerken",
-                feature3: "Foto's uploaden en bekijken",
-                feature4: "Fokplannen maken",
-                feature5: "Privé informatie bewaren",
-                feature6: "Data importeren/exporteren",
-                security: "Beveiliging",
-                roleBasedAccess: "De app gebruikt rol-gebaseerde toegang:",
-                adminRole: "Administrator (admin/admin123)",
-                adminRights: "Volledige rechten, inclusief nieuwe honden toevoegen.",
-                userRole: "Gebruiker (user/user123)",
-                userRights: "Kan data importeren/exporteren en bewerken, maar geen nieuwe honden toevoegen."
-            },
-            en: {
-                appTitle: "Dog Database PWA",
-                logout: "Logout",
-                menu: "Menu",
-                dataManagement: "Data Management",
-                newDog: "New Dog",
-                editDogData: "Edit Dog Data",
-                searchDog: "Search Dog",
-                photoGallery: "Photo Gallery",
-                breedingPlan: "Breeding Plan",
-                privateInfo: "Private Information",
-                quickOverview: "Quick Overview",
-                dogs: "Dogs",
-                photos: "Photos",
-                refresh: "Refresh",
-                dashboard: "Dashboard",
-                welcomeTitle: "Welcome to the Dog Database PWA",
-                welcomeText: "Choose an option from the menu to start. The application works completely offline.",
-                aboutApp: "About this App",
-                appDescription: "This PWA (Progressive Web App) stores all data locally in your browser. You can:",
-                feature1: "Add and manage dogs",
-                feature2: "Edit dog data",
-                feature3: "Upload and view photos",
-                feature4: "Create breeding plans",
-                feature5: "Store private information",
-                feature6: "Import/Export data",
-                security: "Security",
-                roleBasedAccess: "The app uses role-based access:",
-                adminRole: "Administrator (admin/admin123)",
-                adminRights: "Full rights, including adding new dogs.",
-                userRole: "User (user/user123)",
-                userRights: "Can import/export and edit data, but cannot add new dogs."
-            },
-            de: {
-                appTitle: "Hundedatenbank PWA",
-                logout: "Abmelden",
-                menu: "Menü",
-                dataManagement: "Datenverwaltung",
-                newDog: "Neuer Hund",
-                editDogData: "Hundedaten bearbeiten",
-                searchDog: "Hund suchen",
-                photoGallery: "Foto Galerie",
-                breedingPlan: "Zuchtplanung",
-                privateInfo: "Private Informationen",
-                quickOverview: "Schnellübersicht",
-                dogs: "Hunde",
-                photos: "Fotos",
-                refresh: "Aktualisieren",
-                dashboard: "Dashboard",
-                welcomeTitle: "Willkommen bei der Hundedatenbank PWA",
-                welcomeText: "Wählen Sie eine Option aus dem Menü, um zu beginnen. Die Anwendung funktioniert vollständig offline.",
-                aboutApp: "Über diese App",
-                appDescription: "Diese PWA (Progressive Web App) speichert alle Daten lokal in Ihrem Browser. Sie können:",
-                feature1: "Hunde hinzufügen und verwalten",
-                feature2: "Hundedaten bearbeiten",
-                feature3: "Fotos hochladen und ansehen",
-                feature4: "Zuchtpläne erstellen",
-                feature5: "Private Informationen speichern",
-                feature6: "Daten importieren/exportieren",
-                security: "Sicherheit",
-                roleBasedAccess: "Die App verwendet rollenbasierte Zugriffe:",
-                adminRole: "Administrator (admin/admin123)",
-                adminRights: "Volle Rechte, inclusief nieuwe honden toevoegen.",
-                userRole: "Benutzer (user/user123)",
-                userRights: "Kann Daten importieren/exportieren und bearbeiten, aber keine neuen Hunde hinzufügen."
+        // Globale referentie voor debugging
+        let appUI = null;
+        
+        // Initialiseer app na DOM laden
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('DOM geladen, initialiseer app...');
+            
+            // Initialiseer UI Handler
+            appUI = new UIHandler();
+            window.appUI = appUI; // Maak globaal beschikbaar
+            
+            // Test of UIHandler werkt
+            if (appUI.test) {
+                appUI.test();
             }
-        };
-
-        // Pagina tekst vertalen
-        function translateAppPage(lang) {
-            const elements = document.querySelectorAll('.app-text');
-            elements.forEach(element => {
-                const key = element.getAttribute('data-key');
-                if (appTranslations[lang] && appTranslations[lang][key]) {
-                    element.textContent = appTranslations[lang][key];
+            
+            // Toon huidige gebruiker
+            document.getElementById('currentUser').textContent = 
+                `${auth.getCurrentUser().username} (${auth.isAdmin() ? 'Admin' : 'Gebruiker'})`;
+            
+            // Setup menu event listeners (DIRECTE VERSIE)
+            setupMenuEvents();
+            
+            // Setup andere event listeners
+            setupOtherEvents();
+            
+            // Laad initiële statistieken
+            loadInitialStats();
+            
+            // Initialiseer taal
+            initLanguage();
+        });
+        
+        function setupMenuEvents() {
+            console.log('Setting up menu events...');
+            
+            // DIRECTE EVENT LISTENERS voor alle menu knoppen
+            document.querySelectorAll('.menu-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const module = this.getAttribute('data-module');
+                    console.log(`Menu knop geklikt: ${module}`);
+                    
+                    if (appUI && appUI.showModal) {
+                        appUI.showModal(module);
+                    } else {
+                        console.error('appUI.showModal niet beschikbaar!');
+                        alert('Fout: UI niet geladen. Herlaad pagina.');
+                    }
+                });
+            });
+            
+            console.log(`Menu event listeners geïnstalleerd voor ${document.querySelectorAll('.menu-btn').length} knoppen`);
+        }
+        
+        function setupOtherEvents() {
+            // Uitloggen
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                if (auth.logout) {
+                    auth.logout();
+                } else {
+                    window.location.href = 'index.html';
                 }
             });
             
-            // Update actieve vlag
+            // Vernieuw statistieken
+            document.getElementById('refreshStatsBtn').addEventListener('click', async function() {
+                try {
+                    if (db.getStatistieken) {
+                        const stats = await db.getStatistieken();
+                        document.getElementById('quickStatsHonden').textContent = stats.totaalHonden;
+                        document.getElementById('quickStatsFotos').textContent = stats.totaalFotos;
+                        if (appUI && appUI.showSuccess) {
+                            appUI.showSuccess('Statistieken vernieuwd!');
+                        }
+                    }
+                } catch (error) {
+                    console.error('Fout bij laden statistieken:', error);
+                    if (appUI && appUI.showError) {
+                        appUI.showError('Fout bij laden statistieken');
+                    }
+                }
+            });
+            
+            // Taal switcher
             document.querySelectorAll('.app-lang-btn').forEach(btn => {
-                if (btn.getAttribute('data-lang') === lang) {
+                btn.addEventListener('click', function() {
+                    const lang = this.getAttribute('data-lang');
+                    localStorage.setItem('appLanguage', lang);
+                    location.reload(); // Herlaad voor simpliciteit
+                });
+            });
+        }
+        
+        async function loadInitialStats() {
+            try {
+                if (db.init && db.getStatistieken) {
+                    await db.init();
+                    const stats = await db.getStatistieken();
+                    document.getElementById('quickStatsHonden').textContent = stats.totaalHonden;
+                    document.getElementById('quickStatsFotos').textContent = stats.totaalFotos;
+                }
+            } catch (error) {
+                console.error('Fout bij initialiseren:', error);
+            }
+        }
+        
+        function initLanguage() {
+            const appLanguage = localStorage.getItem('appLanguage') || 'nl';
+            const appTranslations = {
+                nl: {
+                    appTitle: "Hondendatabase PWA",
+                    logout: "Uitloggen",
+                    menu: "Menu",
+                    dataManagement: "Data Beheer",
+                    newDog: "Nieuwe Hond",
+                    editDogData: "Data Hond Bewerken",
+                    searchDog: "Hond Zoeken",
+                    photoGallery: "Foto Galerij",
+                    breedingPlan: "Fok Planning",
+                    privateInfo: "Privé Informatie",
+                    quickOverview: "Snel Overzicht",
+                    dogs: "Honden",
+                    photos: "Foto's",
+                    refresh: "Vernieuwen",
+                    dashboard: "Dashboard",
+                    welcomeTitle: "Welkom bij de Hondendatabase PWA",
+                    welcomeText: "Kies een optie uit het menu om te beginnen. De applicatie werkt volledig offline.",
+                    aboutApp: "Over deze App",
+                    appDescription: "Deze PWA (Progressive Web App) slaat alle data lokaal op in uw browser. U kunt:",
+                    feature1: "Honden toevoegen en beheren",
+                    feature2: "Data van honden bewerken",
+                    feature3: "Foto's uploaden en bekijken",
+                    feature4: "Fokplannen maken",
+                    feature5: "Privé informatie bewaren",
+                    feature6: "Data importeren/exporteren",
+                    security: "Beveiliging",
+                    roleBasedAccess: "De app gebruikt rol-gebaseerde toegang:",
+                    adminRole: "Administrator (admin/admin123)",
+                    adminRights: "Volledige rechten, inclusief nieuwe honden toevoegen.",
+                    userRole: "Gebruiker (user/user123)",
+                    userRights: "Kan data importeren/exporteren en bewerken, maar geen nieuwe honden toevoegen."
+                },
+                en: {
+                    appTitle: "Dog Database PWA",
+                    logout: "Logout",
+                    menu: "Menu",
+                    dataManagement: "Data Management",
+                    newDog: "New Dog",
+                    editDogData: "Edit Dog Data",
+                    searchDog: "Search Dog",
+                    photoGallery: "Photo Gallery",
+                    breedingPlan: "Breeding Plan",
+                    privateInfo: "Private Information",
+                    quickOverview: "Quick Overview",
+                    dogs: "Dogs",
+                    photos: "Photos",
+                    refresh: "Refresh",
+                    dashboard: "Dashboard",
+                    welcomeTitle: "Welcome to the Dog Database PWA",
+                    welcomeText: "Choose an option from the menu to start. The application works completely offline.",
+                    aboutApp: "About this App",
+                    appDescription: "This PWA (Progressive Web App) stores all data locally in your browser. You can:",
+                    feature1: "Add and manage dogs",
+                    feature2: "Edit dog data",
+                    feature3: "Upload and view photos",
+                    feature4: "Create breeding plans",
+                    feature5: "Store private information",
+                    feature6: "Import/Export data",
+                    security: "Security",
+                    roleBasedAccess: "The app uses role-based access:",
+                    adminRole: "Administrator (admin/admin123)",
+                    adminRights: "Full rights, including adding new dogs.",
+                    userRole: "User (user/user123)",
+                    userRights: "Can import/export and edit data, but cannot add new dogs."
+                },
+                de: {
+                    appTitle: "Hundedatenbank PWA",
+                    logout: "Abmelden",
+                    menu: "Menü",
+                    dataManagement: "Datenverwaltung",
+                    newDog: "Neuer Hund",
+                    editDogData: "Hundedaten bearbeiten",
+                    searchDog: "Hund suchen",
+                    photoGallery: "Foto Galerie",
+                    breedingPlan: "Zuchtplanung",
+                    privateInfo: "Private Informationen",
+                    quickOverview: "Schnellübersicht",
+                    dogs: "Hunde",
+                    photos: "Fotos",
+                    refresh: "Aktualisieren",
+                    dashboard: "Dashboard",
+                    welcomeTitle: "Willkommen bei der Hundedatenbank PWA",
+                    welcomeText: "Wählen Sie eine Option aus dem Menü, um zu beginnen. Die Anwendung funktioniert vollständig offline.",
+                    aboutApp: "Über diese App",
+                    appDescription: "Diese PWA (Progressive Web App) speichert alle Daten lokal in Ihrem Browser. Sie können:",
+                    feature1: "Hunde hinzufügen und verwalten",
+                    feature2: "Hundedaten bearbeiten",
+                    feature3: "Fotos hochladen und ansehen",
+                    feature4: "Zuchtpläne erstellen",
+                    feature5: "Private Informationen speichern",
+                    feature6: "Daten importieren/exportieren",
+                    security: "Sicherheit",
+                    roleBasedAccess: "Die App verwendet rollenbasierte Zugriffe:",
+                    adminRole: "Administrator (admin/admin123)",
+                    adminRights: "Volle Rechte, einschließlich neuer Hunde hinzufügen.",
+                    userRole: "Benutzer (user/user123)",
+                    userRights: "Kann Daten importieren/exportieren und bearbeiten, aber keine neuen Hunde hinzufügen."
+                }
+            };
+
+            // Vertaal pagina
+            const elements = document.querySelectorAll('.app-text');
+            elements.forEach(element => {
+                const key = element.getAttribute('data-key');
+                if (appTranslations[appLanguage] && appTranslations[appLanguage][key]) {
+                    element.textContent = appTranslations[appLanguage][key];
+                }
+            });
+            
+            // Update actieve taal knop
+            document.querySelectorAll('.app-lang-btn').forEach(btn => {
+                if (btn.getAttribute('data-lang') === appLanguage) {
                     btn.classList.add('active');
                     btn.classList.remove('btn-outline-light');
                     btn.classList.add('btn-light');
@@ -317,107 +426,14 @@
                 }
             });
             
-            // Update HTML lang attribuut
-            document.documentElement.lang = lang;
-            
-            // Update pagina titel
+            // Update HTML lang attribuut en titel
+            document.documentElement.lang = appLanguage;
             const titles = {
                 nl: "Hondendatabase PWA",
                 en: "Dog Database PWA",
                 de: "Hundedatenbank PWA"
             };
-            document.title = titles[lang] || titles.nl;
-        }
-
-        // Event listeners voor vlaggetjes in app
-        document.querySelectorAll('.app-lang-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const lang = this.getAttribute('data-lang');
-                localStorage.setItem('appLanguage', lang);
-                translateAppPage(lang);
-            });
-        });
-
-        // Controleer of gebruiker is ingelogd
-        if (!auth.isLoggedIn()) {
-            window.location.href = 'index.html';
-        }
-        
-        // **FIX: We moeten wachten tot de UIHandler geladen is voordat we deze initialiseren**
-        // Dit gebeurt automatisch door het script tag
-        
-        // Initialiseer taal
-        translateAppPage(appLanguage);
-        
-        // Toon huidige gebruiker
-        document.getElementById('currentUser').textContent = 
-            `${auth.getCurrentUser().username} (${auth.isAdmin() ? 'Admin' : 'Gebruiker'})`;
-        
-        // **BELANGRIJK: We moeten wachten tot de pagina volledig geladen is**
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialiseer UI Handler
-            const ui = new UIHandler();
-            window.appUI = ui; // Maak globaal beschikbaar voor debugging
-            
-            // Event Listeners voor menu knoppen
-            document.getElementById('dataManagementBtn').addEventListener('click', () => {
-                ui.showModal('data');
-            });
-            
-            document.getElementById('addDogBtn').addEventListener('click', () => {
-                ui.showModal('addDog');
-            });
-            
-            document.getElementById('editDogDataBtn').addEventListener('click', () => {
-                ui.showModal('editDogData');
-            });
-            
-            document.getElementById('searchBtn').addEventListener('click', () => {
-                ui.showModal('search');
-            });
-            
-            document.getElementById('photoGalleryBtn').addEventListener('click', () => {
-                ui.showModal('photos');
-            });
-            
-            document.getElementById('breedingPlanBtn').addEventListener('click', () => {
-                ui.showModal('breeding');
-            });
-            
-            document.getElementById('privateInfoBtn').addEventListener('click', () => {
-                ui.showModal('private');
-            });
-            
-            // Uitloggen
-            document.getElementById('logoutBtn').addEventListener('click', () => {
-                auth.logout();
-            });
-            
-            // Vernieuw statistieken
-            document.getElementById('refreshStatsBtn').addEventListener('click', async () => {
-                try {
-                    const stats = await db.getStatistieken();
-                    document.getElementById('quickStatsHonden').textContent = stats.totaalHonden;
-                    document.getElementById('quickStatsFotos').textContent = stats.totaalFotos;
-                    ui.showSuccess('Statistieken vernieuwd!');
-                } catch (error) {
-                    ui.showError('Fout bij laden statistieken');
-                }
-            });
-            
-            // Laad initiële statistieken
-            loadInitialStats();
-        });
-        
-        async function loadInitialStats() {
-            try {
-                await db.init();
-                const stats = await db.getStatistieken();
-                document.getElementById('quickStatsHonden').textContent = stats.totaalHonden;
-                document.getElementById('quickStatsFotos').textContent = stats.totaalFotos;
-            } catch (error) {
-                console.error('Fout bij initialiseren:', error);
-            }
+            document.title = titles[appLanguage] || titles.nl;
         }
         
         // Service Worker registratie voor PWA
@@ -431,43 +447,15 @@
             });
         }
         
-        // ========== MODAL FIX ==========
-        // Deze fix lost het scherm-donker-vast probleem op
-        document.addEventListener('hidden.bs.modal', function() {
-            // Wacht even en controleer of er nog modals open zijn
-            setTimeout(() => {
-                const openModals = document.querySelectorAll('.modal.show');
-                const backdrops = document.querySelectorAll('.modal-backdrop');
-                
-                // Als er geen modals meer open zijn, verwijder alle backdrops
-                if (openModals.length === 0 && backdrops.length > 0) {
-                    backdrops.forEach(backdrop => {
-                        backdrop.remove();
-                    });
-                    
-                    // Reset body styles
-                    document.body.classList.remove('modal-open');
-                    document.body.style.overflow = '';
-                    document.body.style.paddingRight = '';
-                }
-            }, 100);
+        // DEBUG: Log wanneer alles geladen is
+        window.addEventListener('load', () => {
+            console.log('Pagina volledig geladen');
+            console.log('Modules beschikbaar:', {
+                UIHandler: typeof UIHandler,
+                DogDataManager: typeof DogDataManager,
+                appUI: window.appUI
+            });
         });
-        
-        // **NOODFIX: Directe event listener als backup**
-        setTimeout(() => {
-            const editBtn = document.getElementById('editDogDataBtn');
-            if (editBtn) {
-                editBtn.addEventListener('click', function() {
-                    console.log('Noodfix: editDogDataBtn geklikt');
-                    // Controleer of UIHandler bestaat
-                    if (window.appUI) {
-                        window.appUI.showModal('editDogData');
-                    } else {
-                        alert('Module nog niet beschikbaar. UIHandler niet gevonden.');
-                    }
-                });
-            }
-        }, 1000);
     </script>
 </body>
 </html>

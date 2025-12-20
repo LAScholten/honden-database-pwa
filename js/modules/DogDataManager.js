@@ -7,12 +7,13 @@
 class DogDataManager extends BaseModule {
     constructor() {
         super('dogdata', 'Data Hond Bewerken');
+        console.log('DogDataManager geïnitialiseerd');
     }
     
     /**
      * Render de module interface
      */
-    async render() {
+    getModalHTML() {
         return `
             <div class="modal fade" id="dogDataModal" tabindex="-1" aria-labelledby="dogDataModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
@@ -41,6 +42,7 @@ class DogDataManager extends BaseModule {
                                                 <li>Bulk bewerking van meerdere honden</li>
                                                 <li>Geavanceerde zoekfilters</li>
                                                 <li>Export van bewerkte data</li>
+                                                <li>Historie van wijzigingen</li>
                                             </ul>
                                         </div>
                                     </div>
@@ -50,9 +52,9 @@ class DogDataManager extends BaseModule {
                                         <div class="card-body">
                                             <h6><i class="bi bi-lightning-charge text-warning"></i> Alternatieven</h6>
                                             <p class="mb-0">
-                                                Gebruik voor nu:<br>
-                                                1. <strong>Hond Zoeken</strong> om een hond te vinden<br>
-                                                2. Klik op de <strong>Bewerken</strong> knop in de zoekresultaten
+                                                <strong>Huidige opties:</strong><br>
+                                                1. <button class="btn btn-sm btn-primary mt-2" onclick="appUI.showModal('search')">Hond Zoeken</button><br>
+                                                2. <button class="btn btn-sm btn-success mt-2" onclick="appUI.showModal('addDog')">Nieuwe Hond (admin)</button>
                                             </p>
                                         </div>
                                     </div>
@@ -64,9 +66,9 @@ class DogDataManager extends BaseModule {
                                 <i class="bi bi-x-circle me-1"></i>
                                 <span class="module-text" data-key="close">Sluiten</span>
                             </button>
-                            <button type="button" class="btn btn-primary" onclick="window.location.reload()">
+                            <button type="button" class="btn btn-primary" onclick="location.reload()">
                                 <i class="bi bi-arrow-clockwise me-1"></i>
-                                <span class="module-text" data-key="refresh">Vernieuwen</span>
+                                <span class="module-text" data-key="refresh">Pagina Vernieuwen</span>
                             </button>
                         </div>
                     </div>
@@ -76,14 +78,67 @@ class DogDataManager extends BaseModule {
     }
     
     /**
+     * Setup event listeners voor deze module
+     */
+    setupEvents() {
+        console.log('DogDataManager setupEvents called');
+        
+        // Vertaal de modal tekst
+        setTimeout(() => {
+            this.translateModal();
+        }, 100);
+        
+        // Voeg event listeners toe voor de knoppen in de modal
+        const modal = document.getElementById('dogDataModal');
+        if (modal) {
+            modal.addEventListener('shown.bs.modal', () => {
+                console.log('DogDataModal is nu zichtbaar');
+            });
+        }
+    }
+    
+    /**
+     * Vertaal de modal tekst
+     */
+    translateModal() {
+        const currentLang = localStorage.getItem('appLanguage') || 'nl';
+        const translations = {
+            nl: {
+                editDogData: "Data Hond Bewerken",
+                close: "Sluiten",
+                refresh: "Pagina Vernieuwen"
+            },
+            en: {
+                editDogData: "Edit Dog Data",
+                close: "Close",
+                refresh: "Refresh Page"
+            },
+            de: {
+                editDogData: "Hundedaten bearbeiten",
+                close: "Schließen",
+                refresh: "Seite aktualisieren"
+            }
+        };
+        
+        const elements = document.querySelectorAll('[data-key]');
+        elements.forEach(element => {
+            const key = element.getAttribute('data-key');
+            if (translations[currentLang] && translations[currentLang][key]) {
+                element.textContent = translations[currentLang][key];
+            }
+        });
+    }
+    
+    /**
      * Initialiseer de module
      */
     async init() {
-        console.log('DogDataManager geïnitialiseerd (placeholder)');
+        console.log('DogDataManager geïnitialiseerd');
+        return true;
     }
 }
 
-// Export voor gebruik in andere bestanden
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = DogDataManager;
+// Maak globaal beschikbaar voor debug doeleinden
+if (typeof window !== 'undefined') {
+    window.DogDataManager = DogDataManager;
 }
