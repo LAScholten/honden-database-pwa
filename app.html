@@ -180,6 +180,7 @@
     <script src="js/modules/DataManager.js"></script>
     <script src="js/modules/DogManager.js"></script>
     <script src="js/modules/DogDataManager.js"></script>
+    <script src="js/modules/SearchManager.js"></script> <!-- NIEUW: SearchManager -->
     <script src="js/modules/PhotoManager.js"></script>
     <script src="js/modules/BreedingManager.js"></script>
     <script src="js/modules/PrivateInfoManager.js"></script>
@@ -224,7 +225,7 @@
                 roleBasedAccess: "De app gebruikt rol-gebaseerde toegang:",
                 adminRole: "Administrator (admin/admin123)",
                 adminRights: "Volledige rechten, inclusief nieuwe honden toevoegen.",
-                userRole: "GebruikeXr (user/user123)",
+                userRole: "Gebruiker (user/user123)",
                 userRights: "Kan data importeren/exporteren en bewerken, maar geen nieuwe honden toevoegen."
             },
             en: {
@@ -261,7 +262,7 @@
                 userRights: "Can import/export and edit data, but cannot add new dogs."
             },
             de: {
-                appTitle: "Hundedatenbank PWA",
+                appTitle: "Hundendatenbank PWA",
                 logout: "Abmelden",
                 menu: "Menü",
                 dataManagement: "Datenverwaltung",
@@ -350,6 +351,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             ui = new UIHandler();
             window.appUI = ui; // Maak globaal beschikbaar voor debugging
+            window.uiHandler = ui; // Voor SearchManager om toegang te hebben
             
             console.log('UIHandler geïnitialiseerd:', ui);
             
@@ -398,7 +400,7 @@
                 }
             });
             
-            // Hond Zoeken
+            // Hond Zoeken - NU naar SearchManager
             document.getElementById('searchBtn').addEventListener('click', function() {
                 if (ui && ui.showModal) {
                     ui.showModal('search');
