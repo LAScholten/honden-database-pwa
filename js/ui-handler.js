@@ -9,31 +9,33 @@ class UIHandler {
         this.auth = auth;
         this.currentModal = null;
         
-        // DEBUG: Check of modules beschikbaar zijn
-        console.log('Initializing UIHandler with modules:', {
-            data: typeof DataManager,
-            dog: typeof DogManager,
-            editDogData: typeof DogDataManager,
-            photo: typeof PhotoManager,
-            breeding: typeof BreedingManager,
-            private: typeof PrivateInfoManager
+        // Debug logging
+        console.log('UIHandler constructor aangeroepen');
+        console.log('Beschikbare modules:', {
+            DataManager: typeof DataManager,
+            DogManager: typeof DogManager,
+            DogDataManager: typeof DogDataManager,
+            PhotoManager: typeof PhotoManager,
+            BreedingManager: typeof BreedingManager,
+            PrivateInfoManager: typeof PrivateInfoManager
         });
         
-        // Initialiseer modules - FIX: wacht tot ze geladen zijn
-        this.modules = {
-            data: typeof DataManager !== 'undefined' ? new DataManager() : null,
-            dog: typeof DogManager !== 'undefined' ? new DogManager() : null,
-            editDogData: typeof DogDataManager !== 'undefined' ? new DogDataManager() : null,
-            photo: typeof PhotoManager !== 'undefined' ? new PhotoManager() : null,
-            breeding: typeof BreedingManager !== 'undefined' ? new BreedingManager() : null,
-            private: typeof PrivateInfoManager !== 'undefined' ? new PrivateInfoManager() : null
-        };
-        
-        // Controleer of alle modules geladen zijn
-        for (const [key, module] of Object.entries(this.modules)) {
-            if (!module) {
-                console.error(`Module ${key} is niet geladen!`);
-            }
+        try {
+            // Initialiseer modules
+            this.modules = {
+                data: new DataManager(),
+                dog: new DogManager(),
+                editDogData: new DogDataManager(),
+                photo: new PhotoManager(),
+                breeding: new BreedingManager(),
+                private: new PrivateInfoManager()
+            };
+            
+            console.log('Alle modules succesvol geïnitialiseerd:', Object.keys(this.modules));
+            
+        } catch (error) {
+            console.error('Fout bij initialiseren modules:', error);
+            this.modules = {};
         }
         
         // Voeg CSS toe voor styling
@@ -94,14 +96,7 @@ class UIHandler {
     // ========== MODAL MANAGEMENT ==========
     
     showModal(modalType) {
-        console.log(`showModal called for: ${modalType}`);
-        
-        // Controleer of module bestaat
-        if (!this.modules[modalType]) {
-            console.error(`Module ${modalType} bestaat niet in modules:`, Object.keys(this.modules));
-            this.showError(`Module '${modalType}' is niet beschikbaar.`);
-            return;
-        }
+        console.log(`showModal aangeroepen voor type: ${modalType}`);
         
         let modalHTML = '';
         let modalId = '';
@@ -109,11 +104,13 @@ class UIHandler {
         try {
             switch (modalType) {
                 case 'data':
+                    if (!this.modules.data) throw new Error('DataManager module niet beschikbaar');
                     modalHTML = this.modules.data.getModalHTML();
                     modalId = 'dataManagementModal';
                     break;
                     
                 case 'addDog':
+                    if (!this.modules.dog) throw new Error('DogManager module niet beschikbaar');
                     if (!this.auth.isAdmin()) {
                         this.showError('Alleen administrators mogen nieuwe honden toevoegen');
                         return;
@@ -123,34 +120,37 @@ class UIHandler {
                     break;
                     
                 case 'editDogData':
+                    if (!this.modules.editDogData) throw new Error('DogDataManager module niet beschikbaar');
                     modalHTML = this.modules.editDogData.getModalHTML();
                     modalId = 'dogDataModal';
                     break;
                     
                 case 'search':
+                    if (!this.modules.dog) throw new Error('DogManager module niet beschikbaar');
                     modalHTML = this.modules.dog.getSearchModalHTML();
                     modalId = 'searchModal';
                     break;
                     
                 case 'photos':
+                    if (!this.modules.photo) throw new Error('PhotoManager module niet beschikbaar');
                     modalHTML = this.modules.photo.getModalHTML();
                     modalId = 'photoGalleryModal';
                     break;
                     
                 case 'breeding':
+                    if (!this.modules.breeding) throw new Error('BreedingManager module niet beschikbaar');
                     modalHTML = this.modules.breeding.getModalHTML();
                     modalId = 'breedingPlanModal';
                     break;
                     
                 case 'private':
+                    if (!this.modules.private) throw new Error('PrivateInfoManager module niet beschikbaar');
                     modalHTML = this.modules.private.getModalHTML();
                     modalId = 'privateInfoModal';
                     break;
                     
                 default:
-                    console.error('Onbekend modal type:', modalType);
-                    this.showError(`Modal type '${modalType}' niet herkend.`);
-                    return;
+                    throw new Error(`Onbekend modal type: ${modalType}`);
             }
             
             console.log(`Modal ${modalId} geladen voor type: ${modalType}`);
@@ -174,7 +174,6 @@ class UIHandler {
                     const modalInstance = bootstrap.Modal.getInstance(existingModal);
                     if (modalInstance) {
                         modalInstance.hide();
-                        // Wacht tot modal volledig verborgen is
                         setTimeout(() => {
                             existingModal.remove();
                         }, 300);
@@ -201,31 +200,30 @@ class UIHandler {
         if (modalElement) {
             try {
                 const modal = new bootstrap.Modal(modalElement, {
-                    backdrop: 'static',
-                    keyboard: true
+                    backdrop: true,
+                    keyboard: true,
+                    focus: true
                 });
                 modal.show();
                 
                 modalElement.addEventListener('hidden.bs.modal', () => {
                     console.log(`Modal ${modalId} gesloten`);
                     this.currentModal = null;
-                    // Verwijder modal van DOM na sluiten
-                    setTimeout(() => {
-                        if (modalElement.parentNode) {
-                            modalElement.remove();
-                        }
-                    }, 300);
+                });
+                
+                modalElement.addEventListener('shown.bs.modal', () => {
+                    console.log(`Modal ${modalId} getoond`);
+                    this.currentModal = modalId;
                 });
                 
                 this.currentModal = modalId;
-                console.log(`Modal ${modalId} getoond`);
                 
             } catch (error) {
                 console.error(`Fout bij tonen modal ${modalId}:`, error);
                 this.showError(`Fout bij openen popup: ${error.message}`);
             }
         } else {
-            console.error(`Modal element ${modalId} niet gevonden in HTML:`, html.substring(0, 200));
+            console.error(`Modal element ${modalId} niet gevonden in HTML`);
             this.showError(`Kon popup niet laden. Probeer opnieuw.`);
         }
     }
@@ -240,7 +238,9 @@ class UIHandler {
                     case 'data':
                         if (this.modules.data && this.modules.data.setupEvents) {
                             this.modules.data.setupEvents();
-                            this.modules.data.loadDatabaseStats();
+                            if (this.modules.data.loadDatabaseStats) {
+                                this.modules.data.loadDatabaseStats();
+                            }
                         }
                         break;
                         
@@ -253,9 +253,9 @@ class UIHandler {
                     case 'editDogData':
                         if (this.modules.editDogData && this.modules.editDogData.setupEvents) {
                             this.modules.editDogData.setupEvents();
-                        } else {
-                            // Fallback voor placeholder
-                            console.log('DogDataManager gebruikt placeholder functionaliteit');
+                        } else if (this.modules.editDogData && this.modules.editDogData.init) {
+                            // Fallback voor modules met alleen init
+                            this.modules.editDogData.init();
                         }
                         break;
                         
@@ -268,21 +268,27 @@ class UIHandler {
                     case 'photos':
                         if (this.modules.photo && this.modules.photo.setupEvents) {
                             this.modules.photo.setupEvents();
-                            this.modules.photo.loadPhotosData();
+                            if (this.modules.photo.loadPhotosData) {
+                                this.modules.photo.loadPhotosData();
+                            }
                         }
                         break;
                         
                     case 'breeding':
                         if (this.modules.breeding && this.modules.breeding.setupEvents) {
                             this.modules.breeding.setupEvents();
-                            this.modules.breeding.loadBreedingData();
+                            if (this.modules.breeding.loadBreedingData) {
+                                this.modules.breeding.loadBreedingData();
+                            }
                         }
                         break;
                         
                     case 'private':
                         if (this.modules.private && this.modules.private.setupEvents) {
                             this.modules.private.setupEvents();
-                            this.modules.private.loadPrivateInfoData();
+                            if (this.modules.private.loadPrivateInfoData) {
+                                this.modules.private.loadPrivateInfoData();
+                            }
                         }
                         break;
                 }
@@ -359,9 +365,9 @@ class UIHandler {
         }
     }
     
-    // Helper om te controleren of UIHandler werkt
+    // Test functie voor debugging
     test() {
-        console.log('UIHandler test: OK', this.modules);
+        console.log('UIHandler test - modules:', Object.keys(this.modules));
         return true;
     }
 }
