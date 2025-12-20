@@ -13,11 +13,10 @@ class SearchManager extends BaseModule {
             nl: {
                 // Modal titels
                 searchDog: "Hond Zoeken",
-                searchInfo: "Typ de naam van een hond om te zoeken. Resultaten worden automatisch gefilterd tijdens het typen.",
                 
                 // Zoek velden
-                searchName: "Zoek op hond naam",
-                searchPlaceholder: "Typ hond naam...",
+                searchName: "Zoek hond op naam",
+                searchPlaceholder: "Typ hondennaam...",
                 noDogsFound: "Geen honden gevonden",
                 typeToSearch: "Begin met typen om te zoeken",
                 
@@ -47,10 +46,9 @@ class SearchManager extends BaseModule {
             en: {
                 // Modal titles
                 searchDog: "Search Dog",
-                searchInfo: "Type a dog's name to search. Results are automatically filtered as you type.",
                 
                 // Search fields
-                searchName: "Search by dog name",
+                searchName: "Search dog by name",
                 searchPlaceholder: "Type dog name...",
                 noDogsFound: "No dogs found",
                 typeToSearch: "Start typing to search",
@@ -81,10 +79,9 @@ class SearchManager extends BaseModule {
             de: {
                 // Modal Titel
                 searchDog: "Hund suchen",
-                searchInfo: "Geben Sie einen Hundenamen ein, um zu suchen. Die Ergebnisse werden automatisch während der Eingabe gefiltert.",
                 
                 // Suchfelder
-                searchName: "Nach Hundenamen suchen",
+                searchName: "Hund nach Namen suchen",
                 searchPlaceholder: "Hundenamen eingeben...",
                 noDogsFound: "Keine Hunde gefunden",
                 typeToSearch: "Beginnen Sie mit der Eingabe, um zu suchen",
@@ -140,24 +137,15 @@ class SearchManager extends BaseModule {
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
                         </div>
                         <div class="modal-body">
-                            <div class="alert alert-info mb-4">
-                                <i class="bi bi-info-circle"></i>
-                                ${t('searchInfo')}
-                            </div>
-                            
-                            <div class="card mb-4">
-                                <div class="card-body">
-                                    <div class="mb-3">
-                                        <label for="searchNameInput" class="form-label">${t('searchName')}</label>
-                                        <input type="text" class="form-control search-input" id="searchNameInput" 
-                                               placeholder="${t('searchPlaceholder')}" autocomplete="off">
-                                        <div class="form-text">Zoekt alleen op hondennaam, vanaf 1 letter</div>
-                                    </div>
+                            <div class="mb-4">
+                                <div class="mb-3">
+                                    <input type="text" class="form-control search-input" id="searchNameInput" 
+                                           placeholder="${t('searchPlaceholder')}" autocomplete="off">
                                 </div>
                             </div>
                             
                             <div id="searchResultsContainer">
-                                <div class="text-center py-5">
+                                <div class="text-center py-4">
                                     <i class="bi bi-search display-1 text-muted"></i>
                                     <p class="mt-3 text-muted">${t('typeToSearch')}</p>
                                 </div>
@@ -173,8 +161,9 @@ class SearchManager extends BaseModule {
             <style>
                 .search-input {
                     font-size: 1.1rem;
-                    padding: 12px;
+                    padding: 10px 15px;
                     border: 2px solid #dee2e6;
+                    border-radius: 8px;
                     transition: all 0.3s;
                 }
                 
@@ -183,47 +172,64 @@ class SearchManager extends BaseModule {
                     box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
                 }
                 
-                .dog-result-card {
+                .dog-result-item {
                     cursor: pointer;
                     transition: all 0.2s;
                     border: 1px solid #dee2e6;
-                    margin-bottom: 10px;
+                    border-radius: 6px;
+                    margin-bottom: 8px;
+                    padding: 12px 15px;
+                    background: white;
                 }
                 
-                .dog-result-card:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                .dog-result-item:hover {
+                    background-color: #f8f9fa;
                     border-color: #0d6efd;
+                    transform: translateX(3px);
                 }
                 
-                .dog-result-card .card-body {
-                    padding: 15px;
+                .dog-result-item:active {
+                    background-color: #e9ecef;
                 }
                 
                 .dog-name {
-                    font-size: 1.2rem;
-                    font-weight: bold;
+                    font-size: 1rem;
+                    font-weight: 600;
                     color: #0d6efd;
+                    margin-bottom: 4px;
                 }
                 
                 .dog-info {
                     color: #6c757d;
-                    font-size: 0.9rem;
+                    font-size: 0.85rem;
+                    display: flex;
+                    gap: 15px;
+                    flex-wrap: wrap;
                 }
                 
-                .dog-badge {
+                .dog-info-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                }
+                
+                .dog-info-item i {
                     font-size: 0.8rem;
-                    padding: 4px 8px;
+                    color: #adb5bd;
                 }
                 
                 .search-stats {
-                    font-size: 0.9rem;
+                    font-size: 0.85rem;
                     color: #6c757d;
-                    margin-bottom: 15px;
+                    margin-bottom: 12px;
+                    padding-bottom: 8px;
+                    border-bottom: 1px solid #dee2e6;
                 }
                 
                 .back-btn {
-                    margin-bottom: 20px;
+                    margin-bottom: 15px;
+                    padding: 6px 12px;
+                    font-size: 0.875rem;
                 }
                 
                 .details-section {
@@ -236,6 +242,30 @@ class SearchManager extends BaseModule {
                 .parents-info {
                     background: #e8f4fd;
                     border-left: 4px solid #0d6efd;
+                    padding: 12px;
+                    border-radius: 4px;
+                    margin-bottom: 10px;
+                }
+                
+                .gender-badge {
+                    font-size: 0.75rem;
+                    padding: 3px 6px;
+                    border-radius: 4px;
+                }
+                
+                .badge-male {
+                    background-color: #0d6efd;
+                    color: white;
+                }
+                
+                .badge-female {
+                    background-color: #dc3545;
+                    color: white;
+                }
+                
+                .badge-unknown {
+                    background-color: #6c757d;
+                    color: white;
                 }
             </style>
         `;
@@ -281,7 +311,7 @@ class SearchManager extends BaseModule {
         const t = this.t.bind(this);
         
         container.innerHTML = `
-            <div class="text-center py-5">
+            <div class="text-center py-4">
                 <i class="bi bi-search display-1 text-muted"></i>
                 <p class="mt-3 text-muted">${t('typeToSearch')}</p>
             </div>
@@ -323,10 +353,9 @@ class SearchManager extends BaseModule {
         
         if (this.filteredDogs.length === 0) {
             container.innerHTML = `
-                <div class="text-center py-5">
+                <div class="text-center py-4">
                     <i class="bi bi-search display-1 text-muted"></i>
                     <p class="mt-3 text-muted">${t('noDogsFound')}</p>
-                    <small class="text-muted">Geen honden gevonden met deze naam</small>
                 </div>
             `;
             return;
@@ -334,51 +363,47 @@ class SearchManager extends BaseModule {
         
         let html = `
             <div class="search-stats">
-                <strong>${t('searchResults')}:</strong> ${this.filteredDogs.length} ${t('found')}
+                ${this.filteredDogs.length} ${t('found')}
             </div>
-            
-            <div class="row">
         `;
         
         this.filteredDogs.forEach(dog => {
             const genderText = dog.geslacht === 'reuen' ? t('male') : 
                              dog.geslacht === 'teven' ? t('female') : t('unknown');
-            const genderClass = dog.geslacht === 'reuen' ? 'bg-primary' : 
-                              dog.geslacht === 'teven' ? 'bg-danger' : 'bg-secondary';
+            const genderClass = dog.geslacht === 'reuen' ? 'badge-male' : 
+                              dog.geslacht === 'teven' ? 'badge-female' : 'badge-unknown';
             
             html += `
-                <div class="col-md-6 mb-3">
-                    <div class="card dog-result-card" data-id="${dog.id}">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <div class="dog-name">${dog.naam}</div>
-                                    <div class="dog-info mt-2">
-                                        <div><strong>${t('breed')}:</strong> ${dog.ras || '-'}</div>
-                                        <div><strong>${t('pedigreeNumber')}:</strong> ${dog.stamboomnr || '-'}</div>
-                                    </div>
-                                </div>
-                                <div>
-                                    <span class="badge ${genderClass} dog-badge">${genderText}</span>
-                                </div>
-                            </div>
-                            <div class="mt-3 text-end">
-                                <small class="text-muted">Klik om details te zien</small>
-                            </div>
+                <div class="dog-result-item" data-id="${dog.id}">
+                    <div class="dog-name">
+                        ${dog.naam}
+                        <span class="gender-badge ${genderClass} ms-2">${genderText}</span>
+                    </div>
+                    <div class="dog-info">
+                        ${dog.ras ? `
+                        <div class="dog-info-item">
+                            <i class="bi bi-tag"></i>
+                            <span>${dog.ras}</span>
                         </div>
+                        ` : ''}
+                        
+                        ${dog.stamboomnr ? `
+                        <div class="dog-info-item">
+                            <i class="bi bi-hash"></i>
+                            <span>${dog.stamboomnr}</span>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
             `;
         });
         
-        html += `</div>`;
-        
         container.innerHTML = html;
         
-        // Event listeners voor ALLE hond kaarten
-        document.querySelectorAll('.dog-result-card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                const hondId = card.getAttribute('data-id');
+        // Event listeners voor ALLE hond items
+        document.querySelectorAll('.dog-result-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                const hondId = item.getAttribute('data-id');
                 this.viewDog(hondId);
             });
         });
@@ -417,7 +442,7 @@ class SearchManager extends BaseModule {
                 if (father) {
                     fatherInfo = { 
                         naam: father.naam, 
-                        stamboomnr: father.stamboomnr || 'Geen stamboom',
+                        stamboomnr: father.stamboomnr || '',
                         id: father.id
                     };
                 }
@@ -432,7 +457,7 @@ class SearchManager extends BaseModule {
                 if (mother) {
                     motherInfo = { 
                         naam: mother.naam, 
-                        stamboomnr: mother.stamboomnr || 'Geen stamboom',
+                        stamboomnr: mother.stamboomnr || '',
                         id: mother.id
                     };
                 }
@@ -442,100 +467,78 @@ class SearchManager extends BaseModule {
         }
         
         const html = `
-            <div class="row">
-                <div class="col-12 mb-3">
-                    <button class="btn btn-sm btn-outline-secondary back-btn" id="backToSearchBtn">
-                        <i class="bi bi-arrow-left"></i> Terug naar zoeken
-                    </button>
-                </div>
+            <div class="mb-3">
+                <button class="btn btn-sm btn-outline-secondary back-btn" id="backToSearchBtn">
+                    <i class="bi bi-arrow-left"></i> Terug naar zoeken
+                </button>
             </div>
             
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="card dog-details-card">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">${t('dogDetails')}: ${dog.naam}</h5>
+            <div class="details-section">
+                <div class="row align-items-center mb-3">
+                    <div class="col">
+                        <h4 class="mb-0">${dog.naam}</h4>
+                        <div class="mt-1">
+                            ${dog.ras ? `<span class="badge bg-info">${dog.ras}</span>` : ''}
+                            ${dog.geslacht === 'reuen' ? `<span class="badge bg-primary ms-1">${t('male')}</span>` : ''}
+                            ${dog.geslacht === 'teven' ? `<span class="badge bg-danger ms-1">${t('female')}</span>` : ''}
                         </div>
-                        <div class="card-body">
-                            <div class="row mb-4">
-                                <div class="col-md-6">
-                                    <h4><strong>${dog.naam}</strong></h4>
-                                    <div class="mb-2">
-                                        <span class="badge bg-info">${dog.ras || 'Onbekend ras'}</span>
-                                        <span class="badge bg-secondary ms-2">${dog.geslacht === 'reuen' ? t('male') : dog.geslacht === 'teven' ? t('female') : t('unknown')}</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 text-end">
-                                    <h5><code>${dog.stamboomnr || 'Geen stamboomnummer'}</code></h5>
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="card parents-info">
-                                        <div class="card-header bg-light">
-                                            <h6 class="mb-0">${t('father')}</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <p class="mb-0">${fatherInfo.naam}</p>
-                                            ${fatherInfo.stamboomnr ? `<small class="text-muted">${fatherInfo.stamboomnr}</small>` : ''}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="card parents-info">
-                                        <div class="card-header bg-light">
-                                            <h6 class="mb-0">${t('mother')}</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <p class="mb-0">${motherInfo.naam}</p>
-                                            ${motherInfo.stamboomnr ? `<small class="text-muted">${motherInfo.stamboomnr}</small>` : ''}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            ${dog.opmerkingen ? `
-                            <div class="mt-4 details-section">
-                                <h6>Opmerkingen:</h6>
-                                <p class="text-muted">${dog.opmerkingen}</p>
-                            </div>
-                            ` : ''}
+                    </div>
+                    <div class="col-auto">
+                        ${dog.stamboomnr ? `<code class="fs-5">${dog.stamboomnr}</code>` : ''}
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6 mb-3">
+                        <div class="parents-info">
+                            <div class="fw-bold mb-1">${t('father')}:</div>
+                            <div>${fatherInfo.naam}</div>
+                            ${fatherInfo.stamboomnr ? `<small class="text-muted">${fatherInfo.stamboomnr}</small>` : ''}
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="parents-info">
+                            <div class="fw-bold mb-1">${t('mother')}:</div>
+                            <div>${motherInfo.naam}</div>
+                            ${motherInfo.stamboomnr ? `<small class="text-muted">${motherInfo.stamboomnr}</small>` : ''}
                         </div>
                     </div>
                 </div>
                 
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-header bg-light">
-                            <h6 class="mb-0">Extra informatie</h6>
+                ${dog.geboortedatum || dog.kleur || dog.chipnummer || dog.opmerkingen ? `
+                <div class="mt-3">
+                    <h6 class="border-bottom pb-2 mb-3">Extra informatie</h6>
+                    <div class="row">
+                        ${dog.geboortedatum ? `
+                        <div class="col-md-6 mb-2">
+                            <strong>Geboortedatum:</strong><br>
+                            ${dog.geboortedatum}
                         </div>
-                        <div class="card-body">
-                            <ul class="list-unstyled">
-                                ${dog.geboortedatum ? `
-                                <li class="mb-2">
-                                    <strong>Geboortedatum:</strong><br>
-                                    ${dog.geboortedatum}
-                                </li>
-                                ` : ''}
-                                
-                                ${dog.kleur ? `
-                                <li class="mb-2">
-                                    <strong>Kleur:</strong><br>
-                                    ${dog.kleur}
-                                </li>
-                                ` : ''}
-                                
-                                ${dog.chipnummer ? `
-                                <li class="mb-2">
-                                    <strong>Chipnummer:</strong><br>
-                                    <code>${dog.chipnummer}</code>
-                                </li>
-                                ` : ''}
-                            </ul>
+                        ` : ''}
+                        
+                        ${dog.kleur ? `
+                        <div class="col-md-6 mb-2">
+                            <strong>Kleur:</strong><br>
+                            ${dog.kleur}
                         </div>
+                        ` : ''}
+                        
+                        ${dog.chipnummer ? `
+                        <div class="col-12 mb-2">
+                            <strong>Chipnummer:</strong><br>
+                            <code>${dog.chipnummer}</code>
+                        </div>
+                        ` : ''}
+                        
+                        ${dog.opmerkingen ? `
+                        <div class="col-12 mt-2 pt-2 border-top">
+                            <strong>Opmerkingen:</strong><br>
+                            <p class="text-muted mb-0">${dog.opmerkingen}</p>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
+                ` : ''}
             </div>
         `;
         
