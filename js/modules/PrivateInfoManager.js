@@ -164,7 +164,7 @@ class PrivateInfoManager extends BaseModule {
         this.currentLang = lang;
         if (document.getElementById('privateInfoModal')) {
             this.loadPrivateInfoData();
-            this.setupAutocomplete();
+            this.setupDogSearch();
             if (this.currentHondId) {
                 this.loadPrivateInfoForDog();
             }
@@ -355,30 +355,34 @@ class PrivateInfoManager extends BaseModule {
         
         if (!searchInput || !dropdownMenu) return;
         
-        // Toon dropdown bij focus - IDENTIEK aan PhotoManager
-        searchInput.addEventListener('focus', () => {
-            this.filterDogs('');
+        // Verwijder alle bestaande event listeners eerst
+        searchInput.replaceWith(searchInput.cloneNode(true));
+        const newSearchInput = document.getElementById('privateHondSearch');
+        
+        // Toon dropdown bij focus
+        newSearchInput.addEventListener('focus', async () => {
+            await this.filterDogs('');
             dropdownMenu.classList.add('show');
         });
         
-        // Filter honden bij elke toetsaanslag - IDENTIEK aan PhotoManager
-        searchInput.addEventListener('input', (e) => {
+        // Filter honden bij elke toetsaanslag
+        newSearchInput.addEventListener('input', async (e) => {
             const searchTerm = e.target.value.toLowerCase();
-            this.filterDogs(searchTerm);
+            await this.filterDogs(searchTerm);
             dropdownMenu.classList.add('show');
         });
         
-        // Verberg dropdown bij klik buiten - IDENTIEK aan PhotoManager
+        // Verberg dropdown bij klik buiten
         document.addEventListener('click', (e) => {
-            if (!searchInput.contains(e.target) && !dropdownMenu.contains(e.target)) {
+            if (!newSearchInput.contains(e.target) && !dropdownMenu.contains(e.target)) {
                 dropdownMenu.classList.remove('show');
             }
         });
         
-        // Toon alle honden bij eerste klik - IDENTIEK aan PhotoManager
-        searchInput.addEventListener('click', () => {
+        // Toon alle honden bij eerste klik
+        newSearchInput.addEventListener('click', async () => {
             if (dropdownMenu.children.length === 1 && dropdownMenu.children[0].classList.contains('text-muted')) {
-                this.filterDogs('');
+                await this.filterDogs('');
             }
             dropdownMenu.classList.add('show');
         });
@@ -392,11 +396,18 @@ class PrivateInfoManager extends BaseModule {
             await this.loadPrivateInfoData();
         }
         
+        // Filter de honden op zoekterm
         this.filteredDogs = this.allDogs.filter(dog => {
             const dogName = dog.naam.toLowerCase();
             const dogBreed = dog.ras ? dog.ras.toLowerCase() : '';
             const pedigree = dog.stamboomnr ? dog.stamboomnr.toLowerCase() : '';
             
+            // Als er geen zoekterm is, toon alle honden
+            if (!searchTerm.trim()) {
+                return true;
+            }
+            
+            // Zoek in naam, ras en stamboomnr
             return dogName.includes(searchTerm) || 
                    dogBreed.includes(searchTerm) ||
                    pedigree.includes(searchTerm);
