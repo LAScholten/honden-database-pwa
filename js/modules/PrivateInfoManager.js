@@ -355,63 +355,66 @@ class PrivateInfoManager extends BaseModule {
         
         if (!searchInput || !dropdownMenu) return;
         
-        // Verwijder alle bestaande event listeners eerst
-        searchInput.replaceWith(searchInput.cloneNode(true));
-        const newSearchInput = document.getElementById('privateHondSearch');
-        
         // Toon dropdown bij focus
-        newSearchInput.addEventListener('focus', async () => {
-            await this.filterDogs('');
+        searchInput.addEventListener('focus', () => {
+            this.showAllDogs();
             dropdownMenu.classList.add('show');
         });
         
         // Filter honden bij elke toetsaanslag
-        newSearchInput.addEventListener('input', async (e) => {
+        searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
-            await this.filterDogs(searchTerm);
+            this.filterDogs(searchTerm);
             dropdownMenu.classList.add('show');
         });
         
         // Verberg dropdown bij klik buiten
         document.addEventListener('click', (e) => {
-            if (!newSearchInput.contains(e.target) && !dropdownMenu.contains(e.target)) {
+            if (!searchInput.contains(e.target) && !dropdownMenu.contains(e.target)) {
                 dropdownMenu.classList.remove('show');
             }
         });
         
         // Toon alle honden bij eerste klik
-        newSearchInput.addEventListener('click', async () => {
-            if (dropdownMenu.children.length === 1 && dropdownMenu.children[0].classList.contains('text-muted')) {
-                await this.filterDogs('');
-            }
+        searchInput.addEventListener('click', () => {
+            this.showAllDogs();
             dropdownMenu.classList.add('show');
         });
     }
     
-    async filterDogs(searchTerm = '') {
+    async showAllDogs() {
         const dropdownMenu = document.getElementById('dogDropdownMenu');
         if (!dropdownMenu) return;
         
-        if (!this.allDogs || this.allDogs.length === 0) {
+        if (this.allDogs.length === 0) {
             await this.loadPrivateInfoData();
         }
         
-        // Filter de honden op zoekterm
-        this.filteredDogs = this.allDogs.filter(dog => {
-            const dogName = dog.naam.toLowerCase();
-            const dogBreed = dog.ras ? dog.ras.toLowerCase() : '';
-            const pedigree = dog.stamboomnr ? dog.stamboomnr.toLowerCase() : '';
-            
-            // Als er geen zoekterm is, toon alle honden
-            if (!searchTerm.trim()) {
-                return true;
-            }
-            
-            // Zoek in naam, ras en stamboomnr
-            return dogName.includes(searchTerm) || 
-                   dogBreed.includes(searchTerm) ||
-                   pedigree.includes(searchTerm);
-        });
+        this.filteredDogs = [...this.allDogs];
+        this.updateDropdownMenu();
+    }
+    
+    async filterDogs(searchTerm) {
+        const dropdownMenu = document.getElementById('dogDropdownMenu');
+        if (!dropdownMenu) return;
+        
+        if (this.allDogs.length === 0) {
+            await this.loadPrivateInfoData();
+        }
+        
+        if (!searchTerm.trim()) {
+            this.filteredDogs = [...this.allDogs];
+        } else {
+            this.filteredDogs = this.allDogs.filter(dog => {
+                const dogName = dog.naam.toLowerCase();
+                const dogBreed = dog.ras ? dog.ras.toLowerCase() : '';
+                const pedigree = dog.stamboomnr ? dog.stamboomnr.toLowerCase() : '';
+                
+                return dogName.includes(searchTerm) || 
+                       dogBreed.includes(searchTerm) ||
+                       pedigree.includes(searchTerm);
+            });
+        }
         
         this.updateDropdownMenu();
     }
