@@ -267,7 +267,7 @@ class PrivateInfoManager extends BaseModule {
         `;
     }
     
-    // Permissie controle functies
+    // Permissie controle functies - GECORRIGEERDE VERSIE
     getPermissionInfo() {
         const user = window.auth?.getCurrentUser();
         if (!user) return "Login vereist voor toegang tot privé informatie";
@@ -287,9 +287,9 @@ class PrivateInfoManager extends BaseModule {
         if (!user || !user.permissions) return "disabled";
         
         if (user.permissions.includes('private_full')) {
-            return "";
+            return ""; // Lege string betekent niet disabled
         }
-        return "disabled";
+        return "disabled"; // Dit is het HTML attribuut
     }
     
     getClearButtonPermission() {
@@ -481,6 +481,41 @@ class PrivateInfoManager extends BaseModule {
                 </span>
             `;
         }
+        
+        // Controleer permissies en update velden
+        this.updatePermissionsForSelectedDog();
+    }
+    
+    updatePermissionsForSelectedDog() {
+        const user = window.auth?.getCurrentUser();
+        const notesTextarea = document.getElementById('privateNotes');
+        const clearBtn = document.getElementById('clearPrivateInfoBtn');
+        const saveBtn = document.getElementById('savePrivateInfoBtn');
+        
+        if (!user || !user.permissions) {
+            // Geen gebruiker gevonden, alles uitschakelen
+            if (notesTextarea) notesTextarea.setAttribute('disabled', 'disabled');
+            if (clearBtn) clearBtn.setAttribute('disabled', 'disabled');
+            if (saveBtn) saveBtn.setAttribute('disabled', 'disabled');
+            return;
+        }
+        
+        if (user.permissions.includes('private_full')) {
+            // Volledige toegang
+            if (notesTextarea) notesTextarea.removeAttribute('disabled');
+            if (clearBtn) clearBtn.removeAttribute('disabled');
+            if (saveBtn) saveBtn.removeAttribute('disabled');
+        } else if (user.permissions.includes('private_view')) {
+            // Alleen leestoegang
+            if (notesTextarea) notesTextarea.setAttribute('disabled', 'disabled');
+            if (clearBtn) clearBtn.setAttribute('disabled', 'disabled');
+            if (saveBtn) saveBtn.setAttribute('disabled', 'disabled');
+        } else {
+            // Geen toegang
+            if (notesTextarea) notesTextarea.setAttribute('disabled', 'disabled');
+            if (clearBtn) clearBtn.setAttribute('disabled', 'disabled');
+            if (saveBtn) saveBtn.setAttribute('disabled', 'disabled');
+        }
     }
     
     async loadPrivateInfoForDog() {
@@ -498,6 +533,16 @@ class PrivateInfoManager extends BaseModule {
         this.showProgress(t('loadingInfo'));
         
         try {
+            // Controleer eerst of gebruiker toegang heeft
+            const user = window.auth?.getCurrentUser();
+            if (!user || !user.permissions) {
+                throw new Error("Geen toegang: gebruiker niet ingelogd");
+            }
+            
+            if (!user.permissions.includes('private_full') && !user.permissions.includes('private_view')) {
+                throw new Error("Geen toegang: onvoldoende rechten");
+            }
+            
             // Haal privé info uit PRIVÉ DATABASE
             this.currentPriveInfo = await this.db.getPriveInfoVoorStamboomnr(stamboomnr);
             
@@ -517,6 +562,9 @@ class PrivateInfoManager extends BaseModule {
                 this.currentPriveInfo = null;
                 this.displayPrivateInfo();
                 this.showInfo(t('noInfoFound'));
+            } else if (error.message.includes('Geen toegang')) {
+                this.showError(error.message);
+                this.disableAllFields();
             } else {
                 this.showError(`${t('loadFailed')}${error.message}`);
             }
@@ -534,14 +582,17 @@ class PrivateInfoManager extends BaseModule {
         }
         
         // Update permissions na laden
-        const user = window.auth?.getCurrentUser();
-        if (user && user.permissions) {
-            if (!user.permissions.includes('private_full')) {
-                notesTextarea.setAttribute('disabled', 'disabled');
-                document.getElementById('clearPrivateInfoBtn').setAttribute('disabled', 'disabled');
-                document.getElementById('savePrivateInfoBtn').setAttribute('disabled', 'disabled');
-            }
-        }
+        this.updatePermissionsForSelectedDog();
+    }
+    
+    disableAllFields() {
+        const notesTextarea = document.getElementById('privateNotes');
+        const clearBtn = document.getElementById('clearPrivateInfoBtn');
+        const saveBtn = document.getElementById('savePrivateInfoBtn');
+        
+        if (notesTextarea) notesTextarea.setAttribute('disabled', 'disabled');
+        if (clearBtn) clearBtn.setAttribute('disabled', 'disabled');
+        if (saveBtn) saveBtn.setAttribute('disabled', 'disabled');
     }
     
     updatePrivateInfoHeader(dog) {
@@ -746,5 +797,35 @@ class PrivateInfoManager extends BaseModule {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    }
+    
+    // Helper methoden voor notificaties
+    showProgress(message) {
+        // Implementeer een progress indicator zoals een spinner of toast
+        console.log('Progress:', message);
+        // Voorbeeld: this.showToast(message, 'info');
+    }
+    
+    hideProgress() {
+        // Implementeer het verbergen van de progress indicator
+        console.log('Progress hidden');
+    }
+    
+    showSuccess(message) {
+        // Implementeer een success melding
+        console.log('Success:', message);
+        alert(message); // Tijdelijke oplossing
+    }
+    
+    showError(message) {
+        // Implementeer een error melding
+        console.error('Error:', message);
+        alert(message); // Tijdelijke oplossing
+    }
+    
+    showInfo(message) {
+        // Implementeer een info melding
+        console.log('Info:', message);
+        alert(message); // Tijdelijke oplossing
     }
 }
