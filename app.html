@@ -67,6 +67,9 @@
                         <button class="list-group-item list-group-item-action" id="addDogBtn">
                             <i class="bi bi-plus-circle"></i> <span class="app-text" data-key="newDog">Nieuwe Hond</span>
                         </button>
+                        <button class="list-group-item list-group-item-action" id="editDogDataBtn">
+                            <i class="bi bi-pencil-square"></i> <span class="app-text" data-key="editDogData">Data Hond Bewerken</span>
+                        </button>
                         <button class="list-group-item list-group-item-action" id="searchBtn">
                             <i class="bi bi-search"></i> <span class="app-text" data-key="searchDog">Hond Zoeken</span>
                         </button>
@@ -127,10 +130,11 @@
                                         <p class="app-text" data-key="appDescription">Deze PWA (Progressive Web App) slaat alle data lokaal op in uw browser. U kunt:</p>
                                         <ul>
                                             <li class="app-text" data-key="feature1">Honden toevoegen en beheren</li>
-                                            <li class="app-text" data-key="feature2">Foto's uploaden en bekijken</li>
-                                            <li class="app-text" data-key="feature3">Fokplannen maken</li>
-                                            <li class="app-text" data-key="feature4">Privé informatie bewaren</li>
-                                            <li class="app-text" data-key="feature5">Data importeren/exporteren</li>
+                                            <li class="app-text" data-key="feature2">Data van honden bewerken</li>
+                                            <li class="app-text" data-key="feature3">Foto's uploaden en bekijken</li>
+                                            <li class="app-text" data-key="feature4">Fokplannen maken</li>
+                                            <li class="app-text" data-key="feature5">Privé informatie bewaren</li>
+                                            <li class="app-text" data-key="feature6">Data importeren/exporteren</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -175,6 +179,7 @@
     <!-- Feature Modules -->
     <script src="js/modules/DataManager.js"></script>
     <script src="js/modules/DogManager.js"></script>
+    <script src="js/modules/DogDataManager.js"></script>
     <script src="js/modules/PhotoManager.js"></script>
     <script src="js/modules/BreedingManager.js"></script>
     <script src="js/modules/PrivateInfoManager.js"></script>
@@ -195,6 +200,7 @@
                 menu: "Menu",
                 dataManagement: "Data Beheer",
                 newDog: "Nieuwe Hond",
+                editDogData: "Data Hond Bewerken",
                 searchDog: "Hond Zoeken",
                 photoGallery: "Foto Galerij",
                 breedingPlan: "Fok Planning",
@@ -209,10 +215,11 @@
                 aboutApp: "Over deze App",
                 appDescription: "Deze PWA (Progressive Web App) slaat alle data lokaal op in uw browser. U kunt:",
                 feature1: "Honden toevoegen en beheren",
-                feature2: "Foto's uploaden en bekijken",
-                feature3: "Fokplannen maken",
-                feature4: "Privé informatie bewaren",
-                feature5: "Data importeren/exporteren",
+                feature2: "Data van honden bewerken",
+                feature3: "Foto's uploaden en bekijken",
+                feature4: "Fokplannen maken",
+                feature5: "Privé informatie bewaren",
+                feature6: "Data importeren/exporteren",
                 security: "Beveiliging",
                 roleBasedAccess: "De app gebruikt rol-gebaseerde toegang:",
                 adminRole: "Administrator (admin/admin123)",
@@ -226,6 +233,7 @@
                 menu: "Menu",
                 dataManagement: "Data Management",
                 newDog: "New Dog",
+                editDogData: "Edit Dog Data",
                 searchDog: "Search Dog",
                 photoGallery: "Photo Gallery",
                 breedingPlan: "Breeding Plan",
@@ -240,10 +248,11 @@
                 aboutApp: "About this App",
                 appDescription: "This PWA (Progressive Web App) stores all data locally in your browser. You can:",
                 feature1: "Add and manage dogs",
-                feature2: "Upload and view photos",
-                feature3: "Create breeding plans",
-                feature4: "Store private information",
-                feature5: "Import/Export data",
+                feature2: "Edit dog data",
+                feature3: "Upload and view photos",
+                feature4: "Create breeding plans",
+                feature5: "Store private information",
+                feature6: "Import/Export data",
                 security: "Security",
                 roleBasedAccess: "The app uses role-based access:",
                 adminRole: "Administrator (admin/admin123)",
@@ -257,6 +266,7 @@
                 menu: "Menü",
                 dataManagement: "Datenverwaltung",
                 newDog: "Neuer Hund",
+                editDogData: "Hundedaten bearbeiten",
                 searchDog: "Hund suchen",
                 photoGallery: "Foto Galerie",
                 breedingPlan: "Zuchtplanung",
@@ -271,10 +281,11 @@
                 aboutApp: "Über diese App",
                 appDescription: "Diese PWA (Progressive Web App) speichert alle Daten lokal in Ihrem Browser. Sie können:",
                 feature1: "Hunde hinzufügen und verwalten",
-                feature2: "Fotos hochladen und ansehen",
-                feature3: "Zuchtpläne erstellen",
-                feature4: "Private Informationen speichern",
-                feature5: "Daten importieren/exportieren",
+                feature2: "Hundedaten bearbeiten",
+                feature3: "Fotos hochladen und ansehen",
+                feature4: "Zuchtpläne erstellen",
+                feature5: "Private Informationen speichern",
+                feature6: "Daten importieren/exportieren",
                 security: "Sicherheit",
                 roleBasedAccess: "Die App verwendet rollenbasierte Zugriffe:",
                 adminRole: "Administrator (admin/admin123)",
@@ -349,6 +360,10 @@
         
         document.getElementById('addDogBtn').addEventListener('click', () => {
             ui.showModal('addDog');
+        });
+        
+        document.getElementById('editDogDataBtn').addEventListener('click', () => {
+            ui.showModal('editDogData');
         });
         
         document.getElementById('searchBtn').addEventListener('click', () => {
