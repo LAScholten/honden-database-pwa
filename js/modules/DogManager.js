@@ -8,18 +8,13 @@ class DogManager extends BaseModule {
         super();
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';
         this.lastBreeds = JSON.parse(localStorage.getItem('lastBreeds') || '[]');
-        this.allDogs = []; // Voor autocomplete van ouders
+        this.allDogs = [];
         this.translations = {
             nl: {
-                // Modal titels
                 newDog: "Nieuwe Hond Toevoegen",
                 editDog: "Hond Bewerken",
-                
-                // Form velden
-                name: "Naam",
                 nameRequired: "Naam *",
                 pedigreeNumber: "Stamboomnummer *",
-                breed: "Ras",
                 breedRequired: "Ras *",
                 recentBreeds: "Recent gebruikte rassen",
                 father: "Vader",
@@ -30,77 +25,23 @@ class DogManager extends BaseModule {
                 chooseGender: "Selecteer geslacht...",
                 male: "Reu",
                 female: "Teef",
-                hipDysplasia: "Heupdysplasie",
-                hipGrades: "Selecteer graad...",
-                hipA: "A",
-                hipB: "B",
-                hipC: "C",
-                hipD: "D",
-                hipE: "E",
-                elbowDysplasia: "Elleboogdysplasie",
-                elbowGrades: "Selecteer graad...",
-                elbow0: "0",
-                elbow1: "1",
-                elbow2: "2",
-                elbow3: "3",
-                elbowNB: "NB (Niet bekend)",
-                patellaLuxation: "Patella Luxatie",
-                patellaGrades: "Selecteer graad...",
-                patella0: "0",
-                patella1: "1",
-                patella2: "2",
-                patella3: "3",
-                eyes: "Ogen",
-                eyesFree: "Vrij",
-                eyesDistichiasis: "Distichiasis",
-                eyesOther: "Overig",
-                eyesExplanation: "Verklaring overig",
-                dandyWalker: "Dandy Walker Malformation",
-                dandyOptions: "Selecteer status...",
-                dandyFreeDNA: "Vrij op DNA",
-                dandyFreeParents: "Vrij op ouders",
-                dandyCarrier: "Drager",
-                dandyAffected: "Lijder",
-                thyroid: "Schildklier",
-                thyroidNegative: "Tgaa Negatief",
-                thyroidPositive: "Tgaa Positief",
-                thyroidExplanation: "Toelichting schildklier",
-                country: "Land",
-                zipCode: "Postcode",
-                addPhoto: "Foto toevoegen",
-                chooseFile: "Kies bestand",
-                noFileChosen: "Geen bestand gekozen",
-                remarks: "Opmerkingen",
-                requiredFields: "Velden met * zijn verplicht",
                 saveDog: "Hond Opslaan",
                 cancel: "Annuleren",
                 delete: "Verwijderen",
-                choose: "Kies...",
-                
-                // Alerts
+                requiredFields: "Velden met * zijn verplicht",
                 adminOnly: "Alleen administrators mogen honden toevoegen/bewerken",
                 fieldsRequired: "Naam, stamboomnummer en ras zijn verplichte velden",
                 savingDog: "Hond opslaan...",
                 dogAdded: "Hond succesvol toegevoegd!",
                 dogUpdated: "Hond succesvol bijgewerkt!",
                 dogDeleted: "Hond succesvol verwijderd!",
-                addFailed: "Fout bij toevoegen hond: ",
-                updateFailed: "Fout bij bijwerken hond: ",
-                deleteFailed: "Fout bij verwijderen hond: ",
-                confirmDelete: "Weet u zeker dat u deze hond wilt verwijderen?",
-                photoAdded: "Foto toegevoegd",
-                photoError: "Fout bij uploaden foto: "
+                confirmDelete: "Weet u zeker dat u deze hond wilt verwijderen?"
             },
             en: {
-                // Modal titles
                 newDog: "Add New Dog",
                 editDog: "Edit Dog",
-                
-                // Form fields
-                name: "Name",
                 nameRequired: "Name *",
                 pedigreeNumber: "Pedigree number *",
-                breed: "Breed",
                 breedRequired: "Breed *",
                 recentBreeds: "Recently used breeds",
                 father: "Father",
@@ -111,77 +52,23 @@ class DogManager extends BaseModule {
                 chooseGender: "Select gender...",
                 male: "Male",
                 female: "Female",
-                hipDysplasia: "Hip Dysplasia",
-                hipGrades: "Select grade...",
-                hipA: "A",
-                hipB: "B",
-                hipC: "C",
-                hipD: "D",
-                hipE: "E",
-                elbowDysplasia: "Elbow Dysplasia",
-                elbowGrades: "Select grade...",
-                elbow0: "0",
-                elbow1: "1",
-                elbow2: "2",
-                elbow3: "3",
-                elbowNB: "NB (Not known)",
-                patellaLuxation: "Patella Luxation",
-                patellaGrades: "Select grade...",
-                patella0: "0",
-                patella1: "1",
-                patella2: "2",
-                patella3: "3",
-                eyes: "Eyes",
-                eyesFree: "Free",
-                eyesDistichiasis: "Distichiasis",
-                eyesOther: "Other",
-                eyesExplanation: "Other explanation",
-                dandyWalker: "Dandy Walker Malformation",
-                dandyOptions: "Select status...",
-                dandyFreeDNA: "Free on DNA",
-                dandyFreeParents: "Free on parents",
-                dandyCarrier: "Carrier",
-                dandyAffected: "Affected",
-                thyroid: "Thyroid",
-                thyroidNegative: "Tgaa Negative",
-                thyroidPositive: "Tgaa Positive",
-                thyroidExplanation: "Thyroid explanation",
-                country: "Country",
-                zipCode: "Zip code",
-                addPhoto: "Add photo",
-                chooseFile: "Choose file",
-                noFileChosen: "No file chosen",
-                remarks: "Remarks",
-                requiredFields: "Fields with * are required",
                 saveDog: "Save Dog",
                 cancel: "Cancel",
                 delete: "Delete",
-                choose: "Choose...",
-                
-                // Alerts
+                requiredFields: "Fields with * are required",
                 adminOnly: "Only administrators can add/edit dogs",
                 fieldsRequired: "Name, pedigree number and breed are required fields",
                 savingDog: "Saving dog...",
                 dogAdded: "Dog successfully added!",
                 dogUpdated: "Dog successfully updated!",
                 dogDeleted: "Dog successfully deleted!",
-                addFailed: "Error adding dog: ",
-                updateFailed: "Error updating dog: ",
-                deleteFailed: "Error deleting dog: ",
-                confirmDelete: "Are you sure you want to delete this dog?",
-                photoAdded: "Photo added",
-                photoError: "Error uploading photo: "
+                confirmDelete: "Are you sure you want to delete this dog?"
             },
             de: {
-                // Modal Titel
                 newDog: "Neuen Hund hinzufügen",
                 editDog: "Hund bearbeiten",
-                
-                // Formular Felder
-                name: "Name",
                 nameRequired: "Name *",
                 pedigreeNumber: "Stammbaum-Nummer *",
-                breed: "Rasse",
                 breedRequired: "Rasse *",
                 recentBreeds: "Kürzlich verwendete Rassen",
                 father: "Vater",
@@ -192,76 +79,23 @@ class DogManager extends BaseModule {
                 chooseGender: "Geschlecht wählen...",
                 male: "Rüde",
                 female: "Hündin",
-                hipDysplasia: "Hüftdysplasie",
-                hipGrades: "Grad wählen...",
-                hipA: "A",
-                hipB: "B",
-                hipC: "C",
-                hipD: "D",
-                hipE: "E",
-                elbowDysplasia: "Ellbogendysplasie",
-                elbowGrades: "Grad wählen...",
-                elbow0: "0",
-                elbow1: "1",
-                elbow2: "2",
-                elbow3: "3",
-                elbowNB: "NB (Nicht bekannt)",
-                patellaLuxation: "Patella Luxation",
-                patellaGrades: "Grad wählen...",
-                patella0: "0",
-                patella1: "1",
-                patella2: "2",
-                patella3: "3",
-                eyes: "Augen",
-                eyesFree: "Frei",
-                eyesDistichiasis: "Distichiasis",
-                eyesOther: "Andere",
-                eyesExplanation: "Erklärung andere",
-                dandyWalker: "Dandy Walker Malformation",
-                dandyOptions: "Status wählen...",
-                dandyFreeDNA: "Frei auf DNA",
-                dandyFreeParents: "Frei auf Eltern",
-                dandyCarrier: "Träger",
-                dandyAffected: "Betroffen",
-                thyroid: "Schilddrüse",
-                thyroidNegative: "Tgaa Negativ",
-                thyroidPositive: "Tgaa Positiv",
-                thyroidExplanation: "Schilddrüse Erklärung",
-                country: "Land",
-                zipCode: "Postleitzahl",
-                addPhoto: "Foto hinzufügen",
-                chooseFile: "Datei wählen",
-                noFileChosen: "Keine Datei gewählt",
-                remarks: "Bemerkungen",
-                requiredFields: "Felder mit * sind Pflichtfelder",
                 saveDog: "Hund speichern",
                 cancel: "Abbrechen",
                 delete: "Löschen",
-                choose: "Wählen...",
-                
-                // Meldungen
+                requiredFields: "Felder mit * sind Pflichtfelder",
                 adminOnly: "Nur Administratoren können Hunde hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer en Rasse sind Pflichtfelder",
                 savingDog: "Hund wird gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
                 dogUpdated: "Hund erfolgreich aktualisiert!",
                 dogDeleted: "Hund erfolgreich gelöscht!",
-                addFailed: "Fehler beim Hinzufügen des Hundes: ",
-                updateFailed: "Fehler beim Aktualisieren des Hundes: ",
-                deleteFailed: "Fehler beim Löschen des Hundes: ",
-                confirmDelete: "Sind Sie sicher, dass Sie diesen Hund löschen möchten?",
-                photoAdded: "Foto hinzugefügt",
-                photoError: "Fehler beim Hochladen des Fotos: "
+                confirmDelete: "Sind Sie sicher, dass Sie diesen Hund löschen möchten?"
             }
         };
     }
     
     t(key) {
         return this.translations[this.currentLang][key] || key;
-    }
-    
-    updateLanguage(lang) {
-        this.currentLang = lang;
     }
     
     addToLastBreeds(breed) {
@@ -301,7 +135,6 @@ class DogManager extends BaseModule {
         
         const data = dogData || {};
         
-        // Genereer recente rassen opties
         let recentBreedsHTML = '';
         if (this.lastBreeds.length > 0) {
             recentBreedsHTML = `
@@ -375,7 +208,7 @@ class DogManager extends BaseModule {
                                             <label for="father" class="form-label">${t('father')}</label>
                                             <input type="text" class="form-control parent-input" id="father" 
                                                    value="${data.vader || ''}" 
-                                                   placeholder="Begin met typen om te zoeken..."
+                                                   placeholder="Begin met typen om vader te zoeken..."
                                                    data-parent-type="father"
                                                    autocomplete="off">
                                             <div class="autocomplete-dropdown" id="fatherDropdown" style="display: none;"></div>
@@ -386,7 +219,7 @@ class DogManager extends BaseModule {
                                             <label for="mother" class="form-label">${t('mother')}</label>
                                             <input type="text" class="form-control parent-input" id="mother" 
                                                    value="${data.moeder || ''}" 
-                                                   placeholder="Begin met typen om te zoeken..."
+                                                   placeholder="Begin met typen om moeder te zoeken..."
                                                    data-parent-type="mother"
                                                    autocomplete="off">
                                             <div class="autocomplete-dropdown" id="motherDropdown" style="display: none;"></div>
@@ -407,118 +240,6 @@ class DogManager extends BaseModule {
                                             <input type="date" class="form-control" id="deathDate" value="${data.overlijdensdatum || ''}">
                                         </div>
                                     </div>
-                                </div>
-                                
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label for="hipDysplasia" class="form-label">${t('hipDysplasia')}</label>
-                                            <select class="form-select" id="hipDysplasia">
-                                                <option value="">${t('hipGrades')}</option>
-                                                <option value="A" ${data.heupdysplasie === 'A' ? 'selected' : ''}>${t('hipA')}</option>
-                                                <option value="B" ${data.heupdysplasie === 'B' ? 'selected' : ''}>${t('hipB')}</option>
-                                                <option value="C" ${data.heupdysplasie === 'C' ? 'selected' : ''}>${t('hipC')}</option>
-                                                <option value="D" ${data.heupdysplasie === 'D' ? 'selected' : ''}>${t('hipD')}</option>
-                                                <option value="E" ${data.heupdysplasie === 'E' ? 'selected' : ''}>${t('hipE')}</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label for="elbowDysplasia" class="form-label">${t('elbowDysplasia')}</label>
-                                            <select class="form-select" id="elbowDysplasia">
-                                                <option value="">${t('elbowGrades')}</option>
-                                                <option value="0" ${data.elleboogdysplasie === '0' ? 'selected' : ''}>${t('elbow0')}</option>
-                                                <option value="1" ${data.elleboogdysplasie === '1' ? 'selected' : ''}>${t('elbow1')}</option>
-                                                <option value="2" ${data.elleboogdysplasie === '2' ? 'selected' : ''}>${t('elbow2')}</option>
-                                                <option value="3" ${data.elleboogdysplasie === '3' ? 'selected' : ''}>${t('elbow3')}</option>
-                                                <option value="NB" ${data.elleboogdysplasie === 'NB' ? 'selected' : ''}>${t('elbowNB')}</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label for="patellaLuxation" class="form-label">${t('patellaLuxation')}</label>
-                                            <select class="form-select" id="patellaLuxation">
-                                                <option value="">${t('patellaGrades')}</option>
-                                                <option value="0" ${data.patella === '0' ? 'selected' : ''}>${t('patella0')}</option>
-                                                <option value="1" ${data.patella === '1' ? 'selected' : ''}>${t('patella1')}</option>
-                                                <option value="2" ${data.patella === '2' ? 'selected' : ''}>${t('patella2')}</option>
-                                                <option value="3" ${data.patella === '3' ? 'selected' : ''}>${t('patella3')}</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="eyes" class="form-label">${t('eyes')}</label>
-                                            <select class="form-select" id="eyes">
-                                                <option value="">${t('choose')}</option>
-                                                <option value="Vrij" ${data.ogen === 'Vrij' ? 'selected' : ''}>${t('eyesFree')}</option>
-                                                <option value="Distichiasis" ${data.ogen === 'Distichiasis' ? 'selected' : ''}>${t('eyesDistichiasis')}</option>
-                                                <option value="Overig" ${data.ogen === 'Overig' ? 'selected' : ''}>${t('eyesOther')}</option>
-                                            </select>
-                                        </div>
-                                        <div class="mb-3" id="eyesExplanationContainer" style="${data.ogen === 'Overig' ? '' : 'display: none;'}">
-                                            <label for="eyesExplanation" class="form-label">${t('eyesExplanation')}</label>
-                                            <input type="text" class="form-control" id="eyesExplanation" value="${data.ogenVerklaring || ''}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="dandyWalker" class="form-label">${t('dandyWalker')}</label>
-                                            <select class="form-select" id="dandyWalker">
-                                                <option value="">${t('dandyOptions')}</option>
-                                                <option value="Vrij op DNA" ${data.dandyWalker === 'Vrij op DNA' ? 'selected' : ''}>${t('dandyFreeDNA')}</option>
-                                                <option value="Vrij op ouders" ${data.dandyWalker === 'Vrij op ouders' ? 'selected' : ''}>${t('dandyFreeParents')}</option>
-                                                <option value="Drager" ${data.dandyWalker === 'Drager' ? 'selected' : ''}>${t('dandyCarrier')}</option>
-                                                <option value="Lijder" ${data.dandyWalker === 'Lijder' ? 'selected' : ''}>${t('dandyAffected')}</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="thyroid" class="form-label">${t('thyroid')}</label>
-                                            <select class="form-select" id="thyroid">
-                                                <option value="">${t('choose')}</option>
-                                                <option value="Negatief" ${data.schildklier === 'Negatief' ? 'selected' : ''}>${t('thyroidNegative')}</option>
-                                                <option value="Positief" ${data.schildklier === 'Positief' ? 'selected' : ''}>${t('thyroidPositive')}</option>
-                                            </select>
-                                        </div>
-                                        <div class="mb-3" id="thyroidExplanationContainer" style="${data.schildklier === 'Positief' ? '' : 'display: none;'}">
-                                            <label for="thyroidExplanation" class="form-label">${t('thyroidExplanation')}</label>
-                                            <input type="text" class="form-control" id="thyroidExplanation" value="${data.schildklierVerklaring || ''}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="country" class="form-label">${t('country')}</label>
-                                            <input type="text" class="form-control" id="country" value="${data.land || ''}">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="zipCode" class="form-label">${t('zipCode')}</label>
-                                            <input type="text" class="form-control" id="zipCode" value="${data.postcode || ''}">
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="dogPhoto" class="form-label">${t('addPhoto')}</label>
-                                    <div class="input-group">
-                                        <input type="file" class="form-control" id="dogPhoto" accept="image/*">
-                                        <label class="input-group-text" for="dogPhoto">${t('chooseFile')}</label>
-                                    </div>
-                                    <div class="form-text">${t('noFileChosen')}</div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="remarks" class="form-label">${t('remarks')}</label>
-                                    <textarea class="form-control" id="remarks" rows="3">${data.opmerkingen || ''}</textarea>
                                 </div>
                                 
                                 <div class="alert alert-info">
@@ -573,19 +294,13 @@ class DogManager extends BaseModule {
                     font-size: 0.85em;
                     color: #666;
                 }
-                
-                .parent-input {
-                    position: relative;
-                }
             </style>
         `;
     }
     
     setupEvents() {
-        // Laad honden voor autocomplete
         this.loadAllDogs();
         
-        // Event listeners voor formulier
         const saveBtn = document.getElementById('saveDogBtn');
         if (saveBtn) {
             saveBtn.addEventListener('click', () => {
@@ -594,7 +309,6 @@ class DogManager extends BaseModule {
             });
         }
         
-        // Delete knop
         const deleteBtn = document.getElementById('deleteDogBtn');
         if (deleteBtn) {
             deleteBtn.addEventListener('click', () => {
@@ -602,29 +316,6 @@ class DogManager extends BaseModule {
             });
         }
         
-        // Eyes dropdown handler
-        const eyesSelect = document.getElementById('eyes');
-        if (eyesSelect) {
-            eyesSelect.addEventListener('change', (e) => {
-                const explanationContainer = document.getElementById('eyesExplanationContainer');
-                if (explanationContainer) {
-                    explanationContainer.style.display = e.target.value === 'Overig' ? 'block' : 'none';
-                }
-            });
-        }
-        
-        // Thyroid dropdown handler
-        const thyroidSelect = document.getElementById('thyroid');
-        if (thyroidSelect) {
-            thyroidSelect.addEventListener('change', (e) => {
-                const explanationContainer = document.getElementById('thyroidExplanationContainer');
-                if (explanationContainer) {
-                    explanationContainer.style.display = e.target.value === 'Positief' ? 'block' : 'none';
-                }
-            });
-        }
-        
-        // Recente rassen knoppen
         document.querySelectorAll('.recent-breed-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const breed = e.target.dataset.breed;
@@ -635,15 +326,13 @@ class DogManager extends BaseModule {
             });
         });
         
-        // Setup autocomplete voor ouders
         this.setupParentAutocomplete();
     }
     
     setupParentAutocomplete() {
-        // Event listeners voor vader en moeder velden
         document.querySelectorAll('.parent-input').forEach(input => {
             input.addEventListener('focus', () => {
-                this.loadAllDogs(); // Zorg dat honden geladen zijn
+                this.loadAllDogs();
             });
             
             input.addEventListener('input', (e) => {
@@ -653,7 +342,6 @@ class DogManager extends BaseModule {
             });
             
             input.addEventListener('blur', (e) => {
-                // Wacht even voordat dropdown wordt verborgen (voor klikken op item)
                 setTimeout(() => {
                     const dropdown = document.getElementById(`${parentType}Dropdown`);
                     if (dropdown) {
@@ -663,7 +351,6 @@ class DogManager extends BaseModule {
             });
         });
         
-        // Klik buiten dropdown om te verbergen
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.parent-input') && !e.target.closest('.autocomplete-dropdown')) {
                 document.querySelectorAll('.autocomplete-dropdown').forEach(dropdown => {
@@ -682,19 +369,12 @@ class DogManager extends BaseModule {
             return;
         }
         
-        // Filter honden voor autocomplete (alleen reuen voor vader, teven voor moeder)
+        const targetGender = parentType === 'father' ? 'reuen' : 'teven';
         const suggestions = this.allDogs.filter(dog => {
-            const dogName = dog.naam.toLowerCase();
+            const dogName = dog.naam ? dog.naam.toLowerCase() : '';
             const matchesSearch = dogName.includes(searchTerm);
-            
-            // Filter op geslacht
-            if (parentType === 'father') {
-                return matchesSearch && dog.geslacht === 'reuen';
-            } else if (parentType === 'mother') {
-                return matchesSearch && dog.geslacht === 'teven';
-            }
-            return matchesSearch;
-        }).slice(0, 8); // Max 8 suggesties
+            return matchesSearch && dog.geslacht === targetGender;
+        }).slice(0, 8);
         
         if (suggestions.length === 0) {
             dropdown.style.display = 'none';
@@ -704,7 +384,7 @@ class DogManager extends BaseModule {
         let html = '';
         suggestions.forEach(dog => {
             html += `
-                <div class="autocomplete-item" data-id="${dog.id}" data-name="${dog.naam}" data-pedigree="${dog.stamboomnr || ''}">
+                <div class="autocomplete-item" data-id="${dog.id}" data-name="${dog.naam}">
                     <div class="dog-name">${dog.naam}</div>
                     <div class="dog-info">
                         ${dog.ras || 'Onbekend ras'} | ${dog.stamboomnr || 'Geen stamboom'}
@@ -716,7 +396,6 @@ class DogManager extends BaseModule {
         dropdown.innerHTML = html;
         dropdown.style.display = 'block';
         
-        // Positioneer dropdown
         const input = document.getElementById(parentType);
         if (input) {
             const rect = input.getBoundingClientRect();
@@ -725,7 +404,6 @@ class DogManager extends BaseModule {
             dropdown.style.width = `${rect.width}px`;
         }
         
-        // Event listeners voor autocomplete items
         dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 const dogId = item.getAttribute('data-id');
@@ -733,12 +411,8 @@ class DogManager extends BaseModule {
                 const input = document.getElementById(parentType);
                 const idInput = document.getElementById(`${parentType}Id`);
                 
-                if (input) {
-                    input.value = dogName;
-                }
-                if (idInput) {
-                    idInput.value = dogId;
-                }
+                if (input) input.value = dogName;
+                if (idInput) idInput.value = dogId;
                 
                 dropdown.style.display = 'none';
             });
@@ -765,31 +439,14 @@ class DogManager extends BaseModule {
             moederId: document.getElementById('motherId').value ? parseInt(document.getElementById('motherId').value) : null,
             geboortedatum: document.getElementById('birthDate').value,
             overlijdensdatum: document.getElementById('deathDate').value,
-            heupdysplasie: document.getElementById('hipDysplasia').value,
-            elleboogdysplasie: document.getElementById('elbowDysplasia').value,
-            patella: document.getElementById('patellaLuxation').value,
-            ogen: document.getElementById('eyes').value,
-            ogenVerklaring: document.getElementById('eyesExplanation')?.value.trim() || '',
-            dandyWalker: document.getElementById('dandyWalker').value,
-            schildklier: document.getElementById('thyroid').value,
-            schildklierVerklaring: document.getElementById('thyroidExplanation')?.value.trim() || '',
-            land: document.getElementById('country').value.trim(),
-            postcode: document.getElementById('zipCode').value.trim(),
-            opmerkingen: document.getElementById('remarks').value.trim(),
             updatedAt: new Date().toISOString()
         };
-        
-        // Alleen bij toevoegen
-        if (!isEdit) {
-            dogData.createdAt = new Date().toISOString();
-        }
         
         if (!dogData.naam || !dogData.stamboomnr || !dogData.ras) {
             this.showError(this.t('fieldsRequired'));
             return;
         }
         
-        // Voeg ras toe aan recente rassen
         this.addToLastBreeds(dogData.ras);
         
         this.showProgress(this.t('savingDog'));
@@ -800,28 +457,21 @@ class DogManager extends BaseModule {
                 this.hideProgress();
                 this.showSuccess(this.t('dogUpdated'));
             } else {
+                dogData.createdAt = new Date().toISOString();
                 await this.db.voegHondToe(dogData);
                 this.hideProgress();
                 this.showSuccess(this.t('dogAdded'));
             }
             
-            // Foto uploaden als er een is geselecteerd
-            const photoInput = document.getElementById('dogPhoto');
-            if (photoInput.files.length > 0) {
-                await this.uploadPhoto(dogData.stamboomnr, photoInput.files[0]);
-            }
-            
-            // Modal sluiten
-            const modalId = isEdit ? 'editDogModal' : 'addDogModal';
             setTimeout(() => {
+                const modalId = isEdit ? 'editDogModal' : 'addDogModal';
                 const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
                 if (modal) modal.hide();
             }, 1500);
             
         } catch (error) {
             this.hideProgress();
-            const errorMsg = isEdit ? this.t('updateFailed') : this.t('addFailed');
-            this.showError(`${errorMsg}${error.message}`);
+            this.showError(`Fout bij opslaan: ${error.message}`);
         }
     }
     
@@ -834,9 +484,7 @@ class DogManager extends BaseModule {
         const dogId = document.getElementById('dogId').value;
         if (!dogId) return;
         
-        if (!confirm(this.t('confirmDelete'))) {
-            return;
-        }
+        if (!confirm(this.t('confirmDelete'))) return;
         
         this.showProgress("Verwijderen...");
         
@@ -852,203 +500,7 @@ class DogManager extends BaseModule {
             
         } catch (error) {
             this.hideProgress();
-            this.showError(`${this.t('deleteFailed')}${error.message}`);
-        }
-    }
-    
-    async uploadPhoto(pedigreeNumber, file) {
-        try {
-            const reader = new FileReader();
-            
-            return new Promise((resolve, reject) => {
-                reader.onload = async (e) => {
-                    try {
-                        const photoData = {
-                            stamboomnr: pedigreeNumber,
-                            data: e.target.result,
-                            filename: file.name,
-                            size: file.size,
-                            type: file.type,
-                            uploadedAt: new Date().toISOString()
-                        };
-                        
-                        await this.db.voegFotoToe(photoData);
-                        this.showSuccess(this.t('photoAdded'));
-                        resolve();
-                    } catch (error) {
-                        reject(error);
-                    }
-                };
-                
-                reader.onerror = () => {
-                    reject(new Error('Fout bij lezen bestand'));
-                };
-                
-                reader.readAsDataURL(file);
-            });
-        } catch (error) {
-            this.showError(`${this.t('photoError')}${error.message}`);
-        }
-    }
-    
-    async viewDogDetails(hondId) {
-        // Deze functie wordt aangeroepen vanuit SearchManager
-        const t = this.t.bind(this);
-        
-        try {
-            const honden = await this.db.getHonden();
-            const hond = honden.find(h => h.id === parseInt(hondId));
-            
-            if (!hond) {
-                this.showError('Hond niet gevonden');
-                return;
-            }
-            
-            const genderText = hond.geslacht === 'reuen' ? t('male') : 
-                             hond.geslacht === 'teven' ? t('female') : '-';
-            
-            const html = `
-                <div class="modal fade" id="viewDogModal" tabindex="-1" aria-labelledby="viewDogModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header bg-info text-white">
-                                <h5 class="modal-title" id="viewDogModalLabel">
-                                    <i class="bi bi-eye"></i> ${hond.naam} - ${t('details')}
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <h6 class="border-bottom pb-2">${t('dogInfo')}</h6>
-                                        <table class="table table-sm">
-                                            <tr>
-                                                <th style="width: 40%">${t('name')}:</th>
-                                                <td>${hond.naam}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>${t('breed')}:</th>
-                                                <td>${hond.ras || '-'}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>${t('pedigreeNumber')}:</th>
-                                                <td><code>${hond.stamboomnr || '-'}</code></td>
-                                            </tr>
-                                            <tr>
-                                                <th>${t('gender')}:</th>
-                                                <td>${genderText}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>${t('birthDate')}:</th>
-                                                <td>${hond.geboortedatum ? new Date(hond.geboortedatum).toLocaleDateString(this.currentLang) : '-'}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>${t('deathDate')}:</th>
-                                                <td>${hond.overlijdensdatum ? new Date(hond.overlijdensdatum).toLocaleDateString(this.currentLang) : '-'}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>${t('country')}:</th>
-                                                <td>${hond.land || '-'}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>${t('zipCode')}:</th>
-                                                <td>${hond.postcode || '-'}</td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <h6 class="border-bottom pb-2">${t('pedigreeInfo')}</h6>
-                                        <table class="table table-sm">
-                                            <tr>
-                                                <th style="width: 40%">${t('father')}:</th>
-                                                <td>${hond.vader || '-'}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>${t('mother')}:</th>
-                                                <td>${hond.moeder || '-'}</td>
-                                            </tr>
-                                        </table>
-                                        
-                                        <h6 class="border-bottom pb-2 mt-4">${t('locationInfo')}</h6>
-                                        <table class="table table-sm">
-                                            <tr>
-                                                <th>${t('createdAt')}:</th>
-                                                <td>${new Date(hond.createdAt).toLocaleString(this.currentLang)}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>${t('updatedAt')}:</th>
-                                                <td>${new Date(hond.updatedAt).toLocaleString(this.currentLang)}</td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                </div>
-                                
-                                <div class="row mt-4">
-                                    <div class="col-12">
-                                        <h6 class="border-bottom pb-2">${t('healthInfo')}</h6>
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <strong>${t('hipDysplasia')}:</strong><br>
-                                                ${hond.heupdysplasie || '-'}
-                                            </div>
-                                            <div class="col-md-3">
-                                                <strong>${t('elbowDysplasia')}:</strong><br>
-                                                ${hond.elleboogdysplasie || '-'}
-                                            </div>
-                                            <div class="col-md-3">
-                                                <strong>${t('patellaLuxation')}:</strong><br>
-                                                ${hond.patella || '-'}
-                                            </div>
-                                            <div class="col-md-3">
-                                                <strong>${t('eyes')}:</strong><br>
-                                                ${hond.ogen || '-'}
-                                                ${hond.ogenVerklaring ? ` (${hond.ogenVerklaring})` : ''}
-                                            </div>
-                                        </div>
-                                        <div class="row mt-3">
-                                            <div class="col-md-6">
-                                                <strong>${t('dandyWalker')}:</strong><br>
-                                                ${hond.dandyWalker || '-'}
-                                            </div>
-                                            <div class="col-md-6">
-                                                <strong>${t('thyroid')}:</strong><br>
-                                                ${hond.schildklier || '-'}
-                                                ${hond.schildklierVerklaring ? ` (${hond.schildklierVerklaring})` : ''}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                ${hond.opmerkingen ? `
-                                <div class="mt-4">
-                                    <h6 class="border-bottom pb-2">${t('remarks')}</h6>
-                                    <div class="bg-light p-3 rounded">
-                                        ${hond.opmerkingen}
-                                    </div>
-                                </div>
-                                ` : ''}
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            const container = document.getElementById('modalsContainer');
-            container.insertAdjacentHTML('beforeend', html);
-            
-            const modalElement = document.getElementById('viewDogModal');
-            const modal = new bootstrap.Modal(modalElement);
-            modal.show();
-            
-            modalElement.addEventListener('hidden.bs.modal', () => {
-                modalElement.remove();
-            });
-            
-        } catch (error) {
-            this.showError(`Fout bij laden hond details: ${error.message}`);
+            this.showError(`Fout bij verwijderen: ${error.message}`);
         }
     }
 }

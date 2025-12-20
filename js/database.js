@@ -5,8 +5,8 @@
 
 class HondenDatabase {
     constructor() {
-        this.dbName = 'HondenDatabase_v3';
-        this.version = 3;
+        this.dbName = 'HondenDatabase_v4'; // Versie verhoogd naar v4
+        this.version = 4; // Nieuwe versie voor vaderId/moederId
         this.db = null;
         this.isInitialized = false;
     }
@@ -40,26 +40,6 @@ class HondenDatabase {
     }
 
     createStores(db, oldVersion) {
-        // Verwijder oude stores als we upgraden van v2 naar v3
-        if (oldVersion < 3) {
-            try {
-                if (db.objectStoreNames.contains('honden')) {
-                    db.deleteObjectStore('honden');
-                    console.log('Oude honden store verwijderd');
-                }
-                if (db.objectStoreNames.contains('fotos')) {
-                    db.deleteObjectStore('fotos');
-                    console.log('Oude fotos store verwijderd');
-                }
-                if (db.objectStoreNames.contains('priveInfo')) {
-                    db.deleteObjectStore('priveInfo');
-                    console.log('Oude priveInfo store verwijderd');
-                }
-            } catch (error) {
-                console.log('Fout bij verwijderen oude stores:', error);
-            }
-        }
-        
         // Store 1: Honden data
         if (!db.objectStoreNames.contains('honden')) {
             console.log('Creëer nieuwe honden store');
@@ -73,7 +53,9 @@ class HondenDatabase {
             hondenStore.createIndex('ras', 'ras', { unique: false });
             hondenStore.createIndex('geslacht', 'geslacht', { unique: false });
             hondenStore.createIndex('vader', 'vader', { unique: false });
+            hondenStore.createIndex('vaderId', 'vaderId', { unique: false });
             hondenStore.createIndex('moeder', 'moeder', { unique: false });
+            hondenStore.createIndex('moederId', 'moederId', { unique: false });
             hondenStore.createIndex('geboortedatum', 'geboortedatum', { unique: false });
             hondenStore.createIndex('overlijdensdatum', 'overlijdensdatum', { unique: false });
             hondenStore.createIndex('heupdysplasie', 'heupdysplasie', { unique: false });
@@ -86,6 +68,21 @@ class HondenDatabase {
             hondenStore.createIndex('postcode', 'postcode', { unique: false });
             hondenStore.createIndex('createdAt', 'createdAt', { unique: false });
             hondenStore.createIndex('updatedAt', 'updatedAt', { unique: false });
+        } else if (oldVersion < 4) {
+            // Upgrade naar versie 4: voeg vaderId/moederId indexen toe
+            console.log('Upgrade honden store naar versie 4');
+            const transaction = event.target.transaction;
+            const hondenStore = transaction.objectStore('honden');
+            
+            if (!hondenStore.indexNames.contains('vaderId')) {
+                hondenStore.createIndex('vaderId', 'vaderId', { unique: false });
+                console.log('vaderId index toegevoegd');
+            }
+            
+            if (!hondenStore.indexNames.contains('moederId')) {
+                hondenStore.createIndex('moederId', 'moederId', { unique: false });
+                console.log('moederId index toegevoegd');
+            }
         }
         
         // Store 2: Foto's
@@ -127,7 +124,9 @@ class HondenDatabase {
             ras: hond.ras || '',
             geslacht: hond.geslacht || '',
             vader: hond.vader || '',
+            vaderId: hond.vaderId || null,
             moeder: hond.moeder || '',
+            moederId: hond.moederId || null,
             geboortedatum: hond.geboortedatum || '',
             overlijdensdatum: hond.overlijdensdatum || '',
             heupdysplasie: hond.heupdysplasie || '',
@@ -281,6 +280,19 @@ class HondenDatabase {
         });
     }
 
+    async getHondById(id) {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['honden'], 'readonly');
+            const store = transaction.objectStore('honden');
+            const request = store.get(id);
+            
+            request.onsuccess = () => resolve(request.result || null);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
     // ========== FOTO OPERATIES ==========
 
     async voegFotoToe(foto) {
@@ -338,7 +350,6 @@ class HondenDatabase {
     async bewaarPriveInfo(priveInfo) {
         await this.init();
         
-        // Controleer of gebruiker toegang heeft tot privé info
         const user = window.auth?.getCurrentUser();
         if (!user) {
             throw new Error('Gebruiker niet ingelogd');
@@ -385,7 +396,6 @@ class HondenDatabase {
     async getPriveInfoVoorStamboomnr(stamboomnr) {
         await this.init();
         
-        // Controleer of gebruiker toegang heeft tot privé info
         const user = window.auth?.getCurrentUser();
         if (!user) {
             throw new Error('Gebruiker niet ingelogd');
@@ -403,9 +413,7 @@ class HondenDatabase {
             
             request.onsuccess = () => {
                 const result = request.result;
-                // Als gebruiker alleen leestoegang heeft, retourneren we alleen viewable data
                 if (result && user.permissions && user.permissions.includes('private_view') && !user.permissions.includes('private_full')) {
-                    // Retourneer alleen basis info zonder gevoelige details
                     resolve({
                         stamboomnr: result.stamboomnr,
                         laatstGewijzigd: result.laatstGewijzigd,
@@ -515,7 +523,6 @@ class HondenDatabase {
         if (importData.priveInfo && Array.isArray(importData.priveInfo)) {
             for (const info of importData.priveInfo) {
                 try {
-                    // Controleer of de hond bestaat voordat we privé info toevoegen
                     const hondBestaat = await this.getHondByStamboomnr(info.stamboomnr);
                     if (hondBestaat) {
                         await this.bewaarPriveInfo(info);
@@ -602,7 +609,6 @@ class HondenDatabase {
             this.getAllFotos()
         ]);
         
-        // Voor privé info: alleen tellen als gebruiker toegang heeft
         let priveInfoCount = 0;
         try {
             if (window.auth?.getCurrentUser()?.permissions?.includes('private_full')) {
@@ -693,10 +699,8 @@ class HondenDatabase {
                 throw new Error('Ongeldig backup formaat');
             }
             
-            // Wis eerst alle bestaande data
             await this.wisAlleData();
             
-            // Importeer de backup data
             const resultaat = await this.importData(backupData, true);
             
             console.log('Backup herstel voltooid:', resultaat);
