@@ -1,23 +1,23 @@
 // js/modules/DogManager.js
 
 /**
- * Hond Management Module
- * Beheert toevoegen van nieuwe honden
+ * DogManager - Module voor het toevoegen en beheren van honden
+ * Alleen toegankelijk voor administrators
  */
-
 class DogManager extends BaseModule {
     constructor() {
-        super('dogmanager', 'Hond Beheer');
+        super('dogmanager', 'Hond Toevoegen');
         console.log('DogManager geïnitialiseerd');
-        this.currentLang = localStorage.getItem('appLanguage') || 'nl';
-        this.lastBreeds = JSON.parse(localStorage.getItem('lastBreeds') || '[]');
-        this.allDogs = [];
     }
     
+    /**
+     * Render de module interface
+     */
     getModalHTML() {
         // Controleer of gebruiker admin is
         const isAdmin = auth.isAdmin();
-        const username = auth.getCurrentUser() ? auth.getCurrentUser().username : 'Gast';
+        const user = auth.getCurrentUser();
+        const username = user ? user.username : 'Gast';
         
         if (!isAdmin) {
             return `
@@ -62,14 +62,16 @@ class DogManager extends BaseModule {
             `;
         }
         
-        // Voor admins: toon normaal formulier
+        // Laad recente rassen uit localStorage
+        const lastBreeds = JSON.parse(localStorage.getItem('lastBreeds') || '[]');
         let recentBreedsHTML = '';
-        if (this.lastBreeds.length > 0) {
+        
+        if (lastBreeds.length > 0) {
             recentBreedsHTML = `
                 <div class="form-text mb-2" data-key="recentBreeds">Recent gebruikte rassen:</div>
                 <div class="d-flex flex-wrap gap-2 mb-3">
             `;
-            this.lastBreeds.forEach(breed => {
+            lastBreeds.forEach(breed => {
                 recentBreedsHTML += `
                     <button type="button" class="btn btn-sm btn-outline-secondary recent-breed-btn" data-breed="${breed}">
                         ${breed}
@@ -85,10 +87,10 @@ class DogManager extends BaseModule {
                     <div class="modal-content">
                         <div class="modal-header bg-primary text-white">
                             <h5 class="modal-title" id="addDogModalLabel">
-                                <i class="bi bi-plus-circle"></i>
+                                <i class="bi bi-plus-circle me-2"></i>
                                 <span class="module-title" data-key="newDog">Nieuwe Hond Toevoegen</span>
                             </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <form id="addDogForm">
@@ -130,9 +132,9 @@ class DogManager extends BaseModule {
                                                 <span data-key="gender">Geslacht</span>
                                             </label>
                                             <select class="form-select" id="gender">
-                                                <option value="" data-key="chooseGender">Selecteer geslacht...</option>
-                                                <option value="reuen" data-key="male">Reu</option>
-                                                <option value="teven" data-key="female">Teef</option>
+                                                <option value="">Selecteer geslacht...</option>
+                                                <option value="reuen">Reu</option>
+                                                <option value="teven">Teef</option>
                                             </select>
                                         </div>
                                     </div>
@@ -146,7 +148,7 @@ class DogManager extends BaseModule {
                                             </label>
                                             <input type="text" class="form-control parent-input" id="father" 
                                                    value="" 
-                                                   data-placeholder="fatherSearch"
+                                                   placeholder="Begin met typen om vader te zoeken..."
                                                    data-parent-type="father"
                                                    autocomplete="off">
                                             <div class="autocomplete-dropdown" id="fatherDropdown"></div>
@@ -159,7 +161,7 @@ class DogManager extends BaseModule {
                                             </label>
                                             <input type="text" class="form-control parent-input" id="mother" 
                                                    value="" 
-                                                   data-placeholder="motherSearch"
+                                                   placeholder="Begin met typen om moeder te zoeken..."
                                                    data-parent-type="mother"
                                                    autocomplete="off">
                                             <div class="autocomplete-dropdown" id="motherDropdown"></div>
@@ -208,62 +210,62 @@ class DogManager extends BaseModule {
         `;
     }
     
+    /**
+     * Setup event listeners voor deze module
+     */
     setupEvents() {
-        console.log('DogManager setupEvents aangeroepen');
+        console.log('DogManager setupEvents called');
         
         // Vertaal de modal tekst
         setTimeout(() => {
             this.translateModal();
         }, 100);
         
-        // Als gebruiker geen admin is, stop hier - er zijn geen events nodig voor de toegang geweigerd modal
+        // Als gebruiker geen admin is, stop hier - geen extra events nodig
         if (!auth.isAdmin()) {
-            console.log('Gebruiker is geen admin, alleen close functie nodig');
-            
-            // Voeg event listener toe voor modal sluiten
             const modal = document.getElementById('addDogModal');
             if (modal) {
                 modal.addEventListener('shown.bs.modal', () => {
-                    console.log('Toegang geweigerd modal is nu zichtbaar');
+                    console.log('DogManager toegang geweigerd modal is nu zichtbaar');
                 });
             }
             return;
         }
         
-        // Voor admins: laad honden voor autocomplete
-        this.loadAllDogs();
-        
-        // Event listeners voor formulier
-        const saveBtn = document.getElementById('saveDogBtn');
-        if (saveBtn) {
-            saveBtn.addEventListener('click', () => {
-                this.saveDog();
+        // Alleen voor admins: laad honden en setup events
+        this.loadAllDogs().then(() => {
+            // Event listener voor opslaan knop
+            const saveBtn = document.getElementById('saveDogBtn');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', () => {
+                    this.saveDog();
+                });
+            }
+            
+            // Recente rassen knoppen
+            document.querySelectorAll('.recent-breed-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const breed = e.target.dataset.breed;
+                    const breedInput = document.getElementById('breed');
+                    if (breedInput) {
+                        breedInput.value = breed;
+                    }
+                });
             });
-        }
-        
-        // Recente rassen knoppen
-        document.querySelectorAll('.recent-breed-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const breed = e.target.dataset.breed;
-                const breedInput = document.getElementById('breed');
-                if (breedInput) {
-                    breedInput.value = breed;
-                }
-            });
-        });
-        
-        // Setup autocomplete voor ouders (wacht even tot DOM geladen is)
-        setTimeout(() => {
+            
+            // Setup autocomplete voor ouders
             this.setupParentAutocomplete();
-        }, 100);
+        });
     }
     
+    /**
+     * Vertaal de modal tekst
+     */
     translateModal() {
         const currentLang = localStorage.getItem('appLanguage') || 'nl';
         const translations = {
             nl: {
                 newDog: "Nieuwe Hond Toevoegen",
-                editDog: "Hond Bewerken",
                 nameRequired: "Naam *",
                 pedigreeNumber: "Stamboomnummer *",
                 breedRequired: "Ras *",
@@ -273,34 +275,14 @@ class DogManager extends BaseModule {
                 birthDate: "Geboortedatum",
                 deathDate: "Overlijdensdatum",
                 gender: "Geslacht",
-                chooseGender: "Selecteer geslacht...",
-                male: "Reu",
-                female: "Teef",
-                saveDog: "Hond Opslaan",
-                cancel: "Annuleren",
-                delete: "Verwijderen",
                 requiredFields: "Velden met * zijn verplicht",
-                adminOnly: "Alleen administrators mogen honden toevoegen",
-                fieldsRequired: "Naam, stamboomnummer en ras zijn verplichte velden",
-                savingDog: "Hond opslaan...",
-                dogAdded: "Hond succesvol toegevoegd!",
-                dogUpdated: "Hond succesvol bijgewerkt!",
-                dogDeleted: "Hond succesvol verwijderd!",
-                confirmDelete: "Weet u zeker dat u deze hond wilt verwijderen?",
+                cancel: "Annuleren",
+                saveDog: "Hond Opslaan",
                 accessDenied: "Toegang Geweigerd",
-                insufficientRights: "Onvoldoende rechten",
-                userFunctions: "Beschikbare functies voor gebruikers",
-                searchDogs: "Honden zoeken en bekijken",
-                viewPhotos: "Foto galerij bekijken",
-                managePrivateInfo: "Privé informatie beheren",
-                importExport: "Data importeren/exporteren",
-                close: "Sluiten",
-                fatherSearch: "Begin met typen om vader te zoeken...",
-                motherSearch: "Begin met typen om moeder te zoeken..."
+                close: "Sluiten"
             },
             en: {
                 newDog: "Add New Dog",
-                editDog: "Edit Dog",
                 nameRequired: "Name *",
                 pedigreeNumber: "Pedigree number *",
                 breedRequired: "Breed *",
@@ -310,34 +292,14 @@ class DogManager extends BaseModule {
                 birthDate: "Birth date",
                 deathDate: "Death date",
                 gender: "Gender",
-                chooseGender: "Select gender...",
-                male: "Male",
-                female: "Female",
-                saveDog: "Save Dog",
-                cancel: "Cancel",
-                delete: "Delete",
                 requiredFields: "Fields with * are required",
-                adminOnly: "Only administrators can add dogs",
-                fieldsRequired: "Name, pedigree number and breed are required fields",
-                savingDog: "Saving dog...",
-                dogAdded: "Dog successfully added!",
-                dogUpdated: "Dog successfully updated!",
-                dogDeleted: "Dog successfully deleted!",
-                confirmDelete: "Are you sure you want to delete this dog?",
+                cancel: "Cancel",
+                saveDog: "Save Dog",
                 accessDenied: "Access Denied",
-                insufficientRights: "Insufficient rights",
-                userFunctions: "Available functions for users",
-                searchDogs: "Search and view dogs",
-                viewPhotos: "View photo gallery",
-                managePrivateInfo: "Manage private information",
-                importExport: "Import/export data",
-                close: "Close",
-                fatherSearch: "Start typing to search for father...",
-                motherSearch: "Start typing to search for mother..."
+                close: "Close"
             },
             de: {
                 newDog: "Neuen Hund hinzufügen",
-                editDog: "Hund bearbeiten",
                 nameRequired: "Name *",
                 pedigreeNumber: "Stammbaum-Nummer *",
                 breedRequired: "Rasse *",
@@ -347,34 +309,14 @@ class DogManager extends BaseModule {
                 birthDate: "Geburtsdatum",
                 deathDate: "Sterbedatum",
                 gender: "Geschlecht",
-                chooseGender: "Geschlecht wählen...",
-                male: "Rüde",
-                female: "Hündin",
-                saveDog: "Hund speichern",
-                cancel: "Abbrechen",
-                delete: "Löschen",
                 requiredFields: "Felder mit * sind Pflichtfelder",
-                adminOnly: "Nur Administratoren können Hunde hinzufügen",
-                fieldsRequired: "Naam, Stammbaum-Nummer und Rasse sind Pflichtfelder",
-                savingDog: "Hund wird gespeichert...",
-                dogAdded: "Hund erfolgreich hinzugefügt!",
-                dogUpdated: "Hund erfolgreich aktualisiert!",
-                dogDeleted: "Hund erfolgreich gelöscht!",
-                confirmDelete: "Sind Sie sicher, dass Sie diesen Hund löschen möchten?",
+                cancel: "Abbrechen",
+                saveDog: "Hund speichern",
                 accessDenied: "Zugriff Verweigert",
-                insufficientRights: "Unzureichende Rechte",
-                userFunctions: "Verfügbare Funktionen für Benutzer",
-                searchDogs: "Hunde suchen und anzeigen",
-                viewPhotos: "Foto-Galerie anzeigen",
-                managePrivateInfo: "Private Informationen verwalten",
-                importExport: "Daten importieren/exportieren",
-                close: "Schließen",
-                fatherSearch: "Beginnen Sie mit der Eingabe, um den Vater zu suchen...",
-                motherSearch: "Beginnen Sie mit der Eingabe, um die Mutter zu suchen..."
+                close: "Schließen"
             }
         };
         
-        // Vertaal alle elementen met data-key attribuut
         const elements = document.querySelectorAll('[data-key]');
         elements.forEach(element => {
             const key = element.getAttribute('data-key');
@@ -383,56 +325,52 @@ class DogManager extends BaseModule {
             }
         });
         
-        // Vertaal placeholder attributen
-        const inputs = document.querySelectorAll('[data-placeholder]');
-        inputs.forEach(input => {
-            const key = input.getAttribute('data-placeholder');
-            if (translations[currentLang] && translations[currentLang][key]) {
-                input.placeholder = translations[currentLang][key];
-            }
-        });
-        
         // Vertaal select opties
-        const selectOptions = document.querySelectorAll('select option[data-key]');
-        selectOptions.forEach(option => {
-            const key = option.getAttribute('data-key');
-            if (translations[currentLang] && translations[currentLang][key]) {
-                option.textContent = translations[currentLang][key];
+        const genderSelect = document.getElementById('gender');
+        if (genderSelect) {
+            const options = genderSelect.querySelectorAll('option');
+            if (currentLang === 'en') {
+                if (options[0]) options[0].textContent = "Select gender...";
+                if (options[1]) options[1].textContent = "Male";
+                if (options[2]) options[2].textContent = "Female";
+            } else if (currentLang === 'de') {
+                if (options[0]) options[0].textContent = "Geschlecht wählen...";
+                if (options[1]) options[1].textContent = "Rüde";
+                if (options[2]) options[2].textContent = "Hündin";
             }
-        });
-    }
-    
-    addToLastBreeds(breed) {
-        if (!breed || breed.trim() === '') return;
-        
-        const breedStr = breed.trim();
-        const index = this.lastBreeds.indexOf(breedStr);
-        
-        if (index > -1) {
-            this.lastBreeds.splice(index, 1);
         }
         
-        this.lastBreeds.unshift(breedStr);
-        
-        if (this.lastBreeds.length > 5) {
-            this.lastBreeds = this.lastBreeds.slice(0, 5);
+        // Vertaal placeholders
+        const fatherInput = document.getElementById('father');
+        const motherInput = document.getElementById('mother');
+        if (fatherInput && motherInput) {
+            if (currentLang === 'en') {
+                fatherInput.placeholder = "Start typing to search for father...";
+                motherInput.placeholder = "Start typing to search for mother...";
+            } else if (currentLang === 'de') {
+                fatherInput.placeholder = "Beginnen Sie mit der Eingabe, um den Vater zu suchen...";
+                motherInput.placeholder = "Beginnen Sie mit der Eingabe, um die Mutter zu suchen...";
+            }
         }
-        
-        localStorage.setItem('lastBreeds', JSON.stringify(this.lastBreeds));
     }
     
+    /**
+     * Laad alle honden voor autocomplete
+     */
     async loadAllDogs() {
-        if (this.allDogs.length === 0) {
-            try {
-                this.allDogs = await this.db.getHonden();
-                this.allDogs.sort((a, b) => a.naam.localeCompare(b.naam));
-                console.log(`${this.allDogs.length} honden geladen voor autocomplete`);
-            } catch (error) {
-                console.error('Fout bij laden honden voor autocomplete:', error);
-            }
+        try {
+            this.allDogs = await this.db.getHonden();
+            this.allDogs.sort((a, b) => a.naam.localeCompare(b.naam));
+            console.log(`${this.allDogs.length} honden geladen voor autocomplete`);
+        } catch (error) {
+            console.error('Fout bij laden honden voor autocomplete:', error);
+            this.allDogs = [];
         }
     }
     
+    /**
+     * Setup autocomplete voor ouder velden
+     */
     setupParentAutocomplete() {
         console.log('Setting up parent autocomplete...');
         
@@ -442,21 +380,13 @@ class DogManager extends BaseModule {
         // Event listeners voor vader en moeder velden
         document.querySelectorAll('.parent-input').forEach(input => {
             const parentType = input.dataset.parentType;
-            console.log(`Setting up autocomplete for ${parentType}`);
-            
-            input.addEventListener('focus', () => {
-                console.log(`${parentType} input focus`);
-                this.loadAllDogs(); // Zorg dat honden geladen zijn
-            });
             
             input.addEventListener('input', (e) => {
                 const searchTerm = e.target.value.toLowerCase().trim();
-                console.log(`${parentType} input: "${searchTerm}"`);
                 this.showParentAutocomplete(searchTerm, parentType);
             });
             
-            input.addEventListener('blur', (e) => {
-                // Wacht even voordat dropdown wordt verborgen (voor klikken op item)
+            input.addEventListener('blur', () => {
                 setTimeout(() => {
                     const dropdown = document.getElementById(`${parentType}Dropdown`);
                     if (dropdown) {
@@ -476,8 +406,10 @@ class DogManager extends BaseModule {
         });
     }
     
+    /**
+     * Voeg CSS styles toe voor autocomplete
+     */
     addAutocompleteStyles() {
-        // Voeg CSS toe voor autocomplete dropdowns als deze nog niet bestaat
         if (!document.getElementById('autocomplete-styles')) {
             const style = document.createElement('style');
             style.id = 'autocomplete-styles';
@@ -521,23 +453,17 @@ class DogManager extends BaseModule {
                     color: #6c757d;
                     margin-top: 2px;
                 }
-                
-                .parent-input-container {
-                    position: relative;
-                }
             `;
             document.head.appendChild(style);
         }
     }
     
+    /**
+     * Toon autocomplete suggesties voor ouders
+     */
     showParentAutocomplete(searchTerm, parentType) {
-        console.log(`showParentAutocomplete for ${parentType}: "${searchTerm}"`);
-        
         const dropdown = document.getElementById(`${parentType}Dropdown`);
-        if (!dropdown) {
-            console.error(`Dropdown niet gevonden: ${parentType}Dropdown`);
-            return;
-        }
+        if (!dropdown) return;
         
         if (!searchTerm || searchTerm.length < 1) {
             dropdown.style.display = 'none';
@@ -545,8 +471,6 @@ class DogManager extends BaseModule {
         }
         
         const targetGender = parentType === 'father' ? 'reuen' : 'teven';
-        console.log(`Filtering for gender: ${targetGender}, total dogs: ${this.allDogs.length}`);
-        
         const suggestions = this.allDogs.filter(dog => {
             if (!dog.naam) return false;
             const dogName = dog.naam.toLowerCase();
@@ -554,8 +478,6 @@ class DogManager extends BaseModule {
             const matchesGender = !dog.geslacht || dog.geslacht === targetGender;
             return matchesSearch && matchesGender;
         }).slice(0, 8);
-        
-        console.log(`Found ${suggestions.length} suggestions`);
         
         if (suggestions.length === 0) {
             dropdown.style.display = 'none';
@@ -579,40 +501,26 @@ class DogManager extends BaseModule {
         
         // Event listeners voor autocomplete items
         dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                console.log('Item clicked');
+            item.addEventListener('click', () => {
                 const dogId = item.getAttribute('data-id');
                 const dogName = item.getAttribute('data-name');
                 const input = document.getElementById(parentType);
                 const idInput = document.getElementById(`${parentType}Id`);
                 
-                if (input) {
-                    input.value = dogName;
-                    console.log(`Set ${parentType} to: ${dogName}`);
-                }
-                if (idInput) {
-                    idInput.value = dogId;
-                    console.log(`Set ${parentType}Id to: ${dogId}`);
-                }
+                if (input) input.value = dogName;
+                if (idInput) idInput.value = dogId;
                 
                 dropdown.style.display = 'none';
             });
         });
     }
     
+    /**
+     * Sla een nieuwe hond op
+     */
     async saveDog() {
-        const t = (key) => {
-            const currentLang = localStorage.getItem('appLanguage') || 'nl';
-            const translations = {
-                nl: { adminOnly: "Alleen administrators mogen honden toevoegen", fieldsRequired: "Naam, stamboomnummer en ras zijn verplichte velden", savingDog: "Hond opslaan...", dogAdded: "Hond succesvol toegevoegd!" },
-                en: { adminOnly: "Only administrators can add dogs", fieldsRequired: "Name, pedigree number and breed are required fields", savingDog: "Saving dog...", dogAdded: "Dog successfully added!" },
-                de: { adminOnly: "Nur Administratoren können Hunde hinzufügen", fieldsRequired: "Name, Stammbaum-Nummer und Rasse sind Pflichtfelder", savingDog: "Hund wird gespeichert...", dogAdded: "Hund erfolgreich hinzugefügt!" }
-            };
-            return translations[currentLang] && translations[currentLang][key] ? translations[currentLang][key] : key;
-        };
-        
         if (!auth.isAdmin()) {
-            this.showError(t('adminOnly'));
+            this.showError("Alleen administrators mogen honden toevoegen");
             return;
         }
         
@@ -631,33 +539,34 @@ class DogManager extends BaseModule {
             updatedAt: new Date().toISOString()
         };
         
-        console.log('Saving dog data:', dogData);
-        
+        // Validatie
         if (!dogData.naam || !dogData.stamboomnr || !dogData.ras) {
-            this.showError(t('fieldsRequired'));
+            this.showError("Naam, stamboomnummer en ras zijn verplichte velden");
             return;
         }
         
+        // Voeg ras toe aan recente rassen
         this.addToLastBreeds(dogData.ras);
         
-        this.showProgress(t('savingDog'));
+        // Toon voortgang
+        this.showProgress("Hond opslaan...");
         
         try {
             const newId = await this.db.voegHondToe(dogData);
-            console.log('New dog added with ID:', newId);
             this.hideProgress();
-            this.showSuccess(t('dogAdded'));
+            this.showSuccess("Hond succesvol toegevoegd!");
             
-            // Voeg de nieuwe hond toe aan de lokale lijst voor toekomstige autocomplete
+            // Voeg toe aan lokale lijst voor toekomstige autocomplete
             dogData.id = newId;
             this.allDogs.push(dogData);
             this.allDogs.sort((a, b) => a.naam.localeCompare(b.naam));
             
+            // Sluit modal na succes
             setTimeout(() => {
                 const modal = bootstrap.Modal.getInstance(document.getElementById('addDogModal'));
                 if (modal) modal.hide();
                 
-                // Reset het formulier
+                // Reset formulier
                 document.getElementById('addDogForm').reset();
                 document.getElementById('fatherId').value = '';
                 document.getElementById('motherId').value = '';
@@ -671,15 +580,30 @@ class DogManager extends BaseModule {
     }
     
     /**
-     * Initialiseer de module
+     * Voeg ras toe aan recent gebruikte rassen
      */
-    async init() {
-        console.log('DogManager geïnitialiseerd');
-        return true;
+    addToLastBreeds(breed) {
+        if (!breed || breed.trim() === '') return;
+        
+        const breedStr = breed.trim();
+        let lastBreeds = JSON.parse(localStorage.getItem('lastBreeds') || '[]');
+        const index = lastBreeds.indexOf(breedStr);
+        
+        if (index > -1) {
+            lastBreeds.splice(index, 1);
+        }
+        
+        lastBreeds.unshift(breedStr);
+        
+        if (lastBreeds.length > 5) {
+            lastBreeds = lastBreeds.slice(0, 5);
+        }
+        
+        localStorage.setItem('lastBreeds', JSON.stringify(lastBreeds));
     }
     
     /**
-     * Toon een foutmelding
+     * Helper methodes voor notifications
      */
     showError(message) {
         if (typeof appUI !== 'undefined' && appUI.showNotification) {
@@ -689,9 +613,6 @@ class DogManager extends BaseModule {
         }
     }
     
-    /**
-     * Toon een succesmelding
-     */
     showSuccess(message) {
         if (typeof appUI !== 'undefined' && appUI.showNotification) {
             appUI.showNotification(message, 'success');
@@ -700,24 +621,24 @@ class DogManager extends BaseModule {
         }
     }
     
-    /**
-     * Toon voortgang
-     */
     showProgress(message) {
         if (typeof appUI !== 'undefined' && appUI.showNotification) {
             appUI.showNotification(message, 'info', true);
-        } else {
-            console.log(message);
         }
     }
     
-    /**
-     * Verberg voortgang
-     */
     hideProgress() {
         if (typeof appUI !== 'undefined' && appUI.hideNotification) {
             appUI.hideNotification();
         }
+    }
+    
+    /**
+     * Initialiseer de module
+     */
+    async init() {
+        console.log('DogManager geïnitialiseerd');
+        return true;
     }
 }
 
