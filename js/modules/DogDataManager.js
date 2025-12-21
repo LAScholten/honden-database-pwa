@@ -10,6 +10,7 @@ class DogDataManager extends BaseModule {
         this.lastBreeds = JSON.parse(localStorage.getItem('lastBreeds') || '[]');
         this.allDogs = []; // Voor autocomplete
         this.selectedDog = null; // Geselecteerde hond voor bewerking
+        this.currentDogId = null; // ID van de huidige hond die wordt bewerkt
         
         console.log('DogDataManager geïnitialiseerd');
         
@@ -83,6 +84,7 @@ class DogDataManager extends BaseModule {
                 cancel: "Annuleren",
                 deleteDog: "Hond Verwijderen",
                 choose: "Kies...",
+                searchPlaceholder: "Typ naam of stamboomnummer...",
                 
                 // Toegangscontrole popup teksten
                 insufficientPermissions: "Onvoldoende rechten",
@@ -96,7 +98,6 @@ class DogDataManager extends BaseModule {
                 importExport: "Data importeren/exporteren",
                 
                 // Zoekveld
-                searchPlaceholder: "Typ naam of stamboomnummer...",
                 loadingDogs: "Honden laden...",
                 noResults: "Geen honden gevonden",
                 selectDogToEdit: "Selecteer een hond om te bewerken",
@@ -110,6 +111,8 @@ class DogDataManager extends BaseModule {
                 dogDeleted: "Hond succesvol verwijderd!",
                 confirmDelete: "Weet u zeker dat u deze hond wilt verwijderen?",
                 photoAdded: "Foto toegevoegd",
+                updatingDog: "Hond bijwerken...",
+                dogUpdated: "Hond bijgewerkt!",
                 
                 // Foutmeldingen
                 searchFailed: "Fout bij zoeken: ",
@@ -117,7 +120,9 @@ class DogDataManager extends BaseModule {
                 updateFailed: "Fout bij bijwerken hond: ",
                 deleteFailed: "Fout bij verwijderen hond: ",
                 photoError: "Fout bij uploaden foto: ",
-                fieldsRequired: "Naam, stamboomnummer en ras zijn verplichte velden"
+                fieldsRequired: "Naam, stamboomnummer en ras zijn verplichte velden",
+                dogNotFound: "Hond niet gevonden",
+                adminOnly: "Alleen administrators mogen honden bewerken"
             },
             en: {
                 // Modal titles
@@ -188,6 +193,7 @@ class DogDataManager extends BaseModule {
                 cancel: "Cancel",
                 deleteDog: "Delete Dog",
                 choose: "Choose...",
+                searchPlaceholder: "Type name or pedigree number...",
                 
                 // Access control popup texts
                 insufficientPermissions: "Insufficient permissions",
@@ -201,7 +207,6 @@ class DogDataManager extends BaseModule {
                 importExport: "Import/export data",
                 
                 // Search field
-                searchPlaceholder: "Type name or pedigree number...",
                 loadingDogs: "Loading dogs...",
                 noResults: "No dogs found",
                 selectDogToEdit: "Select a dog to edit",
@@ -215,6 +220,8 @@ class DogDataManager extends BaseModule {
                 dogDeleted: "Dog successfully deleted!",
                 confirmDelete: "Are you sure you want to delete this dog?",
                 photoAdded: "Photo added",
+                updatingDog: "Updating dog...",
+                dogUpdated: "Dog updated!",
                 
                 // Error messages
                 searchFailed: "Error searching: ",
@@ -222,7 +229,9 @@ class DogDataManager extends BaseModule {
                 updateFailed: "Error updating dog: ",
                 deleteFailed: "Error deleting dog: ",
                 photoError: "Error uploading photo: ",
-                fieldsRequired: "Name, pedigree number and breed are required fields"
+                fieldsRequired: "Name, pedigree number and breed are required fields",
+                dogNotFound: "Dog not found",
+                adminOnly: "Only administrators can edit dogs"
             },
             de: {
                 // Modal Titel
@@ -293,6 +302,7 @@ class DogDataManager extends BaseModule {
                 cancel: "Abbrechen",
                 deleteDog: "Hund löschen",
                 choose: "Wählen...",
+                searchPlaceholder: "Name oder Stammbaum-Nummer eingeben...",
                 
                 // Zugangskontrolle Popup Texte
                 insufficientPermissions: "Unzureichende Berechtigungen",
@@ -306,7 +316,6 @@ class DogDataManager extends BaseModule {
                 importExport: "Daten importieren/exportieren",
                 
                 // Suchfeld
-                searchPlaceholder: "Name oder Stammbaum-Nummer eingeben...",
                 loadingDogs: "Hunde laden...",
                 noResults: "Keine Hunde gefunden",
                 selectDogToEdit: "Wählen Sie einen Hund zum Bearbeiten",
@@ -320,6 +329,8 @@ class DogDataManager extends BaseModule {
                 dogDeleted: "Hund erfolgreich gelöscht!",
                 confirmDelete: "Sind Sie sicher, dass Sie diesen Hund löschen möchten?",
                 photoAdded: "Foto hinzugefügt",
+                updatingDog: "Hund aktualisieren...",
+                dogUpdated: "Hund aktualisiert!",
                 
                 // Fehlermeldungen
                 searchFailed: "Fehler bei der Suche: ",
@@ -327,7 +338,9 @@ class DogDataManager extends BaseModule {
                 updateFailed: "Fehler beim Aktualisieren des Hundes: ",
                 deleteFailed: "Fehler beim Löschen des Hundes: ",
                 photoError: "Fehler beim Hochladen des Fotos: ",
-                fieldsRequired: "Name, Stammbaum-Nummer und Rasse sind Pflichtfelder"
+                fieldsRequired: "Name, Stammbaum-Nummer und Rasse sind Pflichtfelder",
+                dogNotFound: "Hund nicht gefunden",
+                adminOnly: "Nur Administratoren können Hunde bearbeiten"
             }
         };
     }
@@ -426,18 +439,18 @@ class DogDataManager extends BaseModule {
                             <!-- Zoek gedeelte -->
                             <div id="searchSection" class="mb-4">
                                 <div class="card">
-                                    <div class="card-header">
+                                    <div class="card-header bg-light">
                                         <i class="bi bi-search me-2"></i>${t('searchDog')}
                                     </div>
                                     <div class="card-body">
                                         <div class="mb-3">
-                                            <label for="dogSearch" class="form-label">${t('searchPlaceholder')}</label>
-                                            <input type="text" class="form-control" id="dogSearch" 
+                                            <label for="dogSearch" class="form-label fw-semibold">${t('searchPlaceholder')}</label>
+                                            <input type="text" class="form-control form-control-lg" id="dogSearch" 
                                                    placeholder="${t('searchPlaceholder')}"
                                                    autocomplete="off">
-                                            <div class="form-text">${t('selectDogToEdit')}</div>
+                                            <div class="form-text mt-1">${t('selectDogToEdit')}</div>
                                         </div>
-                                        <div id="searchResults" style="max-height: 300px; overflow-y: auto;"></div>
+                                        <div id="searchResults" style="max-height: 400px; overflow-y: auto;"></div>
                                     </div>
                                 </div>
                             </div>
@@ -446,23 +459,25 @@ class DogDataManager extends BaseModule {
                             <div id="editSection" style="display: none;">
                                 <form id="editDogForm">
                                     <input type="hidden" id="dogId">
-                                    <input type="hidden" id="fatherId">
-                                    <input type="hidden" id="motherId">
+                                    <input type="hidden" id="fatherId" value="">
+                                    <input type="hidden" id="motherId" value="">
                                     
                                     <div class="alert alert-info mb-3">
-                                        <i class="bi bi-pencil"></i> ${t('editingDog')}: <strong id="editingDogName"></strong>
+                                        <i class="bi bi-pencil"></i> 
+                                        <span class="fw-semibold">${t('editingDog')}:</span> 
+                                        <span id="editingDogName" class="fw-bold text-primary"></span>
                                     </div>
                                     
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="dogName" class="form-label">${t('nameRequired')}</label>
+                                                <label for="dogName" class="form-label fw-semibold">${t('nameRequired')}</label>
                                                 <input type="text" class="form-control" id="dogName" required>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="pedigreeNumber" class="form-label">${t('pedigreeNumber')}</label>
+                                                <label for="pedigreeNumber" class="form-label fw-semibold">${t('pedigreeNumber')}</label>
                                                 <input type="text" class="form-control" id="pedigreeNumber" required>
                                             </div>
                                         </div>
@@ -471,14 +486,14 @@ class DogDataManager extends BaseModule {
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="breed" class="form-label">${t('breedRequired')}</label>
+                                                <label for="breed" class="form-label fw-semibold">${t('breedRequired')}</label>
                                                 <input type="text" class="form-control" id="breed" required>
                                                 ${recentBreedsHTML}
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="gender" class="form-label">${t('gender')}</label>
+                                                <label for="gender" class="form-label fw-semibold">${t('gender')}</label>
                                                 <select class="form-select" id="gender">
                                                     <option value="">${t('chooseGender')}</option>
                                                     <option value="reuen">${t('male')}</option>
@@ -491,7 +506,7 @@ class DogDataManager extends BaseModule {
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="father" class="form-label">${t('father')}</label>
+                                                <label for="father" class="form-label fw-semibold">${t('father')}</label>
                                                 <input type="text" class="form-control parent-input" id="father" 
                                                        placeholder="${t('searchPlaceholder')}"
                                                        data-parent-type="father"
@@ -501,7 +516,7 @@ class DogDataManager extends BaseModule {
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="mother" class="form-label">${t('mother')}</label>
+                                                <label for="mother" class="form-label fw-semibold">${t('mother')}</label>
                                                 <input type="text" class="form-control parent-input" id="mother" 
                                                        placeholder="${t('searchPlaceholder')}"
                                                        data-parent-type="mother"
@@ -514,13 +529,13 @@ class DogDataManager extends BaseModule {
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="birthDate" class="form-label">${t('birthDate')}</label>
+                                                <label for="birthDate" class="form-label fw-semibold">${t('birthDate')}</label>
                                                 <input type="date" class="form-control" id="birthDate">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="deathDate" class="form-label">${t('deathDate')}</label>
+                                                <label for="deathDate" class="form-label fw-semibold">${t('deathDate')}</label>
                                                 <input type="date" class="form-control" id="deathDate">
                                             </div>
                                         </div>
@@ -529,7 +544,7 @@ class DogDataManager extends BaseModule {
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="mb-3">
-                                                <label for="hipDysplasia" class="form-label">${t('hipDysplasia')}</label>
+                                                <label for="hipDysplasia" class="form-label fw-semibold">${t('hipDysplasia')}</label>
                                                 <select class="form-select" id="hipDysplasia">
                                                     <option value="">${t('hipGrades')}</option>
                                                     <option value="A">${t('hipA')}</option>
@@ -542,7 +557,7 @@ class DogDataManager extends BaseModule {
                                         </div>
                                         <div class="col-md-4">
                                             <div class="mb-3">
-                                                <label for="elbowDysplasia" class="form-label">${t('elbowDysplasia')}</label>
+                                                <label for="elbowDysplasia" class="form-label fw-semibold">${t('elbowDysplasia')}</label>
                                                 <select class="form-select" id="elbowDysplasia">
                                                     <option value="">${t('elbowGrades')}</option>
                                                     <option value="0">${t('elbow0')}</option>
@@ -555,7 +570,7 @@ class DogDataManager extends BaseModule {
                                         </div>
                                         <div class="col-md-4">
                                             <div class="mb-3">
-                                                <label for="patellaLuxation" class="form-label">${t('patellaLuxation')}</label>
+                                                <label for="patellaLuxation" class="form-label fw-semibold">${t('patellaLuxation')}</label>
                                                 <select class="form-select" id="patellaLuxation">
                                                     <option value="">${t('patellaGrades')}</option>
                                                     <option value="0">${t('patella0')}</option>
@@ -570,7 +585,7 @@ class DogDataManager extends BaseModule {
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="eyes" class="form-label">${t('eyes')}</label>
+                                                <label for="eyes" class="form-label fw-semibold">${t('eyes')}</label>
                                                 <select class="form-select" id="eyes">
                                                     <option value="">${t('choose')}</option>
                                                     <option value="Vrij">${t('eyesFree')}</option>
@@ -579,13 +594,13 @@ class DogDataManager extends BaseModule {
                                                 </select>
                                             </div>
                                             <div class="mb-3" id="eyesExplanationContainer" style="display: none;">
-                                                <label for="eyesExplanation" class="form-label">${t('eyesExplanation')}</label>
+                                                <label for="eyesExplanation" class="form-label fw-semibold">${t('eyesExplanation')}</label>
                                                 <input type="text" class="form-control" id="eyesExplanation">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="dandyWalker" class="form-label">${t('dandyWalker')}</label>
+                                                <label for="dandyWalker" class="form-label fw-semibold">${t('dandyWalker')}</label>
                                                 <select class="form-select" id="dandyWalker">
                                                     <option value="">${t('dandyOptions')}</option>
                                                     <option value="Vrij op DNA">${t('dandyFreeDNA')}</option>
@@ -600,7 +615,7 @@ class DogDataManager extends BaseModule {
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="thyroid" class="form-label">${t('thyroid')}</label>
+                                                <label for="thyroid" class="form-label fw-semibold">${t('thyroid')}</label>
                                                 <select class="form-select" id="thyroid">
                                                     <option value="">${t('choose')}</option>
                                                     <option value="Negatief">${t('thyroidNegative')}</option>
@@ -608,24 +623,24 @@ class DogDataManager extends BaseModule {
                                                 </select>
                                             </div>
                                             <div class="mb-3" id="thyroidExplanationContainer" style="display: none;">
-                                                <label for="thyroidExplanation" class="form-label">${t('thyroidExplanation')}</label>
+                                                <label for="thyroidExplanation" class="form-label fw-semibold">${t('thyroidExplanation')}</label>
                                                 <input type="text" class="form-control" id="thyroidExplanation">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="country" class="form-label">${t('country')}</label>
+                                                <label for="country" class="form-label fw-semibold">${t('country')}</label>
                                                 <input type="text" class="form-control" id="country">
                                             </div>
                                             <div class="mb-3">
-                                                <label for="zipCode" class="form-label">${t('zipCode')}</label>
+                                                <label for="zipCode" class="form-label fw-semibold">${t('zipCode')}</label>
                                                 <input type="text" class="form-control" id="zipCode">
                                             </div>
                                         </div>
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <label for="dogPhoto" class="form-label">${t('addPhoto')}</label>
+                                        <label for="dogPhoto" class="form-label fw-semibold">${t('addPhoto')}</label>
                                         <div class="input-group">
                                             <input type="file" class="form-control" id="dogPhoto" accept="image/*">
                                             <label class="input-group-text" for="dogPhoto">${t('chooseFile')}</label>
@@ -634,25 +649,25 @@ class DogDataManager extends BaseModule {
                                     </div>
                                     
                                     <div class="mb-3">
-                                        <label for="remarks" class="form-label">${t('remarks')}</label>
+                                        <label for="remarks" class="form-label fw-semibold">${t('remarks')}</label>
                                         <textarea class="form-control" id="remarks" rows="3"></textarea>
                                     </div>
                                     
                                     <div class="alert alert-warning">
-                                        <i class="bi bi-exclamation-triangle"></i>
+                                        <i class="bi bi-exclamation-triangle me-2"></i>
                                         ${t('requiredFields')}
                                     </div>
                                 </form>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" id="cancelEditBtn" style="display: none;">
+                            <button type="button" class="btn btn-outline-secondary" id="cancelEditBtn" style="display: none;">
                                 <i class="bi bi-arrow-left me-1"></i>${t('cancel')}
                             </button>
                             <button type="button" class="btn btn-danger" id="deleteDogBtn" style="display: none;">
                                 <i class="bi bi-trash me-1"></i>${t('deleteDog')}
                             </button>
-                            <button type="button" class="btn btn-primary" id="saveChangesBtn" style="display: none;">
+                            <button type="button" class="btn btn-success" id="saveChangesBtn" style="display: none;">
                                 <i class="bi bi-check-circle me-1"></i>${t('saveChanges')}
                             </button>
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -666,29 +681,48 @@ class DogDataManager extends BaseModule {
             
             <style>
                 .search-result-item {
-                    padding: 10px;
+                    padding: 12px;
                     border-bottom: 1px solid #dee2e6;
                     cursor: pointer;
                     transition: background-color 0.2s;
+                    border-radius: 6px;
+                    margin-bottom: 6px;
+                    border: 1px solid transparent;
                 }
                 
                 .search-result-item:hover {
                     background-color: #f8f9fa;
+                    border-color: #dee2e6;
                 }
                 
                 .search-result-item.selected {
                     background-color: #e3f2fd;
+                    border-color: #0d6efd;
                     border-left: 4px solid #0d6efd;
                 }
                 
                 .search-result-item .dog-name {
-                    font-weight: bold;
-                    font-size: 1.1em;
+                    font-weight: 600;
+                    font-size: 1rem;
+                    color: #212529;
                 }
                 
                 .search-result-item .dog-info {
-                    font-size: 0.9em;
+                    font-size: 0.85rem;
                     color: #6c757d;
+                    display: flex;
+                    gap: 15px;
+                    flex-wrap: wrap;
+                    margin-top: 4px;
+                }
+                
+                .search-stats {
+                    font-size: 0.85rem;
+                    color: #6c757d;
+                    margin-bottom: 12px;
+                    padding-bottom: 8px;
+                    border-bottom: 1px solid #dee2e6;
+                    font-weight: 500;
                 }
                 
                 .autocomplete-dropdown {
@@ -699,14 +733,15 @@ class DogDataManager extends BaseModule {
                     max-height: 200px;
                     overflow-y: auto;
                     width: calc(100% - 30px);
-                    z-index: 1000;
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                    z-index: 1050;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
                 }
                 
                 .autocomplete-item {
-                    padding: 10px;
+                    padding: 10px 12px;
                     cursor: pointer;
                     border-bottom: 1px solid #f0f0f0;
+                    transition: background-color 0.2s;
                 }
                 
                 .autocomplete-item:hover {
@@ -714,16 +749,34 @@ class DogDataManager extends BaseModule {
                 }
                 
                 .autocomplete-item .dog-name {
-                    font-weight: bold;
+                    font-weight: 600;
+                    font-size: 0.9rem;
                 }
                 
                 .autocomplete-item .dog-info {
-                    font-size: 0.85em;
+                    font-size: 0.8rem;
                     color: #666;
                 }
                 
                 .parent-input {
                     position: relative;
+                }
+                
+                #dogSearch {
+                    border: 2px solid #dee2e6;
+                    border-radius: 8px;
+                    transition: border-color 0.3s;
+                }
+                
+                #dogSearch:focus {
+                    border-color: #0d6efd;
+                    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+                }
+                
+                #editDogForm .form-control:focus,
+                #editDogForm .form-select:focus {
+                    border-color: #198754;
+                    box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
                 }
             </style>
         `;
@@ -865,7 +918,7 @@ class DogDataManager extends BaseModule {
             return;
         }
         
-        // Filter honden op naam en stamboomnummer
+        // Filter honden op naam, stamboomnummer en ras
         const filteredDogs = this.allDogs.filter(dog => {
             const naam = dog.naam ? dog.naam.toLowerCase() : '';
             const stamboomnr = dog.stamboomnr ? dog.stamboomnr.toLowerCase() : '';
@@ -878,29 +931,38 @@ class DogDataManager extends BaseModule {
         
         if (filteredDogs.length === 0) {
             searchResults.innerHTML = `
-                <div class="alert alert-light text-center">
-                    <i class="bi bi-search"></i> ${this.t('noResults')}
+                <div class="alert alert-light text-center py-4">
+                    <i class="bi bi-search display-1 text-muted opacity-50"></i>
+                    <p class="mt-3 text-muted">${this.t('noResults')}</p>
                 </div>
             `;
             return;
         }
         
         let html = `
-            <div class="mb-2">
-                <small class="text-muted">${this.t('searchResults')}: ${filteredDogs.length}</small>
+            <div class="search-stats">
+                <i class="bi bi-info-circle me-1"></i>
+                ${this.t('searchResults')}: <strong>${filteredDogs.length}</strong> ${this.t('found')}
             </div>
         `;
         
         filteredDogs.forEach(dog => {
+            const genderText = dog.geslacht === 'reuen' ? this.t('male') : 
+                             dog.geslacht === 'teven' ? this.t('female') : this.t('unknown');
+            
             html += `
                 <div class="search-result-item" data-id="${dog.id}">
                     <div class="dog-name">${dog.naam || 'Onbekend'}</div>
                     <div class="dog-info">
-                        ${dog.ras || 'Onbekend ras'} | 
-                        ${dog.stamboomnr || 'Geen stamboom'} | 
-                        ${dog.geslacht === 'reuen' ? this.t('male') : 
-                          dog.geslacht === 'teven' ? this.t('female') : 
-                          'Onbekend geslacht'}
+                        ${dog.ras ? `
+                        <span><i class="bi bi-tag me-1"></i>${dog.ras}</span>
+                        ` : ''}
+                        
+                        ${dog.stamboomnr ? `
+                        <span><i class="bi bi-hash me-1"></i>${dog.stamboomnr}</span>
+                        ` : ''}
+                        
+                        <span><i class="bi bi-gender-ambiguous me-1"></i>${genderText}</span>
                     </div>
                 </div>
             `;
@@ -922,23 +984,42 @@ class DogDataManager extends BaseModule {
      */
     async selectDogForEditing(dogId) {
         try {
+            console.log(`Selecting dog with ID: ${dogId}`);
+            
             // Markeer geselecteerd item in zoekresultaten
             document.querySelectorAll('.search-result-item').forEach(item => {
                 item.classList.remove('selected');
+                if (parseInt(item.getAttribute('data-id')) === dogId) {
+                    item.classList.add('selected');
+                }
             });
-            const selectedItem = document.querySelector(`.search-result-item[data-id="${dogId}"]`);
-            if (selectedItem) {
-                selectedItem.classList.add('selected');
+            
+            // Laad hond data met progress indicator
+            this.showProgress(this.t('loading') + '...');
+            
+            let dog;
+            try {
+                // Probeer eerst getHondById, anders zoek in lokale cache
+                if (this.db.getHondById) {
+                    dog = await this.db.getHondById(dogId);
+                } else {
+                    // Fallback: zoek in lokale array
+                    dog = this.allDogs.find(d => d.id === dogId);
+                }
+            } catch (error) {
+                console.warn('getHondById failed, using local cache:', error);
+                dog = this.allDogs.find(d => d.id === dogId);
             }
             
-            // Laad hond data
-            const dog = await this.db.getHondById(dogId);
+            this.hideProgress();
+            
             if (!dog) {
-                this.showError('Hond niet gevonden');
+                this.showError(this.t('dogNotFound'));
                 return;
             }
             
             this.selectedDog = dog;
+            this.currentDogId = dogId;
             
             // Vul formulier met hond data
             this.fillFormWithDogData(dog);
@@ -949,8 +1030,9 @@ class DogDataManager extends BaseModule {
             this.showSuccess(`${this.t('dogSelected')}: ${dog.naam}`);
             
         } catch (error) {
+            this.hideProgress();
             console.error('Fout bij selecteren hond:', error);
-            this.showError(this.t('searchFailed') + error.message);
+            this.showError(`${this.t('searchFailed')}${error.message}`);
         }
     }
     
@@ -958,8 +1040,10 @@ class DogDataManager extends BaseModule {
      * Vul formulier met hond data
      */
     fillFormWithDogData(dog) {
+        console.log('Filling form with dog data:', dog);
+        
         // Basis velden
-        document.getElementById('dogId').value = dog.id;
+        document.getElementById('dogId').value = dog.id || '';
         document.getElementById('dogName').value = dog.naam || '';
         document.getElementById('pedigreeNumber').value = dog.stamboomnr || '';
         document.getElementById('breed').value = dog.ras || '';
@@ -993,17 +1077,20 @@ class DogDataManager extends BaseModule {
         document.getElementById('remarks').value = dog.opmerkingen || '';
         
         // Toon titel
-        document.getElementById('editingDogName').textContent = dog.naam;
+        const dogNameElement = document.getElementById('editingDogName');
+        if (dogNameElement) {
+            dogNameElement.textContent = dog.naam || this.t('unknown');
+        }
         
         // Toon/verberg uitleg velden
         const eyesExplanationContainer = document.getElementById('eyesExplanationContainer');
         const thyroidExplanationContainer = document.getElementById('thyroidExplanationContainer');
         
         if (eyesExplanationContainer) {
-            eyesExplanationContainer.style.display = dog.ogen === 'Overig' ? 'block' : 'none';
+            eyesExplanationContainer.style.display = (dog.ogen === 'Overig') ? 'block' : 'none';
         }
         if (thyroidExplanationContainer) {
-            thyroidExplanationContainer.style.display = dog.schildklier === 'Positief' ? 'block' : 'none';
+            thyroidExplanationContainer.style.display = (dog.schildklier === 'Positief') ? 'block' : 'none';
         }
     }
     
@@ -1031,8 +1118,18 @@ class DogDataManager extends BaseModule {
         document.getElementById('deleteDogBtn').style.display = 'none';
         
         // Wis formulier
-        document.getElementById('editDogForm').reset();
+        const form = document.getElementById('editDogForm');
+        if (form) {
+            form.reset();
+        }
+        
+        // Wis hidden inputs
+        document.getElementById('dogId').value = '';
+        document.getElementById('fatherId').value = '';
+        document.getElementById('motherId').value = '';
+        
         this.selectedDog = null;
+        this.currentDogId = null;
         
         // Herlaad zoekresultaten
         const searchInput = document.getElementById('dogSearch');
@@ -1045,14 +1142,14 @@ class DogDataManager extends BaseModule {
      * Opslaan wijzigingen
      */
     async saveDogChanges() {
-        if (!this.auth.isAdmin()) {
+        if (!auth.isAdmin()) {
             this.showError(this.t('adminOnly'));
             return;
         }
         
         const dogId = document.getElementById('dogId').value;
         if (!dogId) {
-            this.showError('Geen hond geselecteerd');
+            this.showError(this.t('dogNotFound'));
             return;
         }
         
@@ -1066,22 +1163,23 @@ class DogDataManager extends BaseModule {
             vaderId: document.getElementById('fatherId').value ? parseInt(document.getElementById('fatherId').value) : null,
             moeder: document.getElementById('mother').value.trim(),
             moederId: document.getElementById('motherId').value ? parseInt(document.getElementById('motherId').value) : null,
-            geboortedatum: document.getElementById('birthDate').value,
-            overlijdensdatum: document.getElementById('deathDate').value,
-            heupdysplasie: document.getElementById('hipDysplasia').value,
-            elleboogdysplasie: document.getElementById('elbowDysplasia').value,
-            patella: document.getElementById('patellaLuxation').value,
-            ogen: document.getElementById('eyes').value,
+            geboortedatum: document.getElementById('birthDate').value || null,
+            overlijdensdatum: document.getElementById('deathDate').value || null,
+            heupdysplasie: document.getElementById('hipDysplasia').value || '',
+            elleboogdysplasie: document.getElementById('elbowDysplasia').value || '',
+            patella: document.getElementById('patellaLuxation').value || '',
+            ogen: document.getElementById('eyes').value || '',
             ogenVerklaring: document.getElementById('eyesExplanation')?.value.trim() || '',
-            dandyWalker: document.getElementById('dandyWalker').value,
-            schildklier: document.getElementById('thyroid').value,
+            dandyWalker: document.getElementById('dandyWalker').value || '',
+            schildklier: document.getElementById('thyroid').value || '',
             schildklierVerklaring: document.getElementById('thyroidExplanation')?.value.trim() || '',
-            land: document.getElementById('country').value.trim(),
-            postcode: document.getElementById('zipCode').value.trim(),
-            opmerkingen: document.getElementById('remarks').value.trim(),
+            land: document.getElementById('country').value.trim() || '',
+            postcode: document.getElementById('zipCode').value.trim() || '',
+            opmerkingen: document.getElementById('remarks').value.trim() || '',
             updatedAt: new Date().toISOString()
         };
         
+        // Valideer verplichte velden
         if (!dogData.naam || !dogData.stamboomnr || !dogData.ras) {
             this.showError(this.t('fieldsRequired'));
             return;
@@ -1090,16 +1188,24 @@ class DogDataManager extends BaseModule {
         // Voeg ras toe aan recente rassen
         this.addToLastBreeds(dogData.ras);
         
+        console.log('Saving dog data:', dogData);
         this.showProgress(this.t('savingChanges'));
         
         try {
+            // Controleer of updateHond methode bestaat
+            if (!this.db.updateHond) {
+                throw new Error('updateHond methode niet gevonden in database');
+            }
+            
+            // Voer de update uit
             await this.db.updateHond(dogData);
+            
             this.hideProgress();
-            this.showSuccess(this.t('changesSaved'));
+            this.showSuccess(this.t('dogUpdated'));
             
             // Foto uploaden als er een is geselecteerd
             const photoInput = document.getElementById('dogPhoto');
-            if (photoInput.files.length > 0) {
+            if (photoInput && photoInput.files.length > 0) {
                 await this.uploadPhoto(dogData.stamboomnr, photoInput.files[0]);
             }
             
@@ -1107,10 +1213,25 @@ class DogDataManager extends BaseModule {
             const index = this.allDogs.findIndex(d => d.id === dogData.id);
             if (index !== -1) {
                 this.allDogs[index] = { ...this.allDogs[index], ...dogData };
+            } else {
+                // Voeg toe als niet gevonden
+                this.allDogs.push(dogData);
             }
+            
+            // Refresh zoekresultaten als nodig
+            const searchInput = document.getElementById('dogSearch');
+            if (searchInput && searchInput.value) {
+                this.performSearch(searchInput.value);
+            }
+            
+            // Terug naar zoeken na succes
+            setTimeout(() => {
+                this.showSearchSection();
+            }, 1500);
             
         } catch (error) {
             this.hideProgress();
+            console.error('Error updating dog:', error);
             this.showError(`${this.t('updateFailed')}${error.message}`);
         }
     }
@@ -1119,27 +1240,33 @@ class DogDataManager extends BaseModule {
      * Verwijder hond
      */
     async deleteDog() {
-        if (!this.auth.isAdmin()) {
+        if (!auth.isAdmin()) {
             this.showError(this.t('adminOnly'));
             return;
         }
         
         const dogId = document.getElementById('dogId').value;
         if (!dogId) {
-            this.showError('Geen hond geselecteerd');
-            return;
-        }
-        
-        if (!confirm(this.t('confirmDelete'))) {
+            this.showError(this.t('dogNotFound'));
             return;
         }
         
         const dogName = document.getElementById('dogName').value;
         
-        this.showProgress('Hond verwijderen...');
+        if (!confirm(`${this.t('confirmDelete')}\n\n${dogName} (ID: ${dogId})`)) {
+            return;
+        }
+        
+        this.showProgress(this.t('deleting') || 'Verwijderen...');
         
         try {
+            // Controleer of verwijderHond methode bestaat
+            if (!this.db.verwijderHond) {
+                throw new Error('verwijderHond methode niet gevonden in database');
+            }
+            
             await this.db.verwijderHond(parseInt(dogId));
+            
             this.hideProgress();
             this.showSuccess(`${this.t('dogDeleted')}: ${dogName}`);
             
@@ -1153,6 +1280,7 @@ class DogDataManager extends BaseModule {
             
         } catch (error) {
             this.hideProgress();
+            console.error('Error deleting dog:', error);
             this.showError(`${this.t('deleteFailed')}${error.message}`);
         }
     }
@@ -1176,9 +1304,14 @@ class DogDataManager extends BaseModule {
                             uploadedAt: new Date().toISOString()
                         };
                         
-                        await this.db.voegFotoToe(photoData);
-                        this.showSuccess(this.t('photoAdded'));
-                        resolve();
+                        if (this.db.voegFotoToe) {
+                            await this.db.voegFotoToe(photoData);
+                            this.showSuccess(this.t('photoAdded'));
+                            resolve();
+                        } else {
+                            console.warn('voegFotoToe methode niet beschikbaar');
+                            resolve();
+                        }
                     } catch (error) {
                         reject(error);
                     }
