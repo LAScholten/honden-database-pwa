@@ -35,7 +35,15 @@ class DogManager extends BaseModule {
                 dogAdded: "Hond succesvol toegevoegd!",
                 dogUpdated: "Hond succesvol bijgewerkt!",
                 dogDeleted: "Hond succesvol verwijderd!",
-                confirmDelete: "Weet u zeker dat u deze hond wilt verwijderen?"
+                confirmDelete: "Weet u zeker dat u deze hond wilt verwijderen?",
+                accessDenied: "Toegang Geweigerd",
+                insufficientRights: "Onvoldoende rechten",
+                userFunctions: "Beschikbare functies voor gebruikers",
+                searchDogs: "Honden zoeken en bekijken",
+                viewPhotos: "Foto galerij bekijken",
+                managePrivateInfo: "Privé informatie beheren",
+                importExport: "Data importeren/exporteren",
+                close: "Sluiten"
             },
             en: {
                 newDog: "Add New Dog",
@@ -62,7 +70,15 @@ class DogManager extends BaseModule {
                 dogAdded: "Dog successfully added!",
                 dogUpdated: "Dog successfully updated!",
                 dogDeleted: "Dog successfully deleted!",
-                confirmDelete: "Are you sure you want to delete this dog?"
+                confirmDelete: "Are you sure you want to delete this dog?",
+                accessDenied: "Access Denied",
+                insufficientRights: "Insufficient rights",
+                userFunctions: "Available functions for users",
+                searchDogs: "Search and view dogs",
+                viewPhotos: "View photo gallery",
+                managePrivateInfo: "Manage private information",
+                importExport: "Import/export data",
+                close: "Close"
             },
             de: {
                 newDog: "Neuen Hund hinzufügen",
@@ -89,7 +105,15 @@ class DogManager extends BaseModule {
                 dogAdded: "Hund erfolgreich hinzugefügt!",
                 dogUpdated: "Hund erfolgreich aktualisiert!",
                 dogDeleted: "Hund erfolgreich gelöscht!",
-                confirmDelete: "Sind Sie sicher, dass Sie diesen Hund löschen möchten?"
+                confirmDelete: "Sind Sie sicher, dass Sie diesen Hund löschen möchten?",
+                accessDenied: "Zugriff Verweigert",
+                insufficientRights: "Unzureichende Rechte",
+                userFunctions: "Verfügbare Funktionen für Benutzer",
+                searchDogs: "Hunde suchen und anzeigen",
+                viewPhotos: "Foto-Galerie anzeigen",
+                managePrivateInfo: "Private Informationen verwalten",
+                importExport: "Daten importieren/exportieren",
+                close: "Schließen"
             }
         };
     }
@@ -98,39 +122,56 @@ class DogManager extends BaseModule {
         return this.translations[this.currentLang][key] || key;
     }
     
-    addToLastBreeds(breed) {
-        if (!breed || breed.trim() === '') return;
-        
-        const breedStr = breed.trim();
-        const index = this.lastBreeds.indexOf(breedStr);
-        
-        if (index > -1) {
-            this.lastBreeds.splice(index, 1);
-        }
-        
-        this.lastBreeds.unshift(breedStr);
-        
-        if (this.lastBreeds.length > 5) {
-            this.lastBreeds = this.lastBreeds.slice(0, 5);
-        }
-        
-        localStorage.setItem('lastBreeds', JSON.stringify(this.lastBreeds));
-    }
-    
-    async loadAllDogs() {
-        if (this.allDogs.length === 0) {
-            try {
-                this.allDogs = await this.db.getHonden();
-                this.allDogs.sort((a, b) => a.naam.localeCompare(b.naam));
-                console.log(`${this.allDogs.length} honden geladen voor autocomplete`);
-            } catch (error) {
-                console.error('Fout bij laden honden voor autocomplete:', error);
-            }
-        }
-    }
-    
     getModalHTML(isEdit = false, dogData = null) {
         const t = this.t.bind(this);
+        
+        // Controleer of gebruiker admin is
+        const isAdmin = auth.isAdmin();
+        
+        if (!isAdmin) {
+            return `
+                <div class="modal fade" id="${isEdit ? 'editDogModal' : 'addDogModal'}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    ${t('accessDenied')}
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-danger">
+                                    <h5><i class="bi bi-shield-lock"></i> ${t('insufficientRights')}</h5>
+                                    <p>U heeft geen toestemming om honden toe te voegen of te bewerken. Alleen administrators kunnen deze functie gebruiken.</p>
+                                    <p class="mb-0">U bent ingelogd als: <strong>${auth.getCurrentUser().username}</strong> (Gebruiker)</p>
+                                </div>
+                                
+                                <div class="card mt-3">
+                                    <div class="card-body">
+                                        <h6><i class="bi bi-info-circle text-primary"></i> ${t('userFunctions')}</h6>
+                                        <ul>
+                                            <li>${t('searchDogs')}</li>
+                                            <li>${t('viewPhotos')}</li>
+                                            <li>${t('managePrivateInfo')}</li>
+                                            <li>${t('importExport')}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="bi bi-x-circle me-1"></i>
+                                    ${t('close')}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Als gebruiker admin is, toon het normale formulier
         const modalTitle = isEdit ? t('editDog') : t('newDog');
         const modalId = isEdit ? 'editDogModal' : 'addDogModal';
         
@@ -266,10 +307,49 @@ class DogManager extends BaseModule {
         `;
     }
     
+    addToLastBreeds(breed) {
+        if (!breed || breed.trim() === '') return;
+        
+        const breedStr = breed.trim();
+        const index = this.lastBreeds.indexOf(breedStr);
+        
+        if (index > -1) {
+            this.lastBreeds.splice(index, 1);
+        }
+        
+        this.lastBreeds.unshift(breedStr);
+        
+        if (this.lastBreeds.length > 5) {
+            this.lastBreeds = this.lastBreeds.slice(0, 5);
+        }
+        
+        localStorage.setItem('lastBreeds', JSON.stringify(this.lastBreeds));
+    }
+    
+    async loadAllDogs() {
+        if (this.allDogs.length === 0) {
+            try {
+                this.allDogs = await this.db.getHonden();
+                this.allDogs.sort((a, b) => a.naam.localeCompare(b.naam));
+                console.log(`${this.allDogs.length} honden geladen voor autocomplete`);
+            } catch (error) {
+                console.error('Fout bij laden honden voor autocomplete:', error);
+            }
+        }
+    }
+    
     setupEvents() {
         console.log('DogManager setupEvents aangeroepen');
         
-        // Laad honden voor autocomplete
+        // Controleer eerst of gebruiker admin is
+        if (!auth.isAdmin()) {
+            // Voor niet-admins hebben we al een toegang geweigerd modal
+            // Event listeners zijn niet nodig voor niet-admins
+            console.log('Gebruiker is geen admin, geen events nodig voor DogManager');
+            return;
+        }
+        
+        // Laad honden voor autocomplete (alleen voor admins)
         this.loadAllDogs();
         
         // Event listeners voor formulier
@@ -474,7 +554,7 @@ class DogManager extends BaseModule {
     }
     
     async saveDog(formType) {
-        if (!this.auth.isAdmin()) {
+        if (!auth.isAdmin()) {
             this.showError(this.t('adminOnly'));
             return;
         }
@@ -541,7 +621,7 @@ class DogManager extends BaseModule {
     }
     
     async deleteDog() {
-        if (!this.auth.isAdmin()) {
+        if (!auth.isAdmin()) {
             this.showError(this.t('adminOnly'));
             return;
         }
