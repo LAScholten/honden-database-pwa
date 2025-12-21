@@ -51,6 +51,7 @@ class DataManager extends BaseModule {
                 importSummary: "Import samenvatting",
                 newDogsAdded: "Nieuwe honden toegevoegd",
                 dogsUpdated: "Honden bijgewerkt",
+                dogsRestored: "Verwijderde honden hersteld",
                 photosImported: "Foto's geïmporteerd",
                 privateUpdated: "Privé records bijgewerkt",
                 exportSuccess: "Export succesvol voltooid!",
@@ -104,6 +105,7 @@ class DataManager extends BaseModule {
                 importSummary: "Import summary",
                 newDogsAdded: "New dogs added",
                 dogsUpdated: "Dogs updated",
+                dogsRestored: "Deleted dogs restored",
                 photosImported: "Photos imported",
                 privateUpdated: "Private records updated",
                 exportSuccess: "Export successful!",
@@ -329,44 +331,51 @@ class DataManager extends BaseModule {
     
     async processImport(importData) {
         const result = {
-            honden: { toegevoegd: 0, bijgewerkt: 0 },
+            honden: { toegevoegd: 0, bijgewerkt: 0, hersteld: 0 },
             fotos: { toegevoegd: 0 },
             priveInfo: { bijgewerkt: 0 }
         };
         
+        // Haal eerst alle bestaande honden op om te weten wat we hebben
+        let existingHonden = [];
+        try {
+            existingHonden = await this.db.getHonden();
+        } catch (e) {
+            console.error('Kon bestaande honden niet ophalen:', e);
+        }
+        
+        const existingHondIds = new Set(existingHonden.map(h => h.id));
+        
         // Import honden data
         if (importData.honden) {
             for (const importedHond of importData.honden) {
-                let existingHond;
-                
-                // Probeer verschillende methodes om hond op te halen
-                try {
-                    existingHond = await this.db.getHondById(importedHond.id);
-                } catch (e1) {
-                    try {
-                        existingHond = await this.db.getHond(importedHond.id);
-                    } catch (e2) {
-                        try {
-                            // Haal alle honden op en zoek de juiste
-                            const allHonden = await this.db.getHonden();
-                            existingHond = allHonden.find(h => h.id === importedHond.id);
-                        } catch (e3) {
-                            existingHond = null;
-                        }
-                    }
-                }
+                // Zoek of deze hond al bestaat
+                const existingHond = existingHonden.find(h => h.id === importedHond.id);
                 
                 if (!existingHond) {
-                    // Nieuwe hond toevoegen
+                    // Nieuwe hond toevoegen (of verwijderde herstellen)
                     try {
                         await this.db.addHond(importedHond);
-                        result.honden.toegevoegd++;
+                        
+                        if (existingHondIds.has(importedHond.id)) {
+                            // Deze hond bestaat technisch gezien al in de ID set
+                            result.honden.hersteld++;
+                        } else {
+                            // Volledig nieuwe hond
+                            result.honden.toegevoegd++;
+                        }
                     } catch (e) {
                         try {
+                            // Probeer alternatieve methode
                             await this.db.saveHond(importedHond);
-                            result.honden.toegevoegd++;
+                            
+                            if (existingHondIds.has(importedHond.id)) {
+                                result.honden.hersteld++;
+                            } else {
+                                result.honden.toegevoegd++;
+                            }
                         } catch (e2) {
-                            console.error('Kon hond niet toevoegen:', importedHond.id, e2);
+                            console.error('Kon hond niet toevoegen/herstellen:', importedHond.id, e2);
                         }
                     }
                 } else {
@@ -385,22 +394,40 @@ class DataManager extends BaseModule {
                     }
                 }
             }
+            
+            // Controleer of er honden in de import zitten die niet in de huidige database staan
+            // Dit zijn honden die mogelijk verwijderd waren en nu hersteld moeten worden
+            const importedHondIds = new Set(importData.honden.map(h => h.id));
+            const missingHonden = importData.honden.filter(h => !existingHondIds.has(h.id));
+            
+            // Deze worden al afgehandeld in de bovenstaande loop
+            // De telling gebeurt daar met result.honden.hersteld
         }
         
         // Import foto metadata
         if (importData.fotos) {
+            // Haal bestaande foto's op om duplicaten te voorkomen
+            let existingFotos = [];
+            try {
+                existingFotos = await this.db.getFotos();
+            } catch (e) {
+                console.error('Kon bestaande foto\'s niet ophalen:', e);
+            }
+            
+            const existingFotoIds = new Set(existingFotos.map(f => f.id));
+            
             for (const importedFoto of importData.fotos) {
-                try {
-                    // Probeer foto toe te voegen (niet controleren of hij al bestaat)
-                    await this.db.addFoto(importedFoto);
-                    result.fotos.toegevoegd++;
-                } catch (e) {
+                if (!existingFotoIds.has(importedFoto.id)) {
                     try {
-                        await this.db.saveFoto(importedFoto);
+                        await this.db.addFoto(importedFoto);
                         result.fotos.toegevoegd++;
-                    } catch (e2) {
-                        // Foto bestaat mogelijk al, sla over
-                        console.log('Foto bestaat al of kan niet worden toegevoegd:', importedFoto.id);
+                    } catch (e) {
+                        try {
+                            await this.db.saveFoto(importedFoto);
+                            result.fotos.toegevoegd++;
+                        } catch (e2) {
+                            console.log('Foto bestaat al of kan niet worden toegevoegd:', importedFoto.id);
+                        }
                     }
                 }
             }
@@ -411,16 +438,36 @@ class DataManager extends BaseModule {
             for (const importedPrive of importData.priveInfo) {
                 try {
                     // Probeer prive info bij te werken
-                    const existingPrive = await this.db.getPriveInfoByHondId(importedPrive.hondId);
+                    let existingPrive;
+                    try {
+                        existingPrive = await this.db.getPriveInfoByHondId(importedPrive.hondId);
+                    } catch (e) {
+                        try {
+                            existingPrive = await this.db.getPriveInfo(importedPrive.hondId);
+                        } catch (e2) {
+                            existingPrive = null;
+                        }
+                    }
                     
                     if (existingPrive) {
                         const updatedPrive = this.mergePriveInfo(existingPrive, importedPrive);
                         await this.db.updatePriveInfo(updatedPrive);
                         result.priveInfo.bijgewerkt++;
+                    } else {
+                        // Nieuwe prive info toevoegen (als de hond bestaat)
+                        try {
+                            await this.db.addPriveInfo(importedPrive);
+                            result.priveInfo.bijgewerkt++; // Tellen als bijgewerkt voor consistentie
+                        } catch (e) {
+                            try {
+                                await this.db.savePriveInfo(importedPrive);
+                                result.priveInfo.bijgewerkt++;
+                            } catch (e2) {
+                                console.log('Kon prive info niet toevoegen voor hond:', importedPrive.hondId);
+                            }
+                        }
                     }
-                    // Als er geen bestaande prive info is, doen we niets (geen nieuwe toevoegen)
                 } catch (e) {
-                    // Prive info kan niet worden bijgewerkt, sla over
                     console.log('Kon prive info niet bijwerken voor hond:', importedPrive.hondId);
                 }
             }
@@ -491,10 +538,11 @@ class DataManager extends BaseModule {
         const summary = `
             <h5>${this.t('importSummary')}</h5>
             <div class="alert alert-success">
-                <strong>${result.honden.toegevoegd}</strong> ${this.t('newDogsAdded')}<br>
-                <strong>${result.honden.bijgewerkt}</strong> ${this.t('dogsUpdated')}<br>
-                <strong>${result.fotos.toegevoegd}</strong> ${this.t('photosImported')}<br>
-                <strong>${result.priveInfo.bijgewerkt}</strong> ${this.t('privateUpdated')}
+                ${result.honden.toegevoegd > 0 ? `<strong>${result.honden.toegevoegd}</strong> ${this.t('newDogsAdded')}<br>` : ''}
+                ${result.honden.hersteld > 0 ? `<strong>${result.honden.hersteld}</strong> ${this.t('dogsRestored')}<br>` : ''}
+                ${result.honden.bijgewerkt > 0 ? `<strong>${result.honden.bijgewerkt}</strong> ${this.t('dogsUpdated')}<br>` : ''}
+                ${result.fotos.toegevoegd > 0 ? `<strong>${result.fotos.toegevoegd}</strong> ${this.t('photosImported')}<br>` : ''}
+                ${result.priveInfo.bijgewerkt > 0 ? `<strong>${result.priveInfo.bijgewerkt}</strong> ${this.t('privateUpdated')}<br>` : ''}
             </div>
         `;
         
@@ -518,7 +566,10 @@ class DataManager extends BaseModule {
                 metadata: {
                     exportDatum: new Date().toISOString(),
                     exportDoor: this.auth.getCurrentUser()?.username || 'unknown',
-                    exportType: exportDataPhotos ? (exportPrivateInfo ? 'all' : 'dataPhotos') : 'privateOnly'
+                    exportType: exportDataPhotos ? (exportPrivateInfo ? 'all' : 'dataPhotos') : 'privateOnly',
+                    aantalHonden: 0,
+                    aantalFotos: 0,
+                    aantalPriveInfo: 0
                 }
             };
             
@@ -526,6 +577,7 @@ class DataManager extends BaseModule {
                 // Haal honden data op
                 try {
                     exportData.honden = await this.db.getHonden();
+                    exportData.metadata.aantalHonden = exportData.honden.length;
                 } catch (e) {
                     console.error('Kon honden niet ophalen:', e);
                     exportData.honden = [];
@@ -534,6 +586,7 @@ class DataManager extends BaseModule {
                 // Haal foto metadata op
                 try {
                     exportData.fotos = await this.db.getFotos();
+                    exportData.metadata.aantalFotos = exportData.fotos.length;
                 } catch (e) {
                     console.error('Kon foto\'s niet ophalen:', e);
                     exportData.fotos = [];
@@ -543,6 +596,7 @@ class DataManager extends BaseModule {
             if (exportPrivateInfo) {
                 // Gebruik veilige methode om privé informatie op te halen
                 exportData.priveInfo = await this.getPrivateInfoSafely();
+                exportData.metadata.aantalPriveInfo = exportData.priveInfo.length;
             }
             
             // Genereer bestandsnaam op basis van export type
@@ -573,7 +627,8 @@ class DataManager extends BaseModule {
             this.hideProgress();
             
             const successMessage = `${this.t('exportSuccess')}<br>
-                                  <small>${this.t('exportFileSaved')} <strong>${fullFilename}</strong></small>`;
+                                  <small>${this.t('exportFileSaved')} <strong>${fullFilename}</strong></small><br>
+                                  <small>Aantal honden: ${exportData.metadata.aantalHonden}</small>`;
             this.showSuccess(successMessage);
             
         } catch (error) {
