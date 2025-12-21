@@ -1,3 +1,5 @@
+// js/modules/DogManager.js
+
 /**
  * Hond Management Module
  * Beheert toevoegen en bewerken van honden
@@ -5,156 +7,47 @@
 
 class DogManager extends BaseModule {
     constructor() {
-        super();
+        super('dog', 'Nieuwe Hond Toevoegen');
+        console.log('DogManager geïnitialiseerd');
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';
         this.lastBreeds = JSON.parse(localStorage.getItem('lastBreeds') || '[]');
         this.allDogs = [];
-        this.translations = {
-            nl: {
-                newDog: "Nieuwe Hond Toevoegen",
-                editDog: "Hond Bewerken",
-                nameRequired: "Naam *",
-                pedigreeNumber: "Stamboomnummer *",
-                breedRequired: "Ras *",
-                recentBreeds: "Recent gebruikte rassen",
-                father: "Vader",
-                mother: "Moeder",
-                birthDate: "Geboortedatum",
-                deathDate: "Overlijdensdatum",
-                gender: "Geslacht",
-                chooseGender: "Selecteer geslacht...",
-                male: "Reu",
-                female: "Teef",
-                saveDog: "Hond Opslaan",
-                cancel: "Annuleren",
-                delete: "Verwijderen",
-                requiredFields: "Velden met * zijn verplicht",
-                adminOnly: "Alleen administrators mogen honden toevoegen/bewerken",
-                fieldsRequired: "Naam, stamboomnummer en ras zijn verplichte velden",
-                savingDog: "Hond opslaan...",
-                dogAdded: "Hond succesvol toegevoegd!",
-                dogUpdated: "Hond succesvol bijgewerkt!",
-                dogDeleted: "Hond succesvol verwijderd!",
-                confirmDelete: "Weet u zeker dat u deze hond wilt verwijderen?",
-                accessDenied: "Toegang Geweigerd",
-                insufficientRights: "Onvoldoende rechten",
-                userFunctions: "Beschikbare functies voor gebruikers",
-                searchDogs: "Honden zoeken en bekijken",
-                viewPhotos: "Foto galerij bekijken",
-                managePrivateInfo: "Privé informatie beheren",
-                importExport: "Data importeren/exporteren",
-                close: "Sluiten"
-            },
-            en: {
-                newDog: "Add New Dog",
-                editDog: "Edit Dog",
-                nameRequired: "Name *",
-                pedigreeNumber: "Pedigree number *",
-                breedRequired: "Breed *",
-                recentBreeds: "Recently used breeds",
-                father: "Father",
-                mother: "Mother",
-                birthDate: "Birth date",
-                deathDate: "Death date",
-                gender: "Gender",
-                chooseGender: "Select gender...",
-                male: "Male",
-                female: "Female",
-                saveDog: "Save Dog",
-                cancel: "Cancel",
-                delete: "Delete",
-                requiredFields: "Fields with * are required",
-                adminOnly: "Only administrators can add/edit dogs",
-                fieldsRequired: "Name, pedigree number and breed are required fields",
-                savingDog: "Saving dog...",
-                dogAdded: "Dog successfully added!",
-                dogUpdated: "Dog successfully updated!",
-                dogDeleted: "Dog successfully deleted!",
-                confirmDelete: "Are you sure you want to delete this dog?",
-                accessDenied: "Access Denied",
-                insufficientRights: "Insufficient rights",
-                userFunctions: "Available functions for users",
-                searchDogs: "Search and view dogs",
-                viewPhotos: "View photo gallery",
-                managePrivateInfo: "Manage private information",
-                importExport: "Import/export data",
-                close: "Close"
-            },
-            de: {
-                newDog: "Neuen Hund hinzufügen",
-                editDog: "Hund bearbeiten",
-                nameRequired: "Name *",
-                pedigreeNumber: "Stammbaum-Nummer *",
-                breedRequired: "Rasse *",
-                recentBreeds: "Kürzlich verwendete Rassen",
-                father: "Vater",
-                mother: "Mutter",
-                birthDate: "Geburtsdatum",
-                deathDate: "Sterbedatum",
-                gender: "Geschlecht",
-                chooseGender: "Geschlecht wählen...",
-                male: "Rüde",
-                female: "Hündin",
-                saveDog: "Hund speichern",
-                cancel: "Abbrechen",
-                delete: "Löschen",
-                requiredFields: "Felder mit * zijn Pflichtfelder",
-                adminOnly: "Nur Administratoren können Hunde hinzufügen/bearbeiten",
-                fieldsRequired: "Name, Stammbaum-Nummer en Rasse sind Pflichtfelder",
-                savingDog: "Hund wird gespeichert...",
-                dogAdded: "Hund erfolgreich hinzugefügt!",
-                dogUpdated: "Hund erfolgreich aktualisiert!",
-                dogDeleted: "Hund erfolgreich gelöscht!",
-                confirmDelete: "Sind Sie sicher, dass Sie diesen Hund löschen möchten?",
-                accessDenied: "Zugriff Verweigert",
-                insufficientRights: "Unzureichende Rechte",
-                userFunctions: "Verfügbare Funktionen für Benutzer",
-                searchDogs: "Hunde suchen und anzeigen",
-                viewPhotos: "Foto-Galerie anzeigen",
-                managePrivateInfo: "Private Informationen verwalten",
-                importExport: "Daten importieren/exportieren",
-                close: "Schließen"
-            }
-        };
     }
     
-    t(key) {
-        return this.translations[this.currentLang][key] || key;
-    }
-    
+    /**
+     * Render de module interface
+     */
     getModalHTML(isEdit = false, dogData = null) {
-        const t = this.t.bind(this);
-        
         // Controleer of gebruiker admin is
         const isAdmin = auth.isAdmin();
         
         if (!isAdmin) {
             return `
-                <div class="modal fade" id="${isEdit ? 'editDogModal' : 'addDogModal'}" tabindex="-1" aria-hidden="true">
+                <div class="modal fade" id="dogModal" tabindex="-1" aria-labelledby="dogModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
                             <div class="modal-header bg-danger text-white">
-                                <h5 class="modal-title">
+                                <h5 class="modal-title" id="dogModalLabel">
                                     <i class="bi bi-exclamation-triangle me-2"></i>
-                                    ${t('accessDenied')}
+                                    <span class="module-title" data-key="accessDenied">Toegang Geweigerd</span>
                                 </h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
                                 <div class="alert alert-danger">
-                                    <h5><i class="bi bi-shield-lock"></i> ${t('insufficientRights')}</h5>
+                                    <h5><i class="bi bi-shield-lock"></i> Onvoldoende rechten</h5>
                                     <p>U heeft geen toestemming om honden toe te voegen of te bewerken. Alleen administrators kunnen deze functie gebruiken.</p>
                                     <p class="mb-0">U bent ingelogd als: <strong>${auth.getCurrentUser().username}</strong> (Gebruiker)</p>
                                 </div>
                                 
                                 <div class="card mt-3">
                                     <div class="card-body">
-                                        <h6><i class="bi bi-info-circle text-primary"></i> ${t('userFunctions')}</h6>
+                                        <h6><i class="bi bi-info-circle text-primary"></i> Beschikbare functies voor gebruikers</h6>
                                         <ul>
-                                            <li>${t('searchDogs')}</li>
-                                            <li>${t('viewPhotos')}</li>
-                                            <li>${t('managePrivateInfo')}</li>
-                                            <li>${t('importExport')}</li>
+                                            <li>Honden zoeken en bekijken</li>
+                                            <li>Foto galerij bekijken</li>
+                                            <li>Privé informatie beheren</li>
+                                            <li>Data importeren/exporteren</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -162,7 +55,7 @@ class DogManager extends BaseModule {
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                     <i class="bi bi-x-circle me-1"></i>
-                                    ${t('close')}
+                                    <span class="module-text" data-key="close">Sluiten</span>
                                 </button>
                             </div>
                         </div>
@@ -172,15 +65,15 @@ class DogManager extends BaseModule {
         }
         
         // Als gebruiker admin is, toon het normale formulier
-        const modalTitle = isEdit ? t('editDog') : t('newDog');
-        const modalId = isEdit ? 'editDogModal' : 'addDogModal';
+        const translations = this.getTranslations();
+        const modalTitle = isEdit ? translations.editDog : translations.newDog;
         
         const data = dogData || {};
         
         let recentBreedsHTML = '';
         if (this.lastBreeds.length > 0) {
             recentBreedsHTML = `
-                <div class="form-text mb-2">${t('recentBreeds')}:</div>
+                <div class="form-text mb-2">${translations.recentBreeds}:</div>
                 <div class="d-flex flex-wrap gap-2 mb-3">
             `;
             this.lastBreeds.forEach(breed => {
@@ -194,14 +87,14 @@ class DogManager extends BaseModule {
         }
         
         return `
-            <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="${modalId}Label" aria-hidden="true">
+            <div class="modal fade" id="dogModal" tabindex="-1" aria-labelledby="dogModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
                         <div class="modal-header bg-primary text-white">
-                            <h5 class="modal-title" id="${modalId}Label">
+                            <h5 class="modal-title" id="dogModalLabel">
                                 <i class="bi bi-plus-circle"></i> ${modalTitle}
                             </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <form id="${isEdit ? 'editDogForm' : 'addDogForm'}">
@@ -212,13 +105,13 @@ class DogManager extends BaseModule {
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label for="dogName" class="form-label">${t('nameRequired')}</label>
+                                            <label for="dogName" class="form-label">${translations.nameRequired}</label>
                                             <input type="text" class="form-control" id="dogName" value="${data.naam || ''}" required>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label for="pedigreeNumber" class="form-label">${t('pedigreeNumber')}</label>
+                                            <label for="pedigreeNumber" class="form-label">${translations.pedigreeNumber}</label>
                                             <input type="text" class="form-control" id="pedigreeNumber" value="${data.stamboomnr || ''}" required>
                                         </div>
                                     </div>
@@ -227,18 +120,18 @@ class DogManager extends BaseModule {
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label for="breed" class="form-label">${t('breedRequired')}</label>
+                                            <label for="breed" class="form-label">${translations.breedRequired}</label>
                                             <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
                                             ${recentBreedsHTML}
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label for="gender" class="form-label">${t('gender')}</label>
+                                            <label for="gender" class="form-label">${translations.gender}</label>
                                             <select class="form-select" id="gender">
-                                                <option value="">${t('chooseGender')}</option>
-                                                <option value="reuen" ${data.geslacht === 'reuen' ? 'selected' : ''}>${t('male')}</option>
-                                                <option value="teven" ${data.geslacht === 'teven' ? 'selected' : ''}>${t('female')}</option>
+                                                <option value="">${translations.chooseGender}</option>
+                                                <option value="reuen" ${data.geslacht === 'reuen' ? 'selected' : ''}>${translations.male}</option>
+                                                <option value="teven" ${data.geslacht === 'teven' ? 'selected' : ''}>${translations.female}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -247,10 +140,10 @@ class DogManager extends BaseModule {
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="mb-3 position-relative">
-                                            <label for="father" class="form-label">${t('father')}</label>
+                                            <label for="father" class="form-label">${translations.father}</label>
                                             <input type="text" class="form-control parent-input" id="father" 
                                                    value="${data.vader || ''}" 
-                                                   placeholder="Begin met typen om vader te zoeken..."
+                                                   placeholder="${translations.fatherSearch}"
                                                    data-parent-type="father"
                                                    autocomplete="off">
                                             <div class="autocomplete-dropdown" id="fatherDropdown"></div>
@@ -258,10 +151,10 @@ class DogManager extends BaseModule {
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-3 position-relative">
-                                            <label for="mother" class="form-label">${t('mother')}</label>
+                                            <label for="mother" class="form-label">${translations.mother}</label>
                                             <input type="text" class="form-control parent-input" id="mother" 
                                                    value="${data.moeder || ''}" 
-                                                   placeholder="Begin met typen om moeder te zoeken..."
+                                                   placeholder="${translations.motherSearch}"
                                                    data-parent-type="mother"
                                                    autocomplete="off">
                                             <div class="autocomplete-dropdown" id="motherDropdown"></div>
@@ -272,13 +165,13 @@ class DogManager extends BaseModule {
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label for="birthDate" class="form-label">${t('birthDate')}</label>
+                                            <label for="birthDate" class="form-label">${translations.birthDate}</label>
                                             <input type="date" class="form-control" id="birthDate" value="${data.geboortedatum || ''}">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label for="deathDate" class="form-label">${t('deathDate')}</label>
+                                            <label for="deathDate" class="form-label">${translations.deathDate}</label>
                                             <input type="date" class="form-control" id="deathDate" value="${data.overlijdensdatum || ''}">
                                         </div>
                                     </div>
@@ -286,25 +179,110 @@ class DogManager extends BaseModule {
                                 
                                 <div class="alert alert-info">
                                     <i class="bi bi-info-circle"></i>
-                                    ${t('requiredFields')}
+                                    ${translations.requiredFields}
                                 </div>
                             </form>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${t('cancel')}</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle me-1"></i>
+                                ${translations.cancel}
+                            </button>
                             ${isEdit ? `
                             <button type="button" class="btn btn-danger" id="deleteDogBtn">
-                                <i class="bi bi-trash"></i> ${t('delete')}
+                                <i class="bi bi-trash"></i> ${translations.delete}
                             </button>
                             ` : ''}
                             <button type="button" class="btn btn-primary" id="saveDogBtn">
-                                ${t('saveDog')}
+                                <i class="bi bi-save"></i> ${translations.saveDog}
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
         `;
+    }
+    
+    /**
+     * Haal vertalingen op voor huidige taal
+     */
+    getTranslations() {
+        const translations = {
+            nl: {
+                newDog: "Nieuwe Hond Toevoegen",
+                editDog: "Hond Bewerken",
+                nameRequired: "Naam *",
+                pedigreeNumber: "Stamboomnummer *",
+                breedRequired: "Ras *",
+                recentBreeds: "Recent gebruikte rassen",
+                father: "Vader",
+                mother: "Moeder",
+                fatherSearch: "Begin met typen om vader te zoeken...",
+                motherSearch: "Begin met typen om moeder te zoeken...",
+                birthDate: "Geboortedatum",
+                deathDate: "Overlijdensdatum",
+                gender: "Geslacht",
+                chooseGender: "Selecteer geslacht...",
+                male: "Reu",
+                female: "Teef",
+                saveDog: "Hond Opslaan",
+                cancel: "Annuleren",
+                delete: "Verwijderen",
+                requiredFields: "Velden met * zijn verplicht",
+                accessDenied: "Toegang Geweigerd",
+                close: "Sluiten"
+            },
+            en: {
+                newDog: "Add New Dog",
+                editDog: "Edit Dog",
+                nameRequired: "Name *",
+                pedigreeNumber: "Pedigree number *",
+                breedRequired: "Breed *",
+                recentBreeds: "Recently used breeds",
+                father: "Father",
+                mother: "Mother",
+                fatherSearch: "Start typing to search for father...",
+                motherSearch: "Start typing to search for mother...",
+                birthDate: "Birth date",
+                deathDate: "Death date",
+                gender: "Gender",
+                chooseGender: "Select gender...",
+                male: "Male",
+                female: "Female",
+                saveDog: "Save Dog",
+                cancel: "Cancel",
+                delete: "Delete",
+                requiredFields: "Fields with * are required",
+                accessDenied: "Access Denied",
+                close: "Close"
+            },
+            de: {
+                newDog: "Neuen Hund hinzufügen",
+                editDog: "Hund bearbeiten",
+                nameRequired: "Name *",
+                pedigreeNumber: "Stammbaum-Nummer *",
+                breedRequired: "Rasse *",
+                recentBreeds: "Kürzlich verwendete Rassen",
+                father: "Vater",
+                mother: "Mutter",
+                fatherSearch: "Beginnen Sie mit der Eingabe, um den Vater zu suchen...",
+                motherSearch: "Beginnen Sie mit der Eingabe, um die Mutter zu suchen...",
+                birthDate: "Geburtsdatum",
+                deathDate: "Sterbedatum",
+                gender: "Geschlecht",
+                chooseGender: "Geschlecht wählen...",
+                male: "Rüde",
+                female: "Hündin",
+                saveDog: "Hund speichern",
+                cancel: "Abbrechen",
+                delete: "Löschen",
+                requiredFields: "Felder mit * zijn Pflichtfelder",
+                accessDenied: "Zugriff Verweigert",
+                close: "Schließen"
+            }
+        };
+        
+        return translations[this.currentLang] || translations.nl;
     }
     
     addToLastBreeds(breed) {
@@ -338,14 +316,20 @@ class DogManager extends BaseModule {
         }
     }
     
+    /**
+     * Setup event listeners voor deze module
+     */
     setupEvents() {
         console.log('DogManager setupEvents aangeroepen');
         
-        // Controleer eerst of gebruiker admin is
+        // Als gebruiker geen admin is, kunnen we stoppen hier
         if (!auth.isAdmin()) {
-            // Voor niet-admins hebben we al een toegang geweigerd modal
-            // Event listeners zijn niet nodig voor niet-admins
             console.log('Gebruiker is geen admin, geen events nodig voor DogManager');
+            
+            // Vertaal de modal tekst
+            setTimeout(() => {
+                this.translateModal();
+            }, 100);
             return;
         }
         
@@ -380,10 +364,28 @@ class DogManager extends BaseModule {
             });
         });
         
-        // Setup autocomplete voor ouders (wacht even tot DOM geladen is)
+        // Setup autocomplete voor ouders
         setTimeout(() => {
             this.setupParentAutocomplete();
         }, 100);
+        
+        // Vertaal de modal tekst
+        setTimeout(() => {
+            this.translateModal();
+        }, 100);
+    }
+    
+    /**
+     * Vertaal de modal tekst
+     */
+    translateModal() {
+        const elements = document.querySelectorAll('[data-key]');
+        elements.forEach(element => {
+            const key = element.getAttribute('data-key');
+            if (this.getTranslations()[key]) {
+                element.textContent = this.getTranslations()[key];
+            }
+        });
     }
     
     setupParentAutocomplete() {
@@ -555,7 +557,7 @@ class DogManager extends BaseModule {
     
     async saveDog(formType) {
         if (!auth.isAdmin()) {
-            this.showError(this.t('adminOnly'));
+            this.showError("Alleen administrators mogen honden toevoegen/bewerken");
             return;
         }
         
@@ -579,25 +581,25 @@ class DogManager extends BaseModule {
         console.log('Saving dog data:', dogData);
         
         if (!dogData.naam || !dogData.stamboomnr || !dogData.ras) {
-            this.showError(this.t('fieldsRequired'));
+            this.showError("Naam, stamboomnummer en ras zijn verplichte velden");
             return;
         }
         
         this.addToLastBreeds(dogData.ras);
         
-        this.showProgress(this.t('savingDog'));
+        this.showProgress("Hond opslaan...");
         
         try {
             if (isEdit && dogId) {
                 await this.db.updateHond(parseInt(dogId), dogData);
                 this.hideProgress();
-                this.showSuccess(this.t('dogUpdated'));
+                this.showSuccess("Hond succesvol bijgewerkt!");
             } else {
                 dogData.createdAt = new Date().toISOString();
                 const newId = await this.db.voegHondToe(dogData);
                 console.log('New dog added with ID:', newId);
                 this.hideProgress();
-                this.showSuccess(this.t('dogAdded'));
+                this.showSuccess("Hond succesvol toegevoegd!");
             }
             
             // Voeg de nieuwe hond toe aan de lokale lijst voor toekomstige autocomplete
@@ -608,8 +610,7 @@ class DogManager extends BaseModule {
             }
             
             setTimeout(() => {
-                const modalId = isEdit ? 'editDogModal' : 'addDogModal';
-                const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
+                const modal = bootstrap.Modal.getInstance(document.getElementById('dogModal'));
                 if (modal) modal.hide();
             }, 1500);
             
@@ -622,21 +623,21 @@ class DogManager extends BaseModule {
     
     async deleteDog() {
         if (!auth.isAdmin()) {
-            this.showError(this.t('adminOnly'));
+            this.showError("Alleen administrators mogen honden toevoegen/bewerken");
             return;
         }
         
         const dogId = document.getElementById('dogId').value;
         if (!dogId) return;
         
-        if (!confirm(this.t('confirmDelete'))) return;
+        if (!confirm("Weet u zeker dat u deze hond wilt verwijderen?")) return;
         
         this.showProgress("Verwijderen...");
         
         try {
             await this.db.verwijderHond(parseInt(dogId));
             this.hideProgress();
-            this.showSuccess(this.t('dogDeleted'));
+            this.showSuccess("Hond succesvol verwijderd!");
             
             // Verwijder uit lokale lijst
             const index = this.allDogs.findIndex(dog => dog.id === parseInt(dogId));
@@ -645,7 +646,7 @@ class DogManager extends BaseModule {
             }
             
             setTimeout(() => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('editDogModal'));
+                const modal = bootstrap.Modal.getInstance(document.getElementById('dogModal'));
                 if (modal) modal.hide();
             }, 1500);
             
@@ -654,4 +655,17 @@ class DogManager extends BaseModule {
             this.showError(`Fout bij verwijderen: ${error.message}`);
         }
     }
+    
+    /**
+     * Initialiseer de module
+     */
+    async init() {
+        console.log('DogManager geïnitialiseerd');
+        return true;
+    }
+}
+
+// Maak globaal beschikbaar voor debug doeleinden
+if (typeof window !== 'undefined') {
+    window.DogManager = DogManager;
 }
