@@ -195,18 +195,6 @@ class DataManager extends BaseModule {
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
                         </div>
                         <div class="modal-body">
-                            <div class="alert alert-info mb-4">
-                                <div class="d-flex">
-                                    <div class="flex-shrink-0">
-                                        <i class="bi bi-person fs-4"></i>
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <h6 class="alert-heading">${t('loggedInAs')} ${t('user')}</h6>
-                                        ${t('userRights')}
-                                    </div>
-                                </div>
-                            </div>
-                            
                             <div class="row">
                                 <div class="col-lg-6 mb-4">
                                     <div class="card h-100 border-success">
@@ -430,7 +418,7 @@ class DataManager extends BaseModule {
             }
         }
         
-        // Import prive info (voor alle gebruikers)
+        // Import prive info
         if (importData.priveInfo) {
             for (const importedPrive of importData.priveInfo) {
                 const existingPrive = await this.db.getPriveInfo(importedPrive.hondId);
