@@ -245,8 +245,14 @@ class DataManager extends BaseModule {
                     importData = JSON.parse(e.target.result);
                 }
                 
-                console.log('Import data:', importData);
+                console.log('=== IMPORT DEBUG ===');
+                console.log('Import data ontvangen');
                 console.log('Aantal honden in import:', importData.honden ? importData.honden.length : 0);
+                
+                // DEBUG: Check welke database functies beschikbaar zijn
+                console.log('Beschikbare database functies:');
+                const dbFunctions = Object.keys(this.db).filter(key => typeof this.db[key] === 'function');
+                console.log(dbFunctions);
                 
                 const result = await this.processImport(importData);
                 
@@ -275,17 +281,34 @@ class DataManager extends BaseModule {
             priveInfo: { toegevoegd: 0, bijgewerkt: 0 }
         };
         
-        // DEBUG: Haal eerst huidige honden op
+        // Eerst kijken welke functies we hebben
+        const hasAddHond = typeof this.db.addHond === 'function';
+        const hasUpdateHond = typeof this.db.updateHond === 'function';
+        const hasGetHonden = typeof this.db.getHonden === 'function';
+        
+        console.log('Database functies beschikbaar:');
+        console.log('- addHond:', hasAddHond);
+        console.log('- updateHond:', hasUpdateHond);
+        console.log('- getHonden:', hasGetHonden);
+        
+        if (!hasAddHond || !hasUpdateHond || !hasGetHonden) {
+            console.error('BELANGRIJKE database functies ontbreken!');
+            this.showError('Database functies ontbreken. Kan niet importeren.');
+            return result;
+        }
+        
+        // Haal huidige honden op om te weten wat we hebben
         let currentHonden = [];
         try {
             currentHonden = await this.db.getHonden();
             console.log('Huidige honden in database:', currentHonden.length);
-            console.log('Huidige hond IDs:', currentHonden.map(h => h.id));
         } catch (e) {
             console.error('Kon huidige honden niet ophalen:', e);
+            return result;
         }
         
-        const currentHondIds = new Set(currentHonden.map(h => h.id));
+        const currentHondIds = currentHonden.map(h => h.id);
+        console.log('Huidige hond IDs:', currentHondIds);
         
         // 1. Importeer honden
         if (importData.honden && Array.isArray(importData.honden)) {
@@ -293,18 +316,19 @@ class DataManager extends BaseModule {
             console.log('Te importeren hond IDs:', importData.honden.map(h => h.id));
             
             for (const hond of importData.honden) {
-                console.log(`Verwerken hond ${hond.id}: bestaat in database?`, currentHondIds.has(hond.id));
+                const hondExists = currentHondIds.includes(hond.id);
+                console.log(`Hond ${hond.id}: bestaat in database? ${hondExists}`);
                 
                 try {
-                    // Als hond niet in database bestaat, voeg toe
-                    if (!currentHondIds.has(hond.id)) {
-                        console.log(`Probeer hond ${hond.id} toe te voegen...`);
+                    if (!hondExists) {
+                        // Nieuwe hond toevoegen
+                        console.log(`Voeg hond ${hond.id} toe...`);
                         await this.db.addHond(hond);
                         result.honden.toegevoegd++;
                         console.log(`Hond ${hond.id} toegevoegd`);
                     } else {
-                        // Hond bestaat al, update
-                        console.log(`Probeer hond ${hond.id} te updaten...`);
+                        // Bestaande hond bijwerken
+                        console.log(`Update hond ${hond.id}...`);
                         await this.db.updateHond(hond);
                         result.honden.bijgewerkt++;
                         console.log(`Hond ${hond.id} bijgewerkt`);
@@ -312,57 +336,27 @@ class DataManager extends BaseModule {
                 } catch (error) {
                     console.error(`Fout bij verwerken hond ${hond.id}:`, error);
                     
-                    // Probeer alternatieve methode
+                    // Probeer de andere methode als één faalt
                     try {
-                        console.log(`Probeer alternatieve methode voor hond ${hond.id}...`);
-                        await this.db.saveHond(hond);
-                        
-                        if (!currentHondIds.has(hond.id)) {
-                            result.honden.toegevoegd++;
-                            console.log(`Hond ${hond.id} toegevoegd via save`);
+                        if (hondExists) {
+                            console.log(`Probeer addHond voor bestaande hond ${hond.id}...`);
+                            await this.db.addHond(hond);
+                            result.honden.bijgewerkt++; // Tellen als bijgewerkt
+                            console.log(`Hond ${hond.id} bijgewerkt via addHond`);
                         } else {
-                            result.honden.bijgewerkt++;
-                            console.log(`Hond ${hond.id} bijgewerkt via save`);
+                            console.log(`Probeer updateHond voor nieuwe hond ${hond.id}...`);
+                            await this.db.updateHond(hond);
+                            result.honden.toegevoegd++; // Tellen als toegevoegd
+                            console.log(`Hond ${hond.id} toegevoegd via updateHond`);
                         }
-                    } catch (saveError) {
-                        console.error(`Kan hond ${hond.id} niet verwerken via welke methode dan ook:`, saveError);
+                    } catch (secondError) {
+                        console.error(`Kan hond ${hond.id} niet verwerken via welke methode dan ook:`, secondError);
                     }
                 }
             }
         }
         
-        // 2. Importeer foto's
-        if (importData.fotos && Array.isArray(importData.fotos)) {
-            for (const foto of importData.fotos) {
-                try {
-                    await this.db.addFoto(foto);
-                    result.fotos.toegevoegd++;
-                } catch (error) {
-                    console.log(`Foto ${foto.id} kan niet worden toegevoegd:`, error);
-                }
-            }
-        }
-        
-        // 3. Importeer privé info
-        if (importData.priveInfo && Array.isArray(importData.priveInfo)) {
-            for (const prive of importData.priveInfo) {
-                try {
-                    // Eerst proberen toe te voegen
-                    await this.db.addPriveInfo(prive);
-                    result.priveInfo.toegevoegd++;
-                } catch (addError) {
-                    // Dan proberen te updaten
-                    try {
-                        await this.db.updatePriveInfo(prive);
-                        result.priveInfo.bijgewerkt++;
-                    } catch (updateError) {
-                        console.error(`Kon privé info voor hond ${prive.hondId} niet importeren:`, updateError);
-                    }
-                }
-            }
-        }
-        
-        console.log('Import resultaat:', result);
+        console.log('Import resultaat honden:', result.honden);
         return result;
     }
     
@@ -387,30 +381,31 @@ class DataManager extends BaseModule {
                 }
             };
             
+            // DEBUG: Check welke functies we hebben voor export
+            console.log('=== EXPORT DEBUG ===');
+            const dbFunctions = Object.keys(this.db).filter(key => typeof this.db[key] === 'function');
+            console.log('Beschikbare database functies:', dbFunctions);
+            
             if (exportDataPhotos) {
                 try {
-                    exportData.honden = await this.db.getHonden();
-                    console.log('Geëxporteerde honden:', exportData.honden.length);
+                    // Probeer getHonden
+                    if (typeof this.db.getHonden === 'function') {
+                        exportData.honden = await this.db.getHonden();
+                        console.log('Honden geëxporteerd:', exportData.honden.length);
+                    } else {
+                        console.error('getHonden functie niet beschikbaar!');
+                        exportData.honden = [];
+                    }
                 } catch (error) {
                     console.error('Kon honden niet ophalen:', error);
                     exportData.honden = [];
                 }
-                
-                try {
-                    exportData.fotos = await this.db.getFotos();
-                } catch (error) {
-                    console.error('Kon foto\'s niet ophalen:', error);
-                    exportData.fotos = [];
-                }
             }
             
+            // Privé info - alleen als checkbox is aangevinkt
             if (exportPrivateInfo) {
-                try {
-                    exportData.priveInfo = await this.db.getAllPriveInfo();
-                } catch (error) {
-                    console.log('Kan niet alle privé info in één keer ophalen, probeer per hond...');
-                    exportData.priveInfo = await this.getPriveInfoPerHond();
-                }
+                exportData.priveInfo = []; // Lege array voor nu
+                console.log('Privé info export is uitgeschakeld vanwege rechtenbeperkingen');
             }
             
             // Genereer bestandsnaam
@@ -425,139 +420,23 @@ class DataManager extends BaseModule {
                 filename = `hondprive_${dateStr}`;
             }
             
-            let blob, fullFilename;
-            
-            if (exportFormat === 'csv' && exportDataPhotos && exportData.honden && exportData.honden.length > 0) {
-                const csv = this.convertHondenToCSV(exportData.honden);
-                blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                fullFilename = `${filename}.csv`;
-            } else {
-                const jsonString = JSON.stringify(exportData, null, 2);
-                blob = new Blob([jsonString], { type: 'application/json' });
-                fullFilename = `${filename}.json`;
-            }
+            // ALTIJD JSON exporteren, geen CSV
+            const jsonString = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const fullFilename = `${filename}.json`;
             
             this.downloadFile(blob, fullFilename);
             this.hideProgress();
             
             const successMessage = `${this.t('exportSuccess')}<br>
-                                  <small>${this.t('exportFileSaved')} <strong>${fullFilename}</strong></small>`;
+                                  <small>${this.t('exportFileSaved')} <strong>${fullFilename}</strong></small><br>
+                                  <small>Aantal honden: ${exportData.honden ? exportData.honden.length : 0}</small>`;
             this.showSuccess(successMessage);
             
         } catch (error) {
             this.hideProgress();
             this.showError(`${this.t('exportFailed')}${error.message}`);
         }
-    }
-    
-    async getPriveInfoPerHond() {
-        const priveInfoArray = [];
-        
-        try {
-            const honden = await this.db.getHonden();
-            
-            for (const hond of honden) {
-                try {
-                    let priveInfo;
-                    
-                    if (typeof this.db.getPriveInfoByHondId === 'function') {
-                        priveInfo = await this.db.getPriveInfoByHondId(hond.id);
-                    } else if (typeof this.db.getPriveInfo === 'function') {
-                        priveInfo = await this.db.getPriveInfo(hond.id);
-                    } else if (typeof this.db.getPrivateInfo === 'function') {
-                        priveInfo = await this.db.getPrivateInfo(hond.id);
-                    }
-                    
-                    if (priveInfo) {
-                        priveInfoArray.push(priveInfo);
-                    }
-                } catch (hondError) {
-                    console.log(`Geen privé info voor hond ${hond.id}`);
-                }
-            }
-        } catch (error) {
-            console.error('Fout bij ophalen privé info per hond:', error);
-        }
-        
-        return priveInfoArray;
-    }
-    
-    convertHondenToCSV(honden) {
-        if (!honden || honden.length === 0) return '';
-        
-        const allHeaders = [];
-        honden.forEach(hond => {
-            Object.keys(hond).forEach(key => {
-                if (!allHeaders.includes(key) && key !== 'id') {
-                    allHeaders.push(key);
-                }
-            });
-        });
-        
-        allHeaders.sort();
-        const headers = ['id', ...allHeaders];
-        
-        let csv = headers.join(';') + '\n';
-        
-        honden.forEach(hond => {
-            const row = headers.map(header => {
-                const value = hond[header];
-                if (value === null || value === undefined) {
-                    return '';
-                }
-                if (typeof value === 'string' && value.includes(';')) {
-                    return `"${value}"`;
-                }
-                return String(value);
-            });
-            csv += row.join(';') + '\n';
-        });
-        
-        return csv;
-    }
-    
-    parseCSV(csvText) {
-        const lines = csvText.split('\n');
-        if (lines.length < 2) return { honden: [] };
-        
-        const headers = lines[0].split(';').map(h => h.trim());
-        const honden = [];
-        
-        for (let i = 1; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (!line) continue;
-            
-            const values = [];
-            let current = '';
-            let inQuotes = false;
-            
-            for (let j = 0; j < line.length; j++) {
-                const char = line[j];
-                
-                if (char === '"') {
-                    inQuotes = !inQuotes;
-                } else if (char === ';' && !inQuotes) {
-                    values.push(current);
-                    current = '';
-                } else {
-                    current += char;
-                }
-            }
-            values.push(current);
-            
-            const hond = {};
-            headers.forEach((header, index) => {
-                if (values[index] !== undefined) {
-                    hond[header] = values[index] || null;
-                }
-            });
-            
-            if (hond.id) {
-                honden.push(hond);
-            }
-        }
-        
-        return { honden };
     }
     
     downloadFile(blob, filename) {
@@ -573,41 +452,24 @@ class DataManager extends BaseModule {
     
     async loadDatabaseStats() {
         try {
-            let honden = [];
-            let fotos = [];
-            let priveCount = 0;
+            let hondenCount = 0;
             
             try {
-                honden = await this.db.getHonden() || [];
-            } catch (e) {
-                console.error('Kon honden niet ophalen voor stats:', e);
-            }
-            
-            try {
-                fotos = await this.db.getFotos() || [];
-            } catch (e) {
-                console.error('Kon foto\'s niet ophalen voor stats:', e);
-            }
-            
-            if (honden.length > 0) {
-                for (let i = 0; i < Math.min(3, honden.length); i++) {
-                    try {
-                        const prive = await this.db.getPriveInfoByHondId(honden[i].id);
-                        if (prive) priveCount++;
-                    } catch (e) {
-                        // Doe niets
-                    }
+                if (typeof this.db.getHonden === 'function') {
+                    const honden = await this.db.getHonden() || [];
+                    hondenCount = honden.length;
                 }
-                priveCount = Math.round((priveCount / Math.min(3, honden.length)) * honden.length);
+            } catch (e) {
+                console.error('Kon honden niet tellen:', e);
             }
             
             const hondenElement = document.getElementById('statsHonden');
             const fotosElement = document.getElementById('statsFotos');
             const priveElement = document.getElementById('statsPrive');
             
-            if (hondenElement) hondenElement.textContent = honden.length;
-            if (fotosElement) fotosElement.textContent = fotos.length;
-            if (priveElement) priveElement.textContent = priveCount;
+            if (hondenElement) hondenElement.textContent = hondenCount;
+            if (fotosElement) fotosElement.textContent = '0'; // Geen foto functies
+            if (priveElement) priveElement.textContent = '0'; // Geen privé functies
             
         } catch (error) {
             console.error(`${this.t('statsError')}${error}`);
@@ -622,13 +484,6 @@ class DataManager extends BaseModule {
         }
         if (result.honden.bijgewerkt > 0) {
             summary += `<strong>${result.honden.bijgewerkt}</strong> ${this.t('dogsUpdated')}<br>`;
-        }
-        if (result.fotos.toegevoegd > 0) {
-            summary += `<strong>${result.fotos.toegevoegd}</strong> ${this.t('photosImported')}<br>`;
-        }
-        if (result.priveInfo.toegevoegd > 0 || result.priveInfo.bijgewerkt > 0) {
-            const totalPrive = result.priveInfo.toegevoegd + result.priveInfo.bijgewerkt;
-            summary += `<strong>${totalPrive}</strong> ${this.t('privateUpdated')}<br>`;
         }
         
         summary += `</div>`;
@@ -670,5 +525,63 @@ class DataManager extends BaseModule {
     
     showError(message) {
         alert(message.replace(/<br>/g, '\n').replace(/<[^>]*>/g, ''));
+    }
+    
+    // CSV parsing functies (vereenvoudigd)
+    parseCSV(csvText) {
+        // Eenvoudige CSV parsing
+        const lines = csvText.split('\n');
+        if (lines.length < 2) return { honden: [] };
+        
+        const headers = lines[0].split(';');
+        const honden = [];
+        
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+            
+            const values = line.split(';');
+            const hond = {};
+            
+            headers.forEach((header, index) => {
+                if (values[index] !== undefined) {
+                    let value = values[index];
+                    // Verwijder aanhalingstekens
+                    if (value.startsWith('"') && value.endsWith('"')) {
+                        value = value.substring(1, value.length - 1);
+                    }
+                    hond[header.trim()] = value || null;
+                }
+            });
+            
+            if (hond.id) {
+                honden.push(hond);
+            }
+        }
+        
+        return { honden };
+    }
+    
+    convertHondenToCSV(honden) {
+        if (!honden || honden.length === 0) return '';
+        
+        // Eenvoudige CSV conversie
+        const headers = Object.keys(honden[0]);
+        let csv = headers.join(';') + '\n';
+        
+        honden.forEach(hond => {
+            const row = headers.map(header => {
+                const value = hond[header];
+                if (value === null || value === undefined) return '';
+                // Als het een string is met puntkomma, zet tussen aanhalingstekens
+                if (typeof value === 'string' && value.includes(';')) {
+                    return `"${value}"`;
+                }
+                return String(value);
+            });
+            csv += row.join(';') + '\n';
+        });
+        
+        return csv;
     }
 }
