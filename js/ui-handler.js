@@ -15,7 +15,7 @@ class UIHandler {
             DataManager: typeof DataManager,
             DogManager: typeof DogManager,
             DogDataManager: typeof DogDataManager,
-            SearchManager: typeof SearchManager, // NIEUW
+            SearchManager: typeof SearchManager,
             PhotoManager: typeof PhotoManager,
             BreedingManager: typeof BreedingManager,
             PrivateInfoManager: typeof PrivateInfoManager
@@ -27,7 +27,7 @@ class UIHandler {
                 data: new DataManager(),
                 dog: new DogManager(),
                 editDogData: new DogDataManager(),
-                search: new SearchManager(), // NIEUW: SearchManager voor "Hond Zoeken"
+                search: new SearchManager(),
                 photo: new PhotoManager(),
                 breeding: new BreedingManager(),
                 private: new PrivateInfoManager()
@@ -116,10 +116,7 @@ class UIHandler {
                     
                 case 'addDog':
                     if (!this.modules.dog) throw new Error('DogManager module niet beschikbaar');
-                    if (!this.auth.isAdmin()) {
-                        this.showError('Alleen administrators mogen nieuwe honden toevoegen');
-                        return;
-                    }
+                    // TOEGANGSCONTROLE IS VERWIJDERD - zit nu in DogManager.getModalHTML()
                     modalHTML = this.modules.dog.getModalHTML();
                     modalId = 'addDogModal';
                     break;
@@ -130,7 +127,7 @@ class UIHandler {
                     modalId = 'dogDataModal';
                     break;
                     
-                case 'search': // NIEUW: SearchManager modal
+                case 'search':
                     if (!this.modules.search) throw new Error('SearchManager module niet beschikbaar');
                     modalHTML = this.modules.search.getModalHTML();
                     modalId = 'searchModal';
@@ -264,7 +261,7 @@ class UIHandler {
                         }
                         break;
                         
-                    case 'search': // NIEUW: SearchManager events
+                    case 'search':
                         if (this.modules.search && this.modules.search.setupEvents) {
                             this.modules.search.setupEvents();
                             if (this.modules.search.loadSearchData) {
