@@ -216,8 +216,18 @@ class HondenDatabase {
         });
     }
 
-    async updateHond(hondId, updateData) {
+    // FIXED: Deze methode accepteert nu één object met ID erin
+    async updateHond(hondData) {
         await this.init();
+        
+        if (!hondData || !hondData.id) {
+            throw new Error('Hond ID is vereist voor update');
+        }
+        
+        const hondId = Number(hondData.id);
+        if (isNaN(hondId) || hondId <= 0) {
+            throw new Error(`Ongeldig hond ID: ${hondData.id}`);
+        }
         
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['honden'], 'readwrite');
@@ -231,38 +241,61 @@ class HondenDatabase {
                     return;
                 }
                 
+                // Update alleen de velden die zijn meegegeven, behoud bestaande waarden
                 const updatedHond = {
                     ...existingHond,
-                    ...updateData,
+                    ...hondData,
+                    id: hondId, // Zorg dat ID behouden blijft
                     updatedAt: new Date().toISOString(),
                     updatedBy: window.auth?.getCurrentUser()?.username || 'unknown'
                 };
                 
+                // Verwijder undefined/null waarden voor oude velden
+                Object.keys(updatedHond).forEach(key => {
+                    if (updatedHond[key] === undefined) {
+                        updatedHond[key] = existingHond[key] || '';
+                    }
+                });
+                
                 const putRequest = store.put(updatedHond);
                 putRequest.onsuccess = () => {
-                    console.log('Hond bijgewerkt:', hondId);
-                    resolve();
+                    console.log('Hond bijgewerkt:', hondId, updatedHond.naam);
+                    resolve(updatedHond);
                 };
-                putRequest.onerror = () => reject(putRequest.error);
+                putRequest.onerror = (error) => {
+                    console.error('Fout bij put request:', error);
+                    reject(new Error(`Fout bij opslaan: ${putRequest.error?.message || 'Onbekende fout'}`));
+                };
             };
             
-            getRequest.onerror = () => reject(getRequest.error);
+            getRequest.onerror = (error) => {
+                console.error('Fout bij get request:', error);
+                reject(new Error(`Fout bij ophalen hond: ${getRequest.error?.message || 'Onbekende fout'}`));
+            };
         });
     }
 
     async verwijderHond(hondId) {
         await this.init();
         
+        const parsedId = Number(hondId);
+        if (isNaN(parsedId) || parsedId <= 0) {
+            throw new Error(`Ongeldig hond ID: ${hondId}`);
+        }
+        
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['honden'], 'readwrite');
             const store = transaction.objectStore('honden');
-            const request = store.delete(hondId);
+            const request = store.delete(parsedId);
             
             request.onsuccess = () => {
-                console.log('Hond verwijderd:', hondId);
+                console.log('Hond verwijderd:', parsedId);
                 resolve();
             };
-            request.onerror = () => reject(request.error);
+            request.onerror = (error) => {
+                console.error('Fout bij verwijderen hond:', error);
+                reject(new Error(`Fout bij verwijderen: ${request.error?.message || 'Onbekende fout'}`));
+            };
         });
     }
 
@@ -283,13 +316,22 @@ class HondenDatabase {
     async getHondById(id) {
         await this.init();
         
+        const parsedId = Number(id);
+        if (isNaN(parsedId) || parsedId <= 0) {
+            console.warn('Ongeldig ID opgevraagd:', id);
+            return null;
+        }
+        
         return new Promise((resolve, reject) => {
             const transaction = this.db.transaction(['honden'], 'readonly');
             const store = transaction.objectStore('honden');
-            const request = store.get(id);
+            const request = store.get(parsedId);
             
             request.onsuccess = () => resolve(request.result || null);
-            request.onerror = () => reject(request.error);
+            request.onerror = (error) => {
+                console.error('Fout bij ophalen hond:', error);
+                reject(new Error(`Fout bij ophalen: ${request.error?.message || 'Onbekende fout'}`));
+            };
         });
     }
 
@@ -487,7 +529,7 @@ class HondenDatabase {
                     const bestaandeHond = await this.getHondByStamboomnr(hond.stamboomnr);
                     
                     if (bestaandeHond && overschrijven) {
-                        await this.updateHond(bestaandeHond.id, hond);
+                        await this.updateHond({ ...hond, id: bestaandeHond.id });
                         resultaat.honden.bijgewerkt++;
                     } else if (!bestaandeHond) {
                         await this.voegHondToe(hond);
