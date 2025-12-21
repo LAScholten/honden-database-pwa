@@ -6,7 +6,7 @@
 class DogManager extends BaseModule {
     constructor() {
         super('dogmanager', 'Hond Beheer');
-        console.log('DogManager geïnitialiseerd');
+        this.currentLang = localStorage.getItem('appLanguage') || 'nl';
         this.lastBreeds = JSON.parse(localStorage.getItem('lastBreeds') || '[]');
         this.allDogs = []; // Voor autocomplete van ouders
         this.translations = {
@@ -249,7 +249,7 @@ class DogManager extends BaseModule {
                 accessDenied: "Zugriff Verweigert",
                 
                 // Meldungen
-                adminOnly: "Nur Administratoren können Hunde hinzufügen/bearbeiten",
+                adminOnly: "Nur Administratoren kunnen Hunde hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer en Rasse sind Pflichtfelder",
                 savingDog: "Hund wordt gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
@@ -273,15 +273,12 @@ class DogManager extends BaseModule {
         this.currentLang = lang;
     }
     
-    /**
-     * Render de module interface
-     */
     getModalHTML(isEdit = false, dogData = null) {
         // Controleer of gebruiker admin is - EXACT zoals in DogDataManager
         const isAdmin = auth.isAdmin();
         
         if (!isAdmin) {
-            const modalId = isEdit ? 'editDogModal' : 'addDogModal';
+            const modalId = 'addDogModal'; // Alleen voor nieuwe hond toevoegen
             
             return `
                 <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="${modalId}Label" aria-hidden="true">
@@ -327,8 +324,8 @@ class DogManager extends BaseModule {
         
         // Als gebruiker admin is, toon het normale formulier
         const t = this.t.bind(this);
-        const modalTitle = isEdit ? t('editDog') : t('newDog');
-        const modalId = isEdit ? 'editDogModal' : 'addDogModal';
+        const modalTitle = t('newDog');
+        const modalId = 'addDogModal';
         
         const data = dogData || {};
         
@@ -349,6 +346,7 @@ class DogManager extends BaseModule {
             recentBreedsHTML += `</div>`;
         }
         
+        // RETURN ALLE VELDEN - compleet formulier
         return `
             <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="${modalId}Label" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
@@ -360,8 +358,7 @@ class DogManager extends BaseModule {
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
                         </div>
                         <div class="modal-body">
-                            <form id="${isEdit ? 'editDogForm' : 'addDogForm'}">
-                                <input type="hidden" id="dogId" value="${data.id || ''}">
+                            <form id="addDogForm">
                                 <input type="hidden" id="fatherId" value="${data.vaderId || ''}">
                                 <input type="hidden" id="motherId" value="${data.moederId || ''}">
                                 
@@ -563,11 +560,6 @@ class DogManager extends BaseModule {
                                 <i class="bi bi-x-circle me-1"></i>
                                 <span class="module-text" data-key="close">${t('close')}</span>
                             </button>
-                            ${isEdit ? `
-                            <button type="button" class="btn btn-danger" id="deleteDogBtn">
-                                <i class="bi bi-trash"></i> ${t('delete')}
-                            </button>
-                            ` : ''}
                             <button type="button" class="btn btn-primary" id="saveDogBtn">
                                 ${t('saveDog')}
                             </button>
@@ -615,9 +607,6 @@ class DogManager extends BaseModule {
         `;
     }
     
-    /**
-     * Setup event listeners voor deze module
-     */
     setupEvents() {
         console.log('DogManager setupEvents called');
         
@@ -631,7 +620,7 @@ class DogManager extends BaseModule {
         
         if (!isAdmin) {
             // Voeg event listeners toe voor de knoppen in de modal
-            const modal = document.getElementById('addDogModal') || document.getElementById('editDogModal');
+            const modal = document.getElementById('addDogModal');
             if (modal) {
                 modal.addEventListener('shown.bs.modal', () => {
                     console.log('DogManager modal is nu zichtbaar (toegang geweigerd)');
@@ -648,16 +637,7 @@ class DogManager extends BaseModule {
         const saveBtn = document.getElementById('saveDogBtn');
         if (saveBtn) {
             saveBtn.addEventListener('click', () => {
-                const formId = document.getElementById('dogId') ? 'editDogForm' : 'addDogForm';
-                this.saveDog(formId);
-            });
-        }
-        
-        // Delete knop
-        const deleteBtn = document.getElementById('deleteDogBtn');
-        if (deleteBtn) {
-            deleteBtn.addEventListener('click', () => {
-                this.deleteDog();
+                this.saveDog();
             });
         }
         
@@ -699,27 +679,21 @@ class DogManager extends BaseModule {
     }
     
     /**
-     * Vertaal de modal tekst - EXACT hetzelfde als in DogDataManager
+     * Vertaal de modal tekst
      */
     translateModal() {
         const currentLang = localStorage.getItem('appLanguage') || 'nl';
         const translations = {
             nl: {
-                editDogData: "Data Hond Bewerken",
                 close: "Sluiten",
-                refresh: "Pagina Vernieuwen",
                 accessDenied: "Toegang Geweigerd"
             },
             en: {
-                editDogData: "Edit Dog Data",
                 close: "Close",
-                refresh: "Refresh Page",
                 accessDenied: "Access Denied"
             },
             de: {
-                editDogData: "Hundedaten bearbeiten",
                 close: "Schließen",
-                refresh: "Seite aktualisieren",
                 accessDenied: "Zugriff Verweigert"
             }
         };
@@ -869,14 +843,11 @@ class DogManager extends BaseModule {
         });
     }
     
-    async saveDog(formType) {
+    async saveDog() {
         if (!this.auth.isAdmin()) {
             this.showError(this.t('adminOnly'));
             return;
         }
-        
-        const isEdit = formType === 'editDogForm';
-        const dogId = isEdit ? document.getElementById('dogId').value : null;
         
         const dogData = {
             naam: document.getElementById('dogName').value.trim(),
@@ -900,13 +871,9 @@ class DogManager extends BaseModule {
             land: document.getElementById('country').value.trim(),
             postcode: document.getElementById('zipCode').value.trim(),
             opmerkingen: document.getElementById('remarks').value.trim(),
+            createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
-        
-        // Alleen bij toevoegen
-        if (!isEdit) {
-            dogData.createdAt = new Date().toISOString();
-        }
         
         if (!dogData.naam || !dogData.stamboomnr || !dogData.ras) {
             this.showError(this.t('fieldsRequired'));
@@ -919,15 +886,9 @@ class DogManager extends BaseModule {
         this.showProgress(this.t('savingDog'));
         
         try {
-            if (isEdit && dogId) {
-                await this.db.updateHond(parseInt(dogId), dogData);
-                this.hideProgress();
-                this.showSuccess(this.t('dogUpdated'));
-            } else {
-                await this.db.voegHondToe(dogData);
-                this.hideProgress();
-                this.showSuccess(this.t('dogAdded'));
-            }
+            await this.db.voegHondToe(dogData);
+            this.hideProgress();
+            this.showSuccess(this.t('dogAdded'));
             
             // Foto uploaden als er een is geselecteerd
             const photoInput = document.getElementById('dogPhoto');
@@ -936,47 +897,14 @@ class DogManager extends BaseModule {
             }
             
             // Modal sluiten
-            const modalId = isEdit ? 'editDogModal' : 'addDogModal';
             setTimeout(() => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addDogModal'));
                 if (modal) modal.hide();
             }, 1500);
             
         } catch (error) {
             this.hideProgress();
-            const errorMsg = isEdit ? this.t('updateFailed') : this.t('addFailed');
-            this.showError(`${errorMsg}${error.message}`);
-        }
-    }
-    
-    async deleteDog() {
-        if (!this.auth.isAdmin()) {
-            this.showError(this.t('adminOnly'));
-            return;
-        }
-        
-        const dogId = document.getElementById('dogId').value;
-        if (!dogId) return;
-        
-        if (!confirm(this.t('confirmDelete'))) {
-            return;
-        }
-        
-        this.showProgress("Verwijderen...");
-        
-        try {
-            await this.db.verwijderHond(parseInt(dogId));
-            this.hideProgress();
-            this.showSuccess(this.t('dogDeleted'));
-            
-            setTimeout(() => {
-                const modal = bootstrap.Modal.getInstance(document.getElementById('editDogModal'));
-                if (modal) modal.hide();
-            }, 1500);
-            
-        } catch (error) {
-            this.hideProgress();
-            this.showError(`${this.t('deleteFailed')}${error.message}`);
+            this.showError(`${this.t('addFailed')}${error.message}`);
         }
     }
     
@@ -1012,167 +940,6 @@ class DogManager extends BaseModule {
             });
         } catch (error) {
             this.showError(`${this.t('photoError')}${error.message}`);
-        }
-    }
-    
-    async viewDogDetails(hondId) {
-        // Deze functie wordt aangeroepen vanuit SearchManager
-        const t = this.t.bind(this);
-        
-        try {
-            const honden = await this.db.getHonden();
-            const hond = honden.find(h => h.id === parseInt(hondId));
-            
-            if (!hond) {
-                this.showError('Hond niet gevonden');
-                return;
-            }
-            
-            const genderText = hond.geslacht === 'reuen' ? t('male') : 
-                             hond.geslacht === 'teven' ? t('female') : '-';
-            
-            const html = `
-                <div class="modal fade" id="viewDogModal" tabindex="-1" aria-labelledby="viewDogModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header bg-info text-white">
-                                <h5 class="modal-title" id="viewDogModalLabel">
-                                    <i class="bi bi-eye"></i> ${hond.naam} - ${t('details')}
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <h6 class="border-bottom pb-2">${t('dogInfo')}</h6>
-                                        <table class="table table-sm">
-                                            <tr>
-                                                <th style="width: 40%">${t('name')}:</th>
-                                                <td>${hond.naam}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>${t('breed')}:</th>
-                                                <td>${hond.ras || '-'}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>${t('pedigreeNumber')}:</th>
-                                                <td><code>${hond.stamboomnr || '-'}</code></td>
-                                            </tr>
-                                            <tr>
-                                                <th>${t('gender')}:</th>
-                                                <td>${genderText}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>${t('birthDate')}:</th>
-                                                <td>${hond.geboortedatum ? new Date(hond.geboortedatum).toLocaleDateString(this.currentLang) : '-'}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>${t('deathDate')}:</th>
-                                                <td>${hond.overlijdensdatum ? new Date(hond.overlijdensdatum).toLocaleDateString(this.currentLang) : '-'}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>${t('country')}:</th>
-                                                <td>${hond.land || '-'}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>${t('zipCode')}:</th>
-                                                <td>${hond.postcode || '-'}</td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <h6 class="border-bottom pb-2">${t('pedigreeInfo')}</h6>
-                                        <table class="table table-sm">
-                                            <tr>
-                                                <th style="width: 40%">${t('father')}:</th>
-                                                <td>${hond.vader || '-'}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>${t('mother')}:</th>
-                                                <td>${hond.moeder || '-'}</td>
-                                            </tr>
-                                        </table>
-                                        
-                                        <h6 class="border-bottom pb-2 mt-4">${t('locationInfo')}</h6>
-                                        <table class="table table-sm">
-                                            <tr>
-                                                <th>${t('createdAt')}:</th>
-                                                <td>${new Date(hond.createdAt).toLocaleString(this.currentLang)}</td>
-                                            </tr>
-                                            <tr>
-                                                <th>${t('updatedAt')}:</th>
-                                                <td>${new Date(hond.updatedAt).toLocaleString(this.currentLang)}</td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                </div>
-                                
-                                <div class="row mt-4">
-                                    <div class="col-12">
-                                        <h6 class="border-bottom pb-2">${t('healthInfo')}</h6>
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <strong>${t('hipDysplasia')}:</strong><br>
-                                                ${hond.heupdysplasie || '-'}
-                                            </div>
-                                            <div class="col-md-3">
-                                                <strong>${t('elbowDysplasia')}:</strong><br>
-                                                ${hond.elleboogdysplasie || '-'}
-                                            </div>
-                                            <div class="col-md-3">
-                                                <strong>${t('patellaLuxation')}:</strong><br>
-                                                ${hond.patella || '-'}
-                                            </div>
-                                            <div class="col-md-3">
-                                                <strong>${t('eyes')}:</strong><br>
-                                                ${hond.ogen || '-'}
-                                                ${hond.ogenVerklaring ? ` (${hond.ogenVerklaring})` : ''}
-                                            </div>
-                                        </div>
-                                        <div class="row mt-3">
-                                            <div class="col-md-6">
-                                                <strong>${t('dandyWalker')}:</strong><br>
-                                                ${hond.dandyWalker || '-'}
-                                            </div>
-                                            <div class="col-md-6">
-                                                <strong>${t('thyroid')}:</strong><br>
-                                                ${hond.schildklier || '-'}
-                                                ${hond.schildklierVerklaring ? ` (${hond.schildklierVerklaring})` : ''}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                ${hond.opmerkingen ? `
-                                <div class="mt-4">
-                                    <h6 class="border-bottom pb-2">${t('remarks')}</h6>
-                                    <div class="bg-light p-3 rounded">
-                                        ${hond.opmerkingen}
-                                    </div>
-                                </div>
-                                ` : ''}
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            const container = document.getElementById('modalsContainer');
-            container.insertAdjacentHTML('beforeend', html);
-            
-            const modalElement = document.getElementById('viewDogModal');
-            const modal = new bootstrap.Modal(modalElement);
-            modal.show();
-            
-            modalElement.addEventListener('hidden.bs.modal', () => {
-                modalElement.remove();
-            });
-            
-        } catch (error) {
-            this.showError(`Fout bij laden hond details: ${error.message}`);
         }
     }
 }
