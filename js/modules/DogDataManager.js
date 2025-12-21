@@ -113,6 +113,7 @@ class DogDataManager extends BaseModule {
                 photoAdded: "Foto toegevoegd",
                 updatingDog: "Hond bijwerken...",
                 dogUpdated: "Hond bijgewerkt!",
+                deleting: "Verwijderen...",
                 
                 // Foutmeldingen
                 searchFailed: "Fout bij zoeken: ",
@@ -122,7 +123,8 @@ class DogDataManager extends BaseModule {
                 photoError: "Fout bij uploaden foto: ",
                 fieldsRequired: "Naam, stamboomnummer en ras zijn verplichte velden",
                 dogNotFound: "Hond niet gevonden",
-                adminOnly: "Alleen administrators mogen honden bewerken"
+                adminOnly: "Alleen administrators mogen honden bewerken",
+                invalidId: "Ongeldig hond ID"
             },
             en: {
                 // Modal titles
@@ -222,6 +224,7 @@ class DogDataManager extends BaseModule {
                 photoAdded: "Photo added",
                 updatingDog: "Updating dog...",
                 dogUpdated: "Dog updated!",
+                deleting: "Deleting...",
                 
                 // Error messages
                 searchFailed: "Error searching: ",
@@ -231,7 +234,8 @@ class DogDataManager extends BaseModule {
                 photoError: "Error uploading photo: ",
                 fieldsRequired: "Name, pedigree number and breed are required fields",
                 dogNotFound: "Dog not found",
-                adminOnly: "Only administrators can edit dogs"
+                adminOnly: "Only administrators can edit dogs",
+                invalidId: "Invalid dog ID"
             },
             de: {
                 // Modal Titel
@@ -331,6 +335,7 @@ class DogDataManager extends BaseModule {
                 photoAdded: "Foto hinzugefügt",
                 updatingDog: "Hund aktualisieren...",
                 dogUpdated: "Hund aktualisiert!",
+                deleting: "Löschen...",
                 
                 // Fehlermeldungen
                 searchFailed: "Fehler bei der Suche: ",
@@ -338,9 +343,10 @@ class DogDataManager extends BaseModule {
                 updateFailed: "Fehler beim Aktualisieren des Hundes: ",
                 deleteFailed: "Fehler beim Löschen des Hundes: ",
                 photoError: "Fehler beim Hochladen des Fotos: ",
-                fieldsRequired: "Name, Stammbaum-Nummer und Rasse sind Pflichtfelder",
+                fieldsRequired: "Name, Stammbaum-Nummer en Rasse sind Pflichtfelder",
                 dogNotFound: "Hund nicht gefunden",
-                adminOnly: "Nur Administratoren können Hunde bearbeiten"
+                adminOnly: "Nur Administratoren können Hunde bearbeiten",
+                invalidId: "Ungültige Hunde-ID"
             }
         };
     }
@@ -986,6 +992,12 @@ class DogDataManager extends BaseModule {
         try {
             console.log(`Selecting dog with ID: ${dogId}`);
             
+            // Controleer of ID geldig is
+            if (!dogId || isNaN(dogId)) {
+                this.showError(this.t('invalidId'));
+                return;
+            }
+            
             // Markeer geselecteerd item in zoekresultaten
             document.querySelectorAll('.search-result-item').forEach(item => {
                 item.classList.remove('selected');
@@ -994,24 +1006,16 @@ class DogDataManager extends BaseModule {
                 }
             });
             
-            // Laad hond data met progress indicator
-            this.showProgress(this.t('loading') + '...');
+            // Zoek in lokale cache eerst
+            let dog = this.allDogs.find(d => d.id === dogId);
             
-            let dog;
-            try {
-                // Probeer eerst getHondById, anders zoek in lokale cache
-                if (this.db.getHondById) {
-                    dog = await this.db.getHondById(dogId);
-                } else {
-                    // Fallback: zoek in lokale array
-                    dog = this.allDogs.find(d => d.id === dogId);
-                }
-            } catch (error) {
-                console.warn('getHondById failed, using local cache:', error);
+            if (!dog) {
+                // Probeer opnieuw te laden uit database
+                this.showProgress(this.t('loading') + '...');
+                await this.loadAllDogs();
                 dog = this.allDogs.find(d => d.id === dogId);
+                this.hideProgress();
             }
-            
-            this.hideProgress();
             
             if (!dog) {
                 this.showError(this.t('dogNotFound'));
@@ -1139,7 +1143,7 @@ class DogDataManager extends BaseModule {
     }
     
     /**
-     * Opslaan wijzigingen
+     * Opslaan wijzigingen - FIXED VERSION
      */
     async saveDogChanges() {
         if (!auth.isAdmin()) {
@@ -1153,8 +1157,15 @@ class DogDataManager extends BaseModule {
             return;
         }
         
+        // Parse ID als getal
+        const parsedId = parseInt(dogId);
+        if (isNaN(parsedId)) {
+            this.showError(this.t('invalidId'));
+            return;
+        }
+        
         const dogData = {
-            id: parseInt(dogId),
+            id: parsedId, // Zorg dat dit een getal is
             naam: document.getElementById('dogName').value.trim(),
             stamboomnr: document.getElementById('pedigreeNumber').value.trim(),
             ras: document.getElementById('breed').value.trim(),
@@ -1192,13 +1203,24 @@ class DogDataManager extends BaseModule {
         this.showProgress(this.t('savingChanges'));
         
         try {
-            // Controleer of updateHond methode bestaat
-            if (!this.db.updateHond) {
-                throw new Error('updateHond methode niet gevonden in database');
+            // Controleer of updateHond methode bestaat - gebruik de methode van je DogManager
+            if (this.db && typeof this.db.updateHond === 'function') {
+                console.log('Calling updateHond with ID:', dogData.id);
+                await this.db.updateHond(dogData);
+            } 
+            // Als updateHond niet bestaat, probeer updateDog of pasPut
+            else if (this.db && typeof this.db.updateDog === 'function') {
+                console.log('Calling updateDog with ID:', dogData.id);
+                await this.db.updateDog(dogData);
             }
-            
-            // Voer de update uit
-            await this.db.updateHond(dogData);
+            // Fallback: gebruik put method
+            else if (this.db && typeof this.db.put === 'function') {
+                console.log('Calling put with ID:', dogData.id);
+                await this.db.put('honden', dogData);
+            }
+            else {
+                throw new Error('Geen geschikte update methode gevonden in database');
+            }
             
             this.hideProgress();
             this.showSuccess(this.t('dogUpdated'));
@@ -1232,12 +1254,18 @@ class DogDataManager extends BaseModule {
         } catch (error) {
             this.hideProgress();
             console.error('Error updating dog:', error);
+            console.error('Error details:', {
+                id: dogData.id,
+                type: typeof dogData.id,
+                errorName: error.name,
+                errorMessage: error.message
+            });
             this.showError(`${this.t('updateFailed')}${error.message}`);
         }
     }
     
     /**
-     * Verwijder hond
+     * Verwijder hond - FIXED VERSION
      */
     async deleteDog() {
         if (!auth.isAdmin()) {
@@ -1251,27 +1279,49 @@ class DogDataManager extends BaseModule {
             return;
         }
         
-        const dogName = document.getElementById('dogName').value;
-        
-        if (!confirm(`${this.t('confirmDelete')}\n\n${dogName} (ID: ${dogId})`)) {
+        const parsedId = parseInt(dogId);
+        if (isNaN(parsedId)) {
+            this.showError(this.t('invalidId'));
             return;
         }
         
-        this.showProgress(this.t('deleting') || 'Verwijderen...');
+        const dogName = document.getElementById('dogName').value;
+        
+        if (!confirm(`${this.t('confirmDelete')}\n\n${dogName} (ID: ${parsedId})`)) {
+            return;
+        }
+        
+        this.showProgress(this.t('deleting'));
         
         try {
-            // Controleer of verwijderHond methode bestaat
-            if (!this.db.verwijderHond) {
-                throw new Error('verwijderHond methode niet gevonden in database');
+            // Probeer verschillende delete methodes
+            let deleted = false;
+            
+            if (this.db && typeof this.db.verwijderHond === 'function') {
+                console.log('Calling verwijderHond with ID:', parsedId);
+                await this.db.verwijderHond(parsedId);
+                deleted = true;
+            }
+            else if (this.db && typeof this.db.deleteDog === 'function') {
+                console.log('Calling deleteDog with ID:', parsedId);
+                await this.db.deleteDog(parsedId);
+                deleted = true;
+            }
+            else if (this.db && typeof this.db.delete === 'function') {
+                console.log('Calling delete with ID:', parsedId);
+                await this.db.delete('honden', parsedId);
+                deleted = true;
             }
             
-            await this.db.verwijderHond(parseInt(dogId));
+            if (!deleted) {
+                throw new Error('Geen geschikte delete methode gevonden in database');
+            }
             
             this.hideProgress();
             this.showSuccess(`${this.t('dogDeleted')}: ${dogName}`);
             
             // Update lokale cache
-            this.allDogs = this.allDogs.filter(d => d.id !== parseInt(dogId));
+            this.allDogs = this.allDogs.filter(d => d.id !== parsedId);
             
             // Terug naar zoeken
             setTimeout(() => {
@@ -1304,7 +1354,7 @@ class DogDataManager extends BaseModule {
                             uploadedAt: new Date().toISOString()
                         };
                         
-                        if (this.db.voegFotoToe) {
+                        if (this.db && typeof this.db.voegFotoToe === 'function') {
                             await this.db.voegFotoToe(photoData);
                             this.showSuccess(this.t('photoAdded'));
                             resolve();
