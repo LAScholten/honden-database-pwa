@@ -337,29 +337,52 @@ class DataManager extends BaseModule {
         // Import honden data
         if (importData.honden) {
             for (const importedHond of importData.honden) {
-                // Controleer of de functie getHond bestaat, anders gebruik getDogById of findHond
                 let existingHond;
                 
-                if (typeof this.db.getHond === 'function') {
-                    existingHond = await this.db.getHond(importedHond.id);
-                } else if (typeof this.db.getDogById === 'function') {
-                    existingHond = await this.db.getDogById(importedHond.id);
-                } else if (typeof this.db.findHond === 'function') {
-                    existingHond = await this.db.findHond(importedHond.id);
-                } else {
-                    // Probeer de eerste beschikbare methode
-                    existingHond = await this.db.getDog(importedHond.id);
+                // Probeer verschillende methodes om hond op te halen
+                try {
+                    existingHond = await this.db.getHondById(importedHond.id);
+                } catch (e1) {
+                    try {
+                        existingHond = await this.db.getHond(importedHond.id);
+                    } catch (e2) {
+                        try {
+                            // Haal alle honden op en zoek de juiste
+                            const allHonden = await this.db.getHonden();
+                            existingHond = allHonden.find(h => h.id === importedHond.id);
+                        } catch (e3) {
+                            existingHond = null;
+                        }
+                    }
                 }
                 
                 if (!existingHond) {
                     // Nieuwe hond toevoegen
-                    await this.addHondToDatabase(importedHond);
-                    result.honden.toegevoegd++;
+                    try {
+                        await this.db.addHond(importedHond);
+                        result.honden.toegevoegd++;
+                    } catch (e) {
+                        try {
+                            await this.db.saveHond(importedHond);
+                            result.honden.toegevoegd++;
+                        } catch (e2) {
+                            console.error('Kon hond niet toevoegen:', importedHond.id, e2);
+                        }
+                    }
                 } else {
                     // Bestaande hond bijwerken en aanvullen
                     const updatedHond = this.mergeHonden(existingHond, importedHond);
-                    await this.updateHondInDatabase(updatedHond);
-                    result.honden.bijgewerkt++;
+                    try {
+                        await this.db.updateHond(updatedHond);
+                        result.honden.bijgewerkt++;
+                    } catch (e) {
+                        try {
+                            await this.db.saveHond(updatedHond);
+                            result.honden.bijgewerkt++;
+                        } catch (e2) {
+                            console.error('Kon hond niet updaten:', updatedHond.id, e2);
+                        }
+                    }
                 }
             }
         }
@@ -367,91 +390,43 @@ class DataManager extends BaseModule {
         // Import foto metadata
         if (importData.fotos) {
             for (const importedFoto of importData.fotos) {
-                let existingFoto;
-                
-                if (typeof this.db.getFoto === 'function') {
-                    existingFoto = await this.db.getFoto(importedFoto.id);
-                } else if (typeof this.db.getPhotoById === 'function') {
-                    existingFoto = await this.db.getPhotoById(importedFoto.id);
-                }
-                
-                if (!existingFoto) {
-                    await this.addFotoToDatabase(importedFoto);
+                try {
+                    // Probeer foto toe te voegen (niet controleren of hij al bestaat)
+                    await this.db.addFoto(importedFoto);
                     result.fotos.toegevoegd++;
+                } catch (e) {
+                    try {
+                        await this.db.saveFoto(importedFoto);
+                        result.fotos.toegevoegd++;
+                    } catch (e2) {
+                        // Foto bestaat mogelijk al, sla over
+                        console.log('Foto bestaat al of kan niet worden toegevoegd:', importedFoto.id);
+                    }
                 }
-                // Bestaande foto's worden niet overschreven
             }
         }
         
         // Import prive info
         if (importData.priveInfo) {
             for (const importedPrive of importData.priveInfo) {
-                let existingPrive;
-                
-                if (typeof this.db.getPriveInfo === 'function') {
-                    existingPrive = await this.db.getPriveInfo(importedPrive.hondId);
-                } else if (typeof this.db.getPrivateInfo === 'function') {
-                    existingPrive = await this.db.getPrivateInfo(importedPrive.hondId);
+                try {
+                    // Probeer prive info bij te werken
+                    const existingPrive = await this.db.getPriveInfoByHondId(importedPrive.hondId);
+                    
+                    if (existingPrive) {
+                        const updatedPrive = this.mergePriveInfo(existingPrive, importedPrive);
+                        await this.db.updatePriveInfo(updatedPrive);
+                        result.priveInfo.bijgewerkt++;
+                    }
+                    // Als er geen bestaande prive info is, doen we niets (geen nieuwe toevoegen)
+                } catch (e) {
+                    // Prive info kan niet worden bijgewerkt, sla over
+                    console.log('Kon prive info niet bijwerken voor hond:', importedPrive.hondId);
                 }
-                
-                if (existingPrive) {
-                    const updatedPrive = this.mergePriveInfo(existingPrive, importedPrive);
-                    await this.updatePriveInfoInDatabase(updatedPrive);
-                    result.priveInfo.bijgewerkt++;
-                }
-                // Alleen bestaande records bijwerken, geen nieuwe toevoegen
             }
         }
         
         return result;
-    }
-    
-    async addHondToDatabase(hond) {
-        if (typeof this.db.addHond === 'function') {
-            return await this.db.addHond(hond);
-        } else if (typeof this.db.addDog === 'function') {
-            return await this.db.addDog(hond);
-        } else if (typeof this.db.saveHond === 'function') {
-            return await this.db.saveHond(hond);
-        } else {
-            return await this.db.createDog(hond);
-        }
-    }
-    
-    async updateHondInDatabase(hond) {
-        if (typeof this.db.updateHond === 'function') {
-            return await this.db.updateHond(hond);
-        } else if (typeof this.db.updateDog === 'function') {
-            return await this.db.updateDog(hond);
-        } else if (typeof this.db.saveHond === 'function') {
-            return await this.db.saveHond(hond);
-        } else {
-            return await this.db.updateDogById(hond.id, hond);
-        }
-    }
-    
-    async addFotoToDatabase(foto) {
-        if (typeof this.db.addFoto === 'function') {
-            return await this.db.addFoto(foto);
-        } else if (typeof this.db.addPhoto === 'function') {
-            return await this.db.addPhoto(foto);
-        } else if (typeof this.db.saveFoto === 'function') {
-            return await this.db.saveFoto(foto);
-        } else {
-            return await this.db.createPhoto(foto);
-        }
-    }
-    
-    async updatePriveInfoInDatabase(priveInfo) {
-        if (typeof this.db.updatePriveInfo === 'function') {
-            return await this.db.updatePriveInfo(priveInfo);
-        } else if (typeof this.db.updatePrivateInfo === 'function') {
-            return await this.db.updatePrivateInfo(priveInfo);
-        } else if (typeof this.db.savePriveInfo === 'function') {
-            return await this.db.savePriveInfo(priveInfo);
-        } else {
-            return await this.db.updatePrivateInfoByDogId(priveInfo.hondId, priveInfo);
-        }
     }
     
     mergeHonden(existing, imported) {
@@ -549,38 +524,25 @@ class DataManager extends BaseModule {
             
             if (exportDataPhotos) {
                 // Haal honden data op
-                if (typeof this.db.getHonden === 'function') {
+                try {
                     exportData.honden = await this.db.getHonden();
-                } else if (typeof this.db.getDogs === 'function') {
-                    exportData.honden = await this.db.getDogs();
-                } else if (typeof this.db.getAllDogs === 'function') {
-                    exportData.honden = await this.db.getAllDogs();
-                } else {
-                    exportData.honden = await this.db.getAllHonden();
+                } catch (e) {
+                    console.error('Kon honden niet ophalen:', e);
+                    exportData.honden = [];
                 }
                 
                 // Haal foto metadata op
-                if (typeof this.db.getAllFotos === 'function') {
-                    exportData.fotos = await this.db.getAllFotos();
-                } else if (typeof this.db.getPhotos === 'function') {
-                    exportData.fotos = await this.db.getPhotos();
-                } else if (typeof this.db.getAllPhotos === 'function') {
-                    exportData.fotos = await this.db.getAllPhotos();
+                try {
+                    exportData.fotos = await this.db.getFotos();
+                } catch (e) {
+                    console.error('Kon foto\'s niet ophalen:', e);
+                    exportData.fotos = [];
                 }
             }
             
             if (exportPrivateInfo) {
-                // Haal privé informatie op
-                if (typeof this.db.getAllPriveInfo === 'function') {
-                    exportData.priveInfo = await this.db.getAllPriveInfo();
-                } else if (typeof this.db.getPrivateInfoAll === 'function') {
-                    exportData.priveInfo = await this.db.getPrivateInfoAll();
-                } else if (typeof this.db.getAllPrivateInfo === 'function') {
-                    exportData.priveInfo = await this.db.getAllPrivateInfo();
-                } else {
-                    // Probeer alternatieve methode
-                    exportData.priveInfo = await this.getPriveInfoForExport();
-                }
+                // Gebruik veilige methode om privé informatie op te halen
+                exportData.priveInfo = await this.getPrivateInfoSafely();
             }
             
             // Genereer bestandsnaam op basis van export type
@@ -620,44 +582,50 @@ class DataManager extends BaseModule {
         }
     }
     
-    async getPriveInfoForExport() {
+    async getPrivateInfoSafely() {
+        const priveInfoArray = [];
+        
         try {
-            // Probeer verschillende methodes om privé info op te halen
-            if (typeof this.db.getAllPriveInfo === 'function') {
-                return await this.db.getAllPriveInfo();
-            } else if (typeof this.db.getPrivateInfoAll === 'function') {
-                return await this.db.getPrivateInfoAll();
-            }
-            
-            // Alternatieve methode: haal per hond de privé info op
+            // Probeer eerst alle honden op te halen
             const honden = await this.db.getHonden();
-            const priveInfoArray = [];
             
+            // Voor elke hond, probeer de privé info op te halen
             for (const hond of honden) {
                 try {
+                    // Probeer verschillende methodes
                     let priveInfo;
                     
-                    if (typeof this.db.getPriveInfo === 'function') {
-                        priveInfo = await this.db.getPriveInfo(hond.id);
-                    } else if (typeof this.db.getPrivateInfo === 'function') {
-                        priveInfo = await this.db.getPrivateInfo(hond.id);
-                    } else if (typeof this.db.getPrivateInfoByDogId === 'function') {
-                        priveInfo = await this.db.getPrivateInfoByDogId(hond.id);
+                    // Methode 1: getPriveInfoByHondId
+                    try {
+                        priveInfo = await this.db.getPriveInfoByHondId(hond.id);
+                    } catch (e1) {
+                        // Methode 2: getPriveInfo (mogelijk met hondId parameter)
+                        try {
+                            priveInfo = await this.db.getPriveInfo(hond.id);
+                        } catch (e2) {
+                            // Methode 3: getPrivateInfo (Engelse naam)
+                            try {
+                                priveInfo = await this.db.getPrivateInfo(hond.id);
+                            } catch (e3) {
+                                // Geen privé info gevonden voor deze hond
+                                priveInfo = null;
+                            }
+                        }
                     }
                     
                     if (priveInfo) {
                         priveInfoArray.push(priveInfo);
                     }
-                } catch (err) {
-                    console.warn(`Kon geen privé info vinden voor hond ${hond.id}:`, err.message);
+                } catch (hondError) {
+                    console.warn(`Kon geen privé info vinden voor hond ${hond.id}:`, hondError.message);
+                    // Ga door met de volgende hond
                 }
             }
-            
-            return priveInfoArray;
         } catch (error) {
-            console.error('Fout bij ophalen privé info:', error);
-            return [];
+            console.error('Fout bij ophalen honden voor privé info export:', error);
         }
+        
+        return priveInfoArray;
     }
     
     convertHondenToCSV(honden) {
@@ -760,33 +728,45 @@ class DataManager extends BaseModule {
     
     async loadDatabaseStats() {
         try {
-            let stats;
+            let stats = {
+                totaalHonden: 0,
+                totaalFotos: 0,
+                totaalPriveInfo: 0
+            };
             
-            if (typeof this.db.getStatistieken === 'function') {
-                stats = await this.db.getStatistieken();
-            } else if (typeof this.db.getStatistics === 'function') {
-                stats = await this.db.getStatistics();
-            } else if (typeof this.db.getStats === 'function') {
-                stats = await this.db.getStats();
-            } else {
-                // Maak handmatig statistieken
-                stats = {
-                    totaalHonden: 0,
-                    totaalFotos: 0,
-                    totaalPriveInfo: 0
-                };
-                
+            try {
                 // Tel honden
-                if (typeof this.db.getHonden === 'function') {
-                    const honden = await this.db.getHonden();
-                    stats.totaalHonden = honden.length;
-                }
-                
+                const honden = await this.db.getHonden();
+                stats.totaalHonden = honden ? honden.length : 0;
+            } catch (e) {
+                console.error('Kon honden niet tellen:', e);
+            }
+            
+            try {
                 // Tel foto's
-                if (typeof this.db.getAllFotos === 'function') {
-                    const fotos = await this.db.getAllFotos();
-                    stats.totaalFotos = fotos.length;
+                const fotos = await this.db.getFotos();
+                stats.totaalFotos = fotos ? fotos.length : 0;
+            } catch (e) {
+                console.error('Kon foto\'s niet tellen:', e);
+            }
+            
+            try {
+                // Tel privé info (veilig)
+                const honden = await this.db.getHonden();
+                if (honden && honden.length > 0) {
+                    let priveCount = 0;
+                    for (const hond of honden.slice(0, 5)) { // Beperk tot 5 checks
+                        try {
+                            const prive = await this.db.getPriveInfoByHondId(hond.id);
+                            if (prive) priveCount++;
+                        } catch (e) {
+                            // Doe niets, ga door
+                        }
+                    }
+                    stats.totaalPriveInfo = priveCount;
                 }
+            } catch (e) {
+                console.error('Kon privé info niet tellen:', e);
             }
             
             const hondenElement = document.getElementById('statsHonden');
@@ -795,7 +775,7 @@ class DataManager extends BaseModule {
             
             if (hondenElement) hondenElement.textContent = stats.totaalHonden;
             if (fotosElement) fotosElement.textContent = stats.totaalFotos;
-            if (priveElement) priveElement.textContent = stats.totaalPriveInfo || 0;
+            if (priveElement) priveElement.textContent = stats.totaalPriveInfo;
             
         } catch (error) {
             console.error(`${this.t('statsError')}${error}`);
