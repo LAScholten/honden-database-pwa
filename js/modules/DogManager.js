@@ -80,6 +80,17 @@ class DogManager extends BaseModule {
                 refresh: "Pagina Vernieuwen",
                 accessDenied: "Toegang Geweigerd",
                 
+                // Toegangscontrole popup teksten
+                insufficientPermissions: "Onvoldoende rechten",
+                insufficientPermissionsText: "U heeft geen toestemming om honden te bewerken. Alleen administrators kunnen deze functie gebruiken.",
+                loggedInAs: "U bent ingelogd als:",
+                user: "Gebruiker",
+                availableFeatures: "Beschikbare functies voor gebruikers",
+                searchDogs: "Honden zoeken en bekijken",
+                viewGallery: "Foto galerij bekijken",
+                managePrivateInfo: "Privé informatie beheren",
+                importExport: "Data importeren/exporteren",
+                
                 // Alerts
                 adminOnly: "Alleen administrators mogen honden toevoegen/bewerken",
                 fieldsRequired: "Naam, stamboomnummer en ras zijn verplichte velden",
@@ -163,6 +174,17 @@ class DogManager extends BaseModule {
                 close: "Close",
                 refresh: "Refresh Page",
                 accessDenied: "Access Denied",
+                
+                // Access control popup texts
+                insufficientPermissions: "Insufficient permissions",
+                insufficientPermissionsText: "You do not have permission to edit dogs. Only administrators can use this function.",
+                loggedInAs: "You are logged in as:",
+                user: "User",
+                availableFeatures: "Available features for users",
+                searchDogs: "Search and view dogs",
+                viewGallery: "View photo gallery",
+                managePrivateInfo: "Manage private information",
+                importExport: "Import/export data",
                 
                 // Alerts
                 adminOnly: "Only administrators can add/edit dogs",
@@ -248,10 +270,21 @@ class DogManager extends BaseModule {
                 refresh: "Seite aktualisieren",
                 accessDenied: "Zugriff Verweigert",
                 
+                // Zugangskontrolle Popup Texte
+                insufficientPermissions: "Unzureichende Berechtigungen",
+                insufficientPermissionsText: "Sie haben keine Berechtigung, Hunde zu bearbeiten. Nur Administratoren können diese Funktion nutzen.",
+                loggedInAs: "Sie sind eingeloggt als:",
+                user: "Benutzer",
+                availableFeatures: "Verfügbare Funktionen für Benutzer",
+                searchDogs: "Hunde suchen und anzeigen",
+                viewGallery: "Fotogalerie anzeigen",
+                managePrivateInfo: "Private Informationen verwalten",
+                importExport: "Daten importieren/exportieren",
+                
                 // Meldungen
-                adminOnly: "Nur Administratoren kunnen Hunde hinzufügen/bearbeiten",
-                fieldsRequired: "Name, Stammbaum-Nummer en Rasse sind Pflichtfelder",
-                savingDog: "Hund wordt gespeichert...",
+                adminOnly: "Nur Administratoren können Hunde hinzufügen/bearbeiten",
+                fieldsRequired: "Name, Stammbaum-Nummer und Rasse sind Pflichtfelder",
+                savingDog: "Hund wird gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
                 dogUpdated: "Hund erfolgreich aktualisiert!",
                 dogDeleted: "Hund erfolgreich gelöscht!",
@@ -276,6 +309,8 @@ class DogManager extends BaseModule {
     getModalHTML(isEdit = false, dogData = null) {
         // Controleer of gebruiker admin is - EXACT zoals in DogDataManager
         const isAdmin = auth.isAdmin();
+        const currentUser = auth.getCurrentUser();
+        const userRole = currentUser.role === 'admin' ? 'Admin' : this.t('user');
         
         if (!isAdmin) {
             const modalId = 'addDogModal'; // Alleen voor nieuwe hond toevoegen
@@ -287,25 +322,25 @@ class DogManager extends BaseModule {
                             <div class="modal-header bg-danger text-white">
                                 <h5 class="modal-title" id="${modalId}Label">
                                     <i class="bi bi-exclamation-triangle me-2"></i>
-                                    <span class="module-title" data-key="accessDenied">Toegang Geweigerd</span>
+                                    <span class="module-title" data-key="accessDenied">${this.t('accessDenied')}</span>
                                 </h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
                                 <div class="alert alert-danger">
-                                    <h5><i class="bi bi-shield-lock"></i> Onvoldoende rechten</h5>
-                                    <p>U heeft geen toestemming om honden te bewerken. Alleen administrators kunnen deze functie gebruiken.</p>
-                                    <p class="mb-0">U bent ingelogd als: <strong>${auth.getCurrentUser().username}</strong> (Gebruiker)</p>
+                                    <h5><i class="bi bi-shield-lock"></i> ${this.t('insufficientPermissions')}</h5>
+                                    <p>${this.t('insufficientPermissionsText')}</p>
+                                    <p class="mb-0">${this.t('loggedInAs')}: <strong>${currentUser.username}</strong> (${userRole})</p>
                                 </div>
                                 
                                 <div class="card mt-3">
                                     <div class="card-body">
-                                        <h6><i class="bi bi-info-circle text-primary"></i> Beschikbare functies voor gebruikers</h6>
+                                        <h6><i class="bi bi-info-circle text-primary"></i> ${this.t('availableFeatures')}</h6>
                                         <ul>
-                                            <li>Honden zoeken en bekijken</li>
-                                            <li>Foto galerij bekijken</li>
-                                            <li>Privé informatie beheren</li>
-                                            <li>Data importeren/exporteren</li>
+                                            <li>${this.t('searchDogs')}</li>
+                                            <li>${this.t('viewGallery')}</li>
+                                            <li>${this.t('managePrivateInfo')}</li>
+                                            <li>${this.t('importExport')}</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -313,7 +348,7 @@ class DogManager extends BaseModule {
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                     <i class="bi bi-x-circle me-1"></i>
-                                    <span class="module-text" data-key="close">Sluiten</span>
+                                    <span class="module-text" data-key="close">${this.t('close')}</span>
                                 </button>
                             </div>
                         </div>
@@ -355,7 +390,7 @@ class DogManager extends BaseModule {
                             <h5 class="modal-title" id="${modalId}Label">
                                 <i class="bi bi-plus-circle"></i> ${modalTitle}
                             </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${t('close')}"></button>
                         </div>
                         <div class="modal-body">
                             <form id="addDogForm">
@@ -403,7 +438,7 @@ class DogManager extends BaseModule {
                                             <label for="father" class="form-label">${t('father')}</label>
                                             <input type="text" class="form-control parent-input" id="father" 
                                                    value="${data.vader || ''}" 
-                                                   placeholder="Begin met typen om te zoeken..."
+                                                   placeholder="${t('searchPlaceholder') || 'Begin met typen om te zoeken...'}"
                                                    data-parent-type="father"
                                                    autocomplete="off">
                                             <div class="autocomplete-dropdown" id="fatherDropdown" style="display: none;"></div>
@@ -414,7 +449,7 @@ class DogManager extends BaseModule {
                                             <label for="mother" class="form-label">${t('mother')}</label>
                                             <input type="text" class="form-control parent-input" id="mother" 
                                                    value="${data.moeder || ''}" 
-                                                   placeholder="Begin met typen om te zoeken..."
+                                                   placeholder="${t('searchPlaceholder') || 'Begin met typen om te zoeken...'}"
                                                    data-parent-type="mother"
                                                    autocomplete="off">
                                             <div class="autocomplete-dropdown" id="motherDropdown" style="display: none;"></div>
