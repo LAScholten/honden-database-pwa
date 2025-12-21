@@ -124,7 +124,7 @@ class DataManager extends BaseModule {
                 selectJsonFile: "Exportdatei auswählen",
                 chooseExportedFile: "Wählen Sie eine zuvor aus dieser Anwendung exportierte Datei",
                 importStrategy: "Importstrategie",
-                importStrategyDescription: "Aktualisieren und vervollständigen: Bestehende Daten ergänzen, neue Daten hinzufügen",
+                importStrategyDescription: "Aktualisieren und vervollständigen: Bestehende Daten ergänzen, nieuwe Daten hinzufügen",
                 updateAndComplete: "Aktualisieren und vervollständigen",
                 startImport: "Import starten",
                 importingData: "Daten importieren...",
@@ -150,7 +150,7 @@ class DataManager extends BaseModule {
                 privateRecords: "Private Datensätze",
                 
                 // Meldungen
-                selectFileFirst: "Wählen Sie zuerst eine Datei zum Importieren",
+                selectFileFirst: "Wählen Sie zuerst een Datei zum Importieren",
                 fileReadError: "Fehler beim Lesen der Datei",
                 importFailed: "Import fehlgeschlagen: ",
                 importComplete: "Import abgeschlossen!",
@@ -164,7 +164,7 @@ class DataManager extends BaseModule {
                 exportFileSaved: "Datei gespeichert als: ",
                 loadingStats: "Lade Statistiken...",
                 statsError: "Fehler beim Laden der Statistiken: ",
-                nothingToExport: "Nichts zu exportieren - keine Exportoptionen ausgewählt",
+                nothingToExport: "Nichts te exportieren - keine Exportoptionen ausgewählt",
                 error: "Fehler"
             }
         };
@@ -534,7 +534,8 @@ class DataManager extends BaseModule {
             }
             
             if (exportPrivateInfo) {
-                exportData.priveInfo = await this.db.getAllPriveInfo();
+                // Gebruik een methode die wel toegang geeft voor alle gebruikers
+                exportData.priveInfo = await this.getPriveInfoForExport();
             }
             
             // Genereer bestandsnaam op basis van export type
@@ -571,6 +572,32 @@ class DataManager extends BaseModule {
         } catch (error) {
             this.hideProgress();
             this.showError(`${this.t('exportFailed')}${error.message}`);
+        }
+    }
+    
+    async getPriveInfoForExport() {
+        try {
+            // Probeer eerst de standaard methode
+            return await this.db.getAllPriveInfo();
+        } catch (error) {
+            console.warn('Kan niet alle privé info ophalen via getAllPriveInfo():', error.message);
+            
+            // Alternatieve methode: haal per hond de privé info op
+            const honden = await this.db.getHonden();
+            const priveInfoArray = [];
+            
+            for (const hond of honden) {
+                try {
+                    const priveInfo = await this.db.getPriveInfo(hond.id);
+                    if (priveInfo) {
+                        priveInfoArray.push(priveInfo);
+                    }
+                } catch (err) {
+                    console.warn(`Kon geen privé info vinden voor hond ${hond.id}:`, err.message);
+                }
+            }
+            
+            return priveInfoArray;
         }
     }
     
