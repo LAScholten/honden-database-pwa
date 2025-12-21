@@ -51,50 +51,6 @@ class DataManager extends BaseModule {
                 statsError: "Fout bij laden statistieken: ",
                 nothingToExport: "Niets te exporteren - geen exportopties geselecteerd",
                 error: "Fout"
-            },
-            en: {
-                dataManagement: "Data Management",
-                dataImport: "Data Import",
-                importDescription: "Import data from a previously exported file.",
-                selectJsonFile: "Select export file",
-                chooseExportedFile: "Choose a file previously exported from this application",
-                importStrategy: "Import strategy",
-                importStrategyDescription: "Full restore: Restore all data from export",
-                updateAndComplete: "Full restore",
-                startImport: "Start Import",
-                importingData: "Importing data...",
-                dataExport: "Data Export",
-                exportDescription: "Export data to a file for backup or sharing.",
-                exportOptions: "Export options",
-                exportDataPhotos: "Export data and photos",
-                exportDataPhotosDescription: "All dog data and photo metadata",
-                exportPrivateInfo: "Export private information",
-                exportPrivateInfoDescription: "Medical and financial data",
-                exportFormat: "Export format",
-                jsonFormat: "JSON (recommended)",
-                csvFormat: "CSV (dog data only)",
-                startExport: "Start Export",
-                exportingData: "Exporting data...",
-                databaseStatistics: "Database Statistics",
-                dogs: "Dogs",
-                photos: "Photos",
-                privateRecords: "Private records",
-                selectFileFirst: "Select a file first to import",
-                fileReadError: "Error reading file",
-                importFailed: "Import failed: ",
-                importComplete: "Import complete!",
-                importSummary: "Import summary",
-                newDogsAdded: "New dogs added",
-                dogsUpdated: "Dogs updated",
-                photosImported: "Photos imported",
-                privateUpdated: "Private records updated",
-                exportSuccess: "Export successful!",
-                exportFailed: "Export failed: ",
-                exportFileSaved: "File saved as: ",
-                loadingStats: "Loading statistics...",
-                statsError: "Error loading statistics: ",
-                nothingToExport: "Nothing to export - no export options selected",
-                error: "Error"
             }
         };
     }
@@ -289,6 +245,9 @@ class DataManager extends BaseModule {
                     importData = JSON.parse(e.target.result);
                 }
                 
+                console.log('Import data:', importData);
+                console.log('Aantal honden in import:', importData.honden ? importData.honden.length : 0);
+                
                 const result = await this.processImport(importData);
                 
                 this.hideProgress();
@@ -316,29 +275,57 @@ class DataManager extends BaseModule {
             priveInfo: { toegevoegd: 0, bijgewerkt: 0 }
         };
         
-        // SIMPELE LOGICA: Voeg alles toe uit de import
-        // Dit zorgt ervoor dat verwijderde honden hersteld worden
+        // DEBUG: Haal eerst huidige honden op
+        let currentHonden = [];
+        try {
+            currentHonden = await this.db.getHonden();
+            console.log('Huidige honden in database:', currentHonden.length);
+            console.log('Huidige hond IDs:', currentHonden.map(h => h.id));
+        } catch (e) {
+            console.error('Kon huidige honden niet ophalen:', e);
+        }
+        
+        const currentHondIds = new Set(currentHonden.map(h => h.id));
         
         // 1. Importeer honden
         if (importData.honden && Array.isArray(importData.honden)) {
+            console.log('Te importeren honden:', importData.honden.length);
+            console.log('Te importeren hond IDs:', importData.honden.map(h => h.id));
+            
             for (const hond of importData.honden) {
+                console.log(`Verwerken hond ${hond.id}: bestaat in database?`, currentHondIds.has(hond.id));
+                
                 try {
-                    // Probeer eerst de hond toe te voegen
-                    await this.db.addHond(hond);
-                    result.honden.toegevoegd++;
-                } catch (addError) {
-                    // Als toevoegen faalt, probeer dan te updaten
-                    try {
+                    // Als hond niet in database bestaat, voeg toe
+                    if (!currentHondIds.has(hond.id)) {
+                        console.log(`Probeer hond ${hond.id} toe te voegen...`);
+                        await this.db.addHond(hond);
+                        result.honden.toegevoegd++;
+                        console.log(`Hond ${hond.id} toegevoegd`);
+                    } else {
+                        // Hond bestaat al, update
+                        console.log(`Probeer hond ${hond.id} te updaten...`);
                         await this.db.updateHond(hond);
                         result.honden.bijgewerkt++;
-                    } catch (updateError) {
-                        // Als update faalt, probeer save (werkt vaak voor beide)
-                        try {
-                            await this.db.saveHond(hond);
+                        console.log(`Hond ${hond.id} bijgewerkt`);
+                    }
+                } catch (error) {
+                    console.error(`Fout bij verwerken hond ${hond.id}:`, error);
+                    
+                    // Probeer alternatieve methode
+                    try {
+                        console.log(`Probeer alternatieve methode voor hond ${hond.id}...`);
+                        await this.db.saveHond(hond);
+                        
+                        if (!currentHondIds.has(hond.id)) {
+                            result.honden.toegevoegd++;
+                            console.log(`Hond ${hond.id} toegevoegd via save`);
+                        } else {
                             result.honden.bijgewerkt++;
-                        } catch (saveError) {
-                            console.error(`Kon hond ${hond.id} niet importeren:`, saveError);
+                            console.log(`Hond ${hond.id} bijgewerkt via save`);
                         }
+                    } catch (saveError) {
+                        console.error(`Kan hond ${hond.id} niet verwerken via welke methode dan ook:`, saveError);
                     }
                 }
             }
@@ -351,8 +338,7 @@ class DataManager extends BaseModule {
                     await this.db.addFoto(foto);
                     result.fotos.toegevoegd++;
                 } catch (error) {
-                    // Foto bestaat mogelijk al, sla over
-                    console.log(`Foto ${foto.id} bestaat al of kan niet worden toegevoegd`);
+                    console.log(`Foto ${foto.id} kan niet worden toegevoegd:`, error);
                 }
             }
         }
@@ -361,11 +347,11 @@ class DataManager extends BaseModule {
         if (importData.priveInfo && Array.isArray(importData.priveInfo)) {
             for (const prive of importData.priveInfo) {
                 try {
-                    // Probeer toe te voegen
+                    // Eerst proberen toe te voegen
                     await this.db.addPriveInfo(prive);
                     result.priveInfo.toegevoegd++;
                 } catch (addError) {
-                    // Probeer te updaten
+                    // Dan proberen te updaten
                     try {
                         await this.db.updatePriveInfo(prive);
                         result.priveInfo.bijgewerkt++;
@@ -376,6 +362,7 @@ class DataManager extends BaseModule {
             }
         }
         
+        console.log('Import resultaat:', result);
         return result;
     }
     
@@ -400,11 +387,10 @@ class DataManager extends BaseModule {
                 }
             };
             
-            // SIMPELE LOGICA: Haal alles op wat beschikbaar is
-            
             if (exportDataPhotos) {
                 try {
                     exportData.honden = await this.db.getHonden();
+                    console.log('Geëxporteerde honden:', exportData.honden.length);
                 } catch (error) {
                     console.error('Kon honden niet ophalen:', error);
                     exportData.honden = [];
@@ -419,7 +405,6 @@ class DataManager extends BaseModule {
             }
             
             if (exportPrivateInfo) {
-                // Veilige methode: probeer eerst getAllPriveInfo, anders per hond
                 try {
                     exportData.priveInfo = await this.db.getAllPriveInfo();
                 } catch (error) {
@@ -469,25 +454,17 @@ class DataManager extends BaseModule {
         const priveInfoArray = [];
         
         try {
-            // Haal alle honden op
             const honden = await this.db.getHonden();
             
-            // Voor elke hond, probeer privé info te krijgen
             for (const hond of honden) {
                 try {
-                    // Probeer verschillende methoden
                     let priveInfo;
                     
-                    // Methode 1
                     if (typeof this.db.getPriveInfoByHondId === 'function') {
                         priveInfo = await this.db.getPriveInfoByHondId(hond.id);
-                    } 
-                    // Methode 2
-                    else if (typeof this.db.getPriveInfo === 'function') {
+                    } else if (typeof this.db.getPriveInfo === 'function') {
                         priveInfo = await this.db.getPriveInfo(hond.id);
-                    }
-                    // Methode 3 - probeer gewoon de hond ID mee te geven
-                    else if (typeof this.db.getPrivateInfo === 'function') {
+                    } else if (typeof this.db.getPrivateInfo === 'function') {
                         priveInfo = await this.db.getPrivateInfo(hond.id);
                     }
                     
@@ -495,7 +472,6 @@ class DataManager extends BaseModule {
                         priveInfoArray.push(priveInfo);
                     }
                 } catch (hondError) {
-                    // Sla deze hond over
                     console.log(`Geen privé info voor hond ${hond.id}`);
                 }
             }
@@ -509,7 +485,6 @@ class DataManager extends BaseModule {
     convertHondenToCSV(honden) {
         if (!honden || honden.length === 0) return '';
         
-        // Zoek alle mogelijke headers
         const allHeaders = [];
         honden.forEach(hond => {
             Object.keys(hond).forEach(key => {
@@ -519,13 +494,9 @@ class DataManager extends BaseModule {
             });
         });
         
-        // Sorteer headers
         allHeaders.sort();
-        
-        // Begin met ID
         const headers = ['id', ...allHeaders];
         
-        // Maak CSV
         let csv = headers.join(';') + '\n';
         
         honden.forEach(hond => {
@@ -534,11 +505,9 @@ class DataManager extends BaseModule {
                 if (value === null || value === undefined) {
                     return '';
                 }
-                // Als het een string is met puntkomma, zet tussen aanhalingstekens
                 if (typeof value === 'string' && value.includes(';')) {
                     return `"${value}"`;
                 }
-                // Converteer naar string
                 return String(value);
             });
             csv += row.join(';') + '\n';
@@ -620,9 +589,7 @@ class DataManager extends BaseModule {
                 console.error('Kon foto\'s niet ophalen voor stats:', e);
             }
             
-            // Probeer privé info te tellen
             if (honden.length > 0) {
-                // Check eerste paar honden
                 for (let i = 0; i < Math.min(3, honden.length); i++) {
                     try {
                         const prive = await this.db.getPriveInfoByHondId(honden[i].id);
@@ -631,7 +598,6 @@ class DataManager extends BaseModule {
                         // Doe niets
                     }
                 }
-                // Schatting maken
                 priveCount = Math.round((priveCount / Math.min(3, honden.length)) * honden.length);
             }
             
@@ -671,7 +637,6 @@ class DataManager extends BaseModule {
     }
     
     showProgress(message) {
-        // Eenvoudige progress indicator
         const progressHtml = `
             <div class="modal-backdrop fade show"></div>
             <div class="modal fade show" style="display: block;">
