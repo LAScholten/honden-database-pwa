@@ -64,9 +64,6 @@ class DataManager extends BaseModule {
             en: {
                 // Card titles
                 dataManagement: "Data Management",
-                loggedInAs: "Logged in as",
-                user: "User",
-                userRights: "You can import/export all data and update existing dogs.",
                 
                 // Import section
                 dataImport: "Data Import",
@@ -120,9 +117,6 @@ class DataManager extends BaseModule {
             de: {
                 // Card Titel
                 dataManagement: "Datenverwaltung",
-                loggedInAs: "Eingeloggt als",
-                user: "Benutzer",
-                userRights: "Sie können alle Daten importieren/exportieren und bestehende Hunde aktualisieren.",
                 
                 // Import Bereich
                 dataImport: "Daten Import",
