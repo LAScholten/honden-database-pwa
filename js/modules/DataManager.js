@@ -54,56 +54,11 @@ class DataManager extends BaseModule {
                 totalDogsExported: "Totaal honden geëxporteerd: ",
                 totalPhotosExported: "Totaal foto's geëxporteerd: ",
                 totalPrivateExported: "Totaal privé records geëxporteerd: "
-            },
-            en: {
-                dataManagement: "Data Management",
-                dataImport: "Data Import",
-                importDescription: "Import data from a previously exported file.",
-                selectJsonFile: "Select export file",
-                chooseExportedFile: "Choose a file previously exported from this application",
-                importStrategy: "Import strategy",
-                importStrategyDescription: "Full restore: Restore all data from export",
-                updateAndComplete: "Full restore",
-                startImport: "Start Import",
-                importingData: "Importing data...",
-                dataExport: "Data Export",
-                exportDescription: "Export data to a file for backup or sharing.",
-                exportOptions: "Export options",
-                exportDataPhotos: "Export data and photos",
-                exportDataPhotosDescription: "All dog data and photo metadata",
-                exportPrivateInfo: "Export private information",
-                exportPrivateInfoDescription: "Medical and financial data",
-                exportFormat: "Export format",
-                jsonFormat: "JSON (recommended)",
-                csvFormat: "CSV (dog data only)",
-                startExport: "Start Export",
-                exportingData: "Exporting data...",
-                databaseStatistics: "Database Statistics",
-                dogs: "Dogs",
-                photos: "Photos",
-                privateRecords: "Private records",
-                selectFileFirst: "Select a file first to import",
-                fileReadError: "Error reading file",
-                importFailed: "Import failed: ",
-                importComplete: "Import complete!",
-                importSummary: "Import summary",
-                newDogsAdded: "New dogs added",
-                dogsUpdated: "Dogs updated",
-                photosImported: "Photos imported",
-                privateUpdated: "Private records updated",
-                exportSuccess: "Export successful!",
-                exportFailed: "Export failed: ",
-                exportFileSaved: "File saved as: ",
-                loadingStats: "Loading statistics...",
-                statsError: "Error loading statistics: ",
-                nothingToExport: "Nothing to export - no export options selected",
-                error: "Error",
-                exportComplete: "Export complete",
-                totalDogsExported: "Total dogs exported: ",
-                totalPhotosExported: "Total photos exported: ",
-                totalPrivateExported: "Total private records exported: "
             }
         };
+        
+        // Gebruik de globale database instantie
+        this.db = window.db;
     }
     
     t(key) {
@@ -296,6 +251,10 @@ class DataManager extends BaseModule {
                     importData = JSON.parse(e.target.result);
                 }
                 
+                console.log('=== IMPORT DEBUG ===');
+                console.log('Import data ontvangen');
+                console.log('Aantal honden in import:', importData.honden ? importData.honden.length : 0);
+                
                 const result = await this.processImport(importData);
                 
                 this.hideProgress();
@@ -325,6 +284,23 @@ class DataManager extends BaseModule {
         
         console.log('=== START IMPORT ===');
         console.log('Import data:', importData);
+        
+        // Eerst kijken welke functies we hebben
+        const hasVoegHondToe = typeof this.db.voegHondToe === 'function';
+        const hasUpdateHond = typeof this.db.updateHond === 'function';
+        const hasGetHonden = typeof this.db.getHonden === 'function';
+        
+        console.log('Database functies beschikbaar:');
+        console.log('- voegHondToe:', hasVoegHondToe);
+        console.log('- updateHond:', hasUpdateHond);
+        console.log('- getHonden:', hasGetHonden);
+        
+        if (!hasVoegHondToe || !hasUpdateHond || !hasGetHonden) {
+            console.error('BELANGRIJKE database functies ontbreken!');
+            console.log('Beschikbare functies:', Object.keys(this.db).filter(key => typeof this.db[key] === 'function'));
+            this.showError('Database functies ontbreken. Kan niet importeren.');
+            return result;
+        }
         
         // 1. Haal alle huidige honden op
         const currentHonden = await this.db.getHonden();
