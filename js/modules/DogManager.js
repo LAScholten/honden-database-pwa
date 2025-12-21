@@ -7,7 +7,8 @@
 
 class DogManager extends BaseModule {
     constructor() {
-        super();
+        super('dogmanager', 'Hond Beheer');
+        console.log('DogManager geïnitialiseerd');
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';
         this.lastBreeds = JSON.parse(localStorage.getItem('lastBreeds') || '[]');
         this.allDogs = [];
@@ -131,10 +132,11 @@ class DogManager extends BaseModule {
     }
     
     getModalHTML() {
-        // Controleer of gebruiker admin is - toon anders toegang geweigerd
-        if (!auth.isAdmin()) {
-            const username = auth.getCurrentUser().username;
-            
+        // Controleer of gebruiker admin is
+        const isAdmin = auth.isAdmin();
+        const username = auth.getCurrentUser() ? auth.getCurrentUser().username : 'Gast';
+        
+        if (!isAdmin) {
             return `
                 <div class="modal fade" id="addDogModal" tabindex="-1" aria-labelledby="addDogModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-lg">
@@ -142,7 +144,7 @@ class DogManager extends BaseModule {
                             <div class="modal-header bg-danger text-white">
                                 <h5 class="modal-title" id="addDogModalLabel">
                                     <i class="bi bi-exclamation-triangle me-2"></i>
-                                    ${this.t('accessDenied')}
+                                    <span class="module-title" data-key="accessDenied">${this.t('accessDenied')}</span>
                                 </h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
@@ -168,7 +170,7 @@ class DogManager extends BaseModule {
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                     <i class="bi bi-x-circle me-1"></i>
-                                    ${this.t('close')}
+                                    <span class="module-text" data-key="close">${this.t('close')}</span>
                                 </button>
                             </div>
                         </div>
@@ -202,7 +204,8 @@ class DogManager extends BaseModule {
                     <div class="modal-content">
                         <div class="modal-header bg-primary text-white">
                             <h5 class="modal-title" id="addDogModalLabel">
-                                <i class="bi bi-plus-circle"></i> ${t('newDog')}
+                                <i class="bi bi-plus-circle"></i>
+                                <span class="module-title" data-key="newDog">${t('newDog')}</span>
                             </h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
                         </div>
@@ -293,15 +296,92 @@ class DogManager extends BaseModule {
                             </form>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${t('cancel')}</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle me-1"></i>
+                                <span class="module-text" data-key="cancel">${t('cancel')}</span>
+                            </button>
                             <button type="button" class="btn btn-primary" id="saveDogBtn">
-                                ${t('saveDog')}
+                                <i class="bi bi-save me-1"></i>
+                                <span class="module-text" data-key="saveDog">${t('saveDog')}</span>
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
         `;
+    }
+    
+    setupEvents() {
+        console.log('DogManager setupEvents aangeroepen');
+        
+        // Vertaal de modal tekst
+        setTimeout(() => {
+            this.translateModal();
+        }, 100);
+        
+        // Als gebruiker geen admin is, stop hier - er zijn geen events nodig voor de toegang geweigerd modal
+        if (!auth.isAdmin()) {
+            console.log('Gebruiker is geen admin, alleen close functie nodig');
+            
+            // Voeg event listener toe voor modal sluiten
+            const modal = document.getElementById('addDogModal');
+            if (modal) {
+                modal.addEventListener('shown.bs.modal', () => {
+                    console.log('Toegang geweigerd modal is nu zichtbaar');
+                });
+            }
+            return;
+        }
+        
+        // Voor admins: laad honden voor autocomplete
+        this.loadAllDogs();
+        
+        // Event listeners voor formulier
+        const saveBtn = document.getElementById('saveDogBtn');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', () => {
+                this.saveDog();
+            });
+        }
+        
+        // Recente rassen knoppen
+        document.querySelectorAll('.recent-breed-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const breed = e.target.dataset.breed;
+                const breedInput = document.getElementById('breed');
+                if (breedInput) {
+                    breedInput.value = breed;
+                }
+            });
+        });
+        
+        // Setup autocomplete voor ouders (wacht even tot DOM geladen is)
+        setTimeout(() => {
+            this.setupParentAutocomplete();
+        }, 100);
+    }
+    
+    translateModal() {
+        const currentLang = localStorage.getItem('appLanguage') || 'nl';
+        
+        // Update de klasse interne taal
+        this.currentLang = currentLang;
+        
+        // Vertaal alle elementen met data-key attribuut
+        const elements = document.querySelectorAll('[data-key]');
+        elements.forEach(element => {
+            const key = element.getAttribute('data-key');
+            const translation = this.t(key);
+            if (translation !== key) {
+                element.textContent = translation;
+            }
+        });
+        
+        // Vertaal ook specifieke knoppen die geen data-key hebben
+        const saveBtn = document.getElementById('saveDogBtn');
+        if (saveBtn && saveBtn.querySelector('.module-text')) {
+            saveBtn.querySelector('.module-text').textContent = this.t('saveDog');
+        }
     }
     
     addToLastBreeds(breed) {
@@ -333,43 +413,6 @@ class DogManager extends BaseModule {
                 console.error('Fout bij laden honden voor autocomplete:', error);
             }
         }
-    }
-    
-    setupEvents() {
-        console.log('DogManager setupEvents aangeroepen');
-        
-        // Als gebruiker geen admin is, stop hier - er zijn geen events nodig voor de toegang geweigerd modal
-        if (!auth.isAdmin()) {
-            console.log('Gebruiker is geen admin, geen events nodig voor DogManager');
-            return;
-        }
-        
-        // Laad honden voor autocomplete (alleen voor admins)
-        this.loadAllDogs();
-        
-        // Event listeners voor formulier
-        const saveBtn = document.getElementById('saveDogBtn');
-        if (saveBtn) {
-            saveBtn.addEventListener('click', () => {
-                this.saveDog();
-            });
-        }
-        
-        // Recente rassen knoppen
-        document.querySelectorAll('.recent-breed-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const breed = e.target.dataset.breed;
-                const breedInput = document.getElementById('breed');
-                if (breedInput) {
-                    breedInput.value = breed;
-                }
-            });
-        });
-        
-        // Setup autocomplete voor ouders (wacht even tot DOM geladen is)
-        setTimeout(() => {
-            this.setupParentAutocomplete();
-        }, 100);
     }
     
     setupParentAutocomplete() {
@@ -598,4 +641,59 @@ class DogManager extends BaseModule {
             this.showError(`Fout bij opslaan: ${error.message}`);
         }
     }
+    
+    /**
+     * Initialiseer de module
+     */
+    async init() {
+        console.log('DogManager geïnitialiseerd');
+        return true;
+    }
+    
+    /**
+     * Toon een foutmelding
+     */
+    showError(message) {
+        if (typeof appUI !== 'undefined' && appUI.showNotification) {
+            appUI.showNotification(message, 'error');
+        } else {
+            alert(message);
+        }
+    }
+    
+    /**
+     * Toon een succesmelding
+     */
+    showSuccess(message) {
+        if (typeof appUI !== 'undefined' && appUI.showNotification) {
+            appUI.showNotification(message, 'success');
+        } else {
+            alert(message);
+        }
+    }
+    
+    /**
+     * Toon voortgang
+     */
+    showProgress(message) {
+        if (typeof appUI !== 'undefined' && appUI.showNotification) {
+            appUI.showNotification(message, 'info', true);
+        } else {
+            console.log(message);
+        }
+    }
+    
+    /**
+     * Verberg voortgang
+     */
+    hideProgress() {
+        if (typeof appUI !== 'undefined' && appUI.hideNotification) {
+            appUI.hideNotification();
+        }
+    }
+}
+
+// Maak globaal beschikbaar voor debug doeleinden
+if (typeof window !== 'undefined') {
+    window.DogManager = DogManager;
 }
