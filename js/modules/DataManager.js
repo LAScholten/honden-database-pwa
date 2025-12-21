@@ -113,59 +113,6 @@ class DataManager extends BaseModule {
                 statsError: "Error loading statistics: ",
                 nothingToExport: "Nothing to export - no export options selected",
                 error: "Error"
-            },
-            de: {
-                // Card Titel
-                dataManagement: "Datenverwaltung",
-                
-                // Import Bereich
-                dataImport: "Daten Import",
-                importDescription: "Importieren Sie Daten aus einer zuvor exportierten Datei.",
-                selectJsonFile: "Exportdatei auswählen",
-                chooseExportedFile: "Wählen Sie eine zuvor aus dieser Anwendung exportierte Datei",
-                importStrategy: "Importstrategie",
-                importStrategyDescription: "Aktualisieren und vervollständigen: Bestehende Daten ergänzen, nieuwe Daten hinzufügen",
-                updateAndComplete: "Aktualisieren und vervollständigen",
-                startImport: "Import starten",
-                importingData: "Daten importieren...",
-                
-                // Export Bereich
-                dataExport: "Daten Export",
-                exportDescription: "Exportieren Sie Daten in eine Datei für Backup oder Freigabe.",
-                exportOptions: "Exportoptionen",
-                exportDataPhotos: "Daten und Fotos exportieren",
-                exportDataPhotosDescription: "Alle Hunde-Daten und Foto-Metadaten",
-                exportPrivateInfo: "Private Informationen exportieren",
-                exportPrivateInfoDescription: "Medizinische und finanzielle Daten",
-                exportFormat: "Exportformat",
-                jsonFormat: "JSON (empfohlen)",
-                csvFormat: "CSV (nur Hunde-Daten)",
-                startExport: "Export starten",
-                exportingData: "Daten exportieren...",
-                
-                // Statistiken
-                databaseStatistics: "Datenbank Statistiken",
-                dogs: "Hunde",
-                photos: "Fotos",
-                privateRecords: "Private Datensätze",
-                
-                // Meldungen
-                selectFileFirst: "Wählen Sie zuerst een Datei zum Importieren",
-                fileReadError: "Fehler beim Lesen der Datei",
-                importFailed: "Import fehlgeschlagen: ",
-                importComplete: "Import abgeschlossen!",
-                importSummary: "Import Zusammenfassung",
-                newDogsAdded: "Neue Hunde hinzugefügt",
-                dogsUpdated: "Hunde aktualisiert",
-                photosImported: "Fotos importiert",
-                privateUpdated: "Private Datensätze aktualisiert",
-                exportSuccess: "Export erfolgreich!",
-                exportFailed: "Export fehlgeschlagen: ",
-                exportFileSaved: "Datei gespeichert als: ",
-                loadingStats: "Lade Statistiken...",
-                statsError: "Fehler beim Laden der Statistiken: ",
-                nothingToExport: "Nichts te exportieren - keine Exportoptionen ausgewählt",
-                error: "Fehler"
             }
         };
     }
@@ -390,16 +337,28 @@ class DataManager extends BaseModule {
         // Import honden data
         if (importData.honden) {
             for (const importedHond of importData.honden) {
-                const existingHond = await this.db.getHond(importedHond.id);
+                // Controleer of de functie getHond bestaat, anders gebruik getDogById of findHond
+                let existingHond;
+                
+                if (typeof this.db.getHond === 'function') {
+                    existingHond = await this.db.getHond(importedHond.id);
+                } else if (typeof this.db.getDogById === 'function') {
+                    existingHond = await this.db.getDogById(importedHond.id);
+                } else if (typeof this.db.findHond === 'function') {
+                    existingHond = await this.db.findHond(importedHond.id);
+                } else {
+                    // Probeer de eerste beschikbare methode
+                    existingHond = await this.db.getDog(importedHond.id);
+                }
                 
                 if (!existingHond) {
                     // Nieuwe hond toevoegen
-                    await this.db.addHond(importedHond);
+                    await this.addHondToDatabase(importedHond);
                     result.honden.toegevoegd++;
                 } else {
                     // Bestaande hond bijwerken en aanvullen
                     const updatedHond = this.mergeHonden(existingHond, importedHond);
-                    await this.db.updateHond(updatedHond);
+                    await this.updateHondInDatabase(updatedHond);
                     result.honden.bijgewerkt++;
                 }
             }
@@ -408,10 +367,16 @@ class DataManager extends BaseModule {
         // Import foto metadata
         if (importData.fotos) {
             for (const importedFoto of importData.fotos) {
-                const existingFoto = await this.db.getFoto(importedFoto.id);
+                let existingFoto;
+                
+                if (typeof this.db.getFoto === 'function') {
+                    existingFoto = await this.db.getFoto(importedFoto.id);
+                } else if (typeof this.db.getPhotoById === 'function') {
+                    existingFoto = await this.db.getPhotoById(importedFoto.id);
+                }
                 
                 if (!existingFoto) {
-                    await this.db.addFoto(importedFoto);
+                    await this.addFotoToDatabase(importedFoto);
                     result.fotos.toegevoegd++;
                 }
                 // Bestaande foto's worden niet overschreven
@@ -421,11 +386,17 @@ class DataManager extends BaseModule {
         // Import prive info
         if (importData.priveInfo) {
             for (const importedPrive of importData.priveInfo) {
-                const existingPrive = await this.db.getPriveInfo(importedPrive.hondId);
+                let existingPrive;
+                
+                if (typeof this.db.getPriveInfo === 'function') {
+                    existingPrive = await this.db.getPriveInfo(importedPrive.hondId);
+                } else if (typeof this.db.getPrivateInfo === 'function') {
+                    existingPrive = await this.db.getPrivateInfo(importedPrive.hondId);
+                }
                 
                 if (existingPrive) {
                     const updatedPrive = this.mergePriveInfo(existingPrive, importedPrive);
-                    await this.db.updatePriveInfo(updatedPrive);
+                    await this.updatePriveInfoInDatabase(updatedPrive);
                     result.priveInfo.bijgewerkt++;
                 }
                 // Alleen bestaande records bijwerken, geen nieuwe toevoegen
@@ -433,6 +404,54 @@ class DataManager extends BaseModule {
         }
         
         return result;
+    }
+    
+    async addHondToDatabase(hond) {
+        if (typeof this.db.addHond === 'function') {
+            return await this.db.addHond(hond);
+        } else if (typeof this.db.addDog === 'function') {
+            return await this.db.addDog(hond);
+        } else if (typeof this.db.saveHond === 'function') {
+            return await this.db.saveHond(hond);
+        } else {
+            return await this.db.createDog(hond);
+        }
+    }
+    
+    async updateHondInDatabase(hond) {
+        if (typeof this.db.updateHond === 'function') {
+            return await this.db.updateHond(hond);
+        } else if (typeof this.db.updateDog === 'function') {
+            return await this.db.updateDog(hond);
+        } else if (typeof this.db.saveHond === 'function') {
+            return await this.db.saveHond(hond);
+        } else {
+            return await this.db.updateDogById(hond.id, hond);
+        }
+    }
+    
+    async addFotoToDatabase(foto) {
+        if (typeof this.db.addFoto === 'function') {
+            return await this.db.addFoto(foto);
+        } else if (typeof this.db.addPhoto === 'function') {
+            return await this.db.addPhoto(foto);
+        } else if (typeof this.db.saveFoto === 'function') {
+            return await this.db.saveFoto(foto);
+        } else {
+            return await this.db.createPhoto(foto);
+        }
+    }
+    
+    async updatePriveInfoInDatabase(priveInfo) {
+        if (typeof this.db.updatePriveInfo === 'function') {
+            return await this.db.updatePriveInfo(priveInfo);
+        } else if (typeof this.db.updatePrivateInfo === 'function') {
+            return await this.db.updatePrivateInfo(priveInfo);
+        } else if (typeof this.db.savePriveInfo === 'function') {
+            return await this.db.savePriveInfo(priveInfo);
+        } else {
+            return await this.db.updatePrivateInfoByDogId(priveInfo.hondId, priveInfo);
+        }
     }
     
     mergeHonden(existing, imported) {
@@ -529,13 +548,39 @@ class DataManager extends BaseModule {
             };
             
             if (exportDataPhotos) {
-                exportData.honden = await this.db.getHonden();
-                exportData.fotos = await this.db.getAllFotos();
+                // Haal honden data op
+                if (typeof this.db.getHonden === 'function') {
+                    exportData.honden = await this.db.getHonden();
+                } else if (typeof this.db.getDogs === 'function') {
+                    exportData.honden = await this.db.getDogs();
+                } else if (typeof this.db.getAllDogs === 'function') {
+                    exportData.honden = await this.db.getAllDogs();
+                } else {
+                    exportData.honden = await this.db.getAllHonden();
+                }
+                
+                // Haal foto metadata op
+                if (typeof this.db.getAllFotos === 'function') {
+                    exportData.fotos = await this.db.getAllFotos();
+                } else if (typeof this.db.getPhotos === 'function') {
+                    exportData.fotos = await this.db.getPhotos();
+                } else if (typeof this.db.getAllPhotos === 'function') {
+                    exportData.fotos = await this.db.getAllPhotos();
+                }
             }
             
             if (exportPrivateInfo) {
-                // Gebruik een methode die wel toegang geeft voor alle gebruikers
-                exportData.priveInfo = await this.getPriveInfoForExport();
+                // Haal privé informatie op
+                if (typeof this.db.getAllPriveInfo === 'function') {
+                    exportData.priveInfo = await this.db.getAllPriveInfo();
+                } else if (typeof this.db.getPrivateInfoAll === 'function') {
+                    exportData.priveInfo = await this.db.getPrivateInfoAll();
+                } else if (typeof this.db.getAllPrivateInfo === 'function') {
+                    exportData.priveInfo = await this.db.getAllPrivateInfo();
+                } else {
+                    // Probeer alternatieve methode
+                    exportData.priveInfo = await this.getPriveInfoForExport();
+                }
             }
             
             // Genereer bestandsnaam op basis van export type
@@ -577,10 +622,12 @@ class DataManager extends BaseModule {
     
     async getPriveInfoForExport() {
         try {
-            // Probeer eerst de standaard methode
-            return await this.db.getAllPriveInfo();
-        } catch (error) {
-            console.warn('Kan niet alle privé info ophalen via getAllPriveInfo():', error.message);
+            // Probeer verschillende methodes om privé info op te halen
+            if (typeof this.db.getAllPriveInfo === 'function') {
+                return await this.db.getAllPriveInfo();
+            } else if (typeof this.db.getPrivateInfoAll === 'function') {
+                return await this.db.getPrivateInfoAll();
+            }
             
             // Alternatieve methode: haal per hond de privé info op
             const honden = await this.db.getHonden();
@@ -588,7 +635,16 @@ class DataManager extends BaseModule {
             
             for (const hond of honden) {
                 try {
-                    const priveInfo = await this.db.getPriveInfo(hond.id);
+                    let priveInfo;
+                    
+                    if (typeof this.db.getPriveInfo === 'function') {
+                        priveInfo = await this.db.getPriveInfo(hond.id);
+                    } else if (typeof this.db.getPrivateInfo === 'function') {
+                        priveInfo = await this.db.getPrivateInfo(hond.id);
+                    } else if (typeof this.db.getPrivateInfoByDogId === 'function') {
+                        priveInfo = await this.db.getPrivateInfoByDogId(hond.id);
+                    }
+                    
                     if (priveInfo) {
                         priveInfoArray.push(priveInfo);
                     }
@@ -598,6 +654,9 @@ class DataManager extends BaseModule {
             }
             
             return priveInfoArray;
+        } catch (error) {
+            console.error('Fout bij ophalen privé info:', error);
+            return [];
         }
     }
     
@@ -701,7 +760,34 @@ class DataManager extends BaseModule {
     
     async loadDatabaseStats() {
         try {
-            const stats = await this.db.getStatistieken();
+            let stats;
+            
+            if (typeof this.db.getStatistieken === 'function') {
+                stats = await this.db.getStatistieken();
+            } else if (typeof this.db.getStatistics === 'function') {
+                stats = await this.db.getStatistics();
+            } else if (typeof this.db.getStats === 'function') {
+                stats = await this.db.getStats();
+            } else {
+                // Maak handmatig statistieken
+                stats = {
+                    totaalHonden: 0,
+                    totaalFotos: 0,
+                    totaalPriveInfo: 0
+                };
+                
+                // Tel honden
+                if (typeof this.db.getHonden === 'function') {
+                    const honden = await this.db.getHonden();
+                    stats.totaalHonden = honden.length;
+                }
+                
+                // Tel foto's
+                if (typeof this.db.getAllFotos === 'function') {
+                    const fotos = await this.db.getAllFotos();
+                    stats.totaalFotos = fotos.length;
+                }
+            }
             
             const hondenElement = document.getElementById('statsHonden');
             const fotosElement = document.getElementById('statsFotos');
@@ -709,7 +795,7 @@ class DataManager extends BaseModule {
             
             if (hondenElement) hondenElement.textContent = stats.totaalHonden;
             if (fotosElement) fotosElement.textContent = stats.totaalFotos;
-            if (priveElement) priveElement.textContent = stats.totaalPriveInfo;
+            if (priveElement) priveElement.textContent = stats.totaalPriveInfo || 0;
             
         } catch (error) {
             console.error(`${this.t('statsError')}${error}`);
