@@ -14,6 +14,52 @@ class DogDataManager extends BaseModule {
      * Render de module interface
      */
     getModalHTML() {
+        // Controleer of gebruiker admin is
+        const isAdmin = auth.isAdmin();
+        
+        if (!isAdmin) {
+            return `
+                <div class="modal fade" id="dogDataModal" tabindex="-1" aria-labelledby="dogDataModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title" id="dogDataModalLabel">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    <span class="module-title" data-key="accessDenied">Toegang Geweigerd</span>
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-danger">
+                                    <h5><i class="bi bi-shield-lock"></i> Onvoldoende rechten</h5>
+                                    <p>U heeft geen toestemming om honden te bewerken. Alleen administrators kunnen deze functie gebruiken.</p>
+                                    <p class="mb-0">U bent ingelogd als: <strong>${auth.getCurrentUser().username}</strong> (Gebruiker)</p>
+                                </div>
+                                
+                                <div class="card mt-3">
+                                    <div class="card-body">
+                                        <h6><i class="bi bi-info-circle text-primary"></i> Beschikbare functies voor gebruikers</h6>
+                                        <ul>
+                                            <li>Honden zoeken en bekijken</li>
+                                            <li>Foto galerij bekijken</li>
+                                            <li>Privé informatie beheren</li>
+                                            <li>Data importeren/exporteren</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="bi bi-x-circle me-1"></i>
+                                    <span class="module-text" data-key="close">Sluiten</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
         return `
             <div class="modal fade" id="dogDataModal" tabindex="-1" aria-labelledby="dogDataModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
@@ -106,17 +152,20 @@ class DogDataManager extends BaseModule {
             nl: {
                 editDogData: "Data Hond Bewerken",
                 close: "Sluiten",
-                refresh: "Pagina Vernieuwen"
+                refresh: "Pagina Vernieuwen",
+                accessDenied: "Toegang Geweigerd"
             },
             en: {
                 editDogData: "Edit Dog Data",
                 close: "Close",
-                refresh: "Refresh Page"
+                refresh: "Refresh Page",
+                accessDenied: "Access Denied"
             },
             de: {
                 editDogData: "Hundedaten bearbeiten",
                 close: "Schließen",
-                refresh: "Seite aktualisieren"
+                refresh: "Seite aktualisieren",
+                accessDenied: "Zugriff Verweigert"
             }
         };
         
