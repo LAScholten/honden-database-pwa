@@ -79,11 +79,6 @@ class DogManager extends BaseModule {
                 close: "Sluiten",
                 refresh: "Pagina Vernieuwen",
                 accessDenied: "Toegang Geweigerd",
-                availableFeatures: "Beschikbare functies voor gebruikers",
-                searchDogs: "Honden zoeken en bekijken",
-                viewGallery: "Foto galerij bekijken",
-                managePrivateInfo: "Privé informatie beheren",
-                importExport: "Data importeren/exporteren",
                 
                 // Alerts
                 adminOnly: "Alleen administrators mogen honden toevoegen/bewerken",
@@ -97,10 +92,7 @@ class DogManager extends BaseModule {
                 deleteFailed: "Fout bij verwijderen hond: ",
                 confirmDelete: "Weet u zeker dat u deze hond wilt verwijderen?",
                 photoAdded: "Foto toegevoegd",
-                photoError: "Fout bij uploaden foto: ",
-                insufficientPermissions: "Onvoldoende rechten",
-                insufficientPermissionsText: "U heeft geen toestemming om honden te bewerken. Alleen administrators kunnen deze functie gebruiken.",
-                loggedInAs: "U bent ingelogd als:"
+                photoError: "Fout bij uploaden foto: "
             },
             en: {
                 // Modal titles
@@ -171,11 +163,6 @@ class DogManager extends BaseModule {
                 close: "Close",
                 refresh: "Refresh Page",
                 accessDenied: "Access Denied",
-                availableFeatures: "Available features for users",
-                searchDogs: "Search and view dogs",
-                viewGallery: "View photo gallery",
-                managePrivateInfo: "Manage private information",
-                importExport: "Import/export data",
                 
                 // Alerts
                 adminOnly: "Only administrators can add/edit dogs",
@@ -189,10 +176,7 @@ class DogManager extends BaseModule {
                 deleteFailed: "Error deleting dog: ",
                 confirmDelete: "Are you sure you want to delete this dog?",
                 photoAdded: "Photo added",
-                photoError: "Error uploading photo: ",
-                insufficientPermissions: "Insufficient permissions",
-                insufficientPermissionsText: "You do not have permission to edit dogs. Only administrators can use this function.",
-                loggedInAs: "You are logged in as:"
+                photoError: "Error uploading photo: "
             },
             de: {
                 // Modal Titel
@@ -242,7 +226,7 @@ class DogManager extends BaseModule {
                 dandyWalker: "Dandy Walker Malformation",
                 dandyOptions: "Status wählen...",
                 dandyFreeDNA: "Frei auf DNA",
-                dandyFreeParents: "Frei auf Eltern",
+                dandyFreeParents: "Frei auf ouders",
                 dandyCarrier: "Träger",
                 dandyAffected: "Betroffen",
                 thyroid: "Schilddrüse",
@@ -263,11 +247,6 @@ class DogManager extends BaseModule {
                 close: "Schließen",
                 refresh: "Seite aktualisieren",
                 accessDenied: "Zugriff Verweigert",
-                availableFeatures: "Verfügbare Funktionen für Benutzer",
-                searchDogs: "Hunde suchen und anzeigen",
-                viewGallery: "Fotogalerie anzeigen",
-                managePrivateInfo: "Private Informationen verwalten",
-                importExport: "Daten importieren/exportieren",
                 
                 // Meldungen
                 adminOnly: "Nur Administratoren können Hunde hinzufügen/bearbeiten",
@@ -281,10 +260,7 @@ class DogManager extends BaseModule {
                 deleteFailed: "Fehler beim Löschen des Hundes: ",
                 confirmDelete: "Sind Sie sicher, dass Sie diesen Hund löschen möchten?",
                 photoAdded: "Foto hinzugefügt",
-                photoError: "Fehler beim Hochladen des Fotos: ",
-                insufficientPermissions: "Unzureichende Berechtigungen",
-                insufficientPermissionsText: "Sie haben keine Berechtigung, Hunde zu bearbeiten. Nur Administratoren können diese Funktion nutzen.",
-                loggedInAs: "Sie sind eingeloggt als:"
+                photoError: "Fehler beim Hochladen des Fotos: "
             }
         };
     }
@@ -303,14 +279,12 @@ class DogManager extends BaseModule {
     getModalHTML(isEdit = false, dogData = null) {
         const t = this.t.bind(this);
         
-        // Controleer of gebruiker admin is
+        // Controleer of gebruiker admin is - EXACT zoals in DogDataManager
         const isAdmin = auth.isAdmin();
         const currentUser = auth.getCurrentUser();
+        const modalId = isEdit ? 'editDogModal' : 'addDogModal';
         
         if (!isAdmin) {
-            const modalId = isEdit ? 'editDogModal' : 'addDogModal';
-            const modalTitle = isEdit ? t('editDog') : t('newDog');
-            
             return `
                 <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="${modalId}Label" aria-hidden="true">
                     <div class="modal-dialog modal-lg">
@@ -318,25 +292,25 @@ class DogManager extends BaseModule {
                             <div class="modal-header bg-danger text-white">
                                 <h5 class="modal-title" id="${modalId}Label">
                                     <i class="bi bi-exclamation-triangle me-2"></i>
-                                    <span class="module-title">${t('accessDenied')}</span>
+                                    <span class="module-title" data-key="accessDenied">${t('accessDenied')}</span>
                                 </h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
                                 <div class="alert alert-danger">
-                                    <h5><i class="bi bi-shield-lock"></i> ${t('insufficientPermissions')}</h5>
-                                    <p>${t('insufficientPermissionsText')}</p>
-                                    <p class="mb-0">${t('loggedInAs')}: <strong>${currentUser.username}</strong> (${currentUser.role === 'admin' ? 'Admin' : 'User'})</p>
+                                    <h5><i class="bi bi-shield-lock"></i> Onvoldoende rechten</h5>
+                                    <p>U heeft geen toestemming om honden te bewerken. Alleen administrators kunnen deze functie gebruiken.</p>
+                                    <p class="mb-0">U bent ingelogd als: <strong>${currentUser.username}</strong> (Gebruiker)</p>
                                 </div>
                                 
                                 <div class="card mt-3">
                                     <div class="card-body">
-                                        <h6><i class="bi bi-info-circle text-primary"></i> ${t('availableFeatures')}</h6>
+                                        <h6><i class="bi bi-info-circle text-primary"></i> Beschikbare functies voor gebruikers</h6>
                                         <ul>
-                                            <li>${t('searchDogs')}</li>
-                                            <li>${t('viewGallery')}</li>
-                                            <li>${t('managePrivateInfo')}</li>
-                                            <li>${t('importExport')}</li>
+                                            <li>Honden zoeken en bekijken</li>
+                                            <li>Foto galerij bekijken</li>
+                                            <li>Privé informatie beheren</li>
+                                            <li>Data importeren/exporteren</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -344,7 +318,7 @@ class DogManager extends BaseModule {
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                     <i class="bi bi-x-circle me-1"></i>
-                                    <span>${t('close')}</span>
+                                    <span class="module-text" data-key="close">${t('close')}</span>
                                 </button>
                             </div>
                         </div>
@@ -355,7 +329,6 @@ class DogManager extends BaseModule {
         
         // Als gebruiker admin is, toon het normale formulier
         const modalTitle = isEdit ? t('editDog') : t('newDog');
-        const modalId = isEdit ? 'editDogModal' : 'addDogModal';
         
         const data = dogData || {};
         
@@ -586,7 +559,10 @@ class DogManager extends BaseModule {
                             </form>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${t('close')}</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle me-1"></i>
+                                <span class="module-text" data-key="close">${t('close')}</span>
+                            </button>
                             ${isEdit ? `
                             <button type="button" class="btn btn-danger" id="deleteDogBtn">
                                 <i class="bi bi-trash"></i> ${t('delete')}
@@ -640,17 +616,24 @@ class DogManager extends BaseModule {
     }
     
     setupEvents() {
+        console.log('DogManager setupEvents called');
+        
+        // Controleer of gebruiker admin is
         const isAdmin = auth.isAdmin();
         
         if (!isAdmin) {
-            // Als gebruiker geen admin is, alleen basis events instellen
-            const closeButtons = document.querySelectorAll('[data-bs-dismiss="modal"]');
-            closeButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const modal = bootstrap.Modal.getInstance(button.closest('.modal'));
-                    if (modal) modal.hide();
+            // Vertaal de modal tekst voor niet-admins (EXACT zoals in DogDataManager)
+            setTimeout(() => {
+                this.translateModal();
+            }, 100);
+            
+            // Voeg event listeners toe voor de knoppen in de modal
+            const modal = document.getElementById('addDogModal') || document.getElementById('editDogModal');
+            if (modal) {
+                modal.addEventListener('shown.bs.modal', () => {
+                    console.log('DogManager modal is nu zichtbaar (toegang geweigerd)');
                 });
-            });
+            }
             return;
         }
         
@@ -710,6 +693,41 @@ class DogManager extends BaseModule {
         
         // Setup autocomplete voor ouders
         this.setupParentAutocomplete();
+    }
+    
+    /**
+     * Vertaal de modal tekst - EXACT hetzelfde als in DogDataManager
+     */
+    translateModal() {
+        const currentLang = localStorage.getItem('appLanguage') || 'nl';
+        const translations = {
+            nl: {
+                editDogData: "Data Hond Bewerken",
+                close: "Sluiten",
+                refresh: "Pagina Vernieuwen",
+                accessDenied: "Toegang Geweigerd"
+            },
+            en: {
+                editDogData: "Edit Dog Data",
+                close: "Close",
+                refresh: "Refresh Page",
+                accessDenied: "Access Denied"
+            },
+            de: {
+                editDogData: "Hundedaten bearbeiten",
+                close: "Schließen",
+                refresh: "Seite aktualisieren",
+                accessDenied: "Zugriff Verweigert"
+            }
+        };
+        
+        const elements = document.querySelectorAll('[data-key]');
+        elements.forEach(element => {
+            const key = element.getAttribute('data-key');
+            if (translations[currentLang] && translations[currentLang][key]) {
+                element.textContent = translations[currentLang][key];
+            }
+        });
     }
     
     addToLastBreeds(breed) {
