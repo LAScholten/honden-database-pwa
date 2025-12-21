@@ -12,42 +12,33 @@ class DataManager extends BaseModule {
                 // Card titels
                 dataManagement: "Data Beheer",
                 loggedInAs: "Ingelogd als",
-                administrator: "Administrator",
                 user: "Gebruiker",
-                adminFullRights: "U kunt nieuwe honden toevoegen en alle data beheren.",
-                userLimitedRights: "U kunt alle data importeren/exporteren en bestaande honden bijwerken, maar geen nieuwe honden toevoegen.",
+                userRights: "U kunt alle data importeren/exporteren en bestaande honden bijwerken.",
                 
                 // Import sectie
                 dataImport: "Data Importeren",
-                importDescription: "Importeer data uit een eerder geëxporteerd JSON bestand.",
-                selectJsonFile: "Selecteer JSON bestand",
+                importDescription: "Importeer data uit een eerder geëxporteerd bestand.",
+                selectJsonFile: "Selecteer exportbestand",
                 chooseExportedFile: "Kies een bestand dat eerder is geëxporteerd uit deze applicatie",
                 importStrategy: "Import strategie",
-                mergeExisting: "Samenvoegen met bestaande data",
-                replaceAll: "Vervang alle bestaande data",
-                updateOnly: "Alleen bestaande records bijwerken",
-                importDogs: "Honden importeren",
-                importPhotos: "Foto's importeren",
-                importPrivateInfo: "Privé informatie importeren",
-                adminOnlyPrivate: "Alleen admin kan privé info importeren",
+                importStrategyDescription: "Bijwerken en aanvullen: Bestaande gegevens aanvullen, nieuwe gegevens toevoegen",
+                updateAndComplete: "Bijwerken en aanvullen",
                 startImport: "Start Import",
+                importingData: "Data importeren...",
                 
                 // Export sectie
                 dataExport: "Data Exporteren",
-                exportDescription: "Exporteer data naar een JSON bestand voor backup of delen.",
-                exportType: "Export type",
-                completeBackup: "Complete backup (alles)",
-                dogsOnly: "Alleen honden data",
-                photosOnly: "Alleen foto metadata",
-                privateOnly: "Alleen privé informatie",
-                customSelection: "Zelf selecteren...",
-                dogsData: "Honden data",
-                photosMetadata: "Foto metadata",
-                privateInformation: "Privé informatie",
+                exportDescription: "Exporteer data naar een bestand voor backup of delen.",
+                exportOptions: "Export opties",
+                exportDataPhotos: "Data en foto's exporteren",
+                exportDataPhotosDescription: "Alle hondengegevens en foto metadata",
+                exportPrivateInfo: "Privé informatie exporteren",
+                exportPrivateInfoDescription: "Medische en financiële gegevens",
                 exportFormat: "Export formaat",
-                jsonRecommended: "JSON (aanbevolen)",
-                csvDogsOnly: "CSV (alleen honden data)",
+                jsonFormat: "JSON (aanbevolen)",
+                csvFormat: "CSV (alleen hondengegevens)",
                 startExport: "Start Export",
+                exportingData: "Data exporteren...",
                 
                 // Statistieken
                 databaseStatistics: "Database Statistieken",
@@ -56,61 +47,54 @@ class DataManager extends BaseModule {
                 privateRecords: "Privé records",
                 
                 // Alerts en messages
-                selectFileFirst: "Selecteer eerst een JSON bestand om te importeren",
+                selectFileFirst: "Selecteer eerst een bestand om te importeren",
                 fileReadError: "Fout bij lezen bestand",
                 importFailed: "Import mislukt: ",
                 importComplete: "Import voltooid!",
-                newDogsAdded: "nieuwe honden toegevoegd",
-                dogsUpdated: "honden bijgewerkt",
-                photosImported: "foto's geïmporteerd",
-                privateUpdated: "privé records bijgewerkt",
-                exportingData: "Data exporteren...",
+                importSummary: "Import samenvatting",
+                newDogsAdded: "Nieuwe honden toegevoegd",
+                dogsUpdated: "Honden bijgewerkt",
+                photosImported: "Foto's geïmporteerd",
+                privateUpdated: "Privé records bijgewerkt",
                 exportSuccess: "Export succesvol voltooid!",
                 exportFailed: "Export mislukt: ",
-                customExportSuccess: "Aangepaste export succesvol voltooid!",
+                exportFileSaved: "Bestand opgeslagen als: ",
                 loadingStats: "Laden statistieken...",
-                statsError: "Fout bij laden statistieken: "
+                statsError: "Fout bij laden statistieken: ",
+                nothingToExport: "Niets te exporteren - geen exportopties geselecteerd",
+                error: "Fout"
             },
             en: {
                 // Card titles
                 dataManagement: "Data Management",
                 loggedInAs: "Logged in as",
-                administrator: "Administrator",
                 user: "User",
-                adminFullRights: "You can add new dogs and manage all data.",
-                userLimitedRights: "You can import/export all data and update existing dogs, but cannot add new dogs.",
+                userRights: "You can import/export all data and update existing dogs.",
                 
                 // Import section
                 dataImport: "Data Import",
-                importDescription: "Import data from a previously exported JSON file.",
-                selectJsonFile: "Select JSON file",
+                importDescription: "Import data from a previously exported file.",
+                selectJsonFile: "Select export file",
                 chooseExportedFile: "Choose a file previously exported from this application",
                 importStrategy: "Import strategy",
-                mergeExisting: "Merge with existing data",
-                replaceAll: "Replace all existing data",
-                updateOnly: "Update existing records only",
-                importDogs: "Import dogs",
-                importPhotos: "Import photos",
-                importPrivateInfo: "Import private information",
-                adminOnlyPrivate: "Only admin can import private info",
+                importStrategyDescription: "Update and complete: Complete existing data, add new data",
+                updateAndComplete: "Update and complete",
                 startImport: "Start Import",
+                importingData: "Importing data...",
                 
                 // Export section
                 dataExport: "Data Export",
-                exportDescription: "Export data to a JSON file for backup or sharing.",
-                exportType: "Export type",
-                completeBackup: "Complete backup (everything)",
-                dogsOnly: "Dogs data only",
-                photosOnly: "Photos metadata only",
-                privateOnly: "Private information only",
-                customSelection: "Custom selection...",
-                dogsData: "Dogs data",
-                photosMetadata: "Photos metadata",
-                privateInformation: "Private information",
+                exportDescription: "Export data to a file for backup or sharing.",
+                exportOptions: "Export options",
+                exportDataPhotos: "Export data and photos",
+                exportDataPhotosDescription: "All dog data and photo metadata",
+                exportPrivateInfo: "Export private information",
+                exportPrivateInfoDescription: "Medical and financial data",
                 exportFormat: "Export format",
-                jsonRecommended: "JSON (recommended)",
-                csvDogsOnly: "CSV (dogs data only)",
+                jsonFormat: "JSON (recommended)",
+                csvFormat: "CSV (dog data only)",
                 startExport: "Start Export",
+                exportingData: "Exporting data...",
                 
                 // Statistics
                 databaseStatistics: "Database Statistics",
@@ -119,61 +103,54 @@ class DataManager extends BaseModule {
                 privateRecords: "Private records",
                 
                 // Alerts and messages
-                selectFileFirst: "Select a JSON file first to import",
+                selectFileFirst: "Select a file first to import",
                 fileReadError: "Error reading file",
                 importFailed: "Import failed: ",
                 importComplete: "Import complete!",
-                newDogsAdded: "new dogs added",
-                dogsUpdated: "dogs updated",
-                photosImported: "photos imported",
-                privateUpdated: "private records updated",
-                exportingData: "Exporting data...",
+                importSummary: "Import summary",
+                newDogsAdded: "New dogs added",
+                dogsUpdated: "Dogs updated",
+                photosImported: "Photos imported",
+                privateUpdated: "Private records updated",
                 exportSuccess: "Export successful!",
                 exportFailed: "Export failed: ",
-                customExportSuccess: "Custom export successful!",
+                exportFileSaved: "File saved as: ",
                 loadingStats: "Loading statistics...",
-                statsError: "Error loading statistics: "
+                statsError: "Error loading statistics: ",
+                nothingToExport: "Nothing to export - no export options selected",
+                error: "Error"
             },
             de: {
                 // Card Titel
                 dataManagement: "Datenverwaltung",
                 loggedInAs: "Eingeloggt als",
-                administrator: "Administrator",
                 user: "Benutzer",
-                adminFullRights: "Sie können neue Hunde hinzufügen und alle Daten verwalten.",
-                userLimitedRights: "Sie können alle Daten importieren/exportieren und bestehende Hunde aktualisieren, aber keine neuen Hunde hinzufügen.",
+                userRights: "Sie können alle Daten importieren/exportieren und bestehende Hunde aktualisieren.",
                 
                 // Import Bereich
                 dataImport: "Daten Import",
-                importDescription: "Importieren Sie Daten aus einer zuvor exportierten JSON-Datei.",
-                selectJsonFile: "JSON-Datei auswählen",
+                importDescription: "Importieren Sie Daten aus einer zuvor exportierten Datei.",
+                selectJsonFile: "Exportdatei auswählen",
                 chooseExportedFile: "Wählen Sie eine zuvor aus dieser Anwendung exportierte Datei",
                 importStrategy: "Importstrategie",
-                mergeExisting: "Mit vorhandenen Daten zusammenführen",
-                replaceAll: "Alle vorhandenen Daten ersetzen",
-                updateOnly: "Nur vorhandene Datensätze aktualisieren",
-                importDogs: "Hunde importieren",
-                importPhotos: "Fotos importieren",
-                importPrivateInfo: "Private Informationen importieren",
-                adminOnlyPrivate: "Nur Admin kann private Info importieren",
+                importStrategyDescription: "Aktualisieren und vervollständigen: Bestehende Daten ergänzen, neue Daten hinzufügen",
+                updateAndComplete: "Aktualisieren und vervollständigen",
                 startImport: "Import starten",
+                importingData: "Daten importieren...",
                 
                 // Export Bereich
                 dataExport: "Daten Export",
-                exportDescription: "Exportieren Sie Daten in eine JSON-Datei für Backup oder Freigabe.",
-                exportType: "Exporttyp",
-                completeBackup: "Komplettes Backup (alles)",
-                dogsOnly: "Nur Hunde-Daten",
-                photosOnly: "Nur Foto-Metadaten",
-                privateOnly: "Nur private Informationen",
-                customSelection: "Eigene Auswahl...",
-                dogsData: "Hunde-Daten",
-                photosMetadata: "Foto-Metadaten",
-                privateInformation: "Private Informationen",
+                exportDescription: "Exportieren Sie Daten in eine Datei für Backup oder Freigabe.",
+                exportOptions: "Exportoptionen",
+                exportDataPhotos: "Daten und Fotos exportieren",
+                exportDataPhotosDescription: "Alle Hunde-Daten und Foto-Metadaten",
+                exportPrivateInfo: "Private Informationen exportieren",
+                exportPrivateInfoDescription: "Medizinische und finanzielle Daten",
                 exportFormat: "Exportformat",
-                jsonRecommended: "JSON (empfohlen)",
-                csvDogsOnly: "CSV (nur Hunde-Daten)",
+                jsonFormat: "JSON (empfohlen)",
+                csvFormat: "CSV (nur Hunde-Daten)",
                 startExport: "Export starten",
+                exportingData: "Daten exportieren...",
                 
                 // Statistiken
                 databaseStatistics: "Datenbank Statistiken",
@@ -182,20 +159,22 @@ class DataManager extends BaseModule {
                 privateRecords: "Private Datensätze",
                 
                 // Meldungen
-                selectFileFirst: "Wählen Sie zuerst eine JSON-Datei zum Importieren",
+                selectFileFirst: "Wählen Sie zuerst eine Datei zum Importieren",
                 fileReadError: "Fehler beim Lesen der Datei",
                 importFailed: "Import fehlgeschlagen: ",
                 importComplete: "Import abgeschlossen!",
-                newDogsAdded: "neue Hunde hinzugefügt",
+                importSummary: "Import Zusammenfassung",
+                newDogsAdded: "Neue Hunde hinzugefügt",
                 dogsUpdated: "Hunde aktualisiert",
                 photosImported: "Fotos importiert",
-                privateUpdated: "private Datensätze aktualisiert",
-                exportingData: "Daten exportieren...",
+                privateUpdated: "Private Datensätze aktualisiert",
                 exportSuccess: "Export erfolgreich!",
                 exportFailed: "Export fehlgeschlagen: ",
-                customExportSuccess: "Benutzerdefinierter Export erfolgreich!",
+                exportFileSaved: "Datei gespeichert als: ",
                 loadingStats: "Lade Statistiken...",
-                statsError: "Fehler beim Laden der Statistiken: "
+                statsError: "Fehler beim Laden der Statistiken: ",
+                nothingToExport: "Nichts zu exportieren - keine Exportoptionen ausgewählt",
+                error: "Fehler"
             }
         };
     }
@@ -206,14 +185,12 @@ class DataManager extends BaseModule {
     
     updateLanguage(lang) {
         this.currentLang = lang;
-        // Herlaad UI als nodig
         if (document.getElementById('dataManagementModal')) {
             this.loadDatabaseStats();
         }
     }
     
     getModalHTML() {
-        const isAdmin = this.auth.isAdmin();
         const t = this.t.bind(this);
         
         return `
@@ -227,14 +204,14 @@ class DataManager extends BaseModule {
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
                         </div>
                         <div class="modal-body">
-                            <div class="alert ${isAdmin ? 'alert-info' : 'alert-warning'} mb-4">
+                            <div class="alert alert-info mb-4">
                                 <div class="d-flex">
                                     <div class="flex-shrink-0">
-                                        <i class="bi bi-${isAdmin ? 'shield-check' : 'person'} fs-4"></i>
+                                        <i class="bi bi-person fs-4"></i>
                                     </div>
                                     <div class="flex-grow-1 ms-3">
-                                        <h6 class="alert-heading">${t('loggedInAs')} ${isAdmin ? t('administrator') : t('user')}</h6>
-                                        ${isAdmin ? t('adminFullRights') : t('userLimitedRights')}
+                                        <h6 class="alert-heading">${t('loggedInAs')} ${t('user')}</h6>
+                                        ${t('userRights')}
                                     </div>
                                 </div>
                             </div>
@@ -254,7 +231,7 @@ class DataManager extends BaseModule {
                                             
                                             <div class="mb-3">
                                                 <label for="importFile" class="form-label">${t('selectJsonFile')}</label>
-                                                <input class="form-control" type="file" id="importFile" accept=".json">
+                                                <input class="form-control" type="file" id="importFile" accept=".json,.csv">
                                                 <div class="form-text">
                                                     ${t('chooseExportedFile')}
                                                 </div>
@@ -263,31 +240,10 @@ class DataManager extends BaseModule {
                                             <div class="mb-3">
                                                 <label for="importStrategy" class="form-label">${t('importStrategy')}</label>
                                                 <select class="form-select" id="importStrategy">
-                                                    <option value="merge" selected>${t('mergeExisting')}</option>
-                                                    ${isAdmin ? `<option value="replace">${t('replaceAll')}</option>` : ''}
-                                                    <option value="update">${t('updateOnly')}</option>
+                                                    <option value="updateComplete" selected>${t('updateAndComplete')}</option>
                                                 </select>
-                                            </div>
-                                            
-                                            <div class="mb-4">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="importHonden" checked>
-                                                    <label class="form-check-label" for="importHonden">
-                                                        ${t('importDogs')}
-                                                    </label>
-                                                </div>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="importFotos" checked>
-                                                    <label class="form-check-label" for="importFotos">
-                                                        ${t('importPhotos')}
-                                                    </label>
-                                                </div>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" id="importPriveInfo" ${isAdmin ? 'checked' : ''}>
-                                                    <label class="form-check-label" for="importPriveInfo">
-                                                        ${t('importPrivateInfo')}
-                                                    </label>
-                                                    ${!isAdmin ? `<div class="form-text">${t('adminOnlyPrivate')}</div>` : ''}
+                                                <div class="form-text">
+                                                    ${t('importStrategyDescription')}
                                                 </div>
                                             </div>
                                             
@@ -310,37 +266,28 @@ class DataManager extends BaseModule {
                                                 ${t('exportDescription')}
                                             </p>
                                             
-                                            <div class="mb-3">
-                                                <label for="exportType" class="form-label">${t('exportType')}</label>
-                                                <select class="form-select" id="exportType">
-                                                    <option value="all" selected>${t('completeBackup')}</option>
-                                                    <option value="honden">${t('dogsOnly')}</option>
-                                                    <option value="fotos">${t('photosOnly')}</option>
-                                                    ${isAdmin ? `<option value="prive">${t('privateOnly')}</option>` : ''}
-                                                    <option value="selectie">${t('customSelection')}</option>
-                                                </select>
-                                            </div>
-                                            
-                                            <div id="exportSelectionOptions" style="display: none;">
+                                            <div class="mb-4">
+                                                <label class="form-label">${t('exportOptions')}</label>
                                                 <div class="mb-3">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox" id="exportHondenSelect" checked>
-                                                        <label class="form-check-label" for="exportHondenSelect">
-                                                            ${t('dogsData')}
+                                                        <input class="form-check-input" type="checkbox" id="exportDataPhotos" checked>
+                                                        <label class="form-check-label" for="exportDataPhotos">
+                                                            <strong>${t('exportDataPhotos')}</strong>
                                                         </label>
+                                                        <div class="form-text">
+                                                            ${t('exportDataPhotosDescription')}
+                                                        </div>
                                                     </div>
+                                                </div>
+                                                <div class="mb-3">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox" id="exportFotosSelect" checked>
-                                                        <label class="form-check-label" for="exportFotosSelect">
-                                                            ${t('photosMetadata')}
+                                                        <input class="form-check-input" type="checkbox" id="exportPrivateInfo" checked>
+                                                        <label class="form-check-label" for="exportPrivateInfo">
+                                                            <strong>${t('exportPrivateInfo')}</strong>
                                                         </label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox" id="exportPriveSelect" ${isAdmin ? 'checked' : ''}>
-                                                        <label class="form-check-label" for="exportPriveSelect">
-                                                            ${t('privateInformation')}
-                                                        </label>
-                                                        ${!isAdmin ? `<div class="form-text">${t('adminOnlyPrivate')}</div>` : ''}
+                                                        <div class="form-text">
+                                                            ${t('exportPrivateInfoDescription')}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -348,8 +295,8 @@ class DataManager extends BaseModule {
                                             <div class="mb-4">
                                                 <label for="exportFormat" class="form-label">${t('exportFormat')}</label>
                                                 <select class="form-select" id="exportFormat">
-                                                    <option value="json" selected>${t('jsonRecommended')}</option>
-                                                    <option value="csv">${t('csvDogsOnly')}</option>
+                                                    <option value="json" selected>${t('jsonFormat')}</option>
+                                                    <option value="csv">${t('csvFormat')}</option>
                                                 </select>
                                             </div>
                                             
@@ -395,18 +342,6 @@ class DataManager extends BaseModule {
     }
     
     setupEvents() {
-        // Export type selector
-        const exportTypeSelect = document.getElementById('exportType');
-        if (exportTypeSelect) {
-            exportTypeSelect.addEventListener('change', (e) => {
-                const showSelection = e.target.value === 'selectie';
-                const optionsDiv = document.getElementById('exportSelectionOptions');
-                if (optionsDiv) {
-                    optionsDiv.style.display = showSelection ? 'block' : 'none';
-                }
-            });
-        }
-        
         // Start import
         const importBtn = document.getElementById('startImportBtn');
         if (importBtn) {
@@ -426,10 +361,6 @@ class DataManager extends BaseModule {
     
     async handleImport() {
         const fileInput = document.getElementById('importFile');
-        const strategy = document.getElementById('importStrategy').value;
-        const importHonden = document.getElementById('importHonden').checked;
-        const importFotos = document.getElementById('importFotos').checked;
-        const importPriveInfo = document.getElementById('importPriveInfo').checked;
         
         if (!fileInput || !fileInput.files.length) {
             this.showError(this.t('selectFileFirst'));
@@ -441,26 +372,19 @@ class DataManager extends BaseModule {
         
         reader.onload = async (e) => {
             try {
-                const importData = JSON.parse(e.target.result);
+                this.showProgress(this.t('importingData'));
                 
-                const filteredData = {};
-                if (importHonden && importData.honden) filteredData.honden = importData.honden;
-                if (importFotos && importData.fotos) filteredData.fotos = importData.fotos;
-                if (importPriveInfo && importData.priveInfo) filteredData.priveInfo = importData.priveInfo;
+                let importData;
+                if (file.name.endsWith('.csv')) {
+                    importData = await this.parseCSV(e.target.result);
+                } else {
+                    importData = JSON.parse(e.target.result);
+                }
                 
-                this.showProgress(this.t('importingData') || 'Data importeren...');
-                
-                const overschrijven = strategy === 'replace';
-                const resultaat = await this.db.importData(filteredData, overschrijven);
+                const result = await this.processImport(importData);
                 
                 this.hideProgress();
-                this.showSuccess(
-                    `${this.t('importComplete')}<br>
-                    ${resultaat.honden.toegevoegd} ${this.t('newDogsAdded')}<br>
-                    ${resultaat.honden.bijgewerkt} ${this.t('dogsUpdated')}<br>
-                    ${resultaat.fotos.toegevoegd} ${this.t('photosImported')}<br>
-                    ${resultaat.priveInfo.bijgewerkt} ${this.t('privateUpdated')}`
-                );
+                this.showImportResults(result);
                 
                 await this.loadDatabaseStats();
                 
@@ -477,53 +401,143 @@ class DataManager extends BaseModule {
         reader.readAsText(file);
     }
     
-    async handleExport() {
-        const exportType = document.getElementById('exportType').value;
-        const exportFormat = document.getElementById('exportFormat').value;
+    async processImport(importData) {
+        const result = {
+            honden: { toegevoegd: 0, bijgewerkt: 0 },
+            fotos: { toegevoegd: 0 },
+            priveInfo: { bijgewerkt: 0 }
+        };
         
-        let type = exportType;
-        if (exportType === 'selectie') {
-            const exportHonden = document.getElementById('exportHondenSelect').checked;
-            const exportFotos = document.getElementById('exportFotosSelect').checked;
-            const exportPrive = document.getElementById('exportPriveSelect').checked;
-            
-            if (exportHonden && exportFotos && exportPrive) type = 'all';
-            else if (exportHonden && !exportFotos && !exportPrive) type = 'honden';
-            else if (!exportHonden && exportFotos && !exportPrive) type = 'fotos';
-            else if (!exportHonden && !exportFotos && exportPrive) type = 'prive';
-            else {
-                await this.handleCustomExport(exportHonden, exportFotos, exportPrive, exportFormat);
-                return;
+        // Import honden data
+        if (importData.honden) {
+            for (const importedHond of importData.honden) {
+                const existingHond = await this.db.getHond(importedHond.id);
+                
+                if (!existingHond) {
+                    // Nieuwe hond toevoegen
+                    await this.db.addHond(importedHond);
+                    result.honden.toegevoegd++;
+                } else {
+                    // Bestaande hond bijwerken en aanvullen
+                    const updatedHond = this.mergeHonden(existingHond, importedHond);
+                    await this.db.updateHond(updatedHond);
+                    result.honden.bijgewerkt++;
+                }
             }
         }
         
-        this.showProgress(this.t('exportingData'));
-        
-        try {
-            const exportData = await this.db.exportData(type);
-            
-            let blob, filename;
-            if (exportFormat === 'csv' && type === 'honden') {
-                const csv = this.convertToCSV(exportData.honden);
-                blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-                filename = `honden-export-${new Date().toISOString().split('T')[0]}.csv`;
-            } else {
-                const jsonString = JSON.stringify(exportData, null, 2);
-                blob = new Blob([jsonString], { type: 'application/json' });
-                filename = `honden-export-${new Date().toISOString().split('T')[0]}.json`;
+        // Import foto metadata
+        if (importData.fotos) {
+            for (const importedFoto of importData.fotos) {
+                const existingFoto = await this.db.getFoto(importedFoto.id);
+                
+                if (!existingFoto) {
+                    await this.db.addFoto(importedFoto);
+                    result.fotos.toegevoegd++;
+                }
+                // Bestaande foto's worden niet overschreven
             }
-            
-            this.downloadFile(blob, filename);
-            this.hideProgress();
-            this.showSuccess(this.t('exportSuccess'));
-            
-        } catch (error) {
-            this.hideProgress();
-            this.showError(`${this.t('exportFailed')}${error.message}`);
         }
+        
+        // Import prive info (voor alle gebruikers)
+        if (importData.priveInfo) {
+            for (const importedPrive of importData.priveInfo) {
+                const existingPrive = await this.db.getPriveInfo(importedPrive.hondId);
+                
+                if (existingPrive) {
+                    const updatedPrive = this.mergePriveInfo(existingPrive, importedPrive);
+                    await this.db.updatePriveInfo(updatedPrive);
+                    result.priveInfo.bijgewerkt++;
+                }
+                // Alleen bestaande records bijwerken, geen nieuwe toevoegen
+            }
+        }
+        
+        return result;
     }
     
-    async handleCustomExport(exportHonden, exportFotos, exportPrive, format) {
+    mergeHonden(existing, imported) {
+        const merged = { ...existing };
+        
+        // Merge alle velden - alleen lege/ontbrekende velden aanvullen
+        for (const key in imported) {
+            if (imported.hasOwnProperty(key) && key !== 'id') {
+                // Als het veld leeg is in bestaande maar gevuld in import, aanvullen
+                if ((existing[key] === null || existing[key] === undefined || existing[key] === '') && 
+                    imported[key] !== null && imported[key] !== undefined && imported[key] !== '') {
+                    merged[key] = imported[key];
+                }
+                // Als het een object is (zoals gezondheidsinformatie), dieper mergen
+                else if (typeof imported[key] === 'object' && imported[key] !== null) {
+                    if (!existing[key] || typeof existing[key] !== 'object') {
+                        merged[key] = imported[key];
+                    } else {
+                        merged[key] = this.deepMerge(existing[key], imported[key]);
+                    }
+                }
+            }
+        }
+        
+        return merged;
+    }
+    
+    mergePriveInfo(existing, imported) {
+        const merged = { ...existing };
+        
+        // Alleen lege velden aanvullen bij prive info
+        for (const key in imported) {
+            if (imported.hasOwnProperty(key) && key !== 'id' && key !== 'hondId') {
+                if ((existing[key] === null || existing[key] === undefined || existing[key] === '') && 
+                    imported[key] !== null && imported[key] !== undefined && imported[key] !== '') {
+                    merged[key] = imported[key];
+                }
+            }
+        }
+        
+        return merged;
+    }
+    
+    deepMerge(target, source) {
+        const output = { ...target };
+        
+        for (const key in source) {
+            if (source.hasOwnProperty(key)) {
+                if (source[key] && typeof source[key] === 'object' && 
+                    target[key] && typeof target[key] === 'object') {
+                    output[key] = this.deepMerge(target[key], source[key]);
+                } else if (target[key] === null || target[key] === undefined || target[key] === '') {
+                    output[key] = source[key];
+                }
+            }
+        }
+        
+        return output;
+    }
+    
+    showImportResults(result) {
+        const summary = `
+            <h5>${this.t('importSummary')}</h5>
+            <div class="alert alert-success">
+                <strong>${result.honden.toegevoegd}</strong> ${this.t('newDogsAdded')}<br>
+                <strong>${result.honden.bijgewerkt}</strong> ${this.t('dogsUpdated')}<br>
+                <strong>${result.fotos.toegevoegd}</strong> ${this.t('photosImported')}<br>
+                <strong>${result.priveInfo.bijgewerkt}</strong> ${this.t('privateUpdated')}
+            </div>
+        `;
+        
+        this.showSuccess(`${this.t('importComplete')}<br>${summary}`);
+    }
+    
+    async handleExport() {
+        const exportDataPhotos = document.getElementById('exportDataPhotos').checked;
+        const exportPrivateInfo = document.getElementById('exportPrivateInfo').checked;
+        const exportFormat = document.getElementById('exportFormat').value;
+        
+        if (!exportDataPhotos && !exportPrivateInfo) {
+            this.showError(this.t('nothingToExport'));
+            return;
+        }
+        
         this.showProgress(this.t('exportingData'));
         
         try {
@@ -531,32 +545,152 @@ class DataManager extends BaseModule {
                 metadata: {
                     exportDatum: new Date().toISOString(),
                     exportDoor: this.auth.getCurrentUser()?.username || 'unknown',
-                    type: 'custom'
+                    exportType: exportDataPhotos ? (exportPrivateInfo ? 'all' : 'dataPhotos') : 'privateOnly'
                 }
             };
             
-            if (exportHonden) {
+            if (exportDataPhotos) {
                 exportData.honden = await this.db.getHonden();
-            }
-            if (exportFotos) {
                 exportData.fotos = await this.db.getAllFotos();
             }
-            if (exportPrive && this.auth.isAdmin()) {
+            
+            if (exportPrivateInfo) {
                 exportData.priveInfo = await this.db.getAllPriveInfo();
             }
             
-            const jsonString = JSON.stringify(exportData, null, 2);
-            const blob = new Blob([jsonString], { type: 'application/json' });
-            const filename = `honden-custom-export-${new Date().toISOString().split('T')[0]}.json`;
+            // Genereer bestandsnaam op basis van export type
+            const dateStr = new Date().toISOString().split('T')[0];
+            let filename;
             
-            this.downloadFile(blob, filename);
+            if (exportDataPhotos && exportPrivateInfo) {
+                filename = `honddataphotoprive_${dateStr}`;
+            } else if (exportDataPhotos && !exportPrivateInfo) {
+                filename = `honddataphoto_${dateStr}`;
+            } else {
+                filename = `hondprive_${dateStr}`;
+            }
+            
+            let blob, fullFilename;
+            
+            if (exportFormat === 'csv' && exportDataPhotos) {
+                const csv = this.convertHondenToCSV(exportData.honden || []);
+                blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                fullFilename = `${filename}.csv`;
+            } else {
+                const jsonString = JSON.stringify(exportData, null, 2);
+                blob = new Blob([jsonString], { type: 'application/json' });
+                fullFilename = `${filename}.json`;
+            }
+            
+            this.downloadFile(blob, fullFilename);
             this.hideProgress();
-            this.showSuccess(this.t('customExportSuccess'));
+            
+            const successMessage = `${this.t('exportSuccess')}<br>
+                                  <small>${this.t('exportFileSaved')} <strong>${fullFilename}</strong></small>`;
+            this.showSuccess(successMessage);
             
         } catch (error) {
             this.hideProgress();
             this.showError(`${this.t('exportFailed')}${error.message}`);
         }
+    }
+    
+    convertHondenToCSV(honden) {
+        if (!honden || honden.length === 0) return '';
+        
+        // Verzamel alle unieke headers
+        const headers = new Set(['id']);
+        honden.forEach(hond => {
+            Object.keys(hond).forEach(key => {
+                // Sla complexe objecten over voor CSV
+                if (typeof hond[key] !== 'object' || hond[key] === null) {
+                    headers.add(key);
+                }
+            });
+        });
+        
+        // Converteer naar array en sorteer
+        const headersArray = Array.from(headers).sort();
+        
+        // Maak CSV header
+        let csv = headersArray.join(';') + '\n';
+        
+        // Voeg rijen toe
+        honden.forEach(hond => {
+            const row = headersArray.map(header => {
+                const value = hond[header];
+                if (value === null || value === undefined) return '';
+                
+                // Escape strings met puntkomma's
+                if (typeof value === 'string' && value.includes(';')) {
+                    return `"${value}"`;
+                }
+                return String(value);
+            });
+            csv += row.join(';') + '\n';
+        });
+        
+        return csv;
+    }
+    
+    parseCSV(csvText) {
+        const lines = csvText.split('\n');
+        if (lines.length < 2) return { honden: [] };
+        
+        const headers = lines[0].split(';').map(h => h.trim());
+        const honden = [];
+        
+        for (let i = 1; i < lines.length; i++) {
+            if (!lines[i].trim()) continue;
+            
+            const values = this.parseCSVLine(lines[i]);
+            const hond = {};
+            
+            headers.forEach((header, index) => {
+                if (values[index] !== undefined) {
+                    hond[header] = values[index] === '' ? null : values[index];
+                }
+            });
+            
+            if (hond.id) {
+                honden.push(hond);
+            }
+        }
+        
+        return { honden };
+    }
+    
+    parseCSVLine(line) {
+        const values = [];
+        let current = '';
+        let inQuotes = false;
+        
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            
+            if (char === '"' && (i === 0 || line[i-1] !== '\\')) {
+                inQuotes = !inQuotes;
+            } else if (char === ';' && !inQuotes) {
+                values.push(current.trim());
+                current = '';
+            } else {
+                current += char;
+            }
+        }
+        
+        values.push(current.trim());
+        return values;
+    }
+    
+    downloadFile(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
     
     async loadDatabaseStats() {
@@ -574,5 +708,25 @@ class DataManager extends BaseModule {
         } catch (error) {
             console.error(`${this.t('statsError')}${error}`);
         }
+    }
+    
+    showProgress(message) {
+        // Implementeer je progress modal/indicator
+        console.log('Progress:', message);
+    }
+    
+    hideProgress() {
+        // Verberg progress indicator
+        console.log('Hide progress');
+    }
+    
+    showSuccess(message) {
+        // Toon success message
+        alert('Success: ' + message);
+    }
+    
+    showError(message) {
+        // Toon error message
+        alert('Error: ' + message);
     }
 }
