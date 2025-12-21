@@ -251,7 +251,7 @@ class DogManager extends BaseModule {
                 // Meldungen
                 adminOnly: "Nur Administratoren können Hunde hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer en Rasse sind Pflichtfelder",
-                savingDog: "Hund wird gespeichert...",
+                savingDog: "Hund wordt gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
                 dogUpdated: "Hund erfolgreich aktualisiert!",
                 dogDeleted: "Hund erfolgreich gelöscht!",
@@ -281,10 +281,10 @@ class DogManager extends BaseModule {
         
         // Controleer of gebruiker admin is - EXACT zoals in DogDataManager
         const isAdmin = auth.isAdmin();
-        const currentUser = auth.getCurrentUser();
-        const modalId = isEdit ? 'editDogModal' : 'addDogModal';
         
         if (!isAdmin) {
+            const modalId = isEdit ? 'editDogModal' : 'addDogModal';
+            
             return `
                 <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="${modalId}Label" aria-hidden="true">
                     <div class="modal-dialog modal-lg">
@@ -292,7 +292,7 @@ class DogManager extends BaseModule {
                             <div class="modal-header bg-danger text-white">
                                 <h5 class="modal-title" id="${modalId}Label">
                                     <i class="bi bi-exclamation-triangle me-2"></i>
-                                    <span class="module-title" data-key="accessDenied">${t('accessDenied')}</span>
+                                    <span class="module-title" data-key="accessDenied">Toegang Geweigerd</span>
                                 </h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
@@ -300,7 +300,7 @@ class DogManager extends BaseModule {
                                 <div class="alert alert-danger">
                                     <h5><i class="bi bi-shield-lock"></i> Onvoldoende rechten</h5>
                                     <p>U heeft geen toestemming om honden te bewerken. Alleen administrators kunnen deze functie gebruiken.</p>
-                                    <p class="mb-0">U bent ingelogd als: <strong>${currentUser.username}</strong> (Gebruiker)</p>
+                                    <p class="mb-0">U bent ingelogd als: <strong>${auth.getCurrentUser().username}</strong> (Gebruiker)</p>
                                 </div>
                                 
                                 <div class="card mt-3">
@@ -318,7 +318,7 @@ class DogManager extends BaseModule {
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                     <i class="bi bi-x-circle me-1"></i>
-                                    <span class="module-text" data-key="close">${t('close')}</span>
+                                    <span class="module-text" data-key="close">Sluiten</span>
                                 </button>
                             </div>
                         </div>
@@ -329,6 +329,7 @@ class DogManager extends BaseModule {
         
         // Als gebruiker admin is, toon het normale formulier
         const modalTitle = isEdit ? t('editDog') : t('newDog');
+        const modalId = isEdit ? 'editDogModal' : 'addDogModal';
         
         const data = dogData || {};
         
@@ -618,11 +619,11 @@ class DogManager extends BaseModule {
     setupEvents() {
         console.log('DogManager setupEvents called');
         
-        // Controleer of gebruiker admin is
+        // Controleer of gebruiker admin is - EXACT zoals in DogDataManager
         const isAdmin = auth.isAdmin();
         
         if (!isAdmin) {
-            // Vertaal de modal tekst voor niet-admins (EXACT zoals in DogDataManager)
+            // Vertaal de modal tekst - EXACT hetzelfde als in DogDataManager
             setTimeout(() => {
                 this.translateModal();
             }, 100);
