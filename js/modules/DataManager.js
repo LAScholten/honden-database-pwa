@@ -11,9 +11,6 @@ class DataManager extends BaseModule {
             nl: {
                 // Card titels
                 dataManagement: "Data Beheer",
-                loggedInAs: "Ingelogd als",
-                user: "Gebruiker",
-                userRights: "U kunt alle data importeren/exporteren en bestaande honden bijwerken.",
                 
                 // Import sectie
                 dataImport: "Data Importeren",
