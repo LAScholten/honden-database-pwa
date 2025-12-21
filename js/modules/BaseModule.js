@@ -4,7 +4,9 @@
  */
 
 class BaseModule {
-    constructor() {
+    constructor(moduleName = '', moduleTitle = '') {
+        this.moduleName = moduleName;
+        this.moduleTitle = moduleTitle;
         this.db = db;
         this.auth = auth;
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';

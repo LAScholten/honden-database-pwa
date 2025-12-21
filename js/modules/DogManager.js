@@ -6,7 +6,7 @@
 class DogManager extends BaseModule {
     constructor() {
         super('dogmanager', 'Hond Beheer');
-        this.currentLang = localStorage.getItem('appLanguage') || 'nl';
+        console.log('DogManager geïnitialiseerd');
         this.lastBreeds = JSON.parse(localStorage.getItem('lastBreeds') || '[]');
         this.allDogs = []; // Voor autocomplete van ouders
         this.translations = {
@@ -274,11 +274,9 @@ class DogManager extends BaseModule {
     }
     
     /**
-     * Controleer of gebruiker admin is en retourneer juiste HTML
+     * Render de module interface
      */
     getModalHTML(isEdit = false, dogData = null) {
-        const t = this.t.bind(this);
-        
         // Controleer of gebruiker admin is - EXACT zoals in DogDataManager
         const isAdmin = auth.isAdmin();
         
@@ -328,6 +326,7 @@ class DogManager extends BaseModule {
         }
         
         // Als gebruiker admin is, toon het normale formulier
+        const t = this.t.bind(this);
         const modalTitle = isEdit ? t('editDog') : t('newDog');
         const modalId = isEdit ? 'editDogModal' : 'addDogModal';
         
@@ -616,18 +615,21 @@ class DogManager extends BaseModule {
         `;
     }
     
+    /**
+     * Setup event listeners voor deze module
+     */
     setupEvents() {
         console.log('DogManager setupEvents called');
         
-        // Controleer of gebruiker admin is - EXACT zoals in DogDataManager
+        // Vertaal de modal tekst
+        setTimeout(() => {
+            this.translateModal();
+        }, 100);
+        
+        // Controleer of gebruiker admin is
         const isAdmin = auth.isAdmin();
         
         if (!isAdmin) {
-            // Vertaal de modal tekst - EXACT hetzelfde als in DogDataManager
-            setTimeout(() => {
-                this.translateModal();
-            }, 100);
-            
             // Voeg event listeners toe voor de knoppen in de modal
             const modal = document.getElementById('addDogModal') || document.getElementById('editDogModal');
             if (modal) {
