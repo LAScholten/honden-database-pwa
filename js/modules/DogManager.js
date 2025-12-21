@@ -12,7 +12,255 @@ class DogManager extends BaseModule {
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';
         this.lastBreeds = JSON.parse(localStorage.getItem('lastBreeds') || '[]');
         this.allDogs = [];
-        this.translations = {
+    }
+    
+    getModalHTML() {
+        // Controleer of gebruiker admin is
+        const isAdmin = auth.isAdmin();
+        const username = auth.getCurrentUser() ? auth.getCurrentUser().username : 'Gast';
+        
+        if (!isAdmin) {
+            return `
+                <div class="modal fade" id="addDogModal" tabindex="-1" aria-labelledby="addDogModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title" id="addDogModalLabel">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    <span class="module-title" data-key="accessDenied">Toegang Geweigerd</span>
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-danger">
+                                    <h5><i class="bi bi-shield-lock"></i> Onvoldoende rechten</h5>
+                                    <p>U heeft geen toestemming om nieuwe honden toe te voegen. Alleen administrators kunnen deze functie gebruiken.</p>
+                                    <p class="mb-0">U bent ingelogd als: <strong>${username}</strong> (Gebruiker)</p>
+                                </div>
+                                
+                                <div class="card mt-3">
+                                    <div class="card-body">
+                                        <h6><i class="bi bi-info-circle text-primary"></i> Beschikbare functies voor gebruikers</h6>
+                                        <ul>
+                                            <li>Honden zoeken en bekijken</li>
+                                            <li>Foto galerij bekijken</li>
+                                            <li>Privé informatie beheren</li>
+                                            <li>Data importeren/exporteren</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="bi bi-x-circle me-1"></i>
+                                    <span class="module-text" data-key="close">Sluiten</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Voor admins: toon normaal formulier
+        let recentBreedsHTML = '';
+        if (this.lastBreeds.length > 0) {
+            recentBreedsHTML = `
+                <div class="form-text mb-2" data-key="recentBreeds">Recent gebruikte rassen:</div>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+            `;
+            this.lastBreeds.forEach(breed => {
+                recentBreedsHTML += `
+                    <button type="button" class="btn btn-sm btn-outline-secondary recent-breed-btn" data-breed="${breed}">
+                        ${breed}
+                    </button>
+                `;
+            });
+            recentBreedsHTML += `</div>`;
+        }
+        
+        return `
+            <div class="modal fade" id="addDogModal" tabindex="-1" aria-labelledby="addDogModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title" id="addDogModalLabel">
+                                <i class="bi bi-plus-circle"></i>
+                                <span class="module-title" data-key="newDog">Nieuwe Hond Toevoegen</span>
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="addDogForm">
+                                <input type="hidden" id="fatherId" value="">
+                                <input type="hidden" id="motherId" value="">
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="dogName" class="form-label">
+                                                <span data-key="nameRequired">Naam *</span>
+                                            </label>
+                                            <input type="text" class="form-control" id="dogName" value="" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="pedigreeNumber" class="form-label">
+                                                <span data-key="pedigreeNumber">Stamboomnummer *</span>
+                                            </label>
+                                            <input type="text" class="form-control" id="pedigreeNumber" value="" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="breed" class="form-label">
+                                                <span data-key="breedRequired">Ras *</span>
+                                            </label>
+                                            <input type="text" class="form-control" id="breed" value="" required>
+                                            ${recentBreedsHTML}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="gender" class="form-label">
+                                                <span data-key="gender">Geslacht</span>
+                                            </label>
+                                            <select class="form-select" id="gender">
+                                                <option value="" data-key="chooseGender">Selecteer geslacht...</option>
+                                                <option value="reuen" data-key="male">Reu</option>
+                                                <option value="teven" data-key="female">Teef</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3 position-relative">
+                                            <label for="father" class="form-label">
+                                                <span data-key="father">Vader</span>
+                                            </label>
+                                            <input type="text" class="form-control parent-input" id="father" 
+                                                   value="" 
+                                                   data-placeholder="fatherSearch"
+                                                   data-parent-type="father"
+                                                   autocomplete="off">
+                                            <div class="autocomplete-dropdown" id="fatherDropdown"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3 position-relative">
+                                            <label for="mother" class="form-label">
+                                                <span data-key="mother">Moeder</span>
+                                            </label>
+                                            <input type="text" class="form-control parent-input" id="mother" 
+                                                   value="" 
+                                                   data-placeholder="motherSearch"
+                                                   data-parent-type="mother"
+                                                   autocomplete="off">
+                                            <div class="autocomplete-dropdown" id="motherDropdown"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="birthDate" class="form-label">
+                                                <span data-key="birthDate">Geboortedatum</span>
+                                            </label>
+                                            <input type="date" class="form-control" id="birthDate" value="">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="deathDate" class="form-label">
+                                                <span data-key="deathDate">Overlijdensdatum</span>
+                                            </label>
+                                            <input type="date" class="form-control" id="deathDate" value="">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle"></i>
+                                    <span data-key="requiredFields">Velden met * zijn verplicht</span>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle me-1"></i>
+                                <span class="module-text" data-key="cancel">Annuleren</span>
+                            </button>
+                            <button type="button" class="btn btn-primary" id="saveDogBtn">
+                                <i class="bi bi-save me-1"></i>
+                                <span class="module-text" data-key="saveDog">Hond Opslaan</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    setupEvents() {
+        console.log('DogManager setupEvents aangeroepen');
+        
+        // Vertaal de modal tekst
+        setTimeout(() => {
+            this.translateModal();
+        }, 100);
+        
+        // Als gebruiker geen admin is, stop hier - er zijn geen events nodig voor de toegang geweigerd modal
+        if (!auth.isAdmin()) {
+            console.log('Gebruiker is geen admin, alleen close functie nodig');
+            
+            // Voeg event listener toe voor modal sluiten
+            const modal = document.getElementById('addDogModal');
+            if (modal) {
+                modal.addEventListener('shown.bs.modal', () => {
+                    console.log('Toegang geweigerd modal is nu zichtbaar');
+                });
+            }
+            return;
+        }
+        
+        // Voor admins: laad honden voor autocomplete
+        this.loadAllDogs();
+        
+        // Event listeners voor formulier
+        const saveBtn = document.getElementById('saveDogBtn');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', () => {
+                this.saveDog();
+            });
+        }
+        
+        // Recente rassen knoppen
+        document.querySelectorAll('.recent-breed-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const breed = e.target.dataset.breed;
+                const breedInput = document.getElementById('breed');
+                if (breedInput) {
+                    breedInput.value = breed;
+                }
+            });
+        });
+        
+        // Setup autocomplete voor ouders (wacht even tot DOM geladen is)
+        setTimeout(() => {
+            this.setupParentAutocomplete();
+        }, 100);
+    }
+    
+    translateModal() {
+        const currentLang = localStorage.getItem('appLanguage') || 'nl';
+        const translations = {
             nl: {
                 newDog: "Nieuwe Hond Toevoegen",
                 editDog: "Hond Bewerken",
@@ -107,7 +355,7 @@ class DogManager extends BaseModule {
                 delete: "Löschen",
                 requiredFields: "Felder mit * sind Pflichtfelder",
                 adminOnly: "Nur Administratoren können Hunde hinzufügen",
-                fieldsRequired: "Name, Stammbaum-Nummer und Rasse sind Pflichtfelder",
+                fieldsRequired: "Naam, Stammbaum-Nummer und Rasse sind Pflichtfelder",
                 savingDog: "Hund wird gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
                 dogUpdated: "Hund erfolgreich aktualisiert!",
@@ -125,263 +373,33 @@ class DogManager extends BaseModule {
                 motherSearch: "Beginnen Sie mit der Eingabe, um die Mutter zu suchen..."
             }
         };
-    }
-    
-    t(key) {
-        return this.translations[this.currentLang][key] || key;
-    }
-    
-    getModalHTML() {
-        // Controleer of gebruiker admin is
-        const isAdmin = auth.isAdmin();
-        const username = auth.getCurrentUser() ? auth.getCurrentUser().username : 'Gast';
-        
-        if (!isAdmin) {
-            return `
-                <div class="modal fade" id="addDogModal" tabindex="-1" aria-labelledby="addDogModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header bg-danger text-white">
-                                <h5 class="modal-title" id="addDogModalLabel">
-                                    <i class="bi bi-exclamation-triangle me-2"></i>
-                                    <span class="module-title" data-key="accessDenied">${this.t('accessDenied')}</span>
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="alert alert-danger">
-                                    <h5><i class="bi bi-shield-lock"></i> ${this.t('insufficientRights')}</h5>
-                                    <p>U heeft geen toestemming om nieuwe honden toe te voegen. Alleen administrators kunnen deze functie gebruiken.</p>
-                                    <p class="mb-0">U bent ingelogd als: <strong>${username}</strong> (Gebruiker)</p>
-                                </div>
-                                
-                                <div class="card mt-3">
-                                    <div class="card-body">
-                                        <h6><i class="bi bi-info-circle text-primary"></i> ${this.t('userFunctions')}</h6>
-                                        <ul>
-                                            <li>${this.t('searchDogs')}</li>
-                                            <li>${this.t('viewPhotos')}</li>
-                                            <li>${this.t('managePrivateInfo')}</li>
-                                            <li>${this.t('importExport')}</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                    <i class="bi bi-x-circle me-1"></i>
-                                    <span class="module-text" data-key="close">${this.t('close')}</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        // Voor admins: toon normaal formulier
-        const t = this.t.bind(this);
-        
-        let recentBreedsHTML = '';
-        if (this.lastBreeds.length > 0) {
-            recentBreedsHTML = `
-                <div class="form-text mb-2">${t('recentBreeds')}:</div>
-                <div class="d-flex flex-wrap gap-2 mb-3">
-            `;
-            this.lastBreeds.forEach(breed => {
-                recentBreedsHTML += `
-                    <button type="button" class="btn btn-sm btn-outline-secondary recent-breed-btn" data-breed="${breed}">
-                        ${breed}
-                    </button>
-                `;
-            });
-            recentBreedsHTML += `</div>`;
-        }
-        
-        return `
-            <div class="modal fade" id="addDogModal" tabindex="-1" aria-labelledby="addDogModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header bg-primary text-white">
-                            <h5 class="modal-title" id="addDogModalLabel">
-                                <i class="bi bi-plus-circle"></i>
-                                <span class="module-title" data-key="newDog">${t('newDog')}</span>
-                            </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form id="addDogForm">
-                                <input type="hidden" id="fatherId" value="">
-                                <input type="hidden" id="motherId" value="">
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="dogName" class="form-label">${t('nameRequired')}</label>
-                                            <input type="text" class="form-control" id="dogName" value="" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="pedigreeNumber" class="form-label">${t('pedigreeNumber')}</label>
-                                            <input type="text" class="form-control" id="pedigreeNumber" value="" required>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="breed" class="form-label">${t('breedRequired')}</label>
-                                            <input type="text" class="form-control" id="breed" value="" required>
-                                            ${recentBreedsHTML}
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="gender" class="form-label">${t('gender')}</label>
-                                            <select class="form-select" id="gender">
-                                                <option value="">${t('chooseGender')}</option>
-                                                <option value="reuen">${t('male')}</option>
-                                                <option value="teven">${t('female')}</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3 position-relative">
-                                            <label for="father" class="form-label">${t('father')}</label>
-                                            <input type="text" class="form-control parent-input" id="father" 
-                                                   value="" 
-                                                   placeholder="${t('fatherSearch')}"
-                                                   data-parent-type="father"
-                                                   autocomplete="off">
-                                            <div class="autocomplete-dropdown" id="fatherDropdown"></div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3 position-relative">
-                                            <label for="mother" class="form-label">${t('mother')}</label>
-                                            <input type="text" class="form-control parent-input" id="mother" 
-                                                   value="" 
-                                                   placeholder="${t('motherSearch')}"
-                                                   data-parent-type="mother"
-                                                   autocomplete="off">
-                                            <div class="autocomplete-dropdown" id="motherDropdown"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="birthDate" class="form-label">${t('birthDate')}</label>
-                                            <input type="date" class="form-control" id="birthDate" value="">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="deathDate" class="form-label">${t('deathDate')}</label>
-                                            <input type="date" class="form-control" id="deathDate" value="">
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="alert alert-info">
-                                    <i class="bi bi-info-circle"></i>
-                                    ${t('requiredFields')}
-                                </div>
-                            </form>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                <i class="bi bi-x-circle me-1"></i>
-                                <span class="module-text" data-key="cancel">${t('cancel')}</span>
-                            </button>
-                            <button type="button" class="btn btn-primary" id="saveDogBtn">
-                                <i class="bi bi-save me-1"></i>
-                                <span class="module-text" data-key="saveDog">${t('saveDog')}</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-    
-    setupEvents() {
-        console.log('DogManager setupEvents aangeroepen');
-        
-        // Vertaal de modal tekst
-        setTimeout(() => {
-            this.translateModal();
-        }, 100);
-        
-        // Als gebruiker geen admin is, stop hier - er zijn geen events nodig voor de toegang geweigerd modal
-        if (!auth.isAdmin()) {
-            console.log('Gebruiker is geen admin, alleen close functie nodig');
-            
-            // Voeg event listener toe voor modal sluiten
-            const modal = document.getElementById('addDogModal');
-            if (modal) {
-                modal.addEventListener('shown.bs.modal', () => {
-                    console.log('Toegang geweigerd modal is nu zichtbaar');
-                });
-            }
-            return;
-        }
-        
-        // Voor admins: laad honden voor autocomplete
-        this.loadAllDogs();
-        
-        // Event listeners voor formulier
-        const saveBtn = document.getElementById('saveDogBtn');
-        if (saveBtn) {
-            saveBtn.addEventListener('click', () => {
-                this.saveDog();
-            });
-        }
-        
-        // Recente rassen knoppen
-        document.querySelectorAll('.recent-breed-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const breed = e.target.dataset.breed;
-                const breedInput = document.getElementById('breed');
-                if (breedInput) {
-                    breedInput.value = breed;
-                }
-            });
-        });
-        
-        // Setup autocomplete voor ouders (wacht even tot DOM geladen is)
-        setTimeout(() => {
-            this.setupParentAutocomplete();
-        }, 100);
-    }
-    
-    translateModal() {
-        const currentLang = localStorage.getItem('appLanguage') || 'nl';
-        
-        // Update de klasse interne taal
-        this.currentLang = currentLang;
         
         // Vertaal alle elementen met data-key attribuut
         const elements = document.querySelectorAll('[data-key]');
         elements.forEach(element => {
             const key = element.getAttribute('data-key');
-            const translation = this.t(key);
-            if (translation !== key) {
-                element.textContent = translation;
+            if (translations[currentLang] && translations[currentLang][key]) {
+                element.textContent = translations[currentLang][key];
             }
         });
         
-        // Vertaal ook specifieke knoppen die geen data-key hebben
-        const saveBtn = document.getElementById('saveDogBtn');
-        if (saveBtn && saveBtn.querySelector('.module-text')) {
-            saveBtn.querySelector('.module-text').textContent = this.t('saveDog');
-        }
+        // Vertaal placeholder attributen
+        const inputs = document.querySelectorAll('[data-placeholder]');
+        inputs.forEach(input => {
+            const key = input.getAttribute('data-placeholder');
+            if (translations[currentLang] && translations[currentLang][key]) {
+                input.placeholder = translations[currentLang][key];
+            }
+        });
+        
+        // Vertaal select opties
+        const selectOptions = document.querySelectorAll('select option[data-key]');
+        selectOptions.forEach(option => {
+            const key = option.getAttribute('data-key');
+            if (translations[currentLang] && translations[currentLang][key]) {
+                option.textContent = translations[currentLang][key];
+            }
+        });
     }
     
     addToLastBreeds(breed) {
@@ -583,8 +601,18 @@ class DogManager extends BaseModule {
     }
     
     async saveDog() {
+        const t = (key) => {
+            const currentLang = localStorage.getItem('appLanguage') || 'nl';
+            const translations = {
+                nl: { adminOnly: "Alleen administrators mogen honden toevoegen", fieldsRequired: "Naam, stamboomnummer en ras zijn verplichte velden", savingDog: "Hond opslaan...", dogAdded: "Hond succesvol toegevoegd!" },
+                en: { adminOnly: "Only administrators can add dogs", fieldsRequired: "Name, pedigree number and breed are required fields", savingDog: "Saving dog...", dogAdded: "Dog successfully added!" },
+                de: { adminOnly: "Nur Administratoren können Hunde hinzufügen", fieldsRequired: "Name, Stammbaum-Nummer und Rasse sind Pflichtfelder", savingDog: "Hund wird gespeichert...", dogAdded: "Hund erfolgreich hinzugefügt!" }
+            };
+            return translations[currentLang] && translations[currentLang][key] ? translations[currentLang][key] : key;
+        };
+        
         if (!auth.isAdmin()) {
-            this.showError(this.t('adminOnly'));
+            this.showError(t('adminOnly'));
             return;
         }
         
@@ -606,19 +634,19 @@ class DogManager extends BaseModule {
         console.log('Saving dog data:', dogData);
         
         if (!dogData.naam || !dogData.stamboomnr || !dogData.ras) {
-            this.showError(this.t('fieldsRequired'));
+            this.showError(t('fieldsRequired'));
             return;
         }
         
         this.addToLastBreeds(dogData.ras);
         
-        this.showProgress(this.t('savingDog'));
+        this.showProgress(t('savingDog'));
         
         try {
             const newId = await this.db.voegHondToe(dogData);
             console.log('New dog added with ID:', newId);
             this.hideProgress();
-            this.showSuccess(this.t('dogAdded'));
+            this.showSuccess(t('dogAdded'));
             
             // Voeg de nieuwe hond toe aan de lokale lijst voor toekomstige autocomplete
             dogData.id = newId;
