@@ -13,7 +13,7 @@ class SearchManager extends BaseModule {
             nl: {
                 searchDog: "Hond Zoeken",
                 searchName: "Zoek hond op naam",
-                searchPlaceholder: "Typ hondennaam...",
+                searchPlaceholder: "Typ hondennaam, stamboomnummer of ras...",
                 noDogsFound: "Geen honden gevonden",
                 typeToSearch: "Begin met typen om te zoeken",
                 searchResults: "Zoekresultaten",
@@ -30,12 +30,74 @@ class SearchManager extends BaseModule {
                 male: "Reu",
                 female: "Teef",
                 unknown: "Onbekend",
-                loading: "Honden laden..."
+                loading: "Honden laden...",
+                backToSearch: "Terug naar zoeken",
+                
+                // Hond gegevens
+                birthDate: "Geboortedatum",
+                deathDate: "Overlijdensdatum",
+                hipDysplasia: "Heupdysplasie",
+                elbowDysplasia: "Elleboogdysplasie",
+                patellaLuxation: "Patella Luxatie",
+                eyes: "Ogen",
+                eyesExplanation: "Verklaring ogen",
+                dandyWalker: "Dandy Walker Malformation",
+                thyroid: "Schildklier",
+                thyroidExplanation: "Toelichting schildklier",
+                country: "Land",
+                zipCode: "Postcode",
+                remarks: "Opmerkingen",
+                healthInfo: "Gezondheidsinformatie",
+                additionalInfo: "Extra informatie",
+                
+                // Gezondheidsstatussen
+                hipGrades: {
+                    A: "A - Geen tekenen van HD",
+                    B: "B - Overgangsvorm",
+                    C: "C - Lichte HD",
+                    D: "D - Matige HD", 
+                    E: "E - Ernstige HD"
+                },
+                elbowGrades: {
+                    "0": "0 - Geen ED",
+                    "1": "1 - Milde ED",
+                    "2": "2 - Matige ED",
+                    "3": "3 - Ernstige ED",
+                    "NB": "NB - Niet bekend"
+                },
+                patellaGrades: {
+                    "0": "0 - Geen PL",
+                    "1": "1 - Af en toe luxatie",
+                    "2": "2 - Regelmatig luxatie",
+                    "3": "3 - Constante luxatie"
+                },
+                eyeStatus: {
+                    "Vrij": "Vrij",
+                    "Distichiasis": "Distichiasis",
+                    "Overig": "Overig"
+                },
+                dandyStatus: {
+                    "Vrij op DNA": "Vrij op DNA",
+                    "Vrij op ouders": "Vrij op ouders", 
+                    "Drager": "Drager",
+                    "Lijder": "Lijder"
+                },
+                thyroidStatus: {
+                    "Negatief": "Tgaa Negatief",
+                    "Positief": "Tgaa Positief"
+                },
+                
+                // Labels
+                grade: "Graad",
+                status: "Status",
+                unknown: "Onbekend",
+                notApplicable: "Niet van toepassing",
+                viewMore: "Meer details"
             },
             en: {
                 searchDog: "Search Dog",
                 searchName: "Search dog by name",
-                searchPlaceholder: "Type dog name...",
+                searchPlaceholder: "Type dog name, pedigree number or breed...",
                 noDogsFound: "No dogs found",
                 typeToSearch: "Start typing to search",
                 searchResults: "Search Results",
@@ -52,12 +114,74 @@ class SearchManager extends BaseModule {
                 male: "Male",
                 female: "Female",
                 unknown: "Unknown",
-                loading: "Loading dogs..."
+                loading: "Loading dogs...",
+                backToSearch: "Back to search",
+                
+                // Dog details
+                birthDate: "Birth date",
+                deathDate: "Death date",
+                hipDysplasia: "Hip Dysplasia",
+                elbowDysplasia: "Elbow Dysplasia",
+                patellaLuxation: "Patella Luxation",
+                eyes: "Eyes",
+                eyesExplanation: "Eye explanation",
+                dandyWalker: "Dandy Walker Malformation",
+                thyroid: "Thyroid",
+                thyroidExplanation: "Thyroid explanation",
+                country: "Country",
+                zipCode: "Zip code",
+                remarks: "Remarks",
+                healthInfo: "Health Information",
+                additionalInfo: "Additional Information",
+                
+                // Health statuses
+                hipGrades: {
+                    A: "A - No signs of HD",
+                    B: "B - Borderline",
+                    C: "C - Mild HD",
+                    D: "D - Moderate HD",
+                    E: "E - Severe HD"
+                },
+                elbowGrades: {
+                    "0": "0 - No ED",
+                    "1": "1 - Mild ED",
+                    "2": "2 - Moderate ED",
+                    "3": "3 - Severe ED",
+                    "NB": "NB - Not known"
+                },
+                patellaGrades: {
+                    "0": "0 - No PL",
+                    "1": "1 - Occasional luxation",
+                    "2": "2 - Frequent luxation",
+                    "3": "3 - Constant luxation"
+                },
+                eyeStatus: {
+                    "Vrij": "Free",
+                    "Distichiasis": "Distichiasis",
+                    "Overig": "Other"
+                },
+                dandyStatus: {
+                    "Vrij op DNA": "Free on DNA",
+                    "Vrij op ouders": "Free on parents",
+                    "Drager": "Carrier",
+                    "Lijder": "Affected"
+                },
+                thyroidStatus: {
+                    "Negatief": "Tgaa Negative",
+                    "Positief": "Tgaa Positive"
+                },
+                
+                // Labels
+                grade: "Grade",
+                status: "Status",
+                unknown: "Unknown",
+                notApplicable: "Not applicable",
+                viewMore: "View details"
             },
             de: {
                 searchDog: "Hund suchen",
                 searchName: "Hund nach Namen suchen",
-                searchPlaceholder: "Hundenamen eingeben...",
+                searchPlaceholder: "Hundenamen, Stammbaum-Nummer oder Rasse eingeben...",
                 noDogsFound: "Keine Hunde gefunden",
                 typeToSearch: "Beginnen Sie mit der Eingabe, um zu suchen",
                 searchResults: "Suchergebnisse",
@@ -74,12 +198,77 @@ class SearchManager extends BaseModule {
                 male: "Rüde",
                 female: "Hündin",
                 unknown: "Unbekannt",
-                loading: "Hunde laden..."
+                loading: "Hunde laden...",
+                backToSearch: "Zurück zur Suche",
+                
+                // Hund Details
+                birthDate: "Geburtsdatum",
+                deathDate: "Sterbedatum",
+                hipDysplasia: "Hüftdysplasie",
+                elbowDysplasia: "Ellbogendysplasie",
+                patellaLuxation: "Patella Luxation",
+                eyes: "Augen",
+                eyesExplanation: "Augenerklärung",
+                dandyWalker: "Dandy Walker Malformation",
+                thyroid: "Schilddrüse",
+                thyroidExplanation: "Schilddrüse Erklärung",
+                country: "Land",
+                zipCode: "Postleitzahl",
+                remarks: "Bemerkungen",
+                healthInfo: "Gesundheitsinformationen",
+                additionalInfo: "Zusätzliche Informationen",
+                
+                // Gesundheitsstatus
+                hipGrades: {
+                    A: "A - Keine Anzeichen von HD",
+                    B: "B - Übergangsform",
+                    C: "C - Leichte HD",
+                    D: "D - Mittlere HD",
+                    E: "E - Schwere HD"
+                },
+                elbowGrades: {
+                    "0": "0 - Keine ED",
+                    "1": "1 - Milde ED",
+                    "2": "2 - Mittlere ED",
+                    "3": "3 - Schwere ED",
+                    "NB": "NB - Nicht bekannt"
+                },
+                patellaGrades: {
+                    "0": "0 - Keine PL",
+                    "1": "1 - Gelegentlich Luxation",
+                    "2": "2 - Häufig Luxation",
+                    "3": "3 - Ständige Luxation"
+                },
+                eyeStatus: {
+                    "Vrij": "Frei",
+                    "Distichiasis": "Distichiasis",
+                    "Overig": "Andere"
+                },
+                dandyStatus: {
+                    "Vrij op DNA": "Frei auf DNA",
+                    "Vrij op ouders": "Frei auf Eltern",
+                    "Drager": "Träger",
+                    "Lijder": "Betroffen"
+                },
+                thyroidStatus: {
+                    "Negatief": "Tgaa Negativ",
+                    "Positief": "Tgaa Positiv"
+                },
+                
+                // Labels
+                grade: "Grad",
+                status: "Status",
+                unknown: "Unbekannt",
+                notApplicable: "Nicht zutreffend",
+                viewMore: "Mehr Details"
             }
         };
     }
     
-    t(key) {
+    t(key, subKey = null) {
+        if (subKey && this.translations[this.currentLang][key] && typeof this.translations[this.currentLang][key] === 'object') {
+            return this.translations[this.currentLang][key][subKey] || subKey;
+        }
         return this.translations[this.currentLang][key] || key;
     }
     
@@ -88,31 +277,59 @@ class SearchManager extends BaseModule {
         
         return `
             <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
+                <div class="modal-dialog modal-xl">
                     <div class="modal-content">
                         <div class="modal-header bg-info text-white">
                             <h5 class="modal-title" id="searchModalLabel">
-                                <i class="bi bi-search"></i> ${t('searchDog')}
+                                <i class="bi bi-search me-2"></i> ${t('searchDog')}
                             </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${t('close')}"></button>
                         </div>
-                        <div class="modal-body">
-                            <div class="mb-4">
-                                <div class="mb-3">
-                                    <input type="text" class="form-control search-input" id="searchNameInput" 
-                                           placeholder="${t('searchPlaceholder')}" autocomplete="off">
-                                </div>
-                            </div>
-                            
-                            <div id="searchResultsContainer">
-                                <div class="text-center py-4">
-                                    <i class="bi bi-search display-1 text-muted"></i>
-                                    <p class="mt-3 text-muted">${t('typeToSearch')}</p>
+                        <div class="modal-body p-0">
+                            <div class="container-fluid">
+                                <div class="row">
+                                    <!-- Zoekkolom -->
+                                    <div class="col-md-5 border-end p-3" id="searchColumn">
+                                        <div class="sticky-top" style="top: 15px;">
+                                            <div class="mb-4">
+                                                <label for="searchNameInput" class="form-label fw-bold">${t('searchName')}</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-white border-end-0">
+                                                        <i class="bi bi-search text-muted"></i>
+                                                    </span>
+                                                    <input type="text" class="form-control search-input border-start-0 ps-0" 
+                                                           id="searchNameInput" 
+                                                           placeholder="${t('searchPlaceholder')}" 
+                                                           autocomplete="off">
+                                                </div>
+                                                <div class="form-text mt-1">${t('typeToSearch')}</div>
+                                            </div>
+                                            
+                                            <div id="searchResultsContainer">
+                                                <div class="text-center py-5">
+                                                    <i class="bi bi-search display-1 text-muted opacity-50"></i>
+                                                    <p class="mt-3 text-muted">${t('typeToSearch')}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Details kolom -->
+                                    <div class="col-md-7 p-3" id="detailsColumn">
+                                        <div id="detailsContainer">
+                                            <div class="text-center py-5">
+                                                <i class="bi bi-eye display-1 text-muted opacity-50"></i>
+                                                <p class="mt-3 text-muted">${t('selectDogToView') || "Selecteer een hond om details te zien"}</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${t('close')}</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle me-1"></i> ${t('close')}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -136,7 +353,7 @@ class SearchManager extends BaseModule {
                     cursor: pointer;
                     transition: all 0.2s;
                     border: 1px solid #dee2e6;
-                    border-radius: 6px;
+                    border-radius: 8px;
                     margin-bottom: 8px;
                     padding: 12px 15px;
                     background: white;
@@ -148,8 +365,10 @@ class SearchManager extends BaseModule {
                     transform: translateX(3px);
                 }
                 
-                .dog-result-item:active {
-                    background-color: #e9ecef;
+                .dog-result-item.selected {
+                    background-color: #e8f4fd;
+                    border-color: #0d6efd;
+                    border-left: 4px solid #0d6efd;
                 }
                 
                 .dog-name {
@@ -167,17 +386,6 @@ class SearchManager extends BaseModule {
                     flex-wrap: wrap;
                 }
                 
-                .dog-info-item {
-                    display: flex;
-                    align-items: center;
-                    gap: 4px;
-                }
-                
-                .dog-info-item i {
-                    font-size: 0.8rem;
-                    color: #adb5bd;
-                }
-                
                 .search-stats {
                     font-size: 0.85rem;
                     color: #6c757d;
@@ -186,46 +394,118 @@ class SearchManager extends BaseModule {
                     border-bottom: 1px solid #dee2e6;
                 }
                 
-                .back-btn {
-                    margin-bottom: 15px;
-                    padding: 6px 12px;
-                    font-size: 0.875rem;
+                .details-card {
+                    border-radius: 10px;
+                    border: 1px solid #dee2e6;
+                    background: white;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
                 }
                 
-                .details-section {
-                    background: #f8f9fa;
-                    border-radius: 8px;
-                    padding: 15px;
-                    margin-bottom: 15px;
+                .details-header {
+                    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+                    color: white;
+                    padding: 20px;
+                    border-radius: 10px 10px 0 0;
+                }
+                
+                .details-body {
+                    padding: 20px;
+                }
+                
+                .info-group {
+                    margin-bottom: 20px;
+                }
+                
+                .info-group-title {
+                    font-size: 0.9rem;
+                    text-transform: uppercase;
+                    color: #6c757d;
+                    letter-spacing: 1px;
+                    margin-bottom: 10px;
+                    padding-bottom: 5px;
+                    border-bottom: 2px solid #f0f0f0;
+                }
+                
+                .info-row {
+                    display: flex;
+                    margin-bottom: 8px;
+                    padding: 8px 0;
+                    border-bottom: 1px solid #f8f9fa;
+                }
+                
+                .info-label {
+                    font-weight: 600;
+                    color: #495057;
+                    width: 180px;
+                    min-width: 180px;
+                }
+                
+                .info-value {
+                    color: #212529;
+                    flex: 1;
+                }
+                
+                .badge-hd {
+                    background-color: #20c997;
+                    color: white;
+                }
+                
+                .badge-ed {
+                    background-color: #6f42c1;
+                    color: white;
+                }
+                
+                .badge-pl {
+                    background-color: #fd7e14;
+                    color: white;
+                }
+                
+                .badge-eyes {
+                    background-color: #17a2b8;
+                    color: white;
+                }
+                
+                .badge-dandy {
+                    background-color: #e83e8c;
+                    color: white;
+                }
+                
+                .badge-thyroid {
+                    background-color: #28a745;
+                    color: white;
                 }
                 
                 .parents-info {
                     background: #e8f4fd;
                     border-left: 4px solid #0d6efd;
-                    padding: 12px;
-                    border-radius: 4px;
-                    margin-bottom: 10px;
+                    padding: 15px;
+                    border-radius: 6px;
+                    margin-bottom: 15px;
                 }
                 
-                .gender-badge {
-                    font-size: 0.75rem;
-                    padding: 3px 6px;
-                    border-radius: 4px;
+                .remarks-box {
+                    background: #f8f9fa;
+                    border-left: 4px solid #6c757d;
+                    padding: 15px;
+                    border-radius: 6px;
+                    font-style: italic;
+                    color: #495057;
                 }
                 
-                .badge-male {
-                    background-color: #0d6efd;
-                    color: white;
+                .empty-state {
+                    color: #adb5bd;
+                    font-style: italic;
                 }
                 
-                .badge-female {
-                    background-color: #dc3545;
-                    color: white;
-                }
-                
-                .badge-unknown {
-                    background-color: #6c757d;
-                    color: white;
+                @media (max-width: 768px) {
+                    .info-row {
+                        flex-direction: column;
+                    }
+                    
+                    .info-label {
+                        width: 100%;
+                        margin-bottom: 4px;
+                    }
                 }
             </style>
         `;
@@ -250,9 +530,10 @@ class SearchManager extends BaseModule {
             const searchTerm = e.target.value.toLowerCase().trim();
             
             if (searchTerm.length >= 1) {
-                this.filterDogsByName(searchTerm);
+                this.filterDogs(searchTerm);
             } else {
                 this.showInitialView();
+                this.clearDetails();
             }
         });
         
@@ -260,7 +541,7 @@ class SearchManager extends BaseModule {
         searchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && this.filteredDogs.length > 0) {
                 e.preventDefault();
-                this.showDogDetails(this.filteredDogs[0]);
+                this.selectDog(this.filteredDogs[0]);
             }
         });
     }
@@ -270,9 +551,21 @@ class SearchManager extends BaseModule {
         const t = this.t.bind(this);
         
         container.innerHTML = `
-            <div class="text-center py-4">
-                <i class="bi bi-search display-1 text-muted"></i>
+            <div class="text-center py-5">
+                <i class="bi bi-search display-1 text-muted opacity-50"></i>
                 <p class="mt-3 text-muted">${t('typeToSearch')}</p>
+            </div>
+        `;
+    }
+    
+    clearDetails() {
+        const container = document.getElementById('detailsContainer');
+        const t = this.t.bind(this);
+        
+        container.innerHTML = `
+            <div class="text-center py-5">
+                <i class="bi bi-eye display-1 text-muted opacity-50"></i>
+                <p class="mt-3 text-muted">${t('selectDogToView') || "Selecteer een hond om details te zien"}</p>
             </div>
         `;
     }
@@ -293,13 +586,17 @@ class SearchManager extends BaseModule {
         }
     }
     
-    filterDogsByName(searchTerm = '') {
-        // BELANGRIJK: Zoek op het BEGIN van de naam (case-insensitive)
+    filterDogs(searchTerm = '') {
+        // Zoek op naam, stamboomnummer én ras
         this.filteredDogs = this.allDogs.filter(dog => {
-            const dogName = dog.naam ? dog.naam.toLowerCase() : '';
+            const naam = dog.naam ? dog.naam.toLowerCase() : '';
+            const stamboomnr = dog.stamboomnr ? dog.stamboomnr.toLowerCase() : '';
+            const ras = dog.ras ? dog.ras.toLowerCase() : '';
             
-            // Check of de naam BEGINT met de zoekterm
-            return dogName.startsWith(searchTerm);
+            // Zoek in alle drie de velden
+            return naam.includes(searchTerm) || 
+                   stamboomnr.includes(searchTerm) || 
+                   ras.includes(searchTerm);
         });
         
         this.displaySearchResults();
@@ -312,8 +609,8 @@ class SearchManager extends BaseModule {
         
         if (this.filteredDogs.length === 0) {
             container.innerHTML = `
-                <div class="text-center py-4">
-                    <i class="bi bi-search display-1 text-muted"></i>
+                <div class="text-center py-5">
+                    <i class="bi bi-search-x display-1 text-muted opacity-50"></i>
                     <p class="mt-3 text-muted">${t('noDogsFound')}</p>
                 </div>
             `;
@@ -322,6 +619,7 @@ class SearchManager extends BaseModule {
         
         let html = `
             <div class="search-stats">
+                <i class="bi bi-info-circle me-1"></i>
                 ${this.filteredDogs.length} ${t('found')}
             </div>
         `;
@@ -329,38 +627,26 @@ class SearchManager extends BaseModule {
         this.filteredDogs.forEach(dog => {
             const genderText = dog.geslacht === 'reuen' ? t('male') : 
                              dog.geslacht === 'teven' ? t('female') : t('unknown');
-            const genderClass = dog.geslacht === 'reuen' ? 'badge-male' : 
-                              dog.geslacht === 'teven' ? 'badge-female' : 'badge-unknown';
-            
-            // Markeer het overeenkomende deel van de naam
-            const searchTerm = document.getElementById('searchNameInput').value.toLowerCase();
-            const dogName = dog.naam || '';
-            let displayedName = dogName;
-            
-            // Als de zoekterm aan het begin staat, markeer deze
-            if (dogName.toLowerCase().startsWith(searchTerm) && searchTerm.length > 0) {
-                const matchPart = dogName.substring(0, searchTerm.length);
-                const restPart = dogName.substring(searchTerm.length);
-                displayedName = `<span class="text-primary fw-bold">${matchPart}</span>${restPart}`;
-            }
+            const genderClass = dog.geslacht === 'reuen' ? 'badge bg-primary' : 
+                              dog.geslacht === 'teven' ? 'badge bg-danger' : 'badge bg-secondary';
             
             html += `
                 <div class="dog-result-item" data-id="${dog.id}">
                     <div class="dog-name">
-                        ${displayedName}
-                        <span class="gender-badge ${genderClass} ms-2">${genderText}</span>
+                        ${dog.naam || 'Onbekend'}
+                        <span class="${genderClass} ms-2" style="font-size: 0.7rem; padding: 2px 6px;">${genderText}</span>
                     </div>
                     <div class="dog-info">
                         ${dog.ras ? `
-                        <div class="dog-info-item">
-                            <i class="bi bi-tag"></i>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-tag me-1" style="font-size: 0.8rem;"></i>
                             <span>${dog.ras}</span>
                         </div>
                         ` : ''}
                         
                         ${dog.stamboomnr ? `
-                        <div class="dog-info-item">
-                            <i class="bi bi-hash"></i>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-hash me-1" style="font-size: 0.8rem;"></i>
                             <span>${dog.stamboomnr}</span>
                         </div>
                         ` : ''}
@@ -374,44 +660,48 @@ class SearchManager extends BaseModule {
         // Event listeners voor ALLE hond items
         document.querySelectorAll('.dog-result-item').forEach(item => {
             item.addEventListener('click', (e) => {
-                const hondId = item.getAttribute('data-id');
-                this.viewDog(hondId);
+                const hondId = parseInt(item.getAttribute('data-id'));
+                this.selectDogById(hondId);
             });
         });
     }
     
-    async viewDog(hondId) {
-        try {
-            const hond = this.allDogs.find(h => h.id === parseInt(hondId));
-            
-            if (!hond) {
-                this.showError('Hond niet gevonden');
-                return;
+    selectDog(dog) {
+        // Markeer geselecteerd item
+        document.querySelectorAll('.dog-result-item').forEach(item => {
+            item.classList.remove('selected');
+            if (parseInt(item.getAttribute('data-id')) === dog.id) {
+                item.classList.add('selected');
             }
-            
-            this.showDogDetails(hond);
-            
-        } catch (error) {
-            this.showError(`Fout bij laden hond: ${error.message}`);
+        });
+        
+        this.showDogDetails(dog);
+    }
+    
+    selectDogById(hondId) {
+        const dog = this.allDogs.find(h => h.id === hondId);
+        if (dog) {
+            this.selectDog(dog);
         }
     }
     
-    async showDogDetails(dog) {
+    showDogDetails(dog) {
         const t = this.t.bind(this);
-        const container = document.getElementById('searchResultsContainer');
+        const container = document.getElementById('detailsContainer');
         
         if (!container) return;
         
-        // Zoek ouders via ID's
-        let fatherInfo = { naam: t('parentsUnknown'), stamboomnr: '' };
-        let motherInfo = { naam: t('parentsUnknown'), stamboomnr: '' };
+        // Zoek ouders
+        let fatherInfo = { naam: t('parentsUnknown'), stamboomnr: '', ras: '' };
+        let motherInfo = { naam: t('parentsUnknown'), stamboomnr: '', ras: '' };
         
         if (dog.vaderId) {
             const father = this.allDogs.find(d => d.id === dog.vaderId);
             if (father) {
                 fatherInfo = { 
-                    naam: father.naam, 
-                    stamboomnr: father.stamboomnr || ''
+                    naam: father.naam || t('unknown'),
+                    stamboomnr: father.stamboomnr || '',
+                    ras: father.ras || ''
                 };
             }
         }
@@ -420,98 +710,247 @@ class SearchManager extends BaseModule {
             const mother = this.allDogs.find(d => d.id === dog.moederId);
             if (mother) {
                 motherInfo = { 
-                    naam: mother.naam, 
-                    stamboomnr: mother.stamboomnr || ''
+                    naam: mother.naam || t('unknown'),
+                    stamboomnr: mother.stamboomnr || '',
+                    ras: mother.ras || ''
                 };
             }
         }
         
-        const html = `
-            <div class="mb-3">
-                <button class="btn btn-sm btn-outline-secondary back-btn" id="backToSearchBtn">
-                    <i class="bi bi-arrow-left"></i> Terug naar zoeken
-                </button>
-            </div>
+        // Format datum
+        const formatDate = (dateString) => {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString(this.currentLang === 'nl' ? 'nl-NL' : 
+                                          this.currentLang === 'de' ? 'de-DE' : 'en-US');
+        };
+        
+        // Genereer health badge
+        const getHealthBadge = (value, type) => {
+            if (!value || value === '') return '';
             
-            <div class="details-section">
-                <div class="row align-items-center mb-3">
-                    <div class="col">
-                        <h4 class="mb-0">${dog.naam}</h4>
-                        <div class="mt-1">
-                            ${dog.ras ? `<span class="badge bg-info">${dog.ras}</span>` : ''}
-                            ${dog.geslacht === 'reuen' ? `<span class="badge bg-primary ms-1">${t('male')}</span>` : ''}
-                            ${dog.geslacht === 'teven' ? `<span class="badge bg-danger ms-1">${t('female')}</span>` : ''}
+            let badgeClass = '';
+            let badgeText = value;
+            
+            switch(type) {
+                case 'hip':
+                    badgeClass = 'badge-hd';
+                    badgeText = t('hipGrades', value) || value;
+                    break;
+                case 'elbow':
+                    badgeClass = 'badge-ed';
+                    badgeText = t('elbowGrades', value) || value;
+                    break;
+                case 'patella':
+                    badgeClass = 'badge-pl';
+                    badgeText = t('patellaGrades', value) || value;
+                    break;
+                case 'eyes':
+                    badgeClass = 'badge-eyes';
+                    badgeText = t('eyeStatus', value) || value;
+                    break;
+                case 'dandy':
+                    badgeClass = 'badge-dandy';
+                    badgeText = t('dandyStatus', value) || value;
+                    break;
+                case 'thyroid':
+                    badgeClass = 'badge-thyroid';
+                    badgeText = t('thyroidStatus', value) || value;
+                    break;
+            }
+            
+            return `<span class="badge ${badgeClass}">${badgeText}</span>`;
+        };
+        
+        const html = `
+            <div class="details-card">
+                <!-- Header -->
+                <div class="details-header">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h4 class="mb-1 fw-bold">${dog.naam || t('unknown')}</h4>
+                            <div class="d-flex align-items-center flex-wrap gap-2 mt-2">
+                                ${dog.stamboomnr ? `<span class="badge bg-light text-dark fs-6">${dog.stamboomnr}</span>` : ''}
+                                ${dog.ras ? `<span class="badge bg-light text-dark">${dog.ras}</span>` : ''}
+                                <span class="badge ${dog.geslacht === 'reuen' ? 'bg-primary' : dog.geslacht === 'teven' ? 'bg-danger' : 'bg-secondary'}">
+                                    ${dog.geslacht === 'reuen' ? t('male') : dog.geslacht === 'teven' ? t('female') : t('unknown')}
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-auto">
-                        ${dog.stamboomnr ? `<code class="fs-5">${dog.stamboomnr}</code>` : ''}
+                        ${dog.geboortedatum || dog.overlijdensdatum ? `
+                        <div class="text-end">
+                            ${dog.geboortedatum ? `
+                            <div class="text-white-80">
+                                <i class="bi bi-calendar me-1"></i>
+                                ${formatDate(dog.geboortedatum)}
+                            </div>
+                            ` : ''}
+                            ${dog.overlijdensdatum ? `
+                            <div class="text-white-80 mt-1">
+                                <i class="bi bi-calendar-x me-1"></i>
+                                ${formatDate(dog.overlijdensdatum)}
+                            </div>
+                            ` : ''}
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
                 
-                <div class="row mt-3">
-                    <div class="col-md-6 mb-3">
+                <!-- Body -->
+                <div class="details-body">
+                    <!-- Ouders -->
+                    <div class="info-group">
+                        <div class="info-group-title">
+                            <i class="bi bi-people me-1"></i> ${t('parents') || 'Ouders'}
+                        </div>
                         <div class="parents-info">
-                            <div class="fw-bold mb-1">${t('father')}:</div>
-                            <div class="fs-5">${fatherInfo.naam}</div>
-                            ${fatherInfo.stamboomnr ? `<div class="text-muted">${fatherInfo.stamboomnr}</div>` : ''}
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="fw-bold mb-1 text-primary">
+                                        <i class="bi bi-gender-male me-1"></i> ${t('father')}
+                                    </div>
+                                    <div class="fs-5 fw-semibold">${fatherInfo.naam}</div>
+                                    ${fatherInfo.stamboomnr ? `<div class="text-muted">${fatherInfo.stamboomnr}</div>` : ''}
+                                    ${fatherInfo.ras ? `<div class="text-muted small">${fatherInfo.ras}</div>` : ''}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="fw-bold mb-1 text-danger">
+                                        <i class="bi bi-gender-female me-1"></i> ${t('mother')}
+                                    </div>
+                                    <div class="fs-5 fw-semibold">${motherInfo.naam}</div>
+                                    ${motherInfo.stamboomnr ? `<div class="text-muted">${motherInfo.stamboomnr}</div>` : ''}
+                                    ${motherInfo.ras ? `<div class="text-muted small">${motherInfo.ras}</div>` : ''}
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <div class="parents-info">
-                            <div class="fw-bold mb-1">${t('mother')}:</div>
-                            <div class="fs-5">${motherInfo.naam}</div>
-                            ${motherInfo.stamboomnr ? `<div class="text-muted">${motherInfo.stamboomnr}</div>` : ''}
+                    
+                    <!-- Gezondheidsinformatie -->
+                    <div class="info-group">
+                        <div class="info-group-title">
+                            <i class="bi bi-heart-pulse me-1"></i> ${t('healthInfo')}
                         </div>
+                        
+                        <div class="row">
+                            ${dog.heupdysplasie ? `
+                            <div class="col-md-6 mb-3">
+                                <div class="fw-bold mb-1">${t('hipDysplasia')}</div>
+                                <div>${getHealthBadge(dog.heupdysplasie, 'hip')}</div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.elleboogdysplasie ? `
+                            <div class="col-md-6 mb-3">
+                                <div class="fw-bold mb-1">${t('elbowDysplasia')}</div>
+                                <div>${getHealthBadge(dog.elleboogdysplasie, 'elbow')}</div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.patella ? `
+                            <div class="col-md-6 mb-3">
+                                <div class="fw-bold mb-1">${t('patellaLuxation')}</div>
+                                <div>${getHealthBadge(dog.patella, 'patella')}</div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.ogen ? `
+                            <div class="col-md-6 mb-3">
+                                <div class="fw-bold mb-1">${t('eyes')}</div>
+                                <div>${getHealthBadge(dog.ogen, 'eyes')}</div>
+                                ${dog.ogenVerklaring ? `<div class="text-muted small mt-1">${dog.ogenVerklaring}</div>` : ''}
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.dandyWalker ? `
+                            <div class="col-md-6 mb-3">
+                                <div class="fw-bold mb-1">${t('dandyWalker')}</div>
+                                <div>${getHealthBadge(dog.dandyWalker, 'dandy')}</div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.schildklier ? `
+                            <div class="col-md-6 mb-3">
+                                <div class="fw-bold mb-1">${t('thyroid')}</div>
+                                <div>${getHealthBadge(dog.schildklier, 'thyroid')}</div>
+                                ${dog.schildklierVerklaring ? `<div class="text-muted small mt-1">${dog.schildklierVerklaring}</div>` : ''}
+                            </div>
+                            ` : ''}
+                        </div>
+                        
+                        ${!dog.heupdysplasie && !dog.elleboogdysplasie && !dog.patella && 
+                          !dog.ogen && !dog.dandyWalker && !dog.schildklier ? `
+                        <div class="text-muted text-center py-3">
+                            <i class="bi bi-heart me-1"></i> ${t('noHealthInfo') || 'Geen gezondheidsinformatie beschikbaar'}
+                        </div>
+                        ` : ''}
                     </div>
-                </div>
-                
-                ${dog.geboortedatum || dog.kleur || dog.chipnummer || dog.opmerkingen ? `
-                <div class="mt-3">
-                    <h6 class="border-bottom pb-2 mb-3">Extra informatie</h6>
-                    <div class="row">
-                        ${dog.geboortedatum ? `
-                        <div class="col-md-6 mb-2">
-                            <strong>Geboortedatum:</strong><br>
-                            ${dog.geboortedatum}
+                    
+                    <!-- Extra informatie -->
+                    <div class="info-group">
+                        <div class="info-group-title">
+                            <i class="bi bi-info-circle me-1"></i> ${t('additionalInfo')}
                         </div>
-                        ` : ''}
                         
-                        ${dog.kleur ? `
-                        <div class="col-md-6 mb-2">
-                            <strong>Kleur:</strong><br>
-                            ${dog.kleur}
-                        </div>
-                        ` : ''}
-                        
-                        ${dog.chipnummer ? `
-                        <div class="col-12 mb-2">
-                            <strong>Chipnummer:</strong><br>
-                            <code>${dog.chipnummer}</code>
+                        ${dog.land || dog.postcode ? `
+                        <div class="row mb-3">
+                            ${dog.land ? `
+                            <div class="col-md-6">
+                                <div class="fw-bold mb-1">${t('country')}</div>
+                                <div>${dog.land}</div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.postcode ? `
+                            <div class="col-md-6">
+                                <div class="fw-bold mb-1">${t('zipCode')}</div>
+                                <div>${dog.postcode}</div>
+                            </div>
+                            ` : ''}
                         </div>
                         ` : ''}
                         
                         ${dog.opmerkingen ? `
-                        <div class="col-12 mt-2 pt-2 border-top">
-                            <strong>Opmerkingen:</strong><br>
-                            <p class="text-muted mb-0">${dog.opmerkingen}</p>
+                        <div class="mt-3">
+                            <div class="fw-bold mb-2">${t('remarks')}</div>
+                            <div class="remarks-box">
+                                ${dog.opmerkingen}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        ${!dog.land && !dog.postcode && !dog.opmerkingen ? `
+                        <div class="text-muted text-center py-3">
+                            <i class="bi bi-info me-1"></i> ${t('noAdditionalInfo') || 'Geen extra informatie beschikbaar'}
                         </div>
                         ` : ''}
                     </div>
+                    
+                    <!-- Timestamps -->
+                    ${dog.createdAt || dog.updatedAt ? `
+                    <div class="info-group">
+                        <div class="info-group-title">
+                            <i class="bi bi-clock-history me-1"></i> Systeem informatie
+                        </div>
+                        <div class="row">
+                            ${dog.createdAt ? `
+                            <div class="col-md-6">
+                                <div class="text-muted small">Aangemaakt</div>
+                                <div class="small">${formatDate(dog.createdAt)}</div>
+                            </div>
+                            ` : ''}
+                            ${dog.updatedAt ? `
+                            <div class="col-md-6">
+                                <div class="text-muted small">Laatst bijgewerkt</div>
+                                <div class="small">${formatDate(dog.updatedAt)}</div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    ` : ''}
                 </div>
-                ` : ''}
             </div>
         `;
         
         container.innerHTML = html;
-        
-        // Event listener voor terug knop
-        document.getElementById('backToSearchBtn').addEventListener('click', () => {
-            const searchTerm = document.getElementById('searchNameInput').value;
-            if (searchTerm && searchTerm.length >= 1) {
-                this.filterDogsByName(searchTerm.toLowerCase());
-            } else {
-                this.showInitialView();
-            }
-        });
     }
 }
