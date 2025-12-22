@@ -38,14 +38,14 @@ class DogDataManager extends BaseModule {
                 chooseGender: "Selecteer geslacht...",
                 male: "Reu",
                 female: "Teef",
-                hipDysplasia: "Heupdysplasie",
+                hipDysplasia: "Heupdysplasia",
                 hipGrades: "Selecteer graad...",
                 hipA: "A",
                 hipB: "B",
                 hipC: "C",
                 hipD: "D",
                 hipE: "E",
-                elbowDysplasia: "Elleboogdysplasie",
+                elbowDysplasia: "Elleboogdysplasia",
                 elbowGrades: "Selecteer graad...",
                 elbow0: "0",
                 elbow1: "1",
@@ -108,7 +108,7 @@ class DogDataManager extends BaseModule {
                 editingDog: "Bewerken hond",
                 savingChanges: "Wijzigingen opslaan...",
                 changesSaved: "Wijzigingen opgeslagen!",
-                dogDeleted: "Hond succesvol verwijderd!",
+                dogDeleted: "Hond succesvol verwijderen!",
                 confirmDelete: "Weet u zeker dat u deze hond wilt verwijderen?",
                 photoAdded: "Foto toegevoegd",
                 updatingDog: "Hond bijwerken...",
@@ -344,7 +344,7 @@ class DogDataManager extends BaseModule {
                 deleteFailed: "Fehler beim Löschen des Hundes: ",
                 photoError: "Fehler beim Hochladen des Fotos: ",
                 fieldsRequired: "Name, Stammbaum-Nummer en Rasse sind Pflichtfelder",
-                dogNotFound: "Hund nicht gefunden",
+                dogNotFound: "Hund nicht gefonden",
                 adminOnly: "Nur Administratoren können Hunde bearbeiten",
                 invalidId: "Ungültige Hunde-ID"
             }
@@ -924,15 +924,12 @@ class DogDataManager extends BaseModule {
             return;
         }
         
-        // Filter honden op naam, stamboomnummer en ras
+        // AANGEPAST: Filter honden alleen op naam (niet op stamboomnummer en ras)
+        // AANGEPAST: Gebruik beginsWith (case-insensitive) in plaats van contains
         const filteredDogs = this.allDogs.filter(dog => {
             const naam = dog.naam ? dog.naam.toLowerCase() : '';
-            const stamboomnr = dog.stamboomnr ? dog.stamboomnr.toLowerCase() : '';
-            const ras = dog.ras ? dog.ras.toLowerCase() : '';
-            
-            return naam.includes(term) || 
-                   stamboomnr.includes(term) || 
-                   ras.includes(term);
+            // Alleen zoeken op naam en alleen als naam begint met de zoekterm
+            return naam.startsWith(term);
         }).slice(0, 20); // Max 20 resultaten
         
         if (filteredDogs.length === 0) {
@@ -948,7 +945,7 @@ class DogDataManager extends BaseModule {
         let html = `
             <div class="search-stats">
                 <i class="bi bi-info-circle me-1"></i>
-                ${this.t('searchResults')}: <strong>${filteredDogs.length}</strong> ${this.t('found')}
+                ${this.t('searchResults')}: <strong>${filteredDogs.length}</strong>
             </div>
         `;
         
@@ -1423,7 +1420,8 @@ class DogDataManager extends BaseModule {
         // Filter honden voor autocomplete
         const suggestions = this.allDogs.filter(dog => {
             const dogName = dog.naam ? dog.naam.toLowerCase() : '';
-            const matchesSearch = dogName.includes(searchTerm);
+            // AANGEPAST: Gebruik startsWith in plaats van contains voor autocomplete ook
+            const matchesSearch = dogName.startsWith(searchTerm);
             
             // Filter op geslacht
             if (parentType === 'father') {
