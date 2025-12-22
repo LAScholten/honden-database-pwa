@@ -587,16 +587,11 @@ class SearchManager extends BaseModule {
     }
     
     filterDogs(searchTerm = '') {
-        // Zoek op naam, stamboomnummer én ras
+        // AANGEPAST: ALLEEN ZOEKEN OP NAAM VAN DE HOND - EN ALLEEN ALS HET BEGINT MET DE ZOEKTERM
         this.filteredDogs = this.allDogs.filter(dog => {
             const naam = dog.naam ? dog.naam.toLowerCase() : '';
-            const stamboomnr = dog.stamboomnr ? dog.stamboomnr.toLowerCase() : '';
-            const ras = dog.ras ? dog.ras.toLowerCase() : '';
-            
-            // Zoek in alle drie de velden
-            return naam.includes(searchTerm) || 
-                   stamboomnr.includes(searchTerm) || 
-                   ras.includes(searchTerm);
+            // AANGEPAST: ALLEEN OP NAAM ZOEKEN EN ALLEEN ALS HET BEGINT MET DE ZOEKTERM
+            return naam.startsWith(searchTerm);
         });
         
         this.displaySearchResults();
@@ -775,7 +770,6 @@ class SearchManager extends BaseModule {
                                 <span class="badge ${dog.geslacht === 'reuen' ? 'bg-primary' : dog.geslacht === 'teven' ? 'bg-danger' : 'bg-secondary'}">
                                     ${dog.geslacht === 'reuen' ? t('male') : dog.geslacht === 'teven' ? t('female') : t('unknown')}
                                 </span>
-                            </div>
                         </div>
                         ${dog.geboortedatum || dog.overlijdensdatum ? `
                         <div class="text-end">

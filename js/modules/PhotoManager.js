@@ -1,3 +1,5 @@
+// js/modules/PhotoManager.js
+
 /**
  * Foto Management Module
  * Beheert foto upload en galerij
@@ -168,7 +170,7 @@ class PhotoManager extends BaseModule {
                 selectPhotoFirst: "Wählen Sie zuerst ein Foto",
                 fileTooLarge: "Datei ist zu groot (maximal 5MB)",
                 invalidType: "Ungültiger Dateityp. Nur JPG, PNG und GIF sind erlaubt",
-                uploading: "Foto wird hochgeladen...",
+                uploading: "Foto wordt hochgeladen...",
                 uploadSuccess: "Foto erfolgreich hochgeladen!",
                 uploadFailed: "Upload fehlgeschlagen: ",
                 fileReadError: "Fehler beim Lesen der Datei",
@@ -412,11 +414,11 @@ class PhotoManager extends BaseModule {
             await this.loadDogsData();
         }
         
-        // ALLEEN ZOEKEN OP NAAM VAN DE HOND
+        // ALLEEN ZOEKEN OP NAAM VAN DE HOND - EN ALLEEN ALS HET BEGINT MET DE ZOEKTERM
         this.filteredDogs = this.allDogs.filter(dog => {
             const dogName = dog.naam.toLowerCase();
-            // ALLEEN OP NAAM ZOEKEN - GEEN RAS OF STAMBOOMNR MEER
-            return dogName.includes(searchTerm);
+            // AANGEPAST: ALLEEN OP NAAM ZOEKEN EN ALLEEN ALS HET BEGINT MET DE ZOEKTERM
+            return dogName.startsWith(searchTerm);
         });
         
         this.updateDropdownMenu();

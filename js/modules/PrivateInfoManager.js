@@ -375,10 +375,11 @@ class PrivateInfoManager extends BaseModule {
         if (!searchTerm.trim()) {
             this.filteredDogs = [...this.allDogs];
         } else {
-            // ALLEEN ZOEKEN OP NAAM VAN DE HOND
+            // AANGEPAST: ALLEEN ZOEKEN OP NAAM VAN DE HOND EN ALLEEN ALS HET BEGINT MET DE ZOEKTERM
             this.filteredDogs = this.allDogs.filter(dog => {
                 const dogName = dog.naam.toLowerCase();
-                return dogName.includes(searchTerm);
+                // ALLEEN OP NAAM ZOEKEN EN ALLEEN ALS HET BEGINT MET DE ZOEKTERM
+                return dogName.startsWith(searchTerm);
             });
         }
         
