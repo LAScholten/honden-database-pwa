@@ -220,7 +220,7 @@ class SearchManager extends BaseModule {
                 
                 // Gesundheitsstatus
                 hipGrades: {
-                    A: "A - Keine Anzeichen von HD",
+                    A: "A - Keine Anzeichen van HD",
                     B: "B - Übergangsform",
                     C: "C - Leichte HD",
                     D: "D - Mittlere HD",
@@ -336,6 +336,42 @@ class SearchManager extends BaseModule {
             </div>
             
             <style>
+                /* Mobiele optimalisaties */
+                @media (max-width: 768px) {
+                    .modal-dialog {
+                        margin: 5px;
+                        max-height: 95vh;
+                    }
+                    
+                    .modal-content {
+                        max-height: 95vh;
+                        overflow-y: auto;
+                    }
+                    
+                    .modal-body {
+                        padding: 5px;
+                        max-height: calc(95vh - 120px);
+                        overflow-y: auto;
+                    }
+                    
+                    .container-fluid {
+                        padding: 0;
+                    }
+                    
+                    .row {
+                        margin: 0;
+                    }
+                    
+                    .col-md-5, .col-md-7 {
+                        padding: 10px !important;
+                    }
+                    
+                    .border-end {
+                        border-right: none !important;
+                        border-bottom: 1px solid #dee2e6 !important;
+                    }
+                }
+                
                 .search-input {
                     font-size: 1.1rem;
                     padding: 10px 15px;
@@ -404,32 +440,32 @@ class SearchManager extends BaseModule {
                 .details-header {
                     background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
                     color: white;
-                    padding: 20px;
+                    padding: 15px;
                     border-radius: 10px 10px 0 0;
                 }
                 
                 .details-body {
-                    padding: 20px;
+                    padding: 15px;
                 }
                 
                 .info-group {
-                    margin-bottom: 20px;
+                    margin-bottom: 15px;
                 }
                 
                 .info-group-title {
-                    font-size: 0.9rem;
+                    font-size: 0.85rem;
                     text-transform: uppercase;
                     color: #6c757d;
                     letter-spacing: 1px;
-                    margin-bottom: 10px;
-                    padding-bottom: 5px;
+                    margin-bottom: 8px;
+                    padding-bottom: 4px;
                     border-bottom: 2px solid #f0f0f0;
                 }
                 
                 .info-row {
                     display: flex;
-                    margin-bottom: 8px;
-                    padding: 8px 0;
+                    margin-bottom: 6px;
+                    padding: 6px 0;
                     border-bottom: 1px solid #f8f9fa;
                 }
                 
@@ -478,15 +514,15 @@ class SearchManager extends BaseModule {
                 .parents-info {
                     background: #e8f4fd;
                     border-left: 4px solid #0d6efd;
-                    padding: 15px;
+                    padding: 12px;
                     border-radius: 6px;
-                    margin-bottom: 15px;
+                    margin-bottom: 12px;
                 }
                 
                 .remarks-box {
                     background: #f8f9fa;
                     border-left: 4px solid #6c757d;
-                    padding: 15px;
+                    padding: 12px;
                     border-radius: 6px;
                     font-style: italic;
                     color: #495057;
@@ -504,7 +540,19 @@ class SearchManager extends BaseModule {
                     
                     .info-label {
                         width: 100%;
-                        margin-bottom: 4px;
+                        margin-bottom: 3px;
+                    }
+                    
+                    .details-header {
+                        padding: 12px;
+                    }
+                    
+                    .details-body {
+                        padding: 12px;
+                    }
+                    
+                    .info-group {
+                        margin-bottom: 12px;
                     }
                 }
             </style>
