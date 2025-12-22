@@ -16,14 +16,92 @@
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
+    
+    <style>
+        .backup-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-left: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .backup-indicator:hover {
+            transform: scale(1.05);
+        }
+        
+        .backup-status-good {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .backup-status-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .backup-status-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .backup-tooltip {
+            position: absolute;
+            z-index: 1000;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 300px;
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
-                <i class="bi bi-database"></i> <span class="app-text" data-key="appTitle">Hondendatabase PWA</span>
+                <i class="bi bi-database"></i> 
+                <span class="app-text" data-key="appTitle">Hondendatabase PWA</span>
+                
+                <!-- Backup Indicator -->
+                <span id="backupIndicator" class="backup-indicator backup-status-good" 
+                      data-bs-toggle="tooltip" data-bs-placement="bottom"
+                      title="Laatste backup status">
+                    <i class="bi bi-shield-check"></i>
+                    <span id="backupStatusText">Backup OK</span>
+                </span>
+                
+                <!-- Backup Tooltip (hidden by default) -->
+                <div id="backupTooltip" class="backup-tooltip">
+                    <h6><i class="bi bi-info-circle"></i> Data Beveiliging</h6>
+                    <p id="backupTooltipText">Je gegevens worden alleen lokaal opgeslagen. Maak regelmatig backups!</p>
+                    <div class="d-grid gap-2 mt-2">
+                        <button id="backupNowBtn" class="btn btn-sm btn-success">
+                            <i class="bi bi-download"></i> Nu backup maken
+                        </button>
+                        <button id="learnMoreBtn" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-question-circle"></i> Meer info
+                        </button>
+                    </div>
+                </div>
             </a>
+            
             <div class="d-flex align-items-center">
                 <!-- Taal selector in navigatie -->
                 <div class="me-3">
@@ -117,6 +195,25 @@
                         <h4 class="mb-0"><i class="bi bi-house-door"></i> <span class="app-text" data-key="dashboard">Dashboard</span></h4>
                     </div>
                     <div class="card-body">
+                        <!-- Backup Reminder Banner -->
+                        <div id="backupReminderBanner" class="alert alert-warning d-none">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-exclamation-triangle-fill"></i>
+                                    <strong>Backup aanbevolen!</strong>
+                                    <span id="backupReminderText">Het is al een tijdje geleden dat je een backup hebt gemaakt.</span>
+                                </div>
+                                <div>
+                                    <button id="remindLaterBtn" class="btn btn-sm btn-outline-warning me-2">
+                                        <i class="bi bi-clock"></i> Herinner later
+                                    </button>
+                                    <button id="backupFromBannerBtn" class="btn btn-sm btn-success">
+                                        <i class="bi bi-download"></i> Nu backup maken
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="alert alert-success">
                             <h5><i class="bi bi-check-circle"></i> <span class="app-text" data-key="welcomeTitle">Welkom bij de Hondendatabase PWA</span></h5>
                             <p class="app-text" data-key="welcomeText">Kies een optie uit het menu om te beginnen. De applicatie werkt volledig offline.</p>
@@ -164,6 +261,43 @@
     
     <!-- Modals Container -->
     <div id="modalsContainer"></div>
+    
+    <!-- Backup Info Modal -->
+    <div class="modal fade" id="backupInfoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-shield-check"></i> Data Backup</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Waarom regelmatig backuppen?</h6>
+                    <p>Deze app slaat alle gegevens <strong>alleen lokaal in je browser</strong> op. Als je:</p>
+                    <ul>
+                        <li>Browser geschiedenis wist</li>
+                        <li>Cookies en sitegegevens verwijdert</li>
+                        <li>De app lange tijd niet gebruikt</li>
+                    </ul>
+                    <p>... dan kunnen je gegevens verloren gaan!</p>
+                    
+                    <div class="alert alert-info">
+                        <h6><i class="bi bi-lightbulb"></i> Tips:</h6>
+                        <ul class="mb-0">
+                            <li>Maak wekelijks een backup</li>
+                            <li>Sla op in je <strong>Bestanden app</strong> (iOS) of <strong>Downloads</strong> (Android)</li>
+                            <li>Voor extra veiligheid: upload naar iCloud/Google Drive</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
+                    <button type="button" class="btn btn-success" id="backupFromModalBtn">
+                        <i class="bi bi-download"></i> Nu backup maken
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- Scripts -->
     <!-- Bootstrap JS -->
@@ -281,7 +415,7 @@
                 welcomeText: "Wählen Sie eine Option aus dem Menü, um zu beginnen. Die Anwendung funktioniert vollständig offline.",
                 aboutApp: "Über diese App",
                 appDescription: "Diese PWA (Progressive Web App) speichert alle Daten lokal in Ihrem Browser. Sie können:",
-                feature1: "Hunde hinzufügen und verwalten",
+                feature1: "Hunde hinzufügen en verwalten",
                 feature2: "Hundedaten bearbeiten",
                 feature3: "Fotos hochladen und ansehen",
                 feature4: "Zuchtpläne erstellen",
@@ -295,6 +429,278 @@
                 userRights: "Kann Daten importieren/exportieren, aber keine neuen Hunde hinzufügen und bearbeiten."
             }
         };
+
+        // Backup status management
+        class BackupStatusManager {
+            constructor() {
+                this.storageKey = 'honden_backup_history';
+                this.warningDays = 7;    // Geel na 7 dagen
+                this.dangerDays = 14;    // Rood na 14 dagen
+                this.backupHistory = this.loadBackupHistory();
+            }
+            
+            loadBackupHistory() {
+                try {
+                    const history = localStorage.getItem(this.storageKey);
+                    return history ? JSON.parse(history) : [];
+                } catch (error) {
+                    console.error('Fout bij laden backup history:', error);
+                    return [];
+                }
+            }
+            
+            saveBackupHistory() {
+                try {
+                    localStorage.setItem(this.storageKey, JSON.stringify(this.backupHistory));
+                } catch (error) {
+                    console.error('Fout bij opslaan backup history:', error);
+                }
+            }
+            
+            recordBackup(backupType = 'full', filename = '') {
+                const backupRecord = {
+                    date: new Date().toISOString(),
+                    type: backupType,
+                    filename: filename,
+                    user: window.auth?.getCurrentUser()?.username || 'unknown'
+                };
+                
+                this.backupHistory.push(backupRecord);
+                this.saveBackupHistory();
+                this.updateIndicator();
+                
+                // Sla ook de datum op voor eenvoudige toegang
+                localStorage.setItem('last_backup_date', backupRecord.date);
+            }
+            
+            getLastBackupDate() {
+                if (this.backupHistory.length === 0) {
+                    return null;
+                }
+                
+                // Sorteer op datum (nieuwste eerst)
+                const sorted = [...this.backupHistory].sort((a, b) => 
+                    new Date(b.date) - new Date(a.date)
+                );
+                
+                return sorted[0].date;
+            }
+            
+            getDaysSinceLastBackup() {
+                const lastBackup = this.getLastBackupDate();
+                if (!lastBackup) return Infinity;
+                
+                const lastDate = new Date(lastBackup);
+                const now = new Date();
+                const diffTime = Math.abs(now - lastDate);
+                return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            }
+            
+            getStatus() {
+                const daysSince = this.getDaysSinceLastBackup();
+                
+                if (daysSince === Infinity) {
+                    return {
+                        level: 'danger',
+                        text: 'NOG NOOIT gebackupt',
+                        days: 999
+                    };
+                } else if (daysSince >= this.dangerDays) {
+                    return {
+                        level: 'danger',
+                        text: `${daysSince} dagen geleden`,
+                        days: daysSince
+                    };
+                } else if (daysSince >= this.warningDays) {
+                    return {
+                        level: 'warning',
+                        text: `${daysSince} dagen geleden`,
+                        days: daysSince
+                    };
+                } else {
+                    return {
+                        level: 'good',
+                        text: `${daysSince === 0 ? 'Vandaag' : daysSince + ' dagen'} geleden`,
+                        days: daysSince
+                    };
+                }
+            }
+            
+            updateIndicator() {
+                const indicator = document.getElementById('backupIndicator');
+                const statusText = document.getElementById('backupStatusText');
+                const tooltipText = document.getElementById('backupTooltipText');
+                
+                if (!indicator || !statusText || !tooltipText) return;
+                
+                const status = this.getStatus();
+                
+                // Update indicator
+                indicator.className = `backup-indicator backup-status-${status.level}`;
+                
+                // Update text based on status
+                let statusDisplayText = '';
+                let tooltipContent = '';
+                
+                switch(status.level) {
+                    case 'good':
+                        statusDisplayText = `✓ ${status.text}`;
+                        tooltipContent = `Laatste backup: <strong>${status.text}</strong>. Je data is recent gebackupt.`;
+                        break;
+                    case 'warning':
+                        statusDisplayText = `⚠ ${status.text}`;
+                        tooltipContent = `Laatste backup: <strong>${status.text}</strong>. Overweeg een nieuwe backup te maken.`;
+                        break;
+                    case 'danger':
+                        statusDisplayText = `🚨 ${status.text}`;
+                        tooltipContent = `Laatste backup: <strong>${status.text}</strong>. Maak een backup om dataverlies te voorkomen!`;
+                        break;
+                }
+                
+                statusText.textContent = statusDisplayText;
+                tooltipText.innerHTML = tooltipContent;
+                
+                // Show/hide reminder banner
+                this.updateReminderBanner(status);
+            }
+            
+            updateReminderBanner(status) {
+                const banner = document.getElementById('backupReminderBanner');
+                const bannerText = document.getElementById('backupReminderText');
+                
+                if (!banner || !bannerText) return;
+                
+                // Verberg banner als backup recent is of gebruiker het heeft uitgezet
+                const hideReminder = localStorage.getItem('hide_backup_reminder') === 'true';
+                
+                if (status.level === 'good' || hideReminder) {
+                    banner.classList.add('d-none');
+                } else {
+                    banner.classList.remove('d-none');
+                    
+                    let message = '';
+                    if (status.level === 'danger') {
+                        message = `Je hebt al ${status.days} dagen geen backup gemaakt!`;
+                    } else {
+                        message = `Het is ${status.days} dagen geleden dat je een backup maakte.`;
+                    }
+                    
+                    bannerText.textContent = message;
+                }
+            }
+            
+            setupEventListeners() {
+                // Backup knop in indicator
+                const backupIndicator = document.getElementById('backupIndicator');
+                const backupTooltip = document.getElementById('backupTooltip');
+                
+                if (backupIndicator) {
+                    backupIndicator.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.toggleTooltip();
+                    });
+                }
+                
+                // Backup now knop in tooltip
+                const backupNowBtn = document.getElementById('backupNowBtn');
+                if (backupNowBtn) {
+                    backupNowBtn.addEventListener('click', () => {
+                        this.openDataManagementForBackup();
+                        this.hideTooltip();
+                    });
+                }
+                
+                // Learn more knop
+                const learnMoreBtn = document.getElementById('learnMoreBtn');
+                if (learnMoreBtn) {
+                    learnMoreBtn.addEventListener('click', () => {
+                        this.showBackupInfoModal();
+                        this.hideTooltip();
+                    });
+                }
+                
+                // Backup from banner knop
+                const backupFromBannerBtn = document.getElementById('backupFromBannerBtn');
+                if (backupFromBannerBtn) {
+                    backupFromBannerBtn.addEventListener('click', () => {
+                        this.openDataManagementForBackup();
+                    });
+                }
+                
+                // Remind later knop
+                const remindLaterBtn = document.getElementById('remindLaterBtn');
+                if (remindLaterBtn) {
+                    remindLaterBtn.addEventListener('click', () => {
+                        localStorage.setItem('hide_backup_reminder', 'true');
+                        document.getElementById('backupReminderBanner').classList.add('d-none');
+                    });
+                }
+                
+                // Backup from modal knop
+                const backupFromModalBtn = document.getElementById('backupFromModalBtn');
+                if (backupFromModalBtn) {
+                    backupFromModalBtn.addEventListener('click', () => {
+                        this.openDataManagementForBackup();
+                        bootstrap.Modal.getInstance(document.getElementById('backupInfoModal')).hide();
+                    });
+                }
+                
+                // Close tooltip when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!backupTooltip.contains(e.target) && !backupIndicator.contains(e.target)) {
+                        this.hideTooltip();
+                    }
+                });
+            }
+            
+            toggleTooltip() {
+                const tooltip = document.getElementById('backupTooltip');
+                const indicator = document.getElementById('backupIndicator');
+                
+                if (tooltip.style.display === 'block') {
+                    this.hideTooltip();
+                } else {
+                    this.showTooltip();
+                }
+            }
+            
+            showTooltip() {
+                const tooltip = document.getElementById('backupTooltip');
+                const indicator = document.getElementById('backupIndicator');
+                
+                if (!tooltip || !indicator) return;
+                
+                const rect = indicator.getBoundingClientRect();
+                tooltip.style.top = (rect.bottom + 5) + 'px';
+                tooltip.style.left = rect.left + 'px';
+                tooltip.style.display = 'block';
+            }
+            
+            hideTooltip() {
+                const tooltip = document.getElementById('backupTooltip');
+                if (tooltip) {
+                    tooltip.style.display = 'none';
+                }
+            }
+            
+            showBackupInfoModal() {
+                const modal = new bootstrap.Modal(document.getElementById('backupInfoModal'));
+                modal.show();
+            }
+            
+            openDataManagementForBackup() {
+                // Open Data Management modal via UI handler
+                if (window.uiHandler && typeof window.uiHandler.showModal === 'function') {
+                    window.uiHandler.showModal('data');
+                } else {
+                    console.error('UI handler niet beschikbaar');
+                }
+            }
+        }
+        
+        // Globale backup manager
+        const backupManager = new BackupStatusManager();
+        window.backupManager = backupManager; // Maak globaal beschikbaar
 
         // Pagina tekst vertalen
         function translateAppPage(lang) {
@@ -361,6 +767,10 @@
             // Toon huidige gebruiker
             document.getElementById('currentUser').textContent = 
                 `${auth.getCurrentUser().username} (${auth.isAdmin() ? 'Admin' : 'Gebruiker'})`;
+            
+            // Setup backup manager
+            backupManager.setupEventListeners();
+            backupManager.updateIndicator();
             
             // Setup event listeners voor alle menu knoppen
             setupMenuEventListeners();
