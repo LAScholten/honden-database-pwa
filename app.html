@@ -18,18 +18,14 @@
     <link rel="manifest" href="manifest.json">
     
     <style>
-        /* Backup Banner Styling */
+        /* Backup Banner Styling - COMPACT */
         #backupHeaderBanner {
             border-radius: 0;
             margin-bottom: 0;
             border-left: none;
             border-right: none;
+            padding: 8px 0;
             transition: all 0.3s ease;
-        }
-        
-        #backupHeaderBanner:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         
         .backup-status-good {
@@ -42,14 +38,13 @@
             background-color: #fff3cd !important;
             color: #856404;
             border-top: 3px solid #ffc107;
-            animation: gentle-pulse 3s infinite;
         }
         
         .backup-status-danger {
             background-color: #f8d7da !important;
             color: #721c24;
             border-top: 3px solid #dc3545;
-            animation: gentle-pulse 1.5s infinite;
+            animation: gentle-pulse 2s infinite;
         }
         
         @keyframes gentle-pulse {
@@ -58,12 +53,12 @@
             100% { opacity: 1; }
         }
         
-        .backup-header-content {
+        .backup-compact-content {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 10px;
+            flex-wrap: nowrap;
+            gap: 15px;
         }
         
         .backup-status-text {
@@ -71,41 +66,63 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
-        .backup-header-actions {
+        .backup-compact-actions {
             display: flex;
             gap: 10px;
-            flex-wrap: wrap;
+            flex-shrink: 0;
         }
         
         /* Responsive adjustments */
         @media (max-width: 768px) {
-            .backup-header-content {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
+            .backup-compact-content {
+                flex-wrap: wrap;
+                gap: 10px;
             }
             
-            .backup-header-actions {
-                width: 100%;
-                justify-content: flex-start;
-            }
-            
-            .backup-header-actions .btn {
+            .backup-status-text {
+                white-space: normal;
                 flex: 1;
-                min-width: 120px;
+                min-width: 0;
+            }
+            
+            .backup-compact-actions {
+                margin-left: auto;
             }
         }
         
         @media (max-width: 576px) {
-            .backup-header-actions {
+            .backup-compact-content {
                 flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
             }
             
-            .backup-header-actions .btn {
-                width: 100%;
+            .backup-status-text {
+                text-align: center;
+                justify-content: center;
             }
+            
+            .backup-compact-actions {
+                justify-content: center;
+                width: 100%;
+                margin-left: 0;
+            }
+        }
+        
+        /* Backup Dashboard Card Styling */
+        #backupDashboardCard {
+            transition: all 0.3s ease;
+        }
+        
+        #backupDashboardCard:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
     </style>
 </head>
@@ -145,23 +162,20 @@
         </div>
     </nav>
     
-    <!-- Backup Status Banner (BELANGRIJK: tussen header en content) -->
+    <!-- Backup Status Banner (COMPACT VERSION) -->
     <div id="backupHeaderBanner" class="alert backup-status-good" style="display: none;">
         <div class="container-fluid">
-            <div class="backup-header-content">
+            <div class="backup-compact-content">
                 <div class="backup-status-text">
                     <i class="bi bi-shield-check"></i>
                     <span id="backupStatusText">Backup status: OK</span>
                 </div>
-                <div class="backup-header-actions">
+                <div class="backup-compact-actions">
                     <button id="backupNowHeaderBtn" class="btn btn-success btn-sm">
-                        <i class="bi bi-download"></i> Nu backup maken
+                        <i class="bi bi-download"></i> <span id="backupNowText">Backup</span>
                     </button>
                     <button id="learnMoreHeaderBtn" class="btn btn-outline-secondary btn-sm">
-                        <i class="bi bi-question-circle"></i> Uitleg
-                    </button>
-                    <button id="remindLaterHeaderBtn" class="btn btn-outline-warning btn-sm">
-                        <i class="bi bi-clock"></i> Herinner later
+                        <i class="bi bi-question-circle"></i> <span id="learnMoreText">Uitleg</span>
                     </button>
                 </div>
             </div>
@@ -237,7 +251,7 @@
                         <!-- Backup Reminder Card -->
                         <div id="backupDashboardCard" class="card mb-4 border-warning" style="display: none;">
                             <div class="card-header bg-warning text-dark">
-                                <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Backup Aanbevolen</h5>
+                                <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> <span id="backupWarningTitle">Backup Aanbevolen</span></h5>
                             </div>
                             <div class="card-body">
                                 <div id="backupDashboardText" class="mb-3">
@@ -245,13 +259,10 @@
                                 </div>
                                 <div class="d-flex gap-2 flex-wrap">
                                     <button id="backupFromDashboardBtn" class="btn btn-success">
-                                        <i class="bi bi-download"></i> Nu backup maken
-                                    </button>
-                                    <button id="remindLaterDashboardBtn" class="btn btn-outline-warning">
-                                        <i class="bi bi-clock"></i> Herinner over 3 dagen
+                                        <i class="bi bi-download"></i> <span id="backupNowDashboardText">Nu backup maken</span>
                                     </button>
                                     <button id="dismissDashboardBackupBtn" class="btn btn-outline-secondary">
-                                        <i class="bi bi-x-circle"></i> Niet meer tonen
+                                        <i class="bi bi-x-circle"></i> <span id="dismissBackupText">Niet meer tonen</span>
                                     </button>
                                 </div>
                             </div>
@@ -310,7 +321,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title"><i class="bi bi-shield-check"></i> Data Backup - Waarom is dit belangrijk?</h5>
+                    <h5 class="modal-title"><i class="bi bi-shield-check"></i> <span id="backupModalTitle">Data Backup - Waarom is dit belangrijk?</span></h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -318,12 +329,12 @@
                         <div class="col-md-6">
                             <div class="card h-100 border-danger">
                                 <div class="card-header bg-danger text-white">
-                                    <h6><i class="bi bi-exclamation-triangle-fill"></i> Risico's zonder backup</h6>
+                                    <h6><i class="bi bi-exclamation-triangle-fill"></i> <span id="backupRisksTitle">Risico's zonder backup</span></h6>
                                 </div>
                                 <div class="card-body">
-                                    <p>Deze app slaat alle gegevens <strong>alleen lokaal in je browser</strong> op.</p>
-                                    <p>Je data kan verloren gaan als je:</p>
-                                    <ul>
+                                    <p id="backupRisksText1">Deze app slaat alle gegevens <strong>alleen lokaal in je browser</strong> op.</p>
+                                    <p id="backupRisksText2">Je data kan verloren gaan als je:</p>
+                                    <ul id="backupRisksList">
                                         <li>Browser geschiedenis wist</li>
                                         <li>Cookies en sitegegevens verwijdert</li>
                                         <li>Je telefoon/tablet reset</li>
@@ -336,18 +347,18 @@
                         <div class="col-md-6">
                             <div class="card h-100 border-success">
                                 <div class="card-header bg-success text-white">
-                                    <h6><i class="bi bi-lightbulb-fill"></i> Hoe te backuppen</h6>
+                                    <h6><i class="bi bi-lightbulb-fill"></i> <span id="backupHowToTitle">Hoe te backuppen</span></h6>
                                 </div>
                                 <div class="card-body">
-                                    <p><strong>Aanbevolen:</strong> Maak wekelijks een backup</p>
-                                    <h6>Op iPhone/iPad:</h6>
-                                    <ol>
+                                    <p id="backupHowToText1"><strong>Aanbevolen:</strong> Maak wekelijks een backup</p>
+                                    <h6 id="backupIOSHeading">Op iPhone/iPad:</h6>
+                                    <ol id="backupIOSSteps">
                                         <li>Klik op "Nu backup maken"</li>
                                         <li>Kies "Opslaan in Bestanden"</li>
                                         <li>Sla op in iCloud Drive</li>
                                     </ol>
-                                    <h6>Op Android:</h6>
-                                    <ol>
+                                    <h6 id="backupAndroidHeading">Op Android:</h6>
+                                    <ol id="backupAndroidSteps">
                                         <li>Klik op "Nu backup maken"</li>
                                         <li>Sla op in Downloads</li>
                                         <li>Upload naar Google Drive</li>
@@ -358,8 +369,8 @@
                     </div>
                     
                     <div class="alert alert-info mt-3">
-                        <h6><i class="bi bi-star-fill"></i> Beste praktijken:</h6>
-                        <ul class="mb-0">
+                        <h6><i class="bi bi-star-fill"></i> <span id="backupBestPracticesTitle">Beste praktijken:</span></h6>
+                        <ul id="backupBestPracticesList" class="mb-0">
                             <li>Maak een backup <strong>voor én na</strong> belangrijke wijzigingen</li>
                             <li>Bewaar meerdere versies (laatste 3-4 backups)</li>
                             <li>Sla backups op op meerdere plaatsen (telefoon + cloud)</li>
@@ -368,9 +379,9 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="backupModalClose">Sluiten</button>
                     <button type="button" class="btn btn-success" id="backupFromModalBtn">
-                        <i class="bi bi-download"></i> Nu backup maken
+                        <i class="bi bi-download"></i> <span id="backupModalAction">Nu backup maken</span>
                     </button>
                 </div>
             </div>
@@ -405,9 +416,10 @@
         // Laad taal uit localStorage
         const appLanguage = localStorage.getItem('appLanguage') || 'nl';
         
-        // Taal vertalingen voor app.html
+        // Volledige vertalingen inclusief backup teksten
         const appTranslations = {
             nl: {
+                // App teksten
                 appTitle: "Hondendatabase PWA",
                 logout: "Uitloggen",
                 menu: "Menu",
@@ -438,9 +450,33 @@
                 adminRole: "Administrator",
                 adminRights: "Volledige rechten, inclusief nieuwe honden toevoegen.",
                 userRole: "Gebruiker",
-                userRights: "Kan data importeren/exporteren, maar geen nieuwe honden toevoegen en bewerken."
+                userRights: "Kan data importeren/exporteren en bekijken, maar geen nieuwe honden toevoegen of bewerken.",
+                
+                // Backup teksten
+                backupNow: "Backup",
+                learnMore: "Uitleg",
+                backupWarningTitle: "Backup Aanbevolen",
+                backupNowDashboard: "Nu backup maken",
+                dismissBackup: "Niet meer tonen",
+                backupModalTitle: "Data Backup - Waarom is dit belangrijk?",
+                backupRisksTitle: "Risico's zonder backup",
+                backupRisksText1: "Deze app slaat alle gegevens <strong>alleen lokaal in je browser</strong> op.",
+                backupRisksText2: "Je data kan verloren gaan als je:",
+                backupHowToTitle: "Hoe te backuppen",
+                backupHowToText1: "<strong>Aanbevolen:</strong> Maak wekelijks een backup",
+                backupIOSHeading: "Op iPhone/iPad:",
+                backupAndroidHeading: "Op Android:",
+                backupBestPracticesTitle: "Beste praktijken:",
+                backupModalClose: "Sluiten",
+                backupModalAction: "Nu backup maken",
+                backupStatusGood: "✓ Backup: vandaag",
+                backupStatusWarning: "⚠ Laatste backup: {days} dagen geleden",
+                backupStatusDanger: "🚨 NOG NOOIT gebackupt!",
+                dashboardWarningNever: "Je hebt nog nooit een backup gemaakt! Als je browser data wist, ben je al je hondengegevens kwijt.",
+                dashboardWarningOld: "Je laatste backup was {days} dagen geleden. Overweeg een nieuwe backup te maken om dataverlies te voorkomen."
             },
             en: {
+                // App texts
                 appTitle: "Dog Database PWA",
                 logout: "Logout",
                 menu: "Menu",
@@ -471,9 +507,33 @@
                 adminRole: "Administrator",
                 adminRights: "Full rights, including adding new dogs.",
                 userRole: "User",
-                userRights: "Can import/export, but cannot add new dogs and edit data."
+                userRights: "Can import/export and view, but cannot add new dogs and edit data.",
+                
+                // Backup texts
+                backupNow: "Backup",
+                learnMore: "Info",
+                backupWarningTitle: "Backup Recommended",
+                backupNowDashboard: "Create Backup Now",
+                dismissBackup: "Don't Show Again",
+                backupModalTitle: "Data Backup - Why is this important?",
+                backupRisksTitle: "Risks without backup",
+                backupRisksText1: "This app stores all data <strong>only locally in your browser</strong>.",
+                backupRisksText2: "Your data can be lost if you:",
+                backupHowToTitle: "How to backup",
+                backupHowToText1: "<strong>Recommended:</strong> Create weekly backups",
+                backupIOSHeading: "On iPhone/iPad:",
+                backupAndroidHeading: "On Android:",
+                backupBestPracticesTitle: "Best practices:",
+                backupModalClose: "Close",
+                backupModalAction: "Create Backup Now",
+                backupStatusGood: "✓ Backup: today",
+                backupStatusWarning: "⚠ Last backup: {days} days ago",
+                backupStatusDanger: "🚨 NEVER backed up!",
+                dashboardWarningNever: "You have never created a backup! If you clear browser data, you will lose all your dog records.",
+                dashboardWarningOld: "Your last backup was {days} days ago. Consider creating a new backup to prevent data loss."
             },
             de: {
+                // App Texte
                 appTitle: "Hundendatenbank PWA",
                 logout: "Abmelden",
                 menu: "Menü",
@@ -504,7 +564,30 @@
                 adminRole: "Administrator",
                 adminRights: "Volle Rechte, einschließlich neuer Hunde hinzufügen.",
                 userRole: "Benutzer",
-                userRights: "Kann Daten importieren/exportieren, aber keine neuen Hunde hinzufügen und bearbeiten."
+                userRights: "Kann Daten importieren/exportieren und ansehen, aber keine neuen Hunde hinzufügen und bearbeiten.",
+                
+                // Backup Texte
+                backupNow: "Backup",
+                learnMore: "Info",
+                backupWarningTitle: "Backup empfohlen",
+                backupNowDashboard: "Jetzt Backup erstellen",
+                dismissBackup: "Nicht mehr anzeigen",
+                backupModalTitle: "Data Backup - Warum ist das wichtig?",
+                backupRisksTitle: "Risiken ohne Backup",
+                backupRisksText1: "Diese App speichert alle Daten <strong>nur lokal in Ihrem Browser</strong>.",
+                backupRisksText2: "Ihre Daten können verloren gehen, wenn Sie:",
+                backupHowToTitle: "Wie man ein Backup erstellt",
+                backupHowToText1: "<strong>Empfohlen:</strong> Erstellen Sie wöchentliche Backups",
+                backupIOSHeading: "Auf iPhone/iPad:",
+                backupAndroidHeading: "Auf Android:",
+                backupBestPracticesTitle: "Beste Praktiken:",
+                backupModalClose: "Schließen",
+                backupModalAction: "Jetzt Backup erstellen",
+                backupStatusGood: "✓ Backup: heute",
+                backupStatusWarning: "⚠ Letztes Backup: vor {days} Tagen",
+                backupStatusDanger: "🚨 NOCH NIE gebackupt!",
+                dashboardWarningNever: "Sie haben noch nie ein Backup erstellt! Wenn Sie Browser-Daten löschen, verlieren Sie alle Ihre Hundeaufzeichnungen.",
+                dashboardWarningOld: "Ihr letztes Backup war vor {days} Tagen. Erwägen Sie, ein neues Backup zu erstellen, um Datenverlust zu vermeiden."
             }
         };
 
@@ -514,8 +597,14 @@
                 this.storageKey = 'honden_backup_history';
                 this.warningDays = 7;    // Geel na 7 dagen
                 this.dangerDays = 14;    // Rood na 14 dagen
+                this.currentLang = appLanguage;
                 this.backupHistory = this.loadBackupHistory();
                 this.hideReminderUntil = this.getHideReminderDate();
+            }
+            
+            setLanguage(lang) {
+                this.currentLang = lang;
+                this.updateUI();
             }
             
             loadBackupHistory() {
@@ -544,11 +633,21 @@
                 }
             }
             
-            setHideReminder(days = 3) {
+            setHideReminder(days = 30) {
                 const hideUntil = new Date();
                 hideUntil.setDate(hideUntil.getDate() + days);
                 localStorage.setItem('hide_backup_reminder_until', hideUntil.toISOString());
                 this.hideReminderUntil = hideUntil.toISOString();
+                this.updateUI();
+                
+                if (window.uiHandler && window.uiHandler.showSuccess) {
+                    const messages = {
+                        nl: `Backup herinnering uitgezet voor ${days} dagen`,
+                        en: `Backup reminder disabled for ${days} days`,
+                        de: `Backup-Erinnerung für ${days} Tage deaktiviert`
+                    };
+                    window.uiHandler.showSuccess(messages[this.currentLang] || messages.nl);
+                }
             }
             
             shouldShowReminder() {
@@ -571,7 +670,6 @@
                 this.saveBackupHistory();
                 this.updateUI();
                 
-                // Sla ook de datum op voor eenvoudige toegang
                 localStorage.setItem('last_backup_date', backupRecord.date);
             }
             
@@ -580,7 +678,6 @@
                     return null;
                 }
                 
-                // Sorteer op datum (nieuwste eerst)
                 const sorted = [...this.backupHistory].sort((a, b) => 
                     new Date(b.date) - new Date(a.date)
                 );
@@ -604,34 +701,26 @@
                 if (daysSince === Infinity) {
                     return {
                         level: 'danger',
-                        text: 'NOG NOOIT gebackupt',
                         days: 999,
-                        icon: 'bi-exclamation-triangle-fill',
-                        color: 'danger'
+                        icon: 'bi-exclamation-triangle-fill'
                     };
                 } else if (daysSince >= this.dangerDays) {
                     return {
                         level: 'danger',
-                        text: `${daysSince} dagen geleden`,
                         days: daysSince,
-                        icon: 'bi-exclamation-triangle-fill',
-                        color: 'danger'
+                        icon: 'bi-exclamation-triangle-fill'
                     };
                 } else if (daysSince >= this.warningDays) {
                     return {
                         level: 'warning',
-                        text: `${daysSince} dagen geleden`,
                         days: daysSince,
-                        icon: 'bi-exclamation-triangle',
-                        color: 'warning'
+                        icon: 'bi-exclamation-triangle'
                     };
                 } else {
                     return {
                         level: 'good',
-                        text: `${daysSince === 0 ? 'Vandaag' : daysSince + ' dagen'} geleden`,
                         days: daysSince,
-                        icon: 'bi-shield-check',
-                        color: 'success'
+                        icon: 'bi-shield-check'
                     };
                 }
             }
@@ -641,46 +730,153 @@
                 const statusText = document.getElementById('backupStatusText');
                 const dashboardCard = document.getElementById('backupDashboardCard');
                 const dashboardText = document.getElementById('backupDashboardText');
+                const warningTitle = document.getElementById('backupWarningTitle');
                 
                 if (!banner || !statusText) return;
                 
                 const status = this.getStatus();
+                const t = this.currentLang;
                 
                 // Update header banner
                 banner.className = `alert backup-status-${status.level}`;
                 banner.style.display = 'block';
                 
+                // Update status text
                 let displayText = '';
-                switch(status.level) {
-                    case 'good':
-                        displayText = `✓ Backup: ${status.text}`;
-                        break;
-                    case 'warning':
-                        displayText = `⚠ Laatste backup: ${status.text}`;
-                        break;
-                    case 'danger':
-                        displayText = `🚨 NOG NOOIT gebackupt!`;
-                        break;
+                if (status.level === 'good') {
+                    const text = appTranslations[t]?.backupStatusGood || appTranslations.nl.backupStatusGood;
+                    displayText = text.replace('{days}', status.days === 0 ? 'vandaag' : status.days);
+                } else if (status.level === 'warning') {
+                    const text = appTranslations[t]?.backupStatusWarning || appTranslations.nl.backupStatusWarning;
+                    displayText = text.replace('{days}', status.days);
+                } else {
+                    displayText = appTranslations[t]?.backupStatusDanger || appTranslations.nl.backupStatusDanger;
                 }
                 
                 statusText.textContent = displayText;
                 
-                // Update dashboard card (alleen tonen bij waarschuwing/gevaar)
-                if (dashboardCard && dashboardText) {
+                // Update dashboard card
+                if (dashboardCard && dashboardText && warningTitle) {
                     if (status.level === 'danger') {
                         dashboardCard.style.display = 'block';
-                        dashboardText.textContent = `Je hebt nog nooit een backup gemaakt! Als je browser data wist, ben je al je hondengegevens kwijt.`;
+                        warningTitle.textContent = appTranslations[t]?.backupWarningTitle || appTranslations.nl.backupWarningTitle;
+                        dashboardText.textContent = appTranslations[t]?.dashboardWarningNever || appTranslations.nl.dashboardWarningNever;
                     } else if (status.level === 'warning' && this.shouldShowReminder()) {
                         dashboardCard.style.display = 'block';
-                        dashboardText.textContent = `Je laatste backup was ${status.days} dagen geleden. Overweeg een nieuwe backup te maken om dataverlies te voorkomen.`;
+                        warningTitle.textContent = appTranslations[t]?.backupWarningTitle || appTranslations.nl.backupWarningTitle;
+                        const text = appTranslations[t]?.dashboardWarningOld || appTranslations.nl.dashboardWarningOld;
+                        dashboardText.textContent = text.replace('{days}', status.days);
                     } else {
                         dashboardCard.style.display = 'none';
                     }
                 }
+                
+                // Update button texts
+                this.updateButtonTexts();
+            }
+            
+            updateButtonTexts() {
+                const t = this.currentLang;
+                const translations = appTranslations[t] || appTranslations.nl;
+                
+                // Header buttons
+                const backupNowText = document.getElementById('backupNowText');
+                const learnMoreText = document.getElementById('learnMoreText');
+                
+                if (backupNowText) backupNowText.textContent = translations.backupNow;
+                if (learnMoreText) learnMoreText.textContent = translations.learnMore;
+                
+                // Dashboard buttons
+                const backupNowDashboardText = document.getElementById('backupNowDashboardText');
+                const dismissBackupText = document.getElementById('dismissBackupText');
+                
+                if (backupNowDashboardText) backupNowDashboardText.textContent = translations.backupNowDashboard;
+                if (dismissBackupText) dismissBackupText.textContent = translations.dismissBackup;
+                
+                // Modal texts
+                this.updateModalTexts();
+            }
+            
+            updateModalTexts() {
+                const t = this.currentLang;
+                const translations = appTranslations[t] || appTranslations.nl;
+                
+                // Update modal content
+                const elements = {
+                    'backupModalTitle': translations.backupModalTitle,
+                    'backupRisksTitle': translations.backupRisksTitle,
+                    'backupRisksText1': translations.backupRisksText1,
+                    'backupRisksText2': translations.backupRisksText2,
+                    'backupHowToTitle': translations.backupHowToTitle,
+                    'backupHowToText1': translations.backupHowToText1,
+                    'backupIOSHeading': translations.backupIOSHeading,
+                    'backupAndroidHeading': translations.backupAndroidHeading,
+                    'backupBestPracticesTitle': translations.backupBestPracticesTitle,
+                    'backupModalClose': translations.backupModalClose,
+                    'backupModalAction': translations.backupModalAction
+                };
+                
+                for (const [id, text] of Object.entries(elements)) {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        if (id === 'backupRisksText1') {
+                            element.innerHTML = text; // HTML gebruiken voor strong tag
+                        } else {
+                            element.textContent = text;
+                        }
+                    }
+                }
+                
+                // Update lists (behouden structuur, alleen tekst vertalen)
+                const backupSteps = {
+                    nl: ["Klik op \"Nu backup maken\"", "Kies \"Opslaan in Bestanden\"", "Sla op in iCloud Drive"],
+                    en: ["Click \"Create Backup Now\"", "Choose \"Save to Files\"", "Save to iCloud Drive"],
+                    de: ["Klicken Sie auf \"Jetzt Backup erstellen\"", "Wählen Sie \"In Dateien speichern\"", "In iCloud Drive speichern"]
+                };
+                
+                const androidSteps = {
+                    nl: ["Klik op \"Nu backup maken\"", "Sla op in Downloads", "Upload naar Google Drive"],
+                    en: ["Click \"Create Backup Now\"", "Save to Downloads", "Upload to Google Drive"],
+                    de: ["Klicken Sie auf \"Jetzt Backup erstellen\"", "In Downloads speichern", "Zu Google Drive hochladen"]
+                };
+                
+                const risksList = {
+                    nl: ["Browser geschiedenis wist", "Cookies en sitegegevens verwijdert", "Je telefoon/tablet reset", "De app lange tijd niet gebruikt", "Van browser wisselt"],
+                    en: ["Clear browser history", "Delete cookies and site data", "Reset your phone/tablet", "Don't use the app for a long time", "Switch browsers"],
+                    de: ["Browserverlauf löschen", "Cookies und Websitedaten entfernen", "Ihr Telefon/Tablet zurücksetzen", "Die App lange nicht verwenden", "Browser wechseln"]
+                };
+                
+                const bestPractices = {
+                    nl: ["Maak een backup <strong>voor én na</strong> belangrijke wijzigingen", "Bewaar meerdere versies (laatste 3-4 backups)", "Sla backups op op meerdere plaatsen (telefoon + cloud)", "Test af en toe of je backup werkt door te importeren"],
+                    en: ["Create a backup <strong>before and after</strong> important changes", "Keep multiple versions (last 3-4 backups)", "Store backups in multiple places (phone + cloud)", "Test occasionally if your backup works by importing it"],
+                    de: ["Erstellen Sie ein Backup <strong>vor und nach</strong> wichtigen Änderungen", "Mehrere Versionen speichern (letzte 3-4 Backups)", "Backups an mehreren Orten speichern (Telefon + Cloud)", "Testen Sie gelegentlich, ob Ihr Backup funktioniert, indem Sie es importieren"]
+                };
+                
+                // Update lists
+                this.updateList('backupIOSSteps', backupSteps[t] || backupSteps.nl);
+                this.updateList('backupAndroidSteps', androidSteps[t] || androidSteps.nl);
+                this.updateList('backupRisksList', risksList[t] || risksList.nl);
+                this.updateList('backupBestPracticesList', bestPractices[t] || bestPractices.nl, true);
+            }
+            
+            updateList(listId, items, isHtml = false) {
+                const listElement = document.getElementById(listId);
+                if (!listElement) return;
+                
+                listElement.innerHTML = '';
+                items.forEach(item => {
+                    const li = document.createElement('li');
+                    if (isHtml) {
+                        li.innerHTML = item;
+                    } else {
+                        li.textContent = item;
+                    }
+                    listElement.appendChild(li);
+                });
             }
             
             setupEventListeners() {
-                // Backup now knoppen
+                // Backup now buttons
                 const backupButtons = [
                     'backupNowHeaderBtn',
                     'backupFromDashboardBtn',
@@ -696,7 +892,7 @@
                     }
                 });
                 
-                // Learn more knoppen
+                // Learn more buttons
                 const learnButtons = ['learnMoreHeaderBtn'];
                 learnButtons.forEach(btnId => {
                     const btn = document.getElementById(btnId);
@@ -707,35 +903,15 @@
                     }
                 });
                 
-                // Remind later knoppen
-                const remindButtons = [
-                    'remindLaterHeaderBtn',
-                    'remindLaterDashboardBtn'
-                ];
-                
-                remindButtons.forEach(btnId => {
-                    const btn = document.getElementById(btnId);
-                    if (btn) {
-                        btn.addEventListener('click', () => {
-                            this.setHideReminder(3); // Herinner over 3 dagen
-                            this.updateUI();
-                            if (window.uiHandler && window.uiHandler.showSuccess) {
-                                window.uiHandler.showSuccess('Backup herinnering uitgesteld tot over 3 dagen');
-                            }
-                        });
-                    }
-                });
-                
-                // Dismiss dashboard backup knop
+                // Dismiss backup button
                 const dismissBtn = document.getElementById('dismissDashboardBackupBtn');
                 if (dismissBtn) {
                     dismissBtn.addEventListener('click', () => {
-                        this.setHideReminder(30); // 30 dagen niet tonen
-                        this.updateUI();
+                        this.setHideReminder(30);
                     });
                 }
                 
-                // Auto-update elke minuut (voor tijdberekeningen)
+                // Auto-update elke minuut
                 setInterval(() => {
                     this.updateUI();
                 }, 60000);
@@ -747,7 +923,6 @@
             }
             
             openDataManagementForBackup() {
-                // Open Data Management modal via UI handler
                 if (window.uiHandler && typeof window.uiHandler.showModal === 'function') {
                     window.uiHandler.showModal('data');
                 } else {
@@ -758,10 +933,14 @@
         
         // Globale backup manager
         const backupManager = new BackupStatusManager();
-        window.backupManager = backupManager; // Maak globaal beschikbaar
+        window.backupManager = backupManager;
 
         // Pagina tekst vertalen
         function translateAppPage(lang) {
+            // Update backup manager taal
+            backupManager.setLanguage(lang);
+            
+            // Update app teksten
             const elements = document.querySelectorAll('.app-text');
             elements.forEach(element => {
                 const key = element.getAttribute('data-key');
@@ -794,7 +973,7 @@
             document.title = titles[lang] || titles.nl;
         }
 
-        // Event listeners voor vlaggetjes in app
+        // Event listeners voor vlaggetjes
         document.querySelectorAll('.app-lang-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const lang = this.getAttribute('data-lang');
@@ -814,8 +993,8 @@
         // Wacht tot DOM volledig geladen is
         document.addEventListener('DOMContentLoaded', function() {
             ui = new UIHandler();
-            window.appUI = ui; // Maak globaal beschikbaar voor debugging
-            window.uiHandler = ui; // Voor SearchManager om toegang te hebben
+            window.appUI = ui;
+            window.uiHandler = ui;
             
             console.log('UIHandler geïnitialiseerd:', ui);
             
@@ -830,7 +1009,7 @@
             backupManager.setupEventListeners();
             backupManager.updateUI();
             
-            // Setup event listeners voor alle menu knoppen
+            // Setup event listeners voor menu knoppen
             setupMenuEventListeners();
             
             // Setup andere event listeners
@@ -841,68 +1020,28 @@
         });
         
         function setupMenuEventListeners() {
-            // Data Beheer
-            document.getElementById('dataManagementBtn').addEventListener('click', function() {
-                if (ui && ui.showModal) {
-                    ui.showModal('data');
-                } else {
-                    console.error('UI handler niet beschikbaar');
-                }
-            });
+            const menuButtons = {
+                'dataManagementBtn': 'data',
+                'addDogBtn': 'addDog',
+                'editDogDataBtn': 'editDogData',
+                'searchBtn': 'search',
+                'photoGalleryBtn': 'photos',
+                'breedingPlanBtn': 'breeding',
+                'privateInfoBtn': 'private'
+            };
             
-            // Nieuwe Hond
-            document.getElementById('addDogBtn').addEventListener('click', function() {
-                if (ui && ui.showModal) {
-                    ui.showModal('addDog');
-                } else {
-                    console.error('UI handler niet beschikbaar');
+            for (const [btnId, modalType] of Object.entries(menuButtons)) {
+                const btn = document.getElementById(btnId);
+                if (btn) {
+                    btn.addEventListener('click', function() {
+                        if (ui && ui.showModal) {
+                            ui.showModal(modalType);
+                        } else {
+                            console.error('UI handler niet beschikbaar');
+                        }
+                    });
                 }
-            });
-            
-            // Data Hond Bewerken
-            document.getElementById('editDogDataBtn').addEventListener('click', function() {
-                if (ui && ui.showModal) {
-                    ui.showModal('editDogData');
-                } else {
-                    console.error('UI handler niet beschikbaar');
-                }
-            });
-            
-            // Hond Zoeken - NU naar SearchManager
-            document.getElementById('searchBtn').addEventListener('click', function() {
-                if (ui && ui.showModal) {
-                    ui.showModal('search');
-                } else {
-                    console.error('UI handler niet beschikbaar');
-                }
-            });
-            
-            // Foto Galerij
-            document.getElementById('photoGalleryBtn').addEventListener('click', function() {
-                if (ui && ui.showModal) {
-                    ui.showModal('photos');
-                } else {
-                    console.error('UI handler niet beschikbaar');
-                }
-            });
-            
-            // Fok Planning
-            document.getElementById('breedingPlanBtn').addEventListener('click', function() {
-                if (ui && ui.showModal) {
-                    ui.showModal('breeding');
-                } else {
-                    console.error('UI handler niet beschikbaar');
-                }
-            });
-            
-            // Privé Informatie
-            document.getElementById('privateInfoBtn').addEventListener('click', function() {
-                if (ui && ui.showModal) {
-                    ui.showModal('private');
-                } else {
-                    console.error('UI handler niet beschikbaar');
-                }
-            });
+            }
         }
         
         function setupOtherEventListeners() {
@@ -940,7 +1079,7 @@
             }
         }
         
-        // Service Worker registratie voor PWA
+        // Service Worker registratie
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').then(registration => {
@@ -951,21 +1090,17 @@
             });
         }
         
-        // ========== MODAL FIX ==========
-        // Deze fix lost het scherm-donker-vast probleem op
+        // Modal fix
         document.addEventListener('hidden.bs.modal', function() {
-            // Wacht even en controleer of er nog modals open zijn
             setTimeout(() => {
                 const openModals = document.querySelectorAll('.modal.show');
                 const backdrops = document.querySelectorAll('.modal-backdrop');
                 
-                // Als er geen modals meer open zijn, verwijder alle backdrops
                 if (openModals.length === 0 && backdrops.length > 0) {
                     backdrops.forEach(backdrop => {
                         backdrop.remove();
                     });
                     
-                    // Reset body styles
                     document.body.classList.remove('modal-open');
                     document.body.style.overflow = '';
                     document.body.style.paddingRight = '';
