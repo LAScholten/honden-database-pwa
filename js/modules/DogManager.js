@@ -392,7 +392,7 @@ class DogManager extends BaseModule {
                             <div class="row text-center choice-container">
                                 <div class="col-md-6 mb-3">
                                     <div class="card h-100 choice-card" data-choice="dog">
-                                        <div class="card-body p-3">
+                                        <div class="card-body p-2">
                                             <div class="choice-icon mb-2">
                                                 <i class="bi bi-emoji-heart-eyes" style="font-size: 2.8rem; color: #3498db;"></i>
                                             </div>
@@ -408,7 +408,7 @@ class DogManager extends BaseModule {
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <div class="card h-100 choice-card" data-choice="litter">
-                                        <div class="card-body p-3">
+                                        <div class="card-body p-2">
                                             <div class="choice-icon mb-2">
                                                 <i class="bi bi-people" style="font-size: 2.8rem; color: #e74c3c;"></i>
                                             </div>
