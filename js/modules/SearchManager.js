@@ -183,7 +183,7 @@ class SearchManager extends BaseModule {
                 searchName: "Hund nach Namen suchen",
                 searchPlaceholder: "Hundenamen, Stammbaum-Nummer oder Rasse eingeben...",
                 noDogsFound: "Keine Hunde gefunden",
-                typeToSearch: "Beginnen Sie mit der Eingabe, um zu suchen",
+                typeToSearch: "Beginnen Sie met der Eingabe, um zu suchen",
                 searchResults: "Suchergebnisse",
                 found: "gefunden",
                 name: "Name",
@@ -220,7 +220,7 @@ class SearchManager extends BaseModule {
                 
                 // Gesundheitsstatus
                 hipGrades: {
-                    A: "A - Keine Anzeichen von HD",
+                    A: "A - Keine Anzeichen van HD",
                     B: "B - Übergangsform",
                     C: "C - Leichte HD",
                     D: "D - Mittlere HD",
@@ -259,7 +259,7 @@ class SearchManager extends BaseModule {
                 grade: "Grad",
                 status: "Status",
                 unknown: "Unbekannt",
-                notApplicable: "Nicht zutreffend",
+                notApplicable: "Niet zutreffend",
                 viewMore: "Mehr Details"
             }
         };
@@ -410,6 +410,7 @@ class SearchManager extends BaseModule {
                 
                 .details-body {
                     padding: 20px;
+                    background: white;
                 }
                 
                 .info-group {
@@ -477,7 +478,7 @@ class SearchManager extends BaseModule {
                 
                 .parents-info {
                     background: #e8f4fd;
-                    border-left: 4px solid #0d6efd;
+                    border: 1px solid #cfe2ff;
                     padding: 15px;
                     border-radius: 6px;
                     margin-bottom: 15px;
@@ -485,7 +486,7 @@ class SearchManager extends BaseModule {
                 
                 .remarks-box {
                     background: #f8f9fa;
-                    border-left: 4px solid #6c757d;
+                    border: 1px solid #dee2e6;
                     padding: 15px;
                     border-radius: 6px;
                     font-style: italic;
@@ -498,6 +499,11 @@ class SearchManager extends BaseModule {
                 }
                 
                 @media (max-width: 768px) {
+                    .modal-body {
+                        max-height: calc(100vh - 200px);
+                        overflow-y: auto;
+                    }
+                    
                     .info-row {
                         flex-direction: column;
                     }
