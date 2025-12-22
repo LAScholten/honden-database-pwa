@@ -259,7 +259,7 @@ class SearchManager extends BaseModule {
                 grade: "Grad",
                 status: "Status",
                 unknown: "Unbekannt",
-                notApplicable: "Niet zutreffend",
+                notApplicable: "Nicht zutreffend",
                 viewMore: "Mehr Details"
             }
         };
@@ -336,25 +336,6 @@ class SearchManager extends BaseModule {
             </div>
             
             <style>
-                /* MOBIELE OPTIMALISATIE - Container 1cm kleiner gemaakt */
-                @media (max-width: 768px) {
-                    .modal-dialog {
-                        margin: 0;
-                        max-height: 96vh;
-                        max-width: 96vw;
-                    }
-                    
-                    .modal-content {
-                        max-height: 96vh;
-                        overflow-y: auto;
-                    }
-                    
-                    .modal-body {
-                        max-height: calc(96vh - 130px);
-                        overflow-y: auto;
-                    }
-                }
-                
                 .search-input {
                     font-size: 1.1rem;
                     padding: 10px 15px;
@@ -517,6 +498,11 @@ class SearchManager extends BaseModule {
                 }
                 
                 @media (max-width: 768px) {
+                    .modal-body {
+                        max-height: calc(100vh - 200px);
+                        overflow-y: auto;
+                    }
+                    
                     .info-row {
                         flex-direction: column;
                     }
