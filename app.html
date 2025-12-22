@@ -18,56 +18,94 @@
     <link rel="manifest" href="manifest.json">
     
     <style>
-        .backup-indicator {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            margin-left: 15px;
-            cursor: pointer;
+        /* Backup Banner Styling */
+        #backupHeaderBanner {
+            border-radius: 0;
+            margin-bottom: 0;
+            border-left: none;
+            border-right: none;
             transition: all 0.3s ease;
         }
         
-        .backup-indicator:hover {
-            transform: scale(1.05);
+        #backupHeaderBanner:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         
         .backup-status-good {
-            background-color: #d4edda;
+            background-color: #d4edda !important;
             color: #155724;
-            border: 1px solid #c3e6cb;
+            border-top: 3px solid #28a745;
         }
         
         .backup-status-warning {
-            background-color: #fff3cd;
+            background-color: #fff3cd !important;
             color: #856404;
-            border: 1px solid #ffeaa7;
+            border-top: 3px solid #ffc107;
+            animation: gentle-pulse 3s infinite;
         }
         
         .backup-status-danger {
-            background-color: #f8d7da;
+            background-color: #f8d7da !important;
             color: #721c24;
-            border: 1px solid #f5c6cb;
-            animation: pulse 1.5s infinite;
+            border-top: 3px solid #dc3545;
+            animation: gentle-pulse 1.5s infinite;
         }
         
-        @keyframes pulse {
+        @keyframes gentle-pulse {
             0% { opacity: 1; }
-            50% { opacity: 0.7; }
+            50% { opacity: 0.9; }
             100% { opacity: 1; }
         }
         
-        .backup-tooltip {
-            position: absolute;
-            z-index: 1000;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            max-width: 300px;
-            display: none;
+        .backup-header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .backup-status-text {
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .backup-header-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .backup-header-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            .backup-header-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            
+            .backup-header-actions .btn {
+                flex: 1;
+                min-width: 120px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .backup-header-actions {
+                flex-direction: column;
+            }
+            
+            .backup-header-actions .btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -78,28 +116,6 @@
             <a class="navbar-brand" href="#">
                 <i class="bi bi-database"></i> 
                 <span class="app-text" data-key="appTitle">Hondendatabase PWA</span>
-                
-                <!-- Backup Indicator -->
-                <span id="backupIndicator" class="backup-indicator backup-status-good" 
-                      data-bs-toggle="tooltip" data-bs-placement="bottom"
-                      title="Laatste backup status">
-                    <i class="bi bi-shield-check"></i>
-                    <span id="backupStatusText">Backup OK</span>
-                </span>
-                
-                <!-- Backup Tooltip (hidden by default) -->
-                <div id="backupTooltip" class="backup-tooltip">
-                    <h6><i class="bi bi-info-circle"></i> Data Beveiliging</h6>
-                    <p id="backupTooltipText">Je gegevens worden alleen lokaal opgeslagen. Maak regelmatig backups!</p>
-                    <div class="d-grid gap-2 mt-2">
-                        <button id="backupNowBtn" class="btn btn-sm btn-success">
-                            <i class="bi bi-download"></i> Nu backup maken
-                        </button>
-                        <button id="learnMoreBtn" class="btn btn-sm btn-outline-secondary">
-                            <i class="bi bi-question-circle"></i> Meer info
-                        </button>
-                    </div>
-                </div>
             </a>
             
             <div class="d-flex align-items-center">
@@ -128,6 +144,29 @@
             </div>
         </div>
     </nav>
+    
+    <!-- Backup Status Banner (BELANGRIJK: tussen header en content) -->
+    <div id="backupHeaderBanner" class="alert backup-status-good" style="display: none;">
+        <div class="container-fluid">
+            <div class="backup-header-content">
+                <div class="backup-status-text">
+                    <i class="bi bi-shield-check"></i>
+                    <span id="backupStatusText">Backup status: OK</span>
+                </div>
+                <div class="backup-header-actions">
+                    <button id="backupNowHeaderBtn" class="btn btn-success btn-sm">
+                        <i class="bi bi-download"></i> Nu backup maken
+                    </button>
+                    <button id="learnMoreHeaderBtn" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-question-circle"></i> Uitleg
+                    </button>
+                    <button id="remindLaterHeaderBtn" class="btn btn-outline-warning btn-sm">
+                        <i class="bi bi-clock"></i> Herinner later
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- Main Content -->
     <div class="container-fluid mt-4">
@@ -195,20 +234,24 @@
                         <h4 class="mb-0"><i class="bi bi-house-door"></i> <span class="app-text" data-key="dashboard">Dashboard</span></h4>
                     </div>
                     <div class="card-body">
-                        <!-- Backup Reminder Banner -->
-                        <div id="backupReminderBanner" class="alert alert-warning d-none">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="bi bi-exclamation-triangle-fill"></i>
-                                    <strong>Backup aanbevolen!</strong>
-                                    <span id="backupReminderText">Het is al een tijdje geleden dat je een backup hebt gemaakt.</span>
+                        <!-- Backup Reminder Card -->
+                        <div id="backupDashboardCard" class="card mb-4 border-warning" style="display: none;">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Backup Aanbevolen</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="backupDashboardText" class="mb-3">
+                                    Het is al een tijdje geleden dat je een backup hebt gemaakt.
                                 </div>
-                                <div>
-                                    <button id="remindLaterBtn" class="btn btn-sm btn-outline-warning me-2">
-                                        <i class="bi bi-clock"></i> Herinner later
-                                    </button>
-                                    <button id="backupFromBannerBtn" class="btn btn-sm btn-success">
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <button id="backupFromDashboardBtn" class="btn btn-success">
                                         <i class="bi bi-download"></i> Nu backup maken
+                                    </button>
+                                    <button id="remindLaterDashboardBtn" class="btn btn-outline-warning">
+                                        <i class="bi bi-clock"></i> Herinner over 3 dagen
+                                    </button>
+                                    <button id="dismissDashboardBackupBtn" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-circle"></i> Niet meer tonen
                                     </button>
                                 </div>
                             </div>
@@ -264,28 +307,63 @@
     
     <!-- Backup Info Modal -->
     <div class="modal fade" id="backupInfoModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title"><i class="bi bi-shield-check"></i> Data Backup</h5>
+                    <h5 class="modal-title"><i class="bi bi-shield-check"></i> Data Backup - Waarom is dit belangrijk?</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <h6>Waarom regelmatig backuppen?</h6>
-                    <p>Deze app slaat alle gegevens <strong>alleen lokaal in je browser</strong> op. Als je:</p>
-                    <ul>
-                        <li>Browser geschiedenis wist</li>
-                        <li>Cookies en sitegegevens verwijdert</li>
-                        <li>De app lange tijd niet gebruikt</li>
-                    </ul>
-                    <p>... dan kunnen je gegevens verloren gaan!</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card h-100 border-danger">
+                                <div class="card-header bg-danger text-white">
+                                    <h6><i class="bi bi-exclamation-triangle-fill"></i> Risico's zonder backup</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p>Deze app slaat alle gegevens <strong>alleen lokaal in je browser</strong> op.</p>
+                                    <p>Je data kan verloren gaan als je:</p>
+                                    <ul>
+                                        <li>Browser geschiedenis wist</li>
+                                        <li>Cookies en sitegegevens verwijdert</li>
+                                        <li>Je telefoon/tablet reset</li>
+                                        <li>De app lange tijd niet gebruikt</li>
+                                        <li>Van browser wisselt</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-success">
+                                <div class="card-header bg-success text-white">
+                                    <h6><i class="bi bi-lightbulb-fill"></i> Hoe te backuppen</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Aanbevolen:</strong> Maak wekelijks een backup</p>
+                                    <h6>Op iPhone/iPad:</h6>
+                                    <ol>
+                                        <li>Klik op "Nu backup maken"</li>
+                                        <li>Kies "Opslaan in Bestanden"</li>
+                                        <li>Sla op in iCloud Drive</li>
+                                    </ol>
+                                    <h6>Op Android:</h6>
+                                    <ol>
+                                        <li>Klik op "Nu backup maken"</li>
+                                        <li>Sla op in Downloads</li>
+                                        <li>Upload naar Google Drive</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     
-                    <div class="alert alert-info">
-                        <h6><i class="bi bi-lightbulb"></i> Tips:</h6>
+                    <div class="alert alert-info mt-3">
+                        <h6><i class="bi bi-star-fill"></i> Beste praktijken:</h6>
                         <ul class="mb-0">
-                            <li>Maak wekelijks een backup</li>
-                            <li>Sla op in je <strong>Bestanden app</strong> (iOS) of <strong>Downloads</strong> (Android)</li>
-                            <li>Voor extra veiligheid: upload naar iCloud/Google Drive</li>
+                            <li>Maak een backup <strong>voor én na</strong> belangrijke wijzigingen</li>
+                            <li>Bewaar meerdere versies (laatste 3-4 backups)</li>
+                            <li>Sla backups op op meerdere plaatsen (telefoon + cloud)</li>
+                            <li>Test af en toe of je backup werkt door te importeren</li>
                         </ul>
                     </div>
                 </div>
@@ -314,7 +392,7 @@
     <script src="js/modules/DataManager.js"></script>
     <script src="js/modules/DogManager.js"></script>
     <script src="js/modules/DogDataManager.js"></script>
-    <script src="js/modules/SearchManager.js"></script> <!-- NIEUW: SearchManager -->
+    <script src="js/modules/SearchManager.js"></script>
     <script src="js/modules/PhotoManager.js"></script>
     <script src="js/modules/BreedingManager.js"></script>
     <script src="js/modules/PrivateInfoManager.js"></script>
@@ -437,6 +515,7 @@
                 this.warningDays = 7;    // Geel na 7 dagen
                 this.dangerDays = 14;    // Rood na 14 dagen
                 this.backupHistory = this.loadBackupHistory();
+                this.hideReminderUntil = this.getHideReminderDate();
             }
             
             loadBackupHistory() {
@@ -457,6 +536,29 @@
                 }
             }
             
+            getHideReminderDate() {
+                try {
+                    return localStorage.getItem('hide_backup_reminder_until');
+                } catch (error) {
+                    return null;
+                }
+            }
+            
+            setHideReminder(days = 3) {
+                const hideUntil = new Date();
+                hideUntil.setDate(hideUntil.getDate() + days);
+                localStorage.setItem('hide_backup_reminder_until', hideUntil.toISOString());
+                this.hideReminderUntil = hideUntil.toISOString();
+            }
+            
+            shouldShowReminder() {
+                if (!this.hideReminderUntil) return true;
+                
+                const now = new Date();
+                const hideUntil = new Date(this.hideReminderUntil);
+                return now > hideUntil;
+            }
+            
             recordBackup(backupType = 'full', filename = '') {
                 const backupRecord = {
                     date: new Date().toISOString(),
@@ -467,7 +569,7 @@
                 
                 this.backupHistory.push(backupRecord);
                 this.saveBackupHistory();
-                this.updateIndicator();
+                this.updateUI();
                 
                 // Sla ook de datum op voor eenvoudige toegang
                 localStorage.setItem('last_backup_date', backupRecord.date);
@@ -503,184 +605,140 @@
                     return {
                         level: 'danger',
                         text: 'NOG NOOIT gebackupt',
-                        days: 999
+                        days: 999,
+                        icon: 'bi-exclamation-triangle-fill',
+                        color: 'danger'
                     };
                 } else if (daysSince >= this.dangerDays) {
                     return {
                         level: 'danger',
                         text: `${daysSince} dagen geleden`,
-                        days: daysSince
+                        days: daysSince,
+                        icon: 'bi-exclamation-triangle-fill',
+                        color: 'danger'
                     };
                 } else if (daysSince >= this.warningDays) {
                     return {
                         level: 'warning',
                         text: `${daysSince} dagen geleden`,
-                        days: daysSince
+                        days: daysSince,
+                        icon: 'bi-exclamation-triangle',
+                        color: 'warning'
                     };
                 } else {
                     return {
                         level: 'good',
                         text: `${daysSince === 0 ? 'Vandaag' : daysSince + ' dagen'} geleden`,
-                        days: daysSince
+                        days: daysSince,
+                        icon: 'bi-shield-check',
+                        color: 'success'
                     };
                 }
             }
             
-            updateIndicator() {
-                const indicator = document.getElementById('backupIndicator');
+            updateUI() {
+                const banner = document.getElementById('backupHeaderBanner');
                 const statusText = document.getElementById('backupStatusText');
-                const tooltipText = document.getElementById('backupTooltipText');
+                const dashboardCard = document.getElementById('backupDashboardCard');
+                const dashboardText = document.getElementById('backupDashboardText');
                 
-                if (!indicator || !statusText || !tooltipText) return;
+                if (!banner || !statusText) return;
                 
                 const status = this.getStatus();
                 
-                // Update indicator
-                indicator.className = `backup-indicator backup-status-${status.level}`;
+                // Update header banner
+                banner.className = `alert backup-status-${status.level}`;
+                banner.style.display = 'block';
                 
-                // Update text based on status
-                let statusDisplayText = '';
-                let tooltipContent = '';
-                
+                let displayText = '';
                 switch(status.level) {
                     case 'good':
-                        statusDisplayText = `✓ ${status.text}`;
-                        tooltipContent = `Laatste backup: <strong>${status.text}</strong>. Je data is recent gebackupt.`;
+                        displayText = `✓ Backup: ${status.text}`;
                         break;
                     case 'warning':
-                        statusDisplayText = `⚠ ${status.text}`;
-                        tooltipContent = `Laatste backup: <strong>${status.text}</strong>. Overweeg een nieuwe backup te maken.`;
+                        displayText = `⚠ Laatste backup: ${status.text}`;
                         break;
                     case 'danger':
-                        statusDisplayText = `🚨 ${status.text}`;
-                        tooltipContent = `Laatste backup: <strong>${status.text}</strong>. Maak een backup om dataverlies te voorkomen!`;
+                        displayText = `🚨 NOG NOOIT gebackupt!`;
                         break;
                 }
                 
-                statusText.textContent = statusDisplayText;
-                tooltipText.innerHTML = tooltipContent;
+                statusText.textContent = displayText;
                 
-                // Show/hide reminder banner
-                this.updateReminderBanner(status);
-            }
-            
-            updateReminderBanner(status) {
-                const banner = document.getElementById('backupReminderBanner');
-                const bannerText = document.getElementById('backupReminderText');
-                
-                if (!banner || !bannerText) return;
-                
-                // Verberg banner als backup recent is of gebruiker het heeft uitgezet
-                const hideReminder = localStorage.getItem('hide_backup_reminder') === 'true';
-                
-                if (status.level === 'good' || hideReminder) {
-                    banner.classList.add('d-none');
-                } else {
-                    banner.classList.remove('d-none');
-                    
-                    let message = '';
+                // Update dashboard card (alleen tonen bij waarschuwing/gevaar)
+                if (dashboardCard && dashboardText) {
                     if (status.level === 'danger') {
-                        message = `Je hebt al ${status.days} dagen geen backup gemaakt!`;
+                        dashboardCard.style.display = 'block';
+                        dashboardText.textContent = `Je hebt nog nooit een backup gemaakt! Als je browser data wist, ben je al je hondengegevens kwijt.`;
+                    } else if (status.level === 'warning' && this.shouldShowReminder()) {
+                        dashboardCard.style.display = 'block';
+                        dashboardText.textContent = `Je laatste backup was ${status.days} dagen geleden. Overweeg een nieuwe backup te maken om dataverlies te voorkomen.`;
                     } else {
-                        message = `Het is ${status.days} dagen geleden dat je een backup maakte.`;
+                        dashboardCard.style.display = 'none';
                     }
-                    
-                    bannerText.textContent = message;
                 }
             }
             
             setupEventListeners() {
-                // Backup knop in indicator
-                const backupIndicator = document.getElementById('backupIndicator');
-                const backupTooltip = document.getElementById('backupTooltip');
+                // Backup now knoppen
+                const backupButtons = [
+                    'backupNowHeaderBtn',
+                    'backupFromDashboardBtn',
+                    'backupFromModalBtn'
+                ];
                 
-                if (backupIndicator) {
-                    backupIndicator.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        this.toggleTooltip();
-                    });
-                }
-                
-                // Backup now knop in tooltip
-                const backupNowBtn = document.getElementById('backupNowBtn');
-                if (backupNowBtn) {
-                    backupNowBtn.addEventListener('click', () => {
-                        this.openDataManagementForBackup();
-                        this.hideTooltip();
-                    });
-                }
-                
-                // Learn more knop
-                const learnMoreBtn = document.getElementById('learnMoreBtn');
-                if (learnMoreBtn) {
-                    learnMoreBtn.addEventListener('click', () => {
-                        this.showBackupInfoModal();
-                        this.hideTooltip();
-                    });
-                }
-                
-                // Backup from banner knop
-                const backupFromBannerBtn = document.getElementById('backupFromBannerBtn');
-                if (backupFromBannerBtn) {
-                    backupFromBannerBtn.addEventListener('click', () => {
-                        this.openDataManagementForBackup();
-                    });
-                }
-                
-                // Remind later knop
-                const remindLaterBtn = document.getElementById('remindLaterBtn');
-                if (remindLaterBtn) {
-                    remindLaterBtn.addEventListener('click', () => {
-                        localStorage.setItem('hide_backup_reminder', 'true');
-                        document.getElementById('backupReminderBanner').classList.add('d-none');
-                    });
-                }
-                
-                // Backup from modal knop
-                const backupFromModalBtn = document.getElementById('backupFromModalBtn');
-                if (backupFromModalBtn) {
-                    backupFromModalBtn.addEventListener('click', () => {
-                        this.openDataManagementForBackup();
-                        bootstrap.Modal.getInstance(document.getElementById('backupInfoModal')).hide();
-                    });
-                }
-                
-                // Close tooltip when clicking outside
-                document.addEventListener('click', (e) => {
-                    if (!backupTooltip.contains(e.target) && !backupIndicator.contains(e.target)) {
-                        this.hideTooltip();
+                backupButtons.forEach(btnId => {
+                    const btn = document.getElementById(btnId);
+                    if (btn) {
+                        btn.addEventListener('click', () => {
+                            this.openDataManagementForBackup();
+                        });
                     }
                 });
-            }
-            
-            toggleTooltip() {
-                const tooltip = document.getElementById('backupTooltip');
-                const indicator = document.getElementById('backupIndicator');
                 
-                if (tooltip.style.display === 'block') {
-                    this.hideTooltip();
-                } else {
-                    this.showTooltip();
+                // Learn more knoppen
+                const learnButtons = ['learnMoreHeaderBtn'];
+                learnButtons.forEach(btnId => {
+                    const btn = document.getElementById(btnId);
+                    if (btn) {
+                        btn.addEventListener('click', () => {
+                            this.showBackupInfoModal();
+                        });
+                    }
+                });
+                
+                // Remind later knoppen
+                const remindButtons = [
+                    'remindLaterHeaderBtn',
+                    'remindLaterDashboardBtn'
+                ];
+                
+                remindButtons.forEach(btnId => {
+                    const btn = document.getElementById(btnId);
+                    if (btn) {
+                        btn.addEventListener('click', () => {
+                            this.setHideReminder(3); // Herinner over 3 dagen
+                            this.updateUI();
+                            if (window.uiHandler && window.uiHandler.showSuccess) {
+                                window.uiHandler.showSuccess('Backup herinnering uitgesteld tot over 3 dagen');
+                            }
+                        });
+                    }
+                });
+                
+                // Dismiss dashboard backup knop
+                const dismissBtn = document.getElementById('dismissDashboardBackupBtn');
+                if (dismissBtn) {
+                    dismissBtn.addEventListener('click', () => {
+                        this.setHideReminder(30); // 30 dagen niet tonen
+                        this.updateUI();
+                    });
                 }
-            }
-            
-            showTooltip() {
-                const tooltip = document.getElementById('backupTooltip');
-                const indicator = document.getElementById('backupIndicator');
                 
-                if (!tooltip || !indicator) return;
-                
-                const rect = indicator.getBoundingClientRect();
-                tooltip.style.top = (rect.bottom + 5) + 'px';
-                tooltip.style.left = rect.left + 'px';
-                tooltip.style.display = 'block';
-            }
-            
-            hideTooltip() {
-                const tooltip = document.getElementById('backupTooltip');
-                if (tooltip) {
-                    tooltip.style.display = 'none';
-                }
+                // Auto-update elke minuut (voor tijdberekeningen)
+                setInterval(() => {
+                    this.updateUI();
+                }, 60000);
             }
             
             showBackupInfoModal() {
@@ -770,7 +828,7 @@
             
             // Setup backup manager
             backupManager.setupEventListeners();
-            backupManager.updateIndicator();
+            backupManager.updateUI();
             
             // Setup event listeners voor alle menu knoppen
             setupMenuEventListeners();
