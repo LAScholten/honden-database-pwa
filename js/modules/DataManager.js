@@ -1,6 +1,6 @@
 /**
  * Data Management Module aangepast voor HondenDatabase
- * Nu met backup tracking
+ * Nu met backup tracking en taalondersteuning
  */
 
 class DataManager extends BaseModule {
@@ -59,7 +59,125 @@ class DataManager extends BaseModule {
                 backupEverything: "Backup alles (veilig opslaan)",
                 backupEverythingDescription: "Exporteer alle data inclusief privé notities",
                 shareData: "Exporteren voor delen",
-                shareDataDescription: "Exporteer alleen publieke data (zonder privé notities)"
+                shareDataDescription: "Exporteer alleen publieke data (zonder privé notities)",
+                backupStatusWarning: "Backup aanbevolen",
+                backupStatusDanger: "Belangrijk",
+                backupWarningText: "Laatste backup was {days} dagen geleden",
+                backupDangerText: "Je hebt nog nooit een backup gemaakt!"
+            },
+            en: {
+                dataManagement: "Data Management",
+                dataImport: "Data Import",
+                importDescription: "Import data from a previously exported file.",
+                selectJsonFile: "Select export file",
+                chooseExportedFile: "Choose a file that was previously exported from this application",
+                importStrategy: "Import strategy",
+                importStrategyDescription: "Full restore: Restore all data from export",
+                updateAndComplete: "Full restore",
+                startImport: "Start Import",
+                importingData: "Importing data...",
+                dataExport: "Data Export",
+                exportDescription: "Export data to a file for backup or sharing.",
+                exportOptions: "Export options",
+                exportDataPhotos: "Export data and photos",
+                exportDataPhotosDescription: "All dog data and photo metadata",
+                exportPrivateInfo: "Export private information",
+                exportPrivateInfoDescription: "Medical and financial information",
+                exportFormat: "Export format",
+                jsonFormat: "JSON (recommended)",
+                csvFormat: "CSV (dog data only)",
+                startExport: "Start Export",
+                exportingData: "Exporting data...",
+                databaseStatistics: "Database Statistics",
+                dogs: "Dogs",
+                photos: "Photos",
+                privateRecords: "Private records",
+                selectFileFirst: "First select a file to import",
+                fileReadError: "Error reading file",
+                importFailed: "Import failed: ",
+                importComplete: "Import completed!",
+                importSummary: "Import summary",
+                newDogsAdded: "New dogs added",
+                dogsUpdated: "Dogs updated",
+                photosImported: "Photos imported",
+                privateUpdated: "Private records updated",
+                exportSuccess: "Export successfully completed!",
+                exportFailed: "Export failed: ",
+                exportFileSaved: "File saved as: ",
+                loadingStats: "Loading statistics...",
+                statsError: "Error loading statistics: ",
+                nothingToExport: "Nothing to export - no export options selected",
+                error: "Error",
+                exportComplete: "Export complete",
+                totalDogsExported: "Total dogs exported: ",
+                totalPhotosExported: "Total photos exported: ",
+                totalPrivateExported: "Total private records exported: ",
+                backupType: "Backup type",
+                backupEverything: "Backup everything (safe storage)",
+                backupEverythingDescription: "Export all data including private notes",
+                shareData: "Export for sharing",
+                shareDataDescription: "Export only public data (without private notes)",
+                backupStatusWarning: "Backup recommended",
+                backupStatusDanger: "Important",
+                backupWarningText: "Last backup was {days} days ago",
+                backupDangerText: "You have never made a backup!"
+            },
+            de: {
+                dataManagement: "Datenverwaltung",
+                dataImport: "Datenimport",
+                importDescription: "Importieren Sie Daten aus einer zuvor exportierten Datei.",
+                selectJsonFile: "Exportdatei auswählen",
+                chooseExportedFile: "Wählen Sie eine Datei, die zuvor aus dieser Anwendung exportiert wurde",
+                importStrategy: "Importstrategie",
+                importStrategyDescription: "Vollständige Wiederherstellung: Alle Daten aus dem Export wiederherstellen",
+                updateAndComplete: "Vollständige Wiederherstellung",
+                startImport: "Import starten",
+                importingData: "Daten werden importiert...",
+                dataExport: "Datenexport",
+                exportDescription: "Exportieren Sie Daten in eine Datei für Backup oder Teilen.",
+                exportOptions: "Exportoptionen",
+                exportDataPhotos: "Daten und Fotos exportieren",
+                exportDataPhotosDescription: "Alle Hunde-Daten und Foto-Metadaten",
+                exportPrivateInfo: "Private Informationen exportieren",
+                exportPrivateInfoDescription: "Medizinische und finanzielle Informationen",
+                exportFormat: "Exportformat",
+                jsonFormat: "JSON (empfohlen)",
+                csvFormat: "CSV (nur Hunde-Daten)",
+                startExport: "Export starten",
+                exportingData: "Daten werden exportiert...",
+                databaseStatistics: "Datenbankstatistiken",
+                dogs: "Hunde",
+                photos: "Fotos",
+                privateRecords: "Private Aufzeichnungen",
+                selectFileFirst: "Wählen Sie zuerst eine Datei zum Importieren",
+                fileReadError: "Fehler beim Lesen der Datei",
+                importFailed: "Import fehlgeschlagen: ",
+                importComplete: "Import abgeschlossen!",
+                importSummary: "Import-Zusammenfassung",
+                newDogsAdded: "Neue Hunde hinzugefügt",
+                dogsUpdated: "Hunde aktualisiert",
+                photosImported: "Fotos importiert",
+                privateUpdated: "Private Aufzeichnungen aktualisiert",
+                exportSuccess: "Export erfolgreich abgeschlossen!",
+                exportFailed: "Export fehlgeschlagen: ",
+                exportFileSaved: "Datei gespeichert als: ",
+                loadingStats: "Statistiken werden geladen...",
+                statsError: "Fehler beim Laden der Statistiken: ",
+                nothingToExport: "Nichts zu exportieren - keine Exportoptionen ausgewählt",
+                error: "Fehler",
+                exportComplete: "Export abgeschlossen",
+                totalDogsExported: "Gesamte Hunde exportiert: ",
+                totalPhotosExported: "Gesamte Fotos exportiert: ",
+                totalPrivateExported: "Gesamte private Aufzeichnungen exportiert: ",
+                backupType: "Backup-Typ",
+                backupEverything: "Alles sichern (sichere Aufbewahrung)",
+                backupEverythingDescription: "Exportieren Sie alle Daten einschließlich privater Notizen",
+                shareData: "Zum Teilen exportieren",
+                shareDataDescription: "Exportieren Sie nur öffentliche Daten (ohne private Notizen)",
+                backupStatusWarning: "Backup empfohlen",
+                backupStatusDanger: "Wichtig",
+                backupWarningText: "Letztes Backup war vor {days} Tagen",
+                backupDangerText: "Sie haben noch nie ein Backup erstellt!"
             }
         };
         
@@ -75,6 +193,7 @@ class DataManager extends BaseModule {
         this.currentLang = lang;
         if (document.getElementById('dataManagementModal')) {
             this.loadDatabaseStats();
+            this.updateModalTexts();
         }
     }
     
@@ -82,21 +201,25 @@ class DataManager extends BaseModule {
         const t = this.t.bind(this);
         
         // Check backup status voor suggestie
-        const lastBackup = localStorage.getItem('last_backup_date');
-        let backupStatusText = '';
-        if (lastBackup) {
-            const daysSince = Math.floor((new Date() - new Date(lastBackup)) / (1000 * 60 * 60 * 24));
-            if (daysSince > 7) {
-                backupStatusText = `<div class="alert alert-warning mb-3">
+        let backupStatusHTML = '';
+        if (window.backupManager) {
+            const status = window.backupManager.getStatus();
+            const daysSince = window.backupManager.getDaysSinceLastBackup();
+            
+            if (status.level === 'danger') {
+                backupStatusHTML = `<div class="alert alert-danger mb-3">
+                    <i class="bi bi-exclamation-triangle-fill"></i> 
+                    <strong>${t('backupStatusDanger')}</strong><br>
+                    ${t('backupDangerText')}
+                </div>`;
+            } else if (status.level === 'warning') {
+                const warningText = t('backupWarningText').replace('{days}', daysSince);
+                backupStatusHTML = `<div class="alert alert-warning mb-3">
                     <i class="bi bi-exclamation-triangle"></i> 
-                    <strong>Backup aanbevolen:</strong> Laatste backup was ${daysSince} dagen geleden
+                    <strong>${t('backupStatusWarning')}</strong><br>
+                    ${warningText}
                 </div>`;
             }
-        } else {
-            backupStatusText = `<div class="alert alert-danger mb-3">
-                <i class="bi bi-exclamation-triangle-fill"></i> 
-                <strong>Belangrijk:</strong> Je hebt nog nooit een backup gemaakt!
-            </div>`;
         }
         
         return `
@@ -107,10 +230,10 @@ class DataManager extends BaseModule {
                             <h5 class="modal-title" id="dataManagementModalLabel">
                                 <i class="bi bi-database-gear"></i> ${t('dataManagement')}
                             </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${t('close') || 'Sluiten'}"></button>
                         </div>
                         <div class="modal-body">
-                            ${backupStatusText}
+                            ${backupStatusHTML}
                             
                             <div class="row">
                                 <div class="col-lg-6 mb-4">
@@ -257,7 +380,7 @@ class DataManager extends BaseModule {
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">${t('close') || 'Sluiten'}</button>
                         </div>
                     </div>
                 </div>
@@ -312,13 +435,196 @@ class DataManager extends BaseModule {
                 this.loadDatabaseStats();
             });
         }
+        
+        // Update modal language when language changes
+        document.querySelectorAll('.app-lang-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const lang = e.target.getAttribute('data-lang');
+                this.updateLanguage(lang);
+            });
+        });
+    }
+    
+    updateModalTexts() {
+        const t = this.t.bind(this);
+        const modal = document.getElementById('dataManagementModal');
+        
+        if (!modal) return;
+        
+        // Update titel
+        const title = modal.querySelector('#dataManagementModalLabel');
+        if (title) {
+            title.innerHTML = `<i class="bi bi-database-gear"></i> ${t('dataManagement')}`;
+        }
+        
+        // Update import card
+        const importCard = modal.querySelector('.card.border-success .card-header h5');
+        if (importCard) {
+            importCard.innerHTML = `<i class="bi bi-upload"></i> ${t('dataImport')}`;
+        }
+        
+        const importDesc = modal.querySelector('.card.border-success .card-body p.card-text');
+        if (importDesc) {
+            importDesc.textContent = t('importDescription');
+        }
+        
+        const importLabel = modal.querySelector('label[for="importFile"]');
+        if (importLabel) {
+            importLabel.textContent = t('selectJsonFile');
+        }
+        
+        const importHelp = modal.querySelector('.card.border-success .form-text');
+        if (importHelp) {
+            importHelp.textContent = t('chooseExportedFile');
+        }
+        
+        const strategyLabel = modal.querySelector('label[for="importStrategy"]');
+        if (strategyLabel) {
+            strategyLabel.textContent = t('importStrategy');
+        }
+        
+        const strategyHelp = modal.querySelectorAll('.card.border-success .form-text')[1];
+        if (strategyHelp) {
+            strategyHelp.textContent = t('importStrategyDescription');
+        }
+        
+        const importBtn = modal.querySelector('#startImportBtn');
+        if (importBtn) {
+            importBtn.innerHTML = `<i class="bi bi-upload"></i> ${t('startImport')}`;
+        }
+        
+        // Update export card
+        const exportCard = modal.querySelector('.card.border-primary .card-header h5');
+        if (exportCard) {
+            exportCard.innerHTML = `<i class="bi bi-download"></i> ${t('dataExport')}`;
+        }
+        
+        const exportDesc = modal.querySelector('.card.border-primary .card-body p.card-text');
+        if (exportDesc) {
+            exportDesc.textContent = t('exportDescription');
+        }
+        
+        const backupTypeLabel = modal.querySelector('.card.border-primary .form-label');
+        if (backupTypeLabel) {
+            backupTypeLabel.textContent = t('backupType');
+        }
+        
+        const backupEverythingLabel = modal.querySelector('label[for="backupEverything"] strong');
+        if (backupEverythingLabel) {
+            backupEverythingLabel.textContent = t('backupEverything');
+        }
+        
+        const backupEverythingHelp = modal.querySelectorAll('.card.border-primary .form-text')[0];
+        if (backupEverythingHelp) {
+            backupEverythingHelp.textContent = t('backupEverythingDescription');
+        }
+        
+        const shareDataLabel = modal.querySelector('label[for="shareData"] strong');
+        if (shareDataLabel) {
+            shareDataLabel.textContent = t('shareData');
+        }
+        
+        const shareDataHelp = modal.querySelectorAll('.card.border-primary .form-text')[1];
+        if (shareDataHelp) {
+            shareDataHelp.textContent = t('shareDataDescription');
+        }
+        
+        const exportOptionsLabel = modal.querySelector('#exportOptionsSection .form-label');
+        if (exportOptionsLabel) {
+            exportOptionsLabel.textContent = t('exportOptions');
+        }
+        
+        const exportDataPhotosLabel = modal.querySelector('label[for="exportDataPhotos"] strong');
+        if (exportDataPhotosLabel) {
+            exportDataPhotosLabel.textContent = t('exportDataPhotos');
+        }
+        
+        const exportDataPhotosHelp = modal.querySelectorAll('.card.border-primary .form-text')[2];
+        if (exportDataPhotosHelp) {
+            exportDataPhotosHelp.textContent = t('exportDataPhotosDescription');
+        }
+        
+        const exportPrivateInfoLabel = modal.querySelector('label[for="exportPrivateInfo"] strong');
+        if (exportPrivateInfoLabel) {
+            exportPrivateInfoLabel.textContent = t('exportPrivateInfo');
+        }
+        
+        const exportPrivateInfoHelp = modal.querySelectorAll('.card.border-primary .form-text')[3];
+        if (exportPrivateInfoHelp) {
+            exportPrivateInfoHelp.textContent = t('exportPrivateInfoDescription');
+        }
+        
+        const formatLabel = modal.querySelector('label[for="exportFormat"]');
+        if (formatLabel) {
+            formatLabel.textContent = t('exportFormat');
+        }
+        
+        const jsonOption = modal.querySelector('#exportFormat option[value="json"]');
+        if (jsonOption) {
+            jsonOption.textContent = t('jsonFormat');
+        }
+        
+        const csvOption = modal.querySelector('#exportFormat option[value="csv"]');
+        if (csvOption) {
+            csvOption.textContent = t('csvFormat');
+        }
+        
+        const exportBtn = modal.querySelector('#startExportBtn');
+        if (exportBtn) {
+            exportBtn.innerHTML = `<i class="bi bi-download"></i> ${t('startExport')}`;
+        }
+        
+        // Update statistics card
+        const statsCard = modal.querySelector('.card.border-info .card-header h5');
+        if (statsCard) {
+            statsCard.innerHTML = `<i class="bi bi-graph-up"></i> ${t('databaseStatistics')}`;
+        }
+        
+        const statsLabels = modal.querySelectorAll('#databaseStats .text-muted');
+        if (statsLabels.length >= 3) {
+            statsLabels[0].textContent = t('dogs');
+            statsLabels[1].textContent = t('photos');
+            statsLabels[2].textContent = t('privateRecords');
+        }
+        
+        // Update footer button
+        const closeBtn = modal.querySelector('.modal-footer .btn-secondary');
+        if (closeBtn) {
+            closeBtn.textContent = t('close') || 'Sluiten';
+        }
+        
+        // Update backup warning
+        this.updateBackupWarningText();
+    }
+    
+    updateBackupWarningText() {
+        if (!window.backupManager) return;
+        
+        const status = window.backupManager.getStatus();
+        const daysSince = window.backupManager.getDaysSinceLastBackup();
+        const t = this.t.bind(this);
+        
+        const warningDiv = document.querySelector('#dataManagementModal .alert');
+        if (!warningDiv) return;
+        
+        if (status.level === 'danger') {
+            warningDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> 
+                <strong>${t('backupStatusDanger')}</strong><br>
+                ${t('backupDangerText')}`;
+        } else if (status.level === 'warning') {
+            const warningText = t('backupWarningText').replace('{days}', daysSince);
+            warningDiv.innerHTML = `<i class="bi bi-exclamation-triangle"></i> 
+                <strong>${t('backupStatusWarning')}</strong><br>
+                ${warningText}`;
+        }
     }
     
     async handleImport() {
+        const t = this.t.bind(this);
         const fileInput = document.getElementById('importFile');
         
         if (!fileInput || !fileInput.files.length) {
-            this.showError(this.t('selectFileFirst'));
+            this.showError(t('selectFileFirst'));
             return;
         }
         
@@ -327,7 +633,7 @@ class DataManager extends BaseModule {
         
         reader.onload = async (e) => {
             try {
-                this.showProgress(this.t('importingData'));
+                this.showProgress(t('importingData'));
                 
                 let importData;
                 if (file.name.endsWith('.csv')) {
@@ -349,18 +655,19 @@ class DataManager extends BaseModule {
                 
             } catch (error) {
                 this.hideProgress();
-                this.showError(`${this.t('importFailed')}${error.message}`);
+                this.showError(`${t('importFailed')}${error.message}`);
             }
         };
         
         reader.onerror = () => {
-            this.showError(this.t('fileReadError'));
+            this.showError(t('fileReadError'));
         };
         
         reader.readAsText(file);
     }
     
     async handleExport() {
+        const t = this.t.bind(this);
         // Determine export type
         const isBackup = document.getElementById('backupEverything')?.checked;
         const exportDataPhotos = document.getElementById('exportDataPhotos').checked;
@@ -368,11 +675,11 @@ class DataManager extends BaseModule {
         const exportFormat = document.getElementById('exportFormat').value;
         
         if (!exportDataPhotos && !exportPrivateInfo) {
-            this.showError(this.t('nothingToExport'));
+            this.showError(t('nothingToExport'));
             return;
         }
         
-        this.showProgress(this.t('exportingData'));
+        this.showProgress(t('exportingData'));
         
         try {
             const exportData = {
@@ -470,32 +777,164 @@ class DataManager extends BaseModule {
                 );
             }
             
-            let successDetails = `${this.t('exportComplete')}<br>`;
+            let successDetails = `${t('exportComplete')}<br>`;
             if (exportDataPhotos) {
-                successDetails += `${this.t('totalDogsExported')}${hondenCount}<br>`;
+                successDetails += `${t('totalDogsExported')}${hondenCount}<br>`;
                 if (fotosCount > 0) {
-                    successDetails += `${this.t('totalPhotosExported')}${fotosCount}<br>`;
+                    successDetails += `${t('totalPhotosExported')}${fotosCount}<br>`;
                 }
             }
             if (exportPrivateInfo && priveCount > 0) {
-                successDetails += `${this.t('totalPrivateExported')}${priveCount}<br>`;
+                successDetails += `${t('totalPrivateExported')}${priveCount}<br>`;
             }
             
-            const successMessage = `${this.t('exportSuccess')}<br>
-                                  <small>${this.t('exportFileSaved')} <strong>${fullFilename}</strong></small><br>
+            const successMessage = `${t('exportSuccess')}<br>
+                                  <small>${t('exportFileSaved')} <strong>${fullFilename}</strong></small><br>
                                   <small>${successDetails}</small>`;
             this.showSuccess(successMessage);
             
         } catch (error) {
             this.hideProgress();
-            this.showError(`${this.t('exportFailed')}${error.message}`);
+            this.showError(`${t('exportFailed')}${error.message}`);
         }
     }
     
-    // ... [rest van de bestaande functies blijven hetzelfde - alleen de bovenstaande wijzigingen zijn nieuw] ...
-    
-    // De rest van je DataManager.js code blijft hetzelfde
-    // Alleen de getModalHTML en handleExport functies zijn aangepast
+    async processImport(importData) {
+        const result = {
+            honden: { toegevoegd: 0, bijgewerkt: 0 },
+            fotos: { toegevoegd: 0 },
+            priveInfo: { bijgewerkt: 0 }
+        };
+        
+        console.log('=== START IMPORT ===');
+        console.log('Import data:', importData);
+        
+        // Eerst kijken welke functies we hebben
+        const hasVoegHondToe = typeof this.db.voegHondToe === 'function';
+        const hasUpdateHond = typeof this.db.updateHond === 'function';
+        const hasGetHonden = typeof this.db.getHonden === 'function';
+        
+        console.log('Database functies beschikbaar:');
+        console.log('- voegHondToe:', hasVoegHondToe);
+        console.log('- updateHond:', hasUpdateHond);
+        console.log('- getHonden:', hasGetHonden);
+        
+        if (!hasVoegHondToe || !hasUpdateHond || !hasGetHonden) {
+            console.error('BELANGRIJKE database functies ontbreken!');
+            console.log('Beschikbare functies:', Object.keys(this.db).filter(key => typeof this.db[key] === 'function'));
+            this.showError('Database functies ontbreken. Kan niet importeren.');
+            return result;
+        }
+        
+        // 1. Haal alle huidige honden op
+        const currentHonden = await this.db.getHonden();
+        const currentHondMap = new Map();
+        currentHonden.forEach(hond => {
+            currentHondMap.set(hond.id, hond);
+            // Ook indexeren op stamboomnr voor snelle lookup
+            if (hond.stamboomnr) {
+                currentHondMap.set(`stamboom_${hond.stamboomnr}`, hond);
+            }
+        });
+        
+        console.log('Huidige honden in database:', currentHonden.length);
+        console.log('Huidige hond IDs:', Array.from(currentHondMap.keys()));
+        
+        // 2. Importeer honden
+        if (importData.honden && Array.isArray(importData.honden)) {
+            console.log('Te importeren honden:', importData.honden.length);
+            
+            for (const importedHond of importData.honden) {
+                try {
+                    // Zoek of deze hond al bestaat
+                    let existingHond = null;
+                    
+                    // Eerst zoeken op ID
+                    if (importedHond.id) {
+                        existingHond = currentHondMap.get(importedHond.id);
+                    }
+                    
+                    // Als niet gevonden, zoek op stamboomnr
+                    if (!existingHond && importedHond.stamboomnr) {
+                        existingHond = currentHondMap.get(`stamboom_${importedHond.stamboomnr}`);
+                    }
+                    
+                    if (!existingHond) {
+                        // NIEUWE HOND: Voeg toe
+                        console.log(`Nieuwe hond: ${importedHond.naam || 'onbekend'} (ID: ${importedHond.id})`);
+                        
+                        // Voor nieuwe honden moeten we het ID verwijderen zodat de database een nieuw ID genereert
+                        const hondZonderId = { ...importedHond };
+                        delete hondZonderId.id;
+                        
+                        try {
+                            const newId = await this.db.voegHondToe(hondZonderId);
+                            console.log(`Hond toegevoegd met nieuw ID: ${newId}`);
+                            result.honden.toegevoegd++;
+                        } catch (addError) {
+                            console.error(`Fout bij toevoegen hond:`, addError);
+                            // Probeer het nog eens met update als add faalt
+                            if (importedHond.id) {
+                                try {
+                                    console.log(`Probeer hond ${importedHond.id} te updaten als fallback...`);
+                                    await this.db.updateHond(importedHond);
+                                    result.honden.bijgewerkt++;
+                                } catch (updateError) {
+                                    console.error(`Kon hond ${importedHond.id} niet toevoegen of updaten:`, updateError);
+                                }
+                            }
+                        }
+                    } else {
+                        // BESTAANDE HOND: Update
+                        console.log(`Bestaande hond: ${existingHond.naam} (ID: ${existingHond.id})`);
+                        
+                        // Zorg dat we het juiste ID gebruiken
+                        const hondData = { ...importedHond, id: existingHond.id };
+                        
+                        try {
+                            await this.db.updateHond(hondData);
+                            result.honden.bijgewerkt++;
+                        } catch (updateError) {
+                            console.error(`Fout bij updaten hond ${existingHond.id}:`, updateError);
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Fout bij verwerken hond:`, error);
+                }
+            }
+        }
+        
+        // 3. Importeer foto's (indien beschikbaar)
+        if (importData.fotos && Array.isArray(importData.fotos) && typeof this.db.voegFotoToe === 'function') {
+            for (const foto of importData.fotos) {
+                try {
+                    await this.db.voegFotoToe(foto);
+                    result.fotos.toegevoegd++;
+                } catch (error) {
+                    console.log(`Foto ${foto.id} kan niet worden toegevoegd:`, error);
+                }
+            }
+        }
+        
+        // 4. Importeer privé info (indien beschikbaar en gebruiker heeft rechten)
+        if (importData.priveInfo && Array.isArray(importData.priveInfo) && typeof this.db.bewaarPriveInfo === 'function') {
+            try {
+                for (const prive of importData.priveInfo) {
+                    try {
+                        await this.db.bewaarPriveInfo(prive);
+                        result.priveInfo.bijgewerkt++;
+                    } catch (error) {
+                        console.log(`Privé info voor ${prive.stamboomnr} kan niet worden opgeslagen:`, error);
+                    }
+                }
+            } catch (authError) {
+                console.log('Geen rechten voor privé info import:', authError);
+            }
+        }
+        
+        console.log('=== IMPORT RESULTAAT ===', result);
+        return result;
+    }
     
     convertHondenToCSV(honden) {
         if (!honden || honden.length === 0) return '';
@@ -610,24 +1049,25 @@ class DataManager extends BaseModule {
     }
     
     showImportResults(result) {
-        let summary = `<h5>${this.t('importSummary')}</h5><div class="alert alert-success">`;
+        const t = this.t.bind(this);
+        let summary = `<h5>${t('importSummary')}</h5><div class="alert alert-success">`;
         
         if (result.honden.toegevoegd > 0) {
-            summary += `<strong>${result.honden.toegevoegd}</strong> ${this.t('newDogsAdded')}<br>`;
+            summary += `<strong>${result.honden.toegevoegd}</strong> ${t('newDogsAdded')}<br>`;
         }
         if (result.honden.bijgewerkt > 0) {
-            summary += `<strong>${result.honden.bijgewerkt}</strong> ${this.t('dogsUpdated')}<br>`;
+            summary += `<strong>${result.honden.bijgewerkt}</strong> ${t('dogsUpdated')}<br>`;
         }
         if (result.fotos.toegevoegd > 0) {
-            summary += `<strong>${result.fotos.toegevoegd}</strong> ${this.t('photosImported')}<br>`;
+            summary += `<strong>${result.fotos.toegevoegd}</strong> ${t('photosImported')}<br>`;
         }
         if (result.priveInfo.bijgewerkt > 0) {
-            summary += `<strong>${result.priveInfo.bijgewerkt}</strong> ${this.t('privateUpdated')}<br>`;
+            summary += `<strong>${result.priveInfo.bijgewerkt}</strong> ${t('privateUpdated')}<br>`;
         }
         
         summary += `</div>`;
         
-        this.showSuccess(`${this.t('importComplete')}<br>${summary}`);
+        this.showSuccess(`${t('importComplete')}<br>${summary}`);
     }
     
     showProgress(message) {
@@ -659,10 +1099,74 @@ class DataManager extends BaseModule {
     }
     
     showSuccess(message) {
-        alert(message.replace(/<br>/g, '\n').replace(/<[^>]*>/g, ''));
+        // Gebruik alert voor eenvoud
+        const modal = document.createElement('div');
+        modal.className = 'modal fade show';
+        modal.style.display = 'block';
+        modal.innerHTML = `
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title"><i class="bi bi-check-circle"></i> Succes</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${message.replace(/\n/g, '<br>')}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Voeg backdrop toe
+        const backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        document.body.appendChild(backdrop);
+        
+        // Remove on click
+        modal.querySelector('[data-bs-dismiss="modal"]').addEventListener('click', () => {
+            modal.remove();
+            backdrop.remove();
+        });
     }
     
     showError(message) {
-        alert(message.replace(/<br>/g, '\n').replace(/<[^>]*>/g, ''));
+        // Gebruik alert voor eenvoud
+        const modal = document.createElement('div');
+        modal.className = 'modal fade show';
+        modal.style.display = 'block';
+        modal.innerHTML = `
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Fout</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${message.replace(/\n/g, '<br>')}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Voeg backdrop toe
+        const backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        document.body.appendChild(backdrop);
+        
+        // Remove on click
+        modal.querySelector('[data-bs-dismiss="modal"]').addEventListener('click', () => {
+            modal.remove();
+            backdrop.remove();
+        });
     }
 }
