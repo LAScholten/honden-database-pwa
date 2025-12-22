@@ -69,7 +69,7 @@ class SearchManager extends BaseModule {
                     "0": "0 - Geen PL",
                     "1": "1 - Af en toe luxatie",
                     "2": "2 - Regelmatig luxatie",
-                    "3": "3 - Constante luxatie"
+                    "3": "3 - Constante luxation"
                 },
                 eyeStatus: {
                     "Vrij": "Vrij",
@@ -483,6 +483,14 @@ class SearchManager extends BaseModule {
                     padding: 15px;
                     border-radius: 6px;
                     margin-bottom: 15px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+                
+                .father-card:hover {
+                    background: #d1e7ff;
+                    transform: translateY(-2px);
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
                 }
                 
                 .mother-card {
@@ -490,6 +498,46 @@ class SearchManager extends BaseModule {
                     border: 1px solid #f8d7e3;
                     padding: 15px;
                     border-radius: 6px;
+                    margin-bottom: 15px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+                
+                .mother-card:hover {
+                    background: #f9d9e9;
+                    transform: translateY(-2px);
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                }
+                
+                .parent-name {
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                    color: #0d6efd;
+                    margin-bottom: 5px;
+                }
+                
+                .parent-mother-name {
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                    color: #dc3545;
+                    margin-bottom: 5px;
+                }
+                
+                .parent-info {
+                    color: #6c757d;
+                    font-size: 0.85rem;
+                }
+                
+                .click-hint {
+                    font-size: 0.75rem;
+                    color: #6c757d;
+                    margin-top: 8px;
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                }
+                
+                .back-button {
                     margin-bottom: 15px;
                 }
                 
@@ -702,20 +750,21 @@ class SearchManager extends BaseModule {
         }
     }
     
-    showDogDetails(dog) {
+    showDogDetails(dog, isParentView = false, originalDogId = null) {
         const t = this.t.bind(this);
         const container = document.getElementById('detailsContainer');
         
         if (!container) return;
         
         // Zoek ouders
-        let fatherInfo = { naam: t('parentsUnknown'), stamboomnr: '', ras: '' };
-        let motherInfo = { naam: t('parentsUnknown'), stamboomnr: '', ras: '' };
+        let fatherInfo = { id: null, naam: t('parentsUnknown'), stamboomnr: '', ras: '' };
+        let motherInfo = { id: null, naam: t('parentsUnknown'), stamboomnr: '', ras: '' };
         
         if (dog.vaderId) {
             const father = this.allDogs.find(d => d.id === dog.vaderId);
             if (father) {
                 fatherInfo = { 
+                    id: father.id,
                     naam: father.naam || t('unknown'),
                     stamboomnr: father.stamboomnr || '',
                     ras: father.ras || ''
@@ -727,6 +776,7 @@ class SearchManager extends BaseModule {
             const mother = this.allDogs.find(d => d.id === dog.moederId);
             if (mother) {
                 motherInfo = { 
+                    id: mother.id,
                     naam: mother.naam || t('unknown'),
                     stamboomnr: mother.stamboomnr || '',
                     ras: mother.ras || ''
@@ -781,8 +831,22 @@ class SearchManager extends BaseModule {
         
         const html = `
             <div class="details-card">
-                <!-- Header -->
+                ${isParentView ? `
+                <!-- Terug knop voor parent view -->
                 <div class="details-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button class="btn btn-sm btn-outline-secondary back-button" data-original-dog="${originalDogId}">
+                            <i class="bi bi-arrow-left me-1"></i> ${t('backToSearch')}
+                        </button>
+                        <div class="text-muted small">
+                            <i class="bi bi-info-circle me-1"></i> ${t('viewingParent') || 'Bekijkt ouder'}
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+                
+                <!-- Header -->
+                <div class="details-header ${isParentView ? 'pt-0' : ''}">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="dog-name-header">${dog.naam || t('unknown')}</div>
@@ -822,23 +886,35 @@ class SearchManager extends BaseModule {
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <div class="father-card">
+                                <div class="father-card" ${fatherInfo.id ? `data-parent-id="${fatherInfo.id}" data-original-dog="${dog.id}"` : ''}>
                                     <div class="fw-bold mb-1 text-primary">
                                         <i class="bi bi-gender-male me-1"></i> ${t('father')}
                                     </div>
-                                    <div class="fs-5 fw-semibold">${fatherInfo.naam}</div>
-                                    ${fatherInfo.stamboomnr ? `<div class="text-muted">${fatherInfo.stamboomnr}</div>` : ''}
-                                    ${fatherInfo.ras ? `<div class="text-muted small">${fatherInfo.ras}</div>` : ''}
+                                    <div class="parent-name">${fatherInfo.naam}</div>
+                                    ${fatherInfo.stamboomnr ? `<div class="parent-info">${fatherInfo.stamboomnr}</div>` : ''}
+                                    ${fatherInfo.ras ? `<div class="parent-info">${fatherInfo.ras}</div>` : ''}
+                                    ${fatherInfo.id ? `
+                                    <div class="click-hint">
+                                        <i class="bi bi-arrow-right-circle"></i>
+                                        ${t('clickToView') || 'Klik om details te bekijken'}
+                                    </div>
+                                    ` : ''}
                                 </div>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <div class="mother-card">
+                                <div class="mother-card" ${motherInfo.id ? `data-parent-id="${motherInfo.id}" data-original-dog="${dog.id}"` : ''}>
                                     <div class="fw-bold mb-1 text-danger">
                                         <i class="bi bi-gender-female me-1"></i> ${t('mother')}
                                     </div>
-                                    <div class="fs-5 fw-semibold">${motherInfo.naam}</div>
-                                    ${motherInfo.stamboomnr ? `<div class="text-muted">${motherInfo.stamboomnr}</div>` : ''}
-                                    ${motherInfo.ras ? `<div class="text-muted small">${motherInfo.ras}</div>` : ''}
+                                    <div class="parent-mother-name">${motherInfo.naam}</div>
+                                    ${motherInfo.stamboomnr ? `<div class="parent-info">${motherInfo.stamboomnr}</div>` : ''}
+                                    ${motherInfo.ras ? `<div class="parent-info">${motherInfo.ras}</div>` : ''}
+                                    ${motherInfo.id ? `
+                                    <div class="click-hint">
+                                        <i class="bi bi-arrow-right-circle"></i>
+                                        ${t('clickToView') || 'Klik om details te bekijken'}
+                                    </div>
+                                    ` : ''}
                                 </div>
                             </div>
                         </div>
@@ -971,5 +1047,57 @@ class SearchManager extends BaseModule {
         `;
         
         container.innerHTML = html;
+        
+        // Voeg event listeners toe voor ouderknoppen
+        if (fatherInfo.id) {
+            const fatherCard = document.querySelector('.father-card');
+            if (fatherCard) {
+                fatherCard.addEventListener('click', (e) => {
+                    const parentId = parseInt(fatherCard.getAttribute('data-parent-id'));
+                    const originalDogId = parseInt(fatherCard.getAttribute('data-original-dog'));
+                    this.showParentDetails(parentId, originalDogId);
+                });
+            }
+        }
+        
+        if (motherInfo.id) {
+            const motherCard = document.querySelector('.mother-card');
+            if (motherCard) {
+                motherCard.addEventListener('click', (e) => {
+                    const parentId = parseInt(motherCard.getAttribute('data-parent-id'));
+                    const originalDogId = parseInt(motherCard.getAttribute('data-original-dog'));
+                    this.showParentDetails(parentId, originalDogId);
+                });
+            }
+        }
+        
+        // Voeg event listener toe voor terugknop
+        if (isParentView) {
+            const backButton = document.querySelector('.back-button');
+            if (backButton) {
+                backButton.addEventListener('click', (e) => {
+                    const originalDogId = parseInt(backButton.getAttribute('data-original-dog'));
+                    const originalDog = this.allDogs.find(d => d.id === originalDogId);
+                    if (originalDog) {
+                        this.showDogDetails(originalDog);
+                    }
+                });
+            }
+        }
+    }
+    
+    showParentDetails(parentId, originalDogId) {
+        const parent = this.allDogs.find(d => d.id === parentId);
+        if (parent) {
+            this.showDogDetails(parent, true, originalDogId);
+            
+            // Markeer ook de ouder in de zoekkolom
+            document.querySelectorAll('.dog-result-item').forEach(item => {
+                item.classList.remove('selected');
+                if (parseInt(item.getAttribute('data-id')) === parentId) {
+                    item.classList.add('selected');
+                }
+            });
+        }
     }
 }
