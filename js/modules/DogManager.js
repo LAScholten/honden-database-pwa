@@ -286,7 +286,7 @@ class DogManager extends BaseModule {
                 back: "Zurück",
                 
                 // Zugangskontrolle Popup Texte
-                insufficientPermissions: "Unzureichende Berechtigungen",
+                insufficientPermissions: "Unzureichende Berechtigingen",
                 insufficientPermissionsText: "Sie haben keine Berechtigung, Hunde zu bearbeiten. Nur Administratoren können diese Funktion nutzen.",
                 loggedInAs: "Sie sind eingeloggt als:",
                 user: "Benutzer",
@@ -389,34 +389,34 @@ class DogManager extends BaseModule {
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${t('close')}"></button>
                         </div>
                         <div class="modal-body">
-                            <div class="row text-center">
-                                <div class="col-md-6 mb-4">
+                            <div class="row text-center choice-container">
+                                <div class="col-md-6 mb-3">
                                     <div class="card h-100 choice-card" data-choice="dog">
-                                        <div class="card-body">
-                                            <div class="choice-icon mb-3">
-                                                <i class="bi bi-emoji-heart-eyes" style="font-size: 4rem; color: #3498db;"></i>
+                                        <div class="card-body p-3">
+                                            <div class="choice-icon mb-2">
+                                                <i class="bi bi-emoji-heart-eyes" style="font-size: 2.8rem; color: #3498db;"></i>
                                             </div>
-                                            <h4 class="card-title">${t('addNewDog')}</h4>
-                                            <p class="card-text">Voeg één hond toe aan de database met alle bijbehorende informatie</p>
+                                            <h5 class="card-title mb-2">${t('addNewDog')}</h5>
+                                            <p class="card-text small">Voeg één hond toe aan de database met alle bijbehorende informatie</p>
                                         </div>
-                                        <div class="card-footer bg-transparent">
-                                            <button type="button" class="btn btn-primary choose-dog-btn">
+                                        <div class="card-footer bg-transparent p-2">
+                                            <button type="button" class="btn btn-primary btn-sm choose-dog-btn">
                                                 <i class="bi bi-check-circle me-1"></i> ${t('choose')}
                                             </button>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6 mb-4">
+                                <div class="col-md-6 mb-3">
                                     <div class="card h-100 choice-card" data-choice="litter">
-                                        <div class="card-body">
-                                            <div class="choice-icon mb-3">
-                                                <i class="bi bi-people" style="font-size: 4rem; color: #e74c3c;"></i>
+                                        <div class="card-body p-3">
+                                            <div class="choice-icon mb-2">
+                                                <i class="bi bi-people" style="font-size: 2.8rem; color: #e74c3c;"></i>
                                             </div>
-                                            <h4 class="card-title">${t('addNewLitter')}</h4>
-                                            <p class="card-text">Voeg een volledig nest toe met alle nestgenoten in één keer</p>
+                                            <h5 class="card-title mb-2">${t('addNewLitter')}</h5>
+                                            <p class="card-text small">Voeg een volledig nest toe met alle nestgenoten in één keer</p>
                                         </div>
-                                        <div class="card-footer bg-transparent">
-                                            <button type="button" class="btn btn-primary choose-litter-btn">
+                                        <div class="card-footer bg-transparent p-2">
+                                            <button type="button" class="btn btn-primary btn-sm choose-litter-btn">
                                                 <i class="bi bi-check-circle me-1"></i> ${t('choose')}
                                             </button>
                                         </div>
@@ -431,13 +431,13 @@ class DogManager extends BaseModule {
                             
                             <!-- Nest Formulier (verborgen initieel) -->
                             <div id="litterFormContainer" style="display: none;">
-                                <div class="text-center py-5">
-                                    <div class="mb-4">
-                                        <i class="bi bi-tools" style="font-size: 5rem; color: #f39c12;"></i>
+                                <div class="text-center py-4">
+                                    <div class="mb-3">
+                                        <i class="bi bi-tools" style="font-size: 3.5rem; color: #f39c12;"></i>
                                     </div>
-                                    <h3>${t('development')}</h3>
-                                    <p class="text-muted">Deze functie is momenteel in ontwikkeling en komt binnenkort beschikbaar.</p>
-                                    <button type="button" class="btn btn-secondary back-to-choice-btn mt-3">
+                                    <h4>${t('development')}</h4>
+                                    <p class="text-muted small">Deze functie is momenteel in ontwikkeling en komt binnenkort beschikbaar.</p>
+                                    <button type="button" class="btn btn-secondary btn-sm back-to-choice-btn mt-2">
                                         <i class="bi bi-arrow-left me-1"></i> ${t('back')}
                                     </button>
                                 </div>
@@ -454,15 +454,21 @@ class DogManager extends BaseModule {
             </div>
             
             <style>
+                .choice-container {
+                    padding: 10px;
+                }
+                
                 .choice-card {
                     cursor: pointer;
                     transition: transform 0.3s, box-shadow 0.3s;
                     border: 2px solid transparent;
+                    max-width: 90%;
+                    margin: 0 auto;
                 }
                 
                 .choice-card:hover {
-                    transform: translateY(-5px);
-                    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+                    transform: translateY(-3px);
+                    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
                     border-color: #3498db;
                 }
                 
@@ -471,7 +477,23 @@ class DogManager extends BaseModule {
                 }
                 
                 .choice-card:hover .choice-icon {
-                    transform: scale(1.1);
+                    transform: scale(1.05);
+                }
+                
+                .card-title {
+                    font-size: 1.1rem;
+                    margin-bottom: 0.5rem;
+                }
+                
+                .card-text.small {
+                    font-size: 0.85rem;
+                    line-height: 1.3;
+                    margin-bottom: 0.5rem;
+                }
+                
+                .btn-sm {
+                    padding: 0.25rem 0.75rem;
+                    font-size: 0.875rem;
                 }
                 
                 .autocomplete-dropdown {
@@ -535,7 +557,7 @@ class DogManager extends BaseModule {
         
         return `
             <div class="mb-3">
-                <button type="button" class="btn btn-outline-secondary back-to-choice-btn">
+                <button type="button" class="btn btn-outline-secondary btn-sm back-to-choice-btn">
                     <i class="bi bi-arrow-left me-1"></i> ${t('back')}
                 </button>
             </div>
@@ -799,7 +821,7 @@ class DogManager extends BaseModule {
     }
     
     showChoiceScreen() {
-        const choiceScreen = document.querySelector('.row.text-center');
+        const choiceScreen = document.querySelector('.choice-container');
         const dogFormContainer = document.getElementById('dogFormContainer');
         const litterFormContainer = document.getElementById('litterFormContainer');
         const modalFooter = document.querySelector('.modal-footer');
@@ -811,7 +833,7 @@ class DogManager extends BaseModule {
     }
     
     showDogForm() {
-        const choiceScreen = document.querySelector('.row.text-center');
+        const choiceScreen = document.querySelector('.choice-container');
         const dogFormContainer = document.getElementById('dogFormContainer');
         const litterFormContainer = document.getElementById('litterFormContainer');
         const modalFooter = document.querySelector('.modal-footer');
@@ -828,7 +850,7 @@ class DogManager extends BaseModule {
     }
     
     showLitterForm() {
-        const choiceScreen = document.querySelector('.row.text-center');
+        const choiceScreen = document.querySelector('.choice-container');
         const dogFormContainer = document.getElementById('dogFormContainer');
         const litterFormContainer = document.getElementById('litterFormContainer');
         const modalFooter = document.querySelector('.modal-footer');
