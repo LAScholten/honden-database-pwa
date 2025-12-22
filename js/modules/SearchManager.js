@@ -183,7 +183,7 @@ class SearchManager extends BaseModule {
                 searchName: "Hund nach Namen suchen",
                 searchPlaceholder: "Hundenamen, Stammbaum-Nummer oder Rasse eingeben...",
                 noDogsFound: "Keine Hunde gefunden",
-                typeToSearch: "Beginnen Sie met der Eingabe, um zu suchen",
+                typeToSearch: "Beginnen Sie mit der Eingabe, um zu suchen",
                 searchResults: "Suchergebnisse",
                 found: "gefunden",
                 name: "Name",
@@ -395,17 +395,18 @@ class SearchManager extends BaseModule {
                 }
                 
                 .details-card {
-                    border-radius: 10px;
+                    border-radius: 8px;
                     border: 1px solid #dee2e6;
                     background: white;
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
                 }
                 
                 .details-header {
-                    background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
-                    color: white;
+                    background: white;
+                    color: #212529;
                     padding: 20px;
-                    border-radius: 10px 10px 0 0;
+                    border-radius: 8px 8px 0 0;
+                    border-bottom: 1px solid #dee2e6;
                 }
                 
                 .details-body {
@@ -424,7 +425,7 @@ class SearchManager extends BaseModule {
                     letter-spacing: 1px;
                     margin-bottom: 10px;
                     padding-bottom: 5px;
-                    border-bottom: 2px solid #f0f0f0;
+                    border-bottom: 1px solid #f0f0f0;
                 }
                 
                 .info-row {
@@ -476,9 +477,17 @@ class SearchManager extends BaseModule {
                     color: white;
                 }
                 
-                .parents-info {
+                .father-card {
                     background: #e8f4fd;
                     border: 1px solid #cfe2ff;
+                    padding: 15px;
+                    border-radius: 6px;
+                    margin-bottom: 15px;
+                }
+                
+                .mother-card {
+                    background: #fce8f1;
+                    border: 1px solid #f8d7e3;
                     padding: 15px;
                     border-radius: 6px;
                     margin-bottom: 15px;
@@ -496,6 +505,13 @@ class SearchManager extends BaseModule {
                 .empty-state {
                     color: #adb5bd;
                     font-style: italic;
+                }
+                
+                .dog-name-header {
+                    color: #0d6efd;
+                    font-size: 1.5rem;
+                    font-weight: 700;
+                    margin-bottom: 5px;
                 }
                 
                 @media (max-width: 768px) {
@@ -769,24 +785,25 @@ class SearchManager extends BaseModule {
                 <div class="details-header">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <h4 class="mb-1 fw-bold">${dog.naam || t('unknown')}</h4>
+                            <div class="dog-name-header">${dog.naam || t('unknown')}</div>
                             <div class="d-flex align-items-center flex-wrap gap-2 mt-2">
-                                ${dog.stamboomnr ? `<span class="badge bg-light text-dark fs-6">${dog.stamboomnr}</span>` : ''}
+                                ${dog.stamboomnr ? `<span class="badge bg-light text-dark">${dog.stamboomnr}</span>` : ''}
                                 ${dog.ras ? `<span class="badge bg-light text-dark">${dog.ras}</span>` : ''}
                                 <span class="badge ${dog.geslacht === 'reuen' ? 'bg-primary' : dog.geslacht === 'teven' ? 'bg-danger' : 'bg-secondary'}">
                                     ${dog.geslacht === 'reuen' ? t('male') : dog.geslacht === 'teven' ? t('female') : t('unknown')}
                                 </span>
+                            </div>
                         </div>
                         ${dog.geboortedatum || dog.overlijdensdatum ? `
                         <div class="text-end">
                             ${dog.geboortedatum ? `
-                            <div class="text-white-80">
+                            <div class="text-muted">
                                 <i class="bi bi-calendar me-1"></i>
                                 ${formatDate(dog.geboortedatum)}
                             </div>
                             ` : ''}
                             ${dog.overlijdensdatum ? `
-                            <div class="text-white-80 mt-1">
+                            <div class="text-muted mt-1">
                                 <i class="bi bi-calendar-x me-1"></i>
                                 ${formatDate(dog.overlijdensdatum)}
                             </div>
@@ -803,9 +820,9 @@ class SearchManager extends BaseModule {
                         <div class="info-group-title">
                             <i class="bi bi-people me-1"></i> ${t('parents') || 'Ouders'}
                         </div>
-                        <div class="parents-info">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="father-card">
                                     <div class="fw-bold mb-1 text-primary">
                                         <i class="bi bi-gender-male me-1"></i> ${t('father')}
                                     </div>
@@ -813,7 +830,9 @@ class SearchManager extends BaseModule {
                                     ${fatherInfo.stamboomnr ? `<div class="text-muted">${fatherInfo.stamboomnr}</div>` : ''}
                                     ${fatherInfo.ras ? `<div class="text-muted small">${fatherInfo.ras}</div>` : ''}
                                 </div>
-                                <div class="col-md-6 mb-3">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="mother-card">
                                     <div class="fw-bold mb-1 text-danger">
                                         <i class="bi bi-gender-female me-1"></i> ${t('mother')}
                                     </div>
