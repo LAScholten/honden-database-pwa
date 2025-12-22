@@ -14,6 +14,10 @@ class DogManager extends BaseModule {
                 // Modal titels
                 newDog: "Nieuwe Hond Toevoegen",
                 editDog: "Hond Bewerken",
+                dogLitterChoice: "Hond of Nest Toevoegen",
+                addNewDog: "Nieuwe Hond",
+                addNewLitter: "Nieuw Nest",
+                development: "In Ontwikkeling",
                 
                 // Form velden
                 name: "Naam",
@@ -79,6 +83,7 @@ class DogManager extends BaseModule {
                 close: "Sluiten",
                 refresh: "Pagina Vernieuwen",
                 accessDenied: "Toegang Geweigerd",
+                back: "Terug",
                 
                 // Toegangscontrole popup teksten
                 insufficientPermissions: "Onvoldoende rechten",
@@ -97,7 +102,7 @@ class DogManager extends BaseModule {
                 savingDog: "Hond opslaan...",
                 dogAdded: "Hond succesvol toegevoegd!",
                 dogUpdated: "Hond succesvol bijgewerkt!",
-                dogDeleted: "Hond succesvol verwijderd!",
+                dogDeleted: "Hond succesvol verwijderen!",
                 addFailed: "Fout bij toevoegen hond: ",
                 updateFailed: "Fout bij bijwerken hond: ",
                 deleteFailed: "Fout bij verwijderen hond: ",
@@ -109,6 +114,10 @@ class DogManager extends BaseModule {
                 // Modal titles
                 newDog: "Add New Dog",
                 editDog: "Edit Dog",
+                dogLitterChoice: "Add Dog or Litter",
+                addNewDog: "New Dog",
+                addNewLitter: "New Litter",
+                development: "In Development",
                 
                 // Form fields
                 name: "Name",
@@ -174,6 +183,7 @@ class DogManager extends BaseModule {
                 close: "Close",
                 refresh: "Refresh Page",
                 accessDenied: "Access Denied",
+                back: "Back",
                 
                 // Access control popup texts
                 insufficientPermissions: "Insufficient permissions",
@@ -204,6 +214,10 @@ class DogManager extends BaseModule {
                 // Modal Titel
                 newDog: "Neuen Hund hinzufügen",
                 editDog: "Hund bearbeiten",
+                dogLitterChoice: "Hund oder Wurf hinzufügen",
+                addNewDog: "Neuer Hund",
+                addNewLitter: "Neuer Wurf",
+                development: "In Entwicklung",
                 
                 // Formular Felder
                 name: "Name",
@@ -269,6 +283,7 @@ class DogManager extends BaseModule {
                 close: "Schließen",
                 refresh: "Seite aktualisieren",
                 accessDenied: "Zugriff Verweigert",
+                back: "Zurück",
                 
                 // Zugangskontrolle Popup Texte
                 insufficientPermissions: "Unzureichende Berechtigungen",
@@ -357,31 +372,12 @@ class DogManager extends BaseModule {
             `;
         }
         
-        // Als gebruiker admin is, toon het normale formulier
+        // Als gebruiker admin is, toon keuze scherm
         const t = this.t.bind(this);
-        const modalTitle = t('newDog');
+        const modalTitle = t('dogLitterChoice');
         const modalId = 'addDogModal';
         
-        const data = dogData || {};
-        
-        // Genereer recente rassen opties
-        let recentBreedsHTML = '';
-        if (this.lastBreeds.length > 0) {
-            recentBreedsHTML = `
-                <div class="form-text mb-2">${t('recentBreeds')}:</div>
-                <div class="d-flex flex-wrap gap-2 mb-3">
-            `;
-            this.lastBreeds.forEach(breed => {
-                recentBreedsHTML += `
-                    <button type="button" class="btn btn-sm btn-outline-secondary recent-breed-btn" data-breed="${breed}">
-                        ${breed}
-                    </button>
-                `;
-            });
-            recentBreedsHTML += `</div>`;
-        }
-        
-        // RETURN ALLE VELDEN - compleet formulier
+        // Keuze scherm HTML
         return `
             <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="${modalId}Label" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
@@ -393,210 +389,64 @@ class DogManager extends BaseModule {
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${t('close')}"></button>
                         </div>
                         <div class="modal-body">
-                            <form id="addDogForm">
-                                <input type="hidden" id="fatherId" value="${data.vaderId || ''}">
-                                <input type="hidden" id="motherId" value="${data.moederId || ''}">
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="dogName" class="form-label">${t('nameRequired')}</label>
-                                            <input type="text" class="form-control" id="dogName" value="${data.naam || ''}" required>
+                            <div class="row text-center">
+                                <div class="col-md-6 mb-4">
+                                    <div class="card h-100 choice-card" data-choice="dog">
+                                        <div class="card-body">
+                                            <div class="choice-icon mb-3">
+                                                <i class="bi bi-emoji-heart-eyes" style="font-size: 4rem; color: #3498db;"></i>
+                                            </div>
+                                            <h4 class="card-title">${t('addNewDog')}</h4>
+                                            <p class="card-text">Voeg één hond toe aan de database met alle bijbehorende informatie</p>
                                         </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="pedigreeNumber" class="form-label">${t('pedigreeNumber')}</label>
-                                            <input type="text" class="form-control" id="pedigreeNumber" value="${data.stamboomnr || ''}" required>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="breed" class="form-label">${t('breedRequired')}</label>
-                                            <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
-                                            ${recentBreedsHTML}
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="gender" class="form-label">${t('gender')}</label>
-                                            <select class="form-select" id="gender">
-                                                <option value="">${t('chooseGender')}</option>
-                                                <option value="reuen" ${data.geslacht === 'reuen' ? 'selected' : ''}>${t('male')}</option>
-                                                <option value="teven" ${data.geslacht === 'teven' ? 'selected' : ''}>${t('female')}</option>
-                                            </select>
+                                        <div class="card-footer bg-transparent">
+                                            <button type="button" class="btn btn-primary choose-dog-btn">
+                                                <i class="bi bi-check-circle me-1"></i> ${t('choose')}
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="father" class="form-label">${t('father')}</label>
-                                            <input type="text" class="form-control parent-input" id="father" 
-                                                   value="${data.vader || ''}" 
-                                                   placeholder="${t('searchPlaceholder') || 'Begin met typen om te zoeken...'}"
-                                                   data-parent-type="father"
-                                                   autocomplete="off">
-                                            <div class="autocomplete-dropdown" id="fatherDropdown" style="display: none;"></div>
+                                <div class="col-md-6 mb-4">
+                                    <div class="card h-100 choice-card" data-choice="litter">
+                                        <div class="card-body">
+                                            <div class="choice-icon mb-3">
+                                                <i class="bi bi-people" style="font-size: 4rem; color: #e74c3c;"></i>
+                                            </div>
+                                            <h4 class="card-title">${t('addNewLitter')}</h4>
+                                            <p class="card-text">Voeg een volledig nest toe met alle nestgenoten in één keer</p>
                                         </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="mother" class="form-label">${t('mother')}</label>
-                                            <input type="text" class="form-control parent-input" id="mother" 
-                                                   value="${data.moeder || ''}" 
-                                                   placeholder="${t('searchPlaceholder') || 'Begin met typen om te zoeken...'}"
-                                                   data-parent-type="mother"
-                                                   autocomplete="off">
-                                            <div class="autocomplete-dropdown" id="motherDropdown" style="display: none;"></div>
+                                        <div class="card-footer bg-transparent">
+                                            <button type="button" class="btn btn-primary choose-litter-btn">
+                                                <i class="bi bi-check-circle me-1"></i> ${t('choose')}
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="birthDate" class="form-label">${t('birthDate')}</label>
-                                            <input type="date" class="form-control" id="birthDate" value="${data.geboortedatum || ''}">
-                                        </div>
+                            </div>
+                            
+                            <!-- Nieuwe Hond Formulier (verborgen initieel) -->
+                            <div id="dogFormContainer" style="display: none;">
+                                ${this.getDogFormHTML(dogData)}
+                            </div>
+                            
+                            <!-- Nest Formulier (verborgen initieel) -->
+                            <div id="litterFormContainer" style="display: none;">
+                                <div class="text-center py-5">
+                                    <div class="mb-4">
+                                        <i class="bi bi-tools" style="font-size: 5rem; color: #f39c12;"></i>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="deathDate" class="form-label">${t('deathDate')}</label>
-                                            <input type="date" class="form-control" id="deathDate" value="${data.overlijdensdatum || ''}">
-                                        </div>
-                                    </div>
+                                    <h3>${t('development')}</h3>
+                                    <p class="text-muted">Deze functie is momenteel in ontwikkeling en komt binnenkort beschikbaar.</p>
+                                    <button type="button" class="btn btn-secondary back-to-choice-btn mt-3">
+                                        <i class="bi bi-arrow-left me-1"></i> ${t('back')}
+                                    </button>
                                 </div>
-                                
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label for="hipDysplasia" class="form-label">${t('hipDysplasia')}</label>
-                                            <select class="form-select" id="hipDysplasia">
-                                                <option value="">${t('hipGrades')}</option>
-                                                <option value="A" ${data.heupdysplasie === 'A' ? 'selected' : ''}>${t('hipA')}</option>
-                                                <option value="B" ${data.heupdysplasie === 'B' ? 'selected' : ''}>${t('hipB')}</option>
-                                                <option value="C" ${data.heupdysplasie === 'C' ? 'selected' : ''}>${t('hipC')}</option>
-                                                <option value="D" ${data.heupdysplasie === 'D' ? 'selected' : ''}>${t('hipD')}</option>
-                                                <option value="E" ${data.heupdysplasie === 'E' ? 'selected' : ''}>${t('hipE')}</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label for="elbowDysplasia" class="form-label">${t('elbowDysplasia')}</label>
-                                            <select class="form-select" id="elbowDysplasia">
-                                                <option value="">${t('elbowGrades')}</option>
-                                                <option value="0" ${data.elleboogdysplasie === '0' ? 'selected' : ''}>${t('elbow0')}</option>
-                                                <option value="1" ${data.elleboogdysplasie === '1' ? 'selected' : ''}>${t('elbow1')}</option>
-                                                <option value="2" ${data.elleboogdysplasie === '2' ? 'selected' : ''}>${t('elbow2')}</option>
-                                                <option value="3" ${data.elleboogdysplasie === '3' ? 'selected' : ''}>${t('elbow3')}</option>
-                                                <option value="NB" ${data.elleboogdysplasie === 'NB' ? 'selected' : ''}>${t('elbowNB')}</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label for="patellaLuxation" class="form-label">${t('patellaLuxation')}</label>
-                                            <select class="form-select" id="patellaLuxation">
-                                                <option value="">${t('patellaGrades')}</option>
-                                                <option value="0" ${data.patella === '0' ? 'selected' : ''}>${t('patella0')}</option>
-                                                <option value="1" ${data.patella === '1' ? 'selected' : ''}>${t('patella1')}</option>
-                                                <option value="2" ${data.patella === '2' ? 'selected' : ''}>${t('patella2')}</option>
-                                                <option value="3" ${data.patella === '3' ? 'selected' : ''}>${t('patella3')}</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="eyes" class="form-label">${t('eyes')}</label>
-                                            <select class="form-select" id="eyes">
-                                                <option value="">${t('choose')}</option>
-                                                <option value="Vrij" ${data.ogen === 'Vrij' ? 'selected' : ''}>${t('eyesFree')}</option>
-                                                <option value="Distichiasis" ${data.ogen === 'Distichiasis' ? 'selected' : ''}>${t('eyesDistichiasis')}</option>
-                                                <option value="Overig" ${data.ogen === 'Overig' ? 'selected' : ''}>${t('eyesOther')}</option>
-                                            </select>
-                                        </div>
-                                        <div class="mb-3" id="eyesExplanationContainer" style="${data.ogen === 'Overig' ? '' : 'display: none;'}">
-                                            <label for="eyesExplanation" class="form-label">${t('eyesExplanation')}</label>
-                                            <input type="text" class="form-control" id="eyesExplanation" value="${data.ogenVerklaring || ''}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="dandyWalker" class="form-label">${t('dandyWalker')}</label>
-                                            <select class="form-select" id="dandyWalker">
-                                                <option value="">${t('dandyOptions')}</option>
-                                                <option value="Vrij op DNA" ${data.dandyWalker === 'Vrij op DNA' ? 'selected' : ''}>${t('dandyFreeDNA')}</option>
-                                                <option value="Vrij op ouders" ${data.dandyWalker === 'Vrij op ouders' ? 'selected' : ''}>${t('dandyFreeParents')}</option>
-                                                <option value="Drager" ${data.dandyWalker === 'Drager' ? 'selected' : ''}>${t('dandyCarrier')}</option>
-                                                <option value="Lijder" ${data.dandyWalker === 'Lijder' ? 'selected' : ''}>${t('dandyAffected')}</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="thyroid" class="form-label">${t('thyroid')}</label>
-                                            <select class="form-select" id="thyroid">
-                                                <option value="">${t('choose')}</option>
-                                                <option value="Negatief" ${data.schildklier === 'Negatief' ? 'selected' : ''}>${t('thyroidNegative')}</option>
-                                                <option value="Positief" ${data.schildklier === 'Positief' ? 'selected' : ''}>${t('thyroidPositive')}</option>
-                                            </select>
-                                        </div>
-                                        <div class="mb-3" id="thyroidExplanationContainer" style="${data.schildklier === 'Positief' ? '' : 'display: none;'}">
-                                            <label for="thyroidExplanation" class="form-label">${t('thyroidExplanation')}</label>
-                                            <input type="text" class="form-control" id="thyroidExplanation" value="${data.schildklierVerklaring || ''}">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="country" class="form-label">${t('country')}</label>
-                                            <input type="text" class="form-control" id="country" value="${data.land || ''}">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="zipCode" class="form-label">${t('zipCode')}</label>
-                                            <input type="text" class="form-control" id="zipCode" value="${data.postcode || ''}">
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="dogPhoto" class="form-label">${t('addPhoto')}</label>
-                                    <div class="input-group">
-                                        <input type="file" class="form-control" id="dogPhoto" accept="image/*">
-                                        <label class="input-group-text" for="dogPhoto">${t('chooseFile')}</label>
-                                    </div>
-                                    <div class="form-text">${t('noFileChosen')}</div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="remarks" class="form-label">${t('remarks')}</label>
-                                    <textarea class="form-control" id="remarks" rows="3">${data.opmerkingen || ''}</textarea>
-                                </div>
-                                
-                                <div class="alert alert-info">
-                                    <i class="bi bi-info-circle"></i>
-                                    ${t('requiredFields')}
-                                </div>
-                            </form>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                 <i class="bi bi-x-circle me-1"></i>
-                                <span class="module-text" data-key="close">${t('close')}</span>
-                            </button>
-                            <button type="button" class="btn btn-primary" id="saveDogBtn">
-                                ${t('saveDog')}
+                                <span class="module-text" data-key="close">${this.t('close')}</span>
                             </button>
                         </div>
                     </div>
@@ -604,6 +454,26 @@ class DogManager extends BaseModule {
             </div>
             
             <style>
+                .choice-card {
+                    cursor: pointer;
+                    transition: transform 0.3s, box-shadow 0.3s;
+                    border: 2px solid transparent;
+                }
+                
+                .choice-card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+                    border-color: #3498db;
+                }
+                
+                .choice-icon {
+                    transition: transform 0.3s;
+                }
+                
+                .choice-card:hover .choice-icon {
+                    transform: scale(1.1);
+                }
+                
                 .autocomplete-dropdown {
                     position: absolute;
                     background: white;
@@ -642,6 +512,239 @@ class DogManager extends BaseModule {
         `;
     }
     
+    getDogFormHTML(dogData = null) {
+        const t = this.t.bind(this);
+        const data = dogData || {};
+        
+        // Genereer recente rassen opties
+        let recentBreedsHTML = '';
+        if (this.lastBreeds.length > 0) {
+            recentBreedsHTML = `
+                <div class="form-text mb-2">${t('recentBreeds')}:</div>
+                <div class="d-flex flex-wrap gap-2 mb-3">
+            `;
+            this.lastBreeds.forEach(breed => {
+                recentBreedsHTML += `
+                    <button type="button" class="btn btn-sm btn-outline-secondary recent-breed-btn" data-breed="${breed}">
+                        ${breed}
+                    </button>
+                `;
+            });
+            recentBreedsHTML += `</div>`;
+        }
+        
+        return `
+            <div class="mb-3">
+                <button type="button" class="btn btn-outline-secondary back-to-choice-btn">
+                    <i class="bi bi-arrow-left me-1"></i> ${t('back')}
+                </button>
+            </div>
+            
+            <form id="addDogForm">
+                <input type="hidden" id="fatherId" value="${data.vaderId || ''}">
+                <input type="hidden" id="motherId" value="${data.moederId || ''}">
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="dogName" class="form-label">${t('nameRequired')}</label>
+                            <input type="text" class="form-control" id="dogName" value="${data.naam || ''}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="pedigreeNumber" class="form-label">${t('pedigreeNumber')}</label>
+                            <input type="text" class="form-control" id="pedigreeNumber" value="${data.stamboomnr || ''}" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="breed" class="form-label">${t('breedRequired')}</label>
+                            <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
+                            ${recentBreedsHTML}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="gender" class="form-label">${t('gender')}</label>
+                            <select class="form-select" id="gender">
+                                <option value="">${t('chooseGender')}</option>
+                                <option value="reuen" ${data.geslacht === 'reuen' ? 'selected' : ''}>${t('male')}</option>
+                                <option value="teven" ${data.geslacht === 'teven' ? 'selected' : ''}>${t('female')}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="father" class="form-label">${t('father')}</label>
+                            <input type="text" class="form-control parent-input" id="father" 
+                                   value="${data.vader || ''}" 
+                                   placeholder="${t('searchPlaceholder') || 'Begin met typen om te zoeken...'}"
+                                   data-parent-type="father"
+                                   autocomplete="off">
+                            <div class="autocomplete-dropdown" id="fatherDropdown" style="display: none;"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="mother" class="form-label">${t('mother')}</label>
+                            <input type="text" class="form-control parent-input" id="mother" 
+                                   value="${data.moeder || ''}" 
+                                   placeholder="${t('searchPlaceholder') || 'Begin met typen om te zoeken...'}"
+                                   data-parent-type="mother"
+                                   autocomplete="off">
+                            <div class="autocomplete-dropdown" id="motherDropdown" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="birthDate" class="form-label">${t('birthDate')}</label>
+                            <input type="date" class="form-control" id="birthDate" value="${data.geboortedatum || ''}">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="deathDate" class="form-label">${t('deathDate')}</label>
+                            <input type="date" class="form-control" id="deathDate" value="${data.overlijdensdatum || ''}">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="hipDysplasia" class="form-label">${t('hipDysplasia')}</label>
+                            <select class="form-select" id="hipDysplasia">
+                                <option value="">${t('hipGrades')}</option>
+                                <option value="A" ${data.heupdysplasie === 'A' ? 'selected' : ''}>${t('hipA')}</option>
+                                <option value="B" ${data.heupdysplasie === 'B' ? 'selected' : ''}>${t('hipB')}</option>
+                                <option value="C" ${data.heupdysplasie === 'C' ? 'selected' : ''}>${t('hipC')}</option>
+                                <option value="D" ${data.heupdysplasie === 'D' ? 'selected' : ''}>${t('hipD')}</option>
+                                <option value="E" ${data.heupdysplasie === 'E' ? 'selected' : ''}>${t('hipE')}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="elbowDysplasia" class="form-label">${t('elbowDysplasia')}</label>
+                            <select class="form-select" id="elbowDysplasia">
+                                <option value="">${t('elbowGrades')}</option>
+                                <option value="0" ${data.elleboogdysplasie === '0' ? 'selected' : ''}>${t('elbow0')}</option>
+                                <option value="1" ${data.elleboogdysplasie === '1' ? 'selected' : ''}>${t('elbow1')}</option>
+                                <option value="2" ${data.elleboogdysplasie === '2' ? 'selected' : ''}>${t('elbow2')}</option>
+                                <option value="3" ${data.elleboogdysplasie === '3' ? 'selected' : ''}>${t('elbow3')}</option>
+                                <option value="NB" ${data.elleboogdysplasie === 'NB' ? 'selected' : ''}>${t('elbowNB')}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="patellaLuxation" class="form-label">${t('patellaLuxation')}</label>
+                            <select class="form-select" id="patellaLuxation">
+                                <option value="">${t('patellaGrades')}</option>
+                                <option value="0" ${data.patella === '0' ? 'selected' : ''}>${t('patella0')}</option>
+                                <option value="1" ${data.patella === '1' ? 'selected' : ''}>${t('patella1')}</option>
+                                <option value="2" ${data.patella === '2' ? 'selected' : ''}>${t('patella2')}</option>
+                                <option value="3" ${data.patella === '3' ? 'selected' : ''}>${t('patella3')}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="eyes" class="form-label">${t('eyes')}</label>
+                            <select class="form-select" id="eyes">
+                                <option value="">${t('choose')}</option>
+                                <option value="Vrij" ${data.ogen === 'Vrij' ? 'selected' : ''}>${t('eyesFree')}</option>
+                                <option value="Distichiasis" ${data.ogen === 'Distichiasis' ? 'selected' : ''}>${t('eyesDistichiasis')}</option>
+                                <option value="Overig" ${data.ogen === 'Overig' ? 'selected' : ''}>${t('eyesOther')}</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="eyesExplanationContainer" style="${data.ogen === 'Overig' ? '' : 'display: none;'}">
+                            <label for="eyesExplanation" class="form-label">${t('eyesExplanation')}</label>
+                            <input type="text" class="form-control" id="eyesExplanation" value="${data.ogenVerklaring || ''}">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="dandyWalker" class="form-label">${t('dandyWalker')}</label>
+                            <select class="form-select" id="dandyWalker">
+                                <option value="">${t('dandyOptions')}</option>
+                                <option value="Vrij op DNA" ${data.dandyWalker === 'Vrij op DNA' ? 'selected' : ''}>${t('dandyFreeDNA')}</option>
+                                <option value="Vrij op ouders" ${data.dandyWalker === 'Vrij op ouders' ? 'selected' : ''}>${t('dandyFreeParents')}</option>
+                                <option value="Drager" ${data.dandyWalker === 'Drager' ? 'selected' : ''}>${t('dandyCarrier')}</option>
+                                <option value="Lijder" ${data.dandyWalker === 'Lijder' ? 'selected' : ''}>${t('dandyAffected')}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="thyroid" class="form-label">${t('thyroid')}</label>
+                            <select class="form-select" id="thyroid">
+                                <option value="">${t('choose')}</option>
+                                <option value="Negatief" ${data.schildklier === 'Negatief' ? 'selected' : ''}>${t('thyroidNegative')}</option>
+                                <option value="Positief" ${data.schildklier === 'Positief' ? 'selected' : ''}>${t('thyroidPositive')}</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="thyroidExplanationContainer" style="${data.schildklier === 'Positief' ? '' : 'display: none;'}">
+                            <label for="thyroidExplanation" class="form-label">${t('thyroidExplanation')}</label>
+                            <input type="text" class="form-control" id="thyroidExplanation" value="${data.schildklierVerklaring || ''}">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="country" class="form-label">${t('country')}</label>
+                            <input type="text" class="form-control" id="country" value="${data.land || ''}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="zipCode" class="form-label">${t('zipCode')}</label>
+                            <input type="text" class="form-control" id="zipCode" value="${data.postcode || ''}">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="dogPhoto" class="form-label">${t('addPhoto')}</label>
+                    <div class="input-group">
+                        <input type="file" class="form-control" id="dogPhoto" accept="image/*">
+                        <label class="input-group-text" for="dogPhoto">${t('chooseFile')}</label>
+                    </div>
+                    <div class="form-text">${t('noFileChosen')}</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="remarks" class="form-label">${t('remarks')}</label>
+                    <textarea class="form-control" id="remarks" rows="3">${data.opmerkingen || ''}</textarea>
+                </div>
+                
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    ${t('requiredFields')}
+                </div>
+                
+                <div class="text-end">
+                    <button type="button" class="btn btn-primary" id="saveDogBtn">
+                        ${t('saveDog')}
+                    </button>
+                </div>
+            </form>
+        `;
+    }
+    
     setupEvents() {
         console.log('DogManager setupEvents called');
         
@@ -668,6 +771,75 @@ class DogManager extends BaseModule {
         // Laad honden voor autocomplete
         this.loadAllDogs();
         
+        // Event listeners voor keuze knoppen
+        const chooseDogBtn = document.querySelector('.choose-dog-btn');
+        const chooseLitterBtn = document.querySelector('.choose-litter-btn');
+        const backToChoiceBtns = document.querySelectorAll('.back-to-choice-btn');
+        
+        if (chooseDogBtn) {
+            chooseDogBtn.addEventListener('click', () => {
+                this.showDogForm();
+            });
+        }
+        
+        if (chooseLitterBtn) {
+            chooseLitterBtn.addEventListener('click', () => {
+                this.showLitterForm();
+            });
+        }
+        
+        backToChoiceBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.showChoiceScreen();
+            });
+        });
+        
+        // Event listeners voor formulier (worden later toegevoegd als formulier geladen wordt)
+        this.setupFormEvents();
+    }
+    
+    showChoiceScreen() {
+        const choiceScreen = document.querySelector('.row.text-center');
+        const dogFormContainer = document.getElementById('dogFormContainer');
+        const litterFormContainer = document.getElementById('litterFormContainer');
+        const modalFooter = document.querySelector('.modal-footer');
+        
+        if (choiceScreen) choiceScreen.style.display = 'flex';
+        if (dogFormContainer) dogFormContainer.style.display = 'none';
+        if (litterFormContainer) litterFormContainer.style.display = 'none';
+        if (modalFooter) modalFooter.style.display = 'flex';
+    }
+    
+    showDogForm() {
+        const choiceScreen = document.querySelector('.row.text-center');
+        const dogFormContainer = document.getElementById('dogFormContainer');
+        const litterFormContainer = document.getElementById('litterFormContainer');
+        const modalFooter = document.querySelector('.modal-footer');
+        
+        if (choiceScreen) choiceScreen.style.display = 'none';
+        if (dogFormContainer) dogFormContainer.style.display = 'block';
+        if (litterFormContainer) litterFormContainer.style.display = 'none';
+        if (modalFooter) modalFooter.style.display = 'flex';
+        
+        // Herlaad formulier events
+        setTimeout(() => {
+            this.setupFormEvents();
+        }, 50);
+    }
+    
+    showLitterForm() {
+        const choiceScreen = document.querySelector('.row.text-center');
+        const dogFormContainer = document.getElementById('dogFormContainer');
+        const litterFormContainer = document.getElementById('litterFormContainer');
+        const modalFooter = document.querySelector('.modal-footer');
+        
+        if (choiceScreen) choiceScreen.style.display = 'none';
+        if (dogFormContainer) dogFormContainer.style.display = 'none';
+        if (litterFormContainer) litterFormContainer.style.display = 'block';
+        if (modalFooter) modalFooter.style.display = 'flex';
+    }
+    
+    setupFormEvents() {
         // Event listeners voor formulier
         const saveBtn = document.getElementById('saveDogBtn');
         if (saveBtn) {
@@ -721,15 +893,24 @@ class DogManager extends BaseModule {
         const translations = {
             nl: {
                 close: "Sluiten",
-                accessDenied: "Toegang Geweigerd"
+                accessDenied: "Toegang Geweigerd",
+                choose: "Kies...",
+                back: "Terug",
+                development: "In Ontwikkeling"
             },
             en: {
                 close: "Close",
-                accessDenied: "Access Denied"
+                accessDenied: "Access Denied",
+                choose: "Choose...",
+                back: "Back",
+                development: "In Development"
             },
             de: {
                 close: "Schließen",
-                accessDenied: "Zugriff Verweigert"
+                accessDenied: "Zugriff Verweigert",
+                choose: "Wählen...",
+                back: "Zurück",
+                development: "In Entwicklung"
             }
         };
         
