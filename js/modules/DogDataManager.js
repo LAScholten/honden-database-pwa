@@ -1511,7 +1511,7 @@ class DogDataManager extends BaseModule {
             nl: {
                 editDogData: "Data Hond Bewerken",
                 close: "Sluiten",
-                refresh: "Pagina Vernieuwend",
+                refresh: "Pagina Vernieuwen",
                 accessDenied: "Toegang Geweigerd"
             },
             en: {
