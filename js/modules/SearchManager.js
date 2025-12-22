@@ -974,4 +974,4 @@ class SearchManager extends BaseModule {
         
         container.innerHTML = html;
     }
-} 
+}
