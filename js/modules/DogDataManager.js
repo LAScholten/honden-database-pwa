@@ -491,7 +491,7 @@ class DogDataManager extends BaseModule {
                                     
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <div class="mb-3">
+                                            <div class="mb-3 parent-input-wrapper">
                                                 <label for="breed" class="form-label fw-semibold">${t('breedRequired')}</label>
                                                 <input type="text" class="form-control" id="breed" required>
                                                 ${recentBreedsHTML}
@@ -511,23 +511,21 @@ class DogDataManager extends BaseModule {
                                     
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <div class="mb-3">
+                                            <div class="mb-3 parent-input-wrapper">
                                                 <label for="father" class="form-label fw-semibold">${t('father')}</label>
-                                                <input type="text" class="form-control parent-input" id="father" 
-                                                       placeholder="${t('searchPlaceholder')}"
+                                                <input type="text" class="form-control" id="father" 
+                                                       placeholder="Begin met typen om te zoeken..."
                                                        data-parent-type="father"
                                                        autocomplete="off">
-                                                <div class="autocomplete-dropdown" id="fatherDropdown" style="display: none;"></div>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
-                                            <div class="mb-3">
+                                            <div class="mb-3 parent-input-wrapper">
                                                 <label for="mother" class="form-label fw-semibold">${t('mother')}</label>
-                                                <input type="text" class="form-control parent-input" id="mother" 
-                                                       placeholder="${t('searchPlaceholder')}"
+                                                <input type="text" class="form-control" id="mother" 
+                                                       placeholder="Begin met typen om te zoeken..."
                                                        data-parent-type="mother"
                                                        autocomplete="off">
-                                                <div class="autocomplete-dropdown" id="motherDropdown" style="display: none;"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -738,9 +736,9 @@ class DogDataManager extends BaseModule {
                     border-radius: 4px;
                     max-height: 200px;
                     overflow-y: auto;
-                    width: calc(100% - 30px);
                     z-index: 1050;
                     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    width: 100%;
                 }
                 
                 .autocomplete-item {
@@ -764,7 +762,7 @@ class DogDataManager extends BaseModule {
                     color: #666;
                 }
                 
-                .parent-input {
+                .parent-input-wrapper {
                     position: relative;
                 }
                 
@@ -1105,6 +1103,9 @@ class DogDataManager extends BaseModule {
         document.getElementById('cancelEditBtn').style.display = 'inline-block';
         document.getElementById('saveChangesBtn').style.display = 'inline-block';
         document.getElementById('deleteDogBtn').style.display = 'inline-block';
+        
+        // Zet de dropdowns terug op
+        this.setupParentAutocomplete();
     }
     
     /**
@@ -1379,16 +1380,47 @@ class DogDataManager extends BaseModule {
      * Setup autocomplete voor ouders
      */
     setupParentAutocomplete() {
-        document.querySelectorAll('.parent-input').forEach(input => {
+        // Verwijder bestaande dropdowns
+        document.querySelectorAll('.autocomplete-dropdown').forEach(dropdown => {
+            dropdown.remove();
+        });
+        
+        // Maak nieuwe dropdown containers
+        const fatherInputWrapper = document.querySelector('#father').closest('.parent-input-wrapper');
+        const motherInputWrapper = document.querySelector('#mother').closest('.parent-input-wrapper');
+        
+        if (fatherInputWrapper) {
+            const fatherDropdown = document.createElement('div');
+            fatherDropdown.className = 'autocomplete-dropdown';
+            fatherDropdown.id = 'fatherDropdown';
+            fatherDropdown.style.display = 'none';
+            fatherInputWrapper.appendChild(fatherDropdown);
+        }
+        
+        if (motherInputWrapper) {
+            const motherDropdown = document.createElement('div');
+            motherDropdown.className = 'autocomplete-dropdown';
+            motherDropdown.id = 'motherDropdown';
+            motherDropdown.style.display = 'none';
+            motherInputWrapper.appendChild(motherDropdown);
+        }
+        
+        // Event listeners voor vader en moeder velden
+        document.querySelectorAll('#father, #mother').forEach(input => {
+            input.addEventListener('focus', () => {
+                this.loadAllDogs(); // Zorg dat honden geladen zijn
+            });
+            
             input.addEventListener('input', (e) => {
                 const searchTerm = e.target.value.toLowerCase().trim();
-                const parentType = input.dataset.parentType;
+                const parentType = input.id === 'father' ? 'father' : 'mother';
                 this.showParentAutocomplete(searchTerm, parentType);
             });
             
             input.addEventListener('blur', (e) => {
+                // Wacht even voordat dropdown wordt verborgen (voor klikken op item)
                 setTimeout(() => {
-                    const dropdown = document.getElementById(`${parentType}Dropdown`);
+                    const dropdown = document.getElementById(`${input.id}Dropdown`);
                     if (dropdown) {
                         dropdown.style.display = 'none';
                     }
@@ -1396,8 +1428,9 @@ class DogDataManager extends BaseModule {
             });
         });
         
+        // Klik buiten dropdown om te verbergen
         document.addEventListener('click', (e) => {
-            if (!e.target.closest('.parent-input') && !e.target.closest('.autocomplete-dropdown')) {
+            if (!e.target.closest('.parent-input-wrapper')) {
                 document.querySelectorAll('.autocomplete-dropdown').forEach(dropdown => {
                     dropdown.style.display = 'none';
                 });
@@ -1452,15 +1485,7 @@ class DogDataManager extends BaseModule {
         dropdown.innerHTML = html;
         dropdown.style.display = 'block';
         
-        // Positioneer dropdown
-        const input = document.getElementById(parentType);
-        if (input) {
-            const rect = input.getBoundingClientRect();
-            dropdown.style.top = `${rect.bottom}px`;
-            dropdown.style.left = `${rect.left}px`;
-            dropdown.style.width = `${rect.width}px`;
-        }
-        
+        // Event listeners voor autocomplete items
         dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 const dogId = item.getAttribute('data-id');
