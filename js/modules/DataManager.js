@@ -173,7 +173,7 @@ class DataManager extends BaseModule {
                 backupEverything: "Alles sichern (sichere Aufbewahrung)",
                 backupEverythingDescription: "Exportieren Sie alle Daten einschließlich privater Notizen",
                 shareData: "Zum Teilen exportieren",
-                shareDataDescription: "Exportieren Sie nur öffentliche Daten (ohne private Notizen)",
+                shareDataDescription: "Exportieren Sie nur öffentliche data (ohne private Notizen)",
                 backupStatusWarning: "Backup empfohlen",
                 backupStatusDanger: "Wichtig",
                 backupWarningText: "Letztes Backup war vor {days} Tagen",
@@ -182,7 +182,14 @@ class DataManager extends BaseModule {
         };
         
         // Gebruik de globale database instantie
-        this.db = window.db;
+        // BELANGRIJK: Zorg ervoor dat dit naar window.db verwijst
+        if (window.db) {
+            this.db = window.db;
+        } else {
+            console.error('Database niet gevonden in window object');
+            // Fallback: probeer het te vinden
+            this.db = window.hondenDatabase || window.database || db;
+        }
     }
     
     t(key) {
@@ -685,7 +692,7 @@ class DataManager extends BaseModule {
             const exportData = {
                 metadata: {
                     exportDatum: new Date().toISOString(),
-                    exportDoor: this.auth.getCurrentUser()?.username || 'unknown',
+                    exportDoor: window.auth?.getCurrentUser()?.username || 'unknown',
                     exportType: isBackup ? 'backup' : 'share',
                     exportFormat: exportFormat,
                     containsPrivate: exportPrivateInfo
@@ -695,6 +702,11 @@ class DataManager extends BaseModule {
             let hondenCount = 0;
             let fotosCount = 0;
             let priveCount = 0;
+            
+            // BELANGRIJK: Zorg dat we de database gebruiken
+            if (!this.db) {
+                throw new Error('Database niet gevonden. Zorg dat window.db is geïnitialiseerd.');
+            }
             
             if (exportDataPhotos) {
                 try {
@@ -808,6 +820,11 @@ class DataManager extends BaseModule {
         
         console.log('=== START IMPORT ===');
         console.log('Import data:', importData);
+        
+        // BELANGRIJK: Zorg dat we de database gebruiken
+        if (!this.db) {
+            throw new Error('Database niet gevonden. Zorg dat window.db is geïnitialiseerd.');
+        }
         
         // Eerst kijken welke functies we hebben
         const hasVoegHondToe = typeof this.db.voegHondToe === 'function';
@@ -1033,15 +1050,20 @@ class DataManager extends BaseModule {
     
     async loadDatabaseStats() {
         try {
+            if (!this.db || typeof this.db.getStatistieken !== 'function') {
+                console.error('Database of getStatistieken functie niet beschikbaar');
+                return;
+            }
+            
             const stats = await this.db.getStatistieken();
             
             const hondenElement = document.getElementById('statsHonden');
             const fotosElement = document.getElementById('statsFotos');
             const priveElement = document.getElementById('statsPrive');
             
-            if (hondenElement) hondenElement.textContent = stats.totaalHonden;
-            if (fotosElement) fotosElement.textContent = stats.totaalFotos;
-            if (priveElement) priveElement.textContent = stats.totaalPriveInfo;
+            if (hondenElement) hondenElement.textContent = stats.totaalHonden || 0;
+            if (fotosElement) fotosElement.textContent = stats.totaalFotos || 0;
+            if (priveElement) priveElement.textContent = stats.totaalPriveInfo || 0;
             
         } catch (error) {
             console.error(`${this.t('statsError')}${error}`);
