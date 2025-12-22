@@ -297,7 +297,7 @@ class DogManager extends BaseModule {
                 importExport: "Daten importieren/exportieren",
                 
                 // Meldungen
-                adminOnly: "Nur Administratoren können Hunde hinzufügen/bearbeiten",
+                adminOnly: "Nur Administratoren kunnen Hunde hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer und Rasse sind Pflichtfelder",
                 savingDog: "Hund wird gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
@@ -394,10 +394,10 @@ class DogManager extends BaseModule {
                                     <div class="card h-100 choice-card" data-choice="dog">
                                         <div class="card-body p-2">
                                             <div class="choice-icon mb-2">
-                                                <i class="bi bi-emoji-heart-eyes" style="font-size: 2.8rem; color: #3498db;"></i>
+                                                <i class="bi bi-emoji-heart-eyes" style="font-size: 2rem; color: #3498db;"></i>
                                             </div>
-                                            <h5 class="card-title mb-2">${t('addNewDog')}</h5>
-                                            <p class="card-text small">Voeg één hond toe aan de database met alle bijbehorende informatie</p>
+                                            <h6 class="card-title mb-1">${t('addNewDog')}</h6>
+                                            <p class="card-text small mb-1">Voeg één hond toe aan de database</p>
                                         </div>
                                         <div class="card-footer bg-transparent p-2">
                                             <button type="button" class="btn btn-primary btn-sm choose-dog-btn">
@@ -410,10 +410,10 @@ class DogManager extends BaseModule {
                                     <div class="card h-100 choice-card" data-choice="litter">
                                         <div class="card-body p-2">
                                             <div class="choice-icon mb-2">
-                                                <i class="bi bi-people" style="font-size: 2.8rem; color: #e74c3c;"></i>
+                                                <i class="bi bi-people" style="font-size: 2rem; color: #e74c3c;"></i>
                                             </div>
-                                            <h5 class="card-title mb-2">${t('addNewLitter')}</h5>
-                                            <p class="card-text small">Voeg een volledig nest toe met alle nestgenoten in één keer</p>
+                                            <h6 class="card-title mb-1">${t('addNewLitter')}</h6>
+                                            <p class="card-text small mb-1">Voeg een volledig nest toe</p>
                                         </div>
                                         <div class="card-footer bg-transparent p-2">
                                             <button type="button" class="btn btn-primary btn-sm choose-litter-btn">
@@ -431,13 +431,13 @@ class DogManager extends BaseModule {
                             
                             <!-- Nest Formulier (verborgen initieel) -->
                             <div id="litterFormContainer" style="display: none;">
-                                <div class="text-center py-4">
-                                    <div class="mb-3">
-                                        <i class="bi bi-tools" style="font-size: 3.5rem; color: #f39c12;"></i>
+                                <div class="text-center py-3">
+                                    <div class="mb-2">
+                                        <i class="bi bi-tools" style="font-size: 2.5rem; color: #f39c12;"></i>
                                     </div>
-                                    <h4>${t('development')}</h4>
-                                    <p class="text-muted small">Deze functie is momenteel in ontwikkeling en komt binnenkort beschikbaar.</p>
-                                    <button type="button" class="btn btn-secondary btn-sm back-to-choice-btn mt-2">
+                                    <h5 class="mb-2">${t('development')}</h5>
+                                    <p class="text-muted small mb-2">Deze functie is momenteel in ontwikkeling en komt binnenkort beschikbaar.</p>
+                                    <button type="button" class="btn btn-secondary btn-sm back-to-choice-btn">
                                         <i class="bi bi-arrow-left me-1"></i> ${t('back')}
                                     </button>
                                 </div>
@@ -454,8 +454,59 @@ class DogManager extends BaseModule {
             </div>
             
             <style>
+                /* Mobiele optimalisaties */
+                @media (max-width: 768px) {
+                    .modal-dialog {
+                        margin: 10px;
+                        max-height: 90vh;
+                    }
+                    
+                    .modal-content {
+                        max-height: 90vh;
+                        overflow-y: auto;
+                    }
+                    
+                    .modal-body {
+                        padding: 15px;
+                        max-height: calc(90vh - 130px);
+                        overflow-y: auto;
+                    }
+                    
+                    .choice-container {
+                        padding: 5px;
+                        min-height: auto;
+                        max-height: 100%;
+                    }
+                    
+                    .choice-card {
+                        min-height: 120px;
+                        margin-bottom: 10px;
+                    }
+                    
+                    .choice-icon {
+                        margin-bottom: 5px;
+                    }
+                    
+                    .choice-icon i {
+                        font-size: 1.8rem !important;
+                    }
+                    
+                    .card-title {
+                        font-size: 1rem;
+                        margin-bottom: 3px;
+                    }
+                    
+                    .card-text.small {
+                        font-size: 0.8rem;
+                        line-height: 1.2;
+                        margin-bottom: 5px;
+                    }
+                }
+                
+                /* Algemene stijlen */
                 .choice-container {
                     padding: 10px;
+                    min-height: auto;
                 }
                 
                 .choice-card {
@@ -464,6 +515,7 @@ class DogManager extends BaseModule {
                     border: 2px solid transparent;
                     max-width: 90%;
                     margin: 0 auto;
+                    min-height: 140px;
                 }
                 
                 .choice-card:hover {
