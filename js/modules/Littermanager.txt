@@ -1,0 +1,68 @@
+/**
+ * Litter Management Module
+ * Beheert toevoegen en bewerken van nesten
+ */
+
+class LitterManager extends BaseModule {
+    constructor() {
+        super('littermanager', 'Nest Beheer');
+        this.currentLang = localStorage.getItem('appLanguage') || 'nl';
+        this.translations = {
+            nl: {
+                development: "In Ontwikkeling",
+                back: "Terug",
+                choose: "Kies...",
+                close: "Sluiten"
+            },
+            en: {
+                development: "In Development",
+                back: "Back",
+                choose: "Choose...",
+                close: "Close"
+            },
+            de: {
+                development: "In Entwicklung",
+                back: "Zurück",
+                choose: "Wählen...",
+                close: "Schließen"
+            }
+        };
+    }
+    
+    t(key) {
+        return this.translations[this.currentLang][key] || key;
+    }
+    
+    getFormHTML() {
+        return `
+            <div class="text-center py-3">
+                <div class="mb-2">
+                    <i class="bi bi-tools" style="font-size: 2.5rem; color: #f39c12;"></i>
+                </div>
+                <h5 class="mb-2">${this.t('development')}</h5>
+                <p class="text-muted small mb-2">Deze functie is momenteel in ontwikkeling en komt binnenkort beschikbaar.</p>
+                <button type="button" class="btn btn-secondary btn-sm back-to-choice-btn">
+                    <i class="bi bi-arrow-left me-1"></i> ${this.t('back')}
+                </button>
+            </div>
+        `;
+    }
+    
+    setupEvents() {
+        // Event listeners voor de terug knop
+        const backBtn = document.querySelector('.back-to-choice-btn');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                // Deze functie moet vanuit DogManager worden aangeroepen
+                if (window.dogManager) {
+                    window.dogManager.showChoiceScreen();
+                }
+            });
+        }
+    }
+}
+
+// Maak globaal beschikbaar
+if (typeof window !== 'undefined') {
+    window.LitterManager = LitterManager;
+}

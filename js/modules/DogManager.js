@@ -9,6 +9,7 @@ class DogManager extends BaseModule {
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';
         this.lastBreeds = JSON.parse(localStorage.getItem('lastBreeds') || '[]');
         this.allDogs = []; // Voor autocomplete van ouders
+        this.litterManager = null; // Wordt later geïnitialiseerd
         this.translations = {
             nl: {
                 // Modal titels
@@ -431,16 +432,7 @@ class DogManager extends BaseModule {
                             
                             <!-- Nest Formulier (verborgen initieel) -->
                             <div id="litterFormContainer" style="display: none;">
-                                <div class="text-center py-3">
-                                    <div class="mb-2">
-                                        <i class="bi bi-tools" style="font-size: 2.5rem; color: #f39c12;"></i>
-                                    </div>
-                                    <h5 class="mb-2">${t('development')}</h5>
-                                    <p class="text-muted small mb-2">Deze functie is momenteel in ontwikkeling en komt binnenkort beschikbaar.</p>
-                                    <button type="button" class="btn btn-secondary btn-sm back-to-choice-btn">
-                                        <i class="bi bi-arrow-left me-1"></i> ${t('back')}
-                                    </button>
-                                </div>
+                                ${this.getLitterFormHTML()}
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -584,6 +576,27 @@ class DogManager extends BaseModule {
                 }
             </style>
         `;
+    }
+    
+    getLitterFormHTML() {
+        // Maak LitterManager aan als deze nog niet bestaat
+        if (!this.litterManager) {
+            this.litterManager = new LitterManager();
+        }
+        
+        // Terug knop HTML
+        const backButtonHTML = `
+            <div class="mb-3">
+                <button type="button" class="btn btn-outline-secondary btn-sm back-to-choice-btn">
+                    <i class="bi bi-arrow-left me-1"></i> ${this.t('back')}
+                </button>
+            </div>
+        `;
+        
+        // Haal het formulier HTML op van LitterManager
+        const litterFormHTML = this.litterManager.getFormHTML();
+        
+        return backButtonHTML + litterFormHTML;
     }
     
     getDogFormHTML(dogData = null) {
@@ -909,6 +922,11 @@ class DogManager extends BaseModule {
         if (dogFormContainer) dogFormContainer.style.display = 'none';
         if (litterFormContainer) litterFormContainer.style.display = 'block';
         if (modalFooter) modalFooter.style.display = 'flex';
+        
+        // Stel LitterManager events in
+        if (this.litterManager) {
+            this.litterManager.setupEvents();
+        }
     }
     
     setupFormEvents() {

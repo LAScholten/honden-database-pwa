@@ -430,6 +430,7 @@
     
     <!-- Feature Modules -->
     <script src="js/modules/DataManager.js"></script>
+    <script src="js/modules/LitterManager.js"></script> <!-- NIEUWE MODULE -->
     <script src="js/modules/DogManager.js"></script>
     <script src="js/modules/DogDataManager.js"></script>
     <script src="js/modules/SearchManager.js"></script>
@@ -477,8 +478,8 @@
                 security: "Beveiliging",
                 roleBasedAccess: "De app gebruikt rol-gebaseerde toegang:",
                 adminRole: "Administrator",
-                adminRights: "Volledige rechten, inclusief nieuwe honden toevoegen.",
-                userRole: "GebruiXker",
+                adminRights: "Volle rechten, inclusief nieuwe honden toevoegen.",
+                userRole: "Gebruiker",
                 userRights: "Kan data importeren/exporteren en bekijken, maar geen nieuwe honden toevoegen of bewerken.",
                 
                 // Backup teksten
@@ -579,7 +580,7 @@
                 refresh: "Aktualisieren",
                 dashboard: "Dashboard",
                 welcomeTitle: "Willkommen bei der Hundendatenbank PWA",
-                welcomeText: "Wählen Sie eine Option aus dem Menü, um zu beginnen. Die Anwendung funktioniert vollständig offline.",
+                welcomeText: "Wählen Sie eine option aus dem Menü, um zu beginnen. Die Anwendung funktioniert vollständig offline.",
                 aboutApp: "Über diese App",
                 appDescription: "Diese PWA (Progressive Web App) speichert alle Daten lokal in Ihrem Browser. Sie können:",
                 feature1: "Hunde hinzufügen en verwalten",
@@ -1047,7 +1048,7 @@
         function setupMenuEventListeners() {
             const menuButtons = {
                 'dataManagementBtn': 'data',
-                'addDogBtn': 'addDog',
+                'addDogBtn': 'addDog',  // Deze opent nu het keuzescherm hond/nest
                 'editDogDataBtn': 'editDogData',
                 'searchBtn': 'search',
                 'photoGalleryBtn': 'photos',

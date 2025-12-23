@@ -18,7 +18,8 @@ class UIHandler {
             SearchManager: typeof SearchManager,
             PhotoManager: typeof PhotoManager,
             BreedingManager: typeof BreedingManager,
-            PrivateInfoManager: typeof PrivateInfoManager
+            PrivateInfoManager: typeof PrivateInfoManager,
+            LitterManager: typeof LitterManager
         });
         
         try {
@@ -30,7 +31,8 @@ class UIHandler {
                 search: new SearchManager(),
                 photo: new PhotoManager(),
                 breeding: new BreedingManager(),
-                private: new PrivateInfoManager()
+                private: new PrivateInfoManager(),
+                litter: new LitterManager() // Nieuwe module toegevoegd
             };
             
             // Maak dogManager beschikbaar voor SearchManager
@@ -90,6 +92,120 @@ class UIHandler {
             
             .photo-thumbnail img:hover {
                 transform: scale(1.05);
+            }
+            
+            /* Stijlen voor keuzescherm */
+            .choice-container {
+                padding: 10px;
+                min-height: auto;
+            }
+            
+            .choice-card {
+                cursor: pointer;
+                transition: transform 0.3s, box-shadow 0.3s;
+                border: 2px solid transparent;
+                max-width: 90%;
+                margin: 0 auto;
+                min-height: 140px;
+            }
+            
+            .choice-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+                border-color: #3498db;
+            }
+            
+            .choice-icon {
+                transition: transform 0.3s;
+            }
+            
+            .choice-card:hover .choice-icon {
+                transform: scale(1.05);
+            }
+            
+            /* Autocomplete stijlen */
+            .autocomplete-dropdown {
+                position: absolute;
+                background: white;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                max-height: 200px;
+                overflow-y: auto;
+                z-index: 9999;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                width: 100%;
+            }
+            
+            .autocomplete-item {
+                padding: 10px;
+                cursor: pointer;
+                border-bottom: 1px solid #f0f0f0;
+            }
+            
+            .autocomplete-item:hover {
+                background-color: #f8f9fa;
+            }
+            
+            .autocomplete-item .dog-name {
+                font-weight: bold;
+            }
+            
+            .autocomplete-item .dog-info {
+                font-size: 0.85em;
+                color: #666;
+            }
+            
+            .parent-input-wrapper {
+                position: relative;
+            }
+            
+            /* Mobiele optimalisaties */
+            @media (max-width: 768px) {
+                .modal-dialog {
+                    margin: 10px;
+                    max-height: 90vh;
+                }
+                
+                .modal-content {
+                    max-height: 90vh;
+                    overflow-y: auto;
+                }
+                
+                .modal-body {
+                    padding: 15px;
+                    max-height: calc(90vh - 130px);
+                    overflow-y: auto;
+                }
+                
+                .choice-container {
+                    padding: 5px;
+                    min-height: auto;
+                    max-height: 100%;
+                }
+                
+                .choice-card {
+                    min-height: 120px;
+                    margin-bottom: 10px;
+                }
+                
+                .choice-icon {
+                    margin-bottom: 5px;
+                }
+                
+                .choice-icon i {
+                    font-size: 1.8rem !important;
+                }
+                
+                .card-title {
+                    font-size: 1rem;
+                    margin-bottom: 3px;
+                }
+                
+                .card-text.small {
+                    font-size: 0.8rem;
+                    line-height: 1.2;
+                    margin-bottom: 5px;
+                }
             }
         `;
         
@@ -151,6 +267,13 @@ class UIHandler {
                     modalId = 'privateInfoModal';
                     break;
                     
+                // Nieuwe case voor litter (als je direct een nest wilt toevoegen)
+                case 'litter':
+                    if (!this.modules.litter) throw new Error('LitterManager module niet beschikbaar');
+                    modalHTML = this.getLitterModalHTML();
+                    modalId = 'litterModal';
+                    break;
+                    
                 default:
                     throw new Error(`Onbekend modal type: ${modalType}`);
             }
@@ -163,6 +286,33 @@ class UIHandler {
             console.error(`Fout bij laden modal ${modalType}:`, error);
             this.showError(`Fout bij openen: ${error.message}`);
         }
+    }
+    
+    getLitterModalHTML() {
+        // Dit is een aparte modal voor als je direct een nest wilt toevoegen
+        // (niet via het keuzescherm in DogManager)
+        return `
+            <div class="modal fade" id="litterModal" tabindex="-1" aria-labelledby="litterModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title" id="litterModalLabel">
+                                <i class="bi bi-people"></i> Nieuw Nest Toevoegen
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
+                        </div>
+                        <div class="modal-body">
+                            ${this.modules.litter.getFormHTML()}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle me-1"></i> Sluiten
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
     }
     
     injectModal(html, modalId) {
@@ -296,6 +446,12 @@ class UIHandler {
                             }
                         }
                         break;
+                        
+                    case 'litter':
+                        if (this.modules.litter && this.modules.litter.setupEvents) {
+                            this.modules.litter.setupEvents();
+                        }
+                        break;
                 }
             } catch (error) {
                 console.error(`Fout bij setup events voor ${modalType}:`, error);
@@ -375,4 +531,18 @@ class UIHandler {
         console.log('UIHandler test - modules:', Object.keys(this.modules));
         return true;
     }
+    
+    // Helper functie voor terugkeer naar keuzescherm (gebruikt door LitterManager)
+    showChoiceScreen() {
+        // Deze functie wordt aangeroepen vanuit LitterManager om terug te gaan naar het keuzescherm
+        if (this.modules.dog && this.modules.dog.showChoiceScreen) {
+            this.modules.dog.showChoiceScreen();
+        }
+    }
+}
+
+// Maak globaal beschikbaar voor debug doeleinden
+if (typeof window !== 'undefined') {
+    window.UIHandler = UIHandler;
+    window.uiHandler = new UIHandler(); // Optioneel: maak direct een instantie beschikbaar
 }
