@@ -364,7 +364,7 @@
                                 </div>
                                 <div class="card-body">
                                     <p id="backupRisksText1">Deze app slaat alle gegevens <strong>alleen lokaal in je browser</strong> op.</p>
-                                    <p id="backupRisksText2">Je data kan verloren gaan als je:</p>
+                                    <p id="backupRisksText2">Je data kan verloren gaan als je: </p>
                                     <ul id="backupRisksList">
                                         <li>Browser geschiedenis wist</li>
                                         <li>Cookies en sitegegevens verwijdert</li>
@@ -430,13 +430,15 @@
     
     <!-- Feature Modules -->
     <script src="js/modules/DataManager.js"></script>
-    <script src="js/modules/LitterManager.js"></script> <!-- NIEUWE MODULE -->
     <script src="js/modules/DogManager.js"></script>
     <script src="js/modules/DogDataManager.js"></script>
     <script src="js/modules/SearchManager.js"></script>
     <script src="js/modules/PhotoManager.js"></script>
     <script src="js/modules/BreedingManager.js"></script>
     <script src="js/modules/PrivateInfoManager.js"></script>
+    
+    <!-- LitterManager Module -->
+    <script src="js/modules/LitterManager.js"></script>
     
     <!-- Main UI Handler -->
     <script src="js/ui-handler.js"></script>
@@ -491,7 +493,7 @@
                 backupModalTitle: "Data Backup - Waarom is dit belangrijk?",
                 backupRisksTitle: "Risico's zonder backup",
                 backupRisksText1: "Deze app slaat alle gegevens <strong>alleen lokaal in je browser</strong> op.",
-                backupRisksText2: "Je data kan verloren gaan als je:",
+                backupRisksText2: "Je data kan verloren gaan als je: ",
                 backupHowToTitle: "Hoe te backuppen",
                 backupHowToText1: "<strong>Aanbevolen:</strong> Maak wekelijks een backup",
                 backupIOSHeading: "Op iPhone/iPad:",
@@ -548,7 +550,7 @@
                 backupModalTitle: "Data Backup - Why is this important?",
                 backupRisksTitle: "Risks without backup",
                 backupRisksText1: "This app stores all data <strong>only locally in your browser</strong>.",
-                backupRisksText2: "Your data can be lost if you:",
+                backupRisksText2: "Your data can be lost if you: ",
                 backupHowToTitle: "How to backup",
                 backupHowToText1: "<strong>Recommended:</strong> Create weekly backups",
                 backupIOSHeading: "On iPhone/iPad:",
@@ -605,7 +607,7 @@
                 backupModalTitle: "Data Backup - Warum ist das wichtig?",
                 backupRisksTitle: "Risiken ohne Backup",
                 backupRisksText1: "Diese App speichert alle Daten <strong>nur lokal in Ihrem Browser</strong>.",
-                backupRisksText2: "Ihre Daten können verloren gehen, wenn Sie:",
+                backupRisksText2: "Ihre Daten können verloren gehen, wenn Sie: ",
                 backupHowToTitle: "Wie man ein Backup erstellt",
                 backupHowToText1: "<strong>Empfohlen:</strong> Erstellen Sie wöchentliche Backups",
                 backupIOSHeading: "Auf iPhone/iPad:",
@@ -674,7 +676,7 @@
                     const messages = {
                         nl: `Backup herinnering uitgezet voor ${days} dagen`,
                         en: `Backup reminder disabled for ${days} days`,
-                        de: `Backup-Erinnerung für ${days} Tage deaktiviert`
+                        de: `Backup-Erinnerung voor ${days} Tage deaktiviert`
                     };
                     window.uiHandler.showSuccess(messages[this.currentLang] || messages.nl);
                 }
@@ -1018,37 +1020,58 @@
         
         // Wacht tot DOM volledig geladen is
         document.addEventListener('DOMContentLoaded', function() {
-            ui = new UIHandler();
-            window.appUI = ui;
-            window.uiHandler = ui;
+            // Debug: check of alles geladen is
+            console.log('DOM volledig geladen');
+            console.log('Auth:', typeof auth);
+            console.log('Database:', typeof db);
+            console.log('UIHandler:', typeof UIHandler);
+            console.log('BaseModule:', typeof BaseModule);
+            console.log('DataManager:', typeof DataManager);
+            console.log('DogManager:', typeof DogManager);
+            console.log('LitterManager:', typeof LitterManager);
             
-            console.log('UIHandler geïnitialiseerd:', ui);
-            
-            // Initialiseer taal
-            translateAppPage(appLanguage);
-            
-            // Toon huidige gebruiker
-            document.getElementById('currentUser').textContent = 
-                `${auth.getCurrentUser().username} (${auth.isAdmin() ? 'Admin' : 'Gebruiker'})`;
-            
-            // Setup backup manager
-            backupManager.setupEventListeners();
-            backupManager.updateUI();
-            
-            // Setup event listeners voor menu knoppen
-            setupMenuEventListeners();
-            
-            // Setup andere event listeners
-            setupOtherEventListeners();
-            
-            // Laad initiële statistieken
-            loadInitialStats();
+            try {
+                ui = new UIHandler();
+                window.appUI = ui;
+                window.uiHandler = ui;
+                
+                console.log('UIHandler succesvol geïnitialiseerd:', ui);
+                
+                // Initialiseer taal
+                translateAppPage(appLanguage);
+                
+                // Toon huidige gebruiker
+                const currentUser = auth.getCurrentUser();
+                if (currentUser) {
+                    document.getElementById('currentUser').textContent = 
+                        `${currentUser.username} (${auth.isAdmin() ? 'Admin' : 'Gebruiker'})`;
+                }
+                
+                // Setup backup manager
+                backupManager.setupEventListeners();
+                backupManager.updateUI();
+                
+                // Setup event listeners voor menu knoppen
+                setupMenuEventListeners();
+                
+                // Setup andere event listeners
+                setupOtherEventListeners();
+                
+                // Laad initiële statistieken
+                loadInitialStats();
+                
+            } catch (error) {
+                console.error('Fout bij initialiseren UI:', error);
+                alert('Fout bij initialiseren applicatie: ' + error.message);
+            }
         });
         
         function setupMenuEventListeners() {
+            console.log('Setting up menu event listeners');
+            
             const menuButtons = {
                 'dataManagementBtn': 'data',
-                'addDogBtn': 'addDog',  // Deze opent nu het keuzescherm hond/nest
+                'addDogBtn': 'addDog',
                 'editDogDataBtn': 'editDogData',
                 'searchBtn': 'search',
                 'photoGalleryBtn': 'photos',
@@ -1059,47 +1082,69 @@
             for (const [btnId, modalType] of Object.entries(menuButtons)) {
                 const btn = document.getElementById(btnId);
                 if (btn) {
+                    console.log(`Setting up listener for ${btnId}`);
                     btn.addEventListener('click', function() {
+                        console.log(`Clicked ${btnId} -> modalType: ${modalType}`);
                         if (ui && ui.showModal) {
+                            console.log(`Calling ui.showModal('${modalType}')`);
                             ui.showModal(modalType);
                         } else {
-                            console.error('UI handler niet beschikbaar');
+                            console.error('UI handler niet beschikbaar of showModal functie ontbreekt');
+                            alert('UI handler niet beschikbaar. Herlaad de pagina.');
                         }
                     });
+                } else {
+                    console.error(`Button ${btnId} not found`);
                 }
             }
         }
         
         function setupOtherEventListeners() {
+            console.log('Setting up other event listeners');
+            
             // Uitloggen
-            document.getElementById('logoutBtn').addEventListener('click', function() {
-                auth.logout();
-            });
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function() {
+                    console.log('Logout button clicked');
+                    auth.logout();
+                });
+            } else {
+                console.error('Logout button not found');
+            }
             
             // Vernieuw statistieken
-            document.getElementById('refreshStatsBtn').addEventListener('click', async function() {
-                try {
-                    const stats = await db.getStatistieken();
-                    document.getElementById('quickStatsHonden').textContent = stats.totaalHonden;
-                    document.getElementById('quickStatsFotos').textContent = stats.totaalFotos;
-                    if (ui && ui.showSuccess) {
-                        ui.showSuccess('Statistieken vernieuwd!');
+            const refreshStatsBtn = document.getElementById('refreshStatsBtn');
+            if (refreshStatsBtn) {
+                refreshStatsBtn.addEventListener('click', async function() {
+                    console.log('Refresh stats button clicked');
+                    try {
+                        const stats = await db.getStatistieken();
+                        document.getElementById('quickStatsHonden').textContent = stats.totaalHonden;
+                        document.getElementById('quickStatsFotos').textContent = stats.totaalFotos;
+                        if (ui && ui.showSuccess) {
+                            ui.showSuccess('Statistieken vernieuwd!');
+                        }
+                    } catch (error) {
+                        console.error('Fout bij laden statistieken:', error);
+                        if (ui && ui.showError) {
+                            ui.showError('Fout bij laden statistieken');
+                        }
                     }
-                } catch (error) {
-                    console.error('Fout bij laden statistieken:', error);
-                    if (ui && ui.showError) {
-                        ui.showError('Fout bij laden statistieken');
-                    }
-                }
-            });
+                });
+            } else {
+                console.error('Refresh stats button not found');
+            }
         }
         
         async function loadInitialStats() {
+            console.log('Loading initial stats');
             try {
                 await db.init();
                 const stats = await db.getStatistieken();
                 document.getElementById('quickStatsHonden').textContent = stats.totaalHonden;
                 document.getElementById('quickStatsFotos').textContent = stats.totaalFotos;
+                console.log('Stats loaded:', stats);
             } catch (error) {
                 console.error('Fout bij initialiseren:', error);
             }
