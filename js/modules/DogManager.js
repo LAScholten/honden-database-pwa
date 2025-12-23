@@ -9,7 +9,7 @@ class DogManager extends BaseModule {
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';
         this.lastBreeds = JSON.parse(localStorage.getItem('lastBreeds') || '[]');
         this.allDogs = []; // Voor autocomplete van ouders
-        this.litterManager = null; // Wordt later geïnitialiseerd
+        this.litterManager = null; // Wordt later geïnitialiseerd indien beschikbaar
         this.translations = {
             nl: {
                 // Modal titels
@@ -579,6 +579,29 @@ class DogManager extends BaseModule {
     }
     
     getLitterFormHTML() {
+        // Controleer of LitterManager beschikbaar is
+        if (typeof LitterManager === 'undefined') {
+            // Fallback HTML als LitterManager niet beschikbaar is
+            return `
+                <div class="mb-3">
+                    <button type="button" class="btn btn-outline-secondary btn-sm back-to-choice-btn">
+                        <i class="bi bi-arrow-left me-1"></i> ${this.t('back')}
+                    </button>
+                </div>
+                
+                <div class="text-center py-3">
+                    <div class="mb-2">
+                        <i class="bi bi-tools" style="font-size: 2.5rem; color: #f39c12;"></i>
+                    </div>
+                    <h5 class="mb-2">${this.t('development')}</h5>
+                    <p class="text-muted small mb-2">Deze functie is momenteel in ontwikkeling en komt binnenkort beschikbaar.</p>
+                    <button type="button" class="btn btn-secondary btn-sm back-to-choice-btn">
+                        <i class="bi bi-arrow-left me-1"></i> ${this.t('back')}
+                    </button>
+                </div>
+            `;
+        }
+        
         // Maak LitterManager aan als deze nog niet bestaat
         if (!this.litterManager) {
             this.litterManager = new LitterManager();
@@ -923,9 +946,19 @@ class DogManager extends BaseModule {
         if (litterFormContainer) litterFormContainer.style.display = 'block';
         if (modalFooter) modalFooter.style.display = 'flex';
         
-        // Stel LitterManager events in
-        if (this.litterManager) {
+        // Stel LitterManager events in als beschikbaar
+        if (this.litterManager && this.litterManager.setupEvents) {
             this.litterManager.setupEvents();
+        } else {
+            // Fallback: voeg event listener toe voor terug knop
+            setTimeout(() => {
+                const backBtn = document.querySelector('.back-to-choice-btn');
+                if (backBtn) {
+                    backBtn.addEventListener('click', () => {
+                        this.showChoiceScreen();
+                    });
+                }
+            }, 50);
         }
     }
     
