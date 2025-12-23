@@ -431,6 +431,7 @@
     <!-- Feature Modules -->
     <script src="js/modules/DataManager.js"></script>
     <script src="js/modules/DogManager.js"></script>
+    <script src="js/modules/LitterManager.js"></script> <!-- HIER TOEGEVOEGD -->
     <script src="js/modules/DogDataManager.js"></script>
     <script src="js/modules/SearchManager.js"></script>
     <script src="js/modules/PhotoManager.js"></script>
@@ -478,7 +479,7 @@
                 roleBasedAccess: "De app gebruikt rol-gebaseerde toegang:",
                 adminRole: "Administrator",
                 adminRights: "Volle rechten, inclusief nieuwe honden toevoegen.",
-                userRole: "Gebruiker",
+                userRole: "GebruiXker",
                 userRights: "Kan data importeren/exporteren en bekijken, maar geen nieuwe honden toevoegen of bewerken.",
                 
                 // Backup teksten
@@ -593,18 +594,18 @@
                 adminRole: "Administrator",
                 adminRights: "Volle Rechte, einschließlich neuer Hunde hinzufügen.",
                 userRole: "Benutzer",
-                userRights: "Kann Daten importieren/exportieren und ansehen, aber keine neuen Hunde hinzufügen en bearbeiten.",
+                userRights: "Kann Daten importieren/exportieren und ansehen, aber keine nieuwe Hunde hinzufügen en bearbeiten.",
                 
                 // Backup Texte
                 backupNow: "Backup",
                 learnMore: "Info",
                 backupWarningTitle: "Backup empfohlen",
                 backupNowDashboard: "Jetzt Backup erstellen",
-                dismissBackup: "Nicht mehr anzeigen",
-                backupModalTitle: "Data Backup - Warum ist das wichtig?",
-                backupRisksTitle: "Risiken ohne Backup",
+                dismissBackup: "Nicht meer anzeigen",
+                backupModalTitle: "Data Backup - Warum is dit wichtig?",
+                backupRisksTitle: "Risiken zonder Backup",
                 backupRisksText1: "Diese App speichert alle Daten <strong>nur lokal in Ihrem Browser</strong>.",
-                backupRisksText2: "Ihre Daten können verloren gehen, wenn Sie: ",
+                backupRisksText2: "Ihre Daten kunnen verloren gehen, wenn Sie: ",
                 backupHowToTitle: "Wie man ein Backup erstellt",
                 backupHowToText1: "<strong>Empfohlen:</strong> Erstellen Sie wöchentliche Backups",
                 backupIOSHeading: "Auf iPhone/iPad:",
@@ -612,7 +613,7 @@
                 backupBestPracticesTitle: "Beste Praktiken:",
                 backupModalClose: "Schließen",
                 backupModalAction: "Jetzt Backup erstellen",
-                backupStatusGood: "✓ Backup: heute",
+                backupStatusGood: "✓ Backup: today",
                 backupStatusWarning: "⚠ Letztes Backup: vor {days} Tagen",
                 backupStatusDanger: "🚨 NOCH NIE gebackupt!",
                 dashboardWarningNever: "Sie haben noch nie ein Backup erstellt! Wenn Sie Browser-Daten löschen, verlieren Sie alle Ihre Hundeaufzeichnungen.",
@@ -673,7 +674,7 @@
                     const messages = {
                         nl: `Backup herinnering uitgezet voor ${days} dagen`,
                         en: `Backup reminder disabled for ${days} days`,
-                        de: `Backup-Erinnerung für ${days} Tage deaktiviert`
+                        de: `Backup-Erinnerung voor ${days} Tage deaktiviert`
                     };
                     window.uiHandler.showSuccess(messages[this.currentLang] || messages.nl);
                 }
@@ -872,7 +873,7 @@
                 const risksList = {
                     nl: ["Browser geschiedenis wist", "Cookies en sitegegevens verwijdert", "Je telefoon/tablet reset", "De app lange tijd niet gebruikt", "Van browser wisselt"],
                     en: ["Clear browser history", "Delete cookies and site data", "Reset your phone/tablet", "Don't use the app for a long time", "Switch browsers"],
-                    de: ["Browserverlauf löschen", "Cookies und Websitedaten entfernen", "Ihr Telefon/Tablet zurücksetzen", "Die App lange nicht verwenden", "Browser wechseln"]
+                    de: ["Browserverlauf löschen", "Cookies und Websitedaten entfernen", "Ihr Telefon/Tablet zurücksetzen", "Die App lange niet verwenden", "Browser wechseln"]
                 };
                 
                 const bestPractices = {
