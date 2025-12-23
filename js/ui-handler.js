@@ -19,11 +19,11 @@ class UIHandler {
             PhotoManager: typeof PhotoManager,
             BreedingManager: typeof BreedingManager,
             PrivateInfoManager: typeof PrivateInfoManager,
-            LitterManager: typeof LitterManager
+            LitterManager: typeof LitterManager // Controleer of deze bestaat
         });
         
         try {
-            // Initialiseer modules
+            // Initialiseer modules - maak LitterManager optioneel
             this.modules = {
                 data: new DataManager(),
                 dog: new DogManager(),
@@ -31,18 +31,39 @@ class UIHandler {
                 search: new SearchManager(),
                 photo: new PhotoManager(),
                 breeding: new BreedingManager(),
-                private: new PrivateInfoManager(),
-                litter: new LitterManager() // Nieuwe module toegevoegd
+                private: new PrivateInfoManager()
             };
+            
+            // Probeer LitterManager te initialiseren als deze beschikbaar is
+            if (typeof LitterManager !== 'undefined') {
+                this.modules.litter = new LitterManager();
+                console.log('LitterManager succesvol geïnitialiseerd');
+            } else {
+                console.warn('LitterManager module niet gevonden - wordt overgeslagen');
+                this.modules.litter = null;
+            }
             
             // Maak dogManager beschikbaar voor SearchManager
             window.dogManager = this.modules.dog;
             
-            console.log('Alle modules succesvol geïnitialiseerd:', Object.keys(this.modules));
+            console.log('Modules geïnitialiseerd:', Object.keys(this.modules).map(key => ({
+                name: key,
+                available: this.modules[key] !== null
+            })));
             
         } catch (error) {
             console.error('Fout bij initialiseren modules:', error);
-            this.modules = {};
+            // Probeer op zijn minst de essentiële modules te behouden
+            this.modules = {
+                data: null,
+                dog: null,
+                editDogData: null,
+                search: null,
+                photo: null,
+                breeding: null,
+                private: null,
+                litter: null
+            };
         }
         
         // Voeg CSS toe voor styling
@@ -92,120 +113,6 @@ class UIHandler {
             
             .photo-thumbnail img:hover {
                 transform: scale(1.05);
-            }
-            
-            /* Stijlen voor keuzescherm */
-            .choice-container {
-                padding: 10px;
-                min-height: auto;
-            }
-            
-            .choice-card {
-                cursor: pointer;
-                transition: transform 0.3s, box-shadow 0.3s;
-                border: 2px solid transparent;
-                max-width: 90%;
-                margin: 0 auto;
-                min-height: 140px;
-            }
-            
-            .choice-card:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-                border-color: #3498db;
-            }
-            
-            .choice-icon {
-                transition: transform 0.3s;
-            }
-            
-            .choice-card:hover .choice-icon {
-                transform: scale(1.05);
-            }
-            
-            /* Autocomplete stijlen */
-            .autocomplete-dropdown {
-                position: absolute;
-                background: white;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                max-height: 200px;
-                overflow-y: auto;
-                z-index: 9999;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                width: 100%;
-            }
-            
-            .autocomplete-item {
-                padding: 10px;
-                cursor: pointer;
-                border-bottom: 1px solid #f0f0f0;
-            }
-            
-            .autocomplete-item:hover {
-                background-color: #f8f9fa;
-            }
-            
-            .autocomplete-item .dog-name {
-                font-weight: bold;
-            }
-            
-            .autocomplete-item .dog-info {
-                font-size: 0.85em;
-                color: #666;
-            }
-            
-            .parent-input-wrapper {
-                position: relative;
-            }
-            
-            /* Mobiele optimalisaties */
-            @media (max-width: 768px) {
-                .modal-dialog {
-                    margin: 10px;
-                    max-height: 90vh;
-                }
-                
-                .modal-content {
-                    max-height: 90vh;
-                    overflow-y: auto;
-                }
-                
-                .modal-body {
-                    padding: 15px;
-                    max-height: calc(90vh - 130px);
-                    overflow-y: auto;
-                }
-                
-                .choice-container {
-                    padding: 5px;
-                    min-height: auto;
-                    max-height: 100%;
-                }
-                
-                .choice-card {
-                    min-height: 120px;
-                    margin-bottom: 10px;
-                }
-                
-                .choice-icon {
-                    margin-bottom: 5px;
-                }
-                
-                .choice-icon i {
-                    font-size: 1.8rem !important;
-                }
-                
-                .card-title {
-                    font-size: 1rem;
-                    margin-bottom: 3px;
-                }
-                
-                .card-text.small {
-                    font-size: 0.8rem;
-                    line-height: 1.2;
-                    margin-bottom: 5px;
-                }
             }
         `;
         
@@ -267,7 +174,7 @@ class UIHandler {
                     modalId = 'privateInfoModal';
                     break;
                     
-                // Nieuwe case voor litter (als je direct een nest wilt toevoegen)
+                // Optionele case voor litter (voor toekomstig gebruik)
                 case 'litter':
                     if (!this.modules.litter) throw new Error('LitterManager module niet beschikbaar');
                     modalHTML = this.getLitterModalHTML();
