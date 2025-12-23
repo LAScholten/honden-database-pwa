@@ -6,7 +6,20 @@
 class DataManager extends BaseModule {
     constructor() {
         super();
-        this.currentLang = localStorage.getItem('appLanguage') || 'nl';
+        // VERVANGD: Veilige localStorage toegang
+        this.currentLang = 'nl'; // Standaardwaarde
+        try {
+            // Probeer taal uit localStorage te halen, maar vang fouten op
+            const savedLang = localStorage.getItem('appLanguage');
+            if (savedLang && this.translations[savedLang]) {
+                this.currentLang = savedLang;
+            }
+        } catch (error) {
+            // localStorage is niet beschikbaar (bijv. door Tracking Prevention)
+            console.warn('Kon taalvoorkeur niet laden uit localStorage:', error.message);
+            // Gebruik de standaardwaarde 'nl'
+        }
+        
         this.translations = {
             nl: {
                 dataManagement: "Data Beheer",
@@ -176,7 +189,7 @@ class DataManager extends BaseModule {
                 shareDataDescription: "Exportieren Sie nur öffentliche data (ohne private Notizen)",
                 backupStatusWarning: "Backup empfohlen",
                 backupStatusDanger: "Wichtig",
-                backupWarningText: "Letztes Backup war vor {days} Tagen",
+                backupWarningText: "Letztes Backup was vor {days} Tagen",
                 backupDangerText: "Sie haben noch nie ein Backup erstellt!"
             }
         };
@@ -197,10 +210,23 @@ class DataManager extends BaseModule {
     }
     
     updateLanguage(lang) {
-        this.currentLang = lang;
-        if (document.getElementById('dataManagementModal')) {
-            this.loadDatabaseStats();
-            this.updateModalTexts();
+        try {
+            if (lang && this.translations[lang]) {
+                this.currentLang = lang;
+                // Probeer op te slaan, maar negeer fouten
+                try {
+                    localStorage.setItem('appLanguage', lang);
+                } catch (storageError) {
+                    console.warn('Kon taalvoorkeur niet opslaan in localStorage:', storageError.message);
+                }
+                
+                if (document.getElementById('dataManagementModal')) {
+                    this.loadDatabaseStats();
+                    this.updateModalTexts();
+                }
+            }
+        } catch (error) {
+            console.warn('Fout bij taal update:', error);
         }
     }
     
