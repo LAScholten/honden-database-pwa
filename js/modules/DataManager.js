@@ -192,19 +192,17 @@ class DataManager extends BaseModule {
             }
         } catch (error) {
             // localStorage is niet beschikbaar (bijv. door Tracking Prevention)
-            console.warn('Kon taalvoorkeur niet laden uit localStorage:', error.message);
+            // Geen console.warn nodig - dit is verwacht gedrag
             // Gebruik de standaardwaarde 'nl'
         }
         
-        // Gebruik de globale database instantie
-        // BELANGRIJK: Zorg ervoor dat dit naar window.db verwijst
-        if (window.db) {
-            this.db = window.db;
-        } else {
-            console.error('Database niet gevonden in window object');
-            // Fallback: probeer het te vinden
-            this.db = window.hondenDatabase || window.database || db;
-        }
+        // Database wordt later ingesteld via setDb() methode
+        this.db = null;
+    }
+    
+    // Nieuwe methode om database in te stellen
+    setDb(dbInstance) {
+        this.db = dbInstance;
     }
     
     t(key) {
@@ -219,7 +217,7 @@ class DataManager extends BaseModule {
                 try {
                     localStorage.setItem('appLanguage', lang);
                 } catch (storageError) {
-                    console.warn('Kon taalvoorkeur niet opslaan in localStorage:', storageError.message);
+                    // Negeer - dit is oké in Tracking Prevention modus
                 }
                 
                 if (document.getElementById('dataManagementModal')) {
@@ -228,7 +226,7 @@ class DataManager extends BaseModule {
                 }
             }
         } catch (error) {
-            console.warn('Fout bij taal update:', error);
+            // Negeer fouten
         }
     }
     
