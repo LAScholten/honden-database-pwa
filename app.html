@@ -1177,29 +1177,4 @@
         });
     </script>
 </body>
-</html>              }).catch(error => {
-                    console.log('ServiceWorker registratie mislukt:', error);
-                });
-            });
-        }
-        
-        // Modal fix
-        document.addEventListener('hidden.bs.modal', function() {
-            setTimeout(() => {
-                const openModals = document.querySelectorAll('.modal.show');
-                const backdrops = document.querySelectorAll('.modal-backdrop');
-                
-                if (openModals.length === 0 && backdrops.length > 0) {
-                    backdrops.forEach(backdrop => {
-                        backdrop.remove();
-                    });
-                    
-                    document.body.classList.remove('modal-open');
-                    document.body.style.overflow = '';
-                    document.body.style.paddingRight = '';
-                }
-            }, 100);
-        });
-    </script>
-</body>
 </html>
