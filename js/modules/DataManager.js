@@ -6,20 +6,8 @@
 class DataManager extends BaseModule {
     constructor() {
         super();
-        // VERVANGD: Veilige localStorage toegang
-        this.currentLang = 'nl'; // Standaardwaarde
-        try {
-            // Probeer taal uit localStorage te halen, maar vang fouten op
-            const savedLang = localStorage.getItem('appLanguage');
-            if (savedLang && this.translations[savedLang]) {
-                this.currentLang = savedLang;
-            }
-        } catch (error) {
-            // localStorage is niet beschikbaar (bijv. door Tracking Prevention)
-            console.warn('Kon taalvoorkeur niet laden uit localStorage:', error.message);
-            // Gebruik de standaardwaarde 'nl'
-        }
         
+        // Definieer translations EERST
         this.translations = {
             nl: {
                 dataManagement: "Data Beheer",
@@ -145,7 +133,7 @@ class DataManager extends BaseModule {
                 importStrategyDescription: "Vollständige Wiederherstellung: Alle Daten aus dem Export wiederherstellen",
                 updateAndComplete: "Vollständige Wiederherstellung",
                 startImport: "Import starten",
-                importingData: "Daten werden importiert...",
+                importingData: "Daten worden importiert...",
                 dataExport: "Datenexport",
                 exportDescription: "Exportieren Sie Daten in eine Datei für Backup oder Teilen.",
                 exportOptions: "Exportoptionen",
@@ -189,10 +177,24 @@ class DataManager extends BaseModule {
                 shareDataDescription: "Exportieren Sie nur öffentliche data (ohne private Notizen)",
                 backupStatusWarning: "Backup empfohlen",
                 backupStatusDanger: "Wichtig",
-                backupWarningText: "Letztes Backup was vor {days} Tagen",
+                backupWarningText: "Letztes Backup war vor {days} Tagen",
                 backupDangerText: "Sie haben noch nie ein Backup erstellt!"
             }
         };
+        
+        // Nu pas de taal instellen
+        this.currentLang = 'nl'; // Standaardwaarde
+        try {
+            // Probeer taal uit localStorage te halen, maar vang fouten op
+            const savedLang = localStorage.getItem('appLanguage');
+            if (savedLang && this.translations[savedLang]) {
+                this.currentLang = savedLang;
+            }
+        } catch (error) {
+            // localStorage is niet beschikbaar (bijv. door Tracking Prevention)
+            console.warn('Kon taalvoorkeur niet laden uit localStorage:', error.message);
+            // Gebruik de standaardwaarde 'nl'
+        }
         
         // Gebruik de globale database instantie
         // BELANGRIJK: Zorg ervoor dat dit naar window.db verwijst
