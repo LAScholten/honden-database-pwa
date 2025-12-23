@@ -437,9 +437,6 @@
     <script src="js/modules/BreedingManager.js"></script>
     <script src="js/modules/PrivateInfoManager.js"></script>
     
-    <!-- LitterManager Module -->
-    <script src="js/modules/LitterManager.js"></script>
-    
     <!-- Main UI Handler -->
     <script src="js/ui-handler.js"></script>
     
@@ -481,7 +478,7 @@
                 roleBasedAccess: "De app gebruikt rol-gebaseerde toegang:",
                 adminRole: "Administrator",
                 adminRights: "Volle rechten, inclusief nieuwe honden toevoegen.",
-                userRole: "GebruiXker",
+                userRole: "Gebruiker",
                 userRights: "Kan data importeren/exporteren en bekijken, maar geen nieuwe honden toevoegen of bewerken.",
                 
                 // Backup teksten
@@ -596,7 +593,7 @@
                 adminRole: "Administrator",
                 adminRights: "Volle Rechte, einschließlich neuer Hunde hinzufügen.",
                 userRole: "Benutzer",
-                userRights: "Kann Daten importieren/exportieren und ansehen, aber keine neuen Hunde hinzufügen und bearbeiten.",
+                userRights: "Kann Daten importieren/exportieren und ansehen, aber keine neuen Hunde hinzufügen en bearbeiten.",
                 
                 // Backup Texte
                 backupNow: "Backup",
@@ -619,7 +616,7 @@
                 backupStatusWarning: "⚠ Letztes Backup: vor {days} Tagen",
                 backupStatusDanger: "🚨 NOCH NIE gebackupt!",
                 dashboardWarningNever: "Sie haben noch nie ein Backup erstellt! Wenn Sie Browser-Daten löschen, verlieren Sie alle Ihre Hundeaufzeichnungen.",
-                dashboardWarningOld: "Ihr letztes Backup war vor {days} Tagen. Erwägen Sie, ein neues Backup zu erstellen, um Datenverlust zu vermeiden."
+                dashboardWarningOld: "Ihr letztes Backup war vor {days} Tagen. Erwägen Sie, ein neues Backup zu createn, um Datenverlust zu vermeiden."
             }
         };
 
@@ -676,7 +673,7 @@
                     const messages = {
                         nl: `Backup herinnering uitgezet voor ${days} dagen`,
                         en: `Backup reminder disabled for ${days} days`,
-                        de: `Backup-Erinnerung voor ${days} Tage deaktiviert`
+                        de: `Backup-Erinnerung für ${days} Tage deaktiviert`
                     };
                     window.uiHandler.showSuccess(messages[this.currentLang] || messages.nl);
                 }
@@ -1156,6 +1153,31 @@
                 navigator.serviceWorker.register('sw.js').then(registration => {
                     console.log('ServiceWorker geregistreerd:', registration.scope);
                 }).catch(error => {
+                    console.log('ServiceWorker registratie mislukt:', error);
+                });
+            });
+        }
+        
+        // Modal fix
+        document.addEventListener('hidden.bs.modal', function() {
+            setTimeout(() => {
+                const openModals = document.querySelectorAll('.modal.show');
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                
+                if (openModals.length === 0 && backdrops.length > 0) {
+                    backdrops.forEach(backdrop => {
+                        backdrop.remove();
+                    });
+                    
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>              }).catch(error => {
                     console.log('ServiceWorker registratie mislukt:', error);
                 });
             });
