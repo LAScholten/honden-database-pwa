@@ -640,8 +640,8 @@ class LitterManager {
         console.log('LitterManager: setupParentAutocomplete aangeroepen');
         
         // Event listeners voor vader en moeder velden
-        const fatherInput = document.getElementById('litterFather');
-        const motherInput = document.getElementById('litterMother');
+        const fatherInput = document.getElementById('Father');
+        const motherInput = document.getElementById('Mother');
         
         if (fatherInput) {
             fatherInput.addEventListener('focus', () => {
@@ -657,7 +657,7 @@ class LitterManager {
             
             fatherInput.addEventListener('blur', () => {
                 setTimeout(() => {
-                    const dropdown = document.getElementById('litterFatherDropdown');
+                    const dropdown = document.getElementById('FatherDropdown');
                     if (dropdown) {
                         dropdown.style.display = 'none';
                     }
@@ -678,7 +678,7 @@ class LitterManager {
             
             motherInput.addEventListener('blur', () => {
                 setTimeout(() => {
-                    const dropdown = document.getElementById('litterMotherDropdown');
+                    const dropdown = document.getElementById('MotherDropdown');
                     if (dropdown) {
                         dropdown.style.display = 'none';
                     }
