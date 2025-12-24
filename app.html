@@ -458,7 +458,7 @@
                 menu: "Menu",
                 dataManagement: "Data Beheer",
                 newDog: "Nieuwe Hond",
-                newLitter: "Nieuw Nest",  // NIEUW TOEGEVOEGD
+                newLitter: "Nieuw Nest",
                 editDogData: "Data Hond Bewerken",
                 searchDog: "Hond Zoeken",
                 photoGallery: "Foto Galerij",
@@ -516,7 +516,7 @@
                 menu: "Menu",
                 dataManagement: "Data Management",
                 newDog: "New Dog",
-                newLitter: "New Litter",  // NIEUW TOEGEVOEGD
+                newLitter: "New Litter",
                 editDogData: "Edit Dog Data",
                 searchDog: "Search Dog",
                 photoGallery: "Photo Gallery",
@@ -574,7 +574,7 @@
                 menu: "Menü",
                 dataManagement: "Datenverwaltung",
                 newDog: "Neuer Hund",
-                newLitter: "Neuer Wurf",  // NIEUW TOEGEVOEGD
+                newLitter: "Neuer Wurf",
                 editDogData: "Hundedaten bearbeiten",
                 searchDog: "Hund suchen",
                 photoGallery: "Foto Galerie",
@@ -611,7 +611,7 @@
                 backupModalTitle: "Data Backup - Warum ist das wichtig?",
                 backupRisksTitle: "Risiken ohne Backup",
                 backupRisksText1: "Diese App speichert alle Daten <strong>nur lokal in Ihrem Browser</strong>.",
-                backupRisksText2: "Ihre Daten können verloren gehen, wenn Sie: ",
+                backupRisksText2: "Ihre Daten kunnen verloren gehen, wenn Sie: ",
                 backupHowToTitle: "Wie man ein Backup erstellt",
                 backupHowToText1: "<strong>Empfohlen:</strong> Erstellen Sie wöchentliche Backups",
                 backupIOSHeading: "Auf iPhone/iPad:",
@@ -622,7 +622,7 @@
                 backupStatusGood: "✓ Backup: heute",
                 backupStatusWarning: "⚠ Letztes Backup: vor {days} Tagen",
                 backupStatusDanger: "🚨 NOCH NIE gebackupt!",
-                dashboardWarningNever: "Sie haben noch nie ein Backup erstellt! Wenn Sie Browser-Daten löschen, verlieren Sie alle Ihre Hundeaufzeichnungen.",
+                dashboardWarningNever: "Sie haben noch nie ein Backup erstellt! Wenn Sie Browser-Daten löschen, verloren Sie alle Ihre Hundeaufzeichnungen.",
                 dashboardWarningOld: "Ihr letztes Backup war vor {days} Tagen. Erwägen Sie, ein neues Backup zu createn, um Datenverlust zu vermeiden."
             }
         };
@@ -849,7 +849,6 @@
                     'backupAndroidHeading': translations.backupAndroidHeading,
                     'backupBestPracticesTitle': translations.backupBestPracticesTitle,
                     'backupModalClose': translations.backupModalClose
-                    // backupModalAction verwijderd (niet meer nodig)
                 };
                 
                 for (const [id, text] of Object.entries(elements)) {
@@ -915,7 +914,6 @@
                 const backupButtons = [
                     'backupNowHeaderBtn',
                     'backupFromDashboardBtn'
-                    // 'backupFromModalBtn' verwijderd
                 ];
                 
                 backupButtons.forEach(btnId => {
@@ -1024,16 +1022,6 @@
         
         // Wacht tot DOM volledig geladen is
         document.addEventListener('DOMContentLoaded', function() {
-            // Debug: check of alles geladen is
-            console.log('DOM volledig geladen');
-            console.log('Auth:', typeof auth);
-            console.log('Database:', typeof db);
-            console.log('UIHandler:', typeof UIHandler);
-            console.log('BaseModule:', typeof BaseModule);
-            console.log('DataManager:', typeof DataManager);
-            console.log('DogManager:', typeof DogManager);
-            console.log('LitterManager:', typeof LitterManager);
-            
             try {
                 ui = new UIHandler();
                 window.appUI = ui;
@@ -1076,7 +1064,7 @@
             const menuButtons = {
                 'dataManagementBtn': 'data',
                 'addDogBtn': 'addDog',
-                'addLitterBtn': 'litter',  // NIEUW TOEGEVOEGD
+                'addLitterBtn': 'litter',
                 'editDogDataBtn': 'editDogData',
                 'searchBtn': 'search',
                 'photoGalleryBtn': 'photos',
@@ -1183,6 +1171,134 @@
                 }
             }, 100);
         });
+        
+        // UI Handler aanpassing voor LitterManager
+        const originalShowModal = UIHandler.prototype.showModal;
+        UIHandler.prototype.showModal = function(modalType) {
+            console.log('Modified showModal called with:', modalType);
+            
+            // Speciale behandeling voor 'litter' modal
+            if (modalType === 'litter') {
+                console.log('Creating litter modal');
+                
+                // Maak LitterManager aan
+                const litterManager = new LitterManager();
+                
+                // Injecteer dependencies
+                if (litterManager.injectDependencies) {
+                    litterManager.injectDependencies(db, auth);
+                    console.log('Dependencies injected into LitterManager');
+                }
+                
+                // Haal de modal HTML op - deze bevat de toegangscontrole
+                const modalHTML = litterManager.getModalHTML();
+                console.log('Got modal HTML from LitterManager');
+                
+                // Toon de modal
+                this.showCustomModal(modalHTML, 'addLitterModal', 'addLitterModalLabel');
+                
+                // Setup events
+                setTimeout(() => {
+                    try {
+                        if (litterManager.setupEvents) {
+                            // Controleer eerst of gebruiker admin is
+                            const isAdmin = auth.isAdmin();
+                            if (!isAdmin) {
+                                console.log('User is not admin, showing access denied popup');
+                                // De modal toont al de toegang geweigerd popup
+                                return;
+                            }
+                            litterManager.setupEvents();
+                            console.log('LitterManager events setup complete');
+                        }
+                    } catch (error) {
+                        console.error('Error setting up LitterManager events:', error);
+                    }
+                }, 500);
+                
+                return;
+            }
+            
+            // Voor alle andere modals, gebruik de originele functionaliteit
+            originalShowModal.call(this, modalType);
+        };
+        
+        // Helper functie om custom modal te tonen
+        UIHandler.prototype.showCustomModal = function(html, modalId, modalLabelId) {
+            console.log('showCustomModal called:', modalId);
+            
+            // Verwijder bestaande modal met hetzelfde ID
+            const existingModal = document.getElementById(modalId);
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Voeg de nieuwe modal toe aan de container
+            const modalsContainer = document.getElementById('modalsContainer');
+            if (modalsContainer) {
+                modalsContainer.innerHTML = html;
+                
+                // Toon de modal
+                const modalElement = document.getElementById(modalId);
+                if (modalElement) {
+                    const modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+                    
+                    // Vertaal de modal
+                    this.translateModalContent(modalElement);
+                    
+                    // Setup vertaling voor taalwissels
+                    this.setupModalTranslation(modalElement);
+                    
+                    console.log('Modal shown:', modalId);
+                } else {
+                    console.error('Modal element not found after adding to DOM:', modalId);
+                }
+            } else {
+                console.error('Modals container not found');
+            }
+        };
+        
+        // Helper om modal content te vertalen
+        UIHandler.prototype.translateModalContent = function(modalElement) {
+            const lang = localStorage.getItem('appLanguage') || 'nl';
+            
+            // Vertaal elementen met data-key attribute
+            const elements = modalElement.querySelectorAll('[data-key]');
+            elements.forEach(element => {
+                const key = element.getAttribute('data-key');
+                const translations = appTranslations[lang];
+                if (translations && translations[key]) {
+                    element.textContent = translations[key];
+                }
+            });
+        };
+        
+        // Helper om modal translation te setupen voor taalwissels
+        UIHandler.prototype.setupModalTranslation = function(modalElement) {
+            const langButtons = document.querySelectorAll('.app-lang-btn');
+            langButtons.forEach(btn => {
+                const originalClickListener = btn.onclick;
+                btn.onclick = function(e) {
+                    if (originalClickListener) originalClickListener.call(this, e);
+                    
+                    // Vertaal de modal content opnieuw
+                    const lang = this.getAttribute('data-lang');
+                    const modal = modalElement.querySelector('.modal');
+                    if (modal) {
+                        // Vertaal alle elementen in de modal
+                        const elements = modal.querySelectorAll('[data-key]');
+                        elements.forEach(element => {
+                            const key = element.getAttribute('data-key');
+                            const translations = appTranslations[lang];
+                            if (translations && translations[key]) {
+                                element.textContent = translations[key];
+                            }
+                        });
+                    }
+                };
+            });
+        };
     </script>
 </body>
 </html>
