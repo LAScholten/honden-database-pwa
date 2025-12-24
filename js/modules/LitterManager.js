@@ -232,7 +232,7 @@ class LitterManager {
                 
                 // Meldungen
                 adminOnly: "Nur Administratoren können Würfe hinzufügen/bearbeiten",
-                fieldsRequired: "Name, Stammbaum-Nummer und Rasse zijn Pflichtfelder",
+                fieldsRequired: "Name, Stammbaum-Nummer und Rasse sind Pflichtfelder",
                 savingDog: "Wurf wordt gespeichert...",
                 dogAdded: "Wurf erfolgreich hinzugefügt!",
                 dogUpdated: "Wurf erfolgreich aktualisiert!",
@@ -287,6 +287,46 @@ class LitterManager {
         
         console.log('LitterManager: Initialisatie voltooid');
         return true;
+    }
+    
+    /**
+     * GET MODAL HTML
+     * Retourneert het HTML voor de "Nieuw Nest" modal
+     */
+    getModalHTML() {
+        console.log('LitterManager: getModalHTML aangeroepen');
+        
+        // Controleer rechten
+        if (!this.auth || !this.auth.isAdmin()) {
+            console.log('LitterManager: Gebruiker is geen admin, toon toegang geweigerd');
+            return this.getAccessDeniedHTML();
+        }
+        
+        const formHTML = this.getFormHTML();
+        const t = this.t.bind(this);
+        
+        return `
+            <div class="modal fade" id="addLitterModal" tabindex="-1" aria-labelledby="addLitterModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title" id="addLitterModalLabel">
+                                <i class="bi bi-plus-circle me-2"></i> ${t('addDogTitle')}
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
+                        </div>
+                        <div class="modal-body">
+                            ${formHTML}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle me-1"></i> ${t('cancel')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
     }
     
     getFormHTML(litterData = null) {
@@ -518,6 +558,33 @@ class LitterManager {
         `;
     }
     
+    getAccessDeniedHTML() {
+        return `
+            <div class="modal fade" id="addLitterModal" tabindex="-1" aria-labelledby="addLitterModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title" id="addLitterModalLabel">
+                                <i class="bi bi-shield-exclamation me-2"></i> Toegang Geweigerd
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="alert alert-danger">
+                                <h5><i class="bi bi-exclamation-triangle-fill"></i> Geen toegang</h5>
+                                <p>Alleen administrators mogen nieuwe nesten toevoegen.</p>
+                                <p>Log in als administrator of vraag een administrator om een nieuw nest voor u toe te voegen.</p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
     setupEvents() {
         console.log('LitterManager: setupEvents aangeroepen');
         
@@ -736,13 +803,14 @@ class LitterManager {
         }
         
         let html = '';
-        suggestions.forEach(dog => {
+        suggestions.forEach((dog, index) => {
             html += `
                 <div class="autocomplete-item" data-id="${dog.id}" data-name="${dog.naam}" data-pedigree="${dog.stamboomnr || ''}">
                     <div class="dog-name">${dog.naam}</div>
                     <div class="dog-info">
                         ${dog.ras || 'Onbekend ras'} | ${dog.stamboomnr || 'Geen stamboom'}
                     </div>
+                    ${index < suggestions.length - 1 ? '<hr class="my-1">' : ''}
                 </div>
             `;
         });
@@ -792,7 +860,7 @@ class LitterManager {
             return;
         }
         
-        // Verzamel formulier data - gebruiken de korte ID's zoals in de HTML
+        // Verzamel formulier data
         const dogData = {
             naam: document.getElementById('name')?.value.trim() || '',
             stamboomnr: document.getElementById('pedigreeNumber')?.value.trim() || '',
