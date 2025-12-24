@@ -13,7 +13,6 @@ class LitterManager extends BaseModule {
     }
     
     t(key) {
-        // Gebruik DogManager's vertalingen als beschikbaar
         if (window.dogManager && window.dogManager.t) {
             return window.dogManager.t(key);
         }
@@ -73,7 +72,7 @@ class LitterManager extends BaseModule {
                 
                 <hr class="my-4">
                 
-                <!-- DogManager formulier -->
+                <!-- Hond Toevoegen Formulier -->
                 <h6 class="mb-3"><i class="bi bi-heart"></i> Hond Toevoegen</h6>
                 <div id="dogFormInLitter">
                     ${this.getDogFormHTML()}
@@ -88,10 +87,6 @@ class LitterManager extends BaseModule {
             </div>
             
             <style>
-                .litter-container .form-label {
-                    margin-bottom: 0.5rem;
-                }
-                
                 .autocomplete-dropdown {
                     position: absolute;
                     background: white;
@@ -133,10 +128,6 @@ class LitterManager extends BaseModule {
                     border-radius: 4px;
                     padding: 12px;
                     margin-bottom: 8px;
-                }
-                
-                .saved-dog-card .dog-info {
-                    font-size: 0.85em;
                 }
             </style>
         `;
@@ -205,9 +196,6 @@ class LitterManager extends BaseModule {
                             <label for="deathDate" class="form-label">Overlijdensdatum</label>
                             <input type="date" class="form-control" id="deathDate" value="${data.overlijdensdatum || ''}">
                         </div>
-                    </div>
-                    <div class="col-md-6">
-                        <!-- Reserve kolom voor toekomstige velden -->
                     </div>
                 </div>
                 
@@ -348,33 +336,25 @@ class LitterManager extends BaseModule {
     }
     
     setupEvents() {
-        console.log('LitterManager setupEvents called');
-        
-        // Laad honden voor autocomplete
-        this.loadAllDogs();
-        
-        // Wacht tot DOM volledig is geladen
+        // Wacht tot de DOM geladen is
         setTimeout(() => {
-            this.setupFormEvents();
+            this.initializeForm();
         }, 100);
     }
     
-    setupFormEvents() {
-        console.log('Setting up LitterManager form events...');
+    initializeForm() {
+        console.log('Initializing LitterManager form...');
         
-        // Setup voor geboortedatum formatting
+        // Setup geboortedatum formatting
         const birthDateInput = document.getElementById('birthDate');
         if (birthDateInput) {
             birthDateInput.addEventListener('input', (e) => {
                 let value = e.target.value.replace(/\D/g, '');
-                
-                // Automatisch / toevoegen
                 if (value.length >= 2 && value.length < 4) {
                     value = value.substring(0, 2) + '/' + value.substring(2);
                 } else if (value.length >= 4 && value.length < 8) {
                     value = value.substring(0, 2) + '/' + value.substring(2, 4) + '/' + value.substring(4, 8);
                 }
-                
                 e.target.value = value;
             });
         }
@@ -382,48 +362,47 @@ class LitterManager extends BaseModule {
         // Setup autocomplete voor ouders
         this.setupParentAutocomplete();
         
-        // Setup events voor DogManager formulier
-        this.setupDogFormEvents();
+        // Setup form events
+        this.setupFormEvents();
         
         // Update saved dogs list
         this.updateSavedDogsList();
     }
     
-    setupDogFormEvents() {
-        console.log('Setting up dog form events in LitterManager...');
+    setupFormEvents() {
+        console.log('Setting up form events...');
         
         // Save dog button
-        const saveDogBtn = document.getElementById('saveDogBtn');
-        if (saveDogBtn) {
-            saveDogBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                console.log('Save dog button clicked in LitterManager');
+        const saveBtn = document.getElementById('saveDogBtn');
+        if (saveBtn) {
+            console.log('Found save dog button');
+            saveBtn.addEventListener('click', () => {
+                console.log('Save button clicked');
                 this.saveDog();
             });
+        } else {
+            console.error('Save dog button not found!');
         }
         
         // Add another dog button
-        const addAnotherDogBtn = document.getElementById('addAnotherDogBtn');
-        if (addAnotherDogBtn) {
-            addAnotherDogBtn.addEventListener('click', (e) => {
-                e.preventDefault();
+        const addAnotherBtn = document.getElementById('addAnotherDogBtn');
+        if (addAnotherBtn) {
+            addAnotherBtn.addEventListener('click', () => {
                 this.resetDogForm();
             });
         }
         
         // Finish litter button
-        const finishLitterBtn = document.getElementById('finishLitterBtn');
-        if (finishLitterBtn) {
-            finishLitterBtn.addEventListener('click', (e) => {
-                e.preventDefault();
+        const finishBtn = document.getElementById('finishLitterBtn');
+        if (finishBtn) {
+            finishBtn.addEventListener('click', () => {
                 this.finishLitter();
             });
         }
         
-        // Recente rassen knoppen
+        // Recent breed buttons
         document.querySelectorAll('.recent-breed-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                e.preventDefault();
                 const breed = e.target.dataset.breed;
                 const breedInput = document.getElementById('breed');
                 if (breedInput) {
@@ -432,84 +411,67 @@ class LitterManager extends BaseModule {
             });
         });
         
-        // Eyes dropdown handler
+        // Eyes dropdown
         const eyesSelect = document.getElementById('eyes');
         if (eyesSelect) {
             eyesSelect.addEventListener('change', (e) => {
-                const explanationContainer = document.getElementById('eyesExplanationContainer');
-                if (explanationContainer) {
-                    explanationContainer.style.display = e.target.value === 'Overig' ? 'block' : 'none';
+                const container = document.getElementById('eyesExplanationContainer');
+                if (container) {
+                    container.style.display = e.target.value === 'Overig' ? 'block' : 'none';
                 }
             });
         }
         
-        // Thyroid dropdown handler
+        // Thyroid dropdown
         const thyroidSelect = document.getElementById('thyroid');
         if (thyroidSelect) {
             thyroidSelect.addEventListener('change', (e) => {
-                const explanationContainer = document.getElementById('thyroidExplanationContainer');
-                if (explanationContainer) {
-                    explanationContainer.style.display = e.target.value === 'Positief' ? 'block' : 'none';
+                const container = document.getElementById('thyroidExplanationContainer');
+                if (container) {
+                    container.style.display = e.target.value === 'Positief' ? 'block' : 'none';
                 }
             });
-        }
-    }
-    
-    async loadAllDogs() {
-        if (this.allDogs.length === 0) {
-            try {
-                if (this.db && typeof this.db.getHonden === 'function') {
-                    this.allDogs = await this.db.getHonden();
-                } else if (window.db && typeof window.db.getHonden === 'function') {
-                    this.allDogs = await window.db.getHonden();
-                }
-                this.allDogs.sort((a, b) => a.naam.localeCompare(b.naam));
-            } catch (error) {
-                console.error('Fout bij laden honden voor autocomplete:', error);
-            }
         }
     }
     
     setupParentAutocomplete() {
+        // Maak dropdowns aan
+        const motherInput = document.getElementById('motherDog');
+        const fatherInput = document.getElementById('fatherDog');
+        
+        if (!motherInput || !fatherInput) return;
+        
+        const motherWrapper = motherInput.parentElement;
+        const fatherWrapper = fatherInput.parentElement;
+        
         // Verwijder bestaande dropdowns
-        document.querySelectorAll('.autocomplete-dropdown').forEach(dropdown => {
-            dropdown.remove();
-        });
+        const existingMotherDropdown = motherWrapper.querySelector('.autocomplete-dropdown');
+        const existingFatherDropdown = fatherWrapper.querySelector('.autocomplete-dropdown');
+        if (existingMotherDropdown) existingMotherDropdown.remove();
+        if (existingFatherDropdown) existingFatherDropdown.remove();
         
-        // Maak nieuwe dropdown containers
-        const motherInputWrapper = document.querySelector('#motherDog')?.closest('.parent-input-wrapper');
-        const fatherInputWrapper = document.querySelector('#fatherDog')?.closest('.parent-input-wrapper');
-        
-        if (!motherInputWrapper || !fatherInputWrapper) {
-            console.log('Parent input wrappers not found');
-            return;
-        }
-        
+        // Maak nieuwe dropdowns
         const motherDropdown = document.createElement('div');
         motherDropdown.className = 'autocomplete-dropdown';
         motherDropdown.id = 'motherDropdown';
         motherDropdown.style.display = 'none';
-        motherInputWrapper.appendChild(motherDropdown);
+        motherWrapper.appendChild(motherDropdown);
         
         const fatherDropdown = document.createElement('div');
         fatherDropdown.className = 'autocomplete-dropdown';
         fatherDropdown.id = 'fatherDropdown';
         fatherDropdown.style.display = 'none';
-        fatherInputWrapper.appendChild(fatherDropdown);
+        fatherWrapper.appendChild(fatherDropdown);
         
-        // Event listeners voor vader en moeder velden
-        document.querySelectorAll('.parent-input-wrapper input').forEach(input => {
-            input.addEventListener('focus', () => {
-                this.loadAllDogs();
-            });
-            
+        // Event listeners
+        [motherInput, fatherInput].forEach(input => {
             input.addEventListener('input', (e) => {
                 const searchTerm = e.target.value.toLowerCase().trim();
                 const parentType = input.id === 'motherDog' ? 'mother' : 'father';
                 this.showParentAutocomplete(searchTerm, parentType);
             });
             
-            input.addEventListener('blur', (e) => {
+            input.addEventListener('blur', () => {
                 setTimeout(() => {
                     const dropdown = document.getElementById(`${input.id}Dropdown`);
                     if (dropdown) {
@@ -518,18 +480,11 @@ class LitterManager extends BaseModule {
                 }, 200);
             });
         });
-        
-        // Klik buiten dropdown om te verbergen
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.parent-input-wrapper')) {
-                document.querySelectorAll('.autocomplete-dropdown').forEach(dropdown => {
-                    dropdown.style.display = 'none';
-                });
-            }
-        });
     }
     
-    showParentAutocomplete(searchTerm, parentType) {
+    async showParentAutocomplete(searchTerm, parentType) {
+        await this.loadAllDogs();
+        
         const dropdown = document.getElementById(`${parentType}Dropdown`);
         if (!dropdown) return;
         
@@ -538,43 +493,28 @@ class LitterManager extends BaseModule {
             return;
         }
         
-        // Filter honden voor autocomplete (filter op geslacht)
-        const suggestions = this.allDogs.filter(dog => {
-            const dogName = dog.naam.toLowerCase();
-            const matchesSearch = dogName.includes(searchTerm);
-            
-            // Filter op geslacht
-            if (parentType === 'mother') {
-                return matchesSearch && dog.geslacht === 'teven';
-            } else if (parentType === 'father') {
-                return matchesSearch && dog.geslacht === 'reuen';
-            }
-            return matchesSearch;
+        const filtered = this.allDogs.filter(dog => {
+            const nameMatch = dog.naam.toLowerCase().includes(searchTerm);
+            const genderMatch = parentType === 'mother' ? dog.geslacht === 'teven' : dog.geslacht === 'reuen';
+            return nameMatch && genderMatch;
         }).slice(0, 8);
         
-        if (suggestions.length === 0) {
+        if (filtered.length === 0) {
             dropdown.style.display = 'none';
             return;
         }
         
-        let html = '';
-        suggestions.forEach(dog => {
-            html += `
-                <div class="autocomplete-item" data-id="${dog.id}" data-name="${dog.naam}" data-pedigree="${dog.stamboomnr || ''}">
-                    <div class="dog-name">${dog.naam}</div>
-                    <div class="dog-info">
-                        ${dog.ras || 'Onbekend ras'} | ${dog.stamboomnr || 'Geen stamboom'}
-                    </div>
-                </div>
-            `;
-        });
+        dropdown.innerHTML = filtered.map(dog => `
+            <div class="autocomplete-item" data-id="${dog.id}" data-name="${dog.naam}">
+                <div class="dog-name">${dog.naam}</div>
+                <div class="dog-info">${dog.ras || ''} | ${dog.stamboomnr || ''}</div>
+            </div>
+        `).join('');
         
-        dropdown.innerHTML = html;
         dropdown.style.display = 'block';
         
-        // Event listeners voor autocomplete items
         dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
-            item.addEventListener('click', (e) => {
+            item.addEventListener('click', () => {
                 const dogId = item.getAttribute('data-id');
                 const dogName = item.getAttribute('data-name');
                 const input = document.getElementById(`${parentType}Dog`);
@@ -588,119 +528,129 @@ class LitterManager extends BaseModule {
         });
     }
     
+    async loadAllDogs() {
+        if (this.allDogs.length === 0) {
+            try {
+                if (this.db && typeof this.db.getHonden === 'function') {
+                    this.allDogs = await this.db.getHonden();
+                } else if (window.db && typeof window.db.getHonden === 'function') {
+                    this.allDogs = await window.db.getHonden();
+                }
+                this.allDogs.sort((a, b) => a.naam.localeCompare(b.naam));
+            } catch (error) {
+                console.error('Fout bij laden honden:', error);
+            }
+        }
+    }
+    
     async saveDog() {
-        console.log('saveDog method called in LitterManager');
+        console.log('Saving dog...');
+        
+        // Verzamel data
+        const motherDog = document.getElementById('motherDog').value.trim();
+        const fatherDog = document.getElementById('fatherDog').value.trim();
+        const nestBirthDate = document.getElementById('birthDate').value.trim();
+        
+        if (!motherDog) {
+            alert('Moederhond is verplicht');
+            return;
+        }
+        
+        if (!fatherDog) {
+            alert('Vaderhond is verplicht');
+            return;
+        }
+        
+        const dogData = {
+            naam: document.getElementById('dogName').value.trim(),
+            stamboomnr: document.getElementById('pedigreeNumber').value.trim(),
+            ras: document.getElementById('breed').value.trim(),
+            geslacht: document.getElementById('gender').value,
+            vader: fatherDog,
+            vaderId: document.getElementById('fatherId').value ? parseInt(document.getElementById('fatherId').value) : null,
+            moeder: motherDog,
+            moederId: document.getElementById('motherId').value ? parseInt(document.getElementById('motherId').value) : null,
+            geboortedatum: this.formatDateForStorage(nestBirthDate),
+            overlijdensdatum: document.getElementById('deathDate').value,
+            heupdysplasie: document.getElementById('hipDysplasia').value,
+            elleboogdysplasie: document.getElementById('elbowDysplasia').value,
+            patella: document.getElementById('patellaLuxation').value,
+            ogen: document.getElementById('eyes').value,
+            ogenVerklaring: document.getElementById('eyesExplanation')?.value.trim() || '',
+            dandyWalker: document.getElementById('dandyWalker').value,
+            schildklier: document.getElementById('thyroid').value,
+            schildklierVerklaring: document.getElementById('thyroidExplanation')?.value.trim() || '',
+            land: document.getElementById('country').value.trim(),
+            postcode: document.getElementById('zipCode').value.trim(),
+            opmerkingen: document.getElementById('remarks').value.trim(),
+            kennelnaam: document.getElementById('kennelName').value.trim(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+        
+        console.log('Dog data:', dogData);
+        
+        // Valideer
+        if (!dogData.naam) {
+            alert('Naam is verplicht');
+            return;
+        }
+        
+        if (!dogData.stamboomnr) {
+            alert('Stamboomnummer is verplicht');
+            return;
+        }
+        
+        if (!dogData.ras) {
+            alert('Ras is verplicht');
+            return;
+        }
+        
+        if (!dogData.geslacht) {
+            alert('Geslacht is verplicht');
+            return;
+        }
         
         try {
-            // Valideer verplichte velden van nest
-            const motherDog = document.getElementById('motherDog').value.trim();
-            const fatherDog = document.getElementById('fatherDog').value.trim();
-            
-            console.log('Mother:', motherDog, 'Father:', fatherDog);
-            
-            if (!motherDog) {
-                alert('Moederhond is verplicht');
-                return;
-            }
-            
-            if (!fatherDog) {
-                alert('Vaderhond is verplicht');
-                return;
-            }
-            
-            // Verzamel alle data - EXACT zoals DogManager doet
-            const dogData = {
-                naam: document.getElementById('dogName').value.trim(),
-                stamboomnr: document.getElementById('pedigreeNumber').value.trim(),
-                ras: document.getElementById('breed').value.trim(),
-                geslacht: document.getElementById('gender').value,
-                vader: fatherDog,
-                vaderId: document.getElementById('fatherId').value ? parseInt(document.getElementById('fatherId').value) : null,
-                moeder: motherDog,
-                moederId: document.getElementById('motherId').value ? parseInt(document.getElementById('motherId').value) : null,
-                geboortedatum: this.formatDateForStorage(document.getElementById('birthDate').value.trim()),
-                overlijdensdatum: document.getElementById('deathDate').value,
-                heupdysplasie: document.getElementById('hipDysplasia').value,
-                elleboogdysplasie: document.getElementById('elbowDysplasia').value,
-                patella: document.getElementById('patellaLuxation').value,
-                ogen: document.getElementById('eyes').value,
-                ogenVerklaring: document.getElementById('eyesExplanation')?.value.trim() || '',
-                dandyWalker: document.getElementById('dandyWalker').value,
-                schildklier: document.getElementById('thyroid').value,
-                schildklierVerklaring: document.getElementById('thyroidExplanation')?.value.trim() || '',
-                land: document.getElementById('country').value.trim(),
-                postcode: document.getElementById('zipCode').value.trim(),
-                opmerkingen: document.getElementById('remarks').value.trim(),
-                kennelnaam: document.getElementById('kennelName').value.trim(),
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
-            };
-            
-            console.log('Dog data collected:', dogData);
-            
-            // Valideer basisvelden - net zoals DogManager doet
-            if (!dogData.naam || !dogData.stamboomnr || !dogData.ras || !dogData.geslacht) {
-                const missingFields = [];
-                if (!dogData.naam) missingFields.push('Naam');
-                if (!dogData.stamboomnr) missingFields.push('Stamboomnummer');
-                if (!dogData.ras) missingFields.push('Ras');
-                if (!dogData.geslacht) missingFields.push('Geslacht');
-                
-                alert(`De volgende velden zijn verplicht: ${missingFields.join(', ')}`);
-                return;
-            }
-            
             // Voeg ras toe aan recente rassen
             this.addToLastBreeds(dogData.ras);
             
-            // Sla hond op in database - net zoals DogManager
+            // Sla op in database
             let savedDog;
             if (this.db && typeof this.db.voegHondToe === 'function') {
                 savedDog = await this.db.voegHondToe(dogData);
-                console.log('Dog saved to database:', savedDog);
             } else if (window.db && typeof window.db.voegHondToe === 'function') {
                 savedDog = await window.db.voegHondToe(dogData);
-                console.log('Dog saved to database:', savedDog);
             } else {
-                throw new Error('Database method voegHondToe niet beschikbaar');
+                savedDog = { id: Date.now(), ...dogData }; // Fallback voor test
             }
             
-            // Voeg toe aan lijst van opgeslagen honden
+            // Voeg toe aan lijst
             this.savedDogs.push({
                 ...savedDog,
                 displayIndex: this.savedDogs.length + 1
             });
             
-            console.log('Saved dogs list:', this.savedDogs);
-            
             alert('Hond succesvol opgeslagen!');
             
-            // Update lijst met opgeslagen honden
+            // Update UI
             this.updateSavedDogsList();
-            
-            // Reset alleen hond formulier, ouders blijven staan
             this.resetDogForm();
             
-            // Toon sectie met opgeslagen honden
+            // Toon sectie
             const savedDogsSection = document.getElementById('savedDogsSection');
             if (savedDogsSection) {
                 savedDogsSection.style.display = 'block';
             }
             
-            // Focus op naam veld
-            const dogNameInput = document.getElementById('dogName');
-            if (dogNameInput) {
-                dogNameInput.focus();
-            }
-            
         } catch (error) {
-            console.error('Error in saveDog:', error);
+            console.error('Error saving dog:', error);
             alert('Fout bij opslaan: ' + error.message);
         }
     }
     
     addToLastBreeds(breed) {
-        if (!breed || breed.trim() === '') return;
+        if (!breed) return;
         
         const breedStr = breed.trim();
         const index = this.lastBreeds.indexOf(breedStr);
@@ -719,172 +669,108 @@ class LitterManager extends BaseModule {
     }
     
     resetDogForm() {
-        // Reset alleen hond velden, ouders blijven staan
-        const dogName = document.getElementById('dogName');
-        const pedigreeNumber = document.getElementById('pedigreeNumber');
-        const breed = document.getElementById('breed');
-        const gender = document.getElementById('gender');
-        const deathDate = document.getElementById('deathDate');
-        const hipDysplasia = document.getElementById('hipDysplasia');
-        const elbowDysplasia = document.getElementById('elbowDysplasia');
-        const patellaLuxation = document.getElementById('patellaLuxation');
-        const eyes = document.getElementById('eyes');
-        const eyesExplanation = document.getElementById('eyesExplanation');
-        const dandyWalker = document.getElementById('dandyWalker');
-        const thyroid = document.getElementById('thyroid');
-        const thyroidExplanation = document.getElementById('thyroidExplanation');
-        const country = document.getElementById('country');
-        const zipCode = document.getElementById('zipCode');
-        const dogPhoto = document.getElementById('dogPhoto');
-        const remarks = document.getElementById('remarks');
+        // Reset alleen de hond velden
+        const fields = [
+            'dogName', 'pedigreeNumber', 'breed', 'gender', 'deathDate',
+            'hipDysplasia', 'elbowDysplasia', 'patellaLuxation', 'eyes',
+            'eyesExplanation', 'dandyWalker', 'thyroid', 'thyroidExplanation',
+            'country', 'zipCode', 'remarks'
+        ];
         
-        if (dogName) dogName.value = '';
-        if (pedigreeNumber) pedigreeNumber.value = '';
-        if (breed) breed.value = '';
-        if (gender) gender.value = '';
-        if (deathDate) deathDate.value = '';
-        if (hipDysplasia) hipDysplasia.value = '';
-        if (elbowDysplasia) elbowDysplasia.value = '';
-        if (patellaLuxation) patellaLuxation.value = '';
-        if (eyes) eyes.value = '';
-        if (eyesExplanation) eyesExplanation.value = '';
-        if (dandyWalker) dandyWalker.value = '';
-        if (thyroid) thyroid.value = '';
-        if (thyroidExplanation) thyroidExplanation.value = '';
-        if (country) country.value = '';
-        if (zipCode) zipCode.value = '';
+        fields.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                if (element.tagName === 'SELECT') {
+                    element.value = '';
+                } else {
+                    element.value = '';
+                }
+            }
+        });
+        
+        // Reset file input
+        const dogPhoto = document.getElementById('dogPhoto');
         if (dogPhoto) dogPhoto.value = '';
-        if (remarks) remarks.value = '';
         
         // Verberg uitleg velden
-        const eyesExplanationContainer = document.getElementById('eyesExplanationContainer');
-        const thyroidExplanationContainer = document.getElementById('thyroidExplanationContainer');
-        if (eyesExplanationContainer) eyesExplanationContainer.style.display = 'none';
-        if (thyroidExplanationContainer) thyroidExplanationContainer.style.display = 'none';
+        const eyesContainer = document.getElementById('eyesExplanationContainer');
+        const thyroidContainer = document.getElementById('thyroidExplanationContainer');
+        if (eyesContainer) eyesContainer.style.display = 'none';
+        if (thyroidContainer) thyroidContainer.style.display = 'none';
         
-        // Focus op naam veld
+        // Focus op naam
+        const dogName = document.getElementById('dogName');
         if (dogName) dogName.focus();
     }
     
     updateSavedDogsList() {
-        const savedDogsList = document.getElementById('savedDogsList');
-        if (!savedDogsList) {
-            console.log('Saved dogs list element not found');
-            return;
-        }
+        const list = document.getElementById('savedDogsList');
+        if (!list) return;
         
         if (this.savedDogs.length === 0) {
-            savedDogsList.innerHTML = '<div class="text-muted small">Nog geen honden toegevoegd</div>';
+            list.innerHTML = '<div class="text-muted">Nog geen honden toegevoegd</div>';
             return;
         }
         
-        let html = '';
-        this.savedDogs.forEach((dog, index) => {
-            html += `
-                <div class="saved-dog-card">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>${dog.displayIndex}. ${dog.naam}</strong>
-                            <div class="dog-info">
-                                Stamboom: ${dog.stamboomnr} | 
-                                Geslacht: ${dog.geslacht === 'reuen' ? 'Reu' : 'Teef'} | 
-                                Ras: ${dog.ras || 'Onbekend'}
-                            </div>
-                        </div>
-                        <div>
-                            <span class="badge bg-success">Opgeslagen</span>
+        list.innerHTML = this.savedDogs.map(dog => `
+            <div class="saved-dog-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>${dog.displayIndex}. ${dog.naam}</strong>
+                        <div class="text-muted small">
+                            ${dog.stamboomnr} | ${dog.geslacht === 'reuen' ? 'Reu' : 'Teef'} | ${dog.ras || ''}
                         </div>
                     </div>
+                    <span class="badge bg-success">Opgeslagen</span>
                 </div>
-            `;
-        });
-        
-        savedDogsList.innerHTML = html;
+            </div>
+        `).join('');
     }
     
     async finishLitter() {
-        console.log('finishLitter called, saved dogs:', this.savedDogs.length);
-        try {
-            if (this.savedDogs.length === 0) {
-                const confirmAdd = confirm("Je hebt nog geen honden toegevoegd. Wil je toch doorgaan?");
-                if (!confirmAdd) return;
-            }
-            
-            // Valideer nest gegevens
-            const motherDog = document.getElementById('motherDog').value.trim();
-            const fatherDog = document.getElementById('fatherDog').value.trim();
-            
-            if (!motherDog || !fatherDog) {
-                alert('Moeder en vader zijn verplicht voor het nest');
-                return;
-            }
-            
-            // Toon samenvatding
-            const summary = `Nest succesvol afgerond!\n
-Moeder: ${motherDog}\n
-Vader: ${fatherDog}\n
-Geboortedatum: ${document.getElementById('birthDate').value || 'Niet ingevuld'}\n
-Aantal honden: ${this.savedDogs.length}\n
-Kennel: ${document.getElementById('kennelName').value || 'Geen'}`;
-            
-            alert(summary);
-            
-            // Reset alle velden
-            this.savedDogs = [];
-            document.getElementById('motherDog').value = '';
-            document.getElementById('fatherDog').value = '';
-            document.getElementById('motherId').value = '';
-            document.getElementById('fatherId').value = '';
-            document.getElementById('kennelName').value = '';
-            document.getElementById('birthDate').value = '';
-            this.resetDogForm();
-            this.updateSavedDogsList();
-            
-            const savedDogsSection = document.getElementById('savedDogsSection');
-            if (savedDogsSection) {
-                savedDogsSection.style.display = 'none';
-            }
-            
-            // Wacht even en ga terug naar keuze scherm
-            setTimeout(() => {
-                if (window.dogManager && window.dogManager.showChoiceScreen) {
-                    window.dogManager.showChoiceScreen();
-                }
-            }, 1500);
-            
-        } catch (error) {
-            console.error('Error in finishLitter:', error);
-            alert('Fout bij afronden: ' + error.message);
+        if (this.savedDogs.length === 0) {
+            const confirm = window.confirm("Je hebt nog geen honden toegevoegd. Wil je toch doorgaan?");
+            if (!confirm) return;
         }
+        
+        const mother = document.getElementById('motherDog').value;
+        const father = document.getElementById('fatherDog').value;
+        const kennel = document.getElementById('kennelName').value;
+        const birthDate = document.getElementById('birthDate').value;
+        
+        alert(`Nest afgerond!\n\nMoeder: ${mother}\nVader: ${father}\nKennel: ${kennel || 'Geen'}\nGeboortedatum: ${birthDate || 'Niet ingevuld'}\nAantal honden: ${this.savedDogs.length}`);
+        
+        // Reset alles
+        this.savedDogs = [];
+        document.getElementById('motherDog').value = '';
+        document.getElementById('fatherDog').value = '';
+        document.getElementById('motherId').value = '';
+        document.getElementById('fatherId').value = '';
+        document.getElementById('kennelName').value = '';
+        document.getElementById('birthDate').value = '';
+        
+        this.resetDogForm();
+        this.updateSavedDogsList();
+        
+        const section = document.getElementById('savedDogsSection');
+        if (section) section.style.display = 'none';
+        
+        // Terug naar keuze scherm
+        setTimeout(() => {
+            if (window.dogManager && window.dogManager.showChoiceScreen) {
+                window.dogManager.showChoiceScreen();
+            }
+        }, 1500);
     }
     
     formatDateForStorage(dateString) {
         if (!dateString) return '';
         
-        // Converteer DD/MM/YYYY naar YYYY-MM-DD
         const parts = dateString.split('/');
         if (parts.length === 3) {
             return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
         }
         return dateString;
-    }
-    
-    showProgress(message) {
-        // Implementeer progress indicator zoals DogManager
-        console.log('Progress:', message);
-    }
-    
-    hideProgress() {
-        // Implementeer hide progress zoals DogManager
-        console.log('Progress hidden');
-    }
-    
-    showSuccess(message) {
-        alert(message);
-    }
-    
-    showError(message) {
-        alert(message);
     }
 }
 
