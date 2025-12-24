@@ -338,7 +338,8 @@ class LitterManager {
     }
     
     /**
-     * Haal de modal HTML op voor nest toevoegen/bewerken
+     * Haal de volledige modal HTML op voor nest toevoegen/bewerken
+     * Dit is de methode die DogManager gebruikt om de modal te tonen
      */
     getModalHTML(isEdit = false, litterData = null) {
         console.log('LitterManager: getModalHTML aangeroepen');
@@ -424,23 +425,9 @@ class LitterManager {
     }
     
     /**
-     * Initialiseer LitterManager - dit MOET aangeroepen worden voordat events worden opgezet
+     * Haal alleen het formulier HTML op (zonder modal wrapper)
+     * Dit wordt gebruikt door DogManager in het keuzescherm
      */
-    async initialize() {
-        console.log('LitterManager: initialize aangeroepen');
-        
-        if (!this.db || !this.auth) {
-            console.error('LitterManager: Dependencies niet geïnjecteerd!');
-            throw new Error('LitterManager is niet geïnitialiseerd met dependencies');
-        }
-        
-        // Laad honden voor autocomplete
-        await this.loadAllDogs();
-        
-        console.log('LitterManager: Initialisatie voltooid');
-        return true;
-    }
-    
     getFormHTML(litterData = null) {
         console.log('LitterManager: getFormHTML aangeroepen');
         
@@ -705,18 +692,19 @@ class LitterManager {
         `;
     }
     
+    /**
+     * Setup events voor wanneer de modal wordt getoond
+     * Deze methode wordt aangeroepen door DogManager wanneer het nest formulier wordt geladen
+     */
     setupEvents() {
         console.log('LitterManager: setupEvents aangeroepen');
         
-        if (!this.isInitialized) {
-            console.error('LitterManager: Niet geïnitialiseerd! Roep eerst initialize() aan');
-            return;
-        }
-        
-        // Controleer of gebruiker admin is
+        // Controleer of gebruiker admin is - net zoals in DogManager
         const isAdmin = this.auth?.isAdmin ? this.auth.isAdmin() : false;
         
         if (!isAdmin) {
+            console.log('LitterManager: Gebruiker is geen admin, toegang geweigerd popup wordt getoond');
+            
             // Voeg event listeners toe voor de knoppen in de modal
             const modal = document.getElementById('addLitterModal');
             if (modal) {
@@ -728,6 +716,9 @@ class LitterManager {
         }
         
         // Alleen verder gaan als gebruiker admin is
+        // Laad honden voor autocomplete
+        this.loadAllDogs();
+        
         // Event listeners voor formulier
         const saveBtn = document.getElementById('saveDogBtn');
         if (saveBtn) {
@@ -1005,7 +996,7 @@ class LitterManager {
             return;
         }
         
-        // Verzamel formulier data - gebruiken de korte ID's zoals in de HTML
+        // Verzamel formulier data
         const dogData = {
             naam: document.getElementById('name')?.value.trim() || '',
             stamboomnr: document.getElementById('pedigreeNumber')?.value.trim() || '',
