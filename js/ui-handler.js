@@ -231,9 +231,9 @@ class UIHandler {
         }
         
         // Voeg nieuwe modal toe
-        const container = document.getElementById('modalContainer');
+        const container = document.getElementById('modalsContainer');
         if (!container) {
-            console.error('modalContainer niet gevonden!');
+            console.error('modalsContainer niet gevonden!');
             return;
         }
         
