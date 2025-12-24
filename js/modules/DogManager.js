@@ -276,7 +276,7 @@ class DogManager extends BaseModule {
                 chooseFile: "Datei wählen",
                 noFileChosen: "Keine Datei gewählt",
                 remarks: "Bemerkungen",
-                requiredFields: "Felder met * sind Pflichtfelder",
+                requiredFields: "Felder mit * sind Pflichtfelder",
                 saveDog: "Hund speichern",
                 cancel: "Abbrechen",
                 delete: "Löschen",
@@ -579,11 +579,36 @@ class DogManager extends BaseModule {
     }
     
     getLitterFormHTML() {
-        // Maak LitterManager aan als deze nog niet bestaat en injecteer dependencies
+        // Controleer of LitterManager beschikbaar is
+        if (typeof LitterManager === 'undefined') {
+            // Fallback HTML als LitterManager niet beschikbaar is
+            return `
+                <div class="mb-3">
+                    <button type="button" class="btn btn-outline-secondary btn-sm back-to-choice-btn">
+                        <i class="bi bi-arrow-left me-1"></i> ${this.t('back')}
+                    </button>
+                </div>
+                
+                <div class="text-center py-3">
+                    <div class="mb-2">
+                        <i class="bi bi-tools" style="font-size: 2.5rem; color: #f39c12;"></i>
+                    </div>
+                    <h5 class="mb-2">${this.t('development')}</h5>
+                    <p class="text-muted small mb-2">Deze functie is momenteel in ontwikkeling en komt binnenkort beschikbaar.</p>
+                    <button type="button" class="btn btn-secondary btn-sm back-to-choice-btn">
+                        <i class="bi bi-arrow-left me-1"></i> ${this.t('back')}
+                    </button>
+                </div>
+            `;
+        }
+        
+        // Maak LitterManager aan als deze nog niet bestaat
         if (!this.litterManager) {
             this.litterManager = new LitterManager();
-            // INJECTEER DEPENDENCIES VAN DOGMANAGER NAAR LITTERMANAGER
-            this.litterManager.injectDependencies(this.db, this.auth);
+            // Injecteer de dependencies van DogManager naar LitterManager
+            if (this.litterManager.injectDependencies) {
+                this.litterManager.injectDependencies(this.db, this.auth);
+            }
         }
         
         // Terug knop HTML
@@ -925,11 +950,13 @@ class DogManager extends BaseModule {
         if (litterFormContainer) litterFormContainer.style.display = 'block';
         if (modalFooter) modalFooter.style.display = 'flex';
         
-        // Stel LitterManager events in
+        // Stel LitterManager events in als beschikbaar
         if (this.litterManager && this.litterManager.setupEvents) {
             // Zorg ervoor dat LitterManager de dependencies heeft
             if (!this.litterManager.db || !this.litterManager.auth) {
-                this.litterManager.injectDependencies(this.db, this.auth);
+                if (this.litterManager.injectDependencies) {
+                    this.litterManager.injectDependencies(this.db, this.auth);
+                }
             }
             this.litterManager.setupEvents();
         }
@@ -1265,6 +1292,26 @@ class DogManager extends BaseModule {
         } catch (error) {
             this.showError(`${this.t('photoError')}${error.message}`);
         }
+    }
+    
+    showProgress(message) {
+        console.log('Progress:', message);
+        // Implementeer progress indicator
+    }
+    
+    hideProgress() {
+        console.log('Hide progress');
+        // Implementeer hide progress indicator
+    }
+    
+    showSuccess(message) {
+        console.log('Success:', message);
+        // Implementeer success melding
+    }
+    
+    showError(message) {
+        console.error('Error:', message);
+        // Implementeer error melding
     }
 }
 

@@ -209,7 +209,7 @@ class LitterManager {
                 dandyWalker: "Dandy Walker Malformation",
                 dandyOptions: "Status wählen...",
                 dandyFreeDNA: "Frei auf DNA",
-                dandyFreeParents: "Frei auf ouders",
+                dandyFreeParents: "Frei op ouders",
                 dandyCarrier: "Träger",
                 dandyAffected: "Betroffen",
                 thyroid: "Schilddrüse",
