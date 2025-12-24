@@ -11,6 +11,14 @@ class LitterManager {
         this.allDogs = []; // Voor autocomplete van ouders
         this.translations = {
             nl: {
+                // Modal titels
+                newDog: "Nieuw Nest Toevoegen",
+                editDog: "Nest Bewerken",
+                dogLitterChoice: "Hond of Nest Toevoegen",
+                addNewDog: "Nieuwe Hond",
+                addNewLitter: "Nieuw Nest",
+                development: "In Ontwikkeling",
+                
                 // Form velden
                 name: "Naam",
                 nameRequired: "Naam *",
@@ -73,6 +81,20 @@ class LitterManager {
                 delete: "Verwijderen",
                 choose: "Kies...",
                 close: "Sluiten",
+                refresh: "Pagina Vernieuwen",
+                accessDenied: "Toegang Geweigerd",
+                back: "Terug",
+                
+                // Toegangscontrole popup teksten
+                insufficientPermissions: "Onvoldoende rechten",
+                insufficientPermissionsText: "U heeft geen toestemming om nesten te bewerken. Alleen administrators kunnen deze functie gebruiken.",
+                loggedInAs: "U bent ingelogd als:",
+                user: "Gebruiker",
+                availableFeatures: "Beschikbare functies voor gebruikers",
+                searchDogs: "Honden zoeken en bekijken",
+                viewGallery: "Foto galerij bekijken",
+                managePrivateInfo: "Privé informatie beheren",
+                importExport: "Data importeren/exporteren",
                 
                 // Alerts
                 adminOnly: "Alleen administrators mogen nesten toevoegen/bewerken",
@@ -89,6 +111,14 @@ class LitterManager {
                 photoError: "Fout bij uploaden foto: "
             },
             en: {
+                // Modal titles
+                newDog: "Add New Litter",
+                editDog: "Edit Litter",
+                dogLitterChoice: "Add Dog or Litter",
+                addNewDog: "New Dog",
+                addNewLitter: "New Litter",
+                development: "In Development",
+                
                 // Form fields
                 name: "Name",
                 nameRequired: "Name *",
@@ -151,6 +181,20 @@ class LitterManager {
                 delete: "Delete",
                 choose: "Choose...",
                 close: "Close",
+                refresh: "Refresh Page",
+                accessDenied: "Access Denied",
+                back: "Back",
+                
+                // Access control popup texts
+                insufficientPermissions: "Insufficient permissions",
+                insufficientPermissionsText: "You do not have permission to edit litters. Only administrators can use this function.",
+                loggedInAs: "You are logged in as:",
+                user: "User",
+                availableFeatures: "Available features for users",
+                searchDogs: "Search and view dogs",
+                viewGallery: "View photo gallery",
+                managePrivateInfo: "Manage private information",
+                importExport: "Import/export data",
                 
                 // Alerts
                 adminOnly: "Only administrators can add/edit litters",
@@ -167,6 +211,14 @@ class LitterManager {
                 photoError: "Error uploading photo: "
             },
             de: {
+                // Modal Titel
+                newDog: "Neuen Wurf hinzufügen",
+                editDog: "Wurf bearbeiten",
+                dogLitterChoice: "Hund oder Wurf hinzufügen",
+                addNewDog: "Neuer Hund",
+                addNewLitter: "Neuer Wurf",
+                development: "In Entwicklung",
+                
                 // Formular Felder
                 name: "Name",
                 nameRequired: "Name *",
@@ -209,7 +261,7 @@ class LitterManager {
                 eyesExplanation: "Erklärung andere",
                 dandyWalker: "Dandy Walker Malformation",
                 dandyOptions: "Status wählen...",
-                dandyFreeDNA: "Frei op ouders",
+                dandyFreeDNA: "Frei auf DNA",
                 dandyFreeParents: "Frei op ouders",
                 dandyCarrier: "Träger",
                 dandyAffected: "Betroffen",
@@ -223,17 +275,31 @@ class LitterManager {
                 chooseFile: "Datei wählen",
                 noFileChosen: "Keine Datei gewählt",
                 remarks: "Bemerkungen",
-                requiredFields: "Felder mit * zijn Pflichtfelder",
+                requiredFields: "Felder mit * sind Pflichtfelder",
                 saveDog: "Wurf speichern",
                 cancel: "Abbrechen",
                 delete: "Löschen",
                 choose: "Wählen...",
                 close: "Schließen",
+                refresh: "Seite aktualisieren",
+                accessDenied: "Zugriff Verweigert",
+                back: "Zurück",
+                
+                // Zugangskontrolle Popup Texte
+                insufficientPermissions: "Unzureichende Berechtigungen",
+                insufficientPermissionsText: "Sie haben keine Berechtigung, Würfe zu bearbeiten. Nur Administratoren können diese Funktion nutzen.",
+                loggedInAs: "Sie sind eingeloggt als:",
+                user: "Benutzer",
+                availableFeatures: "Verfügbare Funktionen für Benutzer",
+                searchDogs: "Hunde suchen und anzeigen",
+                viewGallery: "Fotogalerie anzeigen",
+                managePrivateInfo: "Private Informationen verwalten",
+                importExport: "Daten importieren/exportieren",
                 
                 // Meldungen
                 adminOnly: "Nur Administratoren können Würfe hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer und Rasse zijn Pflichtfelder",
-                savingDog: "Wurf wordt gespeichert...",
+                savingDog: "Wurf wird gespeichert...",
                 dogAdded: "Wurf erfolgreich hinzugefügt!",
                 dogUpdated: "Wurf erfolgreich aktualisiert!",
                 dogDeleted: "Wurf erfolgreich gelöscht!",
@@ -269,6 +335,92 @@ class LitterManager {
         this.auth = auth;
         this.isInitialized = true;
         console.log('LitterManager: Dependencies geïnjecteerd - db:', !!this.db, 'auth:', !!this.auth);
+    }
+    
+    /**
+     * Haal de modal HTML op voor nest toevoegen/bewerken
+     */
+    getModalHTML(isEdit = false, litterData = null) {
+        console.log('LitterManager: getModalHTML aangeroepen');
+        
+        // Controleer of gebruiker admin is - zoals in DogManager
+        const currentUser = this.auth?.getCurrentUser ? this.auth.getCurrentUser() : { username: 'unknown', role: 'user' };
+        const isAdmin = this.auth?.isAdmin ? this.auth.isAdmin() : false;
+        const userRole = currentUser.role === 'admin' ? 'Admin' : this.t('user');
+        
+        if (!isAdmin) {
+            const modalId = 'addLitterModal';
+            
+            return `
+                <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="${modalId}Label" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-danger text-white">
+                                <h5 class="modal-title" id="${modalId}Label">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    <span class="module-title" data-key="accessDenied">${this.t('accessDenied')}</span>
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-danger">
+                                    <h5><i class="bi bi-shield-lock"></i> ${this.t('insufficientPermissions')}</h5>
+                                    <p>${this.t('insufficientPermissionsText')}</p>
+                                    <p class="mb-0">${this.t('loggedInAs')}: <strong>${currentUser.username}</strong> (${userRole})</p>
+                                </div>
+                                
+                                <div class="card mt-3">
+                                    <div class="card-body">
+                                        <h6><i class="bi bi-info-circle text-primary"></i> ${this.t('availableFeatures')}</h6>
+                                        <ul>
+                                            <li>${this.t('searchDogs')}</li>
+                                            <li>${this.t('viewGallery')}</li>
+                                            <li>${this.t('managePrivateInfo')}</li>
+                                            <li>${this.t('importExport')}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="bi bi-x-circle me-1"></i>
+                                    <span class="module-text" data-key="close">${this.t('close')}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Als gebruiker admin is, toon het nest formulier
+        const t = this.t.bind(this);
+        const modalTitle = isEdit ? t('editDog') : t('newDog');
+        const modalId = 'addLitterModal';
+        
+        return `
+            <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="${modalId}Label" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title" id="${modalId}Label">
+                                <i class="bi bi-plus-circle"></i> ${modalTitle}
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${t('close')}"></button>
+                        </div>
+                        <div class="modal-body">
+                            ${this.getFormHTML(litterData)}
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle me-1"></i>
+                                <span class="module-text" data-key="close">${this.t('close')}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
     }
     
     /**
@@ -561,6 +713,21 @@ class LitterManager {
             return;
         }
         
+        // Controleer of gebruiker admin is
+        const isAdmin = this.auth?.isAdmin ? this.auth.isAdmin() : false;
+        
+        if (!isAdmin) {
+            // Voeg event listeners toe voor de knoppen in de modal
+            const modal = document.getElementById('addLitterModal');
+            if (modal) {
+                modal.addEventListener('shown.bs.modal', () => {
+                    console.log('LitterManager modal is nu zichtbaar (toegang geweigerd)');
+                });
+            }
+            return;
+        }
+        
+        // Alleen verder gaan als gebruiker admin is
         // Event listeners voor formulier
         const saveBtn = document.getElementById('saveDogBtn');
         if (saveBtn) {
