@@ -876,8 +876,8 @@ class LitterManager {
         }
         
         // Reset hidden inputs
-        document.getElementById('litterFatherId').value = '';
-        document.getElementById('litterMotherId').value = '';
+        document.getElementById('FatherId').value = '';
+        document.getElementById('MotherId').value = '';
         
         // Reset dropdowns
         const dropdowns = document.querySelectorAll('.autocomplete-dropdown');
