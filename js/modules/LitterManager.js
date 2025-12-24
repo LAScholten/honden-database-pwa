@@ -232,8 +232,8 @@ class LitterManager {
                 
                 // Meldungen
                 adminOnly: "Nur Administratoren können Würfe hinzufügen/bearbeiten",
-                fieldsRequired: "Name, Stammbaum-Nummer und Rasse sind Pflichtfelder",
-                savingDog: "Wurf wird gespeichert...",
+                fieldsRequired: "Name, Stammbaum-Nummer und Rasse zijn Pflichtfelder",
+                savingDog: "Wurf wordt gespeichert...",
                 dogAdded: "Wurf erfolgreich hinzugefügt!",
                 dogUpdated: "Wurf erfolgreich aktualisiert!",
                 dogDeleted: "Wurf erfolgreich gelöscht!",
@@ -652,7 +652,7 @@ class LitterManager {
             
             fatherInput.addEventListener('input', (e) => {
                 const searchTerm = e.target.value.toLowerCase().trim();
-                this.showParentAutocomplete(searchTerm, 'litterFather');
+                this.showParentAutocomplete(searchTerm, 'father');
             });
             
             fatherInput.addEventListener('blur', () => {
@@ -673,7 +673,7 @@ class LitterManager {
             
             motherInput.addEventListener('input', (e) => {
                 const searchTerm = e.target.value.toLowerCase().trim();
-                this.showParentAutocomplete(searchTerm, 'litterMother');
+                this.showParentAutocomplete(searchTerm, 'mother');
             });
             
             motherInput.addEventListener('blur', () => {
@@ -696,13 +696,13 @@ class LitterManager {
         });
     }
     
-    showParentAutocomplete(searchTerm, parentInputId) {
-        console.log('LitterManager: showParentAutocomplete voor', parentInputId, 'zoekterm:', searchTerm);
+    showParentAutocomplete(searchTerm, parentType) {
+        console.log('LitterManager: showParentAutocomplete voor', parentType, 'zoekterm:', searchTerm);
         
-        const dropdownId = parentInputId + 'Dropdown';
+        const dropdownId = `litter${parentType.charAt(0).toUpperCase() + parentType.slice(1)}Dropdown`;
         const dropdown = document.getElementById(dropdownId);
         if (!dropdown) {
-            console.error('LitterManager: Dropdown niet gevonden voor', parentInputId);
+            console.error('LitterManager: Dropdown niet gevonden voor', dropdownId);
             return;
         }
         
@@ -714,7 +714,7 @@ class LitterManager {
         console.log('LitterManager: Aantal honden beschikbaar voor autocomplete:', this.allDogs.length);
         
         // Bepaal welk geslacht we zoeken
-        const isFather = parentInputId === 'litterFather';
+        const isFather = parentType === 'father';
         
         // Filter honden voor autocomplete
         const suggestions = this.allDogs.filter(dog => {
@@ -756,8 +756,8 @@ class LitterManager {
             item.addEventListener('click', (e) => {
                 const dogId = item.getAttribute('data-id');
                 const dogName = item.getAttribute('data-name');
-                const input = document.getElementById(parentInputId);
-                const idInput = document.getElementById(parentInputId + 'Id');
+                const input = document.getElementById(`litter${parentType.charAt(0).toUpperCase() + parentType.slice(1)}`);
+                const idInput = document.getElementById(`litter${parentType.charAt(0).toUpperCase() + parentType.slice(1)}Id`);
                 
                 if (input) {
                     input.value = dogName;
