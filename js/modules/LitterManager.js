@@ -1,6 +1,5 @@
 /**
  * Litter Management Module
- * Beheert toevoegen en bewerken van nesten
  */
 
 class LitterManager extends BaseModule {
@@ -19,26 +18,6 @@ class LitterManager extends BaseModule {
     }
     
     getFormHTML() {
-        const data = {};
-        
-        // Genereer recente rassen opties - EXACT hetzelfde als DogManager
-        let recentBreedsHTML = '';
-        if (this.lastBreeds.length > 0) {
-            recentBreedsHTML = `
-                <div class="form-text mb-2">Recent gebruikte rassen:</div>
-                <div class="d-flex flex-wrap gap-2 mb-3">
-            `;
-            this.lastBreeds.forEach(breed => {
-                recentBreedsHTML += `
-                    <button type="button" class="btn btn-sm btn-outline-secondary recent-breed-btn" data-breed="${breed}">
-                        ${breed}
-                    </button>
-                `;
-            });
-            recentBreedsHTML += `</div>`;
-        }
-        
-        // EXACT hetzelfde als DogManager
         return `
             <div class="mb-3">
                 <button type="button" class="btn btn-outline-secondary btn-sm back-to-choice-btn">
@@ -47,20 +26,20 @@ class LitterManager extends BaseModule {
             </div>
             
             <form id="addDogForm">
-                <input type="hidden" id="fatherId" value="${data.vaderId || ''}">
-                <input type="hidden" id="motherId" value="${data.moederId || ''}">
+                <input type="hidden" id="fatherId" value="">
+                <input type="hidden" id="motherId" value="">
                 
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="dogName" class="form-label">Naam *</label>
-                            <input type="text" class="form-control" id="dogName" value="${data.naam || ''}" required>
+                            <input type="text" class="form-control" id="dogName" value="" required>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="pedigreeNumber" class="form-label">Stamboomnummer *</label>
-                            <input type="text" class="form-control" id="pedigreeNumber" value="${data.stamboomnr || ''}" required>
+                            <input type="text" class="form-control" id="pedigreeNumber" value="" required>
                         </div>
                     </div>
                 </div>
@@ -69,8 +48,8 @@ class LitterManager extends BaseModule {
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="breed" class="form-label">Ras *</label>
-                            <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
-                            ${recentBreedsHTML}
+                            <input type="text" class="form-control" id="breed" value="" required>
+                            ${this.getRecentBreedsHTML()}
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -78,8 +57,8 @@ class LitterManager extends BaseModule {
                             <label for="gender" class="form-label">Reu/Teef *</label>
                             <select class="form-select" id="gender" required>
                                 <option value="">Selecteer geslacht...</option>
-                                <option value="reuen" ${data.geslacht === 'reuen' ? 'selected' : ''}>Reu</option>
-                                <option value="teven" ${data.geslacht === 'teven' ? 'selected' : ''}>Teef</option>
+                                <option value="reuen">Reu</option>
+                                <option value="teven">Teef</option>
                             </select>
                         </div>
                     </div>
@@ -90,7 +69,7 @@ class LitterManager extends BaseModule {
                         <div class="mb-3 parent-input-wrapper">
                             <label for="father" class="form-label">Vader</label>
                             <input type="text" class="form-control" id="father" 
-                                   value="${data.vader || ''}" 
+                                   value="" 
                                    placeholder="Begin met typen om te zoeken..."
                                    data-parent-type="father"
                                    autocomplete="off">
@@ -100,7 +79,7 @@ class LitterManager extends BaseModule {
                         <div class="mb-3 parent-input-wrapper">
                             <label for="mother" class="form-label">Moeder</label>
                             <input type="text" class="form-control" id="mother" 
-                                   value="${data.moeder || ''}" 
+                                   value="" 
                                    placeholder="Begin met typen om te zoeken..."
                                    data-parent-type="mother"
                                    autocomplete="off">
@@ -112,13 +91,13 @@ class LitterManager extends BaseModule {
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="birthDate" class="form-label">Geboortedatum</label>
-                            <input type="date" class="form-control" id="birthDate" value="${data.geboortedatum || ''}">
+                            <input type="date" class="form-control" id="birthDate" value="">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="deathDate" class="form-label">Overlijdensdatum</label>
-                            <input type="date" class="form-control" id="deathDate" value="${data.overlijdensdatum || ''}">
+                            <input type="date" class="form-control" id="deathDate" value="">
                         </div>
                     </div>
                 </div>
@@ -129,11 +108,11 @@ class LitterManager extends BaseModule {
                             <label for="hipDysplasia" class="form-label">Heupdysplasie</label>
                             <select class="form-select" id="hipDysplasia">
                                 <option value="">Selecteer graad...</option>
-                                <option value="A" ${data.heupdysplasie === 'A' ? 'selected' : ''}>A</option>
-                                <option value="B" ${data.heupdysplasie === 'B' ? 'selected' : ''}>B</option>
-                                <option value="C" ${data.heupdysplasie === 'C' ? 'selected' : ''}>C</option>
-                                <option value="D" ${data.heupdysplasie === 'D' ? 'selected' : ''}>D</option>
-                                <option value="E" ${data.heupdysplasie === 'E' ? 'selected' : ''}>E</option>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                                <option value="E">E</option>
                             </select>
                         </div>
                     </div>
@@ -142,11 +121,11 @@ class LitterManager extends BaseModule {
                             <label for="elbowDysplasia" class="form-label">Elleboogdysplasie</label>
                             <select class="form-select" id="elbowDysplasia">
                                 <option value="">Selecteer graad...</option>
-                                <option value="0" ${data.elleboogdysplasie === '0' ? 'selected' : ''}>0</option>
-                                <option value="1" ${data.elleboogdysplasie === '1' ? 'selected' : ''}>1</option>
-                                <option value="2" ${data.elleboogdysplasie === '2' ? 'selected' : ''}>2</option>
-                                <option value="3" ${data.elleboogdysplasie === '3' ? 'selected' : ''}>3</option>
-                                <option value="NB" ${data.elleboogdysplasie === 'NB' ? 'selected' : ''}>NB (Niet bekend)</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="NB">NB (Niet bekend)</option>
                             </select>
                         </div>
                     </div>
@@ -155,10 +134,10 @@ class LitterManager extends BaseModule {
                             <label for="patellaLuxation" class="form-label">Patella Luxatie</label>
                             <select class="form-select" id="patellaLuxation">
                                 <option value="">Selecteer graad...</option>
-                                <option value="0" ${data.patella === '0' ? 'selected' : ''}>0</option>
-                                <option value="1" ${data.patella === '1' ? 'selected' : ''}>1</option>
-                                <option value="2" ${data.patella === '2' ? 'selected' : ''}>2</option>
-                                <option value="3" ${data.patella === '3' ? 'selected' : ''}>3</option>
+                                <option value="0">0</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
                             </select>
                         </div>
                     </div>
@@ -170,14 +149,14 @@ class LitterManager extends BaseModule {
                             <label for="eyes" class="form-label">Ogen</label>
                             <select class="form-select" id="eyes">
                                 <option value="">Kies...</option>
-                                <option value="Vrij" ${data.ogen === 'Vrij' ? 'selected' : ''}>Vrij</option>
-                                <option value="Distichiasis" ${data.ogen === 'Distichiasis' ? 'selected' : ''}>Distichiasis</option>
-                                <option value="Overig" ${data.ogen === 'Overig' ? 'selected' : ''}>Overig</option>
+                                <option value="Vrij">Vrij</option>
+                                <option value="Distichiasis">Distichiasis</option>
+                                <option value="Overig">Overig</option>
                             </select>
                         </div>
-                        <div class="mb-3" id="eyesExplanationContainer" style="${data.ogen === 'Overig' ? '' : 'display: none;'}">
+                        <div class="mb-3" id="eyesExplanationContainer" style="display: none;">
                             <label for="eyesExplanation" class="form-label">Verklaring overig</label>
-                            <input type="text" class="form-control" id="eyesExplanation" value="${data.ogenVerklaring || ''}">
+                            <input type="text" class="form-control" id="eyesExplanation" value="">
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -185,10 +164,10 @@ class LitterManager extends BaseModule {
                             <label for="dandyWalker" class="form-label">Dandy Walker Malformation</label>
                             <select class="form-select" id="dandyWalker">
                                 <option value="">Selecteer status...</option>
-                                <option value="Vrij op DNA" ${data.dandyWalker === 'Vrij op DNA' ? 'selected' : ''}>Vrij op DNA</option>
-                                <option value="Vrij op ouders" ${data.dandyWalker === 'Vrij op ouders' ? 'selected' : ''}>Vrij op ouders</option>
-                                <option value="Drager" ${data.dandyWalker === 'Drager' ? 'selected' : ''}>Drager</option>
-                                <option value="Lijder" ${data.dandyWalker === 'Lijder' ? 'selected' : ''}>Lijder</option>
+                                <option value="Vrij op DNA">Vrij op DNA</option>
+                                <option value="Vrij op ouders">Vrij op ouders</option>
+                                <option value="Drager">Drager</option>
+                                <option value="Lijder">Lijder</option>
                             </select>
                         </div>
                     </div>
@@ -200,23 +179,23 @@ class LitterManager extends BaseModule {
                             <label for="thyroid" class="form-label">Schildklier</label>
                             <select class="form-select" id="thyroid">
                                 <option value="">Kies...</option>
-                                <option value="Negatief" ${data.schildklier === 'Negatief' ? 'selected' : ''}>Tgaa Negatief</option>
-                                <option value="Positief" ${data.schildklier === 'Positief' ? 'selected' : ''}>Tgaa Positief</option>
+                                <option value="Negatief">Tgaa Negatief</option>
+                                <option value="Positief">Tgaa Positief</option>
                             </select>
                         </div>
-                        <div class="mb-3" id="thyroidExplanationContainer" style="${data.schildklier === 'Positief' ? '' : 'display: none;'}">
+                        <div class="mb-3" id="thyroidExplanationContainer" style="display: none;">
                             <label for="thyroidExplanation" class="form-label">Toelichting schildklier</label>
-                            <input type="text" class="form-control" id="thyroidExplanation" value="${data.schildklierVerklaring || ''}">
+                            <input type="text" class="form-control" id="thyroidExplanation" value="">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="country" class="form-label">Land</label>
-                            <input type="text" class="form-control" id="country" value="${data.land || ''}">
+                            <input type="text" class="form-control" id="country" value="">
                         </div>
                         <div class="mb-3">
                             <label for="zipCode" class="form-label">Postcode</label>
-                            <input type="text" class="form-control" id="zipCode" value="${data.postcode || ''}">
+                            <input type="text" class="form-control" id="zipCode" value="">
                         </div>
                     </div>
                 </div>
@@ -232,7 +211,7 @@ class LitterManager extends BaseModule {
                 
                 <div class="mb-3">
                     <label for="remarks" class="form-label">Opmerkingen</label>
-                    <textarea class="form-control" id="remarks" rows="3">${data.opmerkingen || ''}</textarea>
+                    <textarea class="form-control" id="remarks" rows="3"></textarea>
                 </div>
                 
                 <div class="alert alert-info">
@@ -246,50 +225,24 @@ class LitterManager extends BaseModule {
                     </button>
                 </div>
             </form>
-            
-            <style>
-                .autocomplete-dropdown {
-                    position: absolute;
-                    background: white;
-                    border: 1px solid #ddd;
-                    border-radius: 4px;
-                    max-height: 200px;
-                    overflow-y: auto;
-                    z-index: 9999;
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                    width: 100%;
-                }
-                
-                .autocomplete-item {
-                    padding: 10px;
-                    cursor: pointer;
-                    border-bottom: 1px solid #f0f0f0;
-                }
-                
-                .autocomplete-item:hover {
-                    background-color: #f8f9fa;
-                }
-                
-                .autocomplete-item .dog-name {
-                    font-weight: bold;
-                }
-                
-                .autocomplete-item .dog-info {
-                    font-size: 0.85em;
-                    color: #666;
-                }
-                
-                .parent-input-wrapper {
-                    position: relative;
-                }
-            </style>
         `;
+    }
+    
+    getRecentBreedsHTML() {
+        if (this.lastBreeds.length === 0) return '';
+        
+        let html = '<div class="form-text mb-2">Recent gebruikte rassen:</div><div class="d-flex flex-wrap gap-2 mb-3">';
+        this.lastBreeds.forEach(breed => {
+            html += `<button type="button" class="btn btn-sm btn-outline-secondary recent-breed-btn" data-breed="${breed}">${breed}</button>`;
+        });
+        html += '</div>';
+        return html;
     }
     
     setupEvents() {
         console.log('LitterManager setupEvents called');
         
-        // Laad honden voor autocomplete - EXACT hetzelfde als DogManager
+        // Laad honden voor autocomplete
         this.loadAllDogs();
         
         // Wacht tot DOM geladen is
@@ -301,7 +254,7 @@ class LitterManager extends BaseModule {
     setupFormEvents() {
         console.log('Setting up LitterManager form events...');
         
-        // Save dog button - EXACT hetzelfde als DogManager
+        // Save dog button
         const saveBtn = document.getElementById('saveDogBtn');
         if (saveBtn) {
             console.log('Found save dog button');
@@ -313,18 +266,22 @@ class LitterManager extends BaseModule {
             console.error('Save dog button not found!');
         }
         
-        // Recente rassen knoppen - EXACT hetzelfde als DogManager
+        // Recente rassen knoppen
         document.querySelectorAll('.recent-breed-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
+                console.log('Recent breed button clicked:', e.target.dataset.breed);
                 const breed = e.target.dataset.breed;
                 const breedInput = document.getElementById('breed');
                 if (breedInput) {
                     breedInput.value = breed;
+                    console.log('Breed set to:', breed);
+                } else {
+                    console.error('Breed input not found!');
                 }
             });
         });
         
-        // Eyes dropdown handler - EXACT hetzelfde als DogManager
+        // Eyes dropdown handler
         const eyesSelect = document.getElementById('eyes');
         if (eyesSelect) {
             eyesSelect.addEventListener('change', (e) => {
@@ -335,7 +292,7 @@ class LitterManager extends BaseModule {
             });
         }
         
-        // Thyroid dropdown handler - EXACT hetzelfde als DogManager
+        // Thyroid dropdown handler
         const thyroidSelect = document.getElementById('thyroid');
         if (thyroidSelect) {
             thyroidSelect.addEventListener('change', (e) => {
@@ -346,7 +303,7 @@ class LitterManager extends BaseModule {
             });
         }
         
-        // Setup autocomplete voor ouders - EXACT hetzelfde als DogManager
+        // Setup autocomplete voor ouders
         this.setupParentAutocomplete();
     }
     
@@ -358,7 +315,7 @@ class LitterManager extends BaseModule {
             dropdown.remove();
         });
         
-        // Maak nieuwe dropdown containers - EXACT hetzelfde als DogManager
+        // Maak nieuwe dropdown containers
         const fatherInputWrapper = document.querySelector('#father').closest('.parent-input-wrapper');
         const motherInputWrapper = document.querySelector('#mother').closest('.parent-input-wrapper');
         
@@ -381,14 +338,16 @@ class LitterManager extends BaseModule {
         
         console.log('Created dropdowns');
         
-        // Event listeners voor vader en moeder velden - EXACT hetzelfde als DogManager
+        // Event listeners voor vader en moeder velden
         document.querySelectorAll('.parent-input-wrapper input').forEach(input => {
             input.addEventListener('focus', () => {
+                console.log('Parent input focused');
                 this.loadAllDogs();
             });
             
             input.addEventListener('input', (e) => {
                 const searchTerm = e.target.value.toLowerCase().trim();
+                console.log('Searching for parent:', searchTerm);
                 const parentType = input.id === 'father' ? 'father' : 'mother';
                 this.showParentAutocomplete(searchTerm, parentType);
             });
@@ -403,7 +362,7 @@ class LitterManager extends BaseModule {
             });
         });
         
-        // Klik buiten dropdown om te verbergen - EXACT hetzelfde als DogManager
+        // Klik buiten dropdown om te verbergen
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.parent-input-wrapper')) {
                 document.querySelectorAll('.autocomplete-dropdown').forEach(dropdown => {
@@ -422,12 +381,12 @@ class LitterManager extends BaseModule {
             return;
         }
         
-        // Filter honden voor autocomplete - EXACT hetzelfde als DogManager
+        // Filter honden voor autocomplete
         const suggestions = this.allDogs.filter(dog => {
             const dogName = dog.naam.toLowerCase();
             const matchesSearch = dogName.includes(searchTerm);
             
-            // Filter op geslacht - EXACT hetzelfde als DogManager
+            // Filter op geslacht
             if (parentType === 'father') {
                 return matchesSearch && dog.geslacht === 'reuen';
             } else if (parentType === 'mother') {
@@ -435,6 +394,8 @@ class LitterManager extends BaseModule {
             }
             return matchesSearch;
         }).slice(0, 8);
+        
+        console.log('Found suggestions:', suggestions.length);
         
         if (suggestions.length === 0) {
             dropdown.style.display = 'none';
@@ -456,13 +417,15 @@ class LitterManager extends BaseModule {
         dropdown.innerHTML = html;
         dropdown.style.display = 'block';
         
-        // Event listeners voor autocomplete items - EXACT hetzelfde als DogManager
+        // Event listeners voor autocomplete items
         dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 const dogId = item.getAttribute('data-id');
                 const dogName = item.getAttribute('data-name');
                 const input = document.getElementById(parentType);
                 const idInput = document.getElementById(`${parentType}Id`);
+                
+                console.log('Selected parent:', dogName, 'ID:', dogId);
                 
                 if (input) {
                     input.value = dogName;
@@ -479,6 +442,7 @@ class LitterManager extends BaseModule {
     async loadAllDogs() {
         if (this.allDogs.length === 0) {
             try {
+                console.log('Loading all dogs for autocomplete...');
                 if (this.db && typeof this.db.getHonden === 'function') {
                     this.allDogs = await this.db.getHonden();
                 } else if (window.db && typeof window.db.getHonden === 'function') {
@@ -495,14 +459,14 @@ class LitterManager extends BaseModule {
     async saveDog() {
         console.log('saveDog method called in LitterManager');
         
-        // Valideer eerst of gebruiker admin is - EXACT hetzelfde als DogManager
+        // Valideer eerst of gebruiker admin is
         const isAdmin = auth.isAdmin();
         if (!isAdmin) {
             alert('Alleen administrators mogen honden toevoegen/bewerken');
             return;
         }
         
-        // Verzamel alle data - EXACT hetzelfde als DogManager
+        // Verzamel alle data
         const dogData = {
             naam: document.getElementById('dogName').value.trim(),
             stamboomnr: document.getElementById('pedigreeNumber').value.trim(),
@@ -531,20 +495,17 @@ class LitterManager extends BaseModule {
         
         console.log('Dog data collected:', dogData);
         
-        // Valideer basisvelden - EXACT hetzelfde als DogManager
-        if (!dogData.naam || !dogData.stamboomnr || !dogData.ras) {
-            alert('Naam, stamboomnummer en ras zijn verplichte velden');
+        // Valideer basisvelden
+        if (!dogData.naam || !dogData.stamboomnr || !dogData.ras || !dogData.geslacht) {
+            alert('Naam, stamboomnummer, ras en geslacht zijn verplichte velden');
             return;
         }
         
-        // Voeg ras toe aan recente rassen - EXACT hetzelfde als DogManager
+        // Voeg ras toe aan recente rassen
         this.addToLastBreeds(dogData.ras);
         
-        // Toon progress indicator - EXACT hetzelfde als DogManager
-        console.log('Hond opslaan...');
-        
         try {
-            // Sla hond op in database - EXACT hetzelfde als DogManager
+            // Sla hond op in database
             let savedDog;
             if (this.db && typeof this.db.voegHondToe === 'function') {
                 savedDog = await this.db.voegHondToe(dogData);
@@ -558,21 +519,14 @@ class LitterManager extends BaseModule {
             
             alert('Hond succesvol opgeslagen!');
             
-            // Foto uploaden als er een is geselecteerd - EXACT hetzelfde als DogManager
+            // Foto uploaden als er een is geselecteerd
             const photoInput = document.getElementById('dogPhoto');
             if (photoInput.files.length > 0) {
                 await this.uploadPhoto(dogData.stamboomnr, photoInput.files[0]);
             }
             
-            // Reset formulier - EXACT hetzelfde als DogManager
+            // Reset formulier
             this.resetForm();
-            
-            // Terug naar keuze scherm - Dit is het enige dat anders is
-            setTimeout(() => {
-                if (window.dogManager && window.dogManager.showChoiceScreen) {
-                    window.dogManager.showChoiceScreen();
-                }
-            }, 1500);
             
         } catch (error) {
             console.error('Error in saveDog:', error);
@@ -640,7 +594,7 @@ class LitterManager extends BaseModule {
     }
     
     resetForm() {
-        // Reset alleen het formulier - EXACT hetzelfde als DogManager
+        // Reset het formulier
         document.getElementById('dogName').value = '';
         document.getElementById('pedigreeNumber').value = '';
         document.getElementById('breed').value = '';
