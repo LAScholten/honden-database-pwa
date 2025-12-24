@@ -198,6 +198,7 @@ class LitterManager extends BaseModule {
         
         return `
             <form id="addDogForm">
+                <!-- Hidden fields voor ouders ID's -->
                 <input type="hidden" id="fatherId" value="">
                 <input type="hidden" id="motherId" value="">
                 
@@ -236,33 +237,17 @@ class LitterManager extends BaseModule {
                     </div>
                 </div>
                 
-                <div class="row g-1 mb-1">
-                    <div class="col-md-6">
-                        <div class="mb-1">
-                            <label for="father" class="form-label small">Vader</label>
-                            <input type="text" class="form-control form-control-sm" id="father" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-1">
-                            <label for="mother" class="form-label small">Moeder</label>
-                            <input type="text" class="form-control form-control-sm" id="mother" readonly>
-                        </div>
-                    </div>
-                </div>
+                <!-- OUDERS EN GEBOORTEDATUM ZIJN VERWIJDERD UIT HET HOND FORMULIER -->
                 
                 <div class="row g-1 mb-1">
-                    <div class="col-md-6">
-                        <div class="mb-1">
-                            <label for="birthDate" class="form-label small">Geboortedatum</label>
-                            <input type="date" class="form-control form-control-sm" id="birthDate" value="${data.geboortedatum || ''}">
-                        </div>
-                    </div>
                     <div class="col-md-6">
                         <div class="mb-1">
                             <label for="deathDate" class="form-label small">Overlijdensdatum</label>
                             <input type="date" class="form-control form-control-sm" id="deathDate" value="${data.overlijdensdatum || ''}">
                         </div>
+                    </div>
+                    <div class="col-md-6">
+                        <!-- Reserve kolom voor toekomstige velden -->
                     </div>
                 </div>
                 
@@ -449,28 +434,6 @@ class LitterManager extends BaseModule {
         
         // Update saved dogs list
         this.updateSavedDogsList();
-        
-        // Kopieer ouders naar hond formulier
-        this.copyParentsToDogForm();
-    }
-    
-    copyParentsToDogForm() {
-        const motherDog = document.getElementById('motherDog');
-        const fatherDog = document.getElementById('fatherDog');
-        const motherInDogForm = document.getElementById('mother');
-        const fatherInDogForm = document.getElementById('father');
-        
-        if (motherDog && motherInDogForm) {
-            motherDog.addEventListener('input', () => {
-                motherInDogForm.value = motherDog.value;
-            });
-        }
-        
-        if (fatherDog && fatherInDogForm) {
-            fatherDog.addEventListener('input', () => {
-                fatherInDogForm.value = fatherDog.value;
-            });
-        }
     }
     
     setupDogFormEvents() {
@@ -626,12 +589,6 @@ class LitterManager extends BaseModule {
                 if (input) input.value = dogName;
                 if (idInput) idInput.value = dogId;
                 
-                // Kopieer ook naar hond formulier
-                const dogFormInput = document.getElementById(parentType === 'mother' ? 'mother' : 'father');
-                if (dogFormInput) {
-                    dogFormInput.value = dogName;
-                }
-                
                 dropdown.style.display = 'none';
             });
         });
@@ -765,8 +722,10 @@ class LitterManager extends BaseModule {
         document.getElementById('remarks').value = '';
         
         // Verberg uitleg velden
-        document.getElementById('eyesExplanationContainer').style.display = 'none';
-        document.getElementById('thyroidExplanationContainer').style.display = 'none';
+        const eyesExplanationContainer = document.getElementById('eyesExplanationContainer');
+        const thyroidExplanationContainer = document.getElementById('thyroidExplanationContainer');
+        if (eyesExplanationContainer) eyesExplanationContainer.style.display = 'none';
+        if (thyroidExplanationContainer) thyroidExplanationContainer.style.display = 'none';
         
         // Focus op naam veld
         document.getElementById('dogName').focus();
@@ -813,6 +772,18 @@ class LitterManager extends BaseModule {
             }
             
             alert('Nest succesvol afgerond!');
+            
+            // Reset alle velden
+            this.savedDogs = [];
+            document.getElementById('motherDog').value = '';
+            document.getElementById('fatherDog').value = '';
+            document.getElementById('motherId').value = '';
+            document.getElementById('fatherId').value = '';
+            document.getElementById('kennelName').value = '';
+            document.getElementById('birthDate').value = '';
+            this.resetDogForm();
+            this.updateSavedDogsList();
+            document.getElementById('savedDogsSection').style.display = 'none';
             
             // Wacht even en ga terug naar keuze scherm
             setTimeout(() => {
