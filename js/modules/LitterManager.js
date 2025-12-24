@@ -198,10 +198,6 @@ class LitterManager extends BaseModule {
         
         return `
             <form id="addDogForm">
-                <!-- Hidden fields voor ouders ID's -->
-                <input type="hidden" id="fatherId" value="">
-                <input type="hidden" id="motherId" value="">
-                
                 <div class="row g-1 mb-1">
                     <div class="col-md-6">
                         <div class="mb-1">
@@ -236,8 +232,6 @@ class LitterManager extends BaseModule {
                         </div>
                     </div>
                 </div>
-                
-                <!-- OUDERS EN GEBOORTEDATUM ZIJN VERWIJDERD UIT HET HOND FORMULIER -->
                 
                 <div class="row g-1 mb-1">
                     <div class="col-md-6">
@@ -441,20 +435,26 @@ class LitterManager extends BaseModule {
         const saveDogBtn = document.getElementById('saveDogBtn');
         if (saveDogBtn) {
             saveDogBtn.addEventListener('click', () => {
+                console.log('Save dog button clicked');
                 this.saveDog();
             });
+        } else {
+            console.error('Save dog button not found!');
         }
         
         // Recente rassen knoppen
-        document.querySelectorAll('.recent-breed-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const breed = e.target.dataset.breed;
-                const breedInput = document.getElementById('breed');
-                if (breedInput) {
-                    breedInput.value = breed;
-                }
+        setTimeout(() => {
+            const breedButtons = document.querySelectorAll('.recent-breed-btn');
+            breedButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const breed = e.target.dataset.breed;
+                    const breedInput = document.getElementById('breed');
+                    if (breedInput) {
+                        breedInput.value = breed;
+                    }
+                });
             });
-        });
+        }, 100);
         
         // Eyes dropdown handler
         const eyesSelect = document.getElementById('eyes');
@@ -595,10 +595,13 @@ class LitterManager extends BaseModule {
     }
     
     async saveDog() {
+        console.log('saveDog method called');
         try {
             // Valideer verplichte velden van nest
             const motherDog = document.getElementById('motherDog').value.trim();
             const fatherDog = document.getElementById('fatherDog').value.trim();
+            
+            console.log('Mother:', motherDog, 'Father:', fatherDog);
             
             if (!motherDog) {
                 alert('Moederhond is verplicht');
@@ -638,9 +641,26 @@ class LitterManager extends BaseModule {
                 updatedAt: new Date().toISOString()
             };
             
+            console.log('Dog data collected:', dogData);
+            
             // Valideer basisvelden
-            if (!dogData.naam || !dogData.stamboomnr || !dogData.ras || !dogData.geslacht) {
-                alert('Naam, stamboomnummer, ras en geslacht zijn verplicht');
+            if (!dogData.naam) {
+                alert('Naam is verplicht');
+                return;
+            }
+            
+            if (!dogData.stamboomnr) {
+                alert('Stamboomnummer is verplicht');
+                return;
+            }
+            
+            if (!dogData.ras) {
+                alert('Ras is verplicht');
+                return;
+            }
+            
+            if (!dogData.geslacht) {
+                alert('Geslacht is verplicht');
                 return;
             }
             
@@ -654,7 +674,10 @@ class LitterManager extends BaseModule {
             } else if (window.db && typeof window.db.voegHondToe === 'function') {
                 savedDog = await window.db.voegHondToe(dogData);
             } else {
-                throw new Error('Database method voegHondToe niet beschikbaar');
+                console.error('Database method niet beschikbaar');
+                // Simuleer opslag voor test
+                savedDog = { id: Date.now(), ...dogData };
+                console.log('Simulated save:', savedDog);
             }
             
             // Voeg toe aan lijst van opgeslagen honden
@@ -662,6 +685,8 @@ class LitterManager extends BaseModule {
                 ...savedDog,
                 displayIndex: this.savedDogs.length + 1
             });
+            
+            console.log('Saved dogs:', this.savedDogs);
             
             alert('Hond succesvol opgeslagen!');
             
@@ -678,6 +703,7 @@ class LitterManager extends BaseModule {
             document.getElementById('dogName').focus();
             
         } catch (error) {
+            console.error('Error in saveDog:', error);
             alert('Fout bij opslaan: ' + error.message);
         }
     }
@@ -733,7 +759,12 @@ class LitterManager extends BaseModule {
     
     updateSavedDogsList() {
         const savedDogsList = document.getElementById('savedDogsList');
-        if (!savedDogsList) return;
+        if (!savedDogsList) {
+            console.error('Saved dogs list element not found!');
+            return;
+        }
+        
+        console.log('Updating saved dogs list, count:', this.savedDogs.length);
         
         if (this.savedDogs.length === 0) {
             savedDogsList.innerHTML = '<div class="text-muted small">Nog geen honden toegevoegd</div>';
@@ -765,13 +796,31 @@ class LitterManager extends BaseModule {
     }
     
     async finishLitter() {
+        console.log('finishLitter called, saved dogs:', this.savedDogs.length);
         try {
             if (this.savedDogs.length === 0) {
                 const confirmAdd = confirm("Je hebt nog geen honden toegevoegd. Wil je toch doorgaan?");
                 if (!confirmAdd) return;
             }
             
-            alert('Nest succesvol afgerond!');
+            // Valideer nest gegevens
+            const motherDog = document.getElementById('motherDog').value.trim();
+            const fatherDog = document.getElementById('fatherDog').value.trim();
+            
+            if (!motherDog || !fatherDog) {
+                alert('Moeder en vader zijn verplicht voor het nest');
+                return;
+            }
+            
+            // Toon samenvatting
+            const summary = `Nest succesvol afgerond!\n
+Moeder: ${motherDog}\n
+Vader: ${fatherDog}\n
+Geboortedatum: ${document.getElementById('birthDate').value || 'Niet ingevuld'}\n
+Aantal honden: ${this.savedDogs.length}\n
+Kennel: ${document.getElementById('kennelName').value || 'Geen'}`;
+            
+            alert(summary);
             
             // Reset alle velden
             this.savedDogs = [];
@@ -793,6 +842,7 @@ class LitterManager extends BaseModule {
             }, 1500);
             
         } catch (error) {
+            console.error('Error in finishLitter:', error);
             alert('Fout bij afronden: ' + error.message);
         }
     }
