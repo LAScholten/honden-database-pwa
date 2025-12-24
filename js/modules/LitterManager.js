@@ -10,37 +10,37 @@ class LitterManager {
     getFormHTML() {
         return `
             <div class="mb-3">
-                <button type="button" class="btn btn-outline-secondary btn-sm" id="backBtn">
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="litterBackBtn">
                     <i class="bi bi-arrow-left me-1"></i> Terug
                 </button>
             </div>
             
             <div class="mb-3">
                 <label class="form-label">Vader</label>
-                <input type="text" class="form-control" id="father">
+                <input type="text" class="form-control" id="litterFather" value="">
             </div>
             
             <div class="mb-3">
                 <label class="form-label">Moeder</label>
-                <input type="text" class="form-control" id="mother">
+                <input type="text" class="form-control" id="litterMother" value="">
             </div>
             
             <div class="mb-3">
-                <label class="form-label">Naam hond</label>
-                <input type="text" class="form-control" id="dogName">
+                <label class="form-label">Naam hond *</label>
+                <input type="text" class="form-control" id="litterDogName" value="">
             </div>
             
             <div class="mb-3">
-                <label class="form-label">Stamboomnummer</label>
-                <input type="text" class="form-control" id="pedigree">
+                <label class="form-label">Stamboomnummer *</label>
+                <input type="text" class="form-control" id="litterPedigreeNumber" value="">
             </div>
             
             <div class="mb-3">
-                <label class="form-label">Ras</label>
-                <input type="text" class="form-control" id="breed">
+                <label class="form-label">Ras *</label>
+                <input type="text" class="form-control" id="litterBreed" value="">
             </div>
             
-            <button type="button" class="btn btn-primary mt-3" id="saveBtn">
+            <button type="button" class="btn btn-primary mt-3" id="litterSaveBtn">
                 Opslaan
             </button>
         `;
@@ -50,37 +50,57 @@ class LitterManager {
         console.log('LitterManager events setup');
         
         // Terug knop
-        document.getElementById('backBtn').addEventListener('click', () => {
-            if (window.dogManager) {
-                window.dogManager.showChoiceScreen();
-            }
-        });
+        const backBtn = document.getElementById('litterBackBtn');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                console.log('Terug knop geklikt');
+                if (window.dogManager && window.dogManager.showChoiceScreen) {
+                    window.dogManager.showChoiceScreen();
+                }
+            });
+        } else {
+            console.error('Terug knop niet gevonden');
+        }
         
         // Opslaan knop
-        document.getElementById('saveBtn').addEventListener('click', () => {
-            this.saveDog();
+        const saveBtn = document.getElementById('litterSaveBtn');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', () => {
+                console.log('Opslaan knop geklikt');
+                this.saveDog();
+            });
+        } else {
+            console.error('Opslaan knop niet gevonden');
+        }
+        
+        console.log('Events ingesteld voor:', {
+            backBtn: !!backBtn,
+            saveBtn: !!saveBtn
         });
     }
     
     saveDog() {
-        const dogData = {
-            vader: document.getElementById('father').value,
-            moeder: document.getElementById('mother').value,
-            naam: document.getElementById('dogName').value,
-            stamboomnr: document.getElementById('pedigree').value,
-            ras: document.getElementById('breed').value
-        };
+        console.log('saveDog aangeroepen');
         
-        console.log('Hond opslaan:', dogData);
+        const name = document.getElementById('litterDogName').value;
+        const pedigree = document.getElementById('litterPedigreeNumber').value;
+        const breed = document.getElementById('litterBreed').value;
         
-        if (!dogData.naam || !dogData.stamboomnr || !dogData.ras) {
+        console.log('Veld waarden:', {
+            name: name,
+            pedigree: pedigree,
+            breed: breed
+        });
+        
+        if (!name || !pedigree || !breed) {
             alert('Vul naam, stamboomnummer en ras in');
             return;
         }
         
-        alert('Hond zou opgeslagen worden');
+        alert(`Hond opgeslagen!\nNaam: ${name}\nStamboom: ${pedigree}\nRas: ${breed}`);
     }
 }
 
 // Maak beschikbaar
 window.LitterManager = LitterManager;
+console.log('LitterManager class beschikbaar in window');
