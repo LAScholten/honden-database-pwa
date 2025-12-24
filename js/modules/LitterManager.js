@@ -314,20 +314,20 @@ class LitterManager {
         
         return `
             <form id="litterForm">
-                <input type="hidden" id="litterFatherId" value="${data.vaderId || ''}">
-                <input type="hidden" id="litterMotherId" value="${data.moederId || ''}">
+                <input type="hidden" id="fatherId" value="${data.vaderId || ''}">
+                <input type="hidden" id="motherId" value="${data.moederId || ''}">
                 
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="litterName" class="form-label">${t('nameRequired')}</label>
-                            <input type="text" class="form-control" id="litterName" value="${data.naam || ''}" required>
+                            <label for="name" class="form-label">${t('nameRequired')}</label>
+                            <input type="text" class="form-control" id="name" value="${data.naam || ''}" required>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="litterPedigreeNumber" class="form-label">${t('pedigreeNumber')}</label>
-                            <input type="text" class="form-control" id="litterPedigreeNumber" value="${data.stamboomnr || ''}" required>
+                            <label for="pedigreeNumber" class="form-label">${t('pedigreeNumber')}</label>
+                            <input type="text" class="form-control" id="pedigreeNumber" value="${data.stamboomnr || ''}" required>
                         </div>
                     </div>
                 </div>
@@ -335,15 +335,15 @@ class LitterManager {
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="litterBreed" class="form-label">${t('breedRequired')}</label>
-                            <input type="text" class="form-control" id="litterBreed" value="${data.ras || ''}" required>
+                            <label for="breed" class="form-label">${t('breedRequired')}</label>
+                            <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
                             ${recentBreedsHTML}
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="litterGender" class="form-label">${t('gender')}</label>
-                            <select class="form-select" id="litterGender">
+                            <label for="gender" class="form-label">${t('gender')}</label>
+                            <select class="form-select" id="gender">
                                 <option value="">${t('chooseGender')}</option>
                                 <option value="reuen" ${data.geslacht === 'reuen' ? 'selected' : ''}>${t('male')}</option>
                                 <option value="teven" ${data.geslacht === 'teven' ? 'selected' : ''}>${t('female')}</option>
@@ -355,24 +355,24 @@ class LitterManager {
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3 parent-input-wrapper">
-                            <label for="litterFather" class="form-label">${t('father')}</label>
-                            <input type="text" class="form-control" id="litterFather" 
+                            <label for="father" class="form-label">${t('father')}</label>
+                            <input type="text" class="form-control" id="father" 
                                    value="${data.vader || ''}" 
                                    placeholder="Begin met typen om te zoeken..."
                                    data-parent-type="father"
                                    autocomplete="off">
-                            <div class="autocomplete-dropdown" id="litterFatherDropdown" style="display: none;"></div>
+                            <div class="autocomplete-dropdown" id="fatherDropdown" style="display: none;"></div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3 parent-input-wrapper">
-                            <label for="litterMother" class="form-label">${t('mother')}</label>
-                            <input type="text" class="form-control" id="litterMother" 
+                            <label for="mother" class="form-label">${t('mother')}</label>
+                            <input type="text" class="form-control" id="mother" 
                                    value="${data.moeder || ''}" 
                                    placeholder="Begin met typen om te zoeken..."
                                    data-parent-type="mother"
                                    autocomplete="off">
-                            <div class="autocomplete-dropdown" id="litterMotherDropdown" style="display: none;"></div>
+                            <div class="autocomplete-dropdown" id="motherDropdown" style="display: none;"></div>
                         </div>
                     </div>
                 </div>
@@ -380,14 +380,14 @@ class LitterManager {
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="litterBirthDate" class="form-label">${t('birthDate')}</label>
-                            <input type="date" class="form-control" id="litterBirthDate" value="${data.geboortedatum || ''}">
+                            <label for="birthDate" class="form-label">${t('birthDate')}</label>
+                            <input type="date" class="form-control" id="birthDate" value="${data.geboortedatum || ''}">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="litterDeathDate" class="form-label">${t('deathDate')}</label>
-                            <input type="date" class="form-control" id="litterDeathDate" value="${data.overlijdensdatum || ''}">
+                            <label for="deathDate" class="form-label">${t('deathDate')}</label>
+                            <input type="date" class="form-control" id="deathDate" value="${data.overlijdensdatum || ''}">
                         </div>
                     </div>
                 </div>
@@ -395,8 +395,8 @@ class LitterManager {
                 <div class="row">
                     <div class="col-md-4">
                         <div class="mb-3">
-                            <label for="litterHipDysplasia" class="form-label">${t('hipDysplasia')}</label>
-                            <select class="form-select" id="litterHipDysplasia">
+                            <label for="hipDysplasia" class="form-label">${t('hipDysplasia')}</label>
+                            <select class="form-select" id="hipDysplasia">
                                 <option value="">${t('hipGrades')}</option>
                                 <option value="A" ${data.heupdysplasie === 'A' ? 'selected' : ''}>${t('hipA')}</option>
                                 <option value="B" ${data.heupdysplasie === 'B' ? 'selected' : ''}>${t('hipB')}</option>
@@ -408,8 +408,8 @@ class LitterManager {
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
-                            <label for="litterElbowDysplasia" class="form-label">${t('elbowDysplasia')}</label>
-                            <select class="form-select" id="litterElbowDysplasia">
+                            <label for="elbowDysplasia" class="form-label">${t('elbowDysplasia')}</label>
+                            <select class="form-select" id="elbowDysplasia">
                                 <option value="">${t('elbowGrades')}</option>
                                 <option value="0" ${data.elleboogdysplasie === '0' ? 'selected' : ''}>${t('elbow0')}</option>
                                 <option value="1" ${data.elleboogdysplasie === '1' ? 'selected' : ''}>${t('elbow1')}</option>
@@ -421,8 +421,8 @@ class LitterManager {
                     </div>
                     <div class="col-md-4">
                         <div class="mb-3">
-                            <label for="litterPatellaLuxation" class="form-label">${t('patellaLuxation')}</label>
-                            <select class="form-select" id="litterPatellaLuxation">
+                            <label for="patellaLuxation" class="form-label">${t('patellaLuxation')}</label>
+                            <select class="form-select" id="patellaLuxation">
                                 <option value="">${t('patellaGrades')}</option>
                                 <option value="0" ${data.patella === '0' ? 'selected' : ''}>${t('patella0')}</option>
                                 <option value="1" ${data.patella === '1' ? 'selected' : ''}>${t('patella1')}</option>
@@ -436,23 +436,23 @@ class LitterManager {
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="litterEyes" class="form-label">${t('eyes')}</label>
-                            <select class="form-select" id="litterEyes">
+                            <label for="eyes" class="form-label">${t('eyes')}</label>
+                            <select class="form-select" id="eyes">
                                 <option value="">${t('choose')}</option>
                                 <option value="Vrij" ${data.ogen === 'Vrij' ? 'selected' : ''}>${t('eyesFree')}</option>
                                 <option value="Distichiasis" ${data.ogen === 'Distichiasis' ? 'selected' : ''}>${t('eyesDistichiasis')}</option>
                                 <option value="Overig" ${data.ogen === 'Overig' ? 'selected' : ''}>${t('eyesOther')}</option>
                             </select>
                         </div>
-                        <div class="mb-3" id="litterEyesExplanationContainer" style="${data.ogen === 'Overig' ? '' : 'display: none;'}">
-                            <label for="litterEyesExplanation" class="form-label">${t('eyesExplanation')}</label>
-                            <input type="text" class="form-control" id="litterEyesExplanation" value="${data.ogenVerklaring || ''}">
+                        <div class="mb-3" id="eyesExplanationContainer" style="${data.ogen === 'Overig' ? '' : 'display: none;'}">
+                            <label for="eyesExplanation" class="form-label">${t('eyesExplanation')}</label>
+                            <input type="text" class="form-control" id="eyesExplanation" value="${data.ogenVerklaring || ''}">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="litterDandyWalker" class="form-label">${t('dandyWalker')}</label>
-                            <select class="form-select" id="litterDandyWalker">
+                            <label for="dandyWalker" class="form-label">${t('dandyWalker')}</label>
+                            <select class="form-select" id="dandyWalker">
                                 <option value="">${t('dandyOptions')}</option>
                                 <option value="Vrij op DNA" ${data.dandyWalker === 'Vrij op DNA' ? 'selected' : ''}>${t('dandyFreeDNA')}</option>
                                 <option value="Vrij op ouders" ${data.dandyWalker === 'Vrij op ouders' ? 'selected' : ''}>${t('dandyFreeParents')}</option>
@@ -466,42 +466,42 @@ class LitterManager {
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="litterThyroid" class="form-label">${t('thyroid')}</label>
-                            <select class="form-select" id="litterThyroid">
+                            <label for="thyroid" class="form-label">${t('thyroid')}</label>
+                            <select class="form-select" id="thyroid">
                                 <option value="">${t('choose')}</option>
                                 <option value="Negatief" ${data.schildklier === 'Negatief' ? 'selected' : ''}>${t('thyroidNegative')}</option>
                                 <option value="Positief" ${data.schildklier === 'Positief' ? 'selected' : ''}>${t('thyroidPositive')}</option>
                             </select>
                         </div>
-                        <div class="mb-3" id="litterThyroidExplanationContainer" style="${data.schildklier === 'Positief' ? '' : 'display: none;'}">
-                            <label for="litterThyroidExplanation" class="form-label">${t('thyroidExplanation')}</label>
-                            <input type="text" class="form-control" id="litterThyroidExplanation" value="${data.schildklierVerklaring || ''}">
+                        <div class="mb-3" id="thyroidExplanationContainer" style="${data.schildklier === 'Positief' ? '' : 'display: none;'}">
+                            <label for="thyroidExplanation" class="form-label">${t('thyroidExplanation')}</label>
+                            <input type="text" class="form-control" id="thyroidExplanation" value="${data.schildklierVerklaring || ''}">
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="litterCountry" class="form-label">${t('country')}</label>
-                            <input type="text" class="form-control" id="litterCountry" value="${data.land || ''}">
+                            <label for="country" class="form-label">${t('country')}</label>
+                            <input type="text" class="form-control" id="country" value="${data.land || ''}">
                         </div>
                         <div class="mb-3">
-                            <label for="litterZipCode" class="form-label">${t('zipCode')}</label>
-                            <input type="text" class="form-control" id="litterZipCode" value="${data.postcode || ''}">
+                            <label for="zipCode" class="form-label">${t('zipCode')}</label>
+                            <input type="text" class="form-control" id="zipCode" value="${data.postcode || ''}">
                         </div>
                     </div>
                 </div>
                 
                 <div class="mb-3">
-                    <label for="litterPhoto" class="form-label">${t('addPhoto')}</label>
+                    <label for="photo" class="form-label">${t('addPhoto')}</label>
                     <div class="input-group">
-                        <input type="file" class="form-control" id="litterPhoto" accept="image/*">
-                        <label class="input-group-text" for="litterPhoto">${t('chooseFile')}</label>
+                        <input type="file" class="form-control" id="photo" accept="image/*">
+                        <label class="input-group-text" for="photo">${t('chooseFile')}</label>
                     </div>
                     <div class="form-text">${t('noFileChosen')}</div>
                 </div>
                 
                 <div class="mb-3">
-                    <label for="litterRemarks" class="form-label">${t('remarks')}</label>
-                    <textarea class="form-control" id="litterRemarks" rows="3">${data.opmerkingen || ''}</textarea>
+                    <label for="remarks" class="form-label">${t('remarks')}</label>
+                    <textarea class="form-control" id="remarks" rows="3">${data.opmerkingen || ''}</textarea>
                 </div>
                 
                 <div class="alert alert-info">
@@ -510,7 +510,7 @@ class LitterManager {
                 </div>
                 
                 <div class="text-end">
-                    <button type="button" class="btn btn-primary" id="saveLitterBtn">
+                    <button type="button" class="btn btn-primary" id="saveDogBtn">
                         ${t('saveDog')}
                     </button>
                 </div>
@@ -527,32 +527,32 @@ class LitterManager {
         }
         
         // Event listeners voor formulier
-        const saveBtn = document.getElementById('saveLitterBtn');
+        const saveBtn = document.getElementById('saveDogBtn');
         if (saveBtn) {
             console.log('LitterManager: Save button gevonden');
             saveBtn.addEventListener('click', () => {
                 console.log('LitterManager: Save button geklikt');
-                this.saveLitter();
+                this.saveDog();
             });
         } else {
             console.error('LitterManager: Save button niet gevonden!');
             // Probeer opnieuw na korte vertraging
             setTimeout(() => {
-                const retryBtn = document.getElementById('saveLitterBtn');
+                const retryBtn = document.getElementById('saveDogBtn');
                 if (retryBtn) {
                     console.log('LitterManager: Save button gevonden na retry');
                     retryBtn.addEventListener('click', () => {
-                        this.saveLitter();
+                        this.saveDog();
                     });
                 }
             }, 500);
         }
         
         // Eyes dropdown handler
-        const eyesSelect = document.getElementById('litterEyes');
+        const eyesSelect = document.getElementById('eyes');
         if (eyesSelect) {
             eyesSelect.addEventListener('change', (e) => {
-                const explanationContainer = document.getElementById('litterEyesExplanationContainer');
+                const explanationContainer = document.getElementById('eyesExplanationContainer');
                 if (explanationContainer) {
                     explanationContainer.style.display = e.target.value === 'Overig' ? 'block' : 'none';
                 }
@@ -562,10 +562,10 @@ class LitterManager {
         }
         
         // Thyroid dropdown handler
-        const thyroidSelect = document.getElementById('litterThyroid');
+        const thyroidSelect = document.getElementById('thyroid');
         if (thyroidSelect) {
             thyroidSelect.addEventListener('change', (e) => {
-                const explanationContainer = document.getElementById('litterThyroidExplanationContainer');
+                const explanationContainer = document.getElementById('thyroidExplanationContainer');
                 if (explanationContainer) {
                     explanationContainer.style.display = e.target.value === 'Positief' ? 'block' : 'none';
                 }
@@ -578,7 +578,7 @@ class LitterManager {
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('recent-breed-btn')) {
                 const breed = e.target.dataset.breed;
-                const breedInput = document.getElementById('litterBreed');
+                const breedInput = document.getElementById('breed');
                 if (breedInput) {
                     breedInput.value = breed;
                     console.log('LitterManager: Ras geselecteerd:', breed);
@@ -640,8 +640,8 @@ class LitterManager {
         console.log('LitterManager: setupParentAutocomplete aangeroepen');
         
         // Event listeners voor vader en moeder velden
-        const fatherInput = document.getElementById('Father');
-        const motherInput = document.getElementById('Mother');
+        const fatherInput = document.getElementById('father');
+        const motherInput = document.getElementById('mother');
         
         if (fatherInput) {
             fatherInput.addEventListener('focus', () => {
@@ -657,7 +657,7 @@ class LitterManager {
             
             fatherInput.addEventListener('blur', () => {
                 setTimeout(() => {
-                    const dropdown = document.getElementById('FatherDropdown');
+                    const dropdown = document.getElementById('fatherDropdown');
                     if (dropdown) {
                         dropdown.style.display = 'none';
                     }
@@ -678,7 +678,7 @@ class LitterManager {
             
             motherInput.addEventListener('blur', () => {
                 setTimeout(() => {
-                    const dropdown = document.getElementById('MotherDropdown');
+                    const dropdown = document.getElementById('motherDropdown');
                     if (dropdown) {
                         dropdown.style.display = 'none';
                     }
@@ -699,10 +699,9 @@ class LitterManager {
     showParentAutocomplete(searchTerm, parentType) {
         console.log('LitterManager: showParentAutocomplete voor', parentType, 'zoekterm:', searchTerm);
         
-        const dropdownId = `litter${parentType.charAt(0).toUpperCase() + parentType.slice(1)}Dropdown`;
-        const dropdown = document.getElementById(dropdownId);
+        const dropdown = document.getElementById(parentType + 'Dropdown');
         if (!dropdown) {
-            console.error('LitterManager: Dropdown niet gevonden voor', dropdownId);
+            console.error('LitterManager: Dropdown niet gevonden:', parentType + 'Dropdown');
             return;
         }
         
@@ -756,8 +755,8 @@ class LitterManager {
             item.addEventListener('click', (e) => {
                 const dogId = item.getAttribute('data-id');
                 const dogName = item.getAttribute('data-name');
-                const input = document.getElementById(`litter${parentType.charAt(0).toUpperCase() + parentType.slice(1)}`);
-                const idInput = document.getElementById(`litter${parentType.charAt(0).toUpperCase() + parentType.slice(1)}Id`);
+                const input = document.getElementById(parentType);
+                const idInput = document.getElementById(parentType + 'Id');
                 
                 if (input) {
                     input.value = dogName;
@@ -772,8 +771,8 @@ class LitterManager {
         });
     }
     
-    async saveLitter() {
-        console.log('LitterManager: saveLitter aangeroepen');
+    async saveDog() {
+        console.log('LitterManager: saveDog aangeroepen');
         
         if (!this.auth) {
             console.error('LitterManager: Auth niet beschikbaar!');
@@ -793,29 +792,29 @@ class LitterManager {
             return;
         }
         
-        // Verzamel formulier data
+        // Verzamel formulier data - gebruiken de korte ID's zoals in de HTML
         const dogData = {
-            naam: document.getElementById('litterName')?.value.trim() || '',
-            stamboomnr: document.getElementById('litterPedigreeNumber')?.value.trim() || '',
-            ras: document.getElementById('litterBreed')?.value.trim() || '',
-            geslacht: document.getElementById('litterGender')?.value || '',
-            vader: document.getElementById('litterFather')?.value.trim() || '',
-            vaderId: document.getElementById('litterFatherId')?.value ? parseInt(document.getElementById('litterFatherId').value) : null,
-            moeder: document.getElementById('litterMother')?.value.trim() || '',
-            moederId: document.getElementById('litterMotherId')?.value ? parseInt(document.getElementById('litterMotherId').value) : null,
-            geboortedatum: document.getElementById('litterBirthDate')?.value || '',
-            overlijdensdatum: document.getElementById('litterDeathDate')?.value || '',
-            heupdysplasie: document.getElementById('litterHipDysplasia')?.value || '',
-            elleboogdysplasie: document.getElementById('litterElbowDysplasia')?.value || '',
-            patella: document.getElementById('litterPatellaLuxation')?.value || '',
-            ogen: document.getElementById('litterEyes')?.value || '',
-            ogenVerklaring: document.getElementById('litterEyesExplanation')?.value.trim() || '',
-            dandyWalker: document.getElementById('litterDandyWalker')?.value || '',
-            schildklier: document.getElementById('litterThyroid')?.value || '',
-            schildklierVerklaring: document.getElementById('litterThyroidExplanation')?.value.trim() || '',
-            land: document.getElementById('litterCountry')?.value.trim() || '',
-            postcode: document.getElementById('litterZipCode')?.value.trim() || '',
-            opmerkingen: document.getElementById('litterRemarks')?.value.trim() || '',
+            naam: document.getElementById('name')?.value.trim() || '',
+            stamboomnr: document.getElementById('pedigreeNumber')?.value.trim() || '',
+            ras: document.getElementById('breed')?.value.trim() || '',
+            geslacht: document.getElementById('gender')?.value || '',
+            vader: document.getElementById('father')?.value.trim() || '',
+            vaderId: document.getElementById('fatherId')?.value ? parseInt(document.getElementById('fatherId').value) : null,
+            moeder: document.getElementById('mother')?.value.trim() || '',
+            moederId: document.getElementById('motherId')?.value ? parseInt(document.getElementById('motherId').value) : null,
+            geboortedatum: document.getElementById('birthDate')?.value || '',
+            overlijdensdatum: document.getElementById('deathDate')?.value || '',
+            heupdysplasie: document.getElementById('hipDysplasia')?.value || '',
+            elleboogdysplasie: document.getElementById('elbowDysplasia')?.value || '',
+            patella: document.getElementById('patellaLuxation')?.value || '',
+            ogen: document.getElementById('eyes')?.value || '',
+            ogenVerklaring: document.getElementById('eyesExplanation')?.value.trim() || '',
+            dandyWalker: document.getElementById('dandyWalker')?.value || '',
+            schildklier: document.getElementById('thyroid')?.value || '',
+            schildklierVerklaring: document.getElementById('thyroidExplanation')?.value.trim() || '',
+            land: document.getElementById('country')?.value.trim() || '',
+            postcode: document.getElementById('zipCode')?.value.trim() || '',
+            opmerkingen: document.getElementById('remarks')?.value.trim() || '',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
@@ -849,7 +848,7 @@ class LitterManager {
             console.log('LitterManager: Hond opgeslagen met ID:', result);
             
             // Foto uploaden als er een is geselecteerd
-            const photoInput = document.getElementById('litterPhoto');
+            const photoInput = document.getElementById('photo');
             if (photoInput && photoInput.files.length > 0) {
                 console.log('LitterManager: Foto uploaden...');
                 await this.uploadPhoto(dogData.stamboomnr, photoInput.files[0]);
@@ -876,8 +875,8 @@ class LitterManager {
         }
         
         // Reset hidden inputs
-        document.getElementById('FatherId').value = '';
-        document.getElementById('MotherId').value = '';
+        document.getElementById('fatherId').value = '';
+        document.getElementById('motherId').value = '';
         
         // Reset dropdowns
         const dropdowns = document.querySelectorAll('.autocomplete-dropdown');
