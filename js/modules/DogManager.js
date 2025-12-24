@@ -263,12 +263,12 @@ class DogManager extends BaseModule {
                 dandyWalker: "Dandy Walker Malformation",
                 dandyOptions: "Status wählen...",
                 dandyFreeDNA: "Frei auf DNA",
-                dandyFreeParents: "Frei auf ouders",
+                dandyFreeParents: "Frei op ouders",
                 dandyCarrier: "Träger",
                 dandyAffected: "Betroffen",
                 thyroid: "Schilddrüse",
                 thyroidNegative: "Tgaa Negativ",
-                thyroidPositive: "Tgaa Positiv",
+                thyroidPositive: "Tgaa Positief",
                 thyroidExplanation: "Schilddrüse Erklärung",
                 country: "Land",
                 zipCode: "Postleitzahl",
@@ -276,7 +276,7 @@ class DogManager extends BaseModule {
                 chooseFile: "Datei wählen",
                 noFileChosen: "Keine Datei gewählt",
                 remarks: "Bemerkungen",
-                requiredFields: "Felder mit * sind Pflichtfelder",
+                requiredFields: "Felder met * sind Pflichtfelder",
                 saveDog: "Hund speichern",
                 cancel: "Abbrechen",
                 delete: "Löschen",
@@ -287,7 +287,7 @@ class DogManager extends BaseModule {
                 back: "Zurück",
                 
                 // Zugangskontrolle Popup Texte
-                insufficientPermissions: "Unzureichende Berechtigingen",
+                insufficientPermissions: "Unzureichende Berechtigungen",
                 insufficientPermissionsText: "Sie haben keine Berechtigung, Hunde zu bearbeiten. Nur Administratoren können diese Funktion nutzen.",
                 loggedInAs: "Sie sind eingeloggt als:",
                 user: "Benutzer",
@@ -298,7 +298,7 @@ class DogManager extends BaseModule {
                 importExport: "Daten importieren/exportieren",
                 
                 // Meldungen
-                adminOnly: "Nur Administratoren kunnen Hunde hinzufügen/bearbeiten",
+                adminOnly: "Nur Administratoren können Hunde hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer und Rasse sind Pflichtfelder",
                 savingDog: "Hund wird gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
@@ -579,32 +579,11 @@ class DogManager extends BaseModule {
     }
     
     getLitterFormHTML() {
-        // Controleer of LitterManager beschikbaar is
-        if (typeof LitterManager === 'undefined') {
-            // Fallback HTML als LitterManager niet beschikbaar is
-            return `
-                <div class="mb-3">
-                    <button type="button" class="btn btn-outline-secondary btn-sm back-to-choice-btn">
-                        <i class="bi bi-arrow-left me-1"></i> ${this.t('back')}
-                    </button>
-                </div>
-                
-                <div class="text-center py-3">
-                    <div class="mb-2">
-                        <i class="bi bi-tools" style="font-size: 2.5rem; color: #f39c12;"></i>
-                    </div>
-                    <h5 class="mb-2">${this.t('development')}</h5>
-                    <p class="text-muted small mb-2">Deze functie is momenteel in ontwikkeling en komt binnenkort beschikbaar.</p>
-                    <button type="button" class="btn btn-secondary btn-sm back-to-choice-btn">
-                        <i class="bi bi-arrow-left me-1"></i> ${this.t('back')}
-                    </button>
-                </div>
-            `;
-        }
-        
-        // Maak LitterManager aan als deze nog niet bestaat
+        // Maak LitterManager aan als deze nog niet bestaat en injecteer dependencies
         if (!this.litterManager) {
             this.litterManager = new LitterManager();
+            // INJECTEER DEPENDENCIES VAN DOGMANAGER NAAR LITTERMANAGER
+            this.litterManager.injectDependencies(this.db, this.auth);
         }
         
         // Terug knop HTML
@@ -946,19 +925,13 @@ class DogManager extends BaseModule {
         if (litterFormContainer) litterFormContainer.style.display = 'block';
         if (modalFooter) modalFooter.style.display = 'flex';
         
-        // Stel LitterManager events in als beschikbaar
+        // Stel LitterManager events in
         if (this.litterManager && this.litterManager.setupEvents) {
+            // Zorg ervoor dat LitterManager de dependencies heeft
+            if (!this.litterManager.db || !this.litterManager.auth) {
+                this.litterManager.injectDependencies(this.db, this.auth);
+            }
             this.litterManager.setupEvents();
-        } else {
-            // Fallback: voeg event listener toe voor terug knop
-            setTimeout(() => {
-                const backBtn = document.querySelector('.back-to-choice-btn');
-                if (backBtn) {
-                    backBtn.addEventListener('click', () => {
-                        this.showChoiceScreen();
-                    });
-                }
-            }, 50);
         }
     }
     
