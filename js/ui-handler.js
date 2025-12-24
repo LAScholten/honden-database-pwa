@@ -11,19 +11,9 @@ class UIHandler {
         
         // Debug logging
         console.log('UIHandler constructor aangeroepen');
-        console.log('Beschikbare modules:', {
-            DataManager: typeof DataManager,
-            DogManager: typeof DogManager,
-            DogDataManager: typeof DogDataManager,
-            SearchManager: typeof SearchManager,
-            PhotoManager: typeof PhotoManager,
-            BreedingManager: typeof BreedingManager,
-            PrivateInfoManager: typeof PrivateInfoManager,
-            LitterManager: typeof LitterManager // Controleer of deze bestaat
-        });
         
         try {
-            // Initialiseer modules - maak LitterManager optioneel
+            // Initialiseer alle modules
             this.modules = {
                 data: new DataManager(),
                 dog: new DogManager(),
@@ -31,16 +21,15 @@ class UIHandler {
                 search: new SearchManager(),
                 photo: new PhotoManager(),
                 breeding: new BreedingManager(),
-                private: new PrivateInfoManager()
+                private: new PrivateInfoManager(),
+                // Voeg LitterManager toe
+                litter: new LitterManager()
             };
             
-            // Probeer LitterManager te initialiseren als deze beschikbaar is
-            if (typeof LitterManager !== 'undefined') {
-                this.modules.litter = new LitterManager();
-                console.log('LitterManager succesvol geïnitialiseerd');
-            } else {
-                console.warn('LitterManager module niet gevonden - wordt overgeslagen');
-                this.modules.litter = null;
+            // Injecteer dependencies in LitterManager
+            if (this.modules.litter && this.modules.litter.injectDependencies) {
+                this.modules.litter.injectDependencies(this.db, this.auth);
+                console.log('Dependencies geïnjecteerd in LitterManager');
             }
             
             // Maak dogManager beschikbaar voor SearchManager
@@ -53,7 +42,6 @@ class UIHandler {
             
         } catch (error) {
             console.error('Fout bij initialiseren modules:', error);
-            // Probeer op zijn minst de essentiële modules te behouden
             this.modules = {
                 data: null,
                 dog: null,
@@ -139,7 +127,6 @@ class UIHandler {
                     
                 case 'addDog':
                     if (!this.modules.dog) throw new Error('DogManager module niet beschikbaar');
-                    // TOEGANGSCONTROLE IS VERWIJDERD - zit nu in DogManager.getModalHTML()
                     modalHTML = this.modules.dog.getModalHTML();
                     modalId = 'addDogModal';
                     break;
@@ -174,7 +161,6 @@ class UIHandler {
                     modalId = 'privateInfoModal';
                     break;
                     
-                // Optionele case voor litter (voor toekomstig gebruik)
                 case 'litter':
                     if (!this.modules.litter) throw new Error('LitterManager module niet beschikbaar');
                     modalHTML = this.getLitterModalHTML();
@@ -196,15 +182,14 @@ class UIHandler {
     }
     
     getLitterModalHTML() {
-        // Dit is een aparte modal voor als je direct een nest wilt toevoegen
-        // (niet via het keuzescherm in DogManager)
+        // Direct nest formulier van LitterManager
         return `
             <div class="modal fade" id="litterModal" tabindex="-1" aria-labelledby="litterModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
+                <div class="modal-dialog modal-xl">
                     <div class="modal-content">
-                        <div class="modal-header bg-primary text-white">
+                        <div class="modal-header bg-success text-white">
                             <h5 class="modal-title" id="litterModalLabel">
-                                <i class="bi bi-people"></i> Nieuw Nest Toevoegen
+                                <i class="bi bi-motherboard me-2"></i> Nieuw Nest Toevoegen
                             </h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
                         </div>
@@ -213,7 +198,7 @@ class UIHandler {
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                <i class="bi bi-x-circle me-1"></i> Sluiten
+                                <i class="bi bi-x-circle me-1"></i> Annuleren
                             </button>
                         </div>
                     </div>
@@ -246,9 +231,9 @@ class UIHandler {
         }
         
         // Voeg nieuwe modal toe
-        const container = document.getElementById('modalsContainer');
+        const container = document.getElementById('modalContainer');
         if (!container) {
-            console.error('modalsContainer niet gevonden!');
+            console.error('modalContainer niet gevonden!');
             return;
         }
         
@@ -259,7 +244,7 @@ class UIHandler {
         if (modalElement) {
             try {
                 const modal = new bootstrap.Modal(modalElement, {
-                    backdrop: true,
+                    backdrop: 'static',
                     keyboard: true,
                     focus: true
                 });
@@ -268,6 +253,7 @@ class UIHandler {
                 modalElement.addEventListener('hidden.bs.modal', () => {
                     console.log(`Modal ${modalId} gesloten`);
                     this.currentModal = null;
+                    container.innerHTML = ''; // Leeg de container bij sluiten
                 });
                 
                 modalElement.addEventListener('shown.bs.modal', () => {
@@ -313,7 +299,6 @@ class UIHandler {
                         if (this.modules.editDogData && this.modules.editDogData.setupEvents) {
                             this.modules.editDogData.setupEvents();
                         } else if (this.modules.editDogData && this.modules.editDogData.init) {
-                            // Fallback voor modules met alleen init
                             this.modules.editDogData.init();
                         }
                         break;
@@ -356,6 +341,10 @@ class UIHandler {
                         
                     case 'litter':
                         if (this.modules.litter && this.modules.litter.setupEvents) {
+                            // Initialize LitterManager als dat nodig is
+                            if (this.modules.litter.initialize) {
+                                this.modules.litter.initialize();
+                            }
                             this.modules.litter.setupEvents();
                         }
                         break;
@@ -406,7 +395,6 @@ class UIHandler {
     }
     
     showAlert(message, type, duration = 5000) {
-        // Zoek de juiste plaats voor de alert
         let target = document.querySelector('.modal-body');
         if (!target) {
             target = document.querySelector('.card-body') || document.body;
@@ -422,7 +410,6 @@ class UIHandler {
         if (target) {
             target.insertAdjacentHTML('beforeend', alertHTML);
             
-            // Verwijder alert na bepaalde tijd
             setTimeout(() => {
                 const alert = target.querySelector(`.alert-${type}`);
                 if (alert) {
@@ -438,18 +425,9 @@ class UIHandler {
         console.log('UIHandler test - modules:', Object.keys(this.modules));
         return true;
     }
-    
-    // Helper functie voor terugkeer naar keuzescherm (gebruikt door LitterManager)
-    showChoiceScreen() {
-        // Deze functie wordt aangeroepen vanuit LitterManager om terug te gaan naar het keuzescherm
-        if (this.modules.dog && this.modules.dog.showChoiceScreen) {
-            this.modules.dog.showChoiceScreen();
-        }
-    }
 }
 
-// Maak globaal beschikbaar voor debug doeleinden
+// Maak globaal beschikbaar
 if (typeof window !== 'undefined') {
     window.UIHandler = UIHandler;
-    window.uiHandler = new UIHandler(); // Optioneel: maak direct een instantie beschikbaar
 }
