@@ -72,11 +72,9 @@ class LitterManager extends BaseModule {
                 
                 <hr class="my-4">
                 
-                <!-- Hond Toevoegen Formulier -->
+                <!-- Hond Toevoegen Formulier - EXACT hetzelfde als DogManager -->
                 <h6 class="mb-3"><i class="bi bi-heart"></i> Hond Toevoegen</h6>
-                <div id="dogFormInLitter">
-                    ${this.getDogFormHTML()}
-                </div>
+                ${this.getDogManagerFormHTML()}
                 
                 <!-- Opgeslagen honden -->
                 <div id="savedDogsSection" style="${this.savedDogs.length > 0 ? '' : 'display: none;'}">
@@ -85,58 +83,13 @@ class LitterManager extends BaseModule {
                     <div id="savedDogsList" class="mb-3"></div>
                 </div>
             </div>
-            
-            <style>
-                .autocomplete-dropdown {
-                    position: absolute;
-                    background: white;
-                    border: 1px solid #ddd;
-                    border-radius: 4px;
-                    max-height: 200px;
-                    overflow-y: auto;
-                    z-index: 9999;
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                    width: 100%;
-                }
-                
-                .autocomplete-item {
-                    padding: 10px;
-                    cursor: pointer;
-                    border-bottom: 1px solid #f0f0f0;
-                }
-                
-                .autocomplete-item:hover {
-                    background-color: #f8f9fa;
-                }
-                
-                .autocomplete-item .dog-name {
-                    font-weight: bold;
-                }
-                
-                .autocomplete-item .dog-info {
-                    font-size: 0.85em;
-                    color: #666;
-                }
-                
-                .parent-input-wrapper {
-                    position: relative;
-                }
-                
-                .saved-dog-card {
-                    background-color: #f8f9fa;
-                    border: 1px solid #dee2e6;
-                    border-radius: 4px;
-                    padding: 12px;
-                    margin-bottom: 8px;
-                }
-            </style>
         `;
     }
     
-    getDogFormHTML(dogData = null) {
-        const data = dogData || {};
+    getDogManagerFormHTML() {
+        const data = {};
         
-        // Genereer recente rassen opties
+        // Genereer recente rassen opties - EXACT hetzelfde als DogManager
         let recentBreedsHTML = '';
         if (this.lastBreeds.length > 0) {
             recentBreedsHTML = `
@@ -155,6 +108,9 @@ class LitterManager extends BaseModule {
         
         return `
             <form id="addDogForm">
+                <input type="hidden" id="fatherId" value="${data.vaderId || ''}">
+                <input type="hidden" id="motherId" value="${data.moederId || ''}">
+                
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -191,6 +147,35 @@ class LitterManager extends BaseModule {
                 </div>
                 
                 <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3 parent-input-wrapper">
+                            <label for="father" class="form-label">Vader</label>
+                            <input type="text" class="form-control" id="father" 
+                                   value="${data.vader || ''}" 
+                                   placeholder="Begin met typen om te zoeken..."
+                                   data-parent-type="father"
+                                   autocomplete="off">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3 parent-input-wrapper">
+                            <label for="mother" class="form-label">Moeder</label>
+                            <input type="text" class="form-control" id="mother" 
+                                   value="${data.moeder || ''}" 
+                                   placeholder="Begin met typen om te zoeken..."
+                                   data-parent-type="mother"
+                                   autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="birthDate" class="form-label">Geboortedatum</label>
+                            <input type="date" class="form-control" id="birthDate" value="${data.geboortedatum || ''}">
+                        </div>
+                    </div>
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="deathDate" class="form-label">Overlijdensdatum</label>
@@ -332,52 +317,109 @@ class LitterManager extends BaseModule {
                     <i class="bi bi-check-circle me-1"></i> Nest Afronden
                 </button>
             </div>
+            
+            <style>
+                .autocomplete-dropdown {
+                    position: absolute;
+                    background: white;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    max-height: 200px;
+                    overflow-y: auto;
+                    z-index: 9999;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                    width: 100%;
+                }
+                
+                .autocomplete-item {
+                    padding: 10px;
+                    cursor: pointer;
+                    border-bottom: 1px solid #f0f0f0;
+                }
+                
+                .autocomplete-item:hover {
+                    background-color: #f8f9fa;
+                }
+                
+                .autocomplete-item .dog-name {
+                    font-weight: bold;
+                }
+                
+                .autocomplete-item .dog-info {
+                    font-size: 0.85em;
+                    color: #666;
+                }
+                
+                .parent-input-wrapper {
+                    position: relative;
+                }
+                
+                .saved-dog-card {
+                    background-color: #f8f9fa;
+                    border: 1px solid #dee2e6;
+                    border-radius: 4px;
+                    padding: 12px;
+                    margin-bottom: 8px;
+                }
+            </style>
         `;
     }
     
     setupEvents() {
-        // Wacht tot de DOM geladen is
+        console.log('LitterManager setupEvents called');
+        
+        // Laad honden voor autocomplete - EXACT hetzelfde als DogManager
+        this.loadAllDogs();
+        
+        // Wacht tot DOM geladen is
         setTimeout(() => {
-            this.initializeForm();
+            this.setupFormEvents();
         }, 100);
     }
     
-    initializeForm() {
-        console.log('Initializing LitterManager form...');
+    setupFormEvents() {
+        console.log('Setting up LitterManager form events...');
         
-        // Setup geboortedatum formatting
+        // Setup geboortedatum formatting voor nest geboortedatum
         const birthDateInput = document.getElementById('birthDate');
         if (birthDateInput) {
             birthDateInput.addEventListener('input', (e) => {
                 let value = e.target.value.replace(/\D/g, '');
+                
+                // Automatisch / toevoegen
                 if (value.length >= 2 && value.length < 4) {
                     value = value.substring(0, 2) + '/' + value.substring(2);
                 } else if (value.length >= 4 && value.length < 8) {
                     value = value.substring(0, 2) + '/' + value.substring(2, 4) + '/' + value.substring(4, 8);
                 }
+                
                 e.target.value = value;
             });
         }
         
-        // Setup autocomplete voor ouders
-        this.setupParentAutocomplete();
+        // Setup autocomplete voor ouders in de honden sectie - EXACT hetzelfde als DogManager
+        this.setupParentAutocompleteForDogs();
         
-        // Setup form events
-        this.setupFormEvents();
+        // Setup autocomplete voor ouders in het nest gedeelte
+        this.setupParentAutocompleteForNest();
+        
+        // Setup events voor formulier - EXACT hetzelfde als DogManager
+        this.setupDogFormEvents();
         
         // Update saved dogs list
         this.updateSavedDogsList();
     }
     
-    setupFormEvents() {
-        console.log('Setting up form events...');
+    setupDogFormEvents() {
+        console.log('Setting up dog form events in LitterManager...');
         
         // Save dog button
-        const saveBtn = document.getElementById('saveDogBtn');
-        if (saveBtn) {
+        const saveDogBtn = document.getElementById('saveDogBtn');
+        if (saveDogBtn) {
             console.log('Found save dog button');
-            saveBtn.addEventListener('click', () => {
-                console.log('Save button clicked');
+            saveDogBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Save dog button clicked in LitterManager');
                 this.saveDog();
             });
         } else {
@@ -385,24 +427,27 @@ class LitterManager extends BaseModule {
         }
         
         // Add another dog button
-        const addAnotherBtn = document.getElementById('addAnotherDogBtn');
-        if (addAnotherBtn) {
-            addAnotherBtn.addEventListener('click', () => {
+        const addAnotherDogBtn = document.getElementById('addAnotherDogBtn');
+        if (addAnotherDogBtn) {
+            addAnotherDogBtn.addEventListener('click', (e) => {
+                e.preventDefault();
                 this.resetDogForm();
             });
         }
         
         // Finish litter button
-        const finishBtn = document.getElementById('finishLitterBtn');
-        if (finishBtn) {
-            finishBtn.addEventListener('click', () => {
+        const finishLitterBtn = document.getElementById('finishLitterBtn');
+        if (finishLitterBtn) {
+            finishLitterBtn.addEventListener('click', (e) => {
+                e.preventDefault();
                 this.finishLitter();
             });
         }
         
-        // Recent breed buttons
+        // Recente rassen knoppen - EXACT hetzelfde als DogManager
         document.querySelectorAll('.recent-breed-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
+                e.preventDefault();
                 const breed = e.target.dataset.breed;
                 const breedInput = document.getElementById('breed');
                 if (breedInput) {
@@ -411,31 +456,92 @@ class LitterManager extends BaseModule {
             });
         });
         
-        // Eyes dropdown
+        // Eyes dropdown handler - EXACT hetzelfde als DogManager
         const eyesSelect = document.getElementById('eyes');
         if (eyesSelect) {
             eyesSelect.addEventListener('change', (e) => {
-                const container = document.getElementById('eyesExplanationContainer');
-                if (container) {
-                    container.style.display = e.target.value === 'Overig' ? 'block' : 'none';
+                const explanationContainer = document.getElementById('eyesExplanationContainer');
+                if (explanationContainer) {
+                    explanationContainer.style.display = e.target.value === 'Overig' ? 'block' : 'none';
                 }
             });
         }
         
-        // Thyroid dropdown
+        // Thyroid dropdown handler - EXACT hetzelfde als DogManager
         const thyroidSelect = document.getElementById('thyroid');
         if (thyroidSelect) {
             thyroidSelect.addEventListener('change', (e) => {
-                const container = document.getElementById('thyroidExplanationContainer');
-                if (container) {
-                    container.style.display = e.target.value === 'Positief' ? 'block' : 'none';
+                const explanationContainer = document.getElementById('thyroidExplanationContainer');
+                if (explanationContainer) {
+                    explanationContainer.style.display = e.target.value === 'Positief' ? 'block' : 'none';
                 }
             });
         }
     }
     
-    setupParentAutocomplete() {
-        // Maak dropdowns aan
+    setupParentAutocompleteForDogs() {
+        // Maak dropdowns aan voor de ouders in de honden sectie - EXACT hetzelfde als DogManager
+        const fatherInput = document.getElementById('father');
+        const motherInput = document.getElementById('mother');
+        
+        if (!fatherInput || !motherInput) return;
+        
+        const fatherWrapper = fatherInput.parentElement;
+        const motherWrapper = motherInput.parentElement;
+        
+        // Verwijder bestaande dropdowns
+        const existingFatherDropdown = fatherWrapper.querySelector('.autocomplete-dropdown');
+        const existingMotherDropdown = motherWrapper.querySelector('.autocomplete-dropdown');
+        if (existingFatherDropdown) existingFatherDropdown.remove();
+        if (existingMotherDropdown) existingMotherDropdown.remove();
+        
+        // Maak nieuwe dropdowns
+        const fatherDropdown = document.createElement('div');
+        fatherDropdown.className = 'autocomplete-dropdown';
+        fatherDropdown.id = 'fatherDropdown';
+        fatherDropdown.style.display = 'none';
+        fatherWrapper.appendChild(fatherDropdown);
+        
+        const motherDropdown = document.createElement('div');
+        motherDropdown.className = 'autocomplete-dropdown';
+        motherDropdown.id = 'motherDropdown';
+        motherDropdown.style.display = 'none';
+        motherWrapper.appendChild(motherDropdown);
+        
+        // Event listeners - EXACT hetzelfde als DogManager
+        [fatherInput, motherInput].forEach(input => {
+            input.addEventListener('focus', () => {
+                this.loadAllDogs();
+            });
+            
+            input.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                const parentType = input.id === 'father' ? 'father' : 'mother';
+                this.showParentAutocompleteForDogs(searchTerm, parentType);
+            });
+            
+            input.addEventListener('blur', () => {
+                setTimeout(() => {
+                    const dropdown = document.getElementById(`${input.id}Dropdown`);
+                    if (dropdown) {
+                        dropdown.style.display = 'none';
+                    }
+                }, 200);
+            });
+        });
+        
+        // Klik buiten dropdown om te verbergen - EXACT hetzelfde als DogManager
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.parent-input-wrapper')) {
+                document.querySelectorAll('.autocomplete-dropdown').forEach(dropdown => {
+                    dropdown.style.display = 'none';
+                });
+            }
+        });
+    }
+    
+    setupParentAutocompleteForNest() {
+        // Maak dropdowns aan voor de ouders in het nest gedeelte
         const motherInput = document.getElementById('motherDog');
         const fatherInput = document.getElementById('fatherDog');
         
@@ -453,22 +559,26 @@ class LitterManager extends BaseModule {
         // Maak nieuwe dropdowns
         const motherDropdown = document.createElement('div');
         motherDropdown.className = 'autocomplete-dropdown';
-        motherDropdown.id = 'motherDropdown';
+        motherDropdown.id = 'motherDogDropdown';
         motherDropdown.style.display = 'none';
         motherWrapper.appendChild(motherDropdown);
         
         const fatherDropdown = document.createElement('div');
         fatherDropdown.className = 'autocomplete-dropdown';
-        fatherDropdown.id = 'fatherDropdown';
+        fatherDropdown.id = 'fatherDogDropdown';
         fatherDropdown.style.display = 'none';
         fatherWrapper.appendChild(fatherDropdown);
         
         // Event listeners
         [motherInput, fatherInput].forEach(input => {
+            input.addEventListener('focus', () => {
+                this.loadAllDogs();
+            });
+            
             input.addEventListener('input', (e) => {
                 const searchTerm = e.target.value.toLowerCase().trim();
-                const parentType = input.id === 'motherDog' ? 'mother' : 'father';
-                this.showParentAutocomplete(searchTerm, parentType);
+                const parentType = input.id === 'motherDog' ? 'motherDog' : 'fatherDog';
+                this.showParentAutocompleteForNest(searchTerm, parentType);
             });
             
             input.addEventListener('blur', () => {
@@ -482,7 +592,7 @@ class LitterManager extends BaseModule {
         });
     }
     
-    async showParentAutocomplete(searchTerm, parentType) {
+    async showParentAutocompleteForDogs(searchTerm, parentType) {
         await this.loadAllDogs();
         
         const dropdown = document.getElementById(`${parentType}Dropdown`);
@@ -493,9 +603,10 @@ class LitterManager extends BaseModule {
             return;
         }
         
+        // Filter honden voor autocomplete (filter op geslacht) - EXACT hetzelfde als DogManager
         const filtered = this.allDogs.filter(dog => {
             const nameMatch = dog.naam.toLowerCase().includes(searchTerm);
-            const genderMatch = parentType === 'mother' ? dog.geslacht === 'teven' : dog.geslacht === 'reuen';
+            const genderMatch = parentType === 'father' ? dog.geslacht === 'reuen' : dog.geslacht === 'teven';
             return nameMatch && genderMatch;
         }).slice(0, 8);
         
@@ -517,8 +628,55 @@ class LitterManager extends BaseModule {
             item.addEventListener('click', () => {
                 const dogId = item.getAttribute('data-id');
                 const dogName = item.getAttribute('data-name');
-                const input = document.getElementById(`${parentType}Dog`);
+                const input = document.getElementById(parentType);
                 const idInput = document.getElementById(`${parentType}Id`);
+                
+                if (input) input.value = dogName;
+                if (idInput) idInput.value = dogId;
+                
+                dropdown.style.display = 'none';
+            });
+        });
+    }
+    
+    async showParentAutocompleteForNest(searchTerm, parentType) {
+        await this.loadAllDogs();
+        
+        const dropdown = document.getElementById(`${parentType}Dropdown`);
+        if (!dropdown) return;
+        
+        if (!searchTerm || searchTerm.length < 1) {
+            dropdown.style.display = 'none';
+            return;
+        }
+        
+        // Filter honden voor autocomplete (filter op geslacht)
+        const filtered = this.allDogs.filter(dog => {
+            const nameMatch = dog.naam.toLowerCase().includes(searchTerm);
+            const genderMatch = parentType === 'fatherDog' ? dog.geslacht === 'reuen' : dog.geslacht === 'teven';
+            return nameMatch && genderMatch;
+        }).slice(0, 8);
+        
+        if (filtered.length === 0) {
+            dropdown.style.display = 'none';
+            return;
+        }
+        
+        dropdown.innerHTML = filtered.map(dog => `
+            <div class="autocomplete-item" data-id="${dog.id}" data-name="${dog.naam}">
+                <div class="dog-name">${dog.naam}</div>
+                <div class="dog-info">${dog.ras || ''} | ${dog.stamboomnr || ''}</div>
+            </div>
+        `).join('');
+        
+        dropdown.style.display = 'block';
+        
+        dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const dogId = item.getAttribute('data-id');
+                const dogName = item.getAttribute('data-name');
+                const input = document.getElementById(parentType);
+                const idInput = document.getElementById(`${parentType.replace('Dog', '')}Id`);
                 
                 if (input) input.value = dogName;
                 if (idInput) idInput.value = dogId;
@@ -544,12 +702,14 @@ class LitterManager extends BaseModule {
     }
     
     async saveDog() {
-        console.log('Saving dog...');
+        console.log('Saving dog in LitterManager...');
         
-        // Verzamel data
+        // Valideer verplichte velden van nest
         const motherDog = document.getElementById('motherDog').value.trim();
         const fatherDog = document.getElementById('fatherDog').value.trim();
         const nestBirthDate = document.getElementById('birthDate').value.trim();
+        
+        console.log('Nest parents:', motherDog, fatherDog);
         
         if (!motherDog) {
             alert('Moederhond is verplicht');
@@ -561,16 +721,17 @@ class LitterManager extends BaseModule {
             return;
         }
         
+        // Verzamel data van de hond - EXACT hetzelfde als DogManager
         const dogData = {
             naam: document.getElementById('dogName').value.trim(),
             stamboomnr: document.getElementById('pedigreeNumber').value.trim(),
             ras: document.getElementById('breed').value.trim(),
             geslacht: document.getElementById('gender').value,
-            vader: fatherDog,
+            vader: fatherDog, // Gebruik de nest vader
             vaderId: document.getElementById('fatherId').value ? parseInt(document.getElementById('fatherId').value) : null,
-            moeder: motherDog,
+            moeder: motherDog, // Gebruik de nest moeder
             moederId: document.getElementById('motherId').value ? parseInt(document.getElementById('motherId').value) : null,
-            geboortedatum: this.formatDateForStorage(nestBirthDate),
+            geboortedatum: this.formatDateForStorage(nestBirthDate), // Gebruik nest geboortedatum
             overlijdensdatum: document.getElementById('deathDate').value,
             heupdysplasie: document.getElementById('hipDysplasia').value,
             elleboogdysplasie: document.getElementById('elbowDysplasia').value,
@@ -588,9 +749,9 @@ class LitterManager extends BaseModule {
             updatedAt: new Date().toISOString()
         };
         
-        console.log('Dog data:', dogData);
+        console.log('Dog data to save:', dogData);
         
-        // Valideer
+        // Valideer - EXACT hetzelfde als DogManager
         if (!dogData.naam) {
             alert('Naam is verplicht');
             return;
@@ -612,10 +773,10 @@ class LitterManager extends BaseModule {
         }
         
         try {
-            // Voeg ras toe aan recente rassen
+            // Voeg ras toe aan recente rassen - EXACT hetzelfde als DogManager
             this.addToLastBreeds(dogData.ras);
             
-            // Sla op in database
+            // Sla op in database - EXACT hetzelfde als DogManager
             let savedDog;
             if (this.db && typeof this.db.voegHondToe === 'function') {
                 savedDog = await this.db.voegHondToe(dogData);
@@ -624,6 +785,8 @@ class LitterManager extends BaseModule {
             } else {
                 savedDog = { id: Date.now(), ...dogData }; // Fallback voor test
             }
+            
+            console.log('Dog saved:', savedDog);
             
             // Voeg toe aan lijst
             this.savedDogs.push({
@@ -669,7 +832,7 @@ class LitterManager extends BaseModule {
     }
     
     resetDogForm() {
-        // Reset alleen de hond velden
+        // Reset alleen de hond velden, niet de nest velden
         const fields = [
             'dogName', 'pedigreeNumber', 'breed', 'gender', 'deathDate',
             'hipDysplasia', 'elbowDysplasia', 'patellaLuxation', 'eyes',
