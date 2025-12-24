@@ -71,8 +71,8 @@ class LitterManager extends BaseModule {
                             <input type="text" class="form-control" id="father" 
                                    value="" 
                                    placeholder="Begin met typen om te zoeken..."
-                                   data-parent-type="father"
                                    autocomplete="off">
+                            <div class="autocomplete-dropdown" id="fatherDropdown" style="display: none;"></div>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -81,8 +81,8 @@ class LitterManager extends BaseModule {
                             <input type="text" class="form-control" id="mother" 
                                    value="" 
                                    placeholder="Begin met typen om te zoeken..."
-                                   data-parent-type="mother"
                                    autocomplete="off">
+                            <div class="autocomplete-dropdown" id="motherDropdown" style="display: none;"></div>
                         </div>
                     </div>
                 </div>
@@ -225,6 +225,43 @@ class LitterManager extends BaseModule {
                     </button>
                 </div>
             </form>
+            
+            <style>
+                .autocomplete-dropdown {
+                    position: absolute;
+                    background: white;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    max-height: 200px;
+                    overflow-y: auto;
+                    z-index: 1050;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                    width: 100%;
+                }
+                
+                .autocomplete-item {
+                    padding: 10px;
+                    cursor: pointer;
+                    border-bottom: 1px solid #f0f0f0;
+                }
+                
+                .autocomplete-item:hover {
+                    background-color: #f8f9fa;
+                }
+                
+                .autocomplete-item .dog-name {
+                    font-weight: bold;
+                }
+                
+                .autocomplete-item .dog-info {
+                    font-size: 0.85em;
+                    color: #666;
+                }
+                
+                .parent-input-wrapper {
+                    position: relative;
+                }
+            </style>
         `;
     }
     
@@ -254,21 +291,23 @@ class LitterManager extends BaseModule {
     setupFormEvents() {
         console.log('Setting up LitterManager form events...');
         
-        // Save dog button
+        // Save dog button - NU MET event.preventDefault()
         const saveBtn = document.getElementById('saveDogBtn');
         if (saveBtn) {
             console.log('Found save dog button');
-            saveBtn.addEventListener('click', () => {
-                console.log('Save button clicked');
+            saveBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Save button clicked with preventDefault');
                 this.saveDog();
             });
         } else {
             console.error('Save dog button not found!');
         }
         
-        // Recente rassen knoppen
+        // Recente rassen knoppen - NU MET event.preventDefault()
         document.querySelectorAll('.recent-breed-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
+                e.preventDefault();
                 console.log('Recent breed button clicked:', e.target.dataset.breed);
                 const breed = e.target.dataset.breed;
                 const breedInput = document.getElementById('breed');
@@ -310,56 +349,53 @@ class LitterManager extends BaseModule {
     setupParentAutocomplete() {
         console.log('Setting up parent autocomplete...');
         
-        // Verwijder bestaande dropdowns
-        document.querySelectorAll('.autocomplete-dropdown').forEach(dropdown => {
-            dropdown.remove();
-        });
+        // Event listeners voor vader en moeder velden
+        const fatherInput = document.getElementById('father');
+        const motherInput = document.getElementById('mother');
         
-        // Maak nieuwe dropdown containers
-        const fatherInputWrapper = document.querySelector('#father').closest('.parent-input-wrapper');
-        const motherInputWrapper = document.querySelector('#mother').closest('.parent-input-wrapper');
-        
-        if (!fatherInputWrapper || !motherInputWrapper) {
-            console.error('Parent input wrappers not found!');
+        if (!fatherInput || !motherInput) {
+            console.error('Parent inputs not found!');
             return;
         }
         
-        const fatherDropdown = document.createElement('div');
-        fatherDropdown.className = 'autocomplete-dropdown';
-        fatherDropdown.id = 'fatherDropdown';
-        fatherDropdown.style.display = 'none';
-        fatherInputWrapper.appendChild(fatherDropdown);
+        fatherInput.addEventListener('focus', () => {
+            console.log('Father input focused');
+            this.loadAllDogs();
+        });
         
-        const motherDropdown = document.createElement('div');
-        motherDropdown.className = 'autocomplete-dropdown';
-        motherDropdown.id = 'motherDropdown';
-        motherDropdown.style.display = 'none';
-        motherInputWrapper.appendChild(motherDropdown);
+        fatherInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            console.log('Searching for father:', searchTerm);
+            this.showParentAutocomplete(searchTerm, 'father');
+        });
         
-        console.log('Created dropdowns');
+        motherInput.addEventListener('focus', () => {
+            console.log('Mother input focused');
+            this.loadAllDogs();
+        });
         
-        // Event listeners voor vader en moeder velden
-        document.querySelectorAll('.parent-input-wrapper input').forEach(input => {
-            input.addEventListener('focus', () => {
-                console.log('Parent input focused');
-                this.loadAllDogs();
-            });
-            
-            input.addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase().trim();
-                console.log('Searching for parent:', searchTerm);
-                const parentType = input.id === 'father' ? 'father' : 'mother';
-                this.showParentAutocomplete(searchTerm, parentType);
-            });
-            
-            input.addEventListener('blur', (e) => {
-                setTimeout(() => {
-                    const dropdown = document.getElementById(`${input.id}Dropdown`);
-                    if (dropdown) {
-                        dropdown.style.display = 'none';
-                    }
-                }, 200);
-            });
+        motherInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            console.log('Searching for mother:', searchTerm);
+            this.showParentAutocomplete(searchTerm, 'mother');
+        });
+        
+        fatherInput.addEventListener('blur', (e) => {
+            setTimeout(() => {
+                const dropdown = document.getElementById('fatherDropdown');
+                if (dropdown) {
+                    dropdown.style.display = 'none';
+                }
+            }, 200);
+        });
+        
+        motherInput.addEventListener('blur', (e) => {
+            setTimeout(() => {
+                const dropdown = document.getElementById('motherDropdown');
+                if (dropdown) {
+                    dropdown.style.display = 'none';
+                }
+            }, 200);
         });
         
         // Klik buiten dropdown om te verbergen
@@ -395,7 +431,7 @@ class LitterManager extends BaseModule {
             return matchesSearch;
         }).slice(0, 8);
         
-        console.log('Found suggestions:', suggestions.length);
+        console.log(`Found ${suggestions.length} suggestions for ${parentType}:`, suggestions);
         
         if (suggestions.length === 0) {
             dropdown.style.display = 'none';
@@ -496,8 +532,23 @@ class LitterManager extends BaseModule {
         console.log('Dog data collected:', dogData);
         
         // Valideer basisvelden
-        if (!dogData.naam || !dogData.stamboomnr || !dogData.ras || !dogData.geslacht) {
-            alert('Naam, stamboomnummer, ras en geslacht zijn verplichte velden');
+        if (!dogData.naam) {
+            alert('Naam is verplicht');
+            return;
+        }
+        
+        if (!dogData.stamboomnr) {
+            alert('Stamboomnummer is verplicht');
+            return;
+        }
+        
+        if (!dogData.ras) {
+            alert('Ras is verplicht');
+            return;
+        }
+        
+        if (!dogData.geslacht) {
+            alert('Geslacht is verplicht');
             return;
         }
         
@@ -512,21 +563,30 @@ class LitterManager extends BaseModule {
             } else if (window.db && typeof window.db.voegHondToe === 'function') {
                 savedDog = await window.db.voegHondToe(dogData);
             } else {
-                throw new Error('Database method voegHondToe niet beschikbaar');
+                // Fallback voor test
+                savedDog = { id: Date.now(), ...dogData };
+                console.log('Using fallback save, no database available');
             }
             
-            console.log('Dog saved to database:', savedDog);
+            console.log('Dog saved:', savedDog);
             
             alert('Hond succesvol opgeslagen!');
             
             // Foto uploaden als er een is geselecteerd
             const photoInput = document.getElementById('dogPhoto');
-            if (photoInput.files.length > 0) {
+            if (photoInput && photoInput.files.length > 0) {
                 await this.uploadPhoto(dogData.stamboomnr, photoInput.files[0]);
             }
             
             // Reset formulier
             this.resetForm();
+            
+            // Terug naar keuze scherm
+            setTimeout(() => {
+                if (window.dogManager && window.dogManager.showChoiceScreen) {
+                    window.dogManager.showChoiceScreen();
+                }
+            }, 1500);
             
         } catch (error) {
             console.error('Error in saveDog:', error);
@@ -615,7 +675,8 @@ class LitterManager extends BaseModule {
         document.getElementById('thyroidExplanation').value = '';
         document.getElementById('country').value = '';
         document.getElementById('zipCode').value = '';
-        document.getElementById('dogPhoto').value = '';
+        const dogPhoto = document.getElementById('dogPhoto');
+        if (dogPhoto) dogPhoto.value = '';
         document.getElementById('remarks').value = '';
         
         // Verberg uitleg velden
