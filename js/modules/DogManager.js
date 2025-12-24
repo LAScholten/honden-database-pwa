@@ -579,8 +579,11 @@ class DogManager extends BaseModule {
     }
     
     getLitterFormHTML() {
+        console.log('DogManager: getLitterFormHTML aangeroepen');
+        
         // Controleer of LitterManager beschikbaar is
         if (typeof LitterManager === 'undefined') {
+            console.error('LitterManager is niet gedefinieerd!');
             // Fallback HTML als LitterManager niet beschikbaar is
             return `
                 <div class="mb-3">
@@ -604,11 +607,22 @@ class DogManager extends BaseModule {
         
         // Maak LitterManager aan als deze nog niet bestaat
         if (!this.litterManager) {
+            console.log('DogManager: Maak nieuwe LitterManager aan');
             this.litterManager = new LitterManager();
+            console.log('DogManager: LitterManager aangemaakt:', this.litterManager);
+            console.log('DogManager: db beschikbaar?', !!this.db);
+            console.log('DogManager: auth beschikbaar?', !!this.auth);
+            
             // Injecteer de dependencies van DogManager naar LitterManager
             if (this.litterManager.injectDependencies) {
+                console.log('DogManager: Injecteer dependencies in LitterManager');
                 this.litterManager.injectDependencies(this.db, this.auth);
+                console.log('DogManager: Dependencies geïnjecteerd');
+            } else {
+                console.error('DogManager: LitterManager heeft geen injectDependencies methode!');
             }
+        } else {
+            console.log('DogManager: LitterManager bestaat al');
         }
         
         // Terug knop HTML
@@ -621,7 +635,9 @@ class DogManager extends BaseModule {
         `;
         
         // Haal het formulier HTML op van LitterManager
+        console.log('DogManager: Haal formulier HTML op van LitterManager');
         const litterFormHTML = this.litterManager.getFormHTML();
+        console.log('DogManager: Formulier HTML opgehaald');
         
         return backButtonHTML + litterFormHTML;
     }
@@ -940,6 +956,8 @@ class DogManager extends BaseModule {
     }
     
     showLitterForm() {
+        console.log('DogManager: showLitterForm aangeroepen');
+        
         const choiceScreen = document.querySelector('.choice-container');
         const dogFormContainer = document.getElementById('dogFormContainer');
         const litterFormContainer = document.getElementById('litterFormContainer');
@@ -952,13 +970,27 @@ class DogManager extends BaseModule {
         
         // Stel LitterManager events in
         if (this.litterManager && this.litterManager.setupEvents) {
+            console.log('DogManager: Roep LitterManager.setupEvents aan');
+            
             // Zorg ervoor dat LitterManager de dependencies heeft
             if (!this.litterManager.db || !this.litterManager.auth) {
+                console.log('DogManager: LitterManager mist dependencies, injecteer ze opnieuw');
                 if (this.litterManager.injectDependencies) {
                     this.litterManager.injectDependencies(this.db, this.auth);
+                    console.log('DogManager: Dependencies opnieuw geïnjecteerd');
                 }
             }
-            this.litterManager.setupEvents();
+            
+            console.log('DogManager: LitterManager.db:', !!this.litterManager.db);
+            console.log('DogManager: LitterManager.auth:', !!this.litterManager.auth);
+            
+            // Wacht even zodat het formulier geladen is
+            setTimeout(() => {
+                this.litterManager.setupEvents();
+                console.log('DogManager: LitterManager.setupEvents uitgevoerd');
+            }, 100);
+        } else {
+            console.error('DogManager: LitterManager of setupEvents methode niet beschikbaar');
         }
     }
     

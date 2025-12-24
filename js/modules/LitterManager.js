@@ -5,6 +5,7 @@
 
 class LitterManager {
     constructor() {
+        console.log('LitterManager constructor aangeroepen');
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';
         this.lastBreeds = JSON.parse(localStorage.getItem('lastBreeds') || '[]');
         this.allDogs = []; // Voor autocomplete van ouders
@@ -262,11 +263,18 @@ class LitterManager {
      * Injecteer database en auth objecten
      */
     injectDependencies(db, auth) {
+        console.log('LitterManager: injectDependencies aangeroepen met:', db, auth);
         this.db = db;
         this.auth = auth;
+        console.log('LitterManager: db geïnjecteerd:', !!this.db);
+        console.log('LitterManager: auth geïnjecteerd:', !!this.auth);
     }
     
     getFormHTML(litterData = null) {
+        console.log('LitterManager: getFormHTML aangeroepen');
+        console.log('LitterManager: db beschikbaar in getFormHTML?', !!this.db);
+        console.log('LitterManager: auth beschikbaar in getFormHTML?', !!this.auth);
+        
         const t = this.t.bind(this);
         const data = litterData || {};
         
@@ -529,7 +537,9 @@ class LitterManager {
     }
     
     setupEvents() {
-        console.log('LitterManager setupEvents called');
+        console.log('LitterManager: setupEvents aangeroepen');
+        console.log('LitterManager: db beschikbaar in setupEvents?', !!this.db);
+        console.log('LitterManager: auth beschikbaar in setupEvents?', !!this.auth);
         
         // Laad honden voor autocomplete
         this.loadAllDogs();
@@ -537,9 +547,13 @@ class LitterManager {
         // Event listeners voor formulier
         const saveBtn = document.getElementById('saveDogBtn');
         if (saveBtn) {
+            console.log('LitterManager: Save button gevonden');
             saveBtn.addEventListener('click', () => {
+                console.log('LitterManager: Save button geklikt');
                 this.saveDog();
             });
+        } else {
+            console.error('LitterManager: Save button niet gevonden!');
         }
         
         // Eyes dropdown handler
@@ -599,17 +613,31 @@ class LitterManager {
     }
     
     async loadAllDogs() {
+        console.log('LitterManager: loadAllDogs aangeroepen');
+        console.log('LitterManager: db voor loadAllDogs:', this.db);
+        
+        if (!this.db) {
+            console.error('LitterManager: Database niet beschikbaar voor loadAllDogs!');
+            return;
+        }
+        
         if (this.allDogs.length === 0) {
             try {
+                console.log('LitterManager: Laad honden van database...');
                 this.allDogs = await this.db.getHonden();
+                console.log('LitterManager: Aantal honden geladen:', this.allDogs.length);
                 this.allDogs.sort((a, b) => a.naam.localeCompare(b.naam));
             } catch (error) {
-                console.error('Fout bij laden honden voor autocomplete:', error);
+                console.error('LitterManager: Fout bij laden honden voor autocomplete:', error);
             }
+        } else {
+            console.log('LitterManager: Honden al geladen:', this.allDogs.length);
         }
     }
     
     setupParentAutocomplete() {
+        console.log('LitterManager: setupParentAutocomplete aangeroepen');
+        
         // Verwijder bestaande dropdowns
         document.querySelectorAll('.autocomplete-dropdown').forEach(dropdown => {
             dropdown.remove();
@@ -620,7 +648,7 @@ class LitterManager {
         const motherInputWrapper = document.querySelector('#mother').closest('.parent-input-wrapper');
         
         if (!fatherInputWrapper || !motherInputWrapper) {
-            console.error('Parent input wrappers niet gevonden');
+            console.error('LitterManager: Parent input wrappers niet gevonden');
             return;
         }
         
@@ -639,6 +667,7 @@ class LitterManager {
         // Event listeners voor vader en moeder velden
         document.querySelectorAll('.parent-input-wrapper input').forEach(input => {
             input.addEventListener('focus', () => {
+                console.log('LitterManager: Input focus, laad honden');
                 this.loadAllDogs(); // Zorg dat honden geladen zijn
             });
             
@@ -670,13 +699,20 @@ class LitterManager {
     }
     
     showParentAutocomplete(searchTerm, parentType) {
+        console.log('LitterManager: showParentAutocomplete aangeroepen voor', parentType);
+        
         const dropdown = document.getElementById(`${parentType}Dropdown`);
-        if (!dropdown) return;
+        if (!dropdown) {
+            console.error('LitterManager: Dropdown niet gevonden voor', parentType);
+            return;
+        }
         
         if (!searchTerm || searchTerm.length < 1) {
             dropdown.style.display = 'none';
             return;
         }
+        
+        console.log('LitterManager: Aantal honden beschikbaar voor autocomplete:', this.allDogs.length);
         
         // Filter honden voor autocomplete (alleen reuen voor vader, teven voor moeder)
         const suggestions = this.allDogs.filter(dog => {
@@ -691,6 +727,8 @@ class LitterManager {
             }
             return matchesSearch;
         }).slice(0, 8); // Max 8 suggesties
+        
+        console.log('LitterManager: Aantal suggesties:', suggestions.length);
         
         if (suggestions.length === 0) {
             dropdown.style.display = 'none';
@@ -733,7 +771,18 @@ class LitterManager {
     }
     
     async saveDog() {
+        console.log('LitterManager: saveDog aangeroepen');
+        console.log('LitterManager: auth beschikbaar?', !!this.auth);
+        console.log('LitterManager: db beschikbaar?', !!this.db);
+        
+        if (!this.auth) {
+            console.error('LitterManager: Auth niet beschikbaar!');
+            this.showError('Authenticatie niet beschikbaar');
+            return;
+        }
+        
         if (!this.auth.isAdmin()) {
+            console.log('LitterManager: Gebruiker is geen admin');
             this.showError(this.t('adminOnly'));
             return;
         }
@@ -764,6 +813,8 @@ class LitterManager {
             updatedAt: new Date().toISOString()
         };
         
+        console.log('LitterManager: Dog data verzameld:', dogData);
+        
         if (!dogData.naam || !dogData.stamboomnr || !dogData.ras) {
             this.showError(this.t('fieldsRequired'));
             return;
@@ -775,6 +826,7 @@ class LitterManager {
         this.showProgress(this.t('savingDog'));
         
         try {
+            console.log('LitterManager: Probeer hond op te slaan via db...');
             await this.db.voegHondToe(dogData);
             this.hideProgress();
             this.showSuccess(this.t('dogAdded'));
@@ -782,10 +834,12 @@ class LitterManager {
             // Foto uploaden als er een is geselecteerd
             const photoInput = document.getElementById('dogPhoto');
             if (photoInput.files.length > 0) {
+                console.log('LitterManager: Foto uploaden...');
                 await this.uploadPhoto(dogData.stamboomnr, photoInput.files[0]);
             }
             
         } catch (error) {
+            console.error('LitterManager: Fout bij opslaan hond:', error);
             this.hideProgress();
             this.showError(`${this.t('addFailed')}${error.message}`);
         }
@@ -827,6 +881,7 @@ class LitterManager {
     }
     
     showProgress(message) {
+        console.log('LitterManager showProgress:', message);
         if (window.uiHandler && window.uiHandler.showProgress) {
             window.uiHandler.showProgress(message);
         } else {
@@ -835,6 +890,7 @@ class LitterManager {
     }
     
     hideProgress() {
+        console.log('LitterManager hideProgress');
         if (window.uiHandler && window.uiHandler.hideProgress) {
             window.uiHandler.hideProgress();
         } else {
@@ -843,6 +899,7 @@ class LitterManager {
     }
     
     showSuccess(message) {
+        console.log('LitterManager showSuccess:', message);
         if (window.uiHandler && window.uiHandler.showSuccess) {
             window.uiHandler.showSuccess(message);
         } else {
@@ -851,6 +908,7 @@ class LitterManager {
     }
     
     showError(message) {
+        console.error('LitterManager showError:', message);
         if (window.uiHandler && window.uiHandler.showError) {
             window.uiHandler.showError(message);
         } else {
