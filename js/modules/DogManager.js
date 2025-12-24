@@ -248,7 +248,7 @@ class DogManager extends BaseModule {
                 elbow1: "1",
                 elbow2: "2",
                 elbow3: "3",
-                elbowNB: "NB (Nicht bekannt)",
+                elbowNB: "NB (Niet bekannt)",
                 patellaLuxation: "Patella Luxation",
                 patellaGrades: "Grad wählen...",
                 patella0: "0",
@@ -299,7 +299,7 @@ class DogManager extends BaseModule {
                 
                 // Meldungen
                 adminOnly: "Nur Administratoren können Hunde hinzufügen/bearbeiten",
-                fieldsRequired: "Name, Stammbaum-Nummer und Rasse sind Pflichtfelder",
+                fieldsRequired: "Name, Stammbaum-Nummer en Rasse zijn Pflichtfelder",
                 savingDog: "Hund wird gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
                 dogUpdated: "Hund erfolgreich aktualisiert!",
@@ -373,12 +373,11 @@ class DogManager extends BaseModule {
             `;
         }
         
-        // Als gebruiker admin is, toon keuze scherm
+        // Als gebruiker admin is, toon direct het hondenformulier
         const t = this.t.bind(this);
-        const modalTitle = t('dogLitterChoice');
+        const modalTitle = isEdit ? t('editDog') : t('newDog');
         const modalId = 'addDogModal';
         
-        // Keuze scherm HTML
         return `
             <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="${modalId}Label" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
@@ -390,50 +389,7 @@ class DogManager extends BaseModule {
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${t('close')}"></button>
                         </div>
                         <div class="modal-body">
-                            <div class="row text-center choice-container">
-                                <div class="col-md-6 mb-3">
-                                    <div class="card h-100 choice-card" data-choice="dog">
-                                        <div class="card-body p-2">
-                                            <div class="choice-icon mb-2">
-                                                <i class="bi bi-emoji-heart-eyes" style="font-size: 2rem; color: #3498db;"></i>
-                                            </div>
-                                            <h6 class="card-title mb-1">${t('addNewDog')}</h6>
-                                            <p class="card-text small mb-1">Voeg één hond toe aan de database</p>
-                                        </div>
-                                        <div class="card-footer bg-transparent p-2">
-                                            <button type="button" class="btn btn-primary btn-sm choose-dog-btn">
-                                                <i class="bi bi-check-circle me-1"></i> ${t('choose')}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <div class="card h-100 choice-card" data-choice="litter">
-                                        <div class="card-body p-2">
-                                            <div class="choice-icon mb-2">
-                                                <i class="bi bi-people" style="font-size: 2rem; color: #e74c3c;"></i>
-                                            </div>
-                                            <h6 class="card-title mb-1">${t('addNewLitter')}</h6>
-                                            <p class="card-text small mb-1">Voeg een volledig nest toe</p>
-                                        </div>
-                                        <div class="card-footer bg-transparent p-2">
-                                            <button type="button" class="btn btn-primary btn-sm choose-litter-btn">
-                                                <i class="bi bi-check-circle me-1"></i> ${t('choose')}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <!-- Nieuwe Hond Formulier (verborgen initieel) -->
-                            <div id="dogFormContainer" style="display: none;">
-                                ${this.getDogFormHTML(dogData)}
-                            </div>
-                            
-                            <!-- Nest Formulier (verborgen initieel) -->
-                            <div id="litterFormContainer" style="display: none;">
-                                ${this.getLitterFormHTML()}
-                            </div>
+                            ${this.getDogFormHTML(dogData)}
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -463,81 +419,6 @@ class DogManager extends BaseModule {
                         max-height: calc(90vh - 130px);
                         overflow-y: auto;
                     }
-                    
-                    .choice-container {
-                        padding: 5px;
-                        min-height: auto;
-                        max-height: 100%;
-                    }
-                    
-                    .choice-card {
-                        min-height: 120px;
-                        margin-bottom: 10px;
-                    }
-                    
-                    .choice-icon {
-                        margin-bottom: 5px;
-                    }
-                    
-                    .choice-icon i {
-                        font-size: 1.8rem !important;
-                    }
-                    
-                    .card-title {
-                        font-size: 1rem;
-                        margin-bottom: 3px;
-                    }
-                    
-                    .card-text.small {
-                        font-size: 0.8rem;
-                        line-height: 1.2;
-                        margin-bottom: 5px;
-                    }
-                }
-                
-                /* Algemene stijlen */
-                .choice-container {
-                    padding: 10px;
-                    min-height: auto;
-                }
-                
-                .choice-card {
-                    cursor: pointer;
-                    transition: transform 0.3s, box-shadow 0.3s;
-                    border: 2px solid transparent;
-                    max-width: 90%;
-                    margin: 0 auto;
-                    min-height: 140px;
-                }
-                
-                .choice-card:hover {
-                    transform: translateY(-3px);
-                    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-                    border-color: #3498db;
-                }
-                
-                .choice-icon {
-                    transition: transform 0.3s;
-                }
-                
-                .choice-card:hover .choice-icon {
-                    transform: scale(1.05);
-                }
-                
-                .card-title {
-                    font-size: 1.1rem;
-                    margin-bottom: 0.5rem;
-                }
-                
-                .card-text.small {
-                    font-size: 0.85rem;
-                    line-height: 1.3;
-                    margin-bottom: 0.5rem;
-                }
-                
-                .btn-sm {
-                    padding: 0.25rem 0.75rem;
-                    font-size: 0.875rem;
                 }
                 
                 .autocomplete-dropdown {
@@ -664,12 +545,6 @@ class DogManager extends BaseModule {
         }
         
         return `
-            <div class="mb-3">
-                <button type="button" class="btn btn-outline-secondary btn-sm back-to-choice-btn">
-                    <i class="bi bi-arrow-left me-1"></i> ${t('back')}
-                </button>
-            </div>
-            
             <form id="addDogForm">
                 <input type="hidden" id="fatherId" value="${data.vaderId || ''}">
                 <input type="hidden" id="motherId" value="${data.moederId || ''}">
@@ -899,99 +774,8 @@ class DogManager extends BaseModule {
         // Laad honden voor autocomplete
         this.loadAllDogs();
         
-        // Event listeners voor keuze knoppen
-        const chooseDogBtn = document.querySelector('.choose-dog-btn');
-        const chooseLitterBtn = document.querySelector('.choose-litter-btn');
-        const backToChoiceBtns = document.querySelectorAll('.back-to-choice-btn');
-        
-        if (chooseDogBtn) {
-            chooseDogBtn.addEventListener('click', () => {
-                this.showDogForm();
-            });
-        }
-        
-        if (chooseLitterBtn) {
-            chooseLitterBtn.addEventListener('click', () => {
-                this.showLitterForm();
-            });
-        }
-        
-        backToChoiceBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                this.showChoiceScreen();
-            });
-        });
-        
-        // Event listeners voor formulier (worden later toegevoegd als formulier geladen wordt)
+        // Event listeners voor formulier
         this.setupFormEvents();
-    }
-    
-    showChoiceScreen() {
-        const choiceScreen = document.querySelector('.choice-container');
-        const dogFormContainer = document.getElementById('dogFormContainer');
-        const litterFormContainer = document.getElementById('litterFormContainer');
-        const modalFooter = document.querySelector('.modal-footer');
-        
-        if (choiceScreen) choiceScreen.style.display = 'flex';
-        if (dogFormContainer) dogFormContainer.style.display = 'none';
-        if (litterFormContainer) litterFormContainer.style.display = 'none';
-        if (modalFooter) modalFooter.style.display = 'flex';
-    }
-    
-    showDogForm() {
-        const choiceScreen = document.querySelector('.choice-container');
-        const dogFormContainer = document.getElementById('dogFormContainer');
-        const litterFormContainer = document.getElementById('litterFormContainer');
-        const modalFooter = document.querySelector('.modal-footer');
-        
-        if (choiceScreen) choiceScreen.style.display = 'none';
-        if (dogFormContainer) dogFormContainer.style.display = 'block';
-        if (litterFormContainer) litterFormContainer.style.display = 'none';
-        if (modalFooter) modalFooter.style.display = 'flex';
-        
-        // Herlaad formulier events
-        setTimeout(() => {
-            this.setupFormEvents();
-        }, 50);
-    }
-    
-    showLitterForm() {
-        console.log('DogManager: showLitterForm aangeroepen');
-        
-        const choiceScreen = document.querySelector('.choice-container');
-        const dogFormContainer = document.getElementById('dogFormContainer');
-        const litterFormContainer = document.getElementById('litterFormContainer');
-        const modalFooter = document.querySelector('.modal-footer');
-        
-        if (choiceScreen) choiceScreen.style.display = 'none';
-        if (dogFormContainer) dogFormContainer.style.display = 'none';
-        if (litterFormContainer) litterFormContainer.style.display = 'block';
-        if (modalFooter) modalFooter.style.display = 'flex';
-        
-        // Stel LitterManager events in
-        if (this.litterManager && this.litterManager.setupEvents) {
-            console.log('DogManager: Roep LitterManager.setupEvents aan');
-            
-            // Zorg ervoor dat LitterManager de dependencies heeft
-            if (!this.litterManager.db || !this.litterManager.auth) {
-                console.log('DogManager: LitterManager mist dependencies, injecteer ze opnieuw');
-                if (this.litterManager.injectDependencies) {
-                    this.litterManager.injectDependencies(this.db, this.auth);
-                    console.log('DogManager: Dependencies opnieuw geïnjecteerd');
-                }
-            }
-            
-            console.log('DogManager: LitterManager.db:', !!this.litterManager.db);
-            console.log('DogManager: LitterManager.auth:', !!this.litterManager.auth);
-            
-            // Wacht even zodat het formulier geladen is
-            setTimeout(() => {
-                this.litterManager.setupEvents();
-                console.log('DogManager: LitterManager.setupEvents uitgevoerd');
-            }, 100);
-        } else {
-            console.error('DogManager: LitterManager of setupEvents methode niet beschikbaar');
-        }
     }
     
     setupFormEvents() {
