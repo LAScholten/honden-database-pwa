@@ -498,39 +498,52 @@ class LitterManager {
             </form>
             
             <style>
+                /* AutoComplete dropdown styling */
+                .parent-input-wrapper {
+                    position: relative;
+                }
+                
                 .autocomplete-dropdown {
-                    position: absolute;
-                    background: white;
-                    border: 1px solid #ddd;
-                    border-radius: 4px;
-                    max-height: 200px;
-                    overflow-y: auto;
-                    z-index: 9999;
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-                    width: 100%;
+                    position: absolute !important;
+                    background: white !important;
+                    border: 1px solid #ddd !important;
+                    border-radius: 4px !important;
+                    max-height: 200px !important;
+                    overflow-y: auto !important;
+                    z-index: 9999 !important;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+                    width: 100% !important;
+                    top: 100% !important;
+                    left: 0 !important;
+                    display: none;
                 }
                 
                 .autocomplete-item {
-                    padding: 10px;
-                    cursor: pointer;
-                    border-bottom: 1px solid #f0f0f0;
+                    padding: 10px !important;
+                    cursor: pointer !important;
+                    border-bottom: 1px solid #f0f0f0 !important;
                 }
                 
                 .autocomplete-item:hover {
-                    background-color: #f8f9fa;
+                    background-color: #f8f9fa !important;
                 }
                 
                 .autocomplete-item .dog-name {
-                    font-weight: bold;
+                    font-weight: bold !important;
                 }
                 
                 .autocomplete-item .dog-info {
-                    font-size: 0.85em;
-                    color: #666;
+                    font-size: 0.85em !important;
+                    color: #666 !important;
                 }
                 
-                .parent-input-wrapper {
-                    position: relative;
+                /* Zorg ervoor dat de dropdown boven andere elementen komt */
+                .modal {
+                    overflow: visible !important;
+                }
+                
+                .modal-body {
+                    overflow: visible !important;
                 }
             </style>
         `;
@@ -664,6 +677,8 @@ class LitterManager {
         motherDropdown.style.display = 'none';
         motherInputWrapper.appendChild(motherDropdown);
         
+        console.log('LitterManager: Dropdowns aangemaakt voor vader en moeder');
+        
         // Event listeners voor vader en moeder velden
         document.querySelectorAll('.parent-input-wrapper input').forEach(input => {
             input.addEventListener('focus', () => {
@@ -674,6 +689,7 @@ class LitterManager {
             input.addEventListener('input', (e) => {
                 const searchTerm = e.target.value.toLowerCase().trim();
                 const parentType = input.id === 'father' ? 'father' : 'mother';
+                console.log('LitterManager: Input event voor', parentType, 'met zoekterm:', searchTerm);
                 this.showParentAutocomplete(searchTerm, parentType);
             });
             
@@ -708,6 +724,7 @@ class LitterManager {
         }
         
         if (!searchTerm || searchTerm.length < 1) {
+            console.log('LitterManager: Zoekterm leeg, verberg dropdown');
             dropdown.style.display = 'none';
             return;
         }
@@ -731,6 +748,7 @@ class LitterManager {
         console.log('LitterManager: Aantal suggesties:', suggestions.length);
         
         if (suggestions.length === 0) {
+            console.log('LitterManager: Geen suggesties, verberg dropdown');
             dropdown.style.display = 'none';
             return;
         }
@@ -749,14 +767,22 @@ class LitterManager {
         
         dropdown.innerHTML = html;
         dropdown.style.display = 'block';
+        console.log('LitterManager: Dropdown gevuld en getoond met', suggestions.length, 'items');
+        
+        // Debug: log de positie en styling van de dropdown
+        console.log('LitterManager: Dropdown positie:', dropdown.getBoundingClientRect());
+        console.log('LitterManager: Dropdown z-index:', window.getComputedStyle(dropdown).zIndex);
         
         // Event listeners voor autocomplete items
         dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
             item.addEventListener('click', (e) => {
+                console.log('LitterManager: Autocomplete item geklikt');
                 const dogId = item.getAttribute('data-id');
                 const dogName = item.getAttribute('data-name');
                 const input = document.getElementById(parentType);
                 const idInput = document.getElementById(`${parentType}Id`);
+                
+                console.log('LitterManager: Geselecteerde hond:', dogName, 'ID:', dogId);
                 
                 if (input) {
                     input.value = dogName;
