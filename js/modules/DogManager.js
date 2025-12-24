@@ -950,7 +950,7 @@ class DogManager extends BaseModule {
         if (litterFormContainer) litterFormContainer.style.display = 'block';
         if (modalFooter) modalFooter.style.display = 'flex';
         
-        // Stel LitterManager events in als beschikbaar
+        // Stel LitterManager events in
         if (this.litterManager && this.litterManager.setupEvents) {
             // Zorg ervoor dat LitterManager de dependencies heeft
             if (!this.litterManager.db || !this.litterManager.auth) {
@@ -1295,23 +1295,35 @@ class DogManager extends BaseModule {
     }
     
     showProgress(message) {
-        console.log('Progress:', message);
-        // Implementeer progress indicator
+        if (window.uiHandler && window.uiHandler.showProgress) {
+            window.uiHandler.showProgress(message);
+        } else {
+            console.log('Progress:', message);
+        }
     }
     
     hideProgress() {
-        console.log('Hide progress');
-        // Implementeer hide progress indicator
+        if (window.uiHandler && window.uiHandler.hideProgress) {
+            window.uiHandler.hideProgress();
+        } else {
+            console.log('Hide progress');
+        }
     }
     
     showSuccess(message) {
-        console.log('Success:', message);
-        // Implementeer success melding
+        if (window.uiHandler && window.uiHandler.showSuccess) {
+            window.uiHandler.showSuccess(message);
+        } else {
+            console.log('Success:', message);
+        }
     }
     
     showError(message) {
-        console.error('Error:', message);
-        // Implementeer error melding
+        if (window.uiHandler && window.uiHandler.showError) {
+            window.uiHandler.showError(message);
+        } else {
+            console.error('Error:', message);
+        }
     }
 }
 

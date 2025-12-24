@@ -619,6 +619,11 @@ class LitterManager {
         const fatherInputWrapper = document.querySelector('#father').closest('.parent-input-wrapper');
         const motherInputWrapper = document.querySelector('#mother').closest('.parent-input-wrapper');
         
+        if (!fatherInputWrapper || !motherInputWrapper) {
+            console.error('Parent input wrappers niet gevonden');
+            return;
+        }
+        
         const fatherDropdown = document.createElement('div');
         fatherDropdown.className = 'autocomplete-dropdown';
         fatherDropdown.id = 'fatherDropdown';
@@ -822,23 +827,35 @@ class LitterManager {
     }
     
     showProgress(message) {
-        console.log('Progress:', message);
-        // Implementeer progress indicator
+        if (window.uiHandler && window.uiHandler.showProgress) {
+            window.uiHandler.showProgress(message);
+        } else {
+            console.log('Progress:', message);
+        }
     }
     
     hideProgress() {
-        console.log('Hide progress');
-        // Implementeer hide progress indicator
+        if (window.uiHandler && window.uiHandler.hideProgress) {
+            window.uiHandler.hideProgress();
+        } else {
+            console.log('Hide progress');
+        }
     }
     
     showSuccess(message) {
-        console.log('Success:', message);
-        // Implementeer success melding
+        if (window.uiHandler && window.uiHandler.showSuccess) {
+            window.uiHandler.showSuccess(message);
+        } else {
+            console.log('Success:', message);
+        }
     }
     
     showError(message) {
-        console.error('Error:', message);
-        // Implementeer error melding
+        if (window.uiHandler && window.uiHandler.showError) {
+            window.uiHandler.showError(message);
+        } else {
+            console.error('Error:', message);
+        }
     }
 }
 
