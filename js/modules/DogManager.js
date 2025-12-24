@@ -292,14 +292,14 @@ class DogManager extends BaseModule {
                 loggedInAs: "Sie sind eingeloggt als:",
                 user: "Benutzer",
                 availableFeatures: "Verfügbare Funktionen für Benutzer",
-                searchDogs: "Hunde suchen und anzeigen",
+                searchDogs: "Hunde suchen en anzeigen",
                 viewGallery: "Fotogalerie anzeigen",
                 managePrivateInfo: "Private Informationen verwalten",
                 importExport: "Daten importieren/exportieren",
                 
                 // Meldungen
-                adminOnly: "Nur Administratoren kunnen Hunde hinzufügen/bearbeiten",
-                fieldsRequired: "Name, Stammbaum-Nummer und Rasse sind Pflichtfelder",
+                adminOnly: "Nur Administratoren können Hunde hinzufügen/bearbeiten",
+                fieldsRequired: "Name, Stammbaum-Nummer en Rasse sind Pflichtfelder",
                 savingDog: "Hund wird gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
                 dogUpdated: "Hund erfolgreich aktualisiert!",
@@ -579,47 +579,48 @@ class DogManager extends BaseModule {
     }
     
     getLitterFormHTML() {
-        // Controleer of LitterManager beschikbaar is
-        if (typeof LitterManager === 'undefined') {
-            // Fallback HTML als LitterManager niet beschikbaar is
-            return `
-                <div class="mb-3">
-                    <button type="button" class="btn btn-outline-secondary btn-sm back-to-choice-btn">
-                        <i class="bi bi-arrow-left me-1"></i> ${this.t('back')}
-                    </button>
-                </div>
-                
-                <div class="text-center py-3">
-                    <div class="mb-2">
-                        <i class="bi bi-tools" style="font-size: 2.5rem; color: #f39c12;"></i>
-                    </div>
-                    <h5 class="mb-2">${this.t('development')}</h5>
-                    <p class="text-muted small mb-2">Deze functie is momenteel in ontwikkeling en komt binnenkort beschikbaar.</p>
-                    <button type="button" class="btn btn-secondary btn-sm back-to-choice-btn">
-                        <i class="bi bi-arrow-left me-1"></i> ${this.t('back')}
-                    </button>
-                </div>
-            `;
-        }
+        console.log('DogManager: Getting litter form HTML');
         
         // Maak LitterManager aan als deze nog niet bestaat
         if (!this.litterManager) {
+            console.log('DogManager: Creating new LitterManager instance');
             this.litterManager = new LitterManager();
+            
+            // GEZAMENLIJKE DATABASE DOORGEVEN
+            if (this.db && this.litterManager) {
+                console.log('DogManager: Passing database to LitterManager');
+                this.litterManager.db = this.db; // ZELFDE DATABASE OBJECT!
+            }
+            
+            // Maak globaal beschikbaar voor debugging
+            window.litterManager = this.litterManager;
         }
         
         // Terug knop HTML
         const backButtonHTML = `
             <div class="mb-3">
-                <button type="button" class="btn btn-outline-secondary btn-sm back-to-choice-btn">
+                <button type="button" class="btn btn-outline-secondary btn-sm back-to-choice-btn" id="litterBackBtn">
                     <i class="bi bi-arrow-left me-1"></i> ${this.t('back')}
                 </button>
             </div>
         `;
         
         // Haal het formulier HTML op van LitterManager
-        const litterFormHTML = this.litterManager.getFormHTML();
-        
-        return backButtonHTML + litterFormHTML;
+        if (this.litterManager && typeof this.litterManager.getFormHTML === 'function') {
+            console.log('DogManager: Getting form HTML from LitterManager');
+            return backButtonHTML + this.litterManager.getFormHTML();
+        } else {
+            console.error('DogManager: LitterManager or getFormHTML method not available');
+            return backButtonHTML + `
+                <div class="text-center py-3">
+                    <div class="mb-2">
+                        <i class="bi bi-tools" style="font-size: 2.5rem; color: #f39c12;"></i>
+                    </div>
+                    <h5 class="mb-2">${this.t('development')}</h5>
+                    <p class="text-muted small mb-2">Deze functie is momenteel in ontwikkeling en komt binnenkort beschikbaar.</p>
+                </div>
+            `;
+        }
     }
     
     getDogFormHTML(dogData = null) {
@@ -645,7 +646,7 @@ class DogManager extends BaseModule {
         
         return `
             <div class="mb-3">
-                <button type="button" class="btn btn-outline-secondary btn-sm back-to-choice-btn">
+                <button type="button" class="btn btn-outline-secondary btn-sm back-to-choice-btn" id="dogBackBtn">
                     <i class="bi bi-arrow-left me-1"></i> ${t('back')}
                 </button>
             </div>
@@ -880,33 +881,51 @@ class DogManager extends BaseModule {
         this.loadAllDogs();
         
         // Event listeners voor keuze knoppen
+        this.setupChoiceButtons();
+    }
+    
+    setupChoiceButtons() {
+        console.log('DogManager: Setting up choice buttons');
+        
+        // Event listeners voor keuze knoppen
         const chooseDogBtn = document.querySelector('.choose-dog-btn');
         const chooseLitterBtn = document.querySelector('.choose-litter-btn');
-        const backToChoiceBtns = document.querySelectorAll('.back-to-choice-btn');
         
         if (chooseDogBtn) {
+            console.log('DogManager: Found choose dog button');
             chooseDogBtn.addEventListener('click', () => {
+                console.log('DogManager: Choose dog clicked');
                 this.showDogForm();
             });
         }
         
         if (chooseLitterBtn) {
+            console.log('DogManager: Found choose litter button');
             chooseLitterBtn.addEventListener('click', () => {
+                console.log('DogManager: Choose litter clicked');
                 this.showLitterForm();
             });
         }
         
-        backToChoiceBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                this.showChoiceScreen();
+        // Event listeners voor terug knoppen
+        setTimeout(() => {
+            const backToChoiceBtns = document.querySelectorAll('.back-to-choice-btn');
+            console.log('DogManager: Found back buttons:', backToChoiceBtns.length);
+            
+            backToChoiceBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    console.log('DogManager: Back button clicked');
+                    this.showChoiceScreen();
+                });
             });
-        });
+        }, 200);
         
         // Event listeners voor formulier (worden later toegevoegd als formulier geladen wordt)
         this.setupFormEvents();
     }
     
     showChoiceScreen() {
+        console.log('DogManager: Showing choice screen');
         const choiceScreen = document.querySelector('.choice-container');
         const dogFormContainer = document.getElementById('dogFormContainer');
         const litterFormContainer = document.getElementById('litterFormContainer');
@@ -919,6 +938,7 @@ class DogManager extends BaseModule {
     }
     
     showDogForm() {
+        console.log('DogManager: Showing dog form');
         const choiceScreen = document.querySelector('.choice-container');
         const dogFormContainer = document.getElementById('dogFormContainer');
         const litterFormContainer = document.getElementById('litterFormContainer');
@@ -936,6 +956,7 @@ class DogManager extends BaseModule {
     }
     
     showLitterForm() {
+        console.log('DogManager: Showing litter form');
         const choiceScreen = document.querySelector('.choice-container');
         const dogFormContainer = document.getElementById('dogFormContainer');
         const litterFormContainer = document.getElementById('litterFormContainer');
@@ -946,29 +967,76 @@ class DogManager extends BaseModule {
         if (litterFormContainer) litterFormContainer.style.display = 'block';
         if (modalFooter) modalFooter.style.display = 'flex';
         
-        // Stel LitterManager events in als beschikbaar
-        if (this.litterManager && this.litterManager.setupEvents) {
-            this.litterManager.setupEvents();
-        } else {
-            // Fallback: voeg event listener toe voor terug knop
-            setTimeout(() => {
+        // BELANGRIJK: Initialiseer LitterManager en geef database door
+        this.initializeLitterManager();
+        
+        // Stel LitterManager events in
+        setTimeout(() => {
+            if (this.litterManager && this.litterManager.setupEvents) {
+                console.log('DogManager: Calling LitterManager setupEvents');
+                this.litterManager.setupEvents();
+            } else {
+                console.error('DogManager: LitterManager not available for setupEvents');
+                // Fallback: voeg event listener toe voor terug knop
                 const backBtn = document.querySelector('.back-to-choice-btn');
                 if (backBtn) {
                     backBtn.addEventListener('click', () => {
                         this.showChoiceScreen();
                     });
                 }
-            }, 50);
+            }
+        }, 100);
+    }
+    
+    initializeLitterManager() {
+        console.log('DogManager: Initializing LitterManager');
+        
+        if (!this.litterManager) {
+            console.log('DogManager: Creating new LitterManager instance');
+            this.litterManager = new LitterManager();
+            
+            // GEZAMENLIJKE DATABASE DOORGEVEN - ZELFDE OBJECT!
+            if (this.db) {
+                console.log('DogManager: Passing database to LitterManager');
+                this.litterManager.db = this.db;
+            } else {
+                console.error('DogManager: No database available to pass to LitterManager');
+            }
+            
+            // Zorg dat LitterManager ook de juiste vertalingen heeft
+            this.litterManager.updateLanguage(this.currentLang);
+            
+            // Maak globaal beschikbaar voor debugging
+            window.litterManager = this.litterManager;
+        } else {
+            console.log('DogManager: LitterManager already exists');
         }
     }
     
     setupFormEvents() {
+        console.log('DogManager: Setting up form events');
+        
         // Event listeners voor formulier
         const saveBtn = document.getElementById('saveDogBtn');
         if (saveBtn) {
+            console.log('DogManager: Found save button');
             saveBtn.addEventListener('click', () => {
+                console.log('DogManager: Save button clicked');
                 this.saveDog();
             });
+        } else {
+            console.log('DogManager: Save button not found yet');
+            // Probeer opnieuw
+            setTimeout(() => {
+                const retryBtn = document.getElementById('saveDogBtn');
+                if (retryBtn) {
+                    console.log('DogManager: Found save button on retry');
+                    retryBtn.addEventListener('click', () => {
+                        console.log('DogManager: Save button clicked (retry)');
+                        this.saveDog();
+                    });
+                }
+            }, 200);
         }
         
         // Eyes dropdown handler
@@ -994,15 +1062,22 @@ class DogManager extends BaseModule {
         }
         
         // Recente rassen knoppen
-        document.querySelectorAll('.recent-breed-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const breed = e.target.dataset.breed;
-                const breedInput = document.getElementById('breed');
-                if (breedInput) {
-                    breedInput.value = breed;
-                }
+        setTimeout(() => {
+            const recentBreedBtns = document.querySelectorAll('.recent-breed-btn');
+            console.log('DogManager: Found recent breed buttons:', recentBreedBtns.length);
+            
+            recentBreedBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    console.log('DogManager: Recent breed button clicked');
+                    const breed = e.target.getAttribute('data-breed');
+                    const breedInput = document.getElementById('breed');
+                    if (breedInput) {
+                        breedInput.value = breed;
+                        console.log('DogManager: Ras ingevuld:', breed);
+                    }
+                });
             });
-        });
+        }, 200);
         
         // Setup autocomplete voor ouders
         this.setupParentAutocomplete();
@@ -1070,33 +1145,40 @@ class DogManager extends BaseModule {
             try {
                 this.allDogs = await this.db.getHonden();
                 this.allDogs.sort((a, b) => a.naam.localeCompare(b.naam));
+                console.log('DogManager: Loaded dogs for autocomplete:', this.allDogs.length);
             } catch (error) {
-                console.error('Fout bij laden honden voor autocomplete:', error);
+                console.error('DogManager: Fout bij laden honden voor autocomplete:', error);
             }
         }
     }
     
     setupParentAutocomplete() {
+        console.log('DogManager: Setting up parent autocomplete');
+        
         // Verwijder bestaande dropdowns
         document.querySelectorAll('.autocomplete-dropdown').forEach(dropdown => {
             dropdown.remove();
         });
         
         // Maak nieuwe dropdown containers
-        const fatherInputWrapper = document.querySelector('#father').closest('.parent-input-wrapper');
-        const motherInputWrapper = document.querySelector('#mother').closest('.parent-input-wrapper');
+        const fatherInputWrapper = document.querySelector('#father')?.closest('.parent-input-wrapper');
+        const motherInputWrapper = document.querySelector('#mother')?.closest('.parent-input-wrapper');
         
-        const fatherDropdown = document.createElement('div');
-        fatherDropdown.className = 'autocomplete-dropdown';
-        fatherDropdown.id = 'fatherDropdown';
-        fatherDropdown.style.display = 'none';
-        fatherInputWrapper.appendChild(fatherDropdown);
+        if (fatherInputWrapper) {
+            const fatherDropdown = document.createElement('div');
+            fatherDropdown.className = 'autocomplete-dropdown';
+            fatherDropdown.id = 'fatherDropdown';
+            fatherDropdown.style.display = 'none';
+            fatherInputWrapper.appendChild(fatherDropdown);
+        }
         
-        const motherDropdown = document.createElement('div');
-        motherDropdown.className = 'autocomplete-dropdown';
-        motherDropdown.id = 'motherDropdown';
-        motherDropdown.style.display = 'none';
-        motherInputWrapper.appendChild(motherDropdown);
+        if (motherInputWrapper) {
+            const motherDropdown = document.createElement('div');
+            motherDropdown.className = 'autocomplete-dropdown';
+            motherDropdown.id = 'motherDropdown';
+            motherDropdown.style.display = 'none';
+            motherInputWrapper.appendChild(motherDropdown);
+        }
         
         // Event listeners voor vader en moeder velden
         document.querySelectorAll('.parent-input-wrapper input').forEach(input => {
@@ -1195,7 +1277,9 @@ class DogManager extends BaseModule {
     }
     
     async saveDog() {
-        if (!this.auth.isAdmin()) {
+        console.log('DogManager: saveDog called');
+        
+        if (!auth.isAdmin()) {
             this.showError(this.t('adminOnly'));
             return;
         }
@@ -1225,6 +1309,8 @@ class DogManager extends BaseModule {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
+        
+        console.log('DogManager: Form data:', dogData);
         
         if (!dogData.naam || !dogData.stamboomnr || !dogData.ras) {
             this.showError(this.t('fieldsRequired'));
@@ -1291,6 +1377,31 @@ class DogManager extends BaseModule {
             });
         } catch (error) {
             this.showError(`${this.t('photoError')}${error.message}`);
+        }
+    }
+    
+    // Helper methods voor UI feedback
+    showError(message) {
+        alert(message);
+    }
+    
+    showSuccess(message) {
+        alert(message);
+    }
+    
+    showProgress(message) {
+        const saveBtn = document.getElementById('saveDogBtn');
+        if (saveBtn) {
+            saveBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ${message}`;
+            saveBtn.disabled = true;
+        }
+    }
+    
+    hideProgress() {
+        const saveBtn = document.getElementById('saveDogBtn');
+        if (saveBtn) {
+            saveBtn.innerHTML = this.t('saveDog');
+            saveBtn.disabled = false;
         }
     }
 }
