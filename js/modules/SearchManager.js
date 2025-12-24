@@ -13,7 +13,7 @@ class SearchManager extends BaseModule {
             nl: {
                 searchDog: "Hond Zoeken",
                 searchName: "Zoek hond op naam",
-                searchPlaceholder: "Typ hondennaam",
+                searchPlaceholder: "Typ hondennaam, stamboomnummer of ras...",
                 noDogsFound: "Geen honden gevonden",
                 typeToSearch: "Begin met typen om te zoeken",
                 searchResults: "Zoekresultaten",
@@ -97,7 +97,7 @@ class SearchManager extends BaseModule {
             en: {
                 searchDog: "Search Dog",
                 searchName: "Search dog by name",
-                searchPlaceholder: "Type dog name",
+                searchPlaceholder: "Type dog name, pedigree number or breed...",
                 noDogsFound: "No dogs found",
                 typeToSearch: "Start typing to search",
                 searchResults: "Search Results",
@@ -181,7 +181,7 @@ class SearchManager extends BaseModule {
             de: {
                 searchDog: "Hund suchen",
                 searchName: "Hund nach Namen suchen",
-                searchPlaceholder: "Hundenamen",
+                searchPlaceholder: "Hundenamen, Stammbaum-Nummer oder Rasse eingeben...",
                 noDogsFound: "Keine Hunde gefunden",
                 typeToSearch: "Beginnen Sie mit der Eingabe, um zu suchen",
                 searchResults: "Suchergebnisse",
