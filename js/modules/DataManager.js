@@ -6,7 +6,8 @@
 class DataManager extends BaseModule {
     constructor() {
         super();
-        this.currentLang = localStorage.getItem('appLanguage') || 'nl';
+        
+        // Definieer translations EERST
         this.translations = {
             nl: {
                 dataManagement: "Data Beheer",
@@ -132,7 +133,7 @@ class DataManager extends BaseModule {
                 importStrategyDescription: "Vollständige Wiederherstellung: Alle Daten aus dem Export wiederherstellen",
                 updateAndComplete: "Vollständige Wiederherstellung",
                 startImport: "Import starten",
-                importingData: "Daten werden importiert...",
+                importingData: "Daten worden importiert...",
                 dataExport: "Datenexport",
                 exportDescription: "Exportieren Sie Daten in eine Datei für Backup oder Teilen.",
                 exportOptions: "Exportoptionen",
@@ -181,15 +182,27 @@ class DataManager extends BaseModule {
             }
         };
         
-        // Gebruik de globale database instantie
-        // BELANGRIJK: Zorg ervoor dat dit naar window.db verwijst
-        if (window.db) {
-            this.db = window.db;
-        } else {
-            console.error('Database niet gevonden in window object');
-            // Fallback: probeer het te vinden
-            this.db = window.hondenDatabase || window.database || db;
+        // Nu pas de taal instellen
+        this.currentLang = 'nl'; // Standaardwaarde
+        try {
+            // Probeer taal uit localStorage te halen, maar vang fouten op
+            const savedLang = localStorage.getItem('appLanguage');
+            if (savedLang && this.translations[savedLang]) {
+                this.currentLang = savedLang;
+            }
+        } catch (error) {
+            // localStorage is niet beschikbaar (bijv. door Tracking Prevention)
+            // Geen console.warn nodig - dit is verwacht gedrag
+            // Gebruik de standaardwaarde 'nl'
         }
+        
+        // Database wordt later ingesteld via setDb() methode
+        this.db = null;
+    }
+    
+    // Nieuwe methode om database in te stellen
+    setDb(dbInstance) {
+        this.db = dbInstance;
     }
     
     t(key) {
@@ -197,10 +210,23 @@ class DataManager extends BaseModule {
     }
     
     updateLanguage(lang) {
-        this.currentLang = lang;
-        if (document.getElementById('dataManagementModal')) {
-            this.loadDatabaseStats();
-            this.updateModalTexts();
+        try {
+            if (lang && this.translations[lang]) {
+                this.currentLang = lang;
+                // Probeer op te slaan, maar negeer fouten
+                try {
+                    localStorage.setItem('appLanguage', lang);
+                } catch (storageError) {
+                    // Negeer - dit is oké in Tracking Prevention modus
+                }
+                
+                if (document.getElementById('dataManagementModal')) {
+                    this.loadDatabaseStats();
+                    this.updateModalTexts();
+                }
+            }
+        } catch (error) {
+            // Negeer fouten
         }
     }
     
