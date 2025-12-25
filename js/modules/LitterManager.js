@@ -9,6 +9,7 @@ class LitterManager {
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';
         this.lastBreeds = JSON.parse(localStorage.getItem('lastBreeds') || '[]');
         this.allDogs = []; // Voor autocomplete van ouders
+        this.currentLitterDogs = []; // Houdt de ingevoerde honden van het huidige nest bij
         this.translations = {
             nl: {
                 // Modal titels
@@ -77,7 +78,7 @@ class LitterManager {
                 noFileChosen: "Geen bestand gekozen",
                 remarks: "Opmerkingen",
                 requiredFields: "Velden met * zijn verplicht",
-                saveDog: "Nest Opslaan",
+                saveDog: "Hond Opslaan", // Gewijzigd van "Nest Opslaan"
                 cancel: "Annuleren",
                 delete: "Verwijderen",
                 choose: "Kies...",
@@ -100,16 +101,18 @@ class LitterManager {
                 // Alerts
                 adminOnly: "Alleen administrators mogen nesten toevoegen/bewerken",
                 fieldsRequired: "Naam, stamboomnummer en ras zijn verplichte velden",
-                savingDog: "Nest opslaan...",
-                dogAdded: "Nest succesvol toegevoegd!",
-                dogUpdated: "Nest succesvol bijgewerkt!",
-                dogDeleted: "Nest succesvol verwijderen!",
-                addFailed: "Fout bij toevoegen nest: ",
-                updateFailed: "Fout bij bijwerken nest: ",
-                deleteFailed: "Fout bij verwijderen nest: ",
-                confirmDelete: "Weet u zeker dat u dit nest wilt verwijderen?",
+                savingDog: "Hond opslaan...", // Gewijzigd van "Nest opslaan..."
+                dogAdded: "Hond succesvol toegevoegd!", // Gewijzigd van "Nest succesvol toegevoegd!"
+                dogUpdated: "Hond succesvol bijgewerkt!", // Gewijzigd van "Nest succesvol bijgewerkt!"
+                dogDeleted: "Hond succesvol verwijderen!", // Gewijzigd van "Nest succesvol verwijderen!"
+                addFailed: "Fout bij toevoegen hond: ", // Gewijzigd van "Fout bij toevoegen nest: "
+                updateFailed: "Fout bij bijwerken hond: ", // Gewijzigd van "Fout bij bijwerken nest: "
+                deleteFailed: "Fout bij verwijderen hond: ", // Gewijzigd van "Fout bij verwijderen nest: "
+                confirmDelete: "Weet u zeker dat u deze hond wilt verwijderen?", // Gewijzigd van "Weet u zeker dat u dit nest wilt verwijderen?"
                 photoAdded: "Foto toegevoegd",
                 photoError: "Fout bij uploaden foto: ",
+                addedDogs: "Toegevoegde honden:",
+                noDogsAdded: "Nog geen honden toegevoegd",
 
                 // Container titels
                 parentDetails: "Ouderdetails",
@@ -183,7 +186,7 @@ class LitterManager {
                 noFileChosen: "No file chosen",
                 remarks: "Remarks",
                 requiredFields: "Fields with * are required",
-                saveDog: "Save Litter",
+                saveDog: "Save Dog", // Gewijzigd van "Save Litter"
                 cancel: "Cancel",
                 delete: "Delete",
                 choose: "Choose...",
@@ -206,16 +209,18 @@ class LitterManager {
                 // Alerts
                 adminOnly: "Only administrators can add/edit litters",
                 fieldsRequired: "Name, pedigree number and breed are required fields",
-                savingDog: "Saving litter...",
-                dogAdded: "Litter successfully added!",
-                dogUpdated: "Litter successfully updated!",
-                dogDeleted: "Litter successfully deleted!",
-                addFailed: "Error adding litter: ",
-                updateFailed: "Error updating litter: ",
-                deleteFailed: "Error deleting litter: ",
-                confirmDelete: "Are you sure you want to delete this litter?",
+                savingDog: "Saving dog...", // Gewijzigd van "Saving litter..."
+                dogAdded: "Dog successfully added!", // Gewijzigd van "Litter successfully added!"
+                dogUpdated: "Dog successfully updated!", // Gewijzigd van "Litter successfully updated!"
+                dogDeleted: "Dog successfully deleted!", // Gewijzigd van "Litter successfully deleted!"
+                addFailed: "Error adding dog: ", // Gewijzigd van "Error adding litter: "
+                updateFailed: "Error updating dog: ", // Gewijzigd van "Error updating litter: "
+                deleteFailed: "Error deleting dog: ", // Gewijzigd van "Error deleting litter: "
+                confirmDelete: "Are you sure you want to delete this dog?", // Gewijzigd van "Are you sure you want to delete this litter?"
                 photoAdded: "Photo added",
                 photoError: "Error uploading photo: ",
+                addedDogs: "Added dogs:",
+                noDogsAdded: "No dogs added yet",
 
                 // Container titles
                 parentDetails: "Parent Details",
@@ -289,7 +294,7 @@ class LitterManager {
                 noFileChosen: "Keine Datei gewählt",
                 remarks: "Bemerkungen",
                 requiredFields: "Felder mit * zijn Pflichtfelder",
-                saveDog: "Wurf speichern",
+                saveDog: "Hund speichern", // Gewijzigd van "Wurf speichern"
                 cancel: "Abbrechen",
                 delete: "Löschen",
                 choose: "Wählen...",
@@ -312,16 +317,18 @@ class LitterManager {
                 // Meldungen
                 adminOnly: "Nur Administratoren können Würfe hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer en Rasse zijn Pflichtfelder",
-                savingDog: "Wurf wordt gespeichert...",
-                dogAdded: "Wurf erfolgreich hinzugefügt!",
-                dogUpdated: "Wurf erfolgreich aktualisiert!",
-                dogDeleted: "Wurf erfolgreich gelöscht!",
-                addFailed: "Fehler beim Hinzufügen des Wurfes: ",
-                updateFailed: "Fehler beim Aktualisieren des Wurfes: ",
-                deleteFailed: "Fehler beim Löschen des Wurfes: ",
-                confirmDelete: "Sind Sie sicher, dass Sie diesen Wurf löschen möchten?",
+                savingDog: "Hund wordt gespeichert...", // Gewijzigd van "Wurf wordt gespeichert..."
+                dogAdded: "Hund erfolgreich hinzugefügt!", // Gewijzigd van "Wurf erfolgreich hinzugefügt!"
+                dogUpdated: "Hund erfolgreich aktualisiert!", // Gewijzigd van "Wurf erfolgreich aktualisiert!"
+                dogDeleted: "Hund erfolgreich gelöscht!", // Gewijzigd van "Wurf erfolgreich gelöscht!"
+                addFailed: "Fehler beim Hinzufügen des Hundes: ", // Gewijzigd van "Fehler beim Hinzufügen des Wurfes: "
+                updateFailed: "Fehler beim Aktualisieren des Hundes: ", // Gewijzigd van "Fehler beim Aktualisieren des Wurfes: "
+                deleteFailed: "Fehler beim Löschen des Hundes: ", // Gewijzigd van "Fehler beim Löschen des Wurfes: "
+                confirmDelete: "Sind Sie sicher, dass Sie diesen Hund löschen möchten?", // Gewijzigd van "Sind Sie sicher, dass Sie diesen Wurf löschen möchten?"
                 photoAdded: "Foto hinzugefügt",
                 photoError: "Fehler beim Hochladen des Fotos: ",
+                addedDogs: "Hinzugefügte Hunde:",
+                noDogsAdded: "Noch keine Hunde hinzugefügt",
 
                 // Container Titel
                 parentDetails: "Elterndetails",
@@ -514,6 +521,20 @@ class LitterManager {
                         font-size: 0.9em;
                         margin-bottom: 8px;
                     }
+                    
+                    /* Added dogs container styling voor mobiel */
+                    #added-dogs-container {
+                        padding: 10px !important;
+                    }
+                    
+                    .dog-item {
+                        font-size: 0.9em;
+                        padding: 8px 0;
+                    }
+                    
+                    .dog-item span {
+                        margin-right: 10px;
+                    }
                 }
                 
                 /* Desktop styling */
@@ -542,6 +563,20 @@ class LitterManager {
                     
                     #ouders-container .row {
                         align-items: center;
+                    }
+                    
+                    /* Added dogs container styling voor desktop */
+                    #added-dogs-container {
+                        padding: 15px !important;
+                    }
+                    
+                    .dog-item {
+                        font-size: 1em;
+                        padding: 10px 0;
+                    }
+                    
+                    .dog-item span {
+                        margin-right: 15px;
                     }
                 }
                 
@@ -697,6 +732,46 @@ class LitterManager {
                     color: #6c757d;
                     opacity: 0.7;
                 }
+                
+                /* Added dogs container */
+                #added-dogs-container {
+                    background-color: #f8f9fa;
+                    border: 1px solid #e0e0e0;
+                    border-radius: 8px;
+                    margin-bottom: 20px;
+                }
+                
+                .added-dogs-title {
+                    font-weight: 600;
+                    color: #495057;
+                    margin-bottom: 10px;
+                    font-size: 1em;
+                }
+                
+                .dog-item {
+                    border-bottom: 1px solid #e9ecef;
+                    padding: 12px 0;
+                }
+                
+                .dog-item:last-child {
+                    border-bottom: none;
+                }
+                
+                .dog-item span {
+                    font-weight: 500;
+                }
+                
+                .dog-item small {
+                    color: #6c757d;
+                    font-size: 0.875em;
+                }
+                
+                #no-dogs-message {
+                    color: #6c757d;
+                    font-style: italic;
+                    text-align: center;
+                    padding: 10px 0;
+                }
             </style>
         `;
     }
@@ -736,6 +811,16 @@ class LitterManager {
             <form id="litterForm">
                 <input type="hidden" id="fatherId" value="${data.vaderId || ''}">
                 <input type="hidden" id="motherId" value="${data.moederId || ''}">
+                
+                <!-- CONTAINER 0: TOEGEVOEGDE HONDEN -->
+                <div class="form-container" id="added-dogs-container">
+                    <div class="container-title">
+                        <i class="bi bi-list-check"></i> ${t('addedDogs')}
+                    </div>
+                    <div id="added-dogs-list">
+                        <div id="no-dogs-message">${t('noDogsAdded')}</div>
+                    </div>
+                </div>
                 
                 <!-- CONTAINER 1: OUDERDETAILS -->
                 <div class="form-container" id="ouders-container">
@@ -1057,6 +1142,10 @@ class LitterManager {
             return;
         }
         
+        // Reset de lijst met ingevoerde honden wanneer modal wordt geopend
+        this.currentLitterDogs = [];
+        this.updateAddedDogsList();
+        
         // Alleen verder gaan als gebruiker admin is
         // Laad honden voor autocomplete
         this.loadAllDogs();
@@ -1128,6 +1217,105 @@ class LitterManager {
         this.setupDateFields();
         
         console.log('LitterManager: Alle events ingesteld');
+    }
+    
+    /**
+     * Update de lijst met toegevoegde honden in de UI
+     */
+    updateAddedDogsList() {
+        const addedDogsList = document.getElementById('added-dogs-list');
+        const noDogsMessage = document.getElementById('no-dogs-message');
+        
+        if (!addedDogsList) return;
+        
+        if (this.currentLitterDogs.length === 0) {
+            if (!noDogsMessage) {
+                addedDogsList.innerHTML = `<div id="no-dogs-message">${this.t('noDogsAdded')}</div>`;
+            }
+            return;
+        }
+        
+        // Verwijder het "geen honden" bericht als het er is
+        if (noDogsMessage) {
+            noDogsMessage.remove();
+        }
+        
+        let html = '';
+        this.currentLitterDogs.forEach((dog, index) => {
+            const genderText = dog.geslacht === 'reuen' ? this.t('male') : 
+                              dog.geslacht === 'teven' ? this.t('female') : '';
+            
+            html += `
+                <div class="dog-item">
+                    <span><strong>${dog.naam}</strong></span>
+                    <small>${dog.stamboomnr}</small>
+                    <small>${genderText}</small>
+                </div>
+            `;
+        });
+        
+        addedDogsList.innerHTML = html;
+    }
+    
+    /**
+     * Reset alleen de nestdetails velden (niet de ouderdetails)
+     */
+    resetLitterDetails() {
+        // Reset naam, stamboomnummer en geslacht
+        const nameInput = document.getElementById('name');
+        const pedigreeInput = document.getElementById('pedigreeNumber');
+        const genderSelect = document.getElementById('gender');
+        
+        if (nameInput) nameInput.value = '';
+        if (pedigreeInput) pedigreeInput.value = '';
+        if (genderSelect) genderSelect.value = '';
+        
+        // Reset overlijdensdatum
+        const deathDateInput = document.getElementById('deathDate');
+        if (deathDateInput) {
+            deathDateInput.value = '';
+            deathDateInput.type = 'date';
+        }
+        
+        // Reset gezondheid velden
+        const healthFields = [
+            'hipDysplasia',
+            'elbowDysplasia',
+            'patellaLuxation',
+            'eyes',
+            'dandyWalker',
+            'thyroid'
+        ];
+        
+        healthFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) field.value = '';
+        });
+        
+        // Reset uitleg velden en verberg ze
+        const eyesExplanationContainer = document.getElementById('eyesExplanationContainer');
+        const eyesExplanation = document.getElementById('eyesExplanation');
+        const thyroidExplanationContainer = document.getElementById('thyroidExplanationContainer');
+        const thyroidExplanation = document.getElementById('thyroidExplanation');
+        
+        if (eyesExplanationContainer) eyesExplanationContainer.style.display = 'none';
+        if (eyesExplanation) eyesExplanation.value = '';
+        if (thyroidExplanationContainer) thyroidExplanationContainer.style.display = 'none';
+        if (thyroidExplanation) thyroidExplanation.value = '';
+        
+        // Reset land/postcode
+        const countryInput = document.getElementById('country');
+        const zipCodeInput = document.getElementById('zipCode');
+        if (countryInput) countryInput.value = '';
+        if (zipCodeInput) zipCodeInput.value = '';
+        
+        // Reset foto
+        const photoInput = document.getElementById('photo');
+        if (photoInput) photoInput.value = '';
+        
+        // Reset opmerkingen
+        const remarksTextarea = document.getElementById('remarks');
+        if (remarksTextarea) remarksTextarea.value = '';
     }
     
     /**
@@ -1494,11 +1682,21 @@ class LitterManager {
                 await this.uploadPhoto(dogData.stamboomnr, photoInput.files[0]);
             }
             
+            // Voeg toe aan de lijst met huidige nest honden
+            this.currentLitterDogs.push({
+                naam: dogData.naam,
+                stamboomnr: dogData.stamboomnr,
+                geslacht: dogData.geslacht
+            });
+            
+            // Update de UI lijst
+            this.updateAddedDogsList();
+            
             this.hideProgress();
             this.showSuccess(this.t('dogAdded'));
             
-            // Reset formulier
-            this.resetForm();
+            // Reset alleen de nestdetails velden (niet de ouderdetails)
+            this.resetLitterDetails();
             
         } catch (error) {
             console.error('LitterManager: Fout bij opslaan hond:', error);
@@ -1535,6 +1733,10 @@ class LitterManager {
             deathDateInput.type = 'date';
             deathDateInput.placeholder = 'DD-MM-JJJJ';
         }
+        
+        // Reset de lijst met ingevoerde honden
+        this.currentLitterDogs = [];
+        this.updateAddedDogsList();
     }
     
     async uploadPhoto(pedigreeNumber, file) {
