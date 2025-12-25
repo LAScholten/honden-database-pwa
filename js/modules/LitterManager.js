@@ -250,7 +250,7 @@ class LitterManager {
                 elbow1: "1",
                 elbow2: "2",
                 elbow3: "3",
-                elbowNB: "NB (Niet bekannt)",
+                elbowNB: "NB (Niet bekend)",
                 patellaLuxation: "Patella Luxation",
                 patellaGrades: "Grad wählen...",
                 patella0: "0",
@@ -301,8 +301,8 @@ class LitterManager {
                 
                 // Meldungen
                 adminOnly: "Nur Administratoren können Würfe hinzufügen/bearbeiten",
-                fieldsRequired: "Name, Stammbaum-Nummer und Rasse zijn Pflichtfelder",
-                savingDog: "Wurf wird gespeichert...",
+                fieldsRequired: "Name, Stammbaum-Nummer en Rasse zijn Pflichtfelder",
+                savingDog: "Wurf wordt gespeichert...",
                 dogAdded: "Wurf erfolgreich hinzugefügt!",
                 dogUpdated: "Wurf erfolgreich aktualisiert!",
                 dogDeleted: "Wurf erfolgreich gelöscht!",
@@ -461,6 +461,33 @@ class LitterManager {
                         font-size: 0.75em !important;
                         padding: 3px 6px !important;
                     }
+                    
+                    /* Geboortedatum input styling voor mobiel */
+                    .date-input-wrapper {
+                        position: relative;
+                    }
+                    
+                    .date-input-wrapper input[type="text"] {
+                        /* Verberg kalender icon op mobiel */
+                        -webkit-appearance: none;
+                        -moz-appearance: none;
+                        appearance: none;
+                    }
+                    
+                    /* Verwijder de kalender picker voor mobiel */
+                    .date-input-wrapper input[type="date"]::-webkit-calendar-picker-indicator,
+                    .date-input-wrapper input[type="date"]::-webkit-inner-spin-button,
+                    .date-input-wrapper input[type="date"]::-webkit-clear-button {
+                        display: none;
+                        -webkit-appearance: none;
+                        appearance: none;
+                    }
+                    
+                    .date-input-wrapper input[type="date"] {
+                        -webkit-appearance: textfield;
+                        -moz-appearance: textfield;
+                        appearance: textfield;
+                    }
                 }
                 
                 .autocomplete-dropdown {
@@ -565,6 +592,36 @@ class LitterManager {
                 .recent-breeds-buttons::-webkit-scrollbar-thumb:hover {
                     background: #a8a8a8;
                 }
+                
+                /* Datum input styling - gebruik text input voor alle apparaten */
+                .date-input-wrapper {
+                    position: relative;
+                }
+                
+                .date-input-wrapper .form-control {
+                    padding-right: 12px;
+                }
+                
+                /* Verberg kalender picker voor alle apparaten */
+                input[type="date"]::-webkit-calendar-picker-indicator,
+                input[type="date"]::-webkit-inner-spin-button,
+                input[type="date"]::-webkit-clear-button {
+                    display: none;
+                    -webkit-appearance: none;
+                    appearance: none;
+                }
+                
+                input[type="date"] {
+                    -webkit-appearance: textfield;
+                    -moz-appearance: textfield;
+                    appearance: textfield;
+                }
+                
+                /* Placeholder styling voor datum velden */
+                input[type="date"]::placeholder {
+                    color: #6c757d;
+                    opacity: 0.7;
+                }
             </style>
         `;
     }
@@ -605,58 +662,7 @@ class LitterManager {
                 <input type="hidden" id="fatherId" value="${data.vaderId || ''}">
                 <input type="hidden" id="motherId" value="${data.moederId || ''}">
                 
-                <!-- Rij 1: Naam en Kennelnaam -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="name" class="form-label">${t('nameRequired')}</label>
-                            <input type="text" class="form-control" id="name" value="${data.naam || ''}" required>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="kennelName" class="form-label">${t('kennelName')}</label>
-                            <input type="text" class="form-control" id="kennelName" value="${data.kennelnaam || ''}">
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Rij 2: Stamboomnummer en Geslacht -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="pedigreeNumber" class="form-label">${t('pedigreeNumber')}</label>
-                            <input type="text" class="form-control" id="pedigreeNumber" value="${data.stamboomnr || ''}" required>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="gender" class="form-label">${t('gender')}</label>
-                            <select class="form-select" id="gender">
-                                <option value="">${t('chooseGender')}</option>
-                                <option value="reuen" ${data.geslacht === 'reuen' ? 'selected' : ''}>${t('male')}</option>
-                                <option value="teven" ${data.geslacht === 'teven' ? 'selected' : ''}>${t('female')}</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Rij 3: Ras met recente rassen op 1 regel -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="mb-3">
-                            <label for="breed" class="form-label">${t('breedRequired')}</label>
-                            <div class="breed-container">
-                                <div class="breed-input-container">
-                                    <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
-                                </div>
-                                ${recentBreedsHTML}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Rij 4: Vader en Moeder (naast elkaar) -->
+                <!-- RIJ 1: OUDERS - Vader en Moeder -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3 parent-input-wrapper">
@@ -680,23 +686,88 @@ class LitterManager {
                     </div>
                 </div>
                 
-                <!-- Rij 5: Geboortedatum en Overlijdensdatum -->
+                <!-- RIJ 2: Kennelnaam -->
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-12">
                         <div class="mb-3">
-                            <label for="birthDate" class="form-label">${t('birthDate')}</label>
-                            <input type="date" class="form-control" id="birthDate" value="${data.geboortedatum || ''}">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="deathDate" class="form-label">${t('deathDate')}</label>
-                            <input type="date" class="form-control" id="deathDate" value="${data.overlijdensdatum || ''}">
+                            <label for="kennelName" class="form-label">${t('kennelName')}</label>
+                            <input type="text" class="form-control" id="kennelName" value="${data.kennelnaam || ''}">
                         </div>
                     </div>
                 </div>
                 
-                <!-- Rij 6: Heupdysplasie, Elleboogdysplasie, Patella Luxatie -->
+                <!-- RIJ 3: Geboortedatum -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="mb-3 date-input-wrapper">
+                            <label for="birthDate" class="form-label">${t('birthDate')}</label>
+                            <input type="date" class="form-control" id="birthDate" 
+                                   value="${data.geboortedatum || ''}"
+                                   placeholder="DD-MM-JJJJ"
+                                   onfocus="this.type='text'"
+                                   onblur="this.type='date'">
+                            <small class="form-text text-muted">Voer datum in als DD-MM-JJJJ (bijv. 15-01-2023)</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- RIJ 4: Naam en Stamboomnummer -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">${t('nameRequired')}</label>
+                            <input type="text" class="form-control" id="name" value="${data.naam || ''}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="pedigreeNumber" class="form-label">${t('pedigreeNumber')}</label>
+                            <input type="text" class="form-control" id="pedigreeNumber" value="${data.stamboomnr || ''}" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- RIJ 5: Geslacht en Ras met recente rassen -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="gender" class="form-label">${t('gender')}</label>
+                            <select class="form-select" id="gender">
+                                <option value="">${t('chooseGender')}</option>
+                                <option value="reuen" ${data.geslacht === 'reuen' ? 'selected' : ''}>${t('male')}</option>
+                                <option value="teven" ${data.geslacht === 'teven' ? 'selected' : ''}>${t('female')}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="mb-3">
+                            <label for="breed" class="form-label">${t('breedRequired')}</label>
+                            <div class="breed-container">
+                                <div class="breed-input-container">
+                                    <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
+                                </div>
+                                ${recentBreedsHTML}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- RIJ 6: Overlijdensdatum -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="mb-3 date-input-wrapper">
+                            <label for="deathDate" class="form-label">${t('deathDate')}</label>
+                            <input type="date" class="form-control" id="deathDate" 
+                                   value="${data.overlijdensdatum || ''}"
+                                   placeholder="DD-MM-JJJJ"
+                                   onfocus="this.type='text'"
+                                   onblur="this.type='date'">
+                            <small class="form-text text-muted">Voer datum in als DD-MM-JJJJ (bijv. 15-01-2023)</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- RIJ 7: Heupdysplasie, Elleboogdysplasie, Patella Luxatie -->
                 <div class="row">
                     <div class="col-md-4">
                         <div class="mb-3">
@@ -738,7 +809,7 @@ class LitterManager {
                     </div>
                 </div>
                 
-                <!-- Rij 7: Ogen en Dandy Walker -->
+                <!-- RIJ 8: Ogen en Dandy Walker -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -769,7 +840,7 @@ class LitterManager {
                     </div>
                 </div>
                 
-                <!-- Rij 8: Schildklier en Land/Postcode -->
+                <!-- RIJ 9: Schildklier en Land/Postcode -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -962,7 +1033,100 @@ class LitterManager {
         // Setup autocomplete voor ouders - zoals in DogManager
         this.setupParentAutocomplete();
         
+        // Setup datum velden voor tekst invoer
+        this.setupDateFields();
+        
         console.log('LitterManager: Alle events ingesteld');
+    }
+    
+    /**
+     * Setup datum velden om als tekst veld te werken op mobiel
+     */
+    setupDateFields() {
+        const birthDateInput = document.getElementById('birthDate');
+        const deathDateInput = document.getElementById('deathDate');
+        
+        if (birthDateInput) {
+            // Verander type naar text wanneer gebruiker focust
+            birthDateInput.addEventListener('focus', function() {
+                this.type = 'text';
+                this.placeholder = 'DD-MM-JJJJ';
+            });
+            
+            // Valideer en converteer naar juiste formaat wanneer gebruiker blurt
+            birthDateInput.addEventListener('blur', function() {
+                const value = this.value.trim();
+                if (value) {
+                    // Converteer DD-MM-JJJJ naar YYYY-MM-DD voor date input
+                    const parts = value.split('-');
+                    if (parts.length === 3) {
+                        const day = parts[0].padStart(2, '0');
+                        const month = parts[1].padStart(2, '0');
+                        const year = parts[2];
+                        if (day.length === 2 && month.length === 2 && year.length === 4) {
+                            this.value = `${year}-${month}-${day}`;
+                        }
+                    }
+                }
+                this.type = 'date';
+            });
+            
+            // Input event voor real-time formatteer hulp
+            birthDateInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/[^0-9-]/g, '');
+                
+                // Auto-format naar DD-MM-JJJJ
+                if (value.length > 2 && value.length <= 4 && !value.includes('-')) {
+                    value = value.substring(0, 2) + '-' + value.substring(2);
+                } else if (value.length > 5 && value.length <= 8 && value.split('-').length === 2) {
+                    const parts = value.split('-');
+                    if (parts[1].length > 2) {
+                        value = parts[0] + '-' + parts[1].substring(0, 2) + '-' + parts[1].substring(2);
+                    }
+                }
+                
+                e.target.value = value;
+            });
+        }
+        
+        if (deathDateInput) {
+            // Zelfde logica voor deathDate
+            deathDateInput.addEventListener('focus', function() {
+                this.type = 'text';
+                this.placeholder = 'DD-MM-JJJJ';
+            });
+            
+            deathDateInput.addEventListener('blur', function() {
+                const value = this.value.trim();
+                if (value) {
+                    const parts = value.split('-');
+                    if (parts.length === 3) {
+                        const day = parts[0].padStart(2, '0');
+                        const month = parts[1].padStart(2, '0');
+                        const year = parts[2];
+                        if (day.length === 2 && month.length === 2 && year.length === 4) {
+                            this.value = `${year}-${month}-${day}`;
+                        }
+                    }
+                }
+                this.type = 'date';
+            });
+            
+            deathDateInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/[^0-9-]/g, '');
+                
+                if (value.length > 2 && value.length <= 4 && !value.includes('-')) {
+                    value = value.substring(0, 2) + '-' + value.substring(2);
+                } else if (value.length > 5 && value.length <= 8 && value.split('-').length === 2) {
+                    const parts = value.split('-');
+                    if (parts[1].length > 2) {
+                        value = parts[0] + '-' + parts[1].substring(0, 2) + '-' + parts[1].substring(2);
+                    }
+                }
+                
+                e.target.value = value;
+            });
+        }
     }
     
     addToLastBreeds(breed) {
@@ -1268,6 +1432,18 @@ class LitterManager {
         dropdowns.forEach(dropdown => {
             dropdown.style.display = 'none';
         });
+        
+        // Reset datum velden
+        const birthDateInput = document.getElementById('birthDate');
+        const deathDateInput = document.getElementById('deathDate');
+        if (birthDateInput) {
+            birthDateInput.type = 'date';
+            birthDateInput.placeholder = 'DD-MM-JJJJ';
+        }
+        if (deathDateInput) {
+            deathDateInput.type = 'date';
+            deathDateInput.placeholder = 'DD-MM-JJJJ';
+        }
     }
     
     async uploadPhoto(pedigreeNumber, file) {
