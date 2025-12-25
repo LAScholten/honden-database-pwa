@@ -87,6 +87,10 @@ class LitterManager {
                 accessDenied: "Toegang Geweigerd",
                 back: "Terug",
                 
+                // Validatie
+                dateFormatError: "Datum moet in DD-MM-JJJJ formaat zijn",
+                deathBeforeBirthError: "Overlijdensdatum kan niet voor geboortedatum zijn",
+                
                 // Toegangscontrole popup teksten
                 insufficientPermissions: "Onvoldoende rechten",
                 insufficientPermissionsText: "U heeft geen toestemming om nesten te bewerken. Alleen administrators kunnen deze functie gebruiken.",
@@ -195,6 +199,10 @@ class LitterManager {
                 accessDenied: "Access Denied",
                 back: "Back",
                 
+                // Validation
+                dateFormatError: "Date must be in DD-MM-YYYY format",
+                deathBeforeBirthError: "Death date cannot be before birth date",
+                
                 // Access control popup texts
                 insufficientPermissions: "Insufficient permissions",
                 insufficientPermissionsText: "You do not have permission to edit litters. Only administrators can use this function.",
@@ -265,7 +273,7 @@ class LitterManager {
                 elbow1: "1",
                 elbow2: "2",
                 elbow3: "3",
-                elbowNB: "NB (Niet bekend)",
+                elbowNB: "NB (Niet bekannt)",
                 patellaLuxation: "Patella Luxation",
                 patellaGrades: "Grad wählen...",
                 patella0: "0",
@@ -303,6 +311,10 @@ class LitterManager {
                 accessDenied: "Zugriff Verweigert",
                 back: "Zurück",
                 
+                // Validierung
+                dateFormatError: "Datum muss im Format TT-MM-JJJJ sein",
+                deathBeforeBirthError: "Sterbedatum kann nicht vor dem Geburtsdatum liegen",
+                
                 // Zugangskontrolle Popup Texte
                 insufficientPermissions: "Unzureichende Berechtigungen",
                 insufficientPermissionsText: "Sie haben keine Berechtigung, Würfe zu bearbeiten. Nur Administratoren können diese Funktion nutzen.",
@@ -315,9 +327,9 @@ class LitterManager {
                 importExport: "Daten importieren/exportieren",
                 
                 // Meldungen
-                adminOnly: "Nur Administratoren kunnen Würfe hinzufügen/bearbeiten",
+                adminOnly: "Nur Administratoren können Würfe hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer en Rasse zijn Pflichtfelder",
-                savingDog: "Hund wordt gespeichert...",
+                savingDog: "Hund wird gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
                 dogUpdated: "Hund erfolgreich aktualisiert!",
                 dogDeleted: "Hund erfolgreich gelöscht!",
@@ -703,7 +715,7 @@ class LitterManager {
                     background: #a8a8a8;
                 }
                 
-                /* Datum input styling - gebruik text input voor alle apparaten */
+                /* Datum input styling */
                 .date-input-wrapper {
                     position: relative;
                 }
@@ -772,6 +784,17 @@ class LitterManager {
                     text-align: center;
                     padding: 10px 0;
                 }
+                
+                /* Validatie styling */
+                .date-error {
+                    border-color: #dc3545 !important;
+                }
+                
+                .error-message {
+                    color: #dc3545;
+                    font-size: 0.875em;
+                    margin-top: 0.25rem;
+                }
             </style>
         `;
     }
@@ -785,6 +808,25 @@ class LitterManager {
         
         const t = this.t.bind(this);
         const data = litterData || {};
+        
+        // Formatteer datums voor weergave (YYYY-MM-DD naar DD-MM-YYYY)
+        const formatDateForDisplay = (dateString) => {
+            if (!dateString) return '';
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return dateString;
+                
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`; // YYYY-MM-DD voor date input
+            } catch (e) {
+                return dateString;
+            }
+        };
+        
+        const birthDateValue = formatDateForDisplay(data.geboortedatum);
+        const deathDateValue = formatDateForDisplay(data.overlijdensdatum);
         
         // Genereer recente rassen knoppen
         let recentBreedsHTML = '';
@@ -879,10 +921,10 @@ class LitterManager {
                             <div class="mb-3 date-input-wrapper">
                                 <label for="birthDate" class="form-label">${t('birthDate')}</label>
                                 <input type="date" class="form-control" id="birthDate" 
-                                       value="${data.geboortedatum || ''}"
+                                       value="${birthDateValue}"
                                        placeholder="DD-MM-JJJJ"
-                                       onfocus="this.type='text'"
-                                       onblur="this.type='date'">
+                                       data-original-value="${birthDateValue}">
+                                <div id="birthDateError" class="error-message" style="display: none;"></div>
                                 <small class="form-text text-muted">Voer datum in als DD-MM-JJJJ (bijv. 15-01-2023)</small>
                             </div>
                         </div>
@@ -1036,10 +1078,10 @@ class LitterManager {
                             <div class="mb-3 date-input-wrapper">
                                 <label for="deathDate" class="form-label">${t('deathDate')}</label>
                                 <input type="date" class="form-control" id="deathDate" 
-                                       value="${data.overlijdensdatum || ''}"
+                                       value="${deathDateValue}"
                                        placeholder="DD-MM-JJJJ"
-                                       onfocus="this.type='text'"
-                                       onblur="this.type='date'">
+                                       data-original-value="${deathDateValue}">
+                                <div id="deathDateError" class="error-message" style="display: none;"></div>
                                 <small class="form-text text-muted">Voer datum in als DD-MM-JJJJ (bijv. 15-01-2023)</small>
                             </div>
                         </div>
@@ -1110,6 +1152,17 @@ class LitterManager {
                 
                 .parent-input-wrapper {
                     position: relative;
+                }
+                
+                /* Validatie styling */
+                .date-error {
+                    border-color: #dc3545 !important;
+                }
+                
+                .error-message {
+                    color: #dc3545;
+                    font-size: 0.875em;
+                    margin-top: 0.25rem;
                 }
             </style>
         `;
@@ -1209,8 +1262,11 @@ class LitterManager {
         // Setup autocomplete voor ouders - zoals in DogManager
         this.setupParentAutocomplete();
         
-        // Setup datum velden voor tekst invoer
+        // Setup datum velden voor correcte verwerking
         this.setupDateFields();
+        
+        // Setup datum validatie
+        this.setupDateValidation();
         
         console.log('LitterManager: Alle events ingesteld');
     }
@@ -1251,6 +1307,133 @@ class LitterManager {
         });
         
         addedDogsList.innerHTML = html;
+    }
+    
+    /**
+     * Setup datum velden voor correcte verwerking
+     */
+    setupDateFields() {
+        const birthDateInput = document.getElementById('birthDate');
+        const deathDateInput = document.getElementById('deathDate');
+        
+        // Vereenvoudigde datum velden - gebruik gewoon date input
+        if (birthDateInput) {
+            // Reset type naar date voor correcte browser support
+            birthDateInput.type = 'date';
+            
+            // Voor weergave: show placeholder when empty
+            birthDateInput.addEventListener('focus', function() {
+                if (!this.value) {
+                    this.placeholder = 'dd-mm-jjjj';
+                }
+            });
+            
+            birthDateInput.addEventListener('blur', function() {
+                this.placeholder = '';
+            });
+        }
+        
+        if (deathDateInput) {
+            // Reset type naar date voor correcte browser support
+            deathDateInput.type = 'date';
+            
+            deathDateInput.addEventListener('focus', function() {
+                if (!this.value) {
+                    this.placeholder = 'dd-mm-jjjj';
+                }
+            });
+            
+            deathDateInput.addEventListener('blur', function() {
+                this.placeholder = '';
+            });
+        }
+    }
+    
+    /**
+     * Setup datum validatie
+     */
+    setupDateValidation() {
+        const birthDateInput = document.getElementById('birthDate');
+        const deathDateInput = document.getElementById('deathDate');
+        
+        if (birthDateInput) {
+            birthDateInput.addEventListener('blur', () => {
+                this.validateDates();
+            });
+        }
+        
+        if (deathDateInput) {
+            deathDateInput.addEventListener('blur', () => {
+                this.validateDates();
+            });
+        }
+    }
+    
+    /**
+     * Valideer datums
+     */
+    validateDates() {
+        const t = this.t.bind(this);
+        const birthDateInput = document.getElementById('birthDate');
+        const deathDateInput = document.getElementById('deathDate');
+        const birthDateError = document.getElementById('birthDateError');
+        const deathDateError = document.getElementById('deathDateError');
+        
+        if (!birthDateInput || !deathDateInput) return;
+        
+        let isValid = true;
+        
+        // Reset error styling
+        birthDateInput.classList.remove('date-error');
+        deathDateInput.classList.remove('date-error');
+        if (birthDateError) birthDateError.style.display = 'none';
+        if (deathDateError) deathDateError.style.display = 'none';
+        
+        const birthValue = birthDateInput.value;
+        const deathValue = deathDateInput.value;
+        
+        // Valideer geboortedatum formaat (alleen als ingevuld)
+        if (birthValue) {
+            const birthDate = new Date(birthValue);
+            if (isNaN(birthDate.getTime())) {
+                birthDateInput.classList.add('date-error');
+                if (birthDateError) {
+                    birthDateError.textContent = t('dateFormatError');
+                    birthDateError.style.display = 'block';
+                }
+                isValid = false;
+            }
+        }
+        
+        // Valideer overlijdensdatum formaat (alleen als ingevuld)
+        if (deathValue) {
+            const deathDate = new Date(deathValue);
+            if (isNaN(deathDate.getTime())) {
+                deathDateInput.classList.add('date-error');
+                if (deathDateError) {
+                    deathDateError.textContent = t('dateFormatError');
+                    deathDateError.style.display = 'block';
+                }
+                isValid = false;
+            }
+        }
+        
+        // Valideer dat overlijdensdatum niet voor geboortedatum is (alleen als beide ingevuld zijn)
+        if (birthValue && deathValue) {
+            const birthDate = new Date(birthValue);
+            const deathDate = new Date(deathValue);
+            
+            if (!isNaN(birthDate.getTime()) && !isNaN(deathDate.getTime()) && deathDate < birthDate) {
+                deathDateInput.classList.add('date-error');
+                if (deathDateError) {
+                    deathDateError.textContent = t('deathBeforeBirthError');
+                    deathDateError.style.display = 'block';
+                }
+                isValid = false;
+            }
+        }
+        
+        return isValid;
     }
     
     /**
@@ -1298,7 +1481,7 @@ class LitterManager {
         if (thyroidExplanationContainer) thyroidExplanationContainer.style.display = 'none';
         if (thyroidExplanation) thyroidExplanation.value = '';
         
-        // Reset overlijdensdatum (nu na schildklier)
+        // Reset overlijdensdatum
         const deathDateInput = document.getElementById('deathDate');
         if (deathDateInput) {
             deathDateInput.value = '';
@@ -1312,96 +1495,6 @@ class LitterManager {
         // Reset opmerkingen
         const remarksTextarea = document.getElementById('remarks');
         if (remarksTextarea) remarksTextarea.value = '';
-    }
-    
-    /**
-     * Setup datum velden om als tekst veld te werken op mobiel
-     */
-    setupDateFields() {
-        const birthDateInput = document.getElementById('birthDate');
-        const deathDateInput = document.getElementById('deathDate');
-        
-        if (birthDateInput) {
-            // Verander type naar text wanneer gebruiker focust
-            birthDateInput.addEventListener('focus', function() {
-                this.type = 'text';
-                this.placeholder = 'DD-MM-JJJJ';
-            });
-            
-            // Valideer en converteer naar juiste formaat wanneer gebruiker blurt
-            birthDateInput.addEventListener('blur', function() {
-                const value = this.value.trim();
-                if (value) {
-                    // Converteer DD-MM-JJJJ naar YYYY-MM-DD voor date input
-                    const parts = value.split('-');
-                    if (parts.length === 3) {
-                        const day = parts[0].padStart(2, '0');
-                        const month = parts[1].padStart(2, '0');
-                        const year = parts[2];
-                        if (day.length === 2 && month.length === 2 && year.length === 4) {
-                            this.value = `${year}-${month}-${day}`;
-                        }
-                    }
-                }
-                this.type = 'date';
-            });
-            
-            // Input event voor real-time formatteer hulp
-            birthDateInput.addEventListener('input', function(e) {
-                let value = e.target.value.replace(/[^0-9-]/g, '');
-                
-                // Auto-format naar DD-MM-JJJJ
-                if (value.length > 2 && value.length <= 4 && !value.includes('-')) {
-                    value = value.substring(0, 2) + '-' + value.substring(2);
-                } else if (value.length > 5 && value.length <= 8 && value.split('-').length === 2) {
-                    const parts = value.split('-');
-                    if (parts[1].length > 2) {
-                        value = parts[0] + '-' + parts[1].substring(0, 2) + '-' + parts[1].substring(2);
-                    }
-                }
-                
-                e.target.value = value;
-            });
-        }
-        
-        if (deathDateInput) {
-            // Zelfde logica voor deathDate
-            deathDateInput.addEventListener('focus', function() {
-                this.type = 'text';
-                this.placeholder = 'DD-MM-JJJJ';
-            });
-            
-            deathDateInput.addEventListener('blur', function() {
-                const value = this.value.trim();
-                if (value) {
-                    const parts = value.split('-');
-                    if (parts.length === 3) {
-                        const day = parts[0].padStart(2, '0');
-                        const month = parts[1].padStart(2, '0');
-                        const year = parts[2];
-                        if (day.length === 2 && month.length === 2 && year.length === 4) {
-                            this.value = `${year}-${month}-${day}`;
-                        }
-                    }
-                }
-                this.type = 'date';
-            });
-            
-            deathDateInput.addEventListener('input', function(e) {
-                let value = e.target.value.replace(/[^0-9-]/g, '');
-                
-                if (value.length > 2 && value.length <= 4 && !value.includes('-')) {
-                    value = value.substring(0, 2) + '-' + value.substring(2);
-                } else if (value.length > 5 && value.length <= 8 && value.split('-').length === 2) {
-                    const parts = value.split('-');
-                    if (parts[1].length > 2) {
-                        value = parts[0] + '-' + parts[1].substring(0, 2) + '-' + parts[1].substring(2);
-                    }
-                }
-                
-                e.target.value = value;
-            });
-        }
     }
     
     addToLastBreeds(breed) {
@@ -1615,6 +1708,32 @@ class LitterManager {
             return;
         }
         
+        // Valideer datums eerst
+        if (!this.validateDates()) {
+            this.showError(this.t('dateFormatError'));
+            return;
+        }
+        
+        // Haal datum waarden op
+        const birthDateValue = document.getElementById('birthDate').value;
+        const deathDateValue = document.getElementById('deathDate').value;
+        
+        // Formatteer datums voor opslag (YYYY-MM-DD formaat)
+        const formatDateForStorage = (dateString) => {
+            if (!dateString) return '';
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return '';
+                
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`; // YYYY-MM-DD formaat
+            } catch (e) {
+                return '';
+            }
+        };
+        
         // Verzamel formulier data
         const dogData = {
             naam: document.getElementById('name')?.value.trim() || '',
@@ -1626,8 +1745,8 @@ class LitterManager {
             vaderId: document.getElementById('fatherId')?.value ? parseInt(document.getElementById('fatherId').value) : null,
             moeder: document.getElementById('mother')?.value.trim() || '',
             moederId: document.getElementById('motherId')?.value ? parseInt(document.getElementById('motherId').value) : null,
-            geboortedatum: document.getElementById('birthDate')?.value || '',
-            overlijdensdatum: document.getElementById('deathDate')?.value || '',
+            geboortedatum: formatDateForStorage(birthDateValue),
+            overlijdensdatum: formatDateForStorage(deathDateValue),
             heupdysplasie: document.getElementById('hipDysplasia')?.value || '',
             elleboogdysplasie: document.getElementById('elbowDysplasia')?.value || '',
             patella: document.getElementById('patellaLuxation')?.value || '',
@@ -1709,8 +1828,10 @@ class LitterManager {
         }
         
         // Reset hidden inputs
-        document.getElementById('fatherId').value = '';
-        document.getElementById('motherId').value = '';
+        const fatherIdInput = document.getElementById('fatherId');
+        const motherIdInput = document.getElementById('motherId');
+        if (fatherIdInput) fatherIdInput.value = '';
+        if (motherIdInput) motherIdInput.value = '';
         
         // Reset dropdowns
         const dropdowns = document.querySelectorAll('.autocomplete-dropdown');
@@ -1729,6 +1850,12 @@ class LitterManager {
             deathDateInput.type = 'date';
             deathDateInput.placeholder = 'DD-MM-JJJJ';
         }
+        
+        // Reset error berichten
+        const errorMessages = document.querySelectorAll('.error-message');
+        errorMessages.forEach(error => {
+            error.style.display = 'none';
+        });
         
         // Reset de lijst met ingevoerde honden
         this.currentLitterDogs = [];
