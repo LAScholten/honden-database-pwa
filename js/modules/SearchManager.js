@@ -36,6 +36,11 @@ class SearchManager extends BaseModule {
                 unknown: "Onbekend",
                 loading: "Honden laden...",
                 backToSearch: "Terug naar zoeken",
+                viewingParent: "Bekijkt ouder",
+                clickToView: "Klik om details te bekijken",
+                parents: "Ouders",
+                noHealthInfo: "Geen gezondheidsinformatie beschikbaar",
+                noAdditionalInfo: "Geen extra informatie beschikbaar",
                 
                 // Hond gegevens
                 birthDate: "Geboortedatum",
@@ -123,6 +128,11 @@ class SearchManager extends BaseModule {
                 unknown: "Unknown",
                 loading: "Loading dogs...",
                 backToSearch: "Back to search",
+                viewingParent: "Viewing parent",
+                clickToView: "Click to view details",
+                parents: "Parents",
+                noHealthInfo: "No health information available",
+                noAdditionalInfo: "No additional information available",
                 
                 // Dog details
                 birthDate: "Birth date",
@@ -210,6 +220,11 @@ class SearchManager extends BaseModule {
                 unknown: "Unbekannt",
                 loading: "Hunde laden...",
                 backToSearch: "Zurück zur Suche",
+                viewingParent: "Elternteil ansehen",
+                clickToView: "Klicken für Details",
+                parents: "Eltern",
+                noHealthInfo: "Keine Gesundheitsinformationen verfügbar",
+                noAdditionalInfo: "Keine zusätzlichen Informationen verfügbar",
                 
                 // Hund Details
                 birthDate: "Geburtsdatum",
@@ -962,9 +977,12 @@ class SearchManager extends BaseModule {
                                           this.currentLang === 'de' ? 'de-DE' : 'en-US');
         };
         
-        // Genereer health badge
+        // Genereer health badge - toont altijd een waarde
         const getHealthBadge = (value, type) => {
-            if (!value || value === '') return '';
+            if (!value || value === '') {
+                // Als er geen waarde is, toon "Onbekend"
+                return `<span class="badge bg-secondary">${t('unknown')}</span>`;
+            }
             
             let badgeClass = '';
             let badgeText = value;
@@ -994,9 +1012,27 @@ class SearchManager extends BaseModule {
                     badgeClass = 'badge-thyroid';
                     badgeText = t('thyroidStatus', value) || value;
                     break;
+                default:
+                    badgeClass = 'badge bg-secondary';
             }
             
             return `<span class="badge ${badgeClass}">${badgeText}</span>`;
+        };
+        
+        // Helper functie om waarde te tonen of "Onbekend"
+        const displayValue = (value) => {
+            return value && value !== '' ? value : t('unknown');
+        };
+        
+        // Helper functie om te checken of er gezondheidsinfo is
+        const hasHealthInfo = (dog) => {
+            return dog.heupdysplasie || dog.elleboogdysplasie || dog.patella || 
+                   dog.ogen || dog.dandyWalker || dog.schildklier;
+        };
+        
+        // Helper functie om te checken of er extra info is
+        const hasAdditionalInfo = (dog) => {
+            return dog.land || dog.postcode || dog.opmerkingen;
         };
         
         const html = `
@@ -1009,7 +1045,7 @@ class SearchManager extends BaseModule {
                             <i class="bi bi-arrow-left me-1"></i> ${t('backToSearch')}
                         </button>
                         <div class="text-muted small">
-                            <i class="bi bi-info-circle me-1"></i> ${t('viewingParent') || 'Bekijkt ouder'}
+                            <i class="bi bi-info-circle me-1"></i> ${t('viewingParent')}
                         </div>
                     </div>
                 </div>
@@ -1019,24 +1055,26 @@ class SearchManager extends BaseModule {
                 <div class="details-header ${isParentView ? 'pt-0' : ''}">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="dog-name-header">${dog.naam || t('unknown')}</div>
-                            ${dog.kennelnaam ? `<div class="text-muted mb-2">${dog.kennelnaam}</div>` : ''}
+                            <div class="dog-name-header">${displayValue(dog.naam)}</div>
+                            <div class="text-muted mb-2">${displayValue(dog.kennelnaam)}</div>
                             <div class="d-flex align-items-center flex-wrap gap-2 mt-2">
-                                ${dog.stamboomnr ? `<span class="badge bg-light text-dark">${dog.stamboomnr}</span>` : ''}
-                                ${dog.ras ? `<span class="badge bg-light text-dark">${dog.ras}</span>` : ''}
+                                ${dog.stamboomnr ? `<span class="badge bg-light text-dark">${displayValue(dog.stamboomnr)}</span>` : 
+                                  `<span class="badge bg-secondary text-light">${t('unknown')}</span>`}
+                                ${dog.ras ? `<span class="badge bg-light text-dark">${displayValue(dog.ras)}</span>` : 
+                                  `<span class="badge bg-secondary text-light">${t('unknown')}</span>`}
                                 <span class="badge ${dog.geslacht === 'reuen' ? 'bg-primary' : dog.geslacht === 'teven' ? 'bg-danger' : 'bg-secondary'}">
                                     ${dog.geslacht === 'reuen' ? t('male') : dog.geslacht === 'teven' ? t('female') : t('unknown')}
                                 </span>
                             </div>
                         </div>
-                        ${dog.geboortedatum || dog.overlijdensdatum ? `
                         <div class="text-end">
-                            ${dog.geboortedatum ? `
+                            <!-- Geboortedatum - altijd tonen -->
                             <div class="text-muted">
                                 <i class="bi bi-calendar me-1"></i>
-                                ${formatDate(dog.geboortedatum)}
+                                ${dog.geboortedatum ? formatDate(dog.geboortedatum) : t('unknown')}
                             </div>
-                            ` : ''}
+                            
+                            <!-- Overlijdensdatum - alleen tonen als ingevuld -->
                             ${dog.overlijdensdatum ? `
                             <div class="text-muted mt-1">
                                 <i class="bi bi-calendar-x me-1"></i>
@@ -1044,16 +1082,15 @@ class SearchManager extends BaseModule {
                             </div>
                             ` : ''}
                         </div>
-                        ` : ''}
                     </div>
                 </div>
                 
                 <!-- Body -->
                 <div class="details-body">
-                    <!-- Ouders -->
+                    <!-- Ouders - altijd tonen -->
                     <div class="info-group">
                         <div class="info-group-title">
-                            <i class="bi bi-people me-1"></i> ${t('parents') || 'Ouders'}
+                            <i class="bi bi-people me-1"></i> ${t('parents')}
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -1067,7 +1104,7 @@ class SearchManager extends BaseModule {
                                     ${fatherInfo.id ? `
                                     <div class="click-hint">
                                         <i class="bi bi-arrow-right-circle"></i>
-                                        ${t('clickToView') || 'Klik om details te bekijken'}
+                                        ${t('clickToView')}
                                     </div>
                                     ` : ''}
                                 </div>
@@ -1083,7 +1120,7 @@ class SearchManager extends BaseModule {
                                     ${motherInfo.id ? `
                                     <div class="click-hint">
                                         <i class="bi bi-arrow-right-circle"></i>
-                                        ${t('clickToView') || 'Klik om details te bekijken'}
+                                        ${t('clickToView')}
                                     </div>
                                     ` : ''}
                                 </div>
@@ -1091,107 +1128,82 @@ class SearchManager extends BaseModule {
                         </div>
                     </div>
                     
-                    <!-- Gezondheidsinformatie -->
+                    <!-- Gezondheidsinformatie - altijd alle velden tonen -->
                     <div class="info-group">
                         <div class="info-group-title">
                             <i class="bi bi-heart-pulse me-1"></i> ${t('healthInfo')}
                         </div>
                         
                         <div class="row">
-                            ${dog.heupdysplasie ? `
+                            <!-- Heupdysplasie - altijd tonen -->
                             <div class="col-md-6 mb-3">
                                 <div class="fw-bold mb-1">${t('hipDysplasia')}</div>
                                 <div>${getHealthBadge(dog.heupdysplasie, 'hip')}</div>
                             </div>
-                            ` : ''}
                             
-                            ${dog.elleboogdysplasie ? `
+                            <!-- Elleboogdysplasie - altijd tonen -->
                             <div class="col-md-6 mb-3">
                                 <div class="fw-bold mb-1">${t('elbowDysplasia')}</div>
                                 <div>${getHealthBadge(dog.elleboogdysplasie, 'elbow')}</div>
                             </div>
-                            ` : ''}
                             
-                            ${dog.patella ? `
+                            <!-- Patella Luxatie - altijd tonen -->
                             <div class="col-md-6 mb-3">
                                 <div class="fw-bold mb-1">${t('patellaLuxation')}</div>
                                 <div>${getHealthBadge(dog.patella, 'patella')}</div>
                             </div>
-                            ` : ''}
                             
-                            ${dog.ogen ? `
+                            <!-- Ogen - altijd tonen -->
                             <div class="col-md-6 mb-3">
                                 <div class="fw-bold mb-1">${t('eyes')}</div>
                                 <div>${getHealthBadge(dog.ogen, 'eyes')}</div>
                                 ${dog.ogenVerklaring ? `<div class="text-muted small mt-1">${dog.ogenVerklaring}</div>` : ''}
                             </div>
-                            ` : ''}
                             
-                            ${dog.dandyWalker ? `
+                            <!-- Dandy Walker - altijd tonen -->
                             <div class="col-md-6 mb-3">
                                 <div class="fw-bold mb-1">${t('dandyWalker')}</div>
                                 <div>${getHealthBadge(dog.dandyWalker, 'dandy')}</div>
                             </div>
-                            ` : ''}
                             
-                            ${dog.schildklier ? `
+                            <!-- Schildklier - altijd tonen -->
                             <div class="col-md-6 mb-3">
                                 <div class="fw-bold mb-1">${t('thyroid')}</div>
                                 <div>${getHealthBadge(dog.schildklier, 'thyroid')}</div>
                                 ${dog.schildklierVerklaring ? `<div class="text-muted small mt-1">${dog.schildklierVerklaring}</div>` : ''}
                             </div>
-                            ` : ''}
                         </div>
-                        
-                        ${!dog.heupdysplasie && !dog.elleboogdysplasie && !dog.patella && 
-                          !dog.ogen && !dog.dandyWalker && !dog.schildklier ? `
-                        <div class="text-muted text-center py-3">
-                            <i class="bi bi-heart me-1"></i> ${t('noHealthInfo') || 'Geen gezondheidsinformatie beschikbaar'}
-                        </div>
-                        ` : ''}
                     </div>
                     
-                    <!-- Extra informatie -->
+                    <!-- Extra informatie - altijd alle velden tonen -->
                     <div class="info-group">
                         <div class="info-group-title">
                             <i class="bi bi-info-circle me-1"></i> ${t('additionalInfo')}
                         </div>
                         
-                        ${dog.land || dog.postcode ? `
+                        <!-- Land en Postcode - altijd tonen -->
                         <div class="row mb-3">
-                            ${dog.land ? `
                             <div class="col-md-6">
                                 <div class="fw-bold mb-1">${t('country')}</div>
-                                <div>${dog.land}</div>
+                                <div>${displayValue(dog.land)}</div>
                             </div>
-                            ` : ''}
                             
-                            ${dog.postcode ? `
                             <div class="col-md-6">
                                 <div class="fw-bold mb-1">${t('zipCode')}</div>
-                                <div>${dog.postcode}</div>
+                                <div>${displayValue(dog.postcode)}</div>
                             </div>
-                            ` : ''}
                         </div>
-                        ` : ''}
                         
-                        ${dog.opmerkingen ? `
+                        <!-- Opmerkingen - altijd tonen -->
                         <div class="mt-3">
                             <div class="fw-bold mb-2">${t('remarks')}</div>
                             <div class="remarks-box">
-                                ${dog.opmerkingen}
+                                ${dog.opmerkingen ? dog.opmerkingen : t('noAdditionalInfo')}
                             </div>
                         </div>
-                        ` : ''}
-                        
-                        ${!dog.land && !dog.postcode && !dog.opmerkingen ? `
-                        <div class="text-muted text-center py-3">
-                            <i class="bi bi-info me-1"></i> ${t('noAdditionalInfo') || 'Geen extra informatie beschikbaar'}
-                        </div>
-                        ` : ''}
                     </div>
                     
-                    <!-- Timestamps -->
+                    <!-- Timestamps - alleen tonen als aanwezig -->
                     ${dog.createdAt || dog.updatedAt ? `
                     <div class="info-group">
                         <div class="info-group-title">
