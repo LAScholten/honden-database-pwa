@@ -251,7 +251,7 @@ class DogManager extends BaseModule {
                 elbow1: "1",
                 elbow2: "2",
                 elbow3: "3",
-                elbowNB: "NB (Niet bekannt)",
+                elbowNB: "NB (Niet bekend)",
                 patellaLuxation: "Patella Luxation",
                 patellaGrades: "Grad wählen...",
                 patella0: "0",
@@ -279,7 +279,7 @@ class DogManager extends BaseModule {
                 chooseFile: "Datei wählen",
                 noFileChosen: "Keine Datei gewählt",
                 remarks: "Bemerkungen",
-                requiredFields: "Felder mit * sind Pflichtfelder",
+                requiredFields: "Felder mit * zijn Pflichtfelder",
                 saveDog: "Hund speichern",
                 cancel: "Abbrechen",
                 delete: "Löschen",
@@ -292,16 +292,16 @@ class DogManager extends BaseModule {
                 // Zugangskontrolle Popup Texte
                 insufficientPermissions: "Unzureichende Berechtigungen",
                 insufficientPermissionsText: "Sie haben keine Berechtigung, Hunde zu bearbeiten. Nur Administratoren können diese Funktion nutzen.",
-                loggedInAs: "Sie sind eingeloggt als:",
+                loggedInAs: "Sie zijn eingeloggt als:",
                 user: "Benutzer",
-                availableFeatures: "Verfügbare Funktionen für Benutzer",
+                availableFeatures: "Verfügbare Funktionen voor Benutzer",
                 searchDogs: "Hunde suchen und anzeigen",
                 viewGallery: "Fotogalerie anzeigen",
                 managePrivateInfo: "Private Informationen verwalten",
                 importExport: "Daten importieren/exportieren",
                 
                 // Meldungen
-                adminOnly: "Nur Administratoren können Hunde hinzufügen/bearbeiten",
+                adminOnly: "Nur Administratoren kunnen Hunde hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer en Rasse zijn Pflichtfelder",
                 savingDog: "Hund wird gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
@@ -422,6 +422,22 @@ class DogManager extends BaseModule {
                         max-height: calc(90vh - 130px);
                         overflow-y: auto;
                     }
+                    
+                    .recent-breeds-container {
+                        flex-direction: column;
+                        align-items: flex-start !important;
+                    }
+                    
+                    .recent-breeds-container .form-text {
+                        width: 100%;
+                        margin-bottom: 8px;
+                    }
+                    
+                    .recent-breeds-buttons {
+                        width: 100%;
+                        overflow-x: auto;
+                        flex-wrap: nowrap;
+                    }
                 }
                 
                 .autocomplete-dropdown {
@@ -457,6 +473,26 @@ class DogManager extends BaseModule {
                 
                 .parent-input-wrapper {
                     position: relative;
+                }
+                
+                /* Recente rassen container */
+                .recent-breeds-container {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    margin-top: 8px;
+                }
+                
+                .recent-breeds-container .form-text {
+                    margin-bottom: 0;
+                    white-space: nowrap;
+                }
+                
+                .recent-breeds-buttons {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 5px;
+                    flex: 1;
                 }
             </style>
         `;
@@ -530,12 +566,13 @@ class DogManager extends BaseModule {
         const t = this.t.bind(this);
         const data = dogData || {};
         
-        // Genereer recente rassen opties
+        // Genereer recente rassen knoppen (op 1 regel onder het ras veld)
         let recentBreedsHTML = '';
         if (this.lastBreeds.length > 0) {
             recentBreedsHTML = `
-                <div class="form-text mb-2">${t('recentBreeds')}:</div>
-                <div class="d-flex flex-wrap gap-2 mb-3">
+                <div class="recent-breeds-container">
+                    <div class="form-text">${t('recentBreeds')}:</div>
+                    <div class="recent-breeds-buttons">
             `;
             this.lastBreeds.forEach(breed => {
                 recentBreedsHTML += `
@@ -544,7 +581,10 @@ class DogManager extends BaseModule {
                     </button>
                 `;
             });
-            recentBreedsHTML += `</div>`;
+            recentBreedsHTML += `
+                    </div>
+                </div>
+            `;
         }
         
         return `
@@ -552,6 +592,7 @@ class DogManager extends BaseModule {
                 <input type="hidden" id="fatherId" value="${data.vaderId || ''}">
                 <input type="hidden" id="motherId" value="${data.moederId || ''}">
                 
+                <!-- Rij 1: Naam en Kennelnaam -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -567,6 +608,7 @@ class DogManager extends BaseModule {
                     </div>
                 </div>
                 
+                <!-- Rij 2: Stamboomnummer en Geslacht -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -574,16 +616,6 @@ class DogManager extends BaseModule {
                             <input type="text" class="form-control" id="pedigreeNumber" value="${data.stamboomnr || ''}" required>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="breed" class="form-label">${t('breedRequired')}</label>
-                            <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
-                            ${recentBreedsHTML}
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="gender" class="form-label">${t('gender')}</label>
@@ -594,6 +626,21 @@ class DogManager extends BaseModule {
                             </select>
                         </div>
                     </div>
+                </div>
+                
+                <!-- Rij 3: Ras met recente rassen eronder -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="mb-3">
+                            <label for="breed" class="form-label">${t('breedRequired')}</label>
+                            <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
+                            ${recentBreedsHTML}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Rij 4: Vader en Moeder (naast elkaar) -->
+                <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3 parent-input-wrapper">
                             <label for="father" class="form-label">${t('father')}</label>
@@ -604,9 +651,6 @@ class DogManager extends BaseModule {
                                    autocomplete="off">
                         </div>
                     </div>
-                </div>
-                
-                <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3 parent-input-wrapper">
                             <label for="mother" class="form-label">${t('mother')}</label>
@@ -617,21 +661,26 @@ class DogManager extends BaseModule {
                                    autocomplete="off">
                         </div>
                     </div>
+                </div>
+                
+                <!-- Rij 5: Geboortedatum en Overlijdensdatum -->
+                <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="birthDate" class="form-label">${t('birthDate')}</label>
                             <input type="date" class="form-control" id="birthDate" value="${data.geboortedatum || ''}">
                         </div>
                     </div>
-                </div>
-                
-                <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="deathDate" class="form-label">${t('deathDate')}</label>
                             <input type="date" class="form-control" id="deathDate" value="${data.overlijdensdatum || ''}">
                         </div>
                     </div>
+                </div>
+                
+                <!-- Rij 6: Heupdysplasie, Elleboogdysplasie, Patella Luxatie -->
+                <div class="row">
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="hipDysplasia" class="form-label">${t('hipDysplasia')}</label>
@@ -672,6 +721,7 @@ class DogManager extends BaseModule {
                     </div>
                 </div>
                 
+                <!-- Rij 7: Ogen en Dandy Walker -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -702,6 +752,7 @@ class DogManager extends BaseModule {
                     </div>
                 </div>
                 
+                <!-- Rij 8: Schildklier en Land/Postcode -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -718,17 +769,24 @@ class DogManager extends BaseModule {
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="country" class="form-label">${t('country')}</label>
-                            <input type="text" class="form-control" id="country" value="${data.land || ''}">
-                        </div>
-                        <div class="mb-3">
-                            <label for="zipCode" class="form-label">${t('zipCode')}</label>
-                            <input type="text" class="form-control" id="zipCode" value="${data.postcode || ''}">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="country" class="form-label">${t('country')}</label>
+                                    <input type="text" class="form-control" id="country" value="${data.land || ''}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="zipCode" class="form-label">${t('zipCode')}</label>
+                                    <input type="text" class="form-control" id="zipCode" value="${data.postcode || ''}">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
+                <!-- Foto uploaden -->
                 <div class="mb-3">
                     <label for="dogPhoto" class="form-label">${t('addPhoto')}</label>
                     <div class="input-group">
@@ -738,16 +796,19 @@ class DogManager extends BaseModule {
                     <div class="form-text">${t('noFileChosen')}</div>
                 </div>
                 
+                <!-- Opmerkingen -->
                 <div class="mb-3">
                     <label for="remarks" class="form-label">${t('remarks')}</label>
                     <textarea class="form-control" id="remarks" rows="3">${data.opmerkingen || ''}</textarea>
                 </div>
                 
+                <!-- Verplichte velden info -->
                 <div class="alert alert-info">
                     <i class="bi bi-info-circle"></i>
                     ${t('requiredFields')}
                 </div>
                 
+                <!-- Opslaan knop -->
                 <div class="text-end">
                     <button type="button" class="btn btn-primary" id="saveDogBtn">
                         ${t('saveDog')}
@@ -1027,7 +1088,7 @@ class DogManager extends BaseModule {
         
         const dogData = {
             naam: document.getElementById('dogName').value.trim(),
-            kennelnaam: document.getElementById('kennelName').value.trim(), // NIEUW VELD
+            kennelnaam: document.getElementById('kennelName').value.trim(),
             stamboomnr: document.getElementById('pedigreeNumber').value.trim(),
             ras: document.getElementById('breed').value.trim(),
             geslacht: document.getElementById('gender').value,
