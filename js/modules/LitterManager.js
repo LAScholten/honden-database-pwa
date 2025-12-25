@@ -1,3 +1,32 @@
+[file name]: image.png
+[file content begin]
+# Nieuw Nest Toevoegen
+
+## Vader
+Begin met typen om te zoeken...
+
+## Kennelnaam
+Moeder  
+Begin met typen om te zoeken...
+
+## Geboortedatum
+dd-mm-jjjj  
+
+Voer datum in als DD-MM-JJJ (bijv. 15-01-2023)
+
+## Naam *
+Stamboomnummer *
+
+## Geslacht
+Ras *
+
+Selecteer geslacht...
+
+Recent: [Kees]
+
+
+[file content end]
+
 /**
  * Nest Management Module
  * Beheert toevoegen en bewerken van nesten
@@ -278,7 +307,7 @@ class LitterManager {
                 chooseFile: "Datei wählen",
                 noFileChosen: "Keine Datei gewählt",
                 remarks: "Bemerkungen",
-                requiredFields: "Felder mit * zijn Pflichtfelder",
+                requiredFields: "Felder met * zijn Pflichtfelder",
                 saveDog: "Wurf speichern",
                 cancel: "Abbrechen",
                 delete: "Löschen",
@@ -300,7 +329,7 @@ class LitterManager {
                 importExport: "Daten importieren/exportieren",
                 
                 // Meldungen
-                adminOnly: "Nur Administratoren können Würfe hinzufügen/bearbeiten",
+                adminOnly: "Nur Administratoren kunnen Würfe hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer en Rasse zijn Pflichtfelder",
                 savingDog: "Wurf wordt gespeichert...",
                 dogAdded: "Wurf erfolgreich hinzugefügt!",
@@ -468,13 +497,11 @@ class LitterManager {
                     }
                     
                     .date-input-wrapper input[type="text"] {
-                        /* Verberg kalender icon op mobiel */
                         -webkit-appearance: none;
                         -moz-appearance: none;
                         appearance: none;
                     }
                     
-                    /* Verwijder de kalender picker voor mobiel */
                     .date-input-wrapper input[type="date"]::-webkit-calendar-picker-indicator,
                     .date-input-wrapper input[type="date"]::-webkit-inner-spin-button,
                     .date-input-wrapper input[type="date"]::-webkit-clear-button {
@@ -488,6 +515,68 @@ class LitterManager {
                         -moz-appearance: textfield;
                         appearance: textfield;
                     }
+                    
+                    /* Container styling voor mobiel */
+                    .form-container {
+                        border: 1px solid #e0e0e0;
+                        border-radius: 8px;
+                        padding: 15px !important;
+                        margin-bottom: 15px;
+                    }
+                    
+                    .container-title {
+                        font-size: 0.9em;
+                        margin-bottom: 8px;
+                    }
+                }
+                
+                /* Desktop styling */
+                @media (min-width: 769px) {
+                    .form-container {
+                        border: 1px solid #e0e0e0;
+                        border-radius: 8px;
+                        padding: 20px !important;
+                        margin-bottom: 20px;
+                        background-color: #f9f9f9;
+                    }
+                    
+                    .container-title {
+                        font-weight: 600;
+                        color: #495057;
+                        margin-bottom: 15px;
+                        padding-bottom: 8px;
+                        border-bottom: 1px solid #dee2e6;
+                        font-size: 1.1em;
+                    }
+                    
+                    /* Desktop layout voor ouderdetails container */
+                    #ouders-container .row > div {
+                        margin-bottom: 10px;
+                    }
+                    
+                    #ouders-container .row {
+                        align-items: center;
+                    }
+                }
+                
+                /* Algemene styling voor containers */
+                .form-container {
+                    transition: all 0.3s ease;
+                }
+                
+                .form-container:hover {
+                    border-color: #b3d7ff;
+                    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+                }
+                
+                .container-title {
+                    display: flex;
+                    align-items: center;
+                }
+                
+                .container-title i {
+                    margin-right: 8px;
+                    font-size: 1.2em;
                 }
                 
                 .autocomplete-dropdown {
@@ -636,7 +725,7 @@ class LitterManager {
         const t = this.t.bind(this);
         const data = litterData || {};
         
-        // Genereer recente rassen knoppen (op 1 regel naast het ras veld)
+        // Genereer recente rassen knoppen
         let recentBreedsHTML = '';
         if (this.lastBreeds && this.lastBreeds.length > 0) {
             recentBreedsHTML = `
@@ -662,232 +751,248 @@ class LitterManager {
                 <input type="hidden" id="fatherId" value="${data.vaderId || ''}">
                 <input type="hidden" id="motherId" value="${data.moederId || ''}">
                 
-                <!-- RIJ 1: OUDERS - Vader en Moeder -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3 parent-input-wrapper">
-                            <label for="father" class="form-label">${t('father')}</label>
-                            <input type="text" class="form-control" id="father" 
-                                   value="${data.vader || ''}" 
-                                   placeholder="Begin met typen om te zoeken..."
-                                   data-parent-type="father"
-                                   autocomplete="off">
+                <!-- CONTAINER 1: OUDERDETAILS -->
+                <div class="form-container" id="ouders-container">
+                    <div class="container-title">
+                        <i class="bi bi-people"></i> Ouderdetails
+                    </div>
+                    
+                    <!-- RIJ 1: Vader en Moeder -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3 parent-input-wrapper">
+                                <label for="father" class="form-label">${t('father')}</label>
+                                <input type="text" class="form-control" id="father" 
+                                       value="${data.vader || ''}" 
+                                       placeholder="Begin met typen om te zoeken..."
+                                       data-parent-type="father"
+                                       autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3 parent-input-wrapper">
+                                <label for="mother" class="form-label">${t('mother')}</label>
+                                <input type="text" class="form-control" id="mother" 
+                                       value="${data.moeder || ''}" 
+                                       placeholder="Begin met typen om te zoeken..."
+                                       data-parent-type="mother"
+                                       autocomplete="off">
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="mb-3 parent-input-wrapper">
-                            <label for="mother" class="form-label">${t('mother')}</label>
-                            <input type="text" class="form-control" id="mother" 
-                                   value="${data.moeder || ''}" 
-                                   placeholder="Begin met typen om te zoeken..."
-                                   data-parent-type="mother"
-                                   autocomplete="off">
+                    
+                    <!-- RIJ 2: Kennelnaam en Ras -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="kennelName" class="form-label">${t('kennelName')}</label>
+                                <input type="text" class="form-control" id="kennelName" value="${data.kennelnaam || ''}">
+                            </div>
                         </div>
-                    </div>
-                </div>
-                
-                <!-- RIJ 2: Kennelnaam -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="mb-3">
-                            <label for="kennelName" class="form-label">${t('kennelName')}</label>
-                            <input type="text" class="form-control" id="kennelName" value="${data.kennelnaam || ''}">
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- RIJ 3: Geboortedatum -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="mb-3 date-input-wrapper">
-                            <label for="birthDate" class="form-label">${t('birthDate')}</label>
-                            <input type="date" class="form-control" id="birthDate" 
-                                   value="${data.geboortedatum || ''}"
-                                   placeholder="DD-MM-JJJJ"
-                                   onfocus="this.type='text'"
-                                   onblur="this.type='date'">
-                            <small class="form-text text-muted">Voer datum in als DD-MM-JJJJ (bijv. 15-01-2023)</small>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- RIJ 4: Naam en Stamboomnummer -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="name" class="form-label">${t('nameRequired')}</label>
-                            <input type="text" class="form-control" id="name" value="${data.naam || ''}" required>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="pedigreeNumber" class="form-label">${t('pedigreeNumber')}</label>
-                            <input type="text" class="form-control" id="pedigreeNumber" value="${data.stamboomnr || ''}" required>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- RIJ 5: Geslacht en Ras met recente rassen -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="gender" class="form-label">${t('gender')}</label>
-                            <select class="form-select" id="gender">
-                                <option value="">${t('chooseGender')}</option>
-                                <option value="reuen" ${data.geslacht === 'reuen' ? 'selected' : ''}>${t('male')}</option>
-                                <option value="teven" ${data.geslacht === 'teven' ? 'selected' : ''}>${t('female')}</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <div class="mb-3">
-                            <label for="breed" class="form-label">${t('breedRequired')}</label>
-                            <div class="breed-container">
-                                <div class="breed-input-container">
-                                    <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
+                        <div class="col-12 col-md-6">
+                            <div class="mb-3">
+                                <label for="breed" class="form-label">${t('breedRequired')}</label>
+                                <div class="breed-container">
+                                    <div class="breed-input-container">
+                                        <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
+                                    </div>
+                                    ${recentBreedsHTML}
                                 </div>
-                                ${recentBreedsHTML}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- RIJ 3: Geboortedatum -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="mb-3 date-input-wrapper">
+                                <label for="birthDate" class="form-label">${t('birthDate')}</label>
+                                <input type="date" class="form-control" id="birthDate" 
+                                       value="${data.geboortedatum || ''}"
+                                       placeholder="DD-MM-JJJJ"
+                                       onfocus="this.type='text'"
+                                       onblur="this.type='date'">
+                                <small class="form-text text-muted">Voer datum in als DD-MM-JJJJ (bijv. 15-01-2023)</small>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- RIJ 6: Overlijdensdatum -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="mb-3 date-input-wrapper">
-                            <label for="deathDate" class="form-label">${t('deathDate')}</label>
-                            <input type="date" class="form-control" id="deathDate" 
-                                   value="${data.overlijdensdatum || ''}"
-                                   placeholder="DD-MM-JJJJ"
-                                   onfocus="this.type='text'"
-                                   onblur="this.type='date'">
-                            <small class="form-text text-muted">Voer datum in als DD-MM-JJJJ (bijv. 15-01-2023)</small>
-                        </div>
+                <!-- CONTAINER 2: NESTDETAILS -->
+                <div class="form-container" id="nest-container">
+                    <div class="container-title">
+                        <i class="bi bi-house"></i> Nestdetails
                     </div>
-                </div>
-                
-                <!-- RIJ 7: Heupdysplasie, Elleboogdysplasie, Patella Luxatie -->
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label for="hipDysplasia" class="form-label">${t('hipDysplasia')}</label>
-                            <select class="form-select" id="hipDysplasia">
-                                <option value="">${t('hipGrades')}</option>
-                                <option value="A" ${data.heupdysplasie === 'A' ? 'selected' : ''}>${t('hipA')}</option>
-                                <option value="B" ${data.heupdysplasie === 'B' ? 'selected' : ''}>${t('hipB')}</option>
-                                <option value="C" ${data.heupdysplasie === 'C' ? 'selected' : ''}>${t('hipC')}</option>
-                                <option value="D" ${data.heupdysplasie === 'D' ? 'selected' : ''}>${t('hipD')}</option>
-                                <option value="E" ${data.heupdysplasie === 'E' ? 'selected' : ''}>${t('hipE')}</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label for="elbowDysplasia" class="form-label">${t('elbowDysplasia')}</label>
-                            <select class="form-select" id="elbowDysplasia">
-                                <option value="">${t('elbowGrades')}</option>
-                                <option value="0" ${data.elleboogdysplasie === '0' ? 'selected' : ''}>${t('elbow0')}</option>
-                                <option value="1" ${data.elleboogdysplasie === '1' ? 'selected' : ''}>${t('elbow1')}</option>
-                                <option value="2" ${data.elleboogdysplasie === '2' ? 'selected' : ''}>${t('elbow2')}</option>
-                                <option value="3" ${data.elleboogdysplasie === '3' ? 'selected' : ''}>${t('elbow3')}</option>
-                                <option value="NB" ${data.elleboogdysplasie === 'NB' ? 'selected' : ''}>${t('elbowNB')}</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="mb-3">
-                            <label for="patellaLuxation" class="form-label">${t('patellaLuxation')}</label>
-                            <select class="form-select" id="patellaLuxation">
-                                <option value="">${t('patellaGrades')}</option>
-                                <option value="0" ${data.patella === '0' ? 'selected' : ''}>${t('patella0')}</option>
-                                <option value="1" ${data.patella === '1' ? 'selected' : ''}>${t('patella1')}</option>
-                                <option value="2" ${data.patella === '2' ? 'selected' : ''}>${t('patella2')}</option>
-                                <option value="3" ${data.patella === '3' ? 'selected' : ''}>${t('patella3')}</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- RIJ 8: Ogen en Dandy Walker -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="eyes" class="form-label">${t('eyes')}</label>
-                            <select class="form-select" id="eyes">
-                                <option value="">${t('choose')}</option>
-                                <option value="Vrij" ${data.ogen === 'Vrij' ? 'selected' : ''}>${t('eyesFree')}</option>
-                                <option value="Distichiasis" ${data.ogen === 'Distichiasis' ? 'selected' : ''}>${t('eyesDistichiasis')}</option>
-                                <option value="Overig" ${data.ogen === 'Overig' ? 'selected' : ''}>${t('eyesOther')}</option>
-                            </select>
-                        </div>
-                        <div class="mb-3" id="eyesExplanationContainer" style="${data.ogen === 'Overig' ? '' : 'display: none;'}">
-                            <label for="eyesExplanation" class="form-label">${t('eyesExplanation')}</label>
-                            <input type="text" class="form-control" id="eyesExplanation" value="${data.ogenVerklaring || ''}">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="dandyWalker" class="form-label">${t('dandyWalker')}</label>
-                            <select class="form-select" id="dandyWalker">
-                                <option value="">${t('dandyOptions')}</option>
-                                <option value="Vrij op DNA" ${data.dandyWalker === 'Vrij op DNA' ? 'selected' : ''}>${t('dandyFreeDNA')}</option>
-                                <option value="Vrij op ouders" ${data.dandyWalker === 'Vrij op ouders' ? 'selected' : ''}>${t('dandyFreeParents')}</option>
-                                <option value="Drager" ${data.dandyWalker === 'Drager' ? 'selected' : ''}>${t('dandyCarrier')}</option>
-                                <option value="Lijder" ${data.dandyWalker === 'Lijder' ? 'selected' : ''}>${t('dandyAffected')}</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- RIJ 9: Schildklier en Land/Postcode -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="thyroid" class="form-label">${t('thyroid')}</label>
-                            <select class="form-select" id="thyroid">
-                                <option value="">${t('choose')}</option>
-                                <option value="Negatief" ${data.schildklier === 'Negatief' ? 'selected' : ''}>${t('thyroidNegative')}</option>
-                                <option value="Positief" ${data.schildklier === 'Positief' ? 'selected' : ''}>${t('thyroidPositive')}</option>
-                            </select>
-                        </div>
-                        <div class="mb-3" id="thyroidExplanationContainer" style="${data.schildklier === 'Positief' ? '' : 'display: none;'}">
-                            <label for="thyroidExplanation" class="form-label">${t('thyroidExplanation')}</label>
-                            <input type="text" class="form-control" id="thyroidExplanation" value="${data.schildklierVerklaring || ''}">
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="country" class="form-label">${t('country')}</label>
-                                    <input type="text" class="form-control" id="country" value="${data.land || ''}">
-                                </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">${t('nameRequired')}</label>
+                                <input type="text" class="form-control" id="name" value="${data.naam || ''}" required>
                             </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="zipCode" class="form-label">${t('zipCode')}</label>
-                                    <input type="text" class="form-control" id="zipCode" value="${data.postcode || ''}">
-                                </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="pedigreeNumber" class="form-label">${t('pedigreeNumber')}</label>
+                                <input type="text" class="form-control" id="pedigreeNumber" value="${data.stamboomnr || ''}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="gender" class="form-label">${t('gender')}</label>
+                                <select class="form-select" id="gender">
+                                    <option value="">${t('chooseGender')}</option>
+                                    <option value="reuen" ${data.geslacht === 'reuen' ? 'selected' : ''}>${t('male')}</option>
+                                    <option value="teven" ${data.geslacht === 'teven' ? 'selected' : ''}>${t('female')}</option>
+                                </select>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Foto uploaden -->
-                <div class="mb-3">
-                    <label for="photo" class="form-label">${t('addPhoto')}</label>
-                    <div class="input-group">
-                        <input type="file" class="form-control" id="photo" accept="image/*">
-                        <label class="input-group-text" for="photo">${t('chooseFile')}</label>
+                <!-- CONTAINER 3: OVERIGE DETAILS -->
+                <div class="form-container" id="details-container">
+                    <div class="container-title">
+                        <i class="bi bi-card-checklist"></i> Overige details
                     </div>
-                    <div class="form-text">${t('noFileChosen')}</div>
-                </div>
-                
-                <!-- Opmerkingen -->
-                <div class="mb-3">
-                    <label for="remarks" class="form-label">${t('remarks')}</label>
-                    <textarea class="form-control" id="remarks" rows="3">${data.opmerkingen || ''}</textarea>
+                    
+                    <!-- Overlijdensdatum -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="mb-3 date-input-wrapper">
+                                <label for="deathDate" class="form-label">${t('deathDate')}</label>
+                                <input type="date" class="form-control" id="deathDate" 
+                                       value="${data.overlijdensdatum || ''}"
+                                       placeholder="DD-MM-JJJJ"
+                                       onfocus="this.type='text'"
+                                       onblur="this.type='date'">
+                                <small class="form-text text-muted">Voer datum in als DD-MM-JJJJ (bijv. 15-01-2023)</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Gezondheid: Heupdysplasie, Elleboogdysplasie, Patella Luxatie -->
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="hipDysplasia" class="form-label">${t('hipDysplasia')}</label>
+                                <select class="form-select" id="hipDysplasia">
+                                    <option value="">${t('hipGrades')}</option>
+                                    <option value="A" ${data.heupdysplasie === 'A' ? 'selected' : ''}>${t('hipA')}</option>
+                                    <option value="B" ${data.heupdysplasie === 'B' ? 'selected' : ''}>${t('hipB')}</option>
+                                    <option value="C" ${data.heupdysplasie === 'C' ? 'selected' : ''}>${t('hipC')}</option>
+                                    <option value="D" ${data.heupdysplasie === 'D' ? 'selected' : ''}>${t('hipD')}</option>
+                                    <option value="E" ${data.heupdysplasie === 'E' ? 'selected' : ''}>${t('hipE')}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="elbowDysplasia" class="form-label">${t('elbowDysplasia')}</label>
+                                <select class="form-select" id="elbowDysplasia">
+                                    <option value="">${t('elbowGrades')}</option>
+                                    <option value="0" ${data.elleboogdysplasie === '0' ? 'selected' : ''}>${t('elbow0')}</option>
+                                    <option value="1" ${data.elleboogdysplasie === '1' ? 'selected' : ''}>${t('elbow1')}</option>
+                                    <option value="2" ${data.elleboogdysplasie === '2' ? 'selected' : ''}>${t('elbow2')}</option>
+                                    <option value="3" ${data.elleboogdysplasie === '3' ? 'selected' : ''}>${t('elbow3')}</option>
+                                    <option value="NB" ${data.elleboogdysplasie === 'NB' ? 'selected' : ''}>${t('elbowNB')}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="patellaLuxation" class="form-label">${t('patellaLuxation')}</label>
+                                <select class="form-select" id="patellaLuxation">
+                                    <option value="">${t('patellaGrades')}</option>
+                                    <option value="0" ${data.patella === '0' ? 'selected' : ''}>${t('patella0')}</option>
+                                    <option value="1" ${data.patella === '1' ? 'selected' : ''}>${t('patella1')}</option>
+                                    <option value="2" ${data.patella === '2' ? 'selected' : ''}>${t('patella2')}</option>
+                                    <option value="3" ${data.patella === '3' ? 'selected' : ''}>${t('patella3')}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Ogen en Dandy Walker -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="eyes" class="form-label">${t('eyes')}</label>
+                                <select class="form-select" id="eyes">
+                                    <option value="">${t('choose')}</option>
+                                    <option value="Vrij" ${data.ogen === 'Vrij' ? 'selected' : ''}>${t('eyesFree')}</option>
+                                    <option value="Distichiasis" ${data.ogen === 'Distichiasis' ? 'selected' : ''}>${t('eyesDistichiasis')}</option>
+                                    <option value="Overig" ${data.ogen === 'Overig' ? 'selected' : ''}>${t('eyesOther')}</option>
+                                </select>
+                            </div>
+                            <div class="mb-3" id="eyesExplanationContainer" style="${data.ogen === 'Overig' ? '' : 'display: none;'}">
+                                <label for="eyesExplanation" class="form-label">${t('eyesExplanation')}</label>
+                                <input type="text" class="form-control" id="eyesExplanation" value="${data.ogenVerklaring || ''}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="dandyWalker" class="form-label">${t('dandyWalker')}</label>
+                                <select class="form-select" id="dandyWalker">
+                                    <option value="">${t('dandyOptions')}</option>
+                                    <option value="Vrij op DNA" ${data.dandyWalker === 'Vrij op DNA' ? 'selected' : ''}>${t('dandyFreeDNA')}</option>
+                                    <option value="Vrij op ouders" ${data.dandyWalker === 'Vrij op ouders' ? 'selected' : ''}>${t('dandyFreeParents')}</option>
+                                    <option value="Drager" ${data.dandyWalker === 'Drager' ? 'selected' : ''}>${t('dandyCarrier')}</option>
+                                    <option value="Lijder" ${data.dandyWalker === 'Lijder' ? 'selected' : ''}>${t('dandyAffected')}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Schildklier en Land/Postcode -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="thyroid" class="form-label">${t('thyroid')}</label>
+                                <select class="form-select" id="thyroid">
+                                    <option value="">${t('choose')}</option>
+                                    <option value="Negatief" ${data.schildklier === 'Negatief' ? 'selected' : ''}>${t('thyroidNegative')}</option>
+                                    <option value="Positief" ${data.schildklier === 'Positief' ? 'selected' : ''}>${t('thyroidPositive')}</option>
+                                </select>
+                            </div>
+                            <div class="mb-3" id="thyroidExplanationContainer" style="${data.schildklier === 'Positief' ? '' : 'display: none;'}">
+                                <label for="thyroidExplanation" class="form-label">${t('thyroidExplanation')}</label>
+                                <input type="text" class="form-control" id="thyroidExplanation" value="${data.schildklierVerklaring || ''}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="country" class="form-label">${t('country')}</label>
+                                        <input type="text" class="form-control" id="country" value="${data.land || ''}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="zipCode" class="form-label">${t('zipCode')}</label>
+                                        <input type="text" class="form-control" id="zipCode" value="${data.postcode || ''}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Foto uploaden -->
+                    <div class="mb-3">
+                        <label for="photo" class="form-label">${t('addPhoto')}</label>
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="photo" accept="image/*">
+                            <label class="input-group-text" for="photo">${t('chooseFile')}</label>
+                        </div>
+                        <div class="form-text">${t('noFileChosen')}</div>
+                    </div>
+                    
+                    <!-- Opmerkingen -->
+                    <div class="mb-3">
+                        <label for="remarks" class="form-label">${t('remarks')}</label>
+                        <textarea class="form-control" id="remarks" rows="3">${data.opmerkingen || ''}</textarea>
+                    </div>
                 </div>
                 
                 <!-- Verplichte velden info -->
