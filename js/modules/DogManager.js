@@ -217,7 +217,7 @@ class DogManager extends BaseModule {
                 // Modal Titel
                 newDog: "Neuen Hund hinzufügen",
                 editDog: "Hund bearbeiten",
-                dogLitterChoice: "Hund oder Wurf hinzufügen",
+                dogLitterChoice: "Hund of Wurf hinzufügen",
                 addNewDog: "Neuer Hund",
                 addNewLitter: "Neuer Wurf",
                 development: "In Entwicklung",
@@ -301,7 +301,7 @@ class DogManager extends BaseModule {
                 importExport: "Daten importieren/exportieren",
                 
                 // Meldungen
-                adminOnly: "Nur Administratoren können Hunde hinzufügen/bearbeiten",
+                adminOnly: "Nur Administratoren kunnen Hunde hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer en Rasse zijn Pflichtfelder",
                 savingDog: "Hund wird gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
@@ -440,6 +440,33 @@ class DogManager extends BaseModule {
                         font-size: 0.75em !important;
                         padding: 3px 6px !important;
                     }
+                    
+                    /* Geboortedatum input styling voor mobiel */
+                    .date-input-wrapper {
+                        position: relative;
+                    }
+                    
+                    .date-input-wrapper input[type="text"] {
+                        /* Verberg kalender icon op mobiel */
+                        -webkit-appearance: none;
+                        -moz-appearance: none;
+                        appearance: none;
+                    }
+                    
+                    /* Verwijder de kalender picker voor mobiel */
+                    .date-input-wrapper input[type="date"]::-webkit-calendar-picker-indicator,
+                    .date-input-wrapper input[type="date"]::-webkit-inner-spin-button,
+                    .date-input-wrapper input[type="date"]::-webkit-clear-button {
+                        display: none;
+                        -webkit-appearance: none;
+                        appearance: none;
+                    }
+                    
+                    .date-input-wrapper input[type="date"] {
+                        -webkit-appearance: textfield;
+                        -moz-appearance: textfield;
+                        appearance: textfield;
+                    }
                 }
                 
                 .autocomplete-dropdown {
@@ -543,6 +570,36 @@ class DogManager extends BaseModule {
                 
                 .recent-breeds-buttons::-webkit-scrollbar-thumb:hover {
                     background: #a8a8a8;
+                }
+                
+                /* Datum input styling - gebruik text input voor alle apparaten */
+                .date-input-wrapper {
+                    position: relative;
+                }
+                
+                .date-input-wrapper .form-control {
+                    padding-right: 12px;
+                }
+                
+                /* Verberg kalender picker voor alle apparaten */
+                input[type="date"]::-webkit-calendar-picker-indicator,
+                input[type="date"]::-webkit-inner-spin-button,
+                input[type="date"]::-webkit-clear-button {
+                    display: none;
+                    -webkit-appearance: none;
+                    appearance: none;
+                }
+                
+                input[type="date"] {
+                    -webkit-appearance: textfield;
+                    -moz-appearance: textfield;
+                    appearance: textfield;
+                }
+                
+                /* Placeholder styling voor datum velden */
+                input[type="date"]::placeholder {
+                    color: #6c757d;
+                    opacity: 0.7;
                 }
             </style>
         `;
@@ -720,15 +777,25 @@ class DogManager extends BaseModule {
                 <!-- Rij 5: Geboortedatum en Overlijdensdatum -->
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="mb-3">
+                        <div class="mb-3 date-input-wrapper">
                             <label for="birthDate" class="form-label">${t('birthDate')}</label>
-                            <input type="date" class="form-control" id="birthDate" value="${data.geboortedatum || ''}">
+                            <input type="date" class="form-control" id="birthDate" 
+                                   value="${data.geboortedatum || ''}"
+                                   placeholder="DD-MM-JJJJ"
+                                   onfocus="this.type='text'"
+                                   onblur="this.type='date'">
+                            <small class="form-text text-muted">Voer datum in als DD-MM-JJJJ (bijv. 15-01-2023)</small>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="mb-3">
+                        <div class="mb-3 date-input-wrapper">
                             <label for="deathDate" class="form-label">${t('deathDate')}</label>
-                            <input type="date" class="form-control" id="deathDate" value="${data.overlijdensdatum || ''}">
+                            <input type="date" class="form-control" id="deathDate" 
+                                   value="${data.overlijdensdatum || ''}"
+                                   placeholder="DD-MM-JJJJ"
+                                   onfocus="this.type='text'"
+                                   onblur="this.type='date'">
+                            <small class="form-text text-muted">Voer datum in als DD-MM-JJJJ (bijv. 15-01-2023)</small>
                         </div>
                     </div>
                 </div>
@@ -946,6 +1013,99 @@ class DogManager extends BaseModule {
         
         // Setup autocomplete voor ouders
         this.setupParentAutocomplete();
+        
+        // Setup datum velden voor tekst invoer
+        this.setupDateFields();
+    }
+    
+    /**
+     * Setup datum velden om als tekst veld te werken op mobiel
+     */
+    setupDateFields() {
+        const birthDateInput = document.getElementById('birthDate');
+        const deathDateInput = document.getElementById('deathDate');
+        
+        if (birthDateInput) {
+            // Verander type naar text wanneer gebruiker focust
+            birthDateInput.addEventListener('focus', function() {
+                this.type = 'text';
+                this.placeholder = 'DD-MM-JJJJ';
+            });
+            
+            // Valideer en converteer naar juiste formaat wanneer gebruiker blurt
+            birthDateInput.addEventListener('blur', function() {
+                const value = this.value.trim();
+                if (value) {
+                    // Converteer DD-MM-JJJJ naar YYYY-MM-DD voor date input
+                    const parts = value.split('-');
+                    if (parts.length === 3) {
+                        const day = parts[0].padStart(2, '0');
+                        const month = parts[1].padStart(2, '0');
+                        const year = parts[2];
+                        if (day.length === 2 && month.length === 2 && year.length === 4) {
+                            this.value = `${year}-${month}-${day}`;
+                        }
+                    }
+                }
+                this.type = 'date';
+            });
+            
+            // Input event voor real-time formatteer hulp
+            birthDateInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/[^0-9-]/g, '');
+                
+                // Auto-format naar DD-MM-JJJJ
+                if (value.length > 2 && value.length <= 4 && !value.includes('-')) {
+                    value = value.substring(0, 2) + '-' + value.substring(2);
+                } else if (value.length > 5 && value.length <= 8 && value.split('-').length === 2) {
+                    const parts = value.split('-');
+                    if (parts[1].length > 2) {
+                        value = parts[0] + '-' + parts[1].substring(0, 2) + '-' + parts[1].substring(2);
+                    }
+                }
+                
+                e.target.value = value;
+            });
+        }
+        
+        if (deathDateInput) {
+            // Zelfde logica voor deathDate
+            deathDateInput.addEventListener('focus', function() {
+                this.type = 'text';
+                this.placeholder = 'DD-MM-JJJJ';
+            });
+            
+            deathDateInput.addEventListener('blur', function() {
+                const value = this.value.trim();
+                if (value) {
+                    const parts = value.split('-');
+                    if (parts.length === 3) {
+                        const day = parts[0].padStart(2, '0');
+                        const month = parts[1].padStart(2, '0');
+                        const year = parts[2];
+                        if (day.length === 2 && month.length === 2 && year.length === 4) {
+                            this.value = `${year}-${month}-${day}`;
+                        }
+                    }
+                }
+                this.type = 'date';
+            });
+            
+            deathDateInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/[^0-9-]/g, '');
+                
+                if (value.length > 2 && value.length <= 4 && !value.includes('-')) {
+                    value = value.substring(0, 2) + '-' + value.substring(2);
+                } else if (value.length > 5 && value.length <= 8 && value.split('-').length === 2) {
+                    const parts = value.split('-');
+                    if (parts[1].length > 2) {
+                        value = parts[0] + '-' + parts[1].substring(0, 2) + '-' + parts[1].substring(2);
+                    }
+                }
+                
+                e.target.value = value;
+            });
+        }
     }
     
     /**
