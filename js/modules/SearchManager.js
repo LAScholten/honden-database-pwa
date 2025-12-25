@@ -223,7 +223,7 @@ class SearchManager extends BaseModule {
                 viewingParent: "Elternteil ansehen",
                 clickToView: "Klicken für Details",
                 parents: "Eltern",
-                noHealthInfo: "Keine Gesundheitsinformationen verfügbar",
+                noHealthInfo: "Keine Gesundheidsinformationen verfügbar",
                 noAdditionalInfo: "Keine zusätzlichen Informationen verfügbar",
                 
                 // Hund Details
@@ -241,51 +241,7 @@ class SearchManager extends BaseModule {
                 zipCode: "Postleitzahl",
                 remarks: "Bemerkungen",
                 healthInfo: "Gesundheitsinformationen",
-                additionalInfo: "Zusätzliche Informationen",
-                
-                // Gesundheitsstatus
-                hipGrades: {
-                    A: "A - Keine Anzeichen van HD",
-                    B: "B - Übergangsform",
-                    C: "C - Leichte HD",
-                    D: "D - Mittlere HD",
-                    E: "E - Schwere HD"
-                },
-                elbowGrades: {
-                    "0": "0 - Keine ED",
-                    "1": "1 - Milde ED",
-                    "2": "2 - Mittlere ED",
-                    "3": "3 - Schwere ED",
-                    "NB": "NB - Nicht bekannt"
-                },
-                patellaGrades: {
-                    "0": "0 - Keine PL",
-                    "1": "1 - Gelegentlich Luxation",
-                    "2": "2 - Häufig Luxation",
-                    "3": "3 - Ständige Luxation"
-                },
-                eyeStatus: {
-                    "Vrij": "Frei",
-                    "Distichiasis": "Distichiasis",
-                    "Overig": "Andere"
-                },
-                dandyStatus: {
-                    "Vrij op DNA": "Frei auf DNA",
-                    "Vrij op ouders": "Frei auf Eltern",
-                    "Drager": "Träger",
-                    "Lijder": "Betroffen"
-                },
-                thyroidStatus: {
-                    "Negatief": "Tgaa Negativ",
-                    "Positief": "Tgaa Positiv"
-                },
-                
-                // Labels
-                grade: "Grad",
-                status: "Status",
-                unknown: "Unbekannt",
-                notApplicable: "Niet zutreffend",
-                viewMore: "Mehr Details"
+                additionalInfo: "Zusätzliche informatie"
             }
         };
     }
@@ -1024,17 +980,6 @@ class SearchManager extends BaseModule {
             return value && value !== '' ? value : t('unknown');
         };
         
-        // Helper functie om te checken of er gezondheidsinfo is
-        const hasHealthInfo = (dog) => {
-            return dog.heupdysplasie || dog.elleboogdysplasie || dog.patella || 
-                   dog.ogen || dog.dandyWalker || dog.schildklier;
-        };
-        
-        // Helper functie om te checken of er extra info is
-        const hasAdditionalInfo = (dog) => {
-            return dog.land || dog.postcode || dog.opmerkingen;
-        };
-        
         const html = `
             <div class="details-card">
                 ${isParentView ? `
@@ -1068,15 +1013,17 @@ class SearchManager extends BaseModule {
                             </div>
                         </div>
                         <div class="text-end">
-                            <!-- Geboortedatum - altijd tonen -->
+                            <!-- Geboortedatum - alleen tonen als bekend -->
+                            ${dog.geboortedatum ? `
                             <div class="text-muted">
                                 <i class="bi bi-calendar me-1"></i>
-                                ${dog.geboortedatum ? formatDate(dog.geboortedatum) : t('unknown')}
+                                ${formatDate(dog.geboortedatum)}
                             </div>
+                            ` : ''}
                             
                             <!-- Overlijdensdatum - alleen tonen als ingevuld -->
                             ${dog.overlijdensdatum ? `
-                            <div class="text-muted mt-1">
+                            <div class="text-muted ${dog.geboortedatum ? 'mt-1' : ''}">
                                 <i class="bi bi-calendar-x me-1"></i>
                                 ${formatDate(dog.overlijdensdatum)}
                             </div>
