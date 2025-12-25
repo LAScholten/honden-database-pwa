@@ -23,6 +23,7 @@ class DogManager extends BaseModule {
                 // Form velden
                 name: "Naam",
                 nameRequired: "Naam *",
+                kennelName: "Kennelnaam",
                 pedigreeNumber: "Stamboomnummer *",
                 breed: "Ras",
                 breedRequired: "Ras *",
@@ -123,6 +124,7 @@ class DogManager extends BaseModule {
                 // Form fields
                 name: "Name",
                 nameRequired: "Name *",
+                kennelName: "Kennel Name",
                 pedigreeNumber: "Pedigree number *",
                 breed: "Breed",
                 breedRequired: "Breed *",
@@ -223,11 +225,12 @@ class DogManager extends BaseModule {
                 // Formular Felder
                 name: "Name",
                 nameRequired: "Name *",
+                kennelName: "Kennelname",
                 pedigreeNumber: "Stammbaum-Nummer *",
                 breed: "Rasse",
                 breedRequired: "Rasse *",
                 recentBreeds: "Kürzlich verwendete Rassen",
-                father: "Vater",
+                father: "Vader",
                 mother: "Mutter",
                 birthDate: "Geburtsdatum",
                 deathDate: "Sterbedatum",
@@ -558,8 +561,8 @@ class DogManager extends BaseModule {
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="pedigreeNumber" class="form-label">${t('pedigreeNumber')}</label>
-                            <input type="text" class="form-control" id="pedigreeNumber" value="${data.stamboomnr || ''}" required>
+                            <label for="kennelName" class="form-label">${t('kennelName')}</label>
+                            <input type="text" class="form-control" id="kennelName" value="${data.kennelnaam || ''}">
                         </div>
                     </div>
                 </div>
@@ -567,11 +570,20 @@ class DogManager extends BaseModule {
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
+                            <label for="pedigreeNumber" class="form-label">${t('pedigreeNumber')}</label>
+                            <input type="text" class="form-control" id="pedigreeNumber" value="${data.stamboomnr || ''}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
                             <label for="breed" class="form-label">${t('breedRequired')}</label>
                             <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
                             ${recentBreedsHTML}
                         </div>
                     </div>
+                </div>
+                
+                <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="gender" class="form-label">${t('gender')}</label>
@@ -582,9 +594,6 @@ class DogManager extends BaseModule {
                             </select>
                         </div>
                     </div>
-                </div>
-                
-                <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3 parent-input-wrapper">
                             <label for="father" class="form-label">${t('father')}</label>
@@ -595,6 +604,9 @@ class DogManager extends BaseModule {
                                    autocomplete="off">
                         </div>
                     </div>
+                </div>
+                
+                <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3 parent-input-wrapper">
                             <label for="mother" class="form-label">${t('mother')}</label>
@@ -605,24 +617,21 @@ class DogManager extends BaseModule {
                                    autocomplete="off">
                         </div>
                     </div>
-                </div>
-                
-                <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="birthDate" class="form-label">${t('birthDate')}</label>
                             <input type="date" class="form-control" id="birthDate" value="${data.geboortedatum || ''}">
                         </div>
                     </div>
+                </div>
+                
+                <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="deathDate" class="form-label">${t('deathDate')}</label>
                             <input type="date" class="form-control" id="deathDate" value="${data.overlijdensdatum || ''}">
                         </div>
                     </div>
-                </div>
-                
-                <div class="row">
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="hipDysplasia" class="form-label">${t('hipDysplasia')}</label>
@@ -1018,6 +1027,7 @@ class DogManager extends BaseModule {
         
         const dogData = {
             naam: document.getElementById('dogName').value.trim(),
+            kennelnaam: document.getElementById('kennelName').value.trim(), // NIEUW VELD
             stamboomnr: document.getElementById('pedigreeNumber').value.trim(),
             ras: document.getElementById('breed').value.trim(),
             geslacht: document.getElementById('gender').value,
