@@ -78,7 +78,7 @@ class LitterManager {
                 noFileChosen: "Geen bestand gekozen",
                 remarks: "Opmerkingen",
                 requiredFields: "Velden met * zijn verplicht",
-                saveDog: "Hond Opslaan", // Gewijzigd van "Nest Opslaan"
+                saveDog: "Hond Opslaan",
                 cancel: "Annuleren",
                 delete: "Verwijderen",
                 choose: "Kies...",
@@ -101,14 +101,14 @@ class LitterManager {
                 // Alerts
                 adminOnly: "Alleen administrators mogen nesten toevoegen/bewerken",
                 fieldsRequired: "Naam, stamboomnummer en ras zijn verplichte velden",
-                savingDog: "Hond opslaan...", // Gewijzigd van "Nest opslaan..."
-                dogAdded: "Hond succesvol toegevoegd!", // Gewijzigd van "Nest succesvol toegevoegd!"
-                dogUpdated: "Hond succesvol bijgewerkt!", // Gewijzigd van "Nest succesvol bijgewerkt!"
-                dogDeleted: "Hond succesvol verwijderen!", // Gewijzigd van "Nest succesvol verwijderen!"
-                addFailed: "Fout bij toevoegen hond: ", // Gewijzigd van "Fout bij toevoegen nest: "
-                updateFailed: "Fout bij bijwerken hond: ", // Gewijzigd van "Fout bij bijwerken nest: "
-                deleteFailed: "Fout bij verwijderen hond: ", // Gewijzigd van "Fout bij verwijderen nest: "
-                confirmDelete: "Weet u zeker dat u deze hond wilt verwijderen?", // Gewijzigd van "Weet u zeker dat u dit nest wilt verwijderen?"
+                savingDog: "Hond opslaan...",
+                dogAdded: "Hond succesvol toegevoegd!",
+                dogUpdated: "Hond succesvol bijgewerkt!",
+                dogDeleted: "Hond succesvol verwijderen!",
+                addFailed: "Fout bij toevoegen hond: ",
+                updateFailed: "Fout bij bijwerken hond: ",
+                deleteFailed: "Fout bij verwijderen hond: ",
+                confirmDelete: "Weet u zeker dat u deze hond wilt verwijderen?",
                 photoAdded: "Foto toegevoegd",
                 photoError: "Fout bij uploaden foto: ",
                 addedDogs: "Toegevoegde honden:",
@@ -186,7 +186,7 @@ class LitterManager {
                 noFileChosen: "No file chosen",
                 remarks: "Remarks",
                 requiredFields: "Fields with * are required",
-                saveDog: "Save Dog", // Gewijzigd van "Save Litter"
+                saveDog: "Save Dog",
                 cancel: "Cancel",
                 delete: "Delete",
                 choose: "Choose...",
@@ -209,14 +209,14 @@ class LitterManager {
                 // Alerts
                 adminOnly: "Only administrators can add/edit litters",
                 fieldsRequired: "Name, pedigree number and breed are required fields",
-                savingDog: "Saving dog...", // Gewijzigd van "Saving litter..."
-                dogAdded: "Dog successfully added!", // Gewijzigd van "Litter successfully added!"
-                dogUpdated: "Dog successfully updated!", // Gewijzigd van "Litter successfully updated!"
-                dogDeleted: "Dog successfully deleted!", // Gewijzigd van "Litter successfully deleted!"
-                addFailed: "Error adding dog: ", // Gewijzigd van "Error adding litter: "
-                updateFailed: "Error updating dog: ", // Gewijzigd van "Error updating litter: "
-                deleteFailed: "Error deleting dog: ", // Gewijzigd van "Error deleting litter: "
-                confirmDelete: "Are you sure you want to delete this dog?", // Gewijzigd van "Are you sure you want to delete this litter?"
+                savingDog: "Saving dog...",
+                dogAdded: "Dog successfully added!",
+                dogUpdated: "Dog successfully updated!",
+                dogDeleted: "Dog successfully deleted!",
+                addFailed: "Error adding dog: ",
+                updateFailed: "Error updating dog: ",
+                deleteFailed: "Error deleting dog: ",
+                confirmDelete: "Are you sure you want to delete this dog?",
                 photoAdded: "Photo added",
                 photoError: "Error uploading photo: ",
                 addedDogs: "Added dogs:",
@@ -294,7 +294,7 @@ class LitterManager {
                 noFileChosen: "Keine Datei gewählt",
                 remarks: "Bemerkungen",
                 requiredFields: "Felder mit * zijn Pflichtfelder",
-                saveDog: "Hund speichern", // Gewijzigd van "Wurf speichern"
+                saveDog: "Hund speichern",
                 cancel: "Abbrechen",
                 delete: "Löschen",
                 choose: "Wählen...",
@@ -315,16 +315,16 @@ class LitterManager {
                 importExport: "Daten importieren/exportieren",
                 
                 // Meldungen
-                adminOnly: "Nur Administratoren können Würfe hinzufügen/bearbeiten",
+                adminOnly: "Nur Administratoren kunnen Würfe hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer en Rasse zijn Pflichtfelder",
-                savingDog: "Hund wordt gespeichert...", // Gewijzigd van "Wurf wordt gespeichert..."
-                dogAdded: "Hund erfolgreich hinzugefügt!", // Gewijzigd van "Wurf erfolgreich hinzugefügt!"
-                dogUpdated: "Hund erfolgreich aktualisiert!", // Gewijzigd van "Wurf erfolgreich aktualisiert!"
-                dogDeleted: "Hund erfolgreich gelöscht!", // Gewijzigd van "Wurf erfolgreich gelöscht!"
-                addFailed: "Fehler beim Hinzufügen des Hundes: ", // Gewijzigd van "Fehler beim Hinzufügen des Wurfes: "
-                updateFailed: "Fehler beim Aktualisieren des Hundes: ", // Gewijzigd van "Fehler beim Aktualisieren des Wurfes: "
-                deleteFailed: "Fehler beim Löschen des Hundes: ", // Gewijzigd van "Fehler beim Löschen des Wurfes: "
-                confirmDelete: "Sind Sie sicher, dass Sie diesen Hund löschen möchten?", // Gewijzigd van "Sind Sie sicher, dass Sie diesen Wurf löschen möchten?"
+                savingDog: "Hund wird gespeichert...",
+                dogAdded: "Hund erfolgreich hinzugefügt!",
+                dogUpdated: "Hund erfolgreich aktualisiert!",
+                dogDeleted: "Hund erfolgreich gelöscht!",
+                addFailed: "Fehler beim Hinzufügen des Hundes: ",
+                updateFailed: "Fehler beim Aktualisieren des Hundes: ",
+                deleteFailed: "Fehler beim Löschen des Hundes: ",
+                confirmDelete: "Sind Sie sicher, dass Sie diesen Hund löschen möchten?",
                 photoAdded: "Foto hinzugefügt",
                 photoError: "Fehler beim Hochladen des Fotos: ",
                 addedDogs: "Hinzugefügte Hunde:",
@@ -927,17 +927,18 @@ class LitterManager {
                         <i class="bi bi-card-checklist"></i> ${t('otherDetails')}
                     </div>
                     
-                    <!-- Overlijdensdatum -->
+                    <!-- Land en Postcode (NU als eerste bovenaan) -->
                     <div class="row">
-                        <div class="col-12">
-                            <div class="mb-3 date-input-wrapper">
-                                <label for="deathDate" class="form-label">${t('deathDate')}</label>
-                                <input type="date" class="form-control" id="deathDate" 
-                                       value="${data.overlijdensdatum || ''}"
-                                       placeholder="DD-MM-JJJJ"
-                                       onfocus="this.type='text'"
-                                       onblur="this.type='date'">
-                                <small class="form-text text-muted">Voer datum in als DD-MM-JJJJ (bijv. 15-01-2023)</small>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="country" class="form-label">${t('country')}</label>
+                                <input type="text" class="form-control" id="country" value="${data.land || ''}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="zipCode" class="form-label">${t('zipCode')}</label>
+                                <input type="text" class="form-control" id="zipCode" value="${data.postcode || ''}">
                             </div>
                         </div>
                     </div>
@@ -1015,7 +1016,7 @@ class LitterManager {
                         </div>
                     </div>
                     
-                    <!-- Schildklier en Land/Postcode -->
+                    <!-- Schildklier -->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -1031,20 +1032,19 @@ class LitterManager {
                                 <input type="text" class="form-control" id="thyroidExplanation" value="${data.schildklierVerklaring || ''}">
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="country" class="form-label">${t('country')}</label>
-                                        <input type="text" class="form-control" id="country" value="${data.land || ''}">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="zipCode" class="form-label">${t('zipCode')}</label>
-                                        <input type="text" class="form-control" id="zipCode" value="${data.postcode || ''}">
-                                    </div>
-                                </div>
+                    </div>
+                    
+                    <!-- Overlijdensdatum (NU na schildklier, op de oude plaats van land en postcode) -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="mb-3 date-input-wrapper">
+                                <label for="deathDate" class="form-label">${t('deathDate')}</label>
+                                <input type="date" class="form-control" id="deathDate" 
+                                       value="${data.overlijdensdatum || ''}"
+                                       placeholder="DD-MM-JJJJ"
+                                       onfocus="this.type='text'"
+                                       onblur="this.type='date'">
+                                <small class="form-text text-muted">Voer datum in als DD-MM-JJJJ (bijv. 15-01-2023)</small>
                             </div>
                         </div>
                     </div>
@@ -1270,12 +1270,11 @@ class LitterManager {
         if (pedigreeInput) pedigreeInput.value = '';
         if (genderSelect) genderSelect.value = '';
         
-        // Reset overlijdensdatum
-        const deathDateInput = document.getElementById('deathDate');
-        if (deathDateInput) {
-            deathDateInput.value = '';
-            deathDateInput.type = 'date';
-        }
+        // Reset land/postcode (nu bovenaan)
+        const countryInput = document.getElementById('country');
+        const zipCodeInput = document.getElementById('zipCode');
+        if (countryInput) countryInput.value = '';
+        if (zipCodeInput) zipCodeInput.value = '';
         
         // Reset gezondheid velden
         const healthFields = [
@@ -1303,11 +1302,12 @@ class LitterManager {
         if (thyroidExplanationContainer) thyroidExplanationContainer.style.display = 'none';
         if (thyroidExplanation) thyroidExplanation.value = '';
         
-        // Reset land/postcode
-        const countryInput = document.getElementById('country');
-        const zipCodeInput = document.getElementById('zipCode');
-        if (countryInput) countryInput.value = '';
-        if (zipCodeInput) zipCodeInput.value = '';
+        // Reset overlijdensdatum (nu na schildklier)
+        const deathDateInput = document.getElementById('deathDate');
+        if (deathDateInput) {
+            deathDateInput.value = '';
+            deathDateInput.type = 'date';
+        }
         
         // Reset foto
         const photoInput = document.getElementById('photo');
