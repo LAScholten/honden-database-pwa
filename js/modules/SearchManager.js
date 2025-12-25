@@ -1,6 +1,6 @@
 /**
  * Search Manager Module
- * Beheert het zoeken naar honden met real-time filtering op naam
+ * Beheert het zoeken naar honden met real-time filtering op naam en kennelnaam
  */
 
 class SearchManager extends BaseModule {
@@ -9,13 +9,17 @@ class SearchManager extends BaseModule {
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';
         this.allDogs = [];
         this.filteredDogs = [];
+        this.searchType = 'name'; // 'name' of 'kennel'
         this.translations = {
             nl: {
                 searchDog: "Hond Zoeken",
                 searchName: "Zoek hond op naam",
+                searchKennel: "Zoek hond op kennelnaam",
                 searchPlaceholder: "Typ hondennaam, stamboomnummer of ras...",
+                kennelPlaceholder: "Typ kennelnaam...",
                 noDogsFound: "Geen honden gevonden",
                 typeToSearch: "Begin met typen om te zoeken",
+                typeToSearchKennel: "Typ een kennelnaam om te zoeken",
                 searchResults: "Zoekresultaten",
                 found: "gevonden",
                 name: "Naam",
@@ -97,9 +101,12 @@ class SearchManager extends BaseModule {
             en: {
                 searchDog: "Search Dog",
                 searchName: "Search dog by name",
+                searchKennel: "Search dog by kennel name",
                 searchPlaceholder: "Type dog name, pedigree number or breed...",
+                kennelPlaceholder: "Type kennel name...",
                 noDogsFound: "No dogs found",
                 typeToSearch: "Start typing to search",
+                typeToSearchKennel: "Type a kennel name to search",
                 searchResults: "Search Results",
                 found: "found",
                 name: "Name",
@@ -181,9 +188,12 @@ class SearchManager extends BaseModule {
             de: {
                 searchDog: "Hund suchen",
                 searchName: "Hund nach Namen suchen",
+                searchKennel: "Hund nach Kennelname suchen",
                 searchPlaceholder: "Hundenamen, Stammbaum-Nummer oder Rasse eingeben...",
+                kennelPlaceholder: "Kennelnamen eingeben...",
                 noDogsFound: "Keine Hunde gefunden",
                 typeToSearch: "Beginnen Sie mit der Eingabe, um zu suchen",
+                typeToSearchKennel: "Kennelnamen eingeben um zu suchen",
                 searchResults: "Suchergebnisse",
                 found: "gefunden",
                 name: "Name",
@@ -291,11 +301,22 @@ class SearchManager extends BaseModule {
                                     <!-- Zoekkolom -->
                                     <div class="col-md-5 border-end p-3" id="searchColumn">
                                         <div class="sticky-top" style="top: 15px;">
-                                            <div class="mb-4">
+                                            <!-- Tab knoppen voor zoektype -->
+                                            <div class="d-flex mb-3 border-bottom">
+                                                <button type="button" class="btn btn-search-type btn-outline-info active me-2" data-search-type="name">
+                                                    ${t('searchName')}
+                                                </button>
+                                                <button type="button" class="btn btn-search-type btn-outline-info" data-search-type="kennel">
+                                                    ${t('searchKennel')}
+                                                </button>
+                                            </div>
+                                            
+                                            <!-- Zoekveld voor naam -->
+                                            <div class="mb-4" id="nameSearchField">
                                                 <label for="searchNameInput" class="form-label fw-bold">${t('searchName')}</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text bg-white border-end-0">
-                                                        <i class="bi bi-search text-muted"></i>
+                                                        <i class="bi bi-person text-muted"></i>
                                                     </span>
                                                     <input type="text" class="form-control search-input border-start-0 ps-0" 
                                                            id="searchNameInput" 
@@ -303,6 +324,21 @@ class SearchManager extends BaseModule {
                                                            autocomplete="off">
                                                 </div>
                                                 <div class="form-text mt-1">${t('typeToSearch')}</div>
+                                            </div>
+                                            
+                                            <!-- Zoekveld voor kennelnaam -->
+                                            <div class="mb-4 d-none" id="kennelSearchField">
+                                                <label for="searchKennelInput" class="form-label fw-bold">${t('searchKennel')}</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-white border-end-0">
+                                                        <i class="bi bi-house text-muted"></i>
+                                                    </span>
+                                                    <input type="text" class="form-control search-input border-start-0 ps-0" 
+                                                           id="searchKennelInput" 
+                                                           placeholder="${t('kennelPlaceholder')}" 
+                                                           autocomplete="off">
+                                                </div>
+                                                <div class="form-text mt-1">${t('typeToSearchKennel')}</div>
                                             </div>
                                             
                                             <div id="searchResultsContainer">
@@ -349,6 +385,19 @@ class SearchManager extends BaseModule {
                     box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
                 }
                 
+                .btn-search-type {
+                    flex: 1;
+                    border-radius: 8px;
+                    padding: 8px 12px;
+                    transition: all 0.3s;
+                }
+                
+                .btn-search-type.active {
+                    background-color: #0d6efd;
+                    color: white;
+                    border-color: #0d6efd;
+                }
+                
                 .dog-result-item {
                     cursor: pointer;
                     transition: all 0.2s;
@@ -371,14 +420,28 @@ class SearchManager extends BaseModule {
                     border-left: 4px solid #0d6efd;
                 }
                 
-                .dog-name {
+                .dog-name-line {
                     font-size: 1rem;
                     font-weight: 600;
                     color: #0d6efd;
                     margin-bottom: 4px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
                 }
                 
-                .dog-info {
+                .dog-name {
+                    font-weight: 600;
+                    color: #0d6efd;
+                }
+                
+                .dog-kennel {
+                    font-size: 0.9rem;
+                    color: #6c757d;
+                    font-weight: normal;
+                }
+                
+                .dog-info-line {
                     color: #6c757d;
                     font-size: 0.85rem;
                     display: flex;
@@ -576,6 +639,12 @@ class SearchManager extends BaseModule {
                         width: 100%;
                         margin-bottom: 4px;
                     }
+                    
+                    .dog-name-line {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 4px;
+                    }
                 }
             </style>
         `;
@@ -586,6 +655,51 @@ class SearchManager extends BaseModule {
     }
     
     setupSearch() {
+        // Tab knoppen voor zoektype
+        document.querySelectorAll('.btn-search-type').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const searchType = e.target.getAttribute('data-search-type');
+                this.switchSearchType(searchType);
+            });
+        });
+        
+        this.setupNameSearch();
+        this.setupKennelSearch();
+    }
+    
+    switchSearchType(type) {
+        this.searchType = type;
+        
+        // Update tab knoppen
+        document.querySelectorAll('.btn-search-type').forEach(btn => {
+            const btnType = btn.getAttribute('data-search-type');
+            if (btnType === type) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        
+        // Toon/verberg zoekvelden
+        const nameField = document.getElementById('nameSearchField');
+        const kennelField = document.getElementById('kennelSearchField');
+        
+        if (type === 'name') {
+            nameField.classList.remove('d-none');
+            kennelField.classList.add('d-none');
+            document.getElementById('searchNameInput').focus();
+        } else {
+            nameField.classList.add('d-none');
+            kennelField.classList.remove('d-none');
+            document.getElementById('searchKennelInput').focus();
+        }
+        
+        // Wis zoekresultaten en details
+        this.showInitialView();
+        this.clearDetails();
+    }
+    
+    setupNameSearch() {
         const searchInput = document.getElementById('searchNameInput');
         if (!searchInput) return;
         
@@ -600,7 +714,38 @@ class SearchManager extends BaseModule {
             const searchTerm = e.target.value.toLowerCase().trim();
             
             if (searchTerm.length >= 1) {
-                this.filterDogs(searchTerm);
+                this.filterDogsByName(searchTerm);
+            } else {
+                this.showInitialView();
+                this.clearDetails();
+            }
+        });
+        
+        // Enter toets om eerste resultaat te selecteren
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && this.filteredDogs.length > 0) {
+                e.preventDefault();
+                this.selectDog(this.filteredDogs[0]);
+            }
+        });
+    }
+    
+    setupKennelSearch() {
+        const searchInput = document.getElementById('searchKennelInput');
+        if (!searchInput) return;
+        
+        searchInput.addEventListener('focus', async () => {
+            if (this.allDogs.length === 0) {
+                await this.loadSearchData();
+            }
+        });
+        
+        // Filter honden op kennelnaam bij ELKE toetsaanslag
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase().trim();
+            
+            if (searchTerm.length >= 1) {
+                this.filterDogsByKennel(searchTerm);
             } else {
                 this.showInitialView();
                 this.clearDetails();
@@ -620,10 +765,12 @@ class SearchManager extends BaseModule {
         const container = document.getElementById('searchResultsContainer');
         const t = this.t.bind(this);
         
+        const message = this.searchType === 'name' ? t('typeToSearch') : t('typeToSearchKennel');
+        
         container.innerHTML = `
             <div class="text-center py-5">
                 <i class="bi bi-search display-1 text-muted opacity-50"></i>
-                <p class="mt-3 text-muted">${t('typeToSearch')}</p>
+                <p class="mt-3 text-muted">${message}</p>
             </div>
         `;
     }
@@ -656,12 +803,26 @@ class SearchManager extends BaseModule {
         }
     }
     
-    filterDogs(searchTerm = '') {
-        // AANGEPAST: ALLEEN ZOEKEN OP NAAM VAN DE HOND - EN ALLEEN ALS HET BEGINT MET DE ZOEKTERM
+    filterDogsByName(searchTerm = '') {
         this.filteredDogs = this.allDogs.filter(dog => {
             const naam = dog.naam ? dog.naam.toLowerCase() : '';
-            // AANGEPAST: ALLEEN OP NAAM ZOEKEN EN ALLEEN ALS HET BEGINT MET DE ZOEKTERM
             return naam.startsWith(searchTerm);
+        });
+        
+        this.displaySearchResults();
+    }
+    
+    filterDogsByKennel(searchTerm = '') {
+        this.filteredDogs = this.allDogs.filter(dog => {
+            const kennelnaam = dog.kennelnaam ? dog.kennelnaam.toLowerCase() : '';
+            return kennelnaam.includes(searchTerm);
+        });
+        
+        // Sorteer op naam (alfabetisch)
+        this.filteredDogs.sort((a, b) => {
+            const naamA = a.naam ? a.naam.toLowerCase() : '';
+            const naamB = b.naam ? b.naam.toLowerCase() : '';
+            return naamA.localeCompare(naamB);
         });
         
         this.displaySearchResults();
@@ -697,11 +858,19 @@ class SearchManager extends BaseModule {
             
             html += `
                 <div class="dog-result-item" data-id="${dog.id}">
-                    <div class="dog-name">
-                        ${dog.naam || 'Onbekend'}
-                        <span class="${genderClass} ms-2" style="font-size: 0.7rem; padding: 2px 6px;">${genderText}</span>
+                    <!-- Eerste regel: Naam en Kennelnaam -->
+                    <div class="dog-name-line">
+                        <span class="dog-name">${dog.naam || 'Onbekend'}</span>
+                        ${dog.kennelnaam ? `<span class="dog-kennel">${dog.kennelnaam}</span>` : ''}
                     </div>
-                    <div class="dog-info">
+                    
+                    <!-- Tweede regel: Geslacht, Ras en Stamboomnummer -->
+                    <div class="dog-info-line">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-gender-${dog.geslacht === 'reuen' ? 'male' : dog.geslacht === 'teven' ? 'female' : 'unknown'} me-1" style="font-size: 0.8rem;"></i>
+                            <span>${genderText}</span>
+                        </div>
+                        
                         ${dog.ras ? `
                         <div class="d-flex align-items-center">
                             <i class="bi bi-tag me-1" style="font-size: 0.8rem;"></i>
@@ -850,6 +1019,7 @@ class SearchManager extends BaseModule {
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="dog-name-header">${dog.naam || t('unknown')}</div>
+                            ${dog.kennelnaam ? `<div class="text-muted mb-2">${dog.kennelnaam}</div>` : ''}
                             <div class="d-flex align-items-center flex-wrap gap-2 mt-2">
                                 ${dog.stamboomnr ? `<span class="badge bg-light text-dark">${dog.stamboomnr}</span>` : ''}
                                 ${dog.ras ? `<span class="badge bg-light text-dark">${dog.ras}</span>` : ''}
