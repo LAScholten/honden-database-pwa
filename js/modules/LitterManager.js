@@ -109,7 +109,12 @@ class LitterManager {
                 deleteFailed: "Fout bij verwijderen nest: ",
                 confirmDelete: "Weet u zeker dat u dit nest wilt verwijderen?",
                 photoAdded: "Foto toegevoegd",
-                photoError: "Fout bij uploaden foto: "
+                photoError: "Fout bij uploaden foto: ",
+
+                // Container titels
+                parentDetails: "Ouderdetails",
+                litterDetails: "Nestdetails",
+                otherDetails: "Overige details"
             },
             en: {
                 // Modal titles
@@ -210,7 +215,12 @@ class LitterManager {
                 deleteFailed: "Error deleting litter: ",
                 confirmDelete: "Are you sure you want to delete this litter?",
                 photoAdded: "Photo added",
-                photoError: "Error uploading photo: "
+                photoError: "Error uploading photo: ",
+
+                // Container titles
+                parentDetails: "Parent Details",
+                litterDetails: "Litter Details",
+                otherDetails: "Other Details"
             },
             de: {
                 // Modal Titel
@@ -278,7 +288,7 @@ class LitterManager {
                 chooseFile: "Datei wählen",
                 noFileChosen: "Keine Datei gewählt",
                 remarks: "Bemerkungen",
-                requiredFields: "Felder met * zijn Pflichtfelder",
+                requiredFields: "Felder mit * zijn Pflichtfelder",
                 saveDog: "Wurf speichern",
                 cancel: "Abbrechen",
                 delete: "Löschen",
@@ -300,7 +310,7 @@ class LitterManager {
                 importExport: "Daten importieren/exportieren",
                 
                 // Meldungen
-                adminOnly: "Nur Administratoren kunnen Würfe hinzufügen/bearbeiten",
+                adminOnly: "Nur Administratoren können Würfe hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer en Rasse zijn Pflichtfelder",
                 savingDog: "Wurf wordt gespeichert...",
                 dogAdded: "Wurf erfolgreich hinzugefügt!",
@@ -311,7 +321,12 @@ class LitterManager {
                 deleteFailed: "Fehler beim Löschen des Wurfes: ",
                 confirmDelete: "Sind Sie sicher, dass Sie diesen Wurf löschen möchten?",
                 photoAdded: "Foto hinzugefügt",
-                photoError: "Fehler beim Hochladen des Fotos: "
+                photoError: "Fehler beim Hochladen des Fotos: ",
+
+                // Container Titel
+                parentDetails: "Elterndetails",
+                litterDetails: "Wurfdetails",
+                otherDetails: "Weitere Details"
             }
         };
         
@@ -725,7 +740,7 @@ class LitterManager {
                 <!-- CONTAINER 1: OUDERDETAILS -->
                 <div class="form-container" id="ouders-container">
                     <div class="container-title">
-                        <i class="bi bi-people"></i> Ouderdetails
+                        <i class="bi bi-people"></i> ${t('parentDetails')}
                     </div>
                     
                     <!-- RIJ 1: Vader en Moeder -->
@@ -792,7 +807,7 @@ class LitterManager {
                 <!-- CONTAINER 2: NESTDETAILS -->
                 <div class="form-container" id="nest-container">
                     <div class="container-title">
-                        <i class="bi bi-house"></i> Nestdetails
+                        <i class="bi bi-house"></i> ${t('litterDetails')}
                     </div>
                     
                     <div class="row">
@@ -824,7 +839,7 @@ class LitterManager {
                 <!-- CONTAINER 3: OVERIGE DETAILS -->
                 <div class="form-container" id="details-container">
                     <div class="container-title">
-                        <i class="bi bi-card-checklist"></i> Overige details
+                        <i class="bi bi-card-checklist"></i> ${t('otherDetails')}
                     </div>
                     
                     <!-- Overlijdensdatum -->
