@@ -1,31 +1,3 @@
-[file name]: image.png
-[file content begin]
-# Overige details
-
-## Land
-- Postcode
-- Heupdysplasie
-  - Selecteer graad...
-  - Elleboodysplasie
-  - Selecteer graad...
-  - Patella Luxatie
-  - Selecteer graad...
-
-## Ogen
-- Kies...
-- Schildklier
-  - Kies...
-- Overlijdensdatum
-  - dd-mm-jjjj
-
-## Foto toevoegen
-- Dandy Walker Malformation
-  - Selecteer status...
-  - Selecteer graad...
-
-
-[file content end]
-
 /**
  * Nest Management Module
  * Beheert toevoegen en bewerken van nesten
@@ -333,7 +305,7 @@ class LitterManager {
                 
                 // Zugangskontrolle Popup Texte
                 insufficientPermissions: "Unzureichende Berechtigungen",
-                insufficientPermissionsText: "Sie haben keine Berechtigung, Würfe te bearbeiten. Nur Administratoren können diese Funktion nutzen.",
+                insufficientPermissionsText: "Sie haben keine Berechtigung, Würfe zu bearbeiten. Nur Administratoren können diese Funktion nutzen.",
                 loggedInAs: "Sie sind eingeloggt als:",
                 user: "Benutzer",
                 availableFeatures: "Verfügbare Funktionen für Benutzer",
@@ -345,7 +317,7 @@ class LitterManager {
                 // Meldungen
                 adminOnly: "Nur Administratoren kunnen Würfe hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer en Rasse zijn Pflichtfelder",
-                savingDog: "Hund wird gespeichert...",
+                savingDog: "Hund wordt gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
                 dogUpdated: "Hund erfolgreich aktualisiert!",
                 dogDeleted: "Hund erfolgreich gelöscht!",
@@ -563,16 +535,6 @@ class LitterManager {
                     .dog-item span {
                         margin-right: 10px;
                     }
-                    
-                    /* Desktop-only layout voor overlijdensdatum */
-                    .desktop-deathdate {
-                        display: none !important;
-                    }
-                    
-                    /* Mobiel layout voor overlijdensdatum */
-                    .mobile-deathdate {
-                        display: block !important;
-                    }
                 }
                 
                 /* Desktop styling */
@@ -615,16 +577,6 @@ class LitterManager {
                     
                     .dog-item span {
                         margin-right: 15px;
-                    }
-                    
-                    /* Desktop-only layout voor overlijdensdatum */
-                    .desktop-deathdate {
-                        display: block !important;
-                    }
-                    
-                    /* Verberg mobiele overlijdensdatum op desktop */
-                    .mobile-deathdate {
-                        display: none !important;
                     }
                 }
                 
@@ -1080,25 +1032,10 @@ class LitterManager {
                                 <input type="text" class="form-control" id="thyroidExplanation" value="${data.schildklierVerklaring || ''}">
                             </div>
                         </div>
-                        <div class="col-md-6 desktop-deathdate">
+                        <div class="col-md-6">
                             <div class="mb-3 date-input-wrapper">
                                 <label for="deathDate" class="form-label">${t('deathDate')}</label>
                                 <input type="date" class="form-control" id="deathDate" 
-                                       value="${data.overlijdensdatum || ''}"
-                                       placeholder="DD-MM-JJJJ"
-                                       onfocus="this.type='text'"
-                                       onblur="this.type='date'">
-                                <small class="form-text text-muted">Voer datum in als DD-MM-JJJJ (bijv. 15-01-2023)</small>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Overlijdensdatum voor mobiel (onder schildklier) -->
-                    <div class="row mobile-deathdate">
-                        <div class="col-12">
-                            <div class="mb-3 date-input-wrapper">
-                                <label for="deathDateMobile" class="form-label">${t('deathDate')}</label>
-                                <input type="date" class="form-control" id="deathDateMobile" 
                                        value="${data.overlijdensdatum || ''}"
                                        placeholder="DD-MM-JJJJ"
                                        onfocus="this.type='text'"
@@ -1139,33 +1076,6 @@ class LitterManager {
                 </div>
             </form>
             
-            <script>
-                // Synchroniseer overlijdensdatum velden
-                document.addEventListener('DOMContentLoaded', function() {
-                    const deathDateDesktop = document.getElementById('deathDate');
-                    const deathDateMobile = document.getElementById('deathDateMobile');
-                    
-                    if (deathDateDesktop && deathDateMobile) {
-                        // Synchroniseer van desktop naar mobiel
-                        deathDateDesktop.addEventListener('change', function() {
-                            deathDateMobile.value = this.value;
-                        });
-                        
-                        // Synchroniseer van mobiel naar desktop
-                        deathDateMobile.addEventListener('change', function() {
-                            deathDateDesktop.value = this.value;
-                        });
-                        
-                        // Initialiseer synchronisatie bij laden
-                        if (deathDateDesktop.value && !deathDateMobile.value) {
-                            deathDateMobile.value = deathDateDesktop.value;
-                        } else if (deathDateMobile.value && !deathDateDesktop.value) {
-                            deathDateDesktop.value = deathDateMobile.value;
-                        }
-                    }
-                });
-            </script>
-            
             <style>
                 .autocomplete-dropdown {
                     position: absolute;
@@ -1200,26 +1110,6 @@ class LitterManager {
                 
                 .parent-input-wrapper {
                     position: relative;
-                }
-                
-                /* Desktop layout voor overlijdensdatum naast schildklier */
-                @media (min-width: 769px) {
-                    .desktop-deathdate {
-                        display: block !important;
-                    }
-                    .mobile-deathdate {
-                        display: none !important;
-                    }
-                }
-                
-                /* Mobiel layout voor overlijdensdatum onder schildklier */
-                @media (max-width: 768px) {
-                    .desktop-deathdate {
-                        display: none !important;
-                    }
-                    .mobile-deathdate {
-                        display: block !important;
-                    }
                 }
             </style>
         `;
@@ -1408,16 +1298,11 @@ class LitterManager {
         if (thyroidExplanationContainer) thyroidExplanationContainer.style.display = 'none';
         if (thyroidExplanation) thyroidExplanation.value = '';
         
-        // Reset overlijdensdatum velden
+        // Reset overlijdensdatum (nu na schildklier)
         const deathDateInput = document.getElementById('deathDate');
-        const deathDateMobileInput = document.getElementById('deathDateMobile');
         if (deathDateInput) {
             deathDateInput.value = '';
             deathDateInput.type = 'date';
-        }
-        if (deathDateMobileInput) {
-            deathDateMobileInput.value = '';
-            deathDateMobileInput.type = 'date';
         }
         
         // Reset foto
@@ -1435,19 +1320,16 @@ class LitterManager {
     setupDateFields() {
         const birthDateInput = document.getElementById('birthDate');
         const deathDateInput = document.getElementById('deathDate');
-        const deathDateMobileInput = document.getElementById('deathDateMobile');
         
-        const setupDateInput = (input) => {
-            if (!input) return;
-            
+        if (birthDateInput) {
             // Verander type naar text wanneer gebruiker focust
-            input.addEventListener('focus', function() {
+            birthDateInput.addEventListener('focus', function() {
                 this.type = 'text';
                 this.placeholder = 'DD-MM-JJJJ';
             });
             
             // Valideer en converteer naar juiste formaat wanneer gebruiker blurt
-            input.addEventListener('blur', function() {
+            birthDateInput.addEventListener('blur', function() {
                 const value = this.value.trim();
                 if (value) {
                     // Converteer DD-MM-JJJJ naar YYYY-MM-DD voor date input
@@ -1465,7 +1347,7 @@ class LitterManager {
             });
             
             // Input event voor real-time formatteer hulp
-            input.addEventListener('input', function(e) {
+            birthDateInput.addEventListener('input', function(e) {
                 let value = e.target.value.replace(/[^0-9-]/g, '');
                 
                 // Auto-format naar DD-MM-JJJJ
@@ -1480,11 +1362,46 @@ class LitterManager {
                 
                 e.target.value = value;
             });
-        };
+        }
         
-        setupDateInput(birthDateInput);
-        setupDateInput(deathDateInput);
-        setupDateInput(deathDateMobileInput);
+        if (deathDateInput) {
+            // Zelfde logica voor deathDate
+            deathDateInput.addEventListener('focus', function() {
+                this.type = 'text';
+                this.placeholder = 'DD-MM-JJJJ';
+            });
+            
+            deathDateInput.addEventListener('blur', function() {
+                const value = this.value.trim();
+                if (value) {
+                    const parts = value.split('-');
+                    if (parts.length === 3) {
+                        const day = parts[0].padStart(2, '0');
+                        const month = parts[1].padStart(2, '0');
+                        const year = parts[2];
+                        if (day.length === 2 && month.length === 2 && year.length === 4) {
+                            this.value = `${year}-${month}-${day}`;
+                        }
+                    }
+                }
+                this.type = 'date';
+            });
+            
+            deathDateInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/[^0-9-]/g, '');
+                
+                if (value.length > 2 && value.length <= 4 && !value.includes('-')) {
+                    value = value.substring(0, 2) + '-' + value.substring(2);
+                } else if (value.length > 5 && value.length <= 8 && value.split('-').length === 2) {
+                    const parts = value.split('-');
+                    if (parts[1].length > 2) {
+                        value = parts[0] + '-' + parts[1].substring(0, 2) + '-' + parts[1].substring(2);
+                    }
+                }
+                
+                e.target.value = value;
+            });
+        }
     }
     
     addToLastBreeds(breed) {
@@ -1698,10 +1615,6 @@ class LitterManager {
             return;
         }
         
-        // Gebruik desktop overlijdensdatum als bron (ze zijn gesynchroniseerd)
-        const deathDateValue = document.getElementById('deathDate')?.value || 
-                               document.getElementById('deathDateMobile')?.value || '';
-        
         // Verzamel formulier data
         const dogData = {
             naam: document.getElementById('name')?.value.trim() || '',
@@ -1714,7 +1627,7 @@ class LitterManager {
             moeder: document.getElementById('mother')?.value.trim() || '',
             moederId: document.getElementById('motherId')?.value ? parseInt(document.getElementById('motherId').value) : null,
             geboortedatum: document.getElementById('birthDate')?.value || '',
-            overlijdensdatum: deathDateValue,
+            overlijdensdatum: document.getElementById('deathDate')?.value || '',
             heupdysplasie: document.getElementById('hipDysplasia')?.value || '',
             elleboogdysplasie: document.getElementById('elbowDysplasia')?.value || '',
             patella: document.getElementById('patellaLuxation')?.value || '',
@@ -1806,20 +1719,16 @@ class LitterManager {
         });
         
         // Reset datum velden
-        const dateInputs = [
-            'birthDate',
-            'deathDate',
-            'deathDateMobile'
-        ];
-        
-        dateInputs.forEach(id => {
-            const input = document.getElementById(id);
-            if (input) {
-                input.type = 'date';
-                input.placeholder = 'DD-MM-JJJJ';
-                input.value = '';
-            }
-        });
+        const birthDateInput = document.getElementById('birthDate');
+        const deathDateInput = document.getElementById('deathDate');
+        if (birthDateInput) {
+            birthDateInput.type = 'date';
+            birthDateInput.placeholder = 'DD-MM-JJJJ';
+        }
+        if (deathDateInput) {
+            deathDateInput.type = 'date';
+            deathDateInput.placeholder = 'DD-MM-JJJJ';
+        }
         
         // Reset de lijst met ingevoerde honden
         this.currentLitterDogs = [];
