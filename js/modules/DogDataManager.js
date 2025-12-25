@@ -348,7 +348,7 @@ class DogDataManager extends BaseModule {
                 photoError: "Fehler beim Hochladen des Fotos: ",
                 fieldsRequired: "Name, Stammbaum-Nummer en Rasse sind Pflichtfelder",
                 dogNotFound: "Hund nicht gefonden",
-                adminOnly: "Nur Administratoren können Hunde bearbeiten",
+                adminOnly: "Nur Administratoren kunnen Hunde bearbeiten",
                 invalidId: "Ungültige Hunde-ID"
             }
         };
@@ -557,15 +557,23 @@ class DogDataManager extends BaseModule {
                                     <!-- Rij 5: Geboortedatum en Overlijdensdatum -->
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <div class="mb-3">
+                                            <div class="mb-3 date-input-wrapper">
                                                 <label for="birthDate" class="form-label fw-semibold">${t('birthDate')}</label>
-                                                <input type="date" class="form-control" id="birthDate">
+                                                <input type="date" class="form-control" id="birthDate" 
+                                                       placeholder="DD-MM-JJJJ"
+                                                       onfocus="this.type='text'"
+                                                       onblur="this.type='date'">
+                                                <small class="form-text text-muted">Voer datum in als DD-MM-JJJJ (bijv. 15-01-2023)</small>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
-                                            <div class="mb-3">
+                                            <div class="mb-3 date-input-wrapper">
                                                 <label for="deathDate" class="form-label fw-semibold">${t('deathDate')}</label>
-                                                <input type="date" class="form-control" id="deathDate">
+                                                <input type="date" class="form-control" id="deathDate" 
+                                                       placeholder="DD-MM-JJJJ"
+                                                       onfocus="this.type='text'"
+                                                       onblur="this.type='date'">
+                                                <small class="form-text text-muted">Voer datum in als DD-MM-JJJJ (bijv. 15-01-2023)</small>
                                             </div>
                                         </div>
                                     </div>
@@ -838,6 +846,33 @@ class DogDataManager extends BaseModule {
                         font-size: 0.75em !important;
                         padding: 3px 6px !important;
                     }
+                    
+                    /* Geboortedatum input styling voor mobiel */
+                    .date-input-wrapper {
+                        position: relative;
+                    }
+                    
+                    .date-input-wrapper input[type="text"] {
+                        /* Verberg kalender icon op mobiel */
+                        -webkit-appearance: none;
+                        -moz-appearance: none;
+                        appearance: none;
+                    }
+                    
+                    /* Verwijder de kalender picker voor mobiel */
+                    .date-input-wrapper input[type="date"]::-webkit-calendar-picker-indicator,
+                    .date-input-wrapper input[type="date"]::-webkit-inner-spin-button,
+                    .date-input-wrapper input[type="date"]::-webkit-clear-button {
+                        display: none;
+                        -webkit-appearance: none;
+                        appearance: none;
+                    }
+                    
+                    .date-input-wrapper input[type="date"] {
+                        -webkit-appearance: textfield;
+                        -moz-appearance: textfield;
+                        appearance: textfield;
+                    }
                 }
                 
                 /* Breed container voor 1-lijn layout - zoals in DogManager */
@@ -906,6 +941,36 @@ class DogDataManager extends BaseModule {
                 
                 .recent-breeds-buttons::-webkit-scrollbar-thumb:hover {
                     background: #a8a8a8;
+                }
+                
+                /* Datum input styling - gebruik text input voor alle apparaten */
+                .date-input-wrapper {
+                    position: relative;
+                }
+                
+                .date-input-wrapper .form-control {
+                    padding-right: 12px;
+                }
+                
+                /* Verberg kalender picker voor alle apparaten */
+                input[type="date"]::-webkit-calendar-picker-indicator,
+                input[type="date"]::-webkit-inner-spin-button,
+                input[type="date"]::-webkit-clear-button {
+                    display: none;
+                    -webkit-appearance: none;
+                    appearance: none;
+                }
+                
+                input[type="date"] {
+                    -webkit-appearance: textfield;
+                    -moz-appearance: textfield;
+                    appearance: textfield;
+                }
+                
+                /* Placeholder styling voor datum velden */
+                input[type="date"]::placeholder {
+                    color: #6c757d;
+                    opacity: 0.7;
                 }
             </style>
         `;
@@ -1011,10 +1076,103 @@ class DogDataManager extends BaseModule {
         // Setup autocomplete voor ouders
         this.setupParentAutocomplete();
         
+        // Setup datum velden voor tekst invoer
+        this.setupDateFields();
+        
         // Vertaal de modal tekst
         setTimeout(() => {
             this.translateModal();
         }, 100);
+    }
+    
+    /**
+     * Setup datum velden om als tekst veld te werken op mobiel
+     */
+    setupDateFields() {
+        const birthDateInput = document.getElementById('birthDate');
+        const deathDateInput = document.getElementById('deathDate');
+        
+        if (birthDateInput) {
+            // Verander type naar text wanneer gebruiker focust
+            birthDateInput.addEventListener('focus', function() {
+                this.type = 'text';
+                this.placeholder = 'DD-MM-JJJJ';
+            });
+            
+            // Valideer en converteer naar juiste formaat wanneer gebruiker blurt
+            birthDateInput.addEventListener('blur', function() {
+                const value = this.value.trim();
+                if (value) {
+                    // Converteer DD-MM-JJJJ naar YYYY-MM-DD voor date input
+                    const parts = value.split('-');
+                    if (parts.length === 3) {
+                        const day = parts[0].padStart(2, '0');
+                        const month = parts[1].padStart(2, '0');
+                        const year = parts[2];
+                        if (day.length === 2 && month.length === 2 && year.length === 4) {
+                            this.value = `${year}-${month}-${day}`;
+                        }
+                    }
+                }
+                this.type = 'date';
+            });
+            
+            // Input event voor real-time formatteer hulp
+            birthDateInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/[^0-9-]/g, '');
+                
+                // Auto-format naar DD-MM-JJJJ
+                if (value.length > 2 && value.length <= 4 && !value.includes('-')) {
+                    value = value.substring(0, 2) + '-' + value.substring(2);
+                } else if (value.length > 5 && value.length <= 8 && value.split('-').length === 2) {
+                    const parts = value.split('-');
+                    if (parts[1].length > 2) {
+                        value = parts[0] + '-' + parts[1].substring(0, 2) + '-' + parts[1].substring(2);
+                    }
+                }
+                
+                e.target.value = value;
+            });
+        }
+        
+        if (deathDateInput) {
+            // Zelfde logica voor deathDate
+            deathDateInput.addEventListener('focus', function() {
+                this.type = 'text';
+                this.placeholder = 'DD-MM-JJJJ';
+            });
+            
+            deathDateInput.addEventListener('blur', function() {
+                const value = this.value.trim();
+                if (value) {
+                    const parts = value.split('-');
+                    if (parts.length === 3) {
+                        const day = parts[0].padStart(2, '0');
+                        const month = parts[1].padStart(2, '0');
+                        const year = parts[2];
+                        if (day.length === 2 && month.length === 2 && year.length === 4) {
+                            this.value = `${year}-${month}-${day}`;
+                        }
+                    }
+                }
+                this.type = 'date';
+            });
+            
+            deathDateInput.addEventListener('input', function(e) {
+                let value = e.target.value.replace(/[^0-9-]/g, '');
+                
+                if (value.length > 2 && value.length <= 4 && !value.includes('-')) {
+                    value = value.substring(0, 2) + '-' + value.substring(2);
+                } else if (value.length > 5 && value.length <= 8 && value.split('-').length === 2) {
+                    const parts = value.split('-');
+                    if (parts[1].length > 2) {
+                        value = parts[0] + '-' + parts[1].substring(0, 2) + '-' + parts[1].substring(2);
+                    }
+                }
+                
+                e.target.value = value;
+            });
+        }
     }
     
     /**
@@ -1180,9 +1338,28 @@ class DogDataManager extends BaseModule {
         document.getElementById('mother').value = dog.moeder || '';
         document.getElementById('motherId').value = dog.moederId || '';
         
-        // Datums
-        document.getElementById('birthDate').value = dog.geboortedatum || '';
-        document.getElementById('deathDate').value = dog.overlijdensdatum || '';
+        // Datums - converteer YYYY-MM-DD terug naar DD-MM-JJJJ voor display
+        if (dog.geboortedatum) {
+            const birthParts = dog.geboortedatum.split('-');
+            if (birthParts.length === 3) {
+                document.getElementById('birthDate').value = `${birthParts[2]}-${birthParts[1]}-${birthParts[0]}`;
+            } else {
+                document.getElementById('birthDate').value = dog.geboortedatum || '';
+            }
+        } else {
+            document.getElementById('birthDate').value = '';
+        }
+        
+        if (dog.overlijdensdatum) {
+            const deathParts = dog.overlijdensdatum.split('-');
+            if (deathParts.length === 3) {
+                document.getElementById('deathDate').value = `${deathParts[2]}-${deathParts[1]}-${deathParts[0]}`;
+            } else {
+                document.getElementById('deathDate').value = dog.overlijdensdatum || '';
+            }
+        } else {
+            document.getElementById('deathDate').value = '';
+        }
         
         // Gezondheidsinformatie
         document.getElementById('hipDysplasia').value = dog.heupdysplasie || '';
@@ -1232,6 +1409,9 @@ class DogDataManager extends BaseModule {
         
         // Zet de dropdowns terug op
         this.setupParentAutocomplete();
+        
+        // Zorg dat datum velden correct zijn ingesteld
+        this.setupDateFields();
     }
     
     /**
@@ -1255,6 +1435,18 @@ class DogDataManager extends BaseModule {
         document.getElementById('dogId').value = '';
         document.getElementById('fatherId').value = '';
         document.getElementById('motherId').value = '';
+        
+        // Reset datum velden naar date type
+        const birthDateInput = document.getElementById('birthDate');
+        const deathDateInput = document.getElementById('deathDate');
+        if (birthDateInput) {
+            birthDateInput.type = 'date';
+            birthDateInput.placeholder = 'DD-MM-JJJJ';
+        }
+        if (deathDateInput) {
+            deathDateInput.type = 'date';
+            deathDateInput.placeholder = 'DD-MM-JJJJ';
+        }
         
         this.selectedDog = null;
         this.currentDogId = null;
@@ -1288,6 +1480,35 @@ class DogDataManager extends BaseModule {
             return;
         }
         
+        // Zorg dat datum velden juist geformatteerd worden voor opslag
+        const birthDateInput = document.getElementById('birthDate');
+        const deathDateInput = document.getElementById('deathDate');
+        
+        // Converteer DD-MM-JJJJ naar YYYY-MM-DD voor opslag
+        let geboortedatum = birthDateInput.value || '';
+        let overlijdensdatum = deathDateInput.value || '';
+        
+        // Als er een datum is ingevuld, converteer het formaat
+        if (geboortedatum) {
+            const parts = geboortedatum.split('-');
+            if (parts.length === 3) {
+                // Controleer of het in DD-MM-JJJJ formaat is
+                if (parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
+                    geboortedatum = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                }
+            }
+        }
+        
+        if (overlijdensdatum) {
+            const parts = overlijdensdatum.split('-');
+            if (parts.length === 3) {
+                // Controleer of het in DD-MM-JJJJ formaat is
+                if (parts[0].length === 2 && parts[1].length === 2 && parts[2].length === 4) {
+                    overlijdensdatum = `${parts[2]}-${parts[1]}-${parts[0]}`;
+                }
+            }
+        }
+        
         const dogData = {
             id: parsedId, // Zorg dat dit een getal is
             naam: document.getElementById('dogName').value.trim(),
@@ -1299,8 +1520,8 @@ class DogDataManager extends BaseModule {
             vaderId: document.getElementById('fatherId').value ? parseInt(document.getElementById('fatherId').value) : null,
             moeder: document.getElementById('mother').value.trim(),
             moederId: document.getElementById('motherId').value ? parseInt(document.getElementById('motherId').value) : null,
-            geboortedatum: document.getElementById('birthDate').value || null,
-            overlijdensdatum: document.getElementById('deathDate').value || null,
+            geboortedatum: geboortedatum || null,
+            overlijdensdatum: overlijdensdatum || null,
             heupdysplasie: document.getElementById('hipDysplasia').value || '',
             elleboogdysplasie: document.getElementById('elbowDysplasia').value || '',
             patella: document.getElementById('patellaLuxation').value || '',
