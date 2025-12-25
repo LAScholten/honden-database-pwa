@@ -5,8 +5,8 @@
 
 class HondenDatabase {
     constructor() {
-        this.dbName = 'HondenDatabase_v4'; // Versie verhoogd naar v4
-        this.version = 4; // Nieuwe versie voor vaderId/moederId
+        this.dbName = 'HondenDatabase_v5'; // Versie verhoogd naar v5 voor kennelnaam
+        this.version = 5; // Nieuwe versie voor kennelnaam
         this.db = null;
         this.isInitialized = false;
     }
@@ -48,40 +48,94 @@ class HondenDatabase {
                 autoIncrement: true 
             });
             
+            // Basis informatie
             hondenStore.createIndex('naam', 'naam', { unique: false });
+            hondenStore.createIndex('kennelnaam', 'kennelnaam', { unique: false });
             hondenStore.createIndex('stamboomnr', 'stamboomnr', { unique: true });
             hondenStore.createIndex('ras', 'ras', { unique: false });
             hondenStore.createIndex('geslacht', 'geslacht', { unique: false });
+            
+            // Ouders
             hondenStore.createIndex('vader', 'vader', { unique: false });
             hondenStore.createIndex('vaderId', 'vaderId', { unique: false });
             hondenStore.createIndex('moeder', 'moeder', { unique: false });
             hondenStore.createIndex('moederId', 'moederId', { unique: false });
+            
+            // Datums
             hondenStore.createIndex('geboortedatum', 'geboortedatum', { unique: false });
             hondenStore.createIndex('overlijdensdatum', 'overlijdensdatum', { unique: false });
+            
+            // Gezondheidsinformatie
             hondenStore.createIndex('heupdysplasie', 'heupdysplasie', { unique: false });
             hondenStore.createIndex('elleboogdysplasie', 'elleboogdysplasie', { unique: false });
             hondenStore.createIndex('patella', 'patella', { unique: false });
             hondenStore.createIndex('ogen', 'ogen', { unique: false });
             hondenStore.createIndex('dandyWalker', 'dandyWalker', { unique: false });
             hondenStore.createIndex('schildklier', 'schildklier', { unique: false });
+            
+            // Locatie
             hondenStore.createIndex('land', 'land', { unique: false });
             hondenStore.createIndex('postcode', 'postcode', { unique: false });
+            
+            // Metadata
             hondenStore.createIndex('createdAt', 'createdAt', { unique: false });
             hondenStore.createIndex('updatedAt', 'updatedAt', { unique: false });
-        } else if (oldVersion < 4) {
-            // Upgrade naar versie 4: voeg vaderId/moederId indexen toe
-            console.log('Upgrade honden store naar versie 4');
+        } else {
+            // Upgrade van oude versies
             const transaction = event.target.transaction;
             const hondenStore = transaction.objectStore('honden');
             
-            if (!hondenStore.indexNames.contains('vaderId')) {
-                hondenStore.createIndex('vaderId', 'vaderId', { unique: false });
-                console.log('vaderId index toegevoegd');
+            // Vervang de oude upgrade logica
+            if (oldVersion < 5) {
+                console.log('Upgrade honden store naar versie 5');
+                
+                // Voeg kennelnaam index toe als deze nog niet bestaat
+                if (!hondenStore.indexNames.contains('kennelnaam')) {
+                    try {
+                        hondenStore.createIndex('kennelnaam', 'kennelnaam', { unique: false });
+                        console.log('kennelnaam index toegevoegd');
+                        
+                        // Voeg kennelnaam veld toe aan bestaande records
+                        const request = hondenStore.openCursor();
+                        request.onsuccess = (e) => {
+                            const cursor = e.target.result;
+                            if (cursor) {
+                                const hond = cursor.value;
+                                // Voeg kennelnaam veld toe als het niet bestaat
+                                if (hond.kennelnaam === undefined) {
+                                    hond.kennelnaam = '';
+                                    cursor.update(hond);
+                                }
+                                cursor.continue();
+                            }
+                        };
+                    } catch (error) {
+                        console.warn('Kon kennelnaam index niet toevoegen:', error);
+                    }
+                }
             }
             
-            if (!hondenStore.indexNames.contains('moederId')) {
-                hondenStore.createIndex('moederId', 'moederId', { unique: false });
-                console.log('moederId index toegevoegd');
+            // Voor versie 4: voeg vaderId/moederId indexen toe
+            if (oldVersion < 4) {
+                console.log('Upgrade honden store naar versie 4');
+                
+                if (!hondenStore.indexNames.contains('vaderId')) {
+                    try {
+                        hondenStore.createIndex('vaderId', 'vaderId', { unique: false });
+                        console.log('vaderId index toegevoegd');
+                    } catch (error) {
+                        console.warn('Kon vaderId index niet toevoegen:', error);
+                    }
+                }
+                
+                if (!hondenStore.indexNames.contains('moederId')) {
+                    try {
+                        hondenStore.createIndex('moederId', 'moederId', { unique: false });
+                        console.log('moederId index toegevoegd');
+                    } catch (error) {
+                        console.warn('Kon moederId index niet toevoegen:', error);
+                    }
+                }
             }
         }
         
@@ -119,16 +173,24 @@ class HondenDatabase {
         await this.init();
         
         const hondMetData = {
+            // Basis informatie
             naam: hond.naam || '',
+            kennelnaam: hond.kennelnaam || '',
             stamboomnr: hond.stamboomnr || '',
             ras: hond.ras || '',
             geslacht: hond.geslacht || '',
+            
+            // Ouders
             vader: hond.vader || '',
             vaderId: hond.vaderId || null,
             moeder: hond.moeder || '',
             moederId: hond.moederId || null,
+            
+            // Datums
             geboortedatum: hond.geboortedatum || '',
             overlijdensdatum: hond.overlijdensdatum || '',
+            
+            // Gezondheidsinformatie
             heupdysplasie: hond.heupdysplasie || '',
             elleboogdysplasie: hond.elleboogdysplasie || '',
             patella: hond.patella || '',
@@ -137,9 +199,15 @@ class HondenDatabase {
             dandyWalker: hond.dandyWalker || '',
             schildklier: hond.schildklier || '',
             schildklierVerklaring: hond.schildklierVerklaring || '',
+            
+            // Locatie
             land: hond.land || '',
             postcode: hond.postcode || '',
+            
+            // Opmerkingen
             opmerkingen: hond.opmerkingen || '',
+            
+            // Metadata
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             createdBy: window.auth?.getCurrentUser()?.username || 'unknown'
@@ -257,6 +325,11 @@ class HondenDatabase {
                     }
                 });
                 
+                // Zorg ervoor dat alle nieuwe velden er zijn
+                if (!updatedHond.kennelnaam && existingHond.kennelnaam === undefined) {
+                    updatedHond.kennelnaam = '';
+                }
+                
                 const putRequest = store.put(updatedHond);
                 putRequest.onsuccess = () => {
                     console.log('Hond bijgewerkt:', hondId, updatedHond.naam);
@@ -332,6 +405,95 @@ class HondenDatabase {
                 console.error('Fout bij ophalen hond:', error);
                 reject(new Error(`Fout bij ophalen: ${request.error?.message || 'Onbekende fout'}`));
             };
+        });
+    }
+
+    // Nieuwe zoekmethodes voor kennelnaam
+    async zoekOpKennelnaam(kennelnaam) {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['honden'], 'readonly');
+            const store = transaction.objectStore('honden');
+            const index = store.index('kennelnaam');
+            
+            // Zoek naar exacte match of gedeeltelijke matches
+            const request = index.getAll(kennelnaam);
+            
+            request.onsuccess = () => {
+                const exactMatches = request.result;
+                
+                if (exactMatches.length > 0) {
+                    resolve(exactMatches);
+                } else {
+                    // Zoek naar gedeeltelijke matches
+                    const results = [];
+                    const cursorRequest = store.openCursor();
+                    
+                    cursorRequest.onsuccess = (event) => {
+                        const cursor = event.target.result;
+                        if (cursor) {
+                            const hond = cursor.value;
+                            if (hond.kennelnaam && hond.kennelnaam.toLowerCase().includes(kennelnaam.toLowerCase())) {
+                                results.push(hond);
+                            }
+                            cursor.continue();
+                        } else {
+                            resolve(results);
+                        }
+                    };
+                    
+                    cursorRequest.onerror = () => reject(cursorRequest.error);
+                }
+            };
+            
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async getHondenPerKennel() {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['honden'], 'readonly');
+            const store = transaction.objectStore('honden');
+            
+            const kennelOverzicht = {};
+            const request = store.openCursor();
+            
+            request.onsuccess = (event) => {
+                const cursor = event.target.result;
+                if (cursor) {
+                    const hond = cursor.value;
+                    const kennel = hond.kennelnaam || 'Geen kennel';
+                    
+                    if (!kennelOverzicht[kennel]) {
+                        kennelOverzicht[kennel] = {
+                            naam: kennel,
+                            aantal: 0,
+                            honden: []
+                        };
+                    }
+                    
+                    kennelOverzicht[kennel].aantal++;
+                    kennelOverzicht[kennel].honden.push({
+                        id: hond.id,
+                        naam: hond.naam,
+                        stamboomnr: hond.stamboomnr,
+                        ras: hond.ras,
+                        geslacht: hond.geslacht
+                    });
+                    
+                    cursor.continue();
+                } else {
+                    // Converteer naar array en sorteer op aantal
+                    const result = Object.values(kennelOverzicht)
+                        .sort((a, b) => b.aantal - a.aantal);
+                    resolve(result);
+                }
+            };
+            
+            request.onerror = () => reject(request.error);
         });
     }
 
@@ -526,6 +688,11 @@ class HondenDatabase {
         if (importData.honden && Array.isArray(importData.honden)) {
             for (const hond of importData.honden) {
                 try {
+                    // Zorg dat oudere imports ook kennelnaam hebben
+                    if (hond.kennelnaam === undefined) {
+                        hond.kennelnaam = '';
+                    }
+                    
                     const bestaandeHond = await this.getHondByStamboomnr(hond.stamboomnr);
                     
                     if (bestaandeHond && overschrijven) {
@@ -661,10 +828,21 @@ class HondenDatabase {
             console.log('Geen toegang tot privé info statistieken');
         }
         
+        // Tel honden per kennel
+        const kennelStats = {};
+        honden.forEach(hond => {
+            const kennel = hond.kennelnaam || 'Geen kennel';
+            kennelStats[kennel] = (kennelStats[kennel] || 0) + 1;
+        });
+        
         return {
             totaalHonden: honden.length,
             totaalFotos: fotos.length,
             totaalPriveInfo: priveInfoCount,
+            kennelStatistieken: {
+                totaalKennels: Object.keys(kennelStats).length,
+                hondenPerKennel: kennelStats
+            },
             laatsteUpdate: honden.reduce((latest, hond) => {
                 const hondDatum = new Date(hond.updatedAt || hond.createdAt);
                 return hondDatum > latest ? hondDatum : latest;
@@ -689,7 +867,7 @@ class HondenDatabase {
             // Geen toegang, gebruik standaard
         }
         
-        const avgHondSize = 1000;
+        const avgHondSize = 1500; // Iets groter door kennelnaam veld
         const avgFotoSize = 50000;
         const avgPriveSize = 1000;
         
