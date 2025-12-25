@@ -26,10 +26,11 @@ class DogDataManager extends BaseModule {
                 // Form velden
                 name: "Naam",
                 nameRequired: "Naam *",
+                kennelName: "Kennelnaam",
                 pedigreeNumber: "Stamboomnummer *",
                 breed: "Ras",
                 breedRequired: "Ras *",
-                recentBreeds: "Recent gebruikte rassen",
+                recent: "Recent:",
                 father: "Vader",
                 mother: "Moeder",
                 birthDate: "Geboortedatum",
@@ -137,10 +138,11 @@ class DogDataManager extends BaseModule {
                 // Form fields
                 name: "Name",
                 nameRequired: "Name *",
+                kennelName: "Kennel Name",
                 pedigreeNumber: "Pedigree number *",
                 breed: "Breed",
                 breedRequired: "Breed *",
-                recentBreeds: "Recently used breeds",
+                recent: "Recent:",
                 father: "Father",
                 mother: "Mother",
                 birthDate: "Birth date",
@@ -248,10 +250,11 @@ class DogDataManager extends BaseModule {
                 // Formular Felder
                 name: "Name",
                 nameRequired: "Name *",
+                kennelName: "Kennelname",
                 pedigreeNumber: "Stammbaum-Nummer *",
                 breed: "Rasse",
                 breedRequired: "Rasse *",
-                recentBreeds: "Kürzlich verwendete Rassen",
+                recent: "Kürzlich:",
                 father: "Vater",
                 mother: "Mutter",
                 birthDate: "Geburtsdatum",
@@ -413,12 +416,13 @@ class DogDataManager extends BaseModule {
         
         const t = this.t.bind(this);
         
-        // Genereer recente rassen opties
+        // Genereer recente rassen knoppen (op 1 regel naast het ras veld)
         let recentBreedsHTML = '';
-        if (this.lastBreeds.length > 0) {
+        if (this.lastBreeds && this.lastBreeds.length > 0) {
             recentBreedsHTML = `
-                <div class="form-text mb-2">${t('recentBreeds')}:</div>
-                <div class="d-flex flex-wrap gap-2 mb-3">
+                <div class="recent-breeds-container">
+                    <div class="recent-breeds-label">${t('recent')}</div>
+                    <div class="recent-breeds-buttons">
             `;
             this.lastBreeds.forEach(breed => {
                 recentBreedsHTML += `
@@ -427,7 +431,10 @@ class DogDataManager extends BaseModule {
                     </button>
                 `;
             });
-            recentBreedsHTML += `</div>`;
+            recentBreedsHTML += `
+                    </div>
+                </div>
+            `;
         }
         
         return `
@@ -474,6 +481,7 @@ class DogDataManager extends BaseModule {
                                         <span id="editingDogName" class="fw-bold text-primary"></span>
                                     </div>
                                     
+                                    <!-- Rij 1: Naam en Kennelnaam -->
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
@@ -483,18 +491,18 @@ class DogDataManager extends BaseModule {
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="pedigreeNumber" class="form-label fw-semibold">${t('pedigreeNumber')}</label>
-                                                <input type="text" class="form-control" id="pedigreeNumber" required>
+                                                <label for="kennelName" class="form-label fw-semibold">${t('kennelName')}</label>
+                                                <input type="text" class="form-control" id="kennelName">
                                             </div>
                                         </div>
                                     </div>
                                     
+                                    <!-- Rij 2: Stamboomnummer en Geslacht -->
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <div class="mb-3 parent-input-wrapper">
-                                                <label for="breed" class="form-label fw-semibold">${t('breedRequired')}</label>
-                                                <input type="text" class="form-control" id="breed" required>
-                                                ${recentBreedsHTML}
+                                            <div class="mb-3">
+                                                <label for="pedigreeNumber" class="form-label fw-semibold">${t('pedigreeNumber')}</label>
+                                                <input type="text" class="form-control" id="pedigreeNumber" required>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -509,6 +517,22 @@ class DogDataManager extends BaseModule {
                                         </div>
                                     </div>
                                     
+                                    <!-- Rij 3: Ras met recente rassen op 1 regel -->
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="mb-3">
+                                                <label for="breed" class="form-label fw-semibold">${t('breedRequired')}</label>
+                                                <div class="breed-container">
+                                                    <div class="breed-input-container">
+                                                        <input type="text" class="form-control" id="breed" required>
+                                                    </div>
+                                                    ${recentBreedsHTML}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Rij 4: Vader en Moeder (naast elkaar) -->
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3 parent-input-wrapper">
@@ -530,6 +554,7 @@ class DogDataManager extends BaseModule {
                                         </div>
                                     </div>
                                     
+                                    <!-- Rij 5: Geboortedatum en Overlijdensdatum -->
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
@@ -545,6 +570,7 @@ class DogDataManager extends BaseModule {
                                         </div>
                                     </div>
                                     
+                                    <!-- Rij 6: Heupdysplasie, Elleboogdysplasie, Patella Luxatie -->
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="mb-3">
@@ -586,6 +612,7 @@ class DogDataManager extends BaseModule {
                                         </div>
                                     </div>
                                     
+                                    <!-- Rij 7: Ogen en Dandy Walker -->
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
@@ -616,6 +643,7 @@ class DogDataManager extends BaseModule {
                                         </div>
                                     </div>
                                     
+                                    <!-- Rij 8: Schildklier en Land/Postcode -->
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
@@ -632,17 +660,24 @@ class DogDataManager extends BaseModule {
                                             </div>
                                         </div>
                                         <div class="col-md-6">
-                                            <div class="mb-3">
-                                                <label for="country" class="form-label fw-semibold">${t('country')}</label>
-                                                <input type="text" class="form-control" id="country">
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="zipCode" class="form-label fw-semibold">${t('zipCode')}</label>
-                                                <input type="text" class="form-control" id="zipCode">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label for="country" class="form-label fw-semibold">${t('country')}</label>
+                                                        <input type="text" class="form-control" id="country">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label for="zipCode" class="form-label fw-semibold">${t('zipCode')}</label>
+                                                        <input type="text" class="form-control" id="zipCode">
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                     
+                                    <!-- Foto uploaden -->
                                     <div class="mb-3">
                                         <label for="dogPhoto" class="form-label fw-semibold">${t('addPhoto')}</label>
                                         <div class="input-group">
@@ -652,6 +687,7 @@ class DogDataManager extends BaseModule {
                                         <div class="form-text">${t('noFileChosen')}</div>
                                     </div>
                                     
+                                    <!-- Opmerkingen -->
                                     <div class="mb-3">
                                         <label for="remarks" class="form-label fw-semibold">${t('remarks')}</label>
                                         <textarea class="form-control" id="remarks" rows="3"></textarea>
@@ -782,6 +818,95 @@ class DogDataManager extends BaseModule {
                     border-color: #198754;
                     box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
                 }
+                
+                /* Mobiele optimalisaties voor breed container */
+                @media (max-width: 768px) {
+                    .breed-container {
+                        gap: 8px !important;
+                    }
+                    
+                    .breed-input-container {
+                        flex: 0 0 180px !important;
+                        min-width: 180px !important;
+                    }
+                    
+                    .recent-breeds-label {
+                        font-size: 0.8em !important;
+                    }
+                    
+                    .recent-breed-btn {
+                        font-size: 0.75em !important;
+                        padding: 3px 6px !important;
+                    }
+                }
+                
+                /* Breed container voor 1-lijn layout - zoals in DogManager */
+                .breed-container {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    flex-wrap: nowrap;
+                    width: 100%;
+                }
+                
+                .breed-input-container {
+                    flex: 0 0 220px;
+                    min-width: 220px;
+                }
+                
+                .recent-breeds-container {
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                    flex: 1;
+                    min-width: 0;
+                    overflow: visible;
+                }
+                
+                .recent-breeds-label {
+                    font-size: 0.875em;
+                    color: #6c757d;
+                    white-space: nowrap;
+                    margin-bottom: 0;
+                    flex-shrink: 0;
+                }
+                
+                .recent-breeds-buttons {
+                    display: flex;
+                    flex-wrap: nowrap;
+                    gap: 4px;
+                    overflow-x: auto;
+                    overflow-y: hidden;
+                    padding-bottom: 2px;
+                    flex: 1;
+                    min-width: 0;
+                }
+                
+                .recent-breed-btn {
+                    white-space: nowrap;
+                    flex-shrink: 0;
+                    font-size: 0.8em;
+                    padding: 4px 8px;
+                }
+                
+                /* Custom scrollbar voor recent breed buttons */
+                .recent-breeds-buttons::-webkit-scrollbar {
+                    height: 4px;
+                }
+                
+                .recent-breeds-buttons::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                    border-radius: 2px;
+                }
+                
+                .recent-breeds-buttons::-webkit-scrollbar-thumb {
+                    background: #c1c1c1;
+                    border-radius: 2px;
+                }
+                
+                .recent-breeds-buttons::-webkit-scrollbar-thumb:hover {
+                    background: #a8a8a8;
+                }
             </style>
         `;
     }
@@ -872,15 +997,15 @@ class DogDataManager extends BaseModule {
             });
         }
         
-        // Recente rassen knoppen
-        document.querySelectorAll('.recent-breed-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+        // Recente rassen knoppen - Delegatie gebruiken
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('recent-breed-btn')) {
                 const breed = e.target.dataset.breed;
                 const breedInput = document.getElementById('breed');
                 if (breedInput) {
                     breedInput.value = breed;
                 }
-            });
+            }
         });
         
         // Setup autocomplete voor ouders
@@ -1044,6 +1169,7 @@ class DogDataManager extends BaseModule {
         // Basis velden
         document.getElementById('dogId').value = dog.id || '';
         document.getElementById('dogName').value = dog.naam || '';
+        document.getElementById('kennelName').value = dog.kennelnaam || '';
         document.getElementById('pedigreeNumber').value = dog.stamboomnr || '';
         document.getElementById('breed').value = dog.ras || '';
         document.getElementById('gender').value = dog.geslacht || '';
@@ -1165,6 +1291,7 @@ class DogDataManager extends BaseModule {
         const dogData = {
             id: parsedId, // Zorg dat dit een getal is
             naam: document.getElementById('dogName').value.trim(),
+            kennelnaam: document.getElementById('kennelName').value.trim(),
             stamboomnr: document.getElementById('pedigreeNumber').value.trim(),
             ras: document.getElementById('breed').value.trim(),
             geslacht: document.getElementById('gender').value,
