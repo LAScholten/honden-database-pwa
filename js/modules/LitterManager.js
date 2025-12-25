@@ -273,7 +273,7 @@ class LitterManager {
                 elbow1: "1",
                 elbow2: "2",
                 elbow3: "3",
-                elbowNB: "NB (Niet bekannt)",
+                elbowNB: "NB (Niet bekend)",
                 patellaLuxation: "Patella Luxation",
                 patellaGrades: "Grad wählen...",
                 patella0: "0",
@@ -301,7 +301,7 @@ class LitterManager {
                 chooseFile: "Datei wählen",
                 noFileChosen: "Keine Datei gewählt",
                 remarks: "Bemerkungen",
-                requiredFields: "Felder mit * zijn Pflichtfelder",
+                requiredFields: "Felder met * zijn Pflichtfelder",
                 saveDog: "Hund speichern",
                 cancel: "Abbrechen",
                 delete: "Löschen",
@@ -312,7 +312,7 @@ class LitterManager {
                 back: "Zurück",
                 
                 // Validierung
-                dateFormatError: "Datum muss im Format TT-MM-JJJJ sein",
+                dateFormatError: "Datum moet im Format TT-MM-JJJJ sein",
                 deathBeforeBirthError: "Sterbedatum kann nicht vor dem Geburtsdatum liegen",
                 
                 // Zugangskontrolle Popup Texte
@@ -1633,15 +1633,17 @@ class LitterManager {
         // Filter honden voor autocomplete (alleen reuen voor vader, teven voor moeder)
         const suggestions = this.allDogs.filter(dog => {
             const dogName = dog.naam.toLowerCase();
-            const matchesSearch = dogName.includes(searchTerm);
+            
+            // Zoek op NAAM die BEGINT met de zoekterm
+            const startsWithSearch = dogName.startsWith(searchTerm.toLowerCase());
             
             // Filter op geslacht
             if (parentType === 'father') {
-                return matchesSearch && dog.geslacht === 'reuen';
+                return startsWithSearch && dog.geslacht === 'reuen';
             } else if (parentType === 'mother') {
-                return matchesSearch && dog.geslacht === 'teven';
+                return startsWithSearch && dog.geslacht === 'teven';
             }
-            return matchesSearch;
+            return startsWithSearch;
         }).slice(0, 8); // Max 8 suggesties
         
         console.log('LitterManager: Aantal suggesties:', suggestions.length);
