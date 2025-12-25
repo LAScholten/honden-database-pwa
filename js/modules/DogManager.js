@@ -27,7 +27,7 @@ class DogManager extends BaseModule {
                 pedigreeNumber: "Stamboomnummer *",
                 breed: "Ras",
                 breedRequired: "Ras *",
-                recentBreeds: "Recent gebruikte rassen",
+                recent: "Recent:",
                 father: "Vader",
                 mother: "Moeder",
                 birthDate: "Geboortedatum",
@@ -128,7 +128,7 @@ class DogManager extends BaseModule {
                 pedigreeNumber: "Pedigree number *",
                 breed: "Breed",
                 breedRequired: "Breed *",
-                recentBreeds: "Recently used breeds",
+                recent: "Recent:",
                 father: "Father",
                 mother: "Mother",
                 birthDate: "Birth date",
@@ -229,7 +229,7 @@ class DogManager extends BaseModule {
                 pedigreeNumber: "Stammbaum-Nummer *",
                 breed: "Rasse",
                 breedRequired: "Rasse *",
-                recentBreeds: "Kürzlich verwendete Rassen",
+                recent: "Kürzlich:",
                 father: "Vader",
                 mother: "Mutter",
                 birthDate: "Geburtsdatum",
@@ -292,16 +292,16 @@ class DogManager extends BaseModule {
                 // Zugangskontrolle Popup Texte
                 insufficientPermissions: "Unzureichende Berechtigungen",
                 insufficientPermissionsText: "Sie haben keine Berechtigung, Hunde zu bearbeiten. Nur Administratoren können diese Funktion nutzen.",
-                loggedInAs: "Sie zijn eingeloggt als:",
+                loggedInAs: "Sie sind eingeloggt als:",
                 user: "Benutzer",
-                availableFeatures: "Verfügbare Funktionen voor Benutzer",
+                availableFeatures: "Verfügbare Funktionen für Benutzer",
                 searchDogs: "Hunde suchen und anzeigen",
                 viewGallery: "Fotogalerie anzeigen",
                 managePrivateInfo: "Private Informationen verwalten",
                 importExport: "Daten importieren/exportieren",
                 
                 // Meldungen
-                adminOnly: "Nur Administratoren kunnen Hunde hinzufügen/bearbeiten",
+                adminOnly: "Nur Administratoren können Hunde hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer en Rasse zijn Pflichtfelder",
                 savingDog: "Hund wird gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
@@ -423,20 +423,22 @@ class DogManager extends BaseModule {
                         overflow-y: auto;
                     }
                     
-                    .recent-breeds-container {
-                        flex-direction: column;
-                        align-items: flex-start !important;
+                    .breed-container {
+                        gap: 8px !important;
                     }
                     
-                    .recent-breeds-container .form-text {
-                        width: 100%;
-                        margin-bottom: 8px;
+                    .breed-input-container {
+                        flex: 0 0 180px !important;
+                        min-width: 180px !important;
                     }
                     
-                    .recent-breeds-buttons {
-                        width: 100%;
-                        overflow-x: auto;
-                        flex-wrap: nowrap;
+                    .recent-breeds-label {
+                        font-size: 0.8em !important;
+                    }
+                    
+                    .recent-breed-btn {
+                        font-size: 0.75em !important;
+                        padding: 3px 6px !important;
                     }
                 }
                 
@@ -475,24 +477,72 @@ class DogManager extends BaseModule {
                     position: relative;
                 }
                 
-                /* Recente rassen container */
-                .recent-breeds-container {
+                /* Breed container voor 1-lijn layout - nu altijd op 1 regel */
+                .breed-container {
                     display: flex;
                     align-items: center;
                     gap: 10px;
-                    margin-top: 8px;
+                    flex-wrap: nowrap;
+                    width: 100%;
                 }
                 
-                .recent-breeds-container .form-text {
-                    margin-bottom: 0;
+                .breed-input-container {
+                    flex: 0 0 220px;
+                    min-width: 220px;
+                }
+                
+                .recent-breeds-container {
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                    flex: 1;
+                    min-width: 0;
+                    overflow: visible;
+                }
+                
+                .recent-breeds-label {
+                    font-size: 0.875em;
+                    color: #6c757d;
                     white-space: nowrap;
+                    margin-bottom: 0;
+                    flex-shrink: 0;
                 }
                 
                 .recent-breeds-buttons {
                     display: flex;
-                    flex-wrap: wrap;
-                    gap: 5px;
+                    flex-wrap: nowrap;
+                    gap: 4px;
+                    overflow-x: auto;
+                    overflow-y: hidden;
+                    padding-bottom: 2px;
                     flex: 1;
+                    min-width: 0;
+                }
+                
+                .recent-breed-btn {
+                    white-space: nowrap;
+                    flex-shrink: 0;
+                    font-size: 0.8em;
+                    padding: 4px 8px;
+                }
+                
+                /* Custom scrollbar voor recent breed buttons */
+                .recent-breeds-buttons::-webkit-scrollbar {
+                    height: 4px;
+                }
+                
+                .recent-breeds-buttons::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                    border-radius: 2px;
+                }
+                
+                .recent-breeds-buttons::-webkit-scrollbar-thumb {
+                    background: #c1c1c1;
+                    border-radius: 2px;
+                }
+                
+                .recent-breeds-buttons::-webkit-scrollbar-thumb:hover {
+                    background: #a8a8a8;
                 }
             </style>
         `;
@@ -566,12 +616,12 @@ class DogManager extends BaseModule {
         const t = this.t.bind(this);
         const data = dogData || {};
         
-        // Genereer recente rassen knoppen (op 1 regel onder het ras veld)
+        // Genereer recente rassen knoppen (op 1 regel naast het ras veld)
         let recentBreedsHTML = '';
         if (this.lastBreeds.length > 0) {
             recentBreedsHTML = `
                 <div class="recent-breeds-container">
-                    <div class="form-text">${t('recentBreeds')}:</div>
+                    <div class="recent-breeds-label">${t('recent')}</div>
                     <div class="recent-breeds-buttons">
             `;
             this.lastBreeds.forEach(breed => {
@@ -628,13 +678,17 @@ class DogManager extends BaseModule {
                     </div>
                 </div>
                 
-                <!-- Rij 3: Ras met recente rassen eronder -->
+                <!-- Rij 3: Ras met recente rassen op 1 regel -->
                 <div class="row">
                     <div class="col-12">
                         <div class="mb-3">
                             <label for="breed" class="form-label">${t('breedRequired')}</label>
-                            <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
-                            ${recentBreedsHTML}
+                            <div class="breed-container">
+                                <div class="breed-input-container">
+                                    <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
+                                </div>
+                                ${recentBreedsHTML}
+                            </div>
                         </div>
                     </div>
                 </div>

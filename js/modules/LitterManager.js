@@ -22,10 +22,11 @@ class LitterManager {
                 // Form velden
                 name: "Naam",
                 nameRequired: "Naam *",
+                kennelName: "Kennelnaam",
                 pedigreeNumber: "Stamboomnummer *",
                 breed: "Ras",
                 breedRequired: "Ras *",
-                recentBreeds: "Recent gebruikte rassen",
+                recent: "Recent:",
                 father: "Vader",
                 mother: "Moeder",
                 birthDate: "Geboortedatum",
@@ -122,10 +123,11 @@ class LitterManager {
                 // Form fields
                 name: "Name",
                 nameRequired: "Name *",
+                kennelName: "Kennel Name",
                 pedigreeNumber: "Pedigree number *",
                 breed: "Breed",
                 breedRequired: "Breed *",
-                recentBreeds: "Recently used breeds",
+                recent: "Recent:",
                 father: "Father",
                 mother: "Mother",
                 birthDate: "Birth date",
@@ -222,10 +224,11 @@ class LitterManager {
                 // Formular Felder
                 name: "Name",
                 nameRequired: "Name *",
+                kennelName: "Kennelname",
                 pedigreeNumber: "Stammbaum-Nummer *",
                 breed: "Rasse",
                 breedRequired: "Rasse *",
-                recentBreeds: "Kürzlich verwendete Rassen",
+                recent: "Kürzlich:",
                 father: "Vater",
                 mother: "Mutter",
                 birthDate: "Geburtsdatum",
@@ -275,7 +278,7 @@ class LitterManager {
                 chooseFile: "Datei wählen",
                 noFileChosen: "Keine Datei gewählt",
                 remarks: "Bemerkungen",
-                requiredFields: "Felder mit * sind Pflichtfelder",
+                requiredFields: "Felder mit * zijn Pflichtfelder",
                 saveDog: "Wurf speichern",
                 cancel: "Abbrechen",
                 delete: "Löschen",
@@ -421,6 +424,148 @@ class LitterManager {
                     </div>
                 </div>
             </div>
+            
+            <style>
+                /* Mobiele optimalisaties */
+                @media (max-width: 768px) {
+                    .modal-dialog {
+                        margin: 10px;
+                        max-height: 90vh;
+                    }
+                    
+                    .modal-content {
+                        max-height: 90vh;
+                        overflow-y: auto;
+                    }
+                    
+                    .modal-body {
+                        padding: 15px;
+                        max-height: calc(90vh - 130px);
+                        overflow-y: auto;
+                    }
+                    
+                    .breed-container {
+                        gap: 8px !important;
+                    }
+                    
+                    .breed-input-container {
+                        flex: 0 0 180px !important;
+                        min-width: 180px !important;
+                    }
+                    
+                    .recent-breeds-label {
+                        font-size: 0.8em !important;
+                    }
+                    
+                    .recent-breed-btn {
+                        font-size: 0.75em !important;
+                        padding: 3px 6px !important;
+                    }
+                }
+                
+                .autocomplete-dropdown {
+                    position: absolute;
+                    background: white;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    max-height: 200px;
+                    overflow-y: auto;
+                    z-index: 9999;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                    width: 100%;
+                }
+                
+                .autocomplete-item {
+                    padding: 10px;
+                    cursor: pointer;
+                    border-bottom: 1px solid #f0f0f0;
+                }
+                
+                .autocomplete-item:hover {
+                    background-color: #f8f9fa;
+                }
+                
+                .autocomplete-item .dog-name {
+                    font-weight: bold;
+                }
+                
+                .autocomplete-item .dog-info {
+                    font-size: 0.85em;
+                    color: #666;
+                }
+                
+                .parent-input-wrapper {
+                    position: relative;
+                }
+                
+                /* Breed container voor 1-lijn layout - nu altijd op 1 regel */
+                .breed-container {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    flex-wrap: nowrap;
+                    width: 100%;
+                }
+                
+                .breed-input-container {
+                    flex: 0 0 220px;
+                    min-width: 220px;
+                }
+                
+                .recent-breeds-container {
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                    flex: 1;
+                    min-width: 0;
+                    overflow: visible;
+                }
+                
+                .recent-breeds-label {
+                    font-size: 0.875em;
+                    color: #6c757d;
+                    white-space: nowrap;
+                    margin-bottom: 0;
+                    flex-shrink: 0;
+                }
+                
+                .recent-breeds-buttons {
+                    display: flex;
+                    flex-wrap: nowrap;
+                    gap: 4px;
+                    overflow-x: auto;
+                    overflow-y: hidden;
+                    padding-bottom: 2px;
+                    flex: 1;
+                    min-width: 0;
+                }
+                
+                .recent-breed-btn {
+                    white-space: nowrap;
+                    flex-shrink: 0;
+                    font-size: 0.8em;
+                    padding: 4px 8px;
+                }
+                
+                /* Custom scrollbar voor recent breed buttons */
+                .recent-breeds-buttons::-webkit-scrollbar {
+                    height: 4px;
+                }
+                
+                .recent-breeds-buttons::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                    border-radius: 2px;
+                }
+                
+                .recent-breeds-buttons::-webkit-scrollbar-thumb {
+                    background: #c1c1c1;
+                    border-radius: 2px;
+                }
+                
+                .recent-breeds-buttons::-webkit-scrollbar-thumb:hover {
+                    background: #a8a8a8;
+                }
+            </style>
         `;
     }
     
@@ -434,12 +579,13 @@ class LitterManager {
         const t = this.t.bind(this);
         const data = litterData || {};
         
-        // Genereer recente rassen opties
+        // Genereer recente rassen knoppen (op 1 regel naast het ras veld)
         let recentBreedsHTML = '';
         if (this.lastBreeds && this.lastBreeds.length > 0) {
             recentBreedsHTML = `
-                <div class="form-text mb-2">${t('recentBreeds')}:</div>
-                <div class="d-flex flex-wrap gap-2 mb-3" id="recentBreedsContainer">
+                <div class="recent-breeds-container">
+                    <div class="recent-breeds-label">${t('recent')}</div>
+                    <div class="recent-breeds-buttons">
             `;
             this.lastBreeds.forEach(breed => {
                 recentBreedsHTML += `
@@ -448,7 +594,10 @@ class LitterManager {
                     </button>
                 `;
             });
-            recentBreedsHTML += `</div>`;
+            recentBreedsHTML += `
+                    </div>
+                </div>
+            `;
         }
         
         return `
@@ -456,6 +605,7 @@ class LitterManager {
                 <input type="hidden" id="fatherId" value="${data.vaderId || ''}">
                 <input type="hidden" id="motherId" value="${data.moederId || ''}">
                 
+                <!-- Rij 1: Naam en Kennelnaam -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -465,18 +615,18 @@ class LitterManager {
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="pedigreeNumber" class="form-label">${t('pedigreeNumber')}</label>
-                            <input type="text" class="form-control" id="pedigreeNumber" value="${data.stamboomnr || ''}" required>
+                            <label for="kennelName" class="form-label">${t('kennelName')}</label>
+                            <input type="text" class="form-control" id="kennelName" value="${data.kennelnaam || ''}">
                         </div>
                     </div>
                 </div>
                 
+                <!-- Rij 2: Stamboomnummer en Geslacht -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label for="breed" class="form-label">${t('breedRequired')}</label>
-                            <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
-                            ${recentBreedsHTML}
+                            <label for="pedigreeNumber" class="form-label">${t('pedigreeNumber')}</label>
+                            <input type="text" class="form-control" id="pedigreeNumber" value="${data.stamboomnr || ''}" required>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -491,6 +641,22 @@ class LitterManager {
                     </div>
                 </div>
                 
+                <!-- Rij 3: Ras met recente rassen op 1 regel -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="mb-3">
+                            <label for="breed" class="form-label">${t('breedRequired')}</label>
+                            <div class="breed-container">
+                                <div class="breed-input-container">
+                                    <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
+                                </div>
+                                ${recentBreedsHTML}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Rij 4: Vader en Moeder (naast elkaar) -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3 parent-input-wrapper">
@@ -514,6 +680,7 @@ class LitterManager {
                     </div>
                 </div>
                 
+                <!-- Rij 5: Geboortedatum en Overlijdensdatum -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -529,6 +696,7 @@ class LitterManager {
                     </div>
                 </div>
                 
+                <!-- Rij 6: Heupdysplasie, Elleboogdysplasie, Patella Luxatie -->
                 <div class="row">
                     <div class="col-md-4">
                         <div class="mb-3">
@@ -570,6 +738,7 @@ class LitterManager {
                     </div>
                 </div>
                 
+                <!-- Rij 7: Ogen en Dandy Walker -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -600,6 +769,7 @@ class LitterManager {
                     </div>
                 </div>
                 
+                <!-- Rij 8: Schildklier en Land/Postcode -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -616,17 +786,24 @@ class LitterManager {
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="country" class="form-label">${t('country')}</label>
-                            <input type="text" class="form-control" id="country" value="${data.land || ''}">
-                        </div>
-                        <div class="mb-3">
-                            <label for="zipCode" class="form-label">${t('zipCode')}</label>
-                            <input type="text" class="form-control" id="zipCode" value="${data.postcode || ''}">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="country" class="form-label">${t('country')}</label>
+                                    <input type="text" class="form-control" id="country" value="${data.land || ''}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="zipCode" class="form-label">${t('zipCode')}</label>
+                                    <input type="text" class="form-control" id="zipCode" value="${data.postcode || ''}">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
+                <!-- Foto uploaden -->
                 <div class="mb-3">
                     <label for="photo" class="form-label">${t('addPhoto')}</label>
                     <div class="input-group">
@@ -636,16 +813,19 @@ class LitterManager {
                     <div class="form-text">${t('noFileChosen')}</div>
                 </div>
                 
+                <!-- Opmerkingen -->
                 <div class="mb-3">
                     <label for="remarks" class="form-label">${t('remarks')}</label>
                     <textarea class="form-control" id="remarks" rows="3">${data.opmerkingen || ''}</textarea>
                 </div>
                 
+                <!-- Verplichte velden info -->
                 <div class="alert alert-info">
                     <i class="bi bi-info-circle"></i>
                     ${t('requiredFields')}
                 </div>
                 
+                <!-- Opslaan knop -->
                 <div class="text-end">
                     <button type="button" class="btn btn-primary" id="saveDogBtn">
                         ${t('saveDog')}
@@ -999,6 +1179,7 @@ class LitterManager {
         // Verzamel formulier data
         const dogData = {
             naam: document.getElementById('name')?.value.trim() || '',
+            kennelnaam: document.getElementById('kennelName')?.value.trim() || '',
             stamboomnr: document.getElementById('pedigreeNumber')?.value.trim() || '',
             ras: document.getElementById('breed')?.value.trim() || '',
             geslacht: document.getElementById('gender')?.value || '',
