@@ -813,9 +813,10 @@ class SearchManager extends BaseModule {
     }
     
     filterDogsByKennel(searchTerm = '') {
+        // GECORRIGEERD: Zoek alleen op honden waarvan de kennelnaam BEGINT met de zoekterm
         this.filteredDogs = this.allDogs.filter(dog => {
             const kennelnaam = dog.kennelnaam ? dog.kennelnaam.toLowerCase() : '';
-            return kennelnaam.includes(searchTerm);
+            return kennelnaam.startsWith(searchTerm);
         });
         
         // Sorteer op naam (alfabetisch)
