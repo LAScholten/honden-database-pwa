@@ -154,6 +154,16 @@
             padding: 0.375rem 0.75rem;
             font-size: 0.9rem;
         }
+        
+        /* PWA Installatie knop styling */
+        #pwaInstallBtn {
+            transition: all 0.3s ease;
+        }
+        
+        #pwaInstallBtn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body>
@@ -185,6 +195,12 @@
                     <i class="bi bi-person-circle"></i> 
                     <span id="currentUser">Gebruiker</span>
                 </span>
+                
+                <!-- PWA Installatie Knop -->
+                <button class="btn btn-outline-light btn-sm me-2" id="pwaInstallBtn" style="display: none;">
+                    <i class="bi bi-download"></i> <span class="app-text" data-key="installPWA">Installeer App</span>
+                </button>
+                
                 <button class="btn btn-outline-light btn-sm" id="logoutBtn">
                     <i class="bi bi-box-arrow-right"></i> <span class="app-text" data-key="logout">Uitloggen</span>
                 </button>
@@ -438,949 +454,1075 @@
     <script src="js/modules/SearchManager.js"></script>
     <script src="js/modules/PhotoManager.js"></script>
     <script src="js/modules/BreedingManager.js"></script>
-    <script src="js/modules/PrivateInfoManager.js"></script>
+<script src="js/modules/PrivateInfoManager.js"></script>
+
+<!-- Main UI Handler -->
+<script src="js/ui-handler.js"></script>
+
+<!-- App Initialization -->
+<script>
+    // Laad taal uit localStorage
+    const appLanguage = localStorage.getItem('appLanguage') || 'nl';
     
-    <!-- Main UI Handler -->
-    <script src="js/ui-handler.js"></script>
-    
-    <!-- App Initialization -->
-    <script>
-        // Laad taal uit localStorage
-        const appLanguage = localStorage.getItem('appLanguage') || 'nl';
-        
-        // Vertalingen - nieuwe vertalingen toegevoegd voor "Nieuw Nest"
-        const appTranslations = {
-            nl: {
-                // App teksten
-                appTitle: "Hondendatabase PWA",
-                logout: "Uitloggen",
-                menu: "Menu",
-                dataManagement: "Data Beheer",
-                newDog: "Nieuwe Hond",
-                newLitter: "Nieuw Nest",
-                editDogData: "Data Hond Bewerken",
-                searchDog: "Hond Zoeken",
-                photoGallery: "Foto Galerij",
-                breedingPlan: "Fok Planning",
-                privateInfo: "Privé Informatie",
-                quickOverview: "Snel Overzicht",
-                dogs: "Honden",
-                photos: "Foto's",
-                refresh: "Vernieuwen",
-                dashboard: "Dashboard",
-                welcomeTitle: "Welkom bij de Hondendatabase PWA",
-                welcomeText: "Kies een optie uit het menu om te beginnen. De applicatie werkt volledig offline.",
-                aboutApp: "Over deze App",
-                appDescription: "Deze PWA (Progressive Web App) slaat alle data lokaal op in uw browser. U kunt:",
-                feature1: "Honden toevoegen en beheren",
-                feature2: "Data van honden bewerken",
-                feature3: "Foto's uploaden en bekijken",
-                feature4: "Fokplannen maken",
-                feature5: "Privé informatie bewaren",
-                feature6: "Data importeren/exporteren",
-                security: "Beveiliging",
-                roleBasedAccess: "De app gebruikt rol-gebaseerde toegang:",
-                adminRole: "Administrator",
-                adminRights: "Volle rechten.",
-                userRole: "Gebruiker",
-                userRights: "Kan data importeren/exporteren, bekijken, privé informatie toevoegen en fokplanning maken.",
-                
-                // Backup teksten
-                backupNow: "Backup",
-                learnMore: "Uitleg",
-                backupWarningTitle: "Backup Aanbevolen",
-                backupNowDashboard: "Nu backup maken",
-                dismissBackup: "Niet meer tonen",
-                backupModalTitle: "Data Backup - Waarom is dit belangrijk?",
-                backupRisksTitle: "Risico's zonder backup",
-                backupRisksText1: "Deze app slaat alle gegevens <strong>alleen lokaal in je browser</strong> op.",
-                backupRisksText2: "Je data kan verloren gaan als je: ",
-                backupHowToTitle: "Hoe te backuppen",
-                backupHowToText1: "<strong>Aanbevolen:</strong> Maak wekelijks een backup",
-                backupIOSHeading: "Op iPhone/iPad:",
-                backupAndroidHeading: "Op Android:",
-                backupBestPracticesTitle: "Beste praktijken:",
-                backupModalClose: "Sluiten",
-                backupModalAction: "Nu backup maken",
-                backupStatusGood: "✓ Backup: Okay",
-                backupStatusWarning: "⚠ Laatste backup: {days} dagen geleden",
-                backupStatusDanger: "🚨 NOG NOOIT gebackupt!",
-                dashboardWarningNever: "Je hebt nog nooit een backup gemaakt! Als je browser data wist, ben je al je hondengegevens kwijt.",
-                dashboardWarningOld: "Je laatste backup was {days} dagen geleden. Overweeg een nieuwe backup te maken om dataverlies te voorkomen."
-            },
-            en: {
-                // App texts
-                appTitle: "Dog Database PWA",
-                logout: "Logout",
-                menu: "Menu",
-                dataManagement: "Data Management",
-                newDog: "New Dog",
-                newLitter: "New Litter",
-                editDogData: "Edit Dog Data",
-                searchDog: "Search Dog",
-                photoGallery: "Photo Gallery",
-                breedingPlan: "Breeding Plan",
-                privateInfo: "Private Information",
-                quickOverview: "Quick Overview",
-                dogs: "Dogs",
-                photos: "Photos",
-                refresh: "Refresh",
-                dashboard: "Dashboard",
-                welcomeTitle: "Welcome to the Dog Database PWA",
-                welcomeText: "Choose an option from the menu to start. The application works completely offline.",
-                aboutApp: "About this App",
-                appDescription: "This PWA (Progressive Web App) stores all data locally in your browser. You can:",
-                feature1: "Add and manage dogs",
-                feature2: "Edit dog data",
-                feature3: "Upload and view photos",
-                feature4: "Create breeding plans",
-                feature5: "Store private information",
-                feature6: "Import/Export data",
-                security: "Security",
-                roleBasedAccess: "The app uses role-based access:",
-                adminRole: "Administrator",
-                adminRights: "Full rights.",
-                userRole: "User",
-                userRights: "Can import/export, view, put privat information and make breedingplans.",
-                
-                // Backup texts
-                backupNow: "Backup",
-                learnMore: "Info",
-                backupWarningTitle: "Backup Recommended",
-                backupNowDashboard: "Create Backup Now",
-                dismissBackup: "Don't Show Again",
-                backupModalTitle: "Data Backup - Why is this important?",
-                backupRisksTitle: "Risks without backup",
-                backupRisksText1: "This app stores all data <strong>only locally in your browser</strong>.",
-                backupRisksText2: "Your data can be lost if you: ",
-                backupHowToTitle: "How to backup",
-                backupHowToText1: "<strong>Recommended:</strong> Create weekly backups",
-                backupIOSHeading: "On iPhone/iPad:",
-                backupAndroidHeading: "On Android:",
-                backupBestPracticesTitle: "Best practices:",
-                backupModalClose: "Close",
-                backupModalAction: "Create Backup Now",
-                backupStatusGood: "✓ Backup: Okay",
-                backupStatusWarning: "⚠ Last backup: {days} days ago",
-                backupStatusDanger: "🚨 NEVER backed up!",
-                dashboardWarningNever: "You have never created a backup! If you clear browser data, you will lose all your dog records.",
-                dashboardWarningOld: "Your last backup was {days} days ago. Consider creating a new backup to prevent data loss."
-            },
-            de: {
-                // App Texte
-                appTitle: "Hundendatenbank PWA",
-                logout: "Abmelden",
-                menu: "Menü",
-                dataManagement: "Datenverwaltung",
-                newDog: "Neuer Hund",
-                newLitter: "Neuer Wurf",
-                editDogData: "Hundedaten bearbeiten",
-                searchDog: "Hund suchen",
-                photoGallery: "Foto Galerie",
-                breedingPlan: "Zuchtplanung",
-                privateInfo: "Private Informationen",
-                quickOverview: "Schnellübersicht",
-                dogs: "Hunde",
-                photos: "Fotos",
-                refresh: "Aktualisieren",
-                dashboard: "Dashboard",
-                welcomeTitle: "Willkommen bei der Hundendatenbank PWA",
-                welcomeText: "Wählen Sie eine option aus dem Menü, um zu beginnen. Die Anwendung funktioniert vollständig offline.",
-                aboutApp: "Über deze App",
-                appDescription: "Diese PWA (Progressive Web App) speichert alle Daten lokal in Ihrem Browser. Sie können:",
-                feature1: "Hunde hinzufügen en verwalten",
-                feature2: "Hundedaten bearbeiten",
-                feature3: "Fotos hochladen und ansehen",
-                feature4: "Zuchtpläne erstellen",
-                feature5: "Private Informationen speichern",
-                feature6: "Daten importieren/exportieren",
-                security: "Sicherheit",
-                roleBasedAccess: "Die App verwendet rollenbasierte Zugriffe:",
-                adminRole: "Administrator",
-                adminRights: "Volle Rechte.",
-                userRole: "Benutzer",
-                userRights: "Kann Daten importieren/exportieren, ansehen, private information platzen und zuchter plannung maken.",
-                
-                // Backup Texte
-                backupNow: "Backup",
-                learnMore: "Info",
-                backupWarningTitle: "Backup empfohlen",
-                backupNowDashboard: "Jetzt Backup erstellen",
-                dismissBackup: "Nicht meer anzeigen",
-                backupModalTitle: "Data Backup - Warum ist das belangrijk?",
-                backupRisksTitle: "Risiken ohne Backup",
-                backupRisksText1: "Diese App speichert alle Daten <strong>nur lokal in Ihrem Browser</strong>.",
-                backupRisksText2: "Ihre Daten kunnen verloren gehen, wenn Sie: ",
-                backupHowToTitle: "Wie man ein Backup erstellt",
-                backupHowToText1: "<strong>Empfohlen:</strong> Erstellen Sie wöchentliche Backups",
-                backupIOSHeading: "Auf iPhone/iPad:",
-                backupAndroidHeading: "Auf Android:",
-                backupBestPracticesTitle: "Beste Praktiken:",
-                backupModalClose: "Schließen",
-                backupModalAction: "Jetzt Backup erstellen",
-                backupStatusGood: "✓ Backup: Okay",
-                backupStatusWarning: "⚠ Letztes Backup: vor {days} Tagen",
-                backupStatusDanger: "🚨 NOCH NIE gebackupt!",
-                dashboardWarningNever: "Sie hebben nog nie ein Backup erstellt! Wenn Sie Browser-Daten löschen, verloren Sie alle Ihre Hundeaufzeichnungen.",
-                dashboardWarningOld: "Ihr letztes Backup war vor {days} Tagen. Erwägen Sie, ein neues Backup zu createn, um Datenverlust zu vermeiden."
-            }
-        };
+    // Vertalingen - nieuwe vertalingen toegevoegd voor "Nieuw Nest" en "installPWA"
+    const appTranslations = {
+        nl: {
+            // App teksten
+            appTitle: "Hondendatabase PWA",
+            logout: "Uitloggen",
+            menu: "Menu",
+            dataManagement: "Data Beheer",
+            newDog: "Nieuwe Hond",
+            newLitter: "Nieuw Nest",
+            editDogData: "Data Hond Bewerken",
+            searchDog: "Hond Zoeken",
+            photoGallery: "Foto Galerij",
+            breedingPlan: "Fok Planning",
+            privateInfo: "Privé Informatie",
+            quickOverview: "Snel Overzicht",
+            dogs: "Honden",
+            photos: "Foto's",
+            refresh: "Vernieuwen",
+            dashboard: "Dashboard",
+            welcomeTitle: "Welkom bij de Hondendatabase PWA",
+            welcomeText: "Kies een optie uit het menu om te beginnen. De applicatie werkt volledig offline.",
+            aboutApp: "Over deze App",
+            appDescription: "Deze PWA (Progressive Web App) slaat alle data lokaal op in uw browser. U kunt:",
+            feature1: "Honden toevoegen en beheren",
+            feature2: "Data van honden bewerken",
+            feature3: "Foto's uploaden en bekijken",
+            feature4: "Fokplannen maken",
+            feature5: "Privé informatie bewaren",
+            feature6: "Data importeren/exporteren",
+            security: "Beveiliging",
+            roleBasedAccess: "De app gebruikt rol-gebaseerde toegang:",
+            adminRole: "Administrator",
+            adminRights: "Volle rechten.",
+            userRole: "Gebruiker",
+            userRights: "Kan data importeren/exporteren, bekijken, privé informatie toevoegen en fokplanning maken.",
+            
+            // Backup teksten
+            backupNow: "Backup",
+            learnMore: "Uitleg",
+            backupWarningTitle: "Backup Aanbevolen",
+            backupNowDashboard: "Nu backup maken",
+            dismissBackup: "Niet meer tonen",
+            backupModalTitle: "Data Backup - Waarom is dit belangrijk?",
+            backupRisksTitle: "Risico's zonder backup",
+            backupRisksText1: "Deze app slaat alle gegevens <strong>alleen lokaal in je browser</strong> op.",
+            backupRisksText2: "Je data kan verloren gaan als je: ",
+            backupHowToTitle: "Hoe te backuppen",
+            backupHowToText1: "<strong>Aanbevolen:</strong> Maak wekelijks een backup",
+            backupIOSHeading: "Op iPhone/iPad:",
+            backupAndroidHeading: "Op Android:",
+            backupBestPracticesTitle: "Beste praktijken:",
+            backupModalClose: "Sluiten",
+            backupModalAction: "Nu backup maken",
+            backupStatusGood: "✓ Backup: Okay",
+            backupStatusWarning: "⚠ Laatste backup: {days} dagen geleden",
+            backupStatusDanger: "🚨 NOG NOOIT gebackupt!",
+            dashboardWarningNever: "Je hebt nog nooit een backup gemaakt! Als je browser data wist, ben je al je hondengegevens kwijt.",
+            dashboardWarningOld: "Je laatste backup was {days} dagen geleden. Overweeg een nieuwe backup te maken om dataverlies te voorkomen.",
+            
+            // PWA installatie tekst
+            installPWA: "Installeer App"
+        },
+        en: {
+            // App texts
+            appTitle: "Dog Database PWA",
+            logout: "Logout",
+            menu: "Menu",
+            dataManagement: "Data Management",
+            newDog: "New Dog",
+            newLitter: "New Litter",
+            editDogData: "Edit Dog Data",
+            searchDog: "Search Dog",
+            photoGallery: "Photo Gallery",
+            breedingPlan: "Breeding Plan",
+            privateInfo: "Private Information",
+            quickOverview: "Quick Overview",
+            dogs: "Dogs",
+            photos: "Photos",
+            refresh: "Refresh",
+            dashboard: "Dashboard",
+            welcomeTitle: "Welcome to the Dog Database PWA",
+            welcomeText: "Choose an option from the menu to start. The application works completely offline.",
+            aboutApp: "About this App",
+            appDescription: "This PWA (Progressive Web App) stores all data locally in your browser. You can:",
+            feature1: "Add and manage dogs",
+            feature2: "Edit dog data",
+            feature3: "Upload and view photos",
+            feature4: "Create breeding plans",
+            feature5: "Store private information",
+            feature6: "Import/Export data",
+            security: "Security",
+            roleBasedAccess: "The app uses role-based access:",
+            adminRole: "Administrator",
+            adminRights: "Full rights.",
+            userRole: "User",
+            userRights: "Can import/export, view, put privat information and make breedingplans.",
+            
+            // Backup texts
+            backupNow: "Backup",
+            learnMore: "Info",
+            backupWarningTitle: "Backup Recommended",
+            backupNowDashboard: "Create Backup Now",
+            dismissBackup: "Don't Show Again",
+            backupModalTitle: "Data Backup - Why is this important?",
+            backupRisksTitle: "Risks without backup",
+            backupRisksText1: "This app stores all data <strong>only locally in your browser</strong>.",
+            backupRisksText2: "Your data can be lost if you: ",
+            backupHowToTitle: "How to backup",
+            backupHowToText1: "<strong>Recommended:</strong> Create weekly backups",
+            backupIOSHeading: "On iPhone/iPad:",
+            backupAndroidHeading: "On Android:",
+            backupBestPracticesTitle: "Best practices:",
+            backupModalClose: "Close",
+            backupModalAction: "Create Backup Now",
+            backupStatusGood: "✓ Backup: Okay",
+            backupStatusWarning: "⚠ Last backup: {days} days ago",
+            backupStatusDanger: "🚨 NEVER backed up!",
+            dashboardWarningNever: "You have never created a backup! If you clear browser data, you will lose all your dog records.",
+            dashboardWarningOld: "Your last backup was {days} days ago. Consider creating a new backup to prevent data loss.",
+            
+            // PWA installatie tekst
+            installPWA: "Install App"
+        },
+        de: {
+            // App Texte
+            appTitle: "Hundendatenbank PWA",
+            logout: "Abmelden",
+            menu: "Menü",
+            dataManagement: "Datenverwaltung",
+            newDog: "Neuer Hund",
+            newLitter: "Neuer Wurf",
+            editDogData: "Hundedaten bearbeiten",
+            searchDog: "Hund suchen",
+            photoGallery: "Foto Galerie",
+            breedingPlan: "Zuchtplanung",
+            privateInfo: "Private Informationen",
+            quickOverview: "Schnellübersicht",
+            dogs: "Hunde",
+            photos: "Fotos",
+            refresh: "Aktualisieren",
+            dashboard: "Dashboard",
+            welcomeTitle: "Willkommen bei der Hundendatenbank PWA",
+            welcomeText: "Wählen Sie eine option aus dem Menü, um zu beginnen. Die Anwendung funktioniert vollständig offline.",
+            aboutApp: "Über diese App",
+            appDescription: "Diese PWA (Progressive Web App) speichert alle Daten lokal in Ihrem Browser. Sie können:",
+            feature1: "Hunde hinzufügen en verwalten",
+            feature2: "Hundedaten bearbeiten",
+            feature3: "Fotos hochladen und ansehen",
+            feature4: "Zuchtpläne erstellen",
+            feature5: "Private Informationen speichern",
+            feature6: "Daten importieren/exportieren",
+            security: "Sicherheit",
+            roleBasedAccess: "Die App verwendet rollenbasierte Zugriffe:",
+            adminRole: "Administrator",
+            adminRights: "Volle Rechte.",
+            userRole: "Benutzer",
+            userRights: "Kann Daten importieren/exportieren, ansehen, private information platzen und zuchter plannung machen.",
+            
+            // Backup Texte
+            backupNow: "Backup",
+            learnMore: "Info",
+            backupWarningTitle: "Backup empfohlen",
+            backupNowDashboard: "Jetzt Backup erstellen",
+            dismissBackup: "Nicht mehr anzeigen",
+            backupModalTitle: "Data Backup - Warum ist das wichtig?",
+            backupRisksTitle: "Risiken ohne Backup",
+            backupRisksText1: "Diese App speichert alle Daten <strong>nur lokal in Ihrem Browser</strong>.",
+            backupRisksText2: "Ihre Daten kunnen verloren gehen, wenn Sie: ",
+            backupHowToTitle: "Wie man ein Backup erstellt",
+            backupHowToText1: "<strong>Empfohlen:</strong> Erstellen Sie wöchentliche Backups",
+            backupIOSHeading: "Auf iPhone/iPad:",
+            backupAndroidHeading: "Auf Android:",
+            backupBestPracticesTitle: "Beste Praktiken:",
+            backupModalClose: "Schließen",
+            backupModalAction: "Jetzt Backup erstellen",
+            backupStatusGood: "✓ Backup: Okay",
+            backupStatusWarning: "⚠ Letztes Backup: vor {days} Tagen",
+            backupStatusDanger: "🚨 NOCH NIE gebackupt!",
+            dashboardWarningNever: "Sie haben noch nie ein Backup erstellt! Wenn Sie Browser-Daten löschen, verloren Sie alle Ihre Hundeaufzeichnungen.",
+            dashboardWarningOld: "Ihr letztes Backup war vor {days} Tagen. Erwägen Sie, ein neues Backup zu createn, um Datenverlust zu vermeiden.",
+            
+            // PWA installatie tekst
+            installPWA: "App installieren"
+        }
+    };
 
-        // Backup status management
-        class BackupStatusManager {
-            constructor() {
-                this.storageKey = 'honden_backup_history';
-                this.warningDays = 7;    // Geel na 7 dagen
-                this.dangerDays = 14;    // Rood na 14 dagen
-                this.currentLang = appLanguage;
-                this.backupHistory = this.loadBackupHistory();
-                this.hideReminderUntil = this.getHideReminderDate();
-            }
-            
-            setLanguage(lang) {
-                this.currentLang = lang;
-                this.updateUI();
-            }
-            
-            loadBackupHistory() {
-                try {
-                    const history = localStorage.getItem(this.storageKey);
-                    return history ? JSON.parse(history) : [];
-                } catch (error) {
-                    console.error('Fout bij laden backup history:', error);
-                    return [];
-                }
-            }
-            
-            saveBackupHistory() {
-                try {
-                    localStorage.setItem(this.storageKey, JSON.stringify(this.backupHistory));
-                } catch (error) {
-                    console.error('Fout bij opslaan backup history:', error);
-                }
-            }
-            
-            getHideReminderDate() {
-                try {
-                    return localStorage.getItem('hide_backup_reminder_until');
-                } catch (error) {
-                    return null;
-                }
-            }
-            
-            setHideReminder(days = 30) {
-                const hideUntil = new Date();
-                hideUntil.setDate(hideUntil.getDate() + days);
-                localStorage.setItem('hide_backup_reminder_until', hideUntil.toISOString());
-                this.hideReminderUntil = hideUntil.toISOString();
-                this.updateUI();
-                
-                if (window.uiHandler && window.uiHandler.showSuccess) {
-                    const messages = {
-                        nl: `Backup herinnering uitgezet voor ${days} dagen`,
-                        en: `Backup reminder disabled for ${days} days`,
-                        de: `Backup-Erinnerung voor ${days} Tage deaktiviert`
-                    };
-                    window.uiHandler.showSuccess(messages[this.currentLang] || messages.nl);
-                }
-            }
-            
-            shouldShowReminder() {
-                if (!this.hideReminderUntil) return true;
-                
-                const now = new Date();
-                const hideUntil = new Date(this.hideReminderUntil);
-                return now > hideUntil;
-            }
-            
-            recordBackup(backupType = 'full', filename = '') {
-                const backupRecord = {
-                    date: new Date().toISOString(),
-                    type: backupType,
-                    filename: filename,
-                    user: window.auth?.getCurrentUser()?.username || 'unknown'
-                };
-                
-                this.backupHistory.push(backupRecord);
-                this.saveBackupHistory();
-                this.updateUI();
-                
-                localStorage.setItem('last_backup_date', backupRecord.date);
-            }
-            
-            getLastBackupDate() {
-                if (this.backupHistory.length === 0) {
-                    return null;
-                }
-                
-                const sorted = [...this.backupHistory].sort((a, b) => 
-                    new Date(b.date) - new Date(a.date)
-                );
-                
-                return sorted[0].date;
-            }
-            
-            getDaysSinceLastBackup() {
-                const lastBackup = this.getLastBackupDate();
-                if (!lastBackup) return Infinity;
-                
-                const lastDate = new Date(lastBackup);
-                const now = new Date();
-                const diffTime = Math.abs(now - lastDate);
-                return Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            }
-            
-            getStatus() {
-                const daysSince = this.getDaysSinceLastBackup();
-                
-                if (daysSince === Infinity) {
-                    return {
-                        level: 'danger',
-                        days: 999,
-                        icon: 'bi-exclamation-triangle-fill'
-                    };
-                } else if (daysSince >= this.dangerDays) {
-                    return {
-                        level: 'danger',
-                        days: daysSince,
-                        icon: 'bi-exclamation-triangle-fill'
-                    };
-                } else if (daysSince >= this.warningDays) {
-                    return {
-                        level: 'warning',
-                        days: daysSince,
-                        icon: 'bi-exclamation-triangle'
-                    };
-                } else {
-                    return {
-                        level: 'good',
-                        days: daysSince,
-                        icon: 'bi-shield-check'
-                    };
-                }
-            }
-            
-            updateUI() {
-                const banner = document.getElementById('backupHeaderBanner');
-                const statusText = document.getElementById('backupStatusText');
-                const dashboardCard = document.getElementById('backupDashboardCard');
-                const dashboardText = document.getElementById('backupDashboardText');
-                const warningTitle = document.getElementById('backupWarningTitle');
-                
-                if (!banner || !statusText) return;
-                
-                const status = this.getStatus();
-                const t = this.currentLang;
-                
-                // Update header banner
-                banner.className = `alert backup-status-${status.level}`;
-                banner.style.display = 'block';
-                
-                // Update status text
-                let displayText = '';
-                if (status.level === 'good') {
-                    const text = appTranslations[t]?.backupStatusGood || appTranslations.nl.backupStatusGood;
-                    displayText = text.replace('{days}', status.days === 0 ? 'vandaag' : status.days);
-                } else if (status.level === 'warning') {
-                    const text = appTranslations[t]?.backupStatusWarning || appTranslations.nl.backupStatusWarning;
-                    displayText = text.replace('{days}', status.days);
-                } else {
-                    displayText = appTranslations[t]?.backupStatusDanger || appTranslations.nl.backupStatusDanger;
-                }
-                
-                statusText.textContent = displayText;
-                
-                // Update dashboard card
-                if (dashboardCard && dashboardText && warningTitle) {
-                    if (status.level === 'danger') {
-                        dashboardCard.style.display = 'block';
-                        warningTitle.textContent = appTranslations[t]?.backupWarningTitle || appTranslations.nl.backupWarningTitle;
-                        dashboardText.textContent = appTranslations[t]?.dashboardWarningNever || appTranslations.nl.dashboardWarningNever;
-                    } else if (status.level === 'warning' && this.shouldShowReminder()) {
-                        dashboardCard.style.display = 'block';
-                        warningTitle.textContent = appTranslations[t]?.backupWarningTitle || appTranslations.nl.backupWarningTitle;
-                        const text = appTranslations[t]?.dashboardWarningOld || appTranslations.nl.dashboardWarningOld;
-                        dashboardText.textContent = text.replace('{days}', status.days);
-                    } else {
-                        dashboardCard.style.display = 'none';
-                    }
-                }
-                
-                // Update button texts
-                this.updateButtonTexts();
-            }
-            
-            updateButtonTexts() {
-                const t = this.currentLang;
-                const translations = appTranslations[t] || appTranslations.nl;
-                
-                // Header buttons
-                const backupNowText = document.getElementById('backupNowText');
-                const learnMoreText = document.getElementById('learnMoreText');
-                
-                if (backupNowText) backupNowText.textContent = translations.backupNow;
-                if (learnMoreText) learnMoreText.textContent = translations.learnMore;
-                
-                // Dashboard buttons
-                const backupNowDashboardText = document.getElementById('backupNowDashboardText');
-                const dismissBackupText = document.getElementById('dismissBackupText');
-                
-                if (backupNowDashboardText) backupNowDashboardText.textContent = translations.backupNowDashboard;
-                if (dismissBackupText) dismissBackupText.textContent = translations.dismissBackup;
-                
-                // Modal texts (ZONDER backup knop)
-                this.updateModalTexts();
-            }
-            
-            updateModalTexts() {
-                const t = this.currentLang;
-                const translations = appTranslations[t] || appTranslations.nl;
-                
-                // Update modal content
-                const elements = {
-                    'backupModalTitle': translations.backupModalTitle,
-                    'backupRisksTitle': translations.backupRisksTitle,
-                    'backupRisksText1': translations.backupRisksText1,
-                    'backupRisksText2': translations.backupRisksText2,
-                    'backupHowToTitle': translations.backupHowToTitle,
-                    'backupHowToText1': translations.backupHowToText1,
-                    'backupIOSHeading': translations.backupIOSHeading,
-                    'backupAndroidHeading': translations.backupAndroidHeading,
-                    'backupBestPracticesTitle': translations.backupBestPracticesTitle,
-                    'backupModalClose': translations.backupModalClose
-                };
-                
-                for (const [id, text] of Object.entries(elements)) {
-                    const element = document.getElementById(id);
-                    if (element) {
-                        if (id === 'backupRisksText1') {
-                            element.innerHTML = text;
-                        } else {
-                            element.textContent = text;
-                        }
-                    }
-                }
-                
-                // Update lists
-                const backupSteps = {
-                    nl: ["Klik op \"Nu backup maken\"", "Kies \"Opslaan in Bestanden\"", "Sla op in iCloud Drive"],
-                    en: ["Click \"Create Backup Now\"", "Choose \"Save to Files\"", "Save to iCloud Drive"],
-                    de: ["Klicken Sie auf \"Jetzt Backup erstellen\"", "Wählen Sie \"In Dateien speichern\"", "In iCloud Drive speichern"]
-                };
-                
-                const androidSteps = {
-                    nl: ["Klik op \"Nu backup maken\"", "Sla op in Downloads", "Upload naar Google Drive"],
-                    en: ["Click \"Create Backup Now\"", "Save to Downloads", "Upload to Google Drive"],
-                    de: ["Klicken Sie op \"Jetzt Backup erstellen\"", "In Downloads speichern", "Zu Google Drive hochladen"]
-                };
-                
-                const risksList = {
-                    nl: ["Browser geschiedenis wist", "Cookies en sitegegevens verwijdert", "Je telefoon/tablet reset", "De app lange tijd niet gebruikt", "Van browser wisselt"],
-                    en: ["Clear browser history", "Delete cookies and site data", "Reset your phone/tablet", "Don't use the app for a long time", "Switch browsers"],
-                    de: ["Browserverlauf löschen", "Cookies und Websitedaten entfernen", "Ihr Telefon/Tablet zurücksetzen", "Die App lange nicht verwenden", "Browser wechseln"]
-                };
-                
-                const bestPractices = {
-                    nl: ["Maak een backup <strong>voor én na</strong> belangrijke wijzigingen", "Bewaar meerdere versies (laatste 3-4 backups)", "Sla backups op op meerdere plaatsen (telefoon + cloud)", "Test af en toe of je backup werkt door te importeren"],
-                    en: ["Create a backup <strong>before and after</strong> important changes", "Keep multiple versions (last 3-4 backups)", "Store backups in multiple places (phone + cloud)", "Test occasionally if your backup works by importing it"],
-                    de: ["Erstellen Sie ein Backup <strong>vor und nach</strong> wichtigen Änderungen", "Mehrere Versionen speichern (letzte 3-4 Backups)", "Backups an mehreren Orten speichern (Telefon + Cloud)", "Testen Sie gelegentlich, ob Ihr Backup funktioniert, indem Sie es importieren"]
-                };
-                
-                this.updateList('backupIOSSteps', backupSteps[t] || backupSteps.nl);
-                this.updateList('backupAndroidSteps', androidSteps[t] || androidSteps.nl);
-                this.updateList('backupRisksList', risksList[t] || risksList.nl);
-                this.updateList('backupBestPracticesList', bestPractices[t] || bestPractices.nl, true);
-            }
-            
-            updateList(listId, items, isHtml = false) {
-                const listElement = document.getElementById(listId);
-                if (!listElement) return;
-                
-                listElement.innerHTML = '';
-                items.forEach(item => {
-                    const li = document.createElement('li');
-                    if (isHtml) {
-                        li.innerHTML = item;
-                    } else {
-                        li.textContent = item;
-                    }
-                    listElement.appendChild(li);
-                });
-            }
-            
-            setupEventListeners() {
-                // Backup now buttons (alleen header en dashboard)
-                const backupButtons = [
-                    'backupNowHeaderBtn',
-                    'backupFromDashboardBtn'
-                ];
-                
-                backupButtons.forEach(btnId => {
-                    const btn = document.getElementById(btnId);
-                    if (btn) {
-                        btn.addEventListener('click', () => {
-                            this.openDataManagementForBackup();
-                        });
-                    }
-                });
-                
-                // Learn more button
-                const learnMoreBtn = document.getElementById('learnMoreHeaderBtn');
-                if (learnMoreBtn) {
-                    learnMoreBtn.addEventListener('click', () => {
-                        this.showBackupInfoModal();
-                    });
-                }
-                
-                // Dismiss backup button
-                const dismissBtn = document.getElementById('dismissDashboardBackupBtn');
-                if (dismissBtn) {
-                    dismissBtn.addEventListener('click', () => {
-                        this.setHideReminder(30);
-                    });
-                }
-                
-                // Auto-update elke minuut
-                setInterval(() => {
-                    this.updateUI();
-                }, 60000);
-            }
-            
-            showBackupInfoModal() {
-                const modal = new bootstrap.Modal(document.getElementById('backupInfoModal'));
-                modal.show();
-            }
-            
-            openDataManagementForBackup() {
-                if (window.uiHandler && typeof window.uiHandler.showModal === 'function') {
-                    window.uiHandler.showModal('data');
-                } else {
-                    console.error('UI handler niet beschikbaar');
-                }
-            }
+    // Backup status management
+    class BackupStatusManager {
+        constructor() {
+            this.storageKey = 'honden_backup_history';
+            this.warningDays = 7;    // Geel na 7 dagen
+            this.dangerDays = 14;    // Rood na 14 dagen
+            this.currentLang = appLanguage;
+            this.backupHistory = this.loadBackupHistory();
+            this.hideReminderUntil = this.getHideReminderDate();
         }
         
-        // Globale backup manager
-        const backupManager = new BackupStatusManager();
-        window.backupManager = backupManager;
-
-        // Pagina tekst vertalen
-        function translateAppPage(lang) {
-            // Update backup manager taal
-            backupManager.setLanguage(lang);
-            
-            // Update app teksten
-            const elements = document.querySelectorAll('.app-text');
-            elements.forEach(element => {
-                const key = element.getAttribute('data-key');
-                if (appTranslations[lang] && appTranslations[lang][key]) {
-                    element.textContent = appTranslations[lang][key];
-                }
-            });
-            
-            // Update actieve vlag
-            document.querySelectorAll('.app-lang-btn').forEach(btn => {
-                if (btn.getAttribute('data-lang') === lang) {
-                    btn.classList.add('active');
-                    btn.classList.remove('btn-outline-light');
-                    btn.classList.add('btn-light');
-                } else {
-                    btn.classList.remove('active', 'btn-light');
-                    btn.classList.add('btn-outline-light');
-                }
-            });
-            
-            // Update HTML lang attribuut
-            document.documentElement.lang = lang;
-            
-            // Update pagina titel
-            const titles = {
-                nl: "Hondendatabase PWA",
-                en: "Dog Database PWA",
-                de: "Hundendatenbank PWA"
-            };
-            document.title = titles[lang] || titles.nl;
-        }
-
-        // Event listeners voor vlaggetjes
-        document.querySelectorAll('.app-lang-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const lang = this.getAttribute('data-lang');
-                localStorage.setItem('appLanguage', lang);
-                translateAppPage(lang);
-            });
-        });
-
-        // Controleer of gebruiker is ingelogd
-        if (!auth.isLoggedIn()) {
-            window.location.href = 'index.html';
+        setLanguage(lang) {
+            this.currentLang = lang;
+            this.updateUI();
         }
         
-        // Initialiseer UI Handler
-        let ui = null;
-        
-        // Wacht tot DOM volledig geladen is
-        document.addEventListener('DOMContentLoaded', function() {
+        loadBackupHistory() {
             try {
-                ui = new UIHandler();
-                window.appUI = ui;
-                window.uiHandler = ui;
-                
-                console.log('UIHandler succesvol geïnitialiseerd:', ui);
-                
-                // Initialiseer taal
-                translateAppPage(appLanguage);
-                
-                // Toon huidige gebruiker
-                const currentUser = auth.getCurrentUser();
-                if (currentUser) {
-                    document.getElementById('currentUser').textContent = 
-                        `${currentUser.username} (${auth.isAdmin() ? 'Admin' : 'Gebruiker'})`;
-                }
-                
-                // Setup backup manager
-                backupManager.setupEventListeners();
-                backupManager.updateUI();
-                
-                // Setup event listeners voor menu knoppen
-                setupMenuEventListeners();
-                
-                // Setup andere event listeners
-                setupOtherEventListeners();
-                
-                // Laad initiële statistieken
-                loadInitialStats();
-                
+                const history = localStorage.getItem(this.storageKey);
+                return history ? JSON.parse(history) : [];
             } catch (error) {
-                console.error('Fout bij initialiseren UI:', error);
-                alert('Fout bij initialiseren applicatie: ' + error.message);
+                console.error('Fout bij laden backup history:', error);
+                return [];
             }
-        });
+        }
         
-        function setupMenuEventListeners() {
-            console.log('Setting up menu event listeners');
+        saveBackupHistory() {
+            try {
+                localStorage.setItem(this.storageKey, JSON.stringify(this.backupHistory));
+            } catch (error) {
+                console.error('Fout bij opslaan backup history:', error);
+            }
+        }
+        
+        getHideReminderDate() {
+            try {
+                return localStorage.getItem('hide_backup_reminder_until');
+            } catch (error) {
+                return null;
+            }
+        }
+        
+        setHideReminder(days = 30) {
+            const hideUntil = new Date();
+            hideUntil.setDate(hideUntil.getDate() + days);
+            localStorage.setItem('hide_backup_reminder_until', hideUntil.toISOString());
+            this.hideReminderUntil = hideUntil.toISOString();
+            this.updateUI();
             
-            const menuButtons = {
-                'dataManagementBtn': 'data',
-                'addDogBtn': 'addDog',
-                'addLitterBtn': 'litter',
-                'editDogDataBtn': 'editDogData',
-                'searchBtn': 'search',
-                'photoGalleryBtn': 'photos',
-                'breedingPlanBtn': 'breeding',
-                'privateInfoBtn': 'private'
+            if (window.uiHandler && window.uiHandler.showSuccess) {
+                const messages = {
+                    nl: `Backup herinnering uitgezet voor ${days} dagen`,
+                    en: `Backup reminder disabled for ${days} days`,
+                    de: `Backup-Erinnerung voor ${days} Tage deaktiviert`
+                };
+                window.uiHandler.showSuccess(messages[this.currentLang] || messages.nl);
+            }
+        }
+        
+        shouldShowReminder() {
+            if (!this.hideReminderUntil) return true;
+            
+            const now = new Date();
+            const hideUntil = new Date(this.hideReminderUntil);
+            return now > hideUntil;
+        }
+        
+        recordBackup(backupType = 'full', filename = '') {
+            const backupRecord = {
+                date: new Date().toISOString(),
+                type: backupType,
+                filename: filename,
+                user: window.auth?.getCurrentUser()?.username || 'unknown'
             };
             
-            for (const [btnId, modalType] of Object.entries(menuButtons)) {
+            this.backupHistory.push(backupRecord);
+            this.saveBackupHistory();
+            this.updateUI();
+            
+            localStorage.setItem('last_backup_date', backupRecord.date);
+        }
+        
+        getLastBackupDate() {
+            if (this.backupHistory.length === 0) {
+                return null;
+            }
+            
+            const sorted = [...this.backupHistory].sort((a, b) => 
+                new Date(b.date) - new Date(a.date)
+            );
+            
+            return sorted[0].date;
+        }
+        
+        getDaysSinceLastBackup() {
+            const lastBackup = this.getLastBackupDate();
+            if (!lastBackup) return Infinity;
+            
+            const lastDate = new Date(lastBackup);
+            const now = new Date();
+            const diffTime = Math.abs(now - lastDate);
+            return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        }
+        
+        getStatus() {
+            const daysSince = this.getDaysSinceLastBackup();
+            
+            if (daysSince === Infinity) {
+                return {
+                    level: 'danger',
+                    days: 999,
+                    icon: 'bi-exclamation-triangle-fill'
+                };
+            } else if (daysSince >= this.dangerDays) {
+                return {
+                    level: 'danger',
+                    days: daysSince,
+                    icon: 'bi-exclamation-triangle-fill'
+                };
+            } else if (daysSince >= this.warningDays) {
+                return {
+                    level: 'warning',
+                    days: daysSince,
+                    icon: 'bi-exclamation-triangle'
+                };
+            } else {
+                return {
+                    level: 'good',
+                    days: daysSince,
+                    icon: 'bi-shield-check'
+                };
+            }
+        }
+        
+        updateUI() {
+            const banner = document.getElementById('backupHeaderBanner');
+            const statusText = document.getElementById('backupStatusText');
+            const dashboardCard = document.getElementById('backupDashboardCard');
+            const dashboardText = document.getElementById('backupDashboardText');
+            const warningTitle = document.getElementById('backupWarningTitle');
+            
+            if (!banner || !statusText) return;
+            
+            const status = this.getStatus();
+            const t = this.currentLang;
+            
+            // Update header banner
+            banner.className = `alert backup-status-${status.level}`;
+            banner.style.display = 'block';
+            
+            // Update status text
+            let displayText = '';
+            if (status.level === 'good') {
+                const text = appTranslations[t]?.backupStatusGood || appTranslations.nl.backupStatusGood;
+                displayText = text.replace('{days}', status.days === 0 ? 'vandaag' : status.days);
+            } else if (status.level === 'warning') {
+                const text = appTranslations[t]?.backupStatusWarning || appTranslations.nl.backupStatusWarning;
+                displayText = text.replace('{days}', status.days);
+            } else {
+                displayText = appTranslations[t]?.backupStatusDanger || appTranslations.nl.backupStatusDanger;
+            }
+            
+            statusText.textContent = displayText;
+            
+            // Update dashboard card
+            if (dashboardCard && dashboardText && warningTitle) {
+                if (status.level === 'danger') {
+                    dashboardCard.style.display = 'block';
+                    warningTitle.textContent = appTranslations[t]?.backupWarningTitle || appTranslations.nl.backupWarningTitle;
+                    dashboardText.textContent = appTranslations[t]?.dashboardWarningNever || appTranslations.nl.dashboardWarningNever;
+                } else if (status.level === 'warning' && this.shouldShowReminder()) {
+                    dashboardCard.style.display = 'block';
+                    warningTitle.textContent = appTranslations[t]?.backupWarningTitle || appTranslations.nl.backupWarningTitle;
+                    const text = appTranslations[t]?.dashboardWarningOld || appTranslations.nl.dashboardWarningOld;
+                    dashboardText.textContent = text.replace('{days}', status.days);
+                } else {
+                    dashboardCard.style.display = 'none';
+                }
+            }
+            
+            // Update button texts
+            this.updateButtonTexts();
+        }
+        
+        updateButtonTexts() {
+            const t = this.currentLang;
+            const translations = appTranslations[t] || appTranslations.nl;
+            
+            // Header buttons
+            const backupNowText = document.getElementById('backupNowText');
+            const learnMoreText = document.getElementById('learnMoreText');
+            
+            if (backupNowText) backupNowText.textContent = translations.backupNow;
+            if (learnMoreText) learnMoreText.textContent = translations.learnMore;
+            
+            // Dashboard buttons
+            const backupNowDashboardText = document.getElementById('backupNowDashboardText');
+            const dismissBackupText = document.getElementById('dismissBackupText');
+            
+            if (backupNowDashboardText) backupNowDashboardText.textContent = translations.backupNowDashboard;
+            if (dismissBackupText) dismissBackupText.textContent = translations.dismissBackup;
+            
+            // Modal texts (ZONDER backup knop)
+            this.updateModalTexts();
+        }
+        
+        updateModalTexts() {
+            const t = this.currentLang;
+            const translations = appTranslations[t] || appTranslations.nl;
+            
+            // Update modal content
+            const elements = {
+                'backupModalTitle': translations.backupModalTitle,
+                'backupRisksTitle': translations.backupRisksTitle,
+                'backupRisksText1': translations.backupRisksText1,
+                'backupRisksText2': translations.backupRisksText2,
+                'backupHowToTitle': translations.backupHowToTitle,
+                'backupHowToText1': translations.backupHowToText1,
+                'backupIOSHeading': translations.backupIOSHeading,
+                'backupAndroidHeading': translations.backupAndroidHeading,
+                'backupBestPracticesTitle': translations.backupBestPracticesTitle,
+                'backupModalClose': translations.backupModalClose
+            };
+            
+            for (const [id, text] of Object.entries(elements)) {
+                const element = document.getElementById(id);
+                if (element) {
+                    if (id === 'backupRisksText1') {
+                        element.innerHTML = text;
+                    } else {
+                        element.textContent = text;
+                    }
+                }
+            }
+            
+            // Update lists
+            const backupSteps = {
+                nl: ["Klik op \"Nu backup maken\"", "Kies \"Opslaan in Bestanden\"", "Sla op in iCloud Drive"],
+                en: ["Click \"Create Backup Now\"", "Choose \"Save to Files\"", "Save to iCloud Drive"],
+                de: ["Klicken Sie auf \"Jetzt Backup erstellen\"", "Wählen Sie \"In Dateien speichern\"", "In iCloud Drive speichern"]
+            };
+            
+            const androidSteps = {
+                nl: ["Klik op \"Nu backup maken\"", "Sla op in Downloads", "Upload naar Google Drive"],
+                en: ["Click \"Create Backup Now\"", "Save to Downloads", "Upload to Google Drive"],
+                de: ["Klicken Sie op \"Jetzt Backup erstellen\"", "In Downloads speichern", "Zu Google Drive hochladen"]
+            };
+            
+            const risksList = {
+                nl: ["Browser geschiedenis wist", "Cookies en sitegegevens verwijdert", "Je telefoon/tablet reset", "De app lange tijd niet gebruikt", "Van browser wisselt"],
+                en: ["Clear browser history", "Delete cookies and site data", "Reset your phone/tablet", "Don't use the app for a long time", "Switch browsers"],
+                de: ["Browserverlauf löschen", "Cookies und Websitedaten entfernen", "Ihr Telefon/Tablet zurücksetzen", "Die App lange nicht verwenden", "Browser wechseln"]
+            };
+            
+            const bestPractices = {
+                nl: ["Maak een backup <strong>voor én na</strong> belangrijke wijzigingen", "Bewaar meerdere versies (laatste 3-4 backups)", "Sla backups op op meerdere plaatsen (telefoon + cloud)", "Test af en toe of je backup werkt door te importeren"],
+                en: ["Create a backup <strong>before and after</strong> important changes", "Keep multiple versions (last 3-4 backups)", "Store backups in multiple places (phone + cloud)", "Test occasionally if your backup works by importing it"],
+                de: ["Erstellen Sie ein Backup <strong>vor und nach</strong> wichtigen Änderungen", "Mehrere Versionen speichern (letzte 3-4 Backups)", "Backups an mehreren Orten speichern (Telefon + Cloud)", "Testen Sie gelegentlich, ob Ihr Backup funktioniert, indem Sie es importieren"]
+            };
+            
+            this.updateList('backupIOSSteps', backupSteps[t] || backupSteps.nl);
+            this.updateList('backupAndroidSteps', androidSteps[t] || androidSteps.nl);
+            this.updateList('backupRisksList', risksList[t] || risksList.nl);
+            this.updateList('backupBestPracticesList', bestPractices[t] || bestPractices.nl, true);
+        }
+        
+        updateList(listId, items, isHtml = false) {
+            const listElement = document.getElementById(listId);
+            if (!listElement) return;
+            
+            listElement.innerHTML = '';
+            items.forEach(item => {
+                const li = document.createElement('li');
+                if (isHtml) {
+                    li.innerHTML = item;
+                } else {
+                    li.textContent = item;
+                }
+                listElement.appendChild(li);
+            });
+        }
+        
+        setupEventListeners() {
+            // Backup now buttons (alleen header en dashboard)
+            const backupButtons = [
+                'backupNowHeaderBtn',
+                'backupFromDashboardBtn'
+            ];
+            
+            backupButtons.forEach(btnId => {
                 const btn = document.getElementById(btnId);
                 if (btn) {
-                    console.log(`Setting up listener for ${btnId}`);
-                    btn.addEventListener('click', function() {
-                        console.log(`Clicked ${btnId} -> modalType: ${modalType}`);
-                        if (ui && ui.showModal) {
-                            console.log(`Calling ui.showModal('${modalType}')`);
-                            ui.showModal(modalType);
-                        } else {
-                            console.error('UI handler niet beschikbaar of showModal functie ontbreekt');
-                            alert('UI handler niet beschikbaar. Herlaad de pagina.');
-                        }
+                    btn.addEventListener('click', () => {
+                        this.openDataManagementForBackup();
                     });
-                } else {
-                    console.error(`Button ${btnId} not found`);
                 }
-            }
-        }
-        
-        function setupOtherEventListeners() {
-            console.log('Setting up other event listeners');
+            });
             
-            // Uitloggen
-            const logoutBtn = document.getElementById('logoutBtn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', function() {
-                    console.log('Logout button clicked');
-                    auth.logout();
+            // Learn more button
+            const learnMoreBtn = document.getElementById('learnMoreHeaderBtn');
+            if (learnMoreBtn) {
+                learnMoreBtn.addEventListener('click', () => {
+                    this.showBackupInfoModal();
                 });
-            } else {
-                console.error('Logout button not found');
             }
             
-            // Vernieuw statistieken
-            const refreshStatsBtn = document.getElementById('refreshStatsBtn');
-            if (refreshStatsBtn) {
-                refreshStatsBtn.addEventListener('click', async function() {
-                    console.log('Refresh stats button clicked');
-                    try {
-                        const stats = await db.getStatistieken();
-                        document.getElementById('quickStatsHonden').textContent = stats.totaalHonden;
-                        document.getElementById('quickStatsFotos').textContent = stats.totaalFotos;
-                        if (ui && ui.showSuccess) {
-                            ui.showSuccess('Statistieken vernieuwd!');
-                        }
-                    } catch (error) {
-                        console.error('Fout bij laden statistieken:', error);
-                        if (ui && ui.showError) {
-                            ui.showError('Fout bij laden statistieken');
-                        }
-                    }
+            // Dismiss backup button
+            const dismissBtn = document.getElementById('dismissDashboardBackupBtn');
+            if (dismissBtn) {
+                dismissBtn.addEventListener('click', () => {
+                    this.setHideReminder(30);
                 });
-            } else {
-                console.error('Refresh stats button not found');
             }
+            
+            // Auto-update elke minuut
+            setInterval(() => {
+                this.updateUI();
+            }, 60000);
         }
         
-        async function loadInitialStats() {
-            console.log('Loading initial stats');
-            try {
-                await db.init();
-                const stats = await db.getStatistieken();
-                document.getElementById('quickStatsHonden').textContent = stats.totaalHonden;
-                document.getElementById('quickStatsFotos').textContent = stats.totaalFotos;
-                console.log('Stats loaded:', stats);
-            } catch (error) {
-                console.error('Fout bij initialiseren:', error);
-            }
+        showBackupInfoModal() {
+            const modal = new bootstrap.Modal(document.getElementById('backupInfoModal'));
+            modal.show();
         }
         
-        // PWA MANIFEST DYNAMISCH LADEN (FIX VOOR FILE:// PROTOCOL)
-        document.addEventListener('DOMContentLoaded', function() {
-            // Alleen manifest toevoegen als we niet vanaf file:// werken
-            if (window.location.protocol !== 'file:') {
-                const manifestLink = document.createElement('link');
-                manifestLink.rel = 'manifest';
-                manifestLink.href = 'manifest.json';
-                document.head.appendChild(manifestLink);
-                console.log('PWA Manifest geladen via HTTP/HTTPS');
+        openDataManagementForBackup() {
+            if (window.uiHandler && typeof window.uiHandler.showModal === 'function') {
+                window.uiHandler.showModal('data');
             } else {
-                // Voor file:// protocol: PWA meta tags inline toevoegen
-                console.log('File:// protocol - PWA meta tags inline gebruiken');
-                
-                // Theme color meta tag
-                const metaThemeColor = document.createElement('meta');
-                metaThemeColor.name = 'theme-color';
-                metaThemeColor.content = '#0d6efd';
-                document.head.appendChild(metaThemeColor);
-                
-                // Apple mobile web app capable
-                const metaAppleMobileWebAppCapable = document.createElement('meta');
-                metaAppleMobileWebAppCapable.name = 'apple-mobile-web-app-capable';
-                metaAppleMobileWebAppCapable.content = 'yes';
-                document.head.appendChild(metaAppleMobileWebAppCapable);
-                
-                // Apple status bar style
-                const metaAppleMobileWebAppStatusBarStyle = document.createElement('meta');
-                metaAppleMobileWebAppStatusBarStyle.name = 'apple-mobile-web-app-status-bar-style';
-                metaAppleMobileWebAppStatusBarStyle.content = 'black-translucent';
-                document.head.appendChild(metaAppleMobileWebAppStatusBarStyle);
-                
-                // Apple touch icons voor verschillende maten
-                const appleIconSizes = [57, 60, 72, 76, 114, 120, 144, 152, 180];
-                appleIconSizes.forEach(size => {
-                    const link = document.createElement('link');
-                    link.rel = 'apple-touch-icon';
-                    link.sizes = `${size}x${size}`;
-                    // Gebruik bestaande icons als ze beschikbaar zijn
-                    if (size === 57 || size === 60 || size === 72 || size === 76 || 
-                        size === 114 || size === 120 || size === 144 || size === 152 || size === 180) {
-                        link.href = `img/icons/icon-${size}x${size}.png`;
+                console.error('UI handler niet beschikbaar');
+            }
+        }
+    }
+    
+    // Globale backup manager
+    const backupManager = new BackupStatusManager();
+    window.backupManager = backupManager;
+
+    // Pagina tekst vertalen
+    function translateAppPage(lang) {
+        // Update backup manager taal
+        backupManager.setLanguage(lang);
+        
+        // Update app teksten
+        const elements = document.querySelectorAll('.app-text');
+        elements.forEach(element => {
+            const key = element.getAttribute('data-key');
+            if (appTranslations[lang] && appTranslations[lang][key]) {
+                element.textContent = appTranslations[lang][key];
+            }
+        });
+        
+        // Update actieve vlag
+        document.querySelectorAll('.app-lang-btn').forEach(btn => {
+            if (btn.getAttribute('data-lang') === lang) {
+                btn.classList.add('active');
+                btn.classList.remove('btn-outline-light');
+                btn.classList.add('btn-light');
+            } else {
+                btn.classList.remove('active', 'btn-light');
+                btn.classList.add('btn-outline-light');
+            }
+        });
+        
+        // Update HTML lang attribuut
+        document.documentElement.lang = lang;
+        
+        // Update pagina titel
+        const titles = {
+            nl: "Hondendatabase PWA",
+            en: "Dog Database PWA",
+            de: "Hundendatenbank PWA"
+        };
+        document.title = titles[lang] || titles.nl;
+    }
+
+    // Event listeners voor vlaggetjes
+    document.querySelectorAll('.app-lang-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const lang = this.getAttribute('data-lang');
+            localStorage.setItem('appLanguage', lang);
+            translateAppPage(lang);
+        });
+    });
+
+    // Controleer of gebruiker is ingelogd
+    if (!auth.isLoggedIn()) {
+        window.location.href = 'index.html';
+    }
+    
+    // Initialiseer UI Handler
+    let ui = null;
+    
+    // Wacht tot DOM volledig geladen is
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            ui = new UIHandler();
+            window.appUI = ui;
+            window.uiHandler = ui;
+            
+            console.log('UIHandler succesvol geïnitialiseerd:', ui);
+            
+            // Initialiseer taal
+            translateAppPage(appLanguage);
+            
+            // Toon huidige gebruiker
+            const currentUser = auth.getCurrentUser();
+            if (currentUser) {
+                document.getElementById('currentUser').textContent = 
+                    `${currentUser.username} (${auth.isAdmin() ? 'Admin' : 'Gebruiker'})`;
+            }
+            
+            // Setup backup manager
+            backupManager.setupEventListeners();
+            backupManager.updateUI();
+            
+            // Setup event listeners voor menu knoppen
+            setupMenuEventListeners();
+            
+            // Setup andere event listeners
+            setupOtherEventListeners();
+            
+            // Setup PWA installatie
+            setupPWAInstallation();
+            
+            // Laad initiële statistieken
+            loadInitialStats();
+            
+        } catch (error) {
+            console.error('Fout bij initialiseren UI:', error);
+            alert('Fout bij initialiseren applicatie: ' + error.message);
+        }
+    });
+    
+    function setupMenuEventListeners() {
+        console.log('Setting up menu event listeners');
+        
+        const menuButtons = {
+            'dataManagementBtn': 'data',
+            'addDogBtn': 'addDog',
+            'addLitterBtn': 'litter',
+            'editDogDataBtn': 'editDogData',
+            'searchBtn': 'search',
+            'photoGalleryBtn': 'photos',
+            'breedingPlanBtn': 'breeding',
+            'privateInfoBtn': 'private'
+        };
+        
+        for (const [btnId, modalType] of Object.entries(menuButtons)) {
+            const btn = document.getElementById(btnId);
+            if (btn) {
+                console.log(`Setting up listener for ${btnId}`);
+                btn.addEventListener('click', function() {
+                    console.log(`Clicked ${btnId} -> modalType: ${modalType}`);
+                    if (ui && ui.showModal) {
+                        console.log(`Calling ui.showModal('${modalType}')`);
+                        ui.showModal(modalType);
                     } else {
-                        // Fallback naar 192x192 voor andere maten
-                        link.href = 'img/icons/icon-192x192.png';
+                        console.error('UI handler niet beschikbaar of showModal functie ontbreekt');
+                        alert('UI handler niet beschikbaar. Herlaad de pagina.');
                     }
-                    document.head.appendChild(link);
                 });
-                
-                console.log('PWA meta tags toegevoegd voor file:// protocol');
-            }
-        });
-        
-        // SERVICE WORKER REGISTRATIE - WERKT NU OOK VOOR FILE://
-        async function registerServiceWorker() {
-            if (!('serviceWorker' in navigator)) {
-                console.log('Service Workers niet ondersteund in deze browser');
-                return;
-            }
-            
-            try {
-                // Probeer Service Worker te registreren - ook voor file://
-                const registration = await navigator.serviceWorker.register('sw.js', {
-                    scope: './',
-                    updateViaCache: 'none'
-                });
-                
-                console.log('✅ Service Worker geregistreerd voor scope:', registration.scope);
-                
-                // Controleer voor updates
-                registration.addEventListener('updatefound', () => {
-                    const newWorker = registration.installing;
-                    console.log('🔄 Nieuwe Service Worker gevonden:', newWorker.state);
-                    
-                    newWorker.addEventListener('statechange', () => {
-                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            console.log('🔄 Nieuwe Service Worker klaar voor gebruik');
-                        }
-                    });
-                });
-                
-                // Forceer update
-                await registration.update();
-                
-            } catch (error) {
-                console.log('⚠ Service Worker kon niet geregistreerd worden:', error.message);
-                // Geen alert - gewoon stil falen
+            } else {
+                console.error(`Button ${btnId} not found`);
             }
         }
+    }
+    
+    function setupOtherEventListeners() {
+        console.log('Setting up other event listeners');
         
-        // Roep Service Worker registratie aan na DOM laden
-        document.addEventListener('DOMContentLoaded', function() {
-            setTimeout(registerServiceWorker, 1000); // Wacht even zodat andere init klaar is
-        });
+        // Uitloggen
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function() {
+                console.log('Logout button clicked');
+                auth.logout();
+            });
+        } else {
+            console.error('Logout button not found');
+        }
         
-        // Modal fix
-        document.addEventListener('hidden.bs.modal', function() {
-            setTimeout(() => {
-                const openModals = document.querySelectorAll('.modal.show');
-                const backdrops = document.querySelectorAll('.modal-backdrop');
-                
-                if (openModals.length === 0 && backdrops.length > 0) {
-                    backdrops.forEach(backdrop => {
-                        backdrop.remove();
-                    });
-                    
-                    document.body.classList.remove('modal-open');
-                    document.body.style.overflow = '';
-                    document.body.style.paddingRight = '';
-                }
-            }, 100);
-        });
-        
-        // UI Handler aanpassing voor LitterManager
-        const originalShowModal = UIHandler.prototype.showModal;
-        UIHandler.prototype.showModal = function(modalType) {
-            console.log('Modified showModal called with:', modalType);
-            
-            // Speciale behandeling voor 'litter' modal
-            if (modalType === 'litter') {
-                console.log('Creating litter modal');
-                
-                // Maak LitterManager aan
-                const litterManager = new LitterManager();
-                
-                // Injecteer dependencies
-                if (litterManager.injectDependencies) {
-                    litterManager.injectDependencies(db, auth);
-                    console.log('Dependencies injected into LitterManager');
-                }
-                
-                // Haal de modal HTML op - deze bevat de toegangscontrole
-                const modalHTML = litterManager.getModalHTML();
-                console.log('Got modal HTML from LitterManager');
-                
-                // Toon de modal
-                this.showCustomModal(modalHTML, 'addLitterModal', 'addLitterModalLabel');
-                
-                // Setup events
-                setTimeout(() => {
-                    try {
-                        if (litterManager.setupEvents) {
-                            // Controleer eerst of gebruiker admin is
-                            const isAdmin = auth.isAdmin();
-                            if (!isAdmin) {
-                                console.log('User is not admin, showing access denied popup');
-                                // De modal toont al de toegang geweigerd popup
-                                return;
-                            }
-                            litterManager.setupEvents();
-                            console.log('LitterManager events setup complete');
-                        }
-                    } catch (error) {
-                        console.error('Error setting up LitterManager events:', error);
+        // Vernieuw statistieken
+        const refreshStatsBtn = document.getElementById('refreshStatsBtn');
+        if (refreshStatsBtn) {
+            refreshStatsBtn.addEventListener('click', async function() {
+                console.log('Refresh stats button clicked');
+                try {
+                    const stats = await db.getStatistieken();
+                    document.getElementById('quickStatsHonden').textContent = stats.totaalHonden;
+                    document.getElementById('quickStatsFotos').textContent = stats.totaalFotos;
+                    if (ui && ui.showSuccess) {
+                        ui.showSuccess('Statistieken vernieuwd!');
                     }
-                }, 500);
-                
-                return;
-            }
-            
-            // Voor alle andere modals, gebruik de originele functionaliteit
-            originalShowModal.call(this, modalType);
-        };
+                } catch (error) {
+                    console.error('Fout bij laden statistieken:', error);
+                    if (ui && ui.showError) {
+                        ui.showError('Fout bij laden statistieken');
+                    }
+                }
+            });
+        } else {
+            console.error('Refresh stats button not found');
+        }
+    }
+    
+    // PWA INSTALLATIE FUNCTIONALITEIT
+    function setupPWAInstallation() {
+        const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+        if (!pwaInstallBtn) return;
         
-        // Helper functie om custom modal te tonen
-        UIHandler.prototype.showCustomModal = function(html, modalId, modalLabelId) {
-            console.log('showCustomModal called:', modalId);
+        let deferredPrompt = null;
+        
+        // Toon installatie knop alleen als PWA ondersteund wordt EN we via HTTP/HTTPS werken
+        if (window.location.protocol.startsWith('http') && 
+            'serviceWorker' in navigator && 
+            'BeforeInstallPromptEvent' in window) {
             
-            // Verwijder bestaande modal met hetzelfde ID
-            const existingModal = document.getElementById(modalId);
-            if (existingModal) {
-                existingModal.remove();
-            }
-            
-            // Voeg de nieuwe modal toe aan de container
-            const modalsContainer = document.getElementById('modalsContainer');
-            if (modalsContainer) {
-                modalsContainer.innerHTML = html;
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // Voorkom dat de standaard prompt verschijnt
+                e.preventDefault();
+                deferredPrompt = e;
                 
-                // Toon de modal
-                const modalElement = document.getElementById(modalId);
-                if (modalElement) {
-                    const modal = new bootstrap.Modal(modalElement);
-                    modal.show();
-                    
-                    // Vertaal de modal
-                    this.translateModalContent(modalElement);
-                    
-                    // Setup vertaling voor taalwissels
-                    this.setupModalTranslation(modalElement);
-                    
-                    console.log('Modal shown:', modalId);
+                // Toon onze eigen installatie knop
+                pwaInstallBtn.style.display = 'inline-block';
+                
+                // Update knop tekst
+                const installText = document.querySelector('#pwaInstallBtn .app-text');
+                if (installText) {
+                    const translations = appTranslations[appLanguage] || appTranslations.nl;
+                    installText.textContent = translations.installPWA || 'Installeer App';
+                }
+                
+                console.log('PWA installatie beschikbaar - knop getoond');
+            });
+            
+            // Wanneer app is geïnstalleerd, verberg de knop
+            window.addEventListener('appinstalled', () => {
+                console.log('PWA succesvol geïnstalleerd!');
+                pwaInstallBtn.style.display = 'none';
+                deferredPrompt = null;
+                
+                if (ui && ui.showSuccess) {
+                    const messages = {
+                        nl: 'App succesvol geïnstalleerd!',
+                        en: 'App successfully installed!',
+                        de: 'App erfolgreich installiert!'
+                    };
+                    ui.showSuccess(messages[appLanguage] || messages.nl);
+                }
+            });
+            
+            // Klik event voor installatie knop
+            pwaInstallBtn.addEventListener('click', async () => {
+                if (!deferredPrompt) {
+                    // Als er geen deferred prompt is, open GitHub Pages URL
+                    window.open('https://YOUR-USERNAME.github.io/honden-database-pwa/', '_blank');
+                    return;
+                }
+                
+                // Toon de installatie prompt
+                deferredPrompt.prompt();
+                
+                // Wacht op gebruiker keuze
+                const { outcome } = await deferredPrompt.userChoice;
+                
+                if (outcome === 'accepted') {
+                    console.log('Gebruiker heeft PWA installatie geaccepteerd');
+                    if (ui && ui.showSuccess) {
+                        ui.showSuccess('Installatie gestart! De app wordt toegevoegd aan je apparaat.');
+                    }
                 } else {
-                    console.error('Modal element not found after adding to DOM:', modalId);
-                }
-            } else {
-                console.error('Modals container not found');
-            }
-        };
-        
-        // Helper om modal content te vertalen
-        UIHandler.prototype.translateModalContent = function(modalElement) {
-            const lang = localStorage.getItem('appLanguage') || 'nl';
-            
-            // Vertaal elementen met data-key attribute
-            const elements = modalElement.querySelectorAll('[data-key]');
-            elements.forEach(element => {
-                const key = element.getAttribute('data-key');
-                const translations = appTranslations[lang];
-                if (translations && translations[key]) {
-                    element.textContent = translations[key];
-                }
-            });
-        };
-        
-        // Helper om modal translation te setupen voor taalwissels
-        UIHandler.prototype.setupModalTranslation = function(modalElement) {
-            const langButtons = document.querySelectorAll('.app-lang-btn');
-            langButtons.forEach(btn => {
-                const originalClickListener = btn.onclick;
-                btn.onclick = function(e) {
-                    if (originalClickListener) originalClickListener.call(this, e);
-                    
-                    // Vertaal de modal content opnieuw
-                    const lang = this.getAttribute('data-lang');
-                    const modal = modalElement.querySelector('.modal');
-                    if (modal) {
-                        // Vertaal alle elementen in de modal
-                        const elements = modal.querySelectorAll('[data-key]');
-                        elements.forEach(element => {
-                            const key = element.getAttribute('data-key');
-                            const translations = appTranslations[lang];
-                            if (translations && translations[key]) {
-                                element.textContent = translations[key];
-                            }
-                        });
+                    console.log('Gebruiker heeft PWA installatie geweigerd');
+                    if (ui && ui.showInfo) {
+                        ui.showInfo('Installatie geannuleerd. Je kunt de app altijd later installeren.');
                     }
-                };
+                }
+                
+                deferredPrompt = null;
+                pwaInstallBtn.style.display = 'none';
             });
-        };
-    </script>
+            
+        } else {
+            // Voor file:// protocol, toon knop die naar GitHub Pages wijst
+            if (window.location.protocol === 'file:') {
+                pwaInstallBtn.style.display = 'inline-block';
+                
+                // Update knop tekst voor offline installatie
+                const installText = document.querySelector('#pwaInstallBtn .app-text');
+                if (installText) {
+                    installText.textContent = 'PWA Installeren';
+                }
+                
+                pwaInstallBtn.addEventListener('click', () => {
+                    const message = "Voor PWA installatie moet je de app online openen via GitHub Pages.\n\n" +
+                                  "1. Push je code naar GitHub\n" +
+                                  "2. Ga naar: https://YOUR-USERNAME.github.io/honden-database-pwa/\n" +
+                                  "3. Klik op 'Installeer App' in de browser";
+                    
+                    alert(message);
+                });
+                
+                console.log('File:// protocol - GitHub Pages installatie knop getoond');
+            } else {
+                pwaInstallBtn.style.display = 'none';
+                console.log('PWA installatie niet beschikbaar in deze browser/context');
+            }
+        }
+    }
+    
+    async function loadInitialStats() {
+        console.log('Loading initial stats');
+        try {
+            await db.init();
+            const stats = await db.getStatistieken();
+            document.getElementById('quickStatsHonden').textContent = stats.totaalHonden;
+            document.getElementById('quickStatsFotos').textContent = stats.totaalFotos;
+            console.log('Stats loaded:', stats);
+        } catch (error) {
+            console.error('Fout bij initialiseren:', error);
+        }
+    }
+    
+    // PWA MANIFEST DYNAMISCH LADEN (FIX VOOR FILE:// PROTOCOL)
+    document.addEventListener('DOMContentLoaded', function() {
+        // Alleen manifest toevoegen als we niet vanaf file:// werken
+        if (window.location.protocol !== 'file:') {
+            const manifestLink = document.createElement('link');
+            manifestLink.rel = 'manifest';
+            manifestLink.href = 'manifest.json';
+            document.head.appendChild(manifestLink);
+            console.log('PWA Manifest geladen via HTTP/HTTPS');
+        } else {
+            // Voor file:// protocol: PWA meta tags inline toevoegen
+            console.log('File:// protocol - PWA meta tags inline gebruiken');
+            
+            // Theme color meta tag
+            const metaThemeColor = document.createElement('meta');
+            metaThemeColor.name = 'theme-color';
+            metaThemeColor.content = '#0d6efd';
+            document.head.appendChild(metaThemeColor);
+            
+            // Apple mobile web app capable
+            const metaAppleMobileWebAppCapable = document.createElement('meta');
+            metaAppleMobileWebAppCapable.name = 'apple-mobile-web-app-capable';
+            metaAppleMobileWebAppCapable.content = 'yes';
+            document.head.appendChild(metaAppleMobileWebAppCapable);
+            
+            // Apple status bar style
+            const metaAppleMobileWebAppStatusBarStyle = document.createElement('meta');
+            metaAppleMobileWebAppStatusBarStyle.name = 'apple-mobile-web-app-status-bar-style';
+            metaAppleMobileWebAppStatusBarStyle.content = 'black-translucent';
+            document.head.appendChild(metaAppleMobileWebAppStatusBarStyle);
+            
+            // Apple touch icons voor verschillende maten
+            const appleIconSizes = [57, 60, 72, 76, 114, 120, 144, 152, 180];
+            appleIconSizes.forEach(size => {
+                const link = document.createElement('link');
+                link.rel = 'apple-touch-icon';
+                link.sizes = `${size}x${size}`;
+                // Gebruik bestaande icons als ze beschikbaar zijn
+                if (size === 57 || size === 60 || size === 72 || size === 76 || 
+                    size === 114 || size === 120 || size === 144 || size === 152 || size === 180) {
+                    link.href = `img/icons/icon-${size}x${size}.png`;
+                } else {
+                    // Fallback naar 192x192 voor andere maten
+                    link.href = 'img/icons/icon-192x192.png';
+                }
+                document.head.appendChild(link);
+            });
+            
+            console.log('PWA meta tags toegevoegd voor file:// protocol');
+        }
+    });
+    
+    // SERVICE WORKER REGISTRATIE - Alleen voor HTTP/HTTPS
+    async function registerServiceWorker() {
+        if (!('serviceWorker' in navigator)) {
+            console.log('Service Workers niet ondersteund in deze browser');
+            return;
+        }
+        
+        // Service Workers werken niet vanaf file:// protocol
+        if (window.location.protocol === 'file:') {
+            console.log('Service Worker uitgeschakeld voor file:// protocol');
+            return;
+        }
+        
+        try {
+            // Probeer Service Worker te registreren - alleen voor HTTP/HTTPS
+            const registration = await navigator.serviceWorker.register('sw.js', {
+                scope: './',
+                updateViaCache: 'none'
+            });
+            
+            console.log('✅ Service Worker geregistreerd voor scope:', registration.scope);
+            
+            // Controleer voor updates
+            registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                console.log('🔄 Nieuwe Service Worker gevonden:', newWorker.state);
+                
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        console.log('🔄 Nieuwe Service Worker klaar voor gebruik');
+                    }
+                });
+            });
+            
+            // Forceer update
+            await registration.update();
+            
+        } catch (error) {
+            console.log('⚠ Service Worker kon niet geregistreerd worden:', error.message);
+            // Geen alert - gewoon stil falen
+        }
+    }
+    
+    // Roep Service Worker registratie aan na DOM laden (alleen voor HTTP/HTTPS)
+    document.addEventListener('DOMContentLoaded', function() {
+        if (window.location.protocol.startsWith('http')) {
+            setTimeout(registerServiceWorker, 1000);
+        } else {
+            console.log('Service Worker niet geregistreerd (file:// protocol)');
+        }
+    });
+    
+    // Modal fix
+    document.addEventListener('hidden.bs.modal', function() {
+        setTimeout(() => {
+            const openModals = document.querySelectorAll('.modal.show');
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            
+            if (openModals.length === 0 && backdrops.length > 0) {
+                backdrops.forEach(backdrop => {
+                    backdrop.remove();
+                });
+                
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            }
+        }, 100);
+    });
+    
+    // UI Handler aanpassing voor LitterManager
+    const originalShowModal = UIHandler.prototype.showModal;
+    UIHandler.prototype.showModal = function(modalType) {
+        console.log('Modified showModal called with:', modalType);
+        
+        // Speciale behandeling voor 'litter' modal
+        if (modalType === 'litter') {
+            console.log('Creating litter modal');
+            
+            // Maak LitterManager aan
+            const litterManager = new LitterManager();
+            
+            // Injecteer dependencies
+            if (litterManager.injectDependencies) {
+                litterManager.injectDependencies(db, auth);
+                console.log('Dependencies injected into LitterManager');
+            }
+            
+            // Haal de modal HTML op - deze bevat de toegangscontrole
+            const modalHTML = litterManager.getModalHTML();
+            console.log('Got modal HTML from LitterManager');
+            
+            // Toon de modal
+            this.showCustomModal(modalHTML, 'addLitterModal', 'addLitterModalLabel');
+            
+            // Setup events
+            setTimeout(() => {
+                try {
+                    if (litterManager.setupEvents) {
+                        // Controleer eerst of gebruiker admin is
+                        const isAdmin = auth.isAdmin();
+                        if (!isAdmin) {
+                            console.log('User is not admin, showing access denied popup');
+                            // De modal toont al de toegang geweigerd popup
+                            return;
+                        }
+                        litterManager.setupEvents();
+                        console.log('LitterManager events setup complete');
+                    }
+                } catch (error) {
+                    console.error('Error setting up LitterManager events:', error);
+                }
+            }, 500);
+            
+            return;
+        }
+        
+        // Voor alle andere modals, gebruik de originele functionaliteit
+        originalShowModal.call(this, modalType);
+    };
+    
+    // Helper functie om custom modal te tonen
+    UIHandler.prototype.showCustomModal = function(html, modalId, modalLabelId) {
+        console.log('showCustomModal called:', modalId);
+        
+        // Verwijder bestaande modal met hetzelfde ID
+        const existingModal = document.getElementById(modalId);
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Voeg de nieuwe modal toe aan de container
+        const modalsContainer = document.getElementById('modalsContainer');
+        if (modalsContainer) {
+            modalsContainer.innerHTML = html;
+            
+            // Toon de modal
+            const modalElement = document.getElementById(modalId);
+            if (modalElement) {
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+                
+                // Vertaal de modal
+                this.translateModalContent(modalElement);
+                
+                // Setup vertaling voor taalwissels
+                this.setupModalTranslation(modalElement);
+                
+                console.log('Modal shown:', modalId);
+            } else {
+                console.error('Modal element not found after adding to DOM:', modalId);
+            }
+        } else {
+            console.error('Modals container not found');
+        }
+    };
+    
+    // Helper om modal content te vertalen
+    UIHandler.prototype.translateModalContent = function(modalElement) {
+        const lang = localStorage.getItem('appLanguage') || 'nl';
+        
+        // Vertaal elementen met data-key attribute
+        const elements = modalElement.querySelectorAll('[data-key]');
+        elements.forEach(element => {
+            const key = element.getAttribute('data-key');
+            const translations = appTranslations[lang];
+            if (translations && translations[key]) {
+                element.textContent = translations[key];
+            }
+        });
+    };
+    
+    // Helper om modal translation te setupen voor taalwissels
+    UIHandler.prototype.setupModalTranslation = function(modalElement) {
+        const langButtons = document.querySelectorAll('.app-lang-btn');
+        langButtons.forEach(btn => {
+            const originalClickListener = btn.onclick;
+            btn.onclick = function(e) {
+                if (originalClickListener) originalClickListener.call(this, e);
+                
+                // Vertaal de modal content opnieuw
+                const lang = this.getAttribute('data-lang');
+                const modal = modalElement.querySelector('.modal');
+                if (modal) {
+                    // Vertaal alle elementen in de modal
+                    const elements = modal.querySelectorAll('[data-key]');
+                    elements.forEach(element => {
+                        const key = element.getAttribute('data-key');
+                        const translations = appTranslations[lang];
+                        if (translations && translations[key]) {
+                            element.textContent = translations[key];
+                        }
+                    });
+                }
+            };
+        });
+    };
+</script>
 </body>
 </html>
