@@ -825,8 +825,12 @@ class SearchManager extends BaseModule {
         this.filteredDogs.forEach(dog => {
             const genderText = dog.geslacht === 'reuen' ? t('male') : 
                              dog.geslacht === 'teven' ? t('female') : t('unknown');
-            const genderClass = dog.geslacht === 'reuen' ? 'badge bg-primary' : 
-                              dog.geslacht === 'teven' ? 'badge bg-danger' : 'badge bg-secondary';
+            
+            // VOEG VACHTKLEUR TOE ACHTER HET GESLACHT
+            let genderDisplay = genderText;
+            if (dog.vachtkleur && dog.vachtkleur.trim() !== '') {
+                genderDisplay = `${genderText} ${dog.vachtkleur}`;
+            }
             
             html += `
                 <div class="dog-result-item" data-id="${dog.id}">
@@ -836,11 +840,11 @@ class SearchManager extends BaseModule {
                         ${dog.kennelnaam ? `<span class="dog-kennel">${dog.kennelnaam}</span>` : ''}
                     </div>
                     
-                    <!-- Tweede regel: Geslacht, Ras en Stamboomnummer -->
+                    <!-- Tweede regel: Geslacht (nu met vachtkleur erachter), Ras en Stamboomnummer -->
                     <div class="dog-info-line">
                         <div class="d-flex align-items-center">
                             <i class="bi bi-gender-${dog.geslacht === 'reuen' ? 'male' : dog.geslacht === 'teven' ? 'female' : 'unknown'} me-1" style="font-size: 0.8rem;"></i>
-                            <span>${genderText}</span>
+                            <span>${genderDisplay}</span>
                         </div>
                         
                         ${dog.ras ? `
