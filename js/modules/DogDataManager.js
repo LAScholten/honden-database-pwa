@@ -2,6 +2,7 @@
 
 /**
  * DogDataManager - Module voor het bewerken en verwijderen van honden
+ * NU MET VACHTKLEUR veld toegevoegd, identiek aan DogManager
  */
 class DogDataManager extends BaseModule {
     constructor() {
@@ -30,6 +31,7 @@ class DogDataManager extends BaseModule {
                 pedigreeNumber: "Stamboomnummer *",
                 breed: "Ras",
                 breedRequired: "Ras *",
+                coatColor: "Vachtkleur", // NIEUW VELD
                 recent: "Recent:",
                 father: "Vader",
                 mother: "Moeder",
@@ -144,6 +146,7 @@ class DogDataManager extends BaseModule {
                 pedigreeNumber: "Pedigree number *",
                 breed: "Breed",
                 breedRequired: "Breed *",
+                coatColor: "Coat Color", // NEW FIELD
                 recent: "Recent:",
                 father: "Father",
                 mother: "Mother",
@@ -258,6 +261,7 @@ class DogDataManager extends BaseModule {
                 pedigreeNumber: "Stammbaum-Nummer *",
                 breed: "Rasse",
                 breedRequired: "Rasse *",
+                coatColor: "Fellfarbe", // NEUES FELD
                 recent: "Kürzlich:",
                 father: "Vater",
                 mother: "Mutter",
@@ -369,7 +373,7 @@ class DogDataManager extends BaseModule {
     }
     
     /**
-     * Render de module interface
+     * Render de module interface - MET VACHTKLEUR
      */
     getModalHTML() {
         // Controleer of gebruiker admin is
@@ -426,8 +430,8 @@ class DogDataManager extends BaseModule {
         let recentBreedsHTML = '';
         if (this.lastBreeds && this.lastBreeds.length > 0) {
             recentBreedsHTML = `
-                <div class="recent-breeds-container">
-                    <div class="recent-breeds-label">${t('recent')}</div>
+                <div class="recent-col">
+                    <span class="recent-breeds-label">${t('recent')}</span>
                     <div class="recent-breeds-buttons">
             `;
             this.lastBreeds.forEach(breed => {
@@ -523,16 +527,23 @@ class DogDataManager extends BaseModule {
                                         </div>
                                     </div>
                                     
-                                    <!-- Rij 3: Ras met recente rassen op 1 regel -->
+                                    <!-- Rij 3: Ras, Recente rassen en Vachtkleur - EXACT zoals scherm2.png EN DogManager -->
                                     <div class="row">
                                         <div class="col-12">
-                                            <div class="mb-3">
-                                                <label for="breed" class="form-label fw-semibold">${t('breedRequired')}</label>
-                                                <div class="breed-container">
-                                                    <div class="breed-input-container">
-                                                        <input type="text" class="form-control" id="breed" required>
-                                                    </div>
-                                                    ${recentBreedsHTML}
+                                            <div class="ras-vachtkleur-row">
+                                                <!-- Ras invoerveld -->
+                                                <div class="ras-col">
+                                                    <label for="breed" class="form-label fw-semibold">${t('breedRequired')}</label>
+                                                    <input type="text" class="form-control" id="breed" required>
+                                                </div>
+                                                
+                                                <!-- Recente rassen sectie -->
+                                                ${recentBreedsHTML}
+                                                
+                                                <!-- Vachtkleur invoerveld -->
+                                                <div class="vachtkleur-col">
+                                                    <label for="coatColor" class="form-label fw-semibold">${t('coatColor')}</label>
+                                                    <input type="text" class="form-control" id="coatColor">
                                                 </div>
                                             </div>
                                         </div>
@@ -734,6 +745,93 @@ class DogDataManager extends BaseModule {
             </div>
             
             <style>
+                /* Desktop layout: EXACT zoals scherm2.png EN DogManager */
+                .ras-vachtkleur-row {
+                    display: flex;
+                    flex-wrap: nowrap;
+                    align-items: flex-start;
+                    gap: 15px;
+                    width: 100%;
+                    margin-bottom: 15px;
+                }
+                
+                .ras-col {
+                    flex: 2;
+                    min-width: 200px;
+                }
+                
+                .recent-col {
+                    flex: 1;
+                    min-width: 200px;
+                }
+                
+                .vachtkleur-col {
+                    flex: 2;
+                    min-width: 200px;
+                }
+                
+                .recent-breeds-label {
+                    font-size: 0.875em;
+                    color: #6c757d;
+                    margin-bottom: 5px;
+                    display: block;
+                }
+                
+                .recent-breeds-buttons {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 4px;
+                    margin-top: 0;
+                }
+                
+                .recent-breed-btn {
+                    white-space: nowrap;
+                    font-size: 0.8em;
+                    padding: 4px 8px;
+                    margin: 2px 0;
+                }
+                
+                /* Zorg dat de labels op dezelfde hoogte staan */
+                .ras-col .form-label,
+                .vachtkleur-col .form-label {
+                    margin-bottom: 8px;
+                    display: block;
+                    height: 19px;
+                    line-height: 19px;
+                }
+                
+                /* Mobiele optimalisaties */
+                @media (max-width: 768px) {
+                    .ras-vachtkleur-row {
+                        flex-direction: column !important;
+                        gap: 10px !important;
+                    }
+                    
+                    .ras-col {
+                        width: 100% !important;
+                        margin-bottom: 15px !important;
+                    }
+                    
+                    .recent-col {
+                        width: 100% !important;
+                        margin-bottom: 15px !important;
+                    }
+                    
+                    .vachtkleur-col {
+                        width: 100% !important;
+                    }
+                    
+                    .recent-breeds-label {
+                        margin-bottom: 5px !important;
+                    }
+                    
+                    .recent-breed-btn {
+                        font-size: 0.75em !important;
+                        padding: 4px 8px !important;
+                        margin: 2px !important;
+                    }
+                }
+                
                 .search-result-item {
                     padding: 12px;
                     border-bottom: 1px solid #dee2e6;
@@ -831,122 +929,6 @@ class DogDataManager extends BaseModule {
                 #editDogForm .form-select:focus {
                     border-color: #198754;
                     box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
-                }
-                
-                /* Mobiele optimalisaties voor breed container */
-                @media (max-width: 768px) {
-                    .breed-container {
-                        gap: 8px !important;
-                    }
-                    
-                    .breed-input-container {
-                        flex: 0 0 180px !important;
-                        min-width: 180px !important;
-                    }
-                    
-                    .recent-breeds-label {
-                        font-size: 0.8em !important;
-                    }
-                    
-                    .recent-breed-btn {
-                        font-size: 0.75em !important;
-                        padding: 3px 6px !important;
-                    }
-                    
-                    /* Geboortedatum input styling voor mobiel */
-                    .date-input-wrapper {
-                        position: relative;
-                    }
-                    
-                    .date-input-wrapper input[type="text"] {
-                        /* Verberg kalender icon op mobiel */
-                        -webkit-appearance: none;
-                        -moz-appearance: none;
-                        appearance: none;
-                    }
-                    
-                    /* Verwijder de kalender picker voor mobiel */
-                    .date-input-wrapper input[type="date"]::-webkit-calendar-picker-indicator,
-                    .date-input-wrapper input[type="date"]::-webkit-inner-spin-button,
-                    .date-input-wrapper input[type="date"]::-webkit-clear-button {
-                        display: none;
-                        -webkit-appearance: none;
-                        appearance: none;
-                    }
-                    
-                    .date-input-wrapper input[type="date"] {
-                        -webkit-appearance: textfield;
-                        -moz-appearance: textfield;
-                        appearance: textfield;
-                    }
-                }
-                
-                /* Breed container voor 1-lijn layout - zoals in DogManager */
-                .breed-container {
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    flex-wrap: nowrap;
-                    width: 100%;
-                }
-                
-                .breed-input-container {
-                    flex: 0 0 220px;
-                    min-width: 220px;
-                }
-                
-                .recent-breeds-container {
-                    display: flex;
-                    align-items: center;
-                    gap: 5px;
-                    flex: 1;
-                    min-width: 0;
-                    overflow: visible;
-                }
-                
-                .recent-breeds-label {
-                    font-size: 0.875em;
-                    color: #6c757d;
-                    white-space: nowrap;
-                    margin-bottom: 0;
-                    flex-shrink: 0;
-                }
-                
-                .recent-breeds-buttons {
-                    display: flex;
-                    flex-wrap: nowrap;
-                    gap: 4px;
-                    overflow-x: auto;
-                    overflow-y: hidden;
-                    padding-bottom: 2px;
-                    flex: 1;
-                    min-width: 0;
-                }
-                
-                .recent-breed-btn {
-                    white-space: nowrap;
-                    flex-shrink: 0;
-                    font-size: 0.8em;
-                    padding: 4px 8px;
-                }
-                
-                /* Custom scrollbar voor recent breed buttons */
-                .recent-breeds-buttons::-webkit-scrollbar {
-                    height: 4px;
-                }
-                
-                .recent-breeds-buttons::-webkit-scrollbar-track {
-                    background: #f1f1f1;
-                    border-radius: 2px;
-                }
-                
-                .recent-breeds-buttons::-webkit-scrollbar-thumb {
-                    background: #c1c1c1;
-                    border-radius: 2px;
-                }
-                
-                .recent-breeds-buttons::-webkit-scrollbar-thumb:hover {
-                    background: #a8a8a8;
                 }
                 
                 /* Datum input styling - gebruik text input voor alle apparaten */
@@ -1262,13 +1244,11 @@ class DogDataManager extends BaseModule {
             return;
         }
         
-        // AANGEPAST: Filter honden alleen op naam (niet op stamboomnummer en ras)
-        // AANGEPAST: Gebruik beginsWith (case-insensitive) in plaats van contains
+        // Filter honden op naam
         const filteredDogs = this.allDogs.filter(dog => {
             const naam = dog.naam ? dog.naam.toLowerCase() : '';
-            // Alleen zoeken op naam en alleen als naam begint met de zoekterm
             return naam.startsWith(term);
-        }).slice(0, 20); // Max 20 resultaten
+        }).slice(0, 20);
         
         if (filteredDogs.length === 0) {
             searchResults.innerHTML = `
@@ -1291,6 +1271,9 @@ class DogDataManager extends BaseModule {
             const genderText = dog.geslacht === 'reuen' ? this.t('male') : 
                              dog.geslacht === 'teven' ? this.t('female') : this.t('unknown');
             
+            // Toon ook vachtkleur in zoekresultaten indien beschikbaar
+            const coatColorText = dog.vachtkleur ? `<span><i class="bi bi-palette me-1"></i>${dog.vachtkleur}</span>` : '';
+            
             html += `
                 <div class="search-result-item" data-id="${dog.id}">
                     <div class="dog-name">${dog.naam || 'Onbekend'}</div>
@@ -1302,6 +1285,8 @@ class DogDataManager extends BaseModule {
                         ${dog.stamboomnr ? `
                         <span><i class="bi bi-hash me-1"></i>${dog.stamboomnr}</span>
                         ` : ''}
+                        
+                        ${coatColorText}
                         
                         <span><i class="bi bi-gender-ambiguous me-1"></i>${genderText}</span>
                     </div>
@@ -1376,7 +1361,7 @@ class DogDataManager extends BaseModule {
     }
     
     /**
-     * Vul formulier met hond data
+     * Vul formulier met hond data - MET VACHTKLEUR
      */
     fillFormWithDogData(dog) {
         console.log('Filling form with dog data:', dog);
@@ -1389,13 +1374,16 @@ class DogDataManager extends BaseModule {
         document.getElementById('breed').value = dog.ras || '';
         document.getElementById('gender').value = dog.geslacht || '';
         
+        // NIEUW VELD: Vachtkleur
+        document.getElementById('coatColor').value = dog.vachtkleur || '';
+        
         // Ouders
         document.getElementById('father').value = dog.vader || '';
         document.getElementById('fatherId').value = dog.vaderId || '';
         document.getElementById('mother').value = dog.moeder || '';
         document.getElementById('motherId').value = dog.moederId || '';
         
-        // Datums - formatteer voor display (YYYY-MM-DD naar YYYY-MM-DD voor date input)
+        // Datums - formatteer voor display
         const formatDateForDisplay = (dateString) => {
             if (!dateString) return '';
             try {
@@ -1405,7 +1393,7 @@ class DogDataManager extends BaseModule {
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 const day = String(date.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`; // YYYY-MM-DD voor date input
+                return `${year}-${month}-${day}`;
             } catch (e) {
                 return dateString;
             }
@@ -1515,7 +1503,7 @@ class DogDataManager extends BaseModule {
     }
     
     /**
-     * Opslaan wijzigingen - FIXED VERSION met correcte datum verwerking
+     * Opslaan wijzigingen - MET VACHTKLEUR VELD
      */
     async saveDogChanges() {
         if (!auth.isAdmin()) {
@@ -1546,7 +1534,7 @@ class DogDataManager extends BaseModule {
         const birthDateValue = document.getElementById('birthDate').value;
         const deathDateValue = document.getElementById('deathDate').value;
         
-        // Formatteer datums voor opslag (YYYY-MM-DD formaat) - ZELFDE LOGICA ALS DogManager
+        // Formatteer datums voor opslag (YYYY-MM-DD formaat)
         const formatDateForStorage = (dateString) => {
             if (!dateString) return '';
             try {
@@ -1563,11 +1551,12 @@ class DogDataManager extends BaseModule {
         };
         
         const dogData = {
-            id: parsedId, // Zorg dat dit een getal is
+            id: parsedId,
             naam: document.getElementById('dogName').value.trim(),
             kennelnaam: document.getElementById('kennelName').value.trim(),
             stamboomnr: document.getElementById('pedigreeNumber').value.trim(),
             ras: document.getElementById('breed').value.trim(),
+            vachtkleur: document.getElementById('coatColor').value.trim(), // NIEUW VELD
             geslacht: document.getElementById('gender').value,
             vader: document.getElementById('father').value.trim(),
             vaderId: document.getElementById('fatherId').value ? parseInt(document.getElementById('fatherId').value) : null,
@@ -1598,21 +1587,19 @@ class DogDataManager extends BaseModule {
         // Voeg ras toe aan recente rassen
         this.addToLastBreeds(dogData.ras);
         
-        console.log('Saving dog data:', dogData);
+        console.log('Saving dog data (with coat color):', dogData);
         this.showProgress(this.t('savingChanges'));
         
         try {
-            // Controleer of updateHond methode bestaat - gebruik de methode van je DogManager
+            // Controleer of updateHond methode bestaat
             if (this.db && typeof this.db.updateHond === 'function') {
                 console.log('Calling updateHond with ID:', dogData.id);
                 await this.db.updateHond(dogData);
             } 
-            // Als updateHond niet bestaat, probeer updateDog of pasPut
             else if (this.db && typeof this.db.updateDog === 'function') {
                 console.log('Calling updateDog with ID:', dogData.id);
                 await this.db.updateDog(dogData);
             }
-            // Fallback: gebruik put method
             else if (this.db && typeof this.db.put === 'function') {
                 console.log('Calling put with ID:', dogData.id);
                 await this.db.put('honden', dogData);
@@ -1635,7 +1622,6 @@ class DogDataManager extends BaseModule {
             if (index !== -1) {
                 this.allDogs[index] = { ...this.allDogs[index], ...dogData };
             } else {
-                // Voeg toe als niet gevonden
                 this.allDogs.push(dogData);
             }
             
@@ -1653,18 +1639,12 @@ class DogDataManager extends BaseModule {
         } catch (error) {
             this.hideProgress();
             console.error('Error updating dog:', error);
-            console.error('Error details:', {
-                id: dogData.id,
-                type: typeof dogData.id,
-                errorName: error.name,
-                errorMessage: error.message
-            });
             this.showError(`${this.t('updateFailed')}${error.message}`);
         }
     }
     
     /**
-     * Verwijder hond - FIXED VERSION
+     * Verwijder hond
      */
     async deleteDog() {
         if (!auth.isAdmin()) {
@@ -1787,8 +1767,8 @@ class DogDataManager extends BaseModule {
         });
         
         // Maak nieuwe dropdown containers
-        const fatherInputWrapper = document.querySelector('#father').closest('.parent-input-wrapper');
-        const motherInputWrapper = document.querySelector('#mother').closest('.parent-input-wrapper');
+        const fatherInputWrapper = document.querySelector('#father')?.closest('.parent-input-wrapper');
+        const motherInputWrapper = document.querySelector('#mother')?.closest('.parent-input-wrapper');
         
         if (fatherInputWrapper) {
             const fatherDropdown = document.createElement('div');
@@ -1808,8 +1788,10 @@ class DogDataManager extends BaseModule {
         
         // Event listeners voor vader en moeder velden
         document.querySelectorAll('#father, #mother').forEach(input => {
+            if (!input) return;
+            
             input.addEventListener('focus', () => {
-                this.loadAllDogs(); // Zorg dat honden geladen zijn
+                this.loadAllDogs();
             });
             
             input.addEventListener('input', (e) => {
@@ -1819,7 +1801,6 @@ class DogDataManager extends BaseModule {
             });
             
             input.addEventListener('blur', (e) => {
-                // Wacht even voordat dropdown wordt verborgen (voor klikken op item)
                 setTimeout(() => {
                     const dropdown = document.getElementById(`${input.id}Dropdown`);
                     if (dropdown) {
@@ -1854,7 +1835,6 @@ class DogDataManager extends BaseModule {
         // Filter honden voor autocomplete
         const suggestions = this.allDogs.filter(dog => {
             const dogName = dog.naam ? dog.naam.toLowerCase() : '';
-            // AANGEPAST: Gebruik startsWith in plaats van contains voor autocomplete ook
             const matchesSearch = dogName.startsWith(searchTerm);
             
             // Filter op geslacht
