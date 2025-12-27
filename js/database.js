@@ -5,8 +5,8 @@
 
 class HondenDatabase {
     constructor() {
-        this.dbName = 'HondenDatabase_v5'; // Versie verhoogd naar v5 voor kennelnaam
-        this.version = 5; // Nieuwe versie voor kennelnaam
+        this.dbName = 'HondenDatabase_v6'; // Versie verhoogd naar v6 voor vachtkleur
+        this.version = 6; // Nieuwe versie voor vachtkleur
         this.db = null;
         this.isInitialized = false;
     }
@@ -53,6 +53,7 @@ class HondenDatabase {
             hondenStore.createIndex('kennelnaam', 'kennelnaam', { unique: false });
             hondenStore.createIndex('stamboomnr', 'stamboomnr', { unique: true });
             hondenStore.createIndex('ras', 'ras', { unique: false });
+            hondenStore.createIndex('vachtkleur', 'vachtkleur', { unique: false }); // Nieuw: vachtkleur
             hondenStore.createIndex('geslacht', 'geslacht', { unique: false });
             
             // Ouders
@@ -85,11 +86,40 @@ class HondenDatabase {
             const transaction = event.target.transaction;
             const hondenStore = transaction.objectStore('honden');
             
-            // Vervang de oude upgrade logica
+            // Upgrade naar versie 6 voor vachtkleur
+            if (oldVersion < 6) {
+                console.log('Upgrade honden store naar versie 6 - vachtkleur toevoegen');
+                
+                // Voeg vachtkleur index toe als deze nog niet bestaat
+                if (!hondenStore.indexNames.contains('vachtkleur')) {
+                    try {
+                        hondenStore.createIndex('vachtkleur', 'vachtkleur', { unique: false });
+                        console.log('vachtkleur index toegevoegd');
+                        
+                        // Voeg vachtkleur veld toe aan bestaande records
+                        const request = hondenStore.openCursor();
+                        request.onsuccess = (e) => {
+                            const cursor = e.target.result;
+                            if (cursor) {
+                                const hond = cursor.value;
+                                // Voeg vachtkleur veld toe als het niet bestaat
+                                if (hond.vachtkleur === undefined) {
+                                    hond.vachtkleur = '';
+                                    cursor.update(hond);
+                                }
+                                cursor.continue();
+                            }
+                        };
+                    } catch (error) {
+                        console.warn('Kon vachtkleur index niet toevoegen:', error);
+                    }
+                }
+            }
+            
+            // Voor versie 5: voeg kennelnaam index toe
             if (oldVersion < 5) {
                 console.log('Upgrade honden store naar versie 5');
                 
-                // Voeg kennelnaam index toe als deze nog niet bestaat
                 if (!hondenStore.indexNames.contains('kennelnaam')) {
                     try {
                         hondenStore.createIndex('kennelnaam', 'kennelnaam', { unique: false });
@@ -101,7 +131,6 @@ class HondenDatabase {
                             const cursor = e.target.result;
                             if (cursor) {
                                 const hond = cursor.value;
-                                // Voeg kennelnaam veld toe als het niet bestaat
                                 if (hond.kennelnaam === undefined) {
                                     hond.kennelnaam = '';
                                     cursor.update(hond);
@@ -178,6 +207,7 @@ class HondenDatabase {
             kennelnaam: hond.kennelnaam || '',
             stamboomnr: hond.stamboomnr || '',
             ras: hond.ras || '',
+            vachtkleur: hond.vachtkleur || '', // Nieuw: vachtkleur
             geslacht: hond.geslacht || '',
             
             // Ouders
@@ -330,6 +360,11 @@ class HondenDatabase {
                     updatedHond.kennelnaam = '';
                 }
                 
+                // Zorg ervoor dat vachtkleur veld bestaat
+                if (!updatedHond.vachtkleur && existingHond.vachtkleur === undefined) {
+                    updatedHond.vachtkleur = '';
+                }
+                
                 const putRequest = store.put(updatedHond);
                 putRequest.onsuccess = () => {
                     console.log('Hond bijgewerkt:', hondId, updatedHond.naam);
@@ -408,6 +443,49 @@ class HondenDatabase {
         });
     }
 
+    // Nieuwe zoekmethodes voor vachtkleur
+    async zoekOpVachtkleur(vachtkleur) {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['honden'], 'readonly');
+            const store = transaction.objectStore('honden');
+            const index = store.index('vachtkleur');
+            
+            // Zoek naar exacte match of gedeeltelijke matches
+            const request = index.getAll(vachtkleur);
+            
+            request.onsuccess = () => {
+                const exactMatches = request.result;
+                
+                if (exactMatches.length > 0) {
+                    resolve(exactMatches);
+                } else {
+                    // Zoek naar gedeeltelijke matches
+                    const results = [];
+                    const cursorRequest = store.openCursor();
+                    
+                    cursorRequest.onsuccess = (event) => {
+                        const cursor = event.target.result;
+                        if (cursor) {
+                            const hond = cursor.value;
+                            if (hond.vachtkleur && hond.vachtkleur.toLowerCase().includes(vachtkleur.toLowerCase())) {
+                                results.push(hond);
+                            }
+                            cursor.continue();
+                        } else {
+                            resolve(results);
+                        }
+                    };
+                    
+                    cursorRequest.onerror = () => reject(cursorRequest.error);
+                }
+            };
+            
+            request.onerror = () => reject(request.error);
+        });
+    }
+
     // Nieuwe zoekmethodes voor kennelnaam
     async zoekOpKennelnaam(kennelnaam) {
         await this.init();
@@ -481,6 +559,7 @@ class HondenDatabase {
                         naam: hond.naam,
                         stamboomnr: hond.stamboomnr,
                         ras: hond.ras,
+                        vachtkleur: hond.vachtkleur,
                         geslacht: hond.geslacht
                     });
                     
@@ -488,6 +567,52 @@ class HondenDatabase {
                 } else {
                     // Converteer naar array en sorteer op aantal
                     const result = Object.values(kennelOverzicht)
+                        .sort((a, b) => b.aantal - a.aantal);
+                    resolve(result);
+                }
+            };
+            
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    async getHondenPerVachtkleur() {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['honden'], 'readonly');
+            const store = transaction.objectStore('honden');
+            
+            const vachtkleurOverzicht = {};
+            const request = store.openCursor();
+            
+            request.onsuccess = (event) => {
+                const cursor = event.target.result;
+                if (cursor) {
+                    const hond = cursor.value;
+                    const vachtkleur = hond.vachtkleur || 'Geen vachtkleur opgegeven';
+                    
+                    if (!vachtkleurOverzicht[vachtkleur]) {
+                        vachtkleurOverzicht[vachtkleur] = {
+                            naam: vachtkleur,
+                            aantal: 0,
+                            honden: []
+                        };
+                    }
+                    
+                    vachtkleurOverzicht[vachtkleur].aantal++;
+                    vachtkleurOverzicht[vachtkleur].honden.push({
+                        id: hond.id,
+                        naam: hond.naam,
+                        stamboomnr: hond.stamboomnr,
+                        ras: hond.ras,
+                        geslacht: hond.geslacht
+                    });
+                    
+                    cursor.continue();
+                } else {
+                    // Converteer naar array en sorteer op aantal
+                    const result = Object.values(vachtkleurOverzicht)
                         .sort((a, b) => b.aantal - a.aantal);
                     resolve(result);
                 }
@@ -693,6 +818,11 @@ class HondenDatabase {
                         hond.kennelnaam = '';
                     }
                     
+                    // Zorg dat oudere imports ook vachtkleur hebben
+                    if (hond.vachtkleur === undefined) {
+                        hond.vachtkleur = '';
+                    }
+                    
                     const bestaandeHond = await this.getHondByStamboomnr(hond.stamboomnr);
                     
                     if (bestaandeHond && overschrijven) {
@@ -830,9 +960,14 @@ class HondenDatabase {
         
         // Tel honden per kennel
         const kennelStats = {};
+        const vachtkleurStats = {};
+        
         honden.forEach(hond => {
             const kennel = hond.kennelnaam || 'Geen kennel';
             kennelStats[kennel] = (kennelStats[kennel] || 0) + 1;
+            
+            const vachtkleur = hond.vachtkleur || 'Geen vachtkleur opgegeven';
+            vachtkleurStats[vachtkleur] = (vachtkleurStats[vachtkleur] || 0) + 1;
         });
         
         return {
@@ -842,6 +977,10 @@ class HondenDatabase {
             kennelStatistieken: {
                 totaalKennels: Object.keys(kennelStats).length,
                 hondenPerKennel: kennelStats
+            },
+            vachtkleurStatistieken: {
+                totaalVachtkleuren: Object.keys(vachtkleurStats).length,
+                hondenPerVachtkleur: vachtkleurStats
             },
             laatsteUpdate: honden.reduce((latest, hond) => {
                 const hondDatum = new Date(hond.updatedAt || hond.createdAt);
@@ -867,7 +1006,7 @@ class HondenDatabase {
             // Geen toegang, gebruik standaard
         }
         
-        const avgHondSize = 1500; // Iets groter door kennelnaam veld
+        const avgHondSize = 1600; // Iets groter door vachtkleur veld
         const avgFotoSize = 50000;
         const avgPriveSize = 1000;
         
