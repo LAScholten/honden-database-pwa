@@ -28,8 +28,9 @@ class LitterManager {
                 breed: "Ras",
                 breedRequired: "Ras *",
                 recent: "Recent:",
-                father: "Vader",
-                mother: "Moeder",
+                father: "Vader *",
+                mother: "Moeder *",
+                coatColor: "Vachtkleur",
                 birthDate: "Geboortedatum",
                 deathDate: "Overlijdensdatum",
                 gender: "Geslacht",
@@ -90,6 +91,7 @@ class LitterManager {
                 // Validatie
                 dateFormatError: "Datum moet in DD-MM-JJJJ formaat zijn",
                 deathBeforeBirthError: "Overlijdensdatum kan niet voor geboortedatum zijn",
+                parentRequired: "Ouder is verplicht",
                 
                 // Toegangscontrole popup teksten
                 insufficientPermissions: "Onvoldoende rechten",
@@ -104,7 +106,7 @@ class LitterManager {
                 
                 // Alerts
                 adminOnly: "Alleen administrators mogen nesten toevoegen/bewerken",
-                fieldsRequired: "Naam, stamboomnummer en ras zijn verplichte velden",
+                fieldsRequired: "Naam, stamboomnummer, ras, vader en moeder zijn verplichte velden",
                 savingDog: "Hond opslaan...",
                 dogAdded: "Hond succesvol toegevoegd!",
                 dogUpdated: "Hond succesvol bijgewerkt!",
@@ -140,8 +142,9 @@ class LitterManager {
                 breed: "Breed",
                 breedRequired: "Breed *",
                 recent: "Recent:",
-                father: "Father",
-                mother: "Mother",
+                father: "Father *",
+                mother: "Mother *",
+                coatColor: "Coat Color",
                 birthDate: "Birth date",
                 deathDate: "Death date",
                 gender: "Gender",
@@ -202,6 +205,7 @@ class LitterManager {
                 // Validation
                 dateFormatError: "Date must be in DD-MM-YYYY format",
                 deathBeforeBirthError: "Death date cannot be before birth date",
+                parentRequired: "Parent is required",
                 
                 // Access control popup texts
                 insufficientPermissions: "Insufficient permissions",
@@ -216,7 +220,7 @@ class LitterManager {
                 
                 // Alerts
                 adminOnly: "Only administrators can add/edit litters",
-                fieldsRequired: "Name, pedigree number and breed are required fields",
+                fieldsRequired: "Name, pedigree number, breed, father and mother are required fields",
                 savingDog: "Saving dog...",
                 dogAdded: "Dog successfully added!",
                 dogUpdated: "Dog successfully updated!",
@@ -252,8 +256,9 @@ class LitterManager {
                 breed: "Rasse",
                 breedRequired: "Rasse *",
                 recent: "Kürzlich:",
-                father: "Vater",
-                mother: "Mutter",
+                father: "Vater *",
+                mother: "Mutter *",
+                coatColor: "Fellfarbe",
                 birthDate: "Geburtsdatum",
                 deathDate: "Sterbedatum",
                 gender: "Geschlecht",
@@ -301,7 +306,7 @@ class LitterManager {
                 chooseFile: "Datei wählen",
                 noFileChosen: "Keine Datei gewählt",
                 remarks: "Bemerkungen",
-                requiredFields: "Felder met * zijn Pflichtfelder",
+                requiredFields: "Felder met * sind Pflichtfelder",
                 saveDog: "Hund speichern",
                 cancel: "Abbrechen",
                 delete: "Löschen",
@@ -312,8 +317,9 @@ class LitterManager {
                 back: "Zurück",
                 
                 // Validierung
-                dateFormatError: "Datum moet im Format TT-MM-JJJJ sein",
+                dateFormatError: "Datum muss im Format TT-MM-JJJJ sein",
                 deathBeforeBirthError: "Sterbedatum kann nicht vor dem Geburtsdatum liegen",
+                parentRequired: "Elternteil ist erforderlich",
                 
                 // Zugangskontrolle Popup Texte
                 insufficientPermissions: "Unzureichende Berechtigungen",
@@ -328,7 +334,7 @@ class LitterManager {
                 
                 // Meldungen
                 adminOnly: "Nur Administratoren können Würfe hinzufügen/bearbeiten",
-                fieldsRequired: "Name, Stammbaum-Nummer en Rasse zijn Pflichtfelder",
+                fieldsRequired: "Name, Stammbaum-Nummer, Rasse, Vater und Mutter sind Pflichtfelder",
                 savingDog: "Hund wird gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
                 dogUpdated: "Hund erfolgreich aktualisiert!",
@@ -547,6 +553,11 @@ class LitterManager {
                     .dog-item span {
                         margin-right: 10px;
                     }
+                    
+                    /* Validatie styling */
+                    .required-field {
+                        border-left: 3px solid #dc3545;
+                    }
                 }
                 
                 /* Desktop styling */
@@ -589,6 +600,11 @@ class LitterManager {
                     
                     .dog-item span {
                         margin-right: 15px;
+                    }
+                    
+                    /* Validatie styling */
+                    .required-field {
+                        border-left: 3px solid #dc3545;
                     }
                 }
                 
@@ -795,6 +811,10 @@ class LitterManager {
                     font-size: 0.875em;
                     margin-top: 0.25rem;
                 }
+                
+                .parent-error {
+                    border-color: #dc3545 !important;
+                }
             </style>
         `;
     }
@@ -870,26 +890,30 @@ class LitterManager {
                         <i class="bi bi-people"></i> ${t('parentDetails')}
                     </div>
                     
-                    <!-- RIJ 1: Vader en Moeder -->
+                    <!-- RIJ 1: Vader en Moeder (NU VERPLICHT) -->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3 parent-input-wrapper">
-                                <label for="father" class="form-label">${t('father')}</label>
-                                <input type="text" class="form-control" id="father" 
+                                <label for="father" class="form-label required">${t('father')}</label>
+                                <input type="text" class="form-control required-field" id="father" 
                                        value="${data.vader || ''}" 
                                        placeholder="Begin met typen om te zoeken..."
                                        data-parent-type="father"
-                                       autocomplete="off">
+                                       autocomplete="off"
+                                       required>
+                                <div id="fatherError" class="error-message" style="display: none;">${t('parentRequired')}</div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3 parent-input-wrapper">
-                                <label for="mother" class="form-label">${t('mother')}</label>
-                                <input type="text" class="form-control" id="mother" 
+                                <label for="mother" class="form-label required">${t('mother')}</label>
+                                <input type="text" class="form-control required-field" id="mother" 
                                        value="${data.moeder || ''}" 
                                        placeholder="Begin met typen om te zoeken..."
                                        data-parent-type="mother"
-                                       autocomplete="off">
+                                       autocomplete="off"
+                                       required>
+                                <div id="motherError" class="error-message" style="display: none;">${t('parentRequired')}</div>
                             </div>
                         </div>
                     </div>
@@ -904,10 +928,10 @@ class LitterManager {
                         </div>
                         <div class="col-12 col-md-6">
                             <div class="mb-3">
-                                <label for="breed" class="form-label">${t('breedRequired')}</label>
+                                <label for="breed" class="form-label required">${t('breedRequired')}</label>
                                 <div class="breed-container">
                                     <div class="breed-input-container">
-                                        <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
+                                        <input type="text" class="form-control required-field" id="breed" value="${data.ras || ''}" required>
                                     </div>
                                     ${recentBreedsHTML}
                                 </div>
@@ -940,14 +964,14 @@ class LitterManager {
                     <div class="row">
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="name" class="form-label">${t('nameRequired')}</label>
-                                <input type="text" class="form-control" id="name" value="${data.naam || ''}" required>
+                                <label for="name" class="form-label required">${t('nameRequired')}</label>
+                                <input type="text" class="form-control required-field" id="name" value="${data.naam || ''}" required>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="mb-3">
-                                <label for="pedigreeNumber" class="form-label">${t('pedigreeNumber')}</label>
-                                <input type="text" class="form-control" id="pedigreeNumber" value="${data.stamboomnr || ''}" required>
+                                <label for="pedigreeNumber" class="form-label required">${t('pedigreeNumber')}</label>
+                                <input type="text" class="form-control required-field" id="pedigreeNumber" value="${data.stamboomnr || ''}" required>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -958,6 +982,17 @@ class LitterManager {
                                     <option value="reuen" ${data.geslacht === 'reuen' ? 'selected' : ''}>${t('male')}</option>
                                     <option value="teven" ${data.geslacht === 'teven' ? 'selected' : ''}>${t('female')}</option>
                                 </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- NIEUW: Vachtkleur veld -->
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="coatColor" class="form-label">${t('coatColor')}</label>
+                                <input type="text" class="form-control" id="coatColor" value="${data.vachtkleur || ''}">
+                                <small class="form-text text-muted">Bijv. black & tan, tri-color, etc.</small>
                             </div>
                         </div>
                     </div>
@@ -1164,6 +1199,15 @@ class LitterManager {
                     font-size: 0.875em;
                     margin-top: 0.25rem;
                 }
+                
+                .required-field {
+                    border-left: 3px solid #dc3545;
+                }
+                
+                .form-label.required::after {
+                    content: " *";
+                    color: #dc3545;
+                }
             </style>
         `;
     }
@@ -1268,6 +1312,9 @@ class LitterManager {
         // Setup datum validatie
         this.setupDateValidation();
         
+        // Setup ouder validatie
+        this.setupParentValidation();
+        
         console.log('LitterManager: Alle events ingesteld');
     }
     
@@ -1370,6 +1417,28 @@ class LitterManager {
     }
     
     /**
+     * Setup ouder validatie
+     */
+    setupParentValidation() {
+        const fatherInput = document.getElementById('father');
+        const motherInput = document.getElementById('mother');
+        const fatherError = document.getElementById('fatherError');
+        const motherError = document.getElementById('motherError');
+        
+        if (fatherInput) {
+            fatherInput.addEventListener('blur', () => {
+                this.validateParents();
+            });
+        }
+        
+        if (motherInput) {
+            motherInput.addEventListener('blur', () => {
+                this.validateParents();
+            });
+        }
+    }
+    
+    /**
      * Valideer datums
      */
     validateDates() {
@@ -1379,7 +1448,7 @@ class LitterManager {
         const birthDateError = document.getElementById('birthDateError');
         const deathDateError = document.getElementById('deathDateError');
         
-        if (!birthDateInput || !deathDateInput) return;
+        if (!birthDateInput || !deathDateInput) return true;
         
         let isValid = true;
         
@@ -1437,6 +1506,49 @@ class LitterManager {
     }
     
     /**
+     * Valideer ouders
+     */
+    validateParents() {
+        const t = this.t.bind(this);
+        const fatherInput = document.getElementById('father');
+        const motherInput = document.getElementById('mother');
+        const fatherError = document.getElementById('fatherError');
+        const motherError = document.getElementById('motherError');
+        
+        if (!fatherInput || !motherInput) return true;
+        
+        let isValid = true;
+        
+        // Reset error styling
+        fatherInput.classList.remove('parent-error');
+        motherInput.classList.remove('parent-error');
+        if (fatherError) fatherError.style.display = 'none';
+        if (motherError) motherError.style.display = 'none';
+        
+        // Valideer vader
+        if (!fatherInput.value || fatherInput.value.trim() === '') {
+            fatherInput.classList.add('parent-error');
+            if (fatherError) {
+                fatherError.textContent = t('parentRequired');
+                fatherError.style.display = 'block';
+            }
+            isValid = false;
+        }
+        
+        // Valideer moeder
+        if (!motherInput.value || motherInput.value.trim() === '') {
+            motherInput.classList.add('parent-error');
+            if (motherError) {
+                motherError.textContent = t('parentRequired');
+                motherError.style.display = 'block';
+            }
+            isValid = false;
+        }
+        
+        return isValid;
+    }
+    
+    /**
      * Reset alleen de nestdetails velden (niet de ouderdetails)
      */
     resetLitterDetails() {
@@ -1444,10 +1556,12 @@ class LitterManager {
         const nameInput = document.getElementById('name');
         const pedigreeInput = document.getElementById('pedigreeNumber');
         const genderSelect = document.getElementById('gender');
+        const coatColorInput = document.getElementById('coatColor'); // NIEUW: vachtkleur
         
         if (nameInput) nameInput.value = '';
         if (pedigreeInput) pedigreeInput.value = '';
         if (genderSelect) genderSelect.value = '';
+        if (coatColorInput) coatColorInput.value = ''; // NIEUW: reset vachtkleur
         
         // Reset land/postcode (nu bovenaan)
         const countryInput = document.getElementById('country');
@@ -1591,9 +1705,17 @@ class LitterManager {
                 const searchTerm = e.target.value.toLowerCase().trim();
                 const parentType = input.id === 'father' ? 'father' : 'mother';
                 this.showParentAutocomplete(searchTerm, parentType);
+                
+                // Reset validatie tijdens typen
+                input.classList.remove('parent-error');
+                const errorElement = document.getElementById(`${parentType}Error`);
+                if (errorElement) errorElement.style.display = 'none';
             });
             
             input.addEventListener('blur', (e) => {
+                // Valideer ouder bij blur
+                this.validateParents();
+                
                 // Wacht even voordat dropdown wordt verborgen (voor klikken op item)
                 setTimeout(() => {
                     const dropdown = document.getElementById(`${input.id}Dropdown`);
@@ -1678,10 +1800,15 @@ class LitterManager {
                 
                 if (input) {
                     input.value = dogName;
+                    input.classList.remove('parent-error');
                 }
                 if (idInput) {
                     idInput.value = dogId;
                 }
+                
+                // Verberg foutmelding als die er was
+                const errorElement = document.getElementById(`${parentType}Error`);
+                if (errorElement) errorElement.style.display = 'none';
                 
                 dropdown.style.display = 'none';
                 console.log('LitterManager: Ouder geselecteerd:', dogName, 'ID:', dogId);
@@ -1716,6 +1843,12 @@ class LitterManager {
             return;
         }
         
+        // Valideer ouders
+        if (!this.validateParents()) {
+            this.showError(this.t('parentRequired'));
+            return;
+        }
+        
         // Haal datum waarden op
         const birthDateValue = document.getElementById('birthDate').value;
         const deathDateValue = document.getElementById('deathDate').value;
@@ -1742,6 +1875,7 @@ class LitterManager {
             kennelnaam: document.getElementById('kennelName')?.value.trim() || '',
             stamboomnr: document.getElementById('pedigreeNumber')?.value.trim() || '',
             ras: document.getElementById('breed')?.value.trim() || '',
+            vachtkleur: document.getElementById('coatColor')?.value.trim() || '', // NIEUW: vachtkleur
             geslacht: document.getElementById('gender')?.value || '',
             vader: document.getElementById('father')?.value.trim() || '',
             vaderId: document.getElementById('fatherId')?.value ? parseInt(document.getElementById('fatherId').value) : null,
@@ -1782,6 +1916,16 @@ class LitterManager {
             return;
         }
         
+        if (!dogData.vader) {
+            this.showError('Vader is verplicht');
+            return;
+        }
+        
+        if (!dogData.moeder) {
+            this.showError('Moeder is verplicht');
+            return;
+        }
+        
         // Voeg ras toe aan recente rassen
         this.addToLastBreeds(dogData.ras);
         
@@ -1803,7 +1947,8 @@ class LitterManager {
             this.currentLitterDogs.push({
                 naam: dogData.naam,
                 stamboomnr: dogData.stamboomnr,
-                geslacht: dogData.geslacht
+                geslacht: dogData.geslacht,
+                vachtkleur: dogData.vachtkleur // NIEUW: vachtkleur toevoegen
             });
             
             // Update de UI lijst
