@@ -447,32 +447,376 @@
         // Vertalingen
         const appTranslations = {
             nl: {
-                // Bestaande vertalingen blijven hetzelfde...
-                // [Alle bestaande vertalingen hier - niet veranderd]
+                appTitle: "Hondendatabase PWA",
+                logout: "Uitloggen",
+                menu: "Menu",
+                dataManagement: "Data Beheer",
+                newDog: "Nieuwe Hond",
+                newLitter: "Nieuw Nest",
+                editDogData: "Data Hond Bewerken",
+                searchDog: "Hond Zoeken",
+                photoGallery: "Foto Galerij",
+                breedingPlan: "Fok Planning",
+                privateInfo: "Privé Informatie",
+                quickOverview: "Snel Overzicht",
+                dogs: "Honden",
+                photos: "Foto's",
+                refresh: "Vernieuwen",
+                dashboard: "Dashboard",
+                welcomeTitle: "Welkom bij de Hondendatabase PWA",
+                welcomeText: "Kies een optie uit het menu om te beginnen. De applicatie werkt volledig offline.",
+                aboutApp: "Over deze App",
+                appDescription: "Deze PWA (Progressive Web App) slaat alle data lokaal op in uw browser. U kunt:",
+                feature1: "Honden toevoegen en beheren",
+                feature2: "Data van honden bewerken",
+                feature3: "Foto's uploaden en bekijken",
+                feature4: "Fokplannen maken",
+                feature5: "Privé informatie bewaren",
+                feature6: "Data importeren/exporteren",
+                security: "Beveiliging",
+                roleBasedAccess: "De app gebruikt rol-gebaseerde toegang:",
+                adminRole: "Administrator",
+                adminRights: "Volledige rechten, inclusief nieuwe honden toevoegen.",
+                userRole: "Gebruiker",
+                userRights: "Kan data importeren/exporteren en bekijken, maar geen nieuwe honden toevoegen of bewerken.",
+                
+                // Backup teksten
+                backupNow: "Backup",
+                learnMore: "Uitleg",
+                backupWarningTitle: "Backup Aanbevolen",
+                backupNowDashboard: "Nu backup maken",
+                dismissBackup: "Niet meer tonen",
+                backupModalTitle: "Data Backup - Waarom is dit belangrijk?",
+                backupRisksTitle: "Risico's zonder backup",
+                backupRisksText1: "Deze app slaat alle gegevens <strong>alleen lokaal in je browser</strong> op.",
+                backupRisksText2: "Je data kan verloren gaan als je: ",
+                backupHowToTitle: "Hoe te backuppen",
+                backupHowToText1: "<strong>Aanbevolen:</strong> Maak wekelijks een backup",
+                backupIOSHeading: "Op iPhone/iPad:",
+                backupAndroidHeading: "Op Android:",
+                backupBestPracticesTitle: "Beste praktijken:",
+                backupModalClose: "Sluiten",
+                backupModalAction: "Nu backup maken",
+                backupStatusGood: "✓ Backup: Okay",
+                backupStatusWarning: "⚠ Laatste backup: {days} dagen geleden",
+                backupStatusDanger: "🚨 NOG NOOIT gebackupt!",
+                dashboardWarningNever: "Je hebt nog nooit een backup gemaakt! Als je browser data wist, ben je al je hondengegevens kwijt.",
+                dashboardWarningOld: "Je laatste backup was {days} dagen geleden. Overweeg een nieuwe backup te maken om dataverlies te voorkomen.",
+                
                 installPWA: "Installeer App"
             },
             en: {
-                // [Alle bestaande vertalingen hier - niet veranderd]
+                appTitle: "Dog Database PWA",
+                logout: "Logout",
+                menu: "Menu",
+                dataManagement: "Data Management",
+                newDog: "New Dog",
+                newLitter: "New Litter",
+                editDogData: "Edit Dog Data",
+                searchDog: "Search Dog",
+                photoGallery: "Photo Gallery",
+                breedingPlan: "Breeding Plan",
+                privateInfo: "Private Information",
+                quickOverview: "Quick Overview",
+                dogs: "Dogs",
+                photos: "Photos",
+                refresh: "Refresh",
+                dashboard: "Dashboard",
+                welcomeTitle: "Welcome to the Dog Database PWA",
+                welcomeText: "Choose an option from the menu to start. The application works completely offline.",
+                aboutApp: "About this App",
+                appDescription: "This PWA (Progressive Web App) stores all data locally in your browser. You can:",
+                feature1: "Add and manage dogs",
+                feature2: "Edit dog data",
+                feature3: "Upload and view photos",
+                feature4: "Create breeding plans",
+                feature5: "Store private information",
+                feature6: "Import/Export data",
+                security: "Security",
+                roleBasedAccess: "The app uses role-based access:",
+                adminRole: "Administrator",
+                adminRights: "Full rights, including adding new dogs.",
+                userRole: "User",
+                userRights: "Can import/export and view data, but cannot add or edit new dogs.",
+                
+                // Backup texts
+                backupNow: "Backup",
+                learnMore: "Info",
+                backupWarningTitle: "Backup Recommended",
+                backupNowDashboard: "Create Backup Now",
+                dismissBackup: "Don't Show Again",
+                backupModalTitle: "Data Backup - Why is this important?",
+                backupRisksTitle: "Risks without backup",
+                backupRisksText1: "This app stores all data <strong>only locally in your browser</strong>.",
+                backupRisksText2: "Your data can be lost if you: ",
+                backupHowToTitle: "How to backup",
+                backupHowToText1: "<strong>Recommended:</strong> Create weekly backups",
+                backupIOSHeading: "On iPhone/iPad:",
+                backupAndroidHeading: "On Android:",
+                backupBestPracticesTitle: "Best practices:",
+                backupModalClose: "Close",
+                backupModalAction: "Create Backup Now",
+                backupStatusGood: "✓ Backup: Okay",
+                backupStatusWarning: "⚠ Last backup: {days} days ago",
+                backupStatusDanger: "🚨 NEVER backed up!",
+                dashboardWarningNever: "You have never created a backup! If you clear browser data, you will lose all your dog records.",
+                dashboardWarningOld: "Your last backup was {days} days ago. Consider creating a new backup to prevent data loss.",
+                
                 installPWA: "Install App"
             },
             de: {
-                // [Alle bestaande vertalingen hier - niet veranderd]
+                appTitle: "Hundendatenbank PWA",
+                logout: "Abmelden",
+                menu: "Menü",
+                dataManagement: "Datenverwaltung",
+                newDog: "Neuer Hund",
+                newLitter: "Neuer Wurf",
+                editDogData: "Hundedaten bearbeiten",
+                searchDog: "Hund suchen",
+                photoGallery: "Foto Galerie",
+                breedingPlan: "Zuchtplanung",
+                privateInfo: "Private Informationen",
+                quickOverview: "Schnellübersicht",
+                dogs: "Hunde",
+                photos: "Fotos",
+                refresh: "Aktualisieren",
+                dashboard: "Dashboard",
+                welcomeTitle: "Willkommen bei der Hundendatenbank PWA",
+                welcomeText: "Wählen Sie eine option aus dem Menü, um zu beginnen. Die Anwendung funktioniert vollständig offline.",
+                aboutApp: "Über diese App",
+                appDescription: "Diese PWA (Progressive Web App) speichert alle Daten lokal in Ihrem Browser. Sie können:",
+                feature1: "Hunde hinzufügen und verwalten",
+                feature2: "Hundedaten bearbeiten",
+                feature3: "Fotos hochladen und ansehen",
+                feature4: "Zuchtpläne erstellen",
+                feature5: "Private Informationen speichern",
+                feature6: "Daten importieren/exportieren",
+                security: "Sicherheit",
+                roleBasedAccess: "Die App verwendet rollenbasierte Zugriffe:",
+                adminRole: "Administrator",
+                adminRights: "Volle Rechte, einschließlich neuer Hunde hinzufügen.",
+                userRole: "Benutzer",
+                userRights: "Kann Daten importieren/exportieren und ansehen, aber keine neuen Hunde hinzufügen oder bearbeiten.",
+                
+                // Backup Texte
+                backupNow: "Backup",
+                learnMore: "Info",
+                backupWarningTitle: "Backup empfohlen",
+                backupNowDashboard: "Jetzt Backup erstellen",
+                dismissBackup: "Nicht mehr anzeigen",
+                backupModalTitle: "Data Backup - Warum ist das wichtig?",
+                backupRisksTitle: "Risiken ohne Backup",
+                backupRisksText1: "Diese App speichert alle Daten <strong>nur lokal in Ihrem Browser</strong>.",
+                backupRisksText2: "Ihre Daten können verloren gehen, wenn Sie: ",
+                backupHowToTitle: "Wie man ein Backup erstellt",
+                backupHowToText1: "<strong>Empfohlen:</strong> Erstellen Sie wöchentliche Backups",
+                backupIOSHeading: "Auf iPhone/iPad:",
+                backupAndroidHeading: "Auf Android:",
+                backupBestPracticesTitle: "Beste Praktiken:",
+                backupModalClose: "Schließen",
+                backupModalAction: "Jetzt Backup erstellen",
+                backupStatusGood: "✓ Backup: Okay",
+                backupStatusWarning: "⚠ Letztes Backup: vor {days} Tagen",
+                backupStatusDanger: "🚨 NOCH NIE gebackupt!",
+                dashboardWarningNever: "Sie haben noch nie ein Backup erstellt! Wenn Sie Browser-Daten löschen, verlieren Sie alle Ihre Hundeaufzeichnungen.",
+                dashboardWarningOld: "Ihr letztes Backup war vor {days} Tagen. Erwägen Sie, ein neues Backup zu erstellen, um Datenverlust zu vermeiden.",
+                
                 installPWA: "App installieren"
             }
         };
 
-        // Backup status management (zelfde als voorheen)
-        class BackupStatusManager {
-            // [Complete klasse zoals voorheen - niet veranderd]
-        }
+        // Backup status management - VERSIMPELDE VERSIE
+        const backupManager = {
+            storageKey: 'honden_backup_history',
+            warningDays: 7,
+            dangerDays: 14,
+            currentLang: appLanguage,
+            backupHistory: [],
+            hideReminderUntil: null,
+            
+            init: function() {
+                this.backupHistory = this.loadBackupHistory();
+                this.hideReminderUntil = this.getHideReminderDate();
+                this.updateUI();
+            },
+            
+            loadBackupHistory: function() {
+                try {
+                    const history = localStorage.getItem(this.storageKey);
+                    return history ? JSON.parse(history) : [];
+                } catch (error) {
+                    console.error('Fout bij laden backup history:', error);
+                    return [];
+                }
+            },
+            
+            saveBackupHistory: function() {
+                try {
+                    localStorage.setItem(this.storageKey, JSON.stringify(this.backupHistory));
+                } catch (error) {
+                    console.error('Fout bij opslaan backup history:', error);
+                }
+            },
+            
+            getHideReminderDate: function() {
+                try {
+                    return localStorage.getItem('hide_backup_reminder_until');
+                } catch (error) {
+                    return null;
+                }
+            },
+            
+            getLastBackupDate: function() {
+                if (this.backupHistory.length === 0) {
+                    return null;
+                }
+                
+                const sorted = [...this.backupHistory].sort((a, b) => 
+                    new Date(b.date) - new Date(a.date)
+                );
+                
+                return sorted[0].date;
+            },
+            
+            getDaysSinceLastBackup: function() {
+                const lastBackup = this.getLastBackupDate();
+                if (!lastBackup) return Infinity;
+                
+                const lastDate = new Date(lastBackup);
+                const now = new Date();
+                const diffTime = Math.abs(now - lastDate);
+                return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            },
+            
+            getStatus: function() {
+                const daysSince = this.getDaysSinceLastBackup();
+                
+                if (daysSince === Infinity) {
+                    return {
+                        level: 'danger',
+                        days: 999,
+                        icon: 'bi-exclamation-triangle-fill'
+                    };
+                } else if (daysSince >= this.dangerDays) {
+                    return {
+                        level: 'danger',
+                        days: daysSince,
+                        icon: 'bi-exclamation-triangle-fill'
+                    };
+                } else if (daysSince >= this.warningDays) {
+                    return {
+                        level: 'warning',
+                        days: daysSince,
+                        icon: 'bi-exclamation-triangle'
+                    };
+                } else {
+                    return {
+                        level: 'good',
+                        days: daysSince,
+                        icon: 'bi-shield-check'
+                    };
+                }
+            },
+            
+            updateUI: function() {
+                const banner = document.getElementById('backupHeaderBanner');
+                const statusText = document.getElementById('backupStatusText');
+                const dashboardCard = document.getElementById('backupDashboardCard');
+                const dashboardText = document.getElementById('backupDashboardText');
+                const warningTitle = document.getElementById('backupWarningTitle');
+                
+                if (!banner || !statusText) return;
+                
+                const status = this.getStatus();
+                const t = this.currentLang;
+                
+                // Update header banner
+                banner.className = `alert backup-status-${status.level}`;
+                banner.style.display = 'block';
+                
+                // Update status text
+                let displayText = '';
+                if (status.level === 'good') {
+                    const text = appTranslations[t]?.backupStatusGood || appTranslations.nl.backupStatusGood;
+                    displayText = text.replace('{days}', status.days === 0 ? 'vandaag' : status.days);
+                } else if (status.level === 'warning') {
+                    const text = appTranslations[t]?.backupStatusWarning || appTranslations.nl.backupStatusWarning;
+                    displayText = text.replace('{days}', status.days);
+                } else {
+                    displayText = appTranslations[t]?.backupStatusDanger || appTranslations.nl.backupStatusDanger;
+                }
+                
+                statusText.textContent = displayText;
+                
+                // Update dashboard card
+                if (dashboardCard && dashboardText && warningTitle) {
+                    if (status.level === 'danger') {
+                        dashboardCard.style.display = 'block';
+                        warningTitle.textContent = appTranslations[t]?.backupWarningTitle || appTranslations.nl.backupWarningTitle;
+                        dashboardText.textContent = appTranslations[t]?.dashboardWarningNever || appTranslations.nl.dashboardWarningNever;
+                    } else if (status.level === 'warning') {
+                        dashboardCard.style.display = 'block';
+                        warningTitle.textContent = appTranslations[t]?.backupWarningTitle || appTranslations.nl.backupWarningTitle;
+                        const text = appTranslations[t]?.dashboardWarningOld || appTranslations.nl.dashboardWarningOld;
+                        dashboardText.textContent = text.replace('{days}', status.days);
+                    } else {
+                        dashboardCard.style.display = 'none';
+                    }
+                }
+            },
+            
+            setupEventListeners: function() {
+                // Backup now buttons
+                const backupButtons = [
+                    'backupNowHeaderBtn',
+                    'backupFromDashboardBtn'
+                ];
+                
+                backupButtons.forEach(btnId => {
+                    const btn = document.getElementById(btnId);
+                    if (btn) {
+                        btn.addEventListener('click', () => {
+                            if (window.uiHandler && typeof window.uiHandler.showModal === 'function') {
+                                window.uiHandler.showModal('data');
+                            }
+                        });
+                    }
+                });
+                
+                // Learn more button
+                const learnMoreBtn = document.getElementById('learnMoreHeaderBtn');
+                if (learnMoreBtn) {
+                    learnMoreBtn.addEventListener('click', () => {
+                        const modal = new bootstrap.Modal(document.getElementById('backupInfoModal'));
+                        modal.show();
+                    });
+                }
+                
+                // Dismiss backup button
+                const dismissBtn = document.getElementById('dismissDashboardBackupBtn');
+                if (dismissBtn) {
+                    dismissBtn.addEventListener('click', () => {
+                        const hideUntil = new Date();
+                        hideUntil.setDate(hideUntil.getDate() + 30);
+                        localStorage.setItem('hide_backup_reminder_until', hideUntil.toISOString());
+                        this.hideReminderUntil = hideUntil.toISOString();
+                        this.updateUI();
+                        
+                        if (window.uiHandler && window.uiHandler.showSuccess) {
+                            window.uiHandler.showSuccess('Backup herinnering uitgezet voor 30 dagen');
+                        }
+                    });
+                }
+            }
+        };
         
-        const backupManager = new BackupStatusManager();
         window.backupManager = backupManager;
 
         // Pagina tekst vertalen
         function translateAppPage(lang) {
             // Update backup manager taal
-            backupManager.setLanguage(lang);
+            backupManager.currentLang = lang;
+            backupManager.updateUI();
             
             // Update app teksten
             const elements = document.querySelectorAll('.app-text');
@@ -544,8 +888,8 @@
                 }
                 
                 // Setup backup manager
+                backupManager.init();
                 backupManager.setupEventListeners();
-                backupManager.updateUI();
                 
                 // Setup event listeners voor menu knoppen
                 setupMenuEventListeners();
@@ -652,9 +996,6 @@
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
             const isAndroid = /Android/.test(navigator.userAgent);
-            const isChrome = /Chrome/.test(navigator.userAgent) && !/Edge/.test(navigator.userAgent);
-            const isEdge = /Edg/.test(navigator.userAgent);
-            const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
             
             let stepsHTML = '';
             
@@ -692,7 +1033,7 @@
                     `;
                 }
             } else {
-                // Desktop instructies - probeer automatische installatie
+                // Desktop instructies
                 stepsHTML = `
                     <div class="step">
                         <span class="step-number">1</span> Zoek in je browser naar de <strong>installatie knop</strong>:
@@ -743,7 +1084,7 @@
             installModal.show();
             
             // Probeer ook automatische browser prompt
-            if (!isMobile && window.deferredPrompt) {
+            if (window.deferredPrompt) {
                 setTimeout(() => {
                     window.deferredPrompt.prompt();
                 }, 1000);
@@ -815,7 +1156,7 @@
             }, 100);
         });
         
-        // UI Handler aanpassing voor LitterManager (zelfde als voorheen)
+        // UI Handler aanpassing voor LitterManager
         const originalShowModal = UIHandler.prototype.showModal;
         UIHandler.prototype.showModal = function(modalType) {
             console.log('Modified showModal called with:', modalType);
