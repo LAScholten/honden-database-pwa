@@ -223,7 +223,7 @@ class SearchManager extends BaseModule {
                 viewingParent: "Elternteil ansehen",
                 clickToView: "Klicken für Details",
                 parents: "Eltern",
-                noHealthInfo: "Keine Gesundheidsinformationen verfügbar",
+                noHealthInfo: "Keine Gesundheitsinformationen verfügbar",
                 noAdditionalInfo: "Keine zusätzlichen Informationen verfügbar",
                 
                 // Hund Details
@@ -396,9 +396,6 @@ class SearchManager extends BaseModule {
                     font-weight: 700;
                     color: #0d6efd;
                     margin-bottom: 4px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
                 }
                 
                 .dog-name {
@@ -425,20 +422,6 @@ class SearchManager extends BaseModule {
                 .dog-details-line .stamboom {
                     font-weight: 700;
                     color: #212529;
-                }
-                
-                .dog-details-line .vachtkleur {
-                    color: #d63384;
-                    font-weight: 500;
-                }
-                
-                .dog-details-line .geslacht {
-                    font-weight: 600;
-                    color: #0d6efd;
-                }
-                
-                .dog-details-line .ras {
-                    color: #6c757d;
                 }
                 
                 .search-stats {
@@ -640,6 +623,11 @@ class SearchManager extends BaseModule {
                     color: #212529;
                 }
                 
+                .dog-detail-header-line .vachtkleur {
+                    color: #d63384;
+                    font-weight: 500;
+                }
+                
                 @media (max-width: 768px) {
                     .modal-body {
                         max-height: calc(100vh - 200px);
@@ -682,7 +670,6 @@ class SearchManager extends BaseModule {
     }
     
     setupSearch() {
-        // Tab knoppen voor zoektype
         document.querySelectorAll('.btn-search-type').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const searchType = e.target.getAttribute('data-search-type');
@@ -697,7 +684,6 @@ class SearchManager extends BaseModule {
     switchSearchType(type) {
         this.searchType = type;
         
-        // Update tab knoppen
         document.querySelectorAll('.btn-search-type').forEach(btn => {
             const btnType = btn.getAttribute('data-search-type');
             if (btnType === type) {
@@ -707,7 +693,6 @@ class SearchManager extends BaseModule {
             }
         });
         
-        // Toon/verberg zoekvelden
         const nameField = document.getElementById('nameSearchField');
         const kennelField = document.getElementById('kennelSearchField');
         
@@ -721,7 +706,6 @@ class SearchManager extends BaseModule {
             document.getElementById('searchKennelInput').focus();
         }
         
-        // Wis zoekresultaten en details
         this.showInitialView();
         this.clearDetails();
     }
@@ -736,7 +720,6 @@ class SearchManager extends BaseModule {
             }
         });
         
-        // Filter honden bij ELKE toetsaanslag (vanaf 1 letter)
         searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase().trim();
             
@@ -748,7 +731,6 @@ class SearchManager extends BaseModule {
             }
         });
         
-        // Enter toets om eerste resultaat te selecteren
         searchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && this.filteredDogs.length > 0) {
                 e.preventDefault();
@@ -767,7 +749,6 @@ class SearchManager extends BaseModule {
             }
         });
         
-        // Filter honden op kennelnaam bij ELKE toetsaanslag
         searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase().trim();
             
@@ -779,7 +760,6 @@ class SearchManager extends BaseModule {
             }
         });
         
-        // Enter toets om eerste resultaat te selecteren
         searchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && this.filteredDogs.length > 0) {
                 e.preventDefault();
@@ -840,13 +820,11 @@ class SearchManager extends BaseModule {
     }
     
     filterDogsByKennel(searchTerm = '') {
-        // GECORRIGEERD: Zoek alleen op honden waarvan de kennelnaam BEGINT met de zoekterm
         this.filteredDogs = this.allDogs.filter(dog => {
             const kennelnaam = dog.kennelnaam ? dog.kennelnaam.toLowerCase() : '';
             return kennelnaam.startsWith(searchTerm);
         });
         
-        // Sorteer op naam (alfabetisch)
         this.filteredDogs.sort((a, b) => {
             const naamA = a.naam ? a.naam.toLowerCase() : '';
             const naamB = b.naam ? b.naam.toLowerCase() : '';
@@ -896,14 +874,11 @@ class SearchManager extends BaseModule {
                     </div>
                     ` : ''}
                     
-                    <!-- REGEL 3: Stamboomnummer, Ras, Geslacht, Vachtkleur -->
+                    <!-- REGEL 3: Stamboomnummer + Ras + Geslacht (GEEN vachtkleur in zoekresultaten) -->
                     <div class="dog-details-line">
                         ${dog.stamboomnr ? `<span class="stamboom">${dog.stamboomnr}</span>` : ''}
                         ${dog.ras ? `<span class="ras">${dog.ras}</span>` : ''}
                         <span class="geslacht">${genderText}</span>
-                        ${dog.vachtkleur && dog.vachtkleur.trim() !== '' ? 
-                          `<span class="vachtkleur">${dog.vachtkleur}</span>` : 
-                          `<span class="text-muted fst-italic">geen vachtkleur</span>`}
                     </div>
                 </div>
             `;
@@ -911,7 +886,6 @@ class SearchManager extends BaseModule {
         
         container.innerHTML = html;
         
-        // Event listeners voor ALLE hond items
         document.querySelectorAll('.dog-result-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 const hondId = parseInt(item.getAttribute('data-id'));
@@ -921,7 +895,6 @@ class SearchManager extends BaseModule {
     }
     
     selectDog(dog) {
-        // Markeer geselecteerd item
         document.querySelectorAll('.dog-result-item').forEach(item => {
             item.classList.remove('selected');
             if (parseInt(item.getAttribute('data-id')) === dog.id) {
@@ -945,7 +918,6 @@ class SearchManager extends BaseModule {
         
         if (!container) return;
         
-        // Zoek ouders
         let fatherInfo = { id: null, naam: t('parentsUnknown'), stamboomnr: '', ras: '' };
         let motherInfo = { id: null, naam: t('parentsUnknown'), stamboomnr: '', ras: '' };
         
@@ -973,7 +945,6 @@ class SearchManager extends BaseModule {
             }
         }
         
-        // Format datum
         const formatDate = (dateString) => {
             if (!dateString) return '';
             const date = new Date(dateString);
@@ -981,10 +952,8 @@ class SearchManager extends BaseModule {
                                           this.currentLang === 'de' ? 'de-DE' : 'en-US');
         };
         
-        // Genereer health badge - toont altijd een waarde
         const getHealthBadge = (value, type) => {
             if (!value || value === '') {
-                // Als er geen waarde is, toon "Onbekend"
                 return `<span class="badge bg-secondary">${t('unknown')}</span>`;
             }
             
@@ -1023,19 +992,16 @@ class SearchManager extends BaseModule {
             return `<span class="badge ${badgeClass}">${badgeText}</span>`;
         };
         
-        // Helper functie om waarde te tonen of "Onbekend"
         const displayValue = (value) => {
             return value && value !== '' ? value : t('unknown');
         };
         
-        // Geslacht tekst voor detailscherm
         const genderText = dog.geslacht === 'reuen' ? t('male') : 
                           dog.geslacht === 'teven' ? t('female') : t('unknown');
         
         const html = `
             <div class="details-card">
                 ${isParentView ? `
-                <!-- Terug knop voor parent view -->
                 <div class="details-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <button class="btn btn-sm btn-outline-secondary back-button" data-original-dog="${originalDogId}">
@@ -1048,29 +1014,24 @@ class SearchManager extends BaseModule {
                 </div>
                 ` : ''}
                 
-                <!-- Header -->
                 <div class="details-header ${isParentView ? 'pt-0' : ''}">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="dog-name-header">${displayValue(dog.naam)}</div>
                             ${dog.kennelnaam ? `<div class="text-muted mb-2">${displayValue(dog.kennelnaam)}</div>` : ''}
                             
-                            <!-- REGEL: Geslacht + Ras + Stamboomnummer -->
+                            <!-- VOLGORDE: Stamboomnummer + Ras + Geslacht + Vachtkleur (zoals in 2e image) -->
                             <div class="dog-detail-header-line mt-2">
-                                <span class="geslacht">${genderText}</span>
-                                ${dog.ras ? `<span class="ras">${dog.ras}</span>` : ''}
                                 ${dog.stamboomnr ? `<span class="stamboom">${dog.stamboomnr}</span>` : ''}
+                                ${dog.ras ? `<span class="ras">${dog.ras}</span>` : ''}
+                                <span class="geslacht">${genderText}</span>
+                                ${dog.vachtkleur && dog.vachtkleur.trim() !== '' ? 
+                                  `<span class="vachtkleur">${dog.vachtkleur}</span>` : 
+                                  `<span class="text-muted fst-italic">geen vachtkleur</span>`}
                             </div>
-                            
-                            <!-- Vachtkleur apart tonen -->
-                            ${dog.vachtkleur && dog.vachtkleur.trim() !== '' ? `
-                            <div class="mt-2">
-                                <span class="badge bg-pink text-white">${dog.vachtkleur}</span>
-                            </div>
-                            ` : ''}
                         </div>
                         <div class="text-end">
-                            <!-- Geboortedatum - alleen tonen als bekend -->
+                            <!-- Geboortedatum - behouden -->
                             ${dog.geboortedatum ? `
                             <div class="text-muted">
                                 <i class="bi bi-calendar me-1"></i>
@@ -1078,7 +1039,7 @@ class SearchManager extends BaseModule {
                             </div>
                             ` : ''}
                             
-                            <!-- Overlijdensdatum - alleen tonen als ingevuld -->
+                            <!-- Overlijdensdatum - behouden -->
                             ${dog.overlijdensdatum ? `
                             <div class="text-muted ${dog.geboortedatum ? 'mt-1' : ''}">
                                 <i class="bi bi-calendar-x me-1"></i>
@@ -1089,9 +1050,7 @@ class SearchManager extends BaseModule {
                     </div>
                 </div>
                 
-                <!-- Body -->
                 <div class="details-body">
-                    <!-- Ouders - altijd tonen -->
                     <div class="info-group">
                         <div class="info-group-title">
                             <i class="bi bi-people me-1"></i> ${t('parents')}
@@ -1132,45 +1091,38 @@ class SearchManager extends BaseModule {
                         </div>
                     </div>
                     
-                    <!-- Gezondheidsinformatie - altijd alle velden tonen -->
                     <div class="info-group">
                         <div class="info-group-title">
                             <i class="bi bi-heart-pulse me-1"></i> ${t('healthInfo')}
                         </div>
                         
                         <div class="row">
-                            <!-- Heupdysplasie - altijd tonen -->
                             <div class="col-md-6 mb-3">
                                 <div class="fw-bold mb-1">${t('hipDysplasia')}</div>
                                 <div>${getHealthBadge(dog.heupdysplasie, 'hip')}</div>
                             </div>
                             
-                            <!-- Elleboogdysplasie - altijd tonen -->
                             <div class="col-md-6 mb-3">
                                 <div class="fw-bold mb-1">${t('elbowDysplasia')}</div>
                                 <div>${getHealthBadge(dog.elleboogdysplasie, 'elbow')}</div>
                             </div>
                             
-                            <!-- Patella Luxatie - altijd tonen -->
                             <div class="col-md-6 mb-3">
                                 <div class="fw-bold mb-1">${t('patellaLuxation')}</div>
                                 <div>${getHealthBadge(dog.patella, 'patella')}</div>
                             </div>
                             
-                            <!-- Ogen - altijd tonen -->
                             <div class="col-md-6 mb-3">
                                 <div class="fw-bold mb-1">${t('eyes')}</div>
                                 <div>${getHealthBadge(dog.ogen, 'eyes')}</div>
                                 ${dog.ogenVerklaring ? `<div class="text-muted small mt-1">${dog.ogenVerklaring}</div>` : ''}
                             </div>
                             
-                            <!-- Dandy Walker - altijd tonen -->
                             <div class="col-md-6 mb-3">
                                 <div class="fw-bold mb-1">${t('dandyWalker')}</div>
                                 <div>${getHealthBadge(dog.dandyWalker, 'dandy')}</div>
                             </div>
                             
-                            <!-- Schildklier - altijd tonen -->
                             <div class="col-md-6 mb-3">
                                 <div class="fw-bold mb-1">${t('thyroid')}</div>
                                 <div>${getHealthBadge(dog.schildklier, 'thyroid')}</div>
@@ -1179,13 +1131,11 @@ class SearchManager extends BaseModule {
                         </div>
                     </div>
                     
-                    <!-- Extra informatie - altijd alle velden tonen -->
                     <div class="info-group">
                         <div class="info-group-title">
                             <i class="bi bi-info-circle me-1"></i> ${t('additionalInfo')}
                         </div>
                         
-                        <!-- Land en Postcode - altijd tonen -->
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <div class="fw-bold mb-1">${t('country')}</div>
@@ -1198,7 +1148,6 @@ class SearchManager extends BaseModule {
                             </div>
                         </div>
                         
-                        <!-- Opmerkingen - altijd tonen -->
                         <div class="mt-3">
                             <div class="fw-bold mb-2">${t('remarks')}</div>
                             <div class="remarks-box">
@@ -1207,7 +1156,6 @@ class SearchManager extends BaseModule {
                         </div>
                     </div>
                     
-                    <!-- Timestamps - alleen tonen als aanwezig -->
                     ${dog.createdAt || dog.updatedAt ? `
                     <div class="info-group">
                         <div class="info-group-title">
@@ -1235,20 +1183,6 @@ class SearchManager extends BaseModule {
         
         container.innerHTML = html;
         
-        // Voeg CSS toe voor pink badge (als die er nog niet is)
-        if (!document.querySelector('style[data-vachtkleur-badge]')) {
-            const style = document.createElement('style');
-            style.setAttribute('data-vachtkleur-badge', 'true');
-            style.textContent = `
-                .bg-pink {
-                    background-color: #d63384 !important;
-                    color: white !important;
-                }
-            `;
-            document.head.appendChild(style);
-        }
-        
-        // Voeg event listeners toe voor ouderknoppen
         if (fatherInfo.id) {
             const fatherCard = document.querySelector('.father-card');
             if (fatherCard) {
@@ -1271,7 +1205,6 @@ class SearchManager extends BaseModule {
             }
         }
         
-        // Voeg event listener toe voor terugknop
         if (isParentView) {
             const backButton = document.querySelector('.back-button');
             if (backButton) {
@@ -1291,7 +1224,6 @@ class SearchManager extends BaseModule {
         if (parent) {
             this.showDogDetails(parent, true, originalDogId);
             
-            // Markeer ook de ouder in de zoekkolom
             document.querySelectorAll('.dog-result-item').forEach(item => {
                 item.classList.remove('selected');
                 if (parseInt(item.getAttribute('data-id')) === parentId) {
