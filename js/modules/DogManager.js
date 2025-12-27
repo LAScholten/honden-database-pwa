@@ -438,58 +438,60 @@ class DogManager extends BaseModule {
                         overflow-y: auto;
                     }
                     
-                    /* Mobiele layout: onder elkaar */
-                    .breed-section-row {
-                        flex-direction: column;
+                    /* Mobiel: alles onder elkaar */
+                    .ras-vachtkleur-container {
+                        flex-direction: column !important;
+                        gap: 15px !important;
                     }
                     
-                    .breed-input-container {
-                        width: 100%;
+                    .ras-container {
+                        width: 100% !important;
                     }
                     
-                    .recent-breeds-section {
-                        width: 100%;
-                        margin-top: 10px;
+                    .recent-breeds-container {
+                        width: 100% !important;
                     }
                     
-                    .coat-color-section {
-                        width: 100%;
-                        margin-top: 10px;
+                    .vachtkleur-container {
+                        width: 100% !important;
+                        margin-top: 0 !important;
                     }
                     
                     .recent-breeds-label {
-                        font-size: 0.8em !important;
                         margin-bottom: 5px !important;
                     }
                     
                     .recent-breed-btn {
                         font-size: 0.75em !important;
-                        padding: 3px 6px !important;
-                        margin: 2px 3px !important;
+                        padding: 4px 8px !important;
+                        margin: 2px !important;
                     }
                 }
                 
-                /* Desktop layout */
-                .breed-section-row {
+                /* Desktop layout: exact zoals scherm2.png */
+                .ras-vachtkleur-container {
                     display: flex;
-                    flex-wrap: wrap;
-                    gap: 15px;
+                    flex-wrap: nowrap;
                     align-items: flex-start;
+                    gap: 15px;
+                    width: 100%;
                 }
                 
-                .breed-input-container {
-                    flex: 1;
-                    min-width: 250px;
-                }
-                
-                .recent-breeds-section {
-                    flex: 0 0 auto;
-                    min-width: 180px;
-                }
-                
-                .coat-color-section {
+                .ras-container {
                     flex: 1;
                     min-width: 200px;
+                }
+                
+                .recent-breeds-container {
+                    flex: 0 0 auto;
+                    min-width: 220px;
+                    margin-top: 0;
+                }
+                
+                .vachtkleur-container {
+                    flex: 1;
+                    min-width: 200px;
+                    margin-top: 0;
                 }
                 
                 .recent-breeds-label {
@@ -730,19 +732,19 @@ class DogManager extends BaseModule {
                     </div>
                 </div>
                 
-                <!-- Rij 3: Ras, Recente rassen en Vachtkleur - zoals in scherm2.png -->
+                <!-- Rij 3: Ras, Recente rassen en Vachtkleur - EXACT zoals scherm2.png -->
                 <div class="row">
                     <div class="col-12">
                         <div class="mb-3">
                             <label class="form-label">${t('breedRequired')}</label>
-                            <div class="breed-section-row">
+                            <div class="ras-vachtkleur-container">
                                 <!-- Ras invoerveld -->
-                                <div class="breed-input-container">
+                                <div class="ras-container">
                                     <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
                                 </div>
                                 
                                 <!-- Recente rassen sectie -->
-                                <div class="recent-breeds-section">
+                                <div class="recent-breeds-container">
                                     <span class="recent-breeds-label">${t('recent')}</span>
                                     <div class="recent-breeds-buttons">
                                         ${recentBreedsHTML}
@@ -750,7 +752,7 @@ class DogManager extends BaseModule {
                                 </div>
                                 
                                 <!-- Vachtkleur invoerveld -->
-                                <div class="coat-color-section">
+                                <div class="vachtkleur-container">
                                     <label for="coatColor" class="form-label">${t('coatColor')}</label>
                                     <input type="text" class="form-control" id="coatColor" value="${data.vachtkleur || ''}">
                                 </div>
