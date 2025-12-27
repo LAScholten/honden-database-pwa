@@ -1,3 +1,5 @@
+[file name]: DogManager.js
+[file content begin]
 /**
  * Hond Management Module
  * Beheert toevoegen en bewerken van honden
@@ -27,6 +29,7 @@ class DogManager extends BaseModule {
                 pedigreeNumber: "Stamboomnummer *",
                 breed: "Ras",
                 breedRequired: "Ras *",
+                coatColor: "Vachtkleur",
                 recent: "Recent:",
                 father: "Vader",
                 mother: "Moeder",
@@ -132,6 +135,7 @@ class DogManager extends BaseModule {
                 pedigreeNumber: "Pedigree number *",
                 breed: "Breed",
                 breedRequired: "Breed *",
+                coatColor: "Coat Color",
                 recent: "Recent:",
                 father: "Father",
                 mother: "Mother",
@@ -237,8 +241,9 @@ class DogManager extends BaseModule {
                 pedigreeNumber: "Stammbaum-Nummer *",
                 breed: "Rasse",
                 breedRequired: "Rasse *",
+                coatColor: "Fellfarbe",
                 recent: "Kürzlich:",
-                father: "Vader",
+                father: "Vater",
                 mother: "Mutter",
                 birthDate: "Geburtsdatum",
                 deathDate: "Sterbedatum",
@@ -259,7 +264,7 @@ class DogManager extends BaseModule {
                 elbow1: "1",
                 elbow2: "2",
                 elbow3: "3",
-                elbowNB: "NB (Niet bekend)",
+                elbowNB: "NB (Niet bekannt)",
                 patellaLuxation: "Patella Luxation",
                 patellaGrades: "Grad wählen...",
                 patella0: "0",
@@ -313,7 +318,7 @@ class DogManager extends BaseModule {
                 importExport: "Daten importieren/exportieren",
                 
                 // Meldungen
-                adminOnly: "Nur Administratoren kunnen Hunde hinzufügen/bearbeiten",
+                adminOnly: "Nur Administratoren können Hunde hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer en Rasse zijn Pflichtfelder",
                 savingDog: "Hund wird gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
@@ -777,22 +782,41 @@ class DogManager extends BaseModule {
                     </div>
                 </div>
                 
-                <!-- Rij 3: Ras met recente rassen op 1 regel -->
+                <!-- Rij 3: Ras en Vachtkleur -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="breed" class="form-label">${t('breedRequired')}</label>
+                            <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="coatColor" class="form-label">${t('coatColor')}</label>
+                            <input type="text" class="form-control" id="coatColor" value="${data.vachtkleur || ''}">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Rij 4: Recente rassen -->
                 <div class="row">
                     <div class="col-12">
                         <div class="mb-3">
-                            <label for="breed" class="form-label">${t('breedRequired')}</label>
-                            <div class="breed-container">
-                                <div class="breed-input-container">
-                                    <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
+                            <div class="recent-breeds-container">
+                                <div class="recent-breeds-label">${t('recent')}</div>
+                                <div class="recent-breeds-buttons">
+                                    ${this.lastBreeds.map(breed => `
+                                        <button type="button" class="btn btn-sm btn-outline-secondary recent-breed-btn" data-breed="${breed}">
+                                            ${breed}
+                                        </button>
+                                    `).join('')}
                                 </div>
-                                ${recentBreedsHTML}
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Rij 4: Vader en Moeder (naast elkaar) -->
+                <!-- Rij 5: Vader en Moeder (naast elkaar) -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3 parent-input-wrapper">
@@ -816,7 +840,7 @@ class DogManager extends BaseModule {
                     </div>
                 </div>
                 
-                <!-- Rij 5: Geboortedatum en Overlijdensdatum -->
+                <!-- Rij 6: Geboortedatum en Overlijdensdatum -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3 date-input-wrapper">
@@ -842,7 +866,7 @@ class DogManager extends BaseModule {
                     </div>
                 </div>
                 
-                <!-- Rij 6: Heupdysplasie, Elleboogdysplasie, Patella Luxatie -->
+                <!-- Rij 7: Heupdysplasie, Elleboogdysplasie, Patella Luxatie -->
                 <div class="row">
                     <div class="col-md-4">
                         <div class="mb-3">
@@ -884,7 +908,7 @@ class DogManager extends BaseModule {
                     </div>
                 </div>
                 
-                <!-- Rij 7: Ogen en Dandy Walker -->
+                <!-- Rij 8: Ogen en Dandy Walker -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -915,7 +939,7 @@ class DogManager extends BaseModule {
                     </div>
                 </div>
                 
-                <!-- Rij 8: Schildklier en Land/Postcode -->
+                <!-- Rij 9: Schildklier en Land/Postcode -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -1201,21 +1225,24 @@ class DogManager extends BaseModule {
                 accessDenied: "Toegang Geweigerd",
                 choose: "Kies...",
                 back: "Terug",
-                development: "In Ontwikkeling"
+                development: "In Ontwikkeling",
+                coatColor: "Vachtkleur"
             },
             en: {
                 close: "Close",
                 accessDenied: "Access Denied",
                 choose: "Choose...",
                 back: "Back",
-                development: "In Development"
+                development: "In Development",
+                coatColor: "Coat Color"
             },
             de: {
                 close: "Schließen",
                 accessDenied: "Zugriff Verweigert",
                 choose: "Wählen...",
                 back: "Zurück",
-                development: "In Entwicklung"
+                development: "In Entwicklung",
+                coatColor: "Fellfarbe"
             }
         };
         
@@ -1413,6 +1440,7 @@ class DogManager extends BaseModule {
             kennelnaam: document.getElementById('kennelName').value.trim(),
             stamboomnr: document.getElementById('pedigreeNumber').value.trim(),
             ras: document.getElementById('breed').value.trim(),
+            vachtkleur: document.getElementById('coatColor').value.trim(), // Nieuw veld
             geslacht: document.getElementById('gender').value,
             vader: document.getElementById('father').value.trim(),
             vaderId: document.getElementById('fatherId').value ? parseInt(document.getElementById('fatherId').value) : null,
@@ -1540,3 +1568,4 @@ class DogManager extends BaseModule {
 if (typeof window !== 'undefined') {
     window.DogManager = DogManager;
 }
+[file content end]
