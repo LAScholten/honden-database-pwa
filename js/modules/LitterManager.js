@@ -28,8 +28,8 @@ class LitterManager {
                 breed: "Ras",
                 breedRequired: "Ras *",
                 recent: "Recent:",
-                father: "Vader",
-                mother: "Moeder",
+                father: "Vader *",
+                mother: "Moeder *",
                 coatColor: "Vachtkleur",
                 birthDate: "Geboortedatum",
                 deathDate: "Overlijdensdatum",
@@ -105,7 +105,7 @@ class LitterManager {
                 
                 // Alerts
                 adminOnly: "Alleen administrators mogen nesten toevoegen/bewerken",
-                fieldsRequired: "Naam, stamboomnummer en ras zijn verplichte velden",
+                fieldsRequired: "Naam, stamboomnummer, ras, vader en moeder zijn verplichte velden",
                 savingDog: "Hond opslaan...",
                 dogAdded: "Hond succesvol toegevoegd!",
                 dogUpdated: "Hond succesvol bijgewerkt!",
@@ -141,8 +141,8 @@ class LitterManager {
                 breed: "Breed",
                 breedRequired: "Breed *",
                 recent: "Recent:",
-                father: "Father",
-                mother: "Mother",
+                father: "Father *",
+                mother: "Mother *",
                 coatColor: "Coat Color",
                 birthDate: "Birth date",
                 deathDate: "Death date",
@@ -218,7 +218,7 @@ class LitterManager {
                 
                 // Alerts
                 adminOnly: "Only administrators can add/edit litters",
-                fieldsRequired: "Name, pedigree number and breed are required fields",
+                fieldsRequired: "Name, pedigree number, breed, father and mother are required fields",
                 savingDog: "Saving dog...",
                 dogAdded: "Dog successfully added!",
                 dogUpdated: "Dog successfully updated!",
@@ -254,8 +254,8 @@ class LitterManager {
                 breed: "Rasse",
                 breedRequired: "Rasse *",
                 recent: "Kürzlich:",
-                father: "Vater",
-                mother: "Mutter",
+                father: "Vater *",
+                mother: "Mutter *",
                 coatColor: "Fellfarbe",
                 birthDate: "Geburtsdatum",
                 deathDate: "Sterbedatum",
@@ -304,7 +304,7 @@ class LitterManager {
                 chooseFile: "Datei wählen",
                 noFileChosen: "Keine Datei gewählt",
                 remarks: "Bemerkungen",
-                requiredFields: "Felder met * zijn Pflichtfelder",
+                requiredFields: "Felder met * sind Pflichtfelder",
                 saveDog: "Hund speichern",
                 cancel: "Abbrechen",
                 delete: "Löschen",
@@ -315,7 +315,7 @@ class LitterManager {
                 back: "Zurück",
                 
                 // Validierung
-                dateFormatError: "Datum moet im Format TT-MM-JJJJ sein",
+                dateFormatError: "Datum muss im Format TT-MM-JJJJ sein",
                 deathBeforeBirthError: "Sterbedatum kann nicht vor dem Geburtsdatum liegen",
                 
                 // Zugangskontrolle Popup Texte
@@ -331,7 +331,7 @@ class LitterManager {
                 
                 // Meldungen
                 adminOnly: "Nur Administratoren können Würfe hinzufügen/bearbeiten",
-                fieldsRequired: "Name, Stammbaum-Nummer en Rasse zijn Pflichtfelder",
+                fieldsRequired: "Name, Stammbaum-Nummer, Rasse, Vater und Mutter sind Pflichtfelder",
                 savingDog: "Hund wird gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
                 dogUpdated: "Hund erfolgreich aktualisiert!",
@@ -873,7 +873,7 @@ class LitterManager {
                         <i class="bi bi-people"></i> ${t('parentDetails')}
                     </div>
                     
-                    <!-- RIJ 1: Vader en Moeder -->
+                    <!-- RIJ 1: Vader en Moeder (NU VERPLICHT) -->
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3 parent-input-wrapper">
@@ -882,7 +882,8 @@ class LitterManager {
                                        value="${data.vader || ''}" 
                                        placeholder="Begin met typen om te zoeken..."
                                        data-parent-type="father"
-                                       autocomplete="off">
+                                       autocomplete="off"
+                                       required>
                             </div>
                         </div>
                         <div class="col-md-6">
@@ -892,7 +893,8 @@ class LitterManager {
                                        value="${data.moeder || ''}" 
                                        placeholder="Begin met typen om te zoeken..."
                                        data-parent-type="mother"
-                                       autocomplete="off">
+                                       autocomplete="off"
+                                       required>
                             </div>
                         </div>
                     </div>
@@ -1782,7 +1784,7 @@ class LitterManager {
         
         console.log('LitterManager: Dog data verzameld:', dogData);
         
-        // Validatie
+        // Validatie - OUDERS NU OOK VERPLICHT
         if (!dogData.naam) {
             this.showError('Naam is verplicht');
             return;
@@ -1795,6 +1797,16 @@ class LitterManager {
         
         if (!dogData.ras) {
             this.showError('Ras is verplicht');
+            return;
+        }
+        
+        if (!dogData.vader) {
+            this.showError('Vader is verplicht');
+            return;
+        }
+        
+        if (!dogData.moeder) {
+            this.showError('Moeder is verplicht');
             return;
         }
         
