@@ -826,10 +826,10 @@ class SearchManager extends BaseModule {
             const genderText = dog.geslacht === 'reuen' ? t('male') : 
                              dog.geslacht === 'teven' ? t('female') : t('unknown');
             
-            // VOEG VACHTKLEUR TOE ACHTER HET GESLACHT
-            let genderDisplay = genderText;
+            // VACHTKLEUR ACHTER GESLACHT
+            let genderWithColor = genderText;
             if (dog.vachtkleur && dog.vachtkleur.trim() !== '') {
-                genderDisplay = `${genderText} ${dog.vachtkleur}`;
+                genderWithColor = `${genderText} ${dog.vachtkleur}`;
             }
             
             html += `
@@ -844,7 +844,7 @@ class SearchManager extends BaseModule {
                     <div class="dog-info-line">
                         <div class="d-flex align-items-center">
                             <i class="bi bi-gender-${dog.geslacht === 'reuen' ? 'male' : dog.geslacht === 'teven' ? 'female' : 'unknown'} me-1" style="font-size: 0.8rem;"></i>
-                            <span>${genderDisplay}</span>
+                            <span>${genderWithColor}</span>
                         </div>
                         
                         ${dog.ras ? `
