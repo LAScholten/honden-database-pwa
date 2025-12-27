@@ -1143,16 +1143,42 @@
             }
         }
         
-        // Service Worker registratie
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then(registration => {
-                    console.log('ServiceWorker geregistreerd:', registration.scope);
-                }).catch(error => {
-                    console.log('ServiceWorker registratie mislukt:', error);
+        // Service Worker registratie - VERBETERDE VERSIE
+        async function registerServiceWorker() {
+            if (!('serviceWorker' in navigator)) {
+                console.log('Service Workers niet ondersteund in deze browser');
+                return;
+            }
+            
+            if (window.location.protocol === 'file:') {
+                console.log('Service Worker uitgeschakeld voor lokaal bestand');
+                return;
+            }
+            
+            try {
+                // Controleer of we op GitHub Pages zijn
+                const isGitHubPages = window.location.hostname.includes('github.io');
+                const swPath = isGitHubPages ? '/honden-database-pwa/sw.js' : 'sw.js';
+                
+                const registration = await navigator.serviceWorker.register(swPath);
+                console.log('✅ Service Worker geregistreerd:', registration.scope);
+                
+                // Controleer voor updates
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    console.log('🔄 Nieuwe Service Worker gevonden:', newWorker.state);
                 });
-            });
+                
+            } catch (error) {
+                console.log('⚠ Service Worker kon niet geregistreerd worden:', error.message);
+                // Geen alert - gewoon stil falen
+            }
         }
+        
+        // Roep Service Worker registratie aan na DOM laden
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(registerServiceWorker, 1000); // Wacht even zodat andere init klaar is
+        });
         
         // Modal fix
         document.addEventListener('hidden.bs.modal', function() {
