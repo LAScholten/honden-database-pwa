@@ -392,8 +392,8 @@ class SearchManager extends BaseModule {
                 }
                 
                 .dog-name-line {
-                    font-size: 1rem;
-                    font-weight: 600;
+                    font-size: 1.1rem;
+                    font-weight: 700;
                     color: #0d6efd;
                     margin-bottom: 4px;
                     display: flex;
@@ -402,22 +402,43 @@ class SearchManager extends BaseModule {
                 }
                 
                 .dog-name {
+                    font-weight: 700;
+                    color: #0d6efd;
+                }
+                
+                .dog-kennel-line {
+                    font-size: 0.95rem;
+                    color: #6c757d;
+                    margin-bottom: 8px;
+                    font-style: italic;
+                }
+                
+                .dog-details-line {
+                    color: #495057;
+                    font-size: 0.95rem;
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 12px;
+                    align-items: center;
+                }
+                
+                .dog-details-line .stamboom {
+                    font-weight: 700;
+                    color: #212529;
+                }
+                
+                .dog-details-line .vachtkleur {
+                    color: #d63384;
+                    font-weight: 500;
+                }
+                
+                .dog-details-line .geslacht {
                     font-weight: 600;
                     color: #0d6efd;
                 }
                 
-                .dog-kennel {
-                    font-size: 0.9rem;
+                .dog-details-line .ras {
                     color: #6c757d;
-                    font-weight: normal;
-                }
-                
-                .dog-info-line {
-                    color: #6c757d;
-                    font-size: 0.85rem;
-                    display: flex;
-                    gap: 15px;
-                    flex-wrap: wrap;
                 }
                 
                 .search-stats {
@@ -596,6 +617,29 @@ class SearchManager extends BaseModule {
                     margin-bottom: 5px;
                 }
                 
+                .dog-detail-header-line {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 12px;
+                    align-items: center;
+                    margin-top: 8px;
+                    color: #495057;
+                }
+                
+                .dog-detail-header-line .geslacht {
+                    font-weight: 600;
+                    color: #0d6efd;
+                }
+                
+                .dog-detail-header-line .ras {
+                    font-weight: 500;
+                }
+                
+                .dog-detail-header-line .stamboom {
+                    font-weight: 700;
+                    color: #212529;
+                }
+                
                 @media (max-width: 768px) {
                     .modal-body {
                         max-height: calc(100vh - 200px);
@@ -612,6 +656,18 @@ class SearchManager extends BaseModule {
                     }
                     
                     .dog-name-line {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 4px;
+                    }
+                    
+                    .dog-details-line {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 4px;
+                    }
+                    
+                    .dog-detail-header-line {
                         flex-direction: column;
                         align-items: flex-start;
                         gap: 4px;
@@ -826,40 +882,28 @@ class SearchManager extends BaseModule {
             const genderText = dog.geslacht === 'reuen' ? t('male') : 
                              dog.geslacht === 'teven' ? t('female') : t('unknown');
             
-            // VACHTKLEUR ACHTER GESLACHT
-            let genderWithColor = genderText;
-            if (dog.vachtkleur && dog.vachtkleur.trim() !== '') {
-                genderWithColor = `${genderText} ${dog.vachtkleur}`;
-            }
-            
             html += `
                 <div class="dog-result-item" data-id="${dog.id}">
-                    <!-- Eerste regel: Naam en Kennelnaam -->
+                    <!-- REGEL 1: Alleen naam -->
                     <div class="dog-name-line">
                         <span class="dog-name">${dog.naam || 'Onbekend'}</span>
-                        ${dog.kennelnaam ? `<span class="dog-kennel">${dog.kennelnaam}</span>` : ''}
                     </div>
                     
-                    <!-- Tweede regel: Geslacht (met vachtkleur), Ras en Stamboomnummer -->
-                    <div class="dog-info-line">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-gender-${dog.geslacht === 'reuen' ? 'male' : dog.geslacht === 'teven' ? 'female' : 'unknown'} me-1" style="font-size: 0.8rem;"></i>
-                            <span>${genderWithColor}</span>
-                        </div>
-                        
-                        ${dog.ras ? `
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-tag me-1" style="font-size: 0.8rem;"></i>
-                            <span>${dog.ras}</span>
-                        </div>
-                        ` : ''}
-                        
-                        ${dog.stamboomnr ? `
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-hash me-1" style="font-size: 0.8rem;"></i>
-                            <span>${dog.stamboomnr}</span>
-                        </div>
-                        ` : ''}
+                    <!-- REGEL 2: Kennelnaam -->
+                    ${dog.kennelnaam ? `
+                    <div class="dog-kennel-line">
+                        ${dog.kennelnaam}
+                    </div>
+                    ` : ''}
+                    
+                    <!-- REGEL 3: Stamboomnummer, Ras, Geslacht, Vachtkleur -->
+                    <div class="dog-details-line">
+                        ${dog.stamboomnr ? `<span class="stamboom">${dog.stamboomnr}</span>` : ''}
+                        ${dog.ras ? `<span class="ras">${dog.ras}</span>` : ''}
+                        <span class="geslacht">${genderText}</span>
+                        ${dog.vachtkleur && dog.vachtkleur.trim() !== '' ? 
+                          `<span class="vachtkleur">${dog.vachtkleur}</span>` : 
+                          `<span class="text-muted fst-italic">geen vachtkleur</span>`}
                     </div>
                 </div>
             `;
@@ -984,6 +1028,10 @@ class SearchManager extends BaseModule {
             return value && value !== '' ? value : t('unknown');
         };
         
+        // Geslacht tekst voor detailscherm
+        const genderText = dog.geslacht === 'reuen' ? t('male') : 
+                          dog.geslacht === 'teven' ? t('female') : t('unknown');
+        
         const html = `
             <div class="details-card">
                 ${isParentView ? `
@@ -1005,16 +1053,21 @@ class SearchManager extends BaseModule {
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="dog-name-header">${displayValue(dog.naam)}</div>
-                            <div class="text-muted mb-2">${displayValue(dog.kennelnaam)}</div>
-                            <div class="d-flex align-items-center flex-wrap gap-2 mt-2">
-                                ${dog.stamboomnr ? `<span class="badge bg-light text-dark">${displayValue(dog.stamboomnr)}</span>` : 
-                                  `<span class="badge bg-secondary text-light">${t('unknown')}</span>`}
-                                ${dog.ras ? `<span class="badge bg-light text-dark">${displayValue(dog.ras)}</span>` : 
-                                  `<span class="badge bg-secondary text-light">${t('unknown')}</span>`}
-                                <span class="badge ${dog.geslacht === 'reuen' ? 'bg-primary' : dog.geslacht === 'teven' ? 'bg-danger' : 'bg-secondary'}">
-                                    ${dog.geslacht === 'reuen' ? t('male') : dog.geslacht === 'teven' ? t('female') : t('unknown')}
-                                </span>
+                            ${dog.kennelnaam ? `<div class="text-muted mb-2">${displayValue(dog.kennelnaam)}</div>` : ''}
+                            
+                            <!-- REGEL: Geslacht + Ras + Stamboomnummer -->
+                            <div class="dog-detail-header-line mt-2">
+                                <span class="geslacht">${genderText}</span>
+                                ${dog.ras ? `<span class="ras">${dog.ras}</span>` : ''}
+                                ${dog.stamboomnr ? `<span class="stamboom">${dog.stamboomnr}</span>` : ''}
                             </div>
+                            
+                            <!-- Vachtkleur apart tonen -->
+                            ${dog.vachtkleur && dog.vachtkleur.trim() !== '' ? `
+                            <div class="mt-2">
+                                <span class="badge bg-pink text-white">${dog.vachtkleur}</span>
+                            </div>
+                            ` : ''}
                         </div>
                         <div class="text-end">
                             <!-- Geboortedatum - alleen tonen als bekend -->
@@ -1181,6 +1234,19 @@ class SearchManager extends BaseModule {
         `;
         
         container.innerHTML = html;
+        
+        // Voeg CSS toe voor pink badge (als die er nog niet is)
+        if (!document.querySelector('style[data-vachtkleur-badge]')) {
+            const style = document.createElement('style');
+            style.setAttribute('data-vachtkleur-badge', 'true');
+            style.textContent = `
+                .bg-pink {
+                    background-color: #d63384 !important;
+                    color: white !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
         
         // Voeg event listeners toe voor ouderknoppen
         if (fatherInfo.id) {
