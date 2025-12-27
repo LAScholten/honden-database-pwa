@@ -604,7 +604,7 @@
                 backupWarningTitle: "Backup empfohlen",
                 backupNowDashboard: "Jetzt Backup erstellen",
                 dismissBackup: "Nicht mehr anzeigen",
-                backupModalTitle: "Data Backup - Warum ist das wichtig?",
+                backupModalTitle: "Data Backup - Warum is das wichtig?",
                 backupRisksTitle: "Risiken ohne Backup",
                 backupRisksText1: "Diese App speichert alle Daten <strong>nur lokal in Ihrem Browser</strong>.",
                 backupRisksText2: "Ihre Daten kunnen verloren gehen, wenn Sie: ",
@@ -625,7 +625,7 @@
             }
         };
 
-        // Backup status management - VERSIMPELDE VERSIE
+        // Backup status management - GEÜPDATE VERSIE
         const backupManager = {
             storageKey: 'honden_backup_history',
             warningDays: 7,
@@ -738,7 +738,11 @@
                 let displayText = '';
                 if (status.level === 'good') {
                     const text = appTranslations[t]?.backupStatusGood || appTranslations.nl.backupStatusGood;
-                    displayText = text.replace('{days}', status.days === 0 ? 'vandaag' : status.days);
+                    if (status.days === 0) {
+                        displayText = text.replace('{days}', 'vandaag');
+                    } else {
+                        displayText = text.replace('{days}', status.days);
+                    }
                 } else if (status.level === 'warning') {
                     const text = appTranslations[t]?.backupStatusWarning || appTranslations.nl.backupStatusWarning;
                     displayText = text.replace('{days}', status.days);
@@ -765,6 +769,22 @@
                 }
             },
             
+            // CORRECTIE: WERKENDE recordBackup functie toegevoegd
+            recordBackup: function() {
+                const backupEntry = {
+                    date: new Date().toISOString(),
+                    type: 'manual',
+                    dataSize: 0 // Kan later uitgebreid worden
+                };
+                
+                this.backupHistory.push(backupEntry);
+                this.saveBackupHistory();
+                this.updateUI();
+                
+                console.log('Backup recorded:', backupEntry);
+                return true;
+            },
+            
             setupEventListeners: function() {
                 // Backup now buttons
                 const backupButtons = [
@@ -776,6 +796,10 @@
                     const btn = document.getElementById(btnId);
                     if (btn) {
                         btn.addEventListener('click', () => {
+                            // Eerst de backup manager bijwerken
+                            this.recordBackup();
+                            
+                            // Dan de Data Manager modal openen
                             if (window.uiHandler && typeof window.uiHandler.showModal === 'function') {
                                 window.uiHandler.showModal('data');
                             }
@@ -812,12 +836,6 @@
         
         window.backupManager = backupManager;
         
-        // FIX: Voeg de missende recordBackup functie toe
-        window.backupManager.recordBackup = function() {
-            console.log('Backup recorded (placeholder function)');
-            return true;
-        };
-
         // Pagina tekst vertalen
         function translateAppPage(lang) {
             // Update backup manager taal
@@ -1267,6 +1285,17 @@
                     }
                 };
             });
+        };
+        
+        // **BELANGRIJKE TOEVOEGING: Reset backup status voor bestaande gebruikers**
+        // Als je al een backup hebt gemaakt maar de app zegt van niet,
+        // kun je dit in de console runnen om het te resetten:
+        window.resetBackupHistory = function() {
+            localStorage.removeItem('honden_backup_history');
+            localStorage.removeItem('hide_backup_reminder_until');
+            backupManager.init();
+            console.log('Backup history gereset!');
+            alert('Backup history is gereset. De app zal nu opnieuw beginnen met tellen.');
         };
     </script>
 </body>
