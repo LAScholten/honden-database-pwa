@@ -14,8 +14,7 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
     
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
+    <!-- PWA Manifest wordt dynamisch geladen -->
     
     <style>
         /* COMPACT Backup Banner Styling - 60% van normale hoogte */
@@ -587,7 +586,7 @@
                 dashboard: "Dashboard",
                 welcomeTitle: "Willkommen bei der Hundendatenbank PWA",
                 welcomeText: "Wählen Sie eine option aus dem Menü, um zu beginnen. Die Anwendung funktioniert vollständig offline.",
-                aboutApp: "Über diese App",
+                aboutApp: "Über deze App",
                 appDescription: "Diese PWA (Progressive Web App) speichert alle Daten lokal in Ihrem Browser. Sie können:",
                 feature1: "Hunde hinzufügen en verwalten",
                 feature2: "Hundedaten bearbeiten",
@@ -600,15 +599,15 @@
                 adminRole: "Administrator",
                 adminRights: "Volle Rechte.",
                 userRole: "Benutzer",
-                userRights: "Kann Daten importieren/exportieren, ansehen, private information platzen und zuchter plannung machen.",
+                userRights: "Kann Daten importieren/exportieren, ansehen, private information platzen und zuchter plannung maken.",
                 
                 // Backup Texte
                 backupNow: "Backup",
                 learnMore: "Info",
                 backupWarningTitle: "Backup empfohlen",
                 backupNowDashboard: "Jetzt Backup erstellen",
-                dismissBackup: "Nicht mehr anzeigen",
-                backupModalTitle: "Data Backup - Warum ist das wichtig?",
+                dismissBackup: "Nicht meer anzeigen",
+                backupModalTitle: "Data Backup - Warum ist das belangrijk?",
                 backupRisksTitle: "Risiken ohne Backup",
                 backupRisksText1: "Diese App speichert alle Daten <strong>nur lokal in Ihrem Browser</strong>.",
                 backupRisksText2: "Ihre Daten kunnen verloren gehen, wenn Sie: ",
@@ -622,7 +621,7 @@
                 backupStatusGood: "✓ Backup: Okay",
                 backupStatusWarning: "⚠ Letztes Backup: vor {days} Tagen",
                 backupStatusDanger: "🚨 NOCH NIE gebackupt!",
-                dashboardWarningNever: "Sie haben noch nie ein Backup erstellt! Wenn Sie Browser-Daten löschen, verloren Sie alle Ihre Hundeaufzeichnungen.",
+                dashboardWarningNever: "Sie hebben nog nie ein Backup erstellt! Wenn Sie Browser-Daten löschen, verloren Sie alle Ihre Hundeaufzeichnungen.",
                 dashboardWarningOld: "Ihr letztes Backup war vor {days} Tagen. Erwägen Sie, ein neues Backup zu createn, um Datenverlust zu vermeiden."
             }
         };
@@ -680,7 +679,7 @@
                     const messages = {
                         nl: `Backup herinnering uitgezet voor ${days} dagen`,
                         en: `Backup reminder disabled for ${days} days`,
-                        de: `Backup-Erinnerung für ${days} Tage deaktiviert`
+                        de: `Backup-Erinnerung voor ${days} Tage deaktiviert`
                     };
                     window.uiHandler.showSuccess(messages[this.currentLang] || messages.nl);
                 }
@@ -872,7 +871,7 @@
                 const androidSteps = {
                     nl: ["Klik op \"Nu backup maken\"", "Sla op in Downloads", "Upload naar Google Drive"],
                     en: ["Click \"Create Backup Now\"", "Save to Downloads", "Upload to Google Drive"],
-                    de: ["Klicken Sie auf \"Jetzt Backup erstellen\"", "In Downloads speichern", "Zu Google Drive hochladen"]
+                    de: ["Klicken Sie op \"Jetzt Backup erstellen\"", "In Downloads speichern", "Zu Google Drive hochladen"]
                 };
                 
                 const risksList = {
@@ -1143,31 +1142,88 @@
             }
         }
         
-        // Service Worker registratie - VERBETERDE VERSIE
+        // PWA MANIFEST DYNAMISCH LADEN (FIX VOOR FILE:// PROTOCOL)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Alleen manifest toevoegen als we niet vanaf file:// werken
+            if (window.location.protocol !== 'file:') {
+                const manifestLink = document.createElement('link');
+                manifestLink.rel = 'manifest';
+                manifestLink.href = 'manifest.json';
+                document.head.appendChild(manifestLink);
+                console.log('PWA Manifest geladen via HTTP/HTTPS');
+            } else {
+                // Voor file:// protocol: PWA meta tags inline toevoegen
+                console.log('File:// protocol - PWA meta tags inline gebruiken');
+                
+                // Theme color meta tag
+                const metaThemeColor = document.createElement('meta');
+                metaThemeColor.name = 'theme-color';
+                metaThemeColor.content = '#0d6efd';
+                document.head.appendChild(metaThemeColor);
+                
+                // Apple mobile web app capable
+                const metaAppleMobileWebAppCapable = document.createElement('meta');
+                metaAppleMobileWebAppCapable.name = 'apple-mobile-web-app-capable';
+                metaAppleMobileWebAppCapable.content = 'yes';
+                document.head.appendChild(metaAppleMobileWebAppCapable);
+                
+                // Apple status bar style
+                const metaAppleMobileWebAppStatusBarStyle = document.createElement('meta');
+                metaAppleMobileWebAppStatusBarStyle.name = 'apple-mobile-web-app-status-bar-style';
+                metaAppleMobileWebAppStatusBarStyle.content = 'black-translucent';
+                document.head.appendChild(metaAppleMobileWebAppStatusBarStyle);
+                
+                // Apple touch icons voor verschillende maten
+                const appleIconSizes = [57, 60, 72, 76, 114, 120, 144, 152, 180];
+                appleIconSizes.forEach(size => {
+                    const link = document.createElement('link');
+                    link.rel = 'apple-touch-icon';
+                    link.sizes = `${size}x${size}`;
+                    // Gebruik bestaande icons als ze beschikbaar zijn
+                    if (size === 57 || size === 60 || size === 72 || size === 76 || 
+                        size === 114 || size === 120 || size === 144 || size === 152 || size === 180) {
+                        link.href = `img/icons/icon-${size}x${size}.png`;
+                    } else {
+                        // Fallback naar 192x192 voor andere maten
+                        link.href = 'img/icons/icon-192x192.png';
+                    }
+                    document.head.appendChild(link);
+                });
+                
+                console.log('PWA meta tags toegevoegd voor file:// protocol');
+            }
+        });
+        
+        // SERVICE WORKER REGISTRATIE - WERKT NU OOK VOOR FILE://
         async function registerServiceWorker() {
             if (!('serviceWorker' in navigator)) {
                 console.log('Service Workers niet ondersteund in deze browser');
                 return;
             }
             
-            if (window.location.protocol === 'file:') {
-                console.log('Service Worker uitgeschakeld voor lokaal bestand');
-                return;
-            }
-            
             try {
-                // Controleer of we op GitHub Pages zijn
-                const isGitHubPages = window.location.hostname.includes('github.io');
-                const swPath = isGitHubPages ? '/honden-database-pwa/sw.js' : 'sw.js';
+                // Probeer Service Worker te registreren - ook voor file://
+                const registration = await navigator.serviceWorker.register('sw.js', {
+                    scope: './',
+                    updateViaCache: 'none'
+                });
                 
-                const registration = await navigator.serviceWorker.register(swPath);
-                console.log('✅ Service Worker geregistreerd:', registration.scope);
+                console.log('✅ Service Worker geregistreerd voor scope:', registration.scope);
                 
                 // Controleer voor updates
                 registration.addEventListener('updatefound', () => {
                     const newWorker = registration.installing;
                     console.log('🔄 Nieuwe Service Worker gevonden:', newWorker.state);
+                    
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            console.log('🔄 Nieuwe Service Worker klaar voor gebruik');
+                        }
+                    });
                 });
+                
+                // Forceer update
+                await registration.update();
                 
             } catch (error) {
                 console.log('⚠ Service Worker kon niet geregistreerd worden:', error.message);
