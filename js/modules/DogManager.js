@@ -1,5 +1,3 @@
-[file name]: DogManager.js
-[file content begin]
 /**
  * Hond Management Module
  * Beheert toevoegen en bewerken van honden
@@ -264,7 +262,7 @@ class DogManager extends BaseModule {
                 elbow1: "1",
                 elbow2: "2",
                 elbow3: "3",
-                elbowNB: "NB (Niet bekannt)",
+                elbowNB: "NB (Niet bekend)",
                 patellaLuxation: "Patella Luxation",
                 patellaGrades: "Grad wählen...",
                 patella0: "0",
@@ -720,7 +718,7 @@ class DogManager extends BaseModule {
         const birthDateValue = formatDateForDisplay(data.geboortedatum);
         const deathDateValue = formatDateForDisplay(data.overlijdensdatum);
         
-        // Genereer recente rassen knoppen (op 1 regel naast het ras veld)
+        // Genereer recente rassen knoppen
         let recentBreedsHTML = '';
         if (this.lastBreeds.length > 0) {
             recentBreedsHTML = `
@@ -1568,4 +1566,3 @@ class DogManager extends BaseModule {
 if (typeof window !== 'undefined') {
     window.DogManager = DogManager;
 }
-[file content end]
