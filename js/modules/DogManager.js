@@ -439,22 +439,22 @@ class DogManager extends BaseModule {
                     }
                     
                     /* Mobiel: alles onder elkaar */
-                    .ras-vachtkleur-container {
+                    .ras-vachtkleur-row {
                         flex-direction: column !important;
-                        gap: 15px !important;
                     }
                     
-                    .ras-container {
+                    .ras-col {
                         width: 100% !important;
+                        margin-bottom: 15px !important;
                     }
                     
-                    .recent-breeds-container {
+                    .recent-col {
                         width: 100% !important;
+                        margin-bottom: 15px !important;
                     }
                     
-                    .vachtkleur-container {
+                    .vachtkleur-col {
                         width: 100% !important;
-                        margin-top: 0 !important;
                     }
                     
                     .recent-breeds-label {
@@ -468,30 +468,29 @@ class DogManager extends BaseModule {
                     }
                 }
                 
-                /* Desktop layout: exact zoals scherm2.png */
-                .ras-vachtkleur-container {
+                /* Desktop layout: EXACT zoals scherm2.png */
+                .ras-vachtkleur-row {
                     display: flex;
                     flex-wrap: nowrap;
                     align-items: flex-start;
                     gap: 15px;
                     width: 100%;
+                    margin-bottom: 0;
                 }
                 
-                .ras-container {
+                .ras-col {
+                    flex: 2;
+                    min-width: 200px;
+                }
+                
+                .recent-col {
                     flex: 1;
                     min-width: 200px;
                 }
                 
-                .recent-breeds-container {
-                    flex: 0 0 auto;
-                    min-width: 220px;
-                    margin-top: 0;
-                }
-                
-                .vachtkleur-container {
-                    flex: 1;
+                .vachtkleur-col {
+                    flex: 2;
                     min-width: 200px;
-                    margin-top: 0;
                 }
                 
                 .recent-breeds-label {
@@ -505,6 +504,7 @@ class DogManager extends BaseModule {
                     display: flex;
                     flex-wrap: wrap;
                     gap: 4px;
+                    margin-top: 0;
                 }
                 
                 .recent-breed-btn {
@@ -512,6 +512,15 @@ class DogManager extends BaseModule {
                     font-size: 0.8em;
                     padding: 4px 8px;
                     margin: 2px 0;
+                }
+                
+                /* Zorg dat de labels op dezelfde hoogte staan */
+                .ras-col .form-label,
+                .vachtkleur-col .form-label {
+                    margin-bottom: 8px;
+                    display: block;
+                    height: 19px;
+                    line-height: 19px;
                 }
                 
                 .autocomplete-dropdown {
@@ -735,27 +744,25 @@ class DogManager extends BaseModule {
                 <!-- Rij 3: Ras, Recente rassen en Vachtkleur - EXACT zoals scherm2.png -->
                 <div class="row">
                     <div class="col-12">
-                        <div class="mb-3">
-                            <label class="form-label">${t('breedRequired')}</label>
-                            <div class="ras-vachtkleur-container">
-                                <!-- Ras invoerveld -->
-                                <div class="ras-container">
-                                    <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
+                        <div class="ras-vachtkleur-row">
+                            <!-- Ras invoerveld -->
+                            <div class="ras-col">
+                                <label for="breed" class="form-label">${t('breedRequired')}</label>
+                                <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
+                            </div>
+                            
+                            <!-- Recente rassen sectie -->
+                            <div class="recent-col">
+                                <span class="recent-breeds-label">${t('recent')}</span>
+                                <div class="recent-breeds-buttons">
+                                    ${recentBreedsHTML}
                                 </div>
-                                
-                                <!-- Recente rassen sectie -->
-                                <div class="recent-breeds-container">
-                                    <span class="recent-breeds-label">${t('recent')}</span>
-                                    <div class="recent-breeds-buttons">
-                                        ${recentBreedsHTML}
-                                    </div>
-                                </div>
-                                
-                                <!-- Vachtkleur invoerveld -->
-                                <div class="vachtkleur-container">
-                                    <label for="coatColor" class="form-label">${t('coatColor')}</label>
-                                    <input type="text" class="form-control" id="coatColor" value="${data.vachtkleur || ''}">
-                                </div>
+                            </div>
+                            
+                            <!-- Vachtkleur invoerveld -->
+                            <div class="vachtkleur-col">
+                                <label for="coatColor" class="form-label">${t('coatColor')}</label>
+                                <input type="text" class="form-control" id="coatColor" value="${data.vachtkleur || ''}">
                             </div>
                         </div>
                     </div>
