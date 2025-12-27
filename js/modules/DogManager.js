@@ -301,8 +301,8 @@ class DogManager extends BaseModule {
                 back: "Zurück",
                 
                 // Validierung
-                dateFormatError: "Datum muss im Format TT-MM-JJJJ sein",
-                deathBeforeBirthError: "Sterbedatum kann nicht vor dem Geburtsdatum liegen",
+                dateFormatError: "Datum moet in DD-MM-JJJJ formaat zijn",
+                deathBeforeBirthError: "Sterbedatum kan niet voor geboortedatum zijn",
                 
                 // Zugangskontrolle Popup Texte
                 insufficientPermissions: "Unzureichende Berechtigungen",
@@ -438,50 +438,78 @@ class DogManager extends BaseModule {
                         overflow-y: auto;
                     }
                     
-                    .breed-container {
-                        gap: 8px !important;
+                    /* Mobiele layout: onder elkaar */
+                    .breed-section-row {
+                        flex-direction: column;
                     }
                     
                     .breed-input-container {
-                        flex: 0 0 180px !important;
-                        min-width: 180px !important;
+                        width: 100%;
+                    }
+                    
+                    .recent-breeds-section {
+                        width: 100%;
+                        margin-top: 10px;
+                    }
+                    
+                    .coat-color-section {
+                        width: 100%;
+                        margin-top: 10px;
                     }
                     
                     .recent-breeds-label {
                         font-size: 0.8em !important;
+                        margin-bottom: 5px !important;
                     }
                     
                     .recent-breed-btn {
                         font-size: 0.75em !important;
                         padding: 3px 6px !important;
+                        margin: 2px 3px !important;
                     }
-                    
-                    /* Geboortedatum input styling voor mobiel */
-                    .date-input-wrapper {
-                        position: relative;
-                    }
-                    
-                    .date-input-wrapper input[type="text"] {
-                        /* Verberg kalender icon op mobiel */
-                        -webkit-appearance: none;
-                        -moz-appearance: none;
-                        appearance: none;
-                    }
-                    
-                    /* Verwijder de kalender picker voor mobiel */
-                    .date-input-wrapper input[type="date"]::-webkit-calendar-picker-indicator,
-                    .date-input-wrapper input[type="date"]::-webkit-inner-spin-button,
-                    .date-input-wrapper input[type="date"]::-webkit-clear-button {
-                        display: none;
-                        -webkit-appearance: none;
-                        appearance: none;
-                    }
-                    
-                    .date-input-wrapper input[type="date"] {
-                        -webkit-appearance: textfield;
-                        -moz-appearance: textfield;
-                        appearance: textfield;
-                    }
+                }
+                
+                /* Desktop layout */
+                .breed-section-row {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 15px;
+                    align-items: flex-start;
+                }
+                
+                .breed-input-container {
+                    flex: 1;
+                    min-width: 250px;
+                }
+                
+                .recent-breeds-section {
+                    flex: 0 0 auto;
+                    min-width: 180px;
+                }
+                
+                .coat-color-section {
+                    flex: 1;
+                    min-width: 200px;
+                }
+                
+                .recent-breeds-label {
+                    font-size: 0.875em;
+                    color: #6c757d;
+                    margin-bottom: 5px;
+                    display: block;
+                }
+                
+                .recent-breeds-buttons {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 4px;
+                }
+                
+                .recent-breed-btn {
+                    white-space: nowrap;
+                    font-size: 0.8em;
+                    padding: 4px 8px;
+                    margin: 2px 0;
                 }
                 
                 .autocomplete-dropdown {
@@ -517,74 +545,6 @@ class DogManager extends BaseModule {
                 
                 .parent-input-wrapper {
                     position: relative;
-                }
-                
-                /* Breed container voor 1-lijn layout - nu altijd op 1 regel */
-                .breed-container {
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    flex-wrap: nowrap;
-                    width: 100%;
-                }
-                
-                .breed-input-container {
-                    flex: 0 0 220px;
-                    min-width: 220px;
-                }
-                
-                .recent-breeds-container {
-                    display: flex;
-                    align-items: center;
-                    gap: 5px;
-                    flex: 1;
-                    min-width: 0;
-                    overflow: visible;
-                }
-                
-                .recent-breeds-label {
-                    font-size: 0.875em;
-                    color: #6c757d;
-                    white-space: nowrap;
-                    margin-bottom: 0;
-                    flex-shrink: 0;
-                }
-                
-                .recent-breeds-buttons {
-                    display: flex;
-                    flex-wrap: nowrap;
-                    gap: 4px;
-                    overflow-x: auto;
-                    overflow-y: hidden;
-                    padding-bottom: 2px;
-                    flex: 1;
-                    min-width: 0;
-                }
-                
-                .recent-breed-btn {
-                    white-space: nowrap;
-                    flex-shrink: 0;
-                    font-size: 0.8em;
-                    padding: 4px 8px;
-                }
-                
-                /* Custom scrollbar voor recent breed buttons */
-                .recent-breeds-buttons::-webkit-scrollbar {
-                    height: 4px;
-                }
-                
-                .recent-breeds-buttons::-webkit-scrollbar-track {
-                    background: #f1f1f1;
-                    border-radius: 2px;
-                }
-                
-                .recent-breeds-buttons::-webkit-scrollbar-thumb {
-                    background: #c1c1c1;
-                    border-radius: 2px;
-                }
-                
-                .recent-breeds-buttons::-webkit-scrollbar-thumb:hover {
-                    background: #a8a8a8;
                 }
                 
                 /* Datum input styling - gebruik text input voor alle apparaten */
@@ -718,25 +678,15 @@ class DogManager extends BaseModule {
         const birthDateValue = formatDateForDisplay(data.geboortedatum);
         const deathDateValue = formatDateForDisplay(data.overlijdensdatum);
         
-        // Genereer recente rassen knoppen
+        // Bereken recente rassen (maximaal 4)
+        const recentBreeds = this.lastBreeds.slice(0, 4);
         let recentBreedsHTML = '';
-        if (this.lastBreeds.length > 0) {
-            recentBreedsHTML = `
-                <div class="recent-breeds-container">
-                    <div class="recent-breeds-label">${t('recent')}</div>
-                    <div class="recent-breeds-buttons">
-            `;
-            this.lastBreeds.forEach(breed => {
-                recentBreedsHTML += `
-                    <button type="button" class="btn btn-sm btn-outline-secondary recent-breed-btn" data-breed="${breed}">
-                        ${breed}
-                    </button>
-                `;
-            });
-            recentBreedsHTML += `
-                    </div>
-                </div>
-            `;
+        if (recentBreeds.length > 0) {
+            recentBreedsHTML = recentBreeds.map(breed => `
+                <button type="button" class="btn btn-sm btn-outline-secondary recent-breed-btn" data-breed="${breed}">
+                    ${breed}
+                </button>
+            `).join('');
         }
         
         return `
@@ -780,41 +730,36 @@ class DogManager extends BaseModule {
                     </div>
                 </div>
                 
-                <!-- Rij 3: Ras en Vachtkleur -->
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="breed" class="form-label">${t('breedRequired')}</label>
-                            <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="mb-3">
-                            <label for="coatColor" class="form-label">${t('coatColor')}</label>
-                            <input type="text" class="form-control" id="coatColor" value="${data.vachtkleur || ''}">
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Rij 4: Recente rassen -->
+                <!-- Rij 3: Ras, Recente rassen en Vachtkleur - zoals in scherm2.png -->
                 <div class="row">
                     <div class="col-12">
                         <div class="mb-3">
-                            <div class="recent-breeds-container">
-                                <div class="recent-breeds-label">${t('recent')}</div>
-                                <div class="recent-breeds-buttons">
-                                    ${this.lastBreeds.map(breed => `
-                                        <button type="button" class="btn btn-sm btn-outline-secondary recent-breed-btn" data-breed="${breed}">
-                                            ${breed}
-                                        </button>
-                                    `).join('')}
+                            <label class="form-label">${t('breedRequired')}</label>
+                            <div class="breed-section-row">
+                                <!-- Ras invoerveld -->
+                                <div class="breed-input-container">
+                                    <input type="text" class="form-control" id="breed" value="${data.ras || ''}" required>
+                                </div>
+                                
+                                <!-- Recente rassen sectie -->
+                                <div class="recent-breeds-section">
+                                    <span class="recent-breeds-label">${t('recent')}</span>
+                                    <div class="recent-breeds-buttons">
+                                        ${recentBreedsHTML}
+                                    </div>
+                                </div>
+                                
+                                <!-- Vachtkleur invoerveld -->
+                                <div class="coat-color-section">
+                                    <label for="coatColor" class="form-label">${t('coatColor')}</label>
+                                    <input type="text" class="form-control" id="coatColor" value="${data.vachtkleur || ''}">
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Rij 5: Vader en Moeder (naast elkaar) -->
+                <!-- Rij 4: Vader en Moeder (naast elkaar) -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3 parent-input-wrapper">
@@ -838,7 +783,7 @@ class DogManager extends BaseModule {
                     </div>
                 </div>
                 
-                <!-- Rij 6: Geboortedatum en Overlijdensdatum -->
+                <!-- Rij 5: Geboortedatum en Overlijdensdatum -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3 date-input-wrapper">
@@ -864,7 +809,7 @@ class DogManager extends BaseModule {
                     </div>
                 </div>
                 
-                <!-- Rij 7: Heupdysplasie, Elleboogdysplasie, Patella Luxatie -->
+                <!-- Rij 6: Heupdysplasie, Elleboogdysplasie, Patella Luxatie -->
                 <div class="row">
                     <div class="col-md-4">
                         <div class="mb-3">
@@ -906,7 +851,7 @@ class DogManager extends BaseModule {
                     </div>
                 </div>
                 
-                <!-- Rij 8: Ogen en Dandy Walker -->
+                <!-- Rij 7: Ogen en Dandy Walker -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -937,7 +882,7 @@ class DogManager extends BaseModule {
                     </div>
                 </div>
                 
-                <!-- Rij 9: Schildklier en Land/Postcode -->
+                <!-- Rij 8: Schildklier en Land/Postcode -->
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -1224,7 +1169,8 @@ class DogManager extends BaseModule {
                 choose: "Kies...",
                 back: "Terug",
                 development: "In Ontwikkeling",
-                coatColor: "Vachtkleur"
+                coatColor: "Vachtkleur",
+                recent: "Recent:"
             },
             en: {
                 close: "Close",
@@ -1232,7 +1178,8 @@ class DogManager extends BaseModule {
                 choose: "Choose...",
                 back: "Back",
                 development: "In Development",
-                coatColor: "Coat Color"
+                coatColor: "Coat Color",
+                recent: "Recent:"
             },
             de: {
                 close: "Schließen",
@@ -1240,7 +1187,8 @@ class DogManager extends BaseModule {
                 choose: "Wählen...",
                 back: "Zurück",
                 development: "In Entwicklung",
-                coatColor: "Fellfarbe"
+                coatColor: "Fellfarbe",
+                recent: "Kürzlich:"
             }
         };
         
