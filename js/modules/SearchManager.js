@@ -826,7 +826,7 @@ class SearchManager extends BaseModule {
             const genderText = dog.geslacht === 'reuen' ? t('male') : 
                              dog.geslacht === 'teven' ? t('female') : t('unknown');
             
-            // VOEG VACHTKLEUR TOE ACHTER HET GESLACHT IN DE ZOEKRESULTATEN
+            // VOEG VACHTKLEUR TOE ACHTER HET GESLACHT
             let genderDisplay = genderText;
             if (dog.vachtkleur && dog.vachtkleur.trim() !== '') {
                 genderDisplay = `${genderText} ${dog.vachtkleur}`;
@@ -840,7 +840,7 @@ class SearchManager extends BaseModule {
                         ${dog.kennelnaam ? `<span class="dog-kennel">${dog.kennelnaam}</span>` : ''}
                     </div>
                     
-                    <!-- Tweede regel: Geslacht (met vachtkleur erachter), Ras en Stamboomnummer -->
+                    <!-- Tweede regel: Geslacht (met vachtkleur), Ras en Stamboomnummer -->
                     <div class="dog-info-line">
                         <div class="d-flex align-items-center">
                             <i class="bi bi-gender-${dog.geslacht === 'reuen' ? 'male' : dog.geslacht === 'teven' ? 'female' : 'unknown'} me-1" style="font-size: 0.8rem;"></i>
