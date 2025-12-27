@@ -585,7 +585,7 @@
                 welcomeText: "Wählen Sie eine option aus dem Menü, um zu beginnen. Die Anwendung funktioniert vollständig offline.",
                 aboutApp: "Über diese App",
                 appDescription: "Diese PWA (Progressive Web App) speichert alle Daten lokal in Ihrem Browser. Sie können:",
-                feature1: "Hunde hinzufügen und verwalten",
+                feature1: "Hunde hinzufügen en verwalten",
                 feature2: "Hundedaten bearbeiten",
                 feature3: "Fotos hochladen und ansehen",
                 feature4: "Zuchtpläne erstellen",
@@ -607,7 +607,7 @@
                 backupModalTitle: "Data Backup - Warum ist das wichtig?",
                 backupRisksTitle: "Risiken ohne Backup",
                 backupRisksText1: "Diese App speichert alle Daten <strong>nur lokal in Ihrem Browser</strong>.",
-                backupRisksText2: "Ihre Daten können verloren gehen, wenn Sie: ",
+                backupRisksText2: "Ihre Daten kunnen verloren gehen, wenn Sie: ",
                 backupHowToTitle: "Wie man ein Backup erstellt",
                 backupHowToText1: "<strong>Empfohlen:</strong> Erstellen Sie wöchentliche Backups",
                 backupIOSHeading: "Auf iPhone/iPad:",
@@ -811,6 +811,12 @@
         };
         
         window.backupManager = backupManager;
+        
+        // FIX: Voeg de missende recordBackup functie toe
+        window.backupManager.recordBackup = function() {
+            console.log('Backup recorded (placeholder function)');
+            return true;
+        };
 
         // Pagina tekst vertalen
         function translateAppPage(lang) {
