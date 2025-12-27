@@ -1,20 +1,159 @@
-// sw.js - DISABLED SERVICE WORKER
-// Dit bestand voorkomt 404 errors maar doet niets
+// sw.js - ECHTE SERVICE WORKER voor Honden Database PWA
+const CACHE_NAME = 'honden-database-v2.0';
+const APP_VERSION = '2.0';
 
-console.log('Service Worker: Disabled - alleen voor 404 preventie');
+// ESSENTIËLE bestanden die offline MOETEN werken
+const CORE_ASSETS = [
+  // Hoofdpagina's
+  './index.html',
+  './app.html',
+  
+  // Core CSS
+  './css/style.css',
+  
+  // Core JavaScript
+  './js/auth.js',
+  './js/database.js',
+  './js/ui-handler.js',
+  './js/modules/BaseModule.js',
+  
+  // Manifest (belangrijk voor PWA)
+  './manifest.json',
+  
+  // Favicon/logo
+  './img/logo.png' // als je die hebt
+];
 
+// Dynamische caching voor deze externe bestanden
+const EXTERNAL_ASSETS = [
+  'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
+  'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css',
+  'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'
+];
+
+console.log(`Service Worker v${APP_VERSION} geladen voor Honden Database PWA`);
+
+// INSTALL - Cache alle essentiële bestanden
 self.addEventListener('install', function(event) {
-  console.log('SW: Install (disabled)');
-  // Skip waiting
-  self.skipWaiting();
+  console.log('SW: Installeren - caching essentiële bestanden');
+  
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(function(cache) {
+        console.log('SW: Cache geopend - toevoegen core assets');
+        
+        // Voeg CORE_ASSETS toe aan cache
+        return cache.addAll(CORE_ASSETS)
+          .then(() => {
+            console.log('SW: Core assets gecached');
+            // Externe assets proberen (maar niet falen als ze niet laden)
+            return Promise.all(
+              EXTERNAL_ASSETS.map(url => 
+                fetch(url)
+                  .then(response => cache.put(url, response))
+                  .catch(err => console.log(`SW: Kon ${url} niet cachen:`, err))
+              )
+            );
+          })
+          .catch(error => {
+            console.error('SW: Fout bij caching:', error);
+          });
+      })
+      .then(() => {
+        console.log('SW: Forceer activatie');
+        return self.skipWaiting();
+      })
+  );
 });
 
+// ACTIVATE - Oude caches opruimen
 self.addEventListener('activate', function(event) {
-  console.log('SW: Activate (disabled)');
-  event.waitUntil(self.clients.claim());
+  console.log('SW: Activeren - opruimen oude caches');
+  
+  event.waitUntil(
+    caches.keys().then(function(cacheNames) {
+      return Promise.all(
+        cacheNames.map(function(cacheName) {
+          if (cacheName !== CACHE_NAME) {
+            console.log('SW: Verwijderen oude cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+    .then(() => {
+      console.log('SW: Claim clients');
+      return self.clients.claim();
+    })
+  );
 });
 
-// Gewoon alle requests doorsturen zonder caching
+// FETCH - Serveer uit cache OF haal van netwerk
 self.addEventListener('fetch', function(event) {
-  event.respondWith(fetch(event.request));
+  // Skip niet-GET requests en chrome-extension requests
+  if (event.request.method !== 'GET') return;
+  if (event.request.url.startsWith('chrome-extension://')) return;
+  
+  event.respondWith(
+    caches.match(event.request)
+      .then(function(response) {
+        // Cache hit - return cached response
+        if (response) {
+          console.log('SW: Cache hit voor:', event.request.url);
+          return response;
+        }
+        
+        // Cache miss - haal van netwerk
+        console.log('SW: Cache miss voor:', event.request.url);
+        return fetch(event.request)
+          .then(function(networkResponse) {
+            // Cache de response voor toekomstig gebruik
+            if (event.request.url.startsWith('http') && 
+                !event.request.url.includes('sockjs-node') &&
+                networkResponse.status === 200) {
+              
+              const responseToCache = networkResponse.clone();
+              caches.open(CACHE_NAME)
+                .then(function(cache) {
+                  cache.put(event.request, responseToCache);
+                  console.log('SW: Nieuwe resource gecached:', event.request.url);
+                });
+            }
+            return networkResponse;
+          })
+          .catch(function(error) {
+            // NETWERK FOUT - toon offline pagina
+            console.log('SW: Network error, offline modus:', error);
+            
+            // Voor HTML pagina's: toon offline bericht
+            if (event.request.headers.get('accept').includes('text/html')) {
+              return caches.match('./index.html')
+                .then(response => response || new Response(
+                  '<h1>Offline</h1><p>De app werkt offline. Herlaad wanneer er weer internet is.</p>',
+                  { headers: { 'Content-Type': 'text/html' } }
+                ));
+            }
+            
+            // Voor andere assets: toon error
+            return new Response('Offline - Geen verbinding', {
+              status: 503,
+              statusText: 'Service Unavailable'
+            });
+          });
+      })
+  );
+});
+
+// PERIODIEKE SYNC (voor toekomstige uitbreidingen)
+self.addEventListener('sync', function(event) {
+  if (event.tag === 'sync-backup') {
+    console.log('SW: Background sync - backup');
+    // Hier kun je background sync implementeren
+  }
+});
+
+// PUSH NOTIFICATIES (voor toekomstige uitbreidingen)
+self.addEventListener('push', function(event) {
+  console.log('SW: Push notification ontvangen');
+  // Push notification logica hier
 });
