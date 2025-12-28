@@ -11,6 +11,7 @@ class SearchManager extends BaseModule {
         this.filteredDogs = [];
         this.searchType = 'name'; // 'name' of 'kennel'
         this.stamboomManager = null; // Wordt later geïnitialiseerd
+        this.isMobileCollapsed = false; // Track of mobiele weergave collapsed is
         
         // Vertalingen uitgebreid met pedigree knop
         this.translations = {
@@ -750,6 +751,16 @@ class SearchManager extends BaseModule {
                         align-items: flex-start;
                         gap: 4px;
                     }
+                    
+                    .mobile-back-button {
+                        position: sticky;
+                        top: 0;
+                        z-index: 100;
+                        background: white;
+                        padding: 10px 0;
+                        margin-bottom: 15px;
+                        border-bottom: 1px solid #dee2e6;
+                    }
                 }
             </style>
         `;
@@ -997,7 +1008,7 @@ class SearchManager extends BaseModule {
     
     collapseSearchResultsOnMobile() {
         // Op mobiel schermen, toon alleen de details en verberg de zoekresultaten
-        if (window.innerWidth <= 768) {
+        if (window.innerWidth <= 768 && !this.isMobileCollapsed) {
             const searchColumn = document.getElementById('searchColumn');
             const detailsColumn = document.getElementById('detailsColumn');
             
@@ -1005,6 +1016,7 @@ class SearchManager extends BaseModule {
                 searchColumn.classList.add('d-none');
                 detailsColumn.classList.remove('col-md-7');
                 detailsColumn.classList.add('col-12');
+                this.isMobileCollapsed = true;
                 
                 // Voeg een terugknop toe voor mobiele weergave
                 this.addMobileBackButton();
@@ -1016,19 +1028,32 @@ class SearchManager extends BaseModule {
         const detailsContainer = document.getElementById('detailsContainer');
         if (!detailsContainer) return;
         
-        const backButton = document.createElement('button');
-        backButton.className = 'btn btn-sm btn-outline-secondary mb-3';
-        backButton.innerHTML = '<i class="bi bi-arrow-left me-1"></i> Terug naar zoeken';
-        backButton.onclick = () => {
+        // Verwijder bestaande terugknop als die er al is
+        const existingButton = detailsContainer.querySelector('.mobile-back-button');
+        if (existingButton) {
+            return; // Knop bestaat al, niet opnieuw toevoegen
+        }
+        
+        // Maak terugknop
+        const backButtonDiv = document.createElement('div');
+        backButtonDiv.className = 'mobile-back-button';
+        backButtonDiv.innerHTML = `
+            <button class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> ${this.t('backToSearch')}
+            </button>
+        `;
+        
+        // Voeg event listener toe
+        backButtonDiv.querySelector('button').addEventListener('click', () => {
             this.restoreSearchViewOnMobile();
-        };
+        });
         
         // Voeg de knop toe aan het begin van de details
         const firstChild = detailsContainer.firstChild;
         if (firstChild) {
-            detailsContainer.insertBefore(backButton, firstChild);
+            detailsContainer.insertBefore(backButtonDiv, firstChild);
         } else {
-            detailsContainer.appendChild(backButton);
+            detailsContainer.appendChild(backButtonDiv);
         }
     }
     
@@ -1040,11 +1065,12 @@ class SearchManager extends BaseModule {
             searchColumn.classList.remove('d-none');
             detailsColumn.classList.remove('col-12');
             detailsColumn.classList.add('col-md-7');
+            this.isMobileCollapsed = false;
             
-            // Wis de terugknop
-            const backButton = detailsContainer.querySelector('button.btn-outline-secondary');
-            if (backButton && backButton.textContent.includes('Terug naar zoeken')) {
-                backButton.remove();
+            // Verwijder de terugknop
+            const backButtonDiv = document.querySelector('.mobile-back-button');
+            if (backButtonDiv) {
+                backButtonDiv.remove();
             }
             
             // Herstel de zoekfunctie
@@ -1085,6 +1111,12 @@ class SearchManager extends BaseModule {
         const container = document.getElementById('detailsContainer');
         
         if (!container) return;
+        
+        // Verwijder bestaande mobiele terugknop als die er is
+        const mobileBackButton = container.querySelector('.mobile-back-button');
+        if (mobileBackButton) {
+            mobileBackButton.remove();
+        }
         
         let fatherInfo = { id: null, naam: t('parentsUnknown'), stamboomnr: '', ras: '', kennelnaam: '' };
         let motherInfo = { id: null, naam: t('parentsUnknown'), stamboomnr: '', ras: '', kennelnaam: '' };
@@ -1364,7 +1396,7 @@ class SearchManager extends BaseModule {
         container.innerHTML = html;
         
         // Voeg terugknop toe voor mobiele weergave (als we in collapsed modus zijn)
-        if (window.innerWidth <= 768) {
+        if (this.isMobileCollapsed && window.innerWidth <= 768) {
             this.addMobileBackButton();
         }
         
