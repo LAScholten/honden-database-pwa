@@ -359,7 +359,7 @@ class DogDataManager extends BaseModule {
                 adminOnly: "Nur Administratoren kunnen Hunde bearbeiten",
                 invalidId: "Ungültige Hunde-ID",
                 dateFormatError: "Datum muss im Format TT-MM-JJJJ sein",
-                deathBeforeBirthError: "Sterbedatum kann nicht vor dem Geburtsdatum liegen"
+                deathBeforeBirthError: "Sterbedatum kan niet vor dem Geburtsdatum liegen"
             }
         };
     }
@@ -1244,7 +1244,7 @@ class DogDataManager extends BaseModule {
             return;
         }
         
-        // Filter honden op naam
+        // Filter honden op naam (begint met de letter/tekst)
         const filteredDogs = this.allDogs.filter(dog => {
             const naam = dog.naam ? dog.naam.toLowerCase() : '';
             return naam.startsWith(term);
@@ -1284,6 +1284,10 @@ class DogDataManager extends BaseModule {
                         
                         ${dog.stamboomnr ? `
                         <span><i class="bi bi-hash me-1"></i>${dog.stamboomnr}</span>
+                        ` : ''}
+                        
+                        ${dog.kennelnaam ? `
+                        <span><i class="bi bi-house me-1"></i>${dog.kennelnaam}</span>
                         ` : ''}
                         
                         ${coatColorText}
@@ -1832,7 +1836,7 @@ class DogDataManager extends BaseModule {
             return;
         }
         
-        // Filter honden voor autocomplete
+        // Filter honden voor autocomplete (begint met de letter/tekst)
         const suggestions = this.allDogs.filter(dog => {
             const dogName = dog.naam ? dog.naam.toLowerCase() : '';
             const matchesSearch = dogName.startsWith(searchTerm);
@@ -1857,7 +1861,7 @@ class DogDataManager extends BaseModule {
                 <div class="autocomplete-item" data-id="${dog.id}" data-name="${dog.naam}">
                     <div class="dog-name">${dog.naam}</div>
                     <div class="dog-info">
-                        ${dog.ras || 'Onbekend ras'} | ${dog.stamboomnr || 'Geen stamboom'}
+                        ${dog.kennelnaam ? `${dog.kennelnaam} | ` : ''}${dog.ras || 'Onbekend ras'} | ${dog.stamboomnr || 'Geen stamboom'}
                     </div>
                 </div>
             `;
