@@ -447,7 +447,7 @@ class PhotoManager extends BaseModule {
             item.href = '#';
             item.innerHTML = `
                 <div>
-                    <strong>${dog.naam}</strong>
+                    <strong>${dog.naam} ${dog.kennelnaam ? dog.kennelnaam : ''}</strong>
                     <div class="small text-muted">
                         ${dog.ras || ''} • ${dog.stamboomnr || ''}
                     </div>
@@ -470,7 +470,7 @@ class PhotoManager extends BaseModule {
         const stamboomnrInput = document.getElementById('selectedDogStamboomnr');
         
         if (searchInput) {
-            searchInput.value = `${dog.naam} (${dog.ras || 'Geen ras'})`;
+            searchInput.value = `${dog.naam} ${dog.kennelnaam ? dog.kennelnaam : ''}`;
         }
         if (dogIdInput) {
             dogIdInput.value = dog.id;
@@ -614,7 +614,7 @@ class PhotoManager extends BaseModule {
         
         fotos.forEach((foto, index) => {
             const dog = this.allDogs.find(d => d.stamboomnr === foto.stamboomnr);
-            const dogName = dog ? dog.naam : t('unknownDog');
+            const dogName = dog ? `${dog.naam} ${dog.kennelnaam ? dog.kennelnaam : ''}` : t('unknownDog');
             const uploadDatum = new Date(foto.uploadedAt).toLocaleDateString(this.currentLang);
             
             html += `
@@ -677,7 +677,7 @@ class PhotoManager extends BaseModule {
         
         const getPhotoHTML = (foto, index) => {
             const dog = this.allDogs.find(d => d.stamboomnr === foto.stamboomnr);
-            const dogName = dog ? dog.naam : t('unknownDog');
+            const dogName = dog ? `${dog.naam} ${dog.kennelnaam ? dog.kennelnaam : ''}` : t('unknownDog');
             
             return `
                 <div class="carousel-item ${index === currentIndex ? 'active' : ''}">
