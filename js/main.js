@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     try {
         // Registreer Service Worker voor PWA functionaliteit
-        const registration = await registerServiceWorker();
+        await registerServiceWorker();
         
         // Start connectivity monitoring
         checkInternetConnection();
@@ -29,12 +29,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Log app informatie
         showAppInfo();
         
-        // CHECK OP UPDATE BIJ START
-        if (registration && registration.waiting) {
-            console.log('Update beschikbaar bij start');
-            setTimeout(() => showBackupWarningNotification(registration), 2000);
-        }
-        
     } catch (error) {
         console.error('Initialisatie mislukt:', error);
         showError('Fout bij initialiseren van de applicatie. Probeer de pagina te verversen.');
@@ -47,38 +41,64 @@ document.addEventListener('DOMContentLoaded', async function() {
 async function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
         try {
+            // Verwijder eerst eventuele problematische service workers
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            for (const registration of registrations) {
+                if (registration.active?.scriptURL.includes('sw.js')) {
+                    console.log('Bestaat al SW gevonden, controleren...');
+                }
+            }
+            
             const registration = await navigator.serviceWorker.register('./sw.js', {
                 scope: './',
-                updateViaCache: 'none'
+                updateViaCache: 'none' // Altijd SW van netwerk halen
             });
             
             console.log('Service Worker geregistreerd met scope:', registration.scope);
             
-            // CHECK OP WACHTENDE UPDATE
+            // Controleer op updates
             if (registration.waiting) {
-                return registration;
+                showUpdateNotification(registration);
             }
             
-            // LUISTER VOOR UPDATE
+            // Luister voor updates
             registration.addEventListener('updatefound', () => {
                 const newWorker = registration.installing;
+                console.log('Nieuwe Service Worker wordt geïnstalleerd...');
                 
                 newWorker.addEventListener('statechange', () => {
+                    console.log('Service Worker status:', newWorker.state);
+                    
                     if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        console.log('Nieuwe update beschikbaar');
-                        showBackupWarningNotification(registration);
+                        // Nieuwe update beschikbaar
+                        showUpdateNotification(registration);
                     }
                     
                     if (newWorker.state === 'activated') {
                         console.log('Nieuwe Service Worker geactiveerd');
+                        // Optioneel: pagina herladen om nieuwe SW te gebruiken
+                        // window.location.reload();
                     }
                 });
+            });
+            
+            // Luister voor controller change
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                console.log('Nieuwe Service Worker heeft controle over pagina');
+                // Optioneel: update UI of toon melding
             });
             
             return registration;
             
         } catch (error) {
             console.error('Service Worker registratie mislukt:', error);
+            
+            // Toon gebruikersvriendelijke melding
+            if (error.message.includes('MIME type') || error.message.includes('script')) {
+                console.warn('Service Worker MIME type probleem. Controleer server configuratie.');
+            }
+            
+            // Probeer de pagina toch te laten werken zonder SW
             return null;
         }
     } else {
@@ -88,35 +108,26 @@ async function registerServiceWorker() {
 }
 
 /**
- * Toon BACKUP WAARSCHUWING voordat update wordt uitgevoerd
+ * Toon update notificatie en vraag om te herladen
  */
-function showBackupWarningNotification(registration) {
+function showUpdateNotification(registration) {
     // Controleer of we al een notificatie hebben
-    if (document.getElementById('backupWarningNotification')) return;
-    
-    console.log('Toon backup waarschuwing banner');
+    if (document.getElementById('updateNotification')) return;
     
     const notificationHTML = `
-        <div id="backupWarningNotification" class="alert alert-warning alert-dismissible fade show m-3" role="alert" style="z-index: 9999;">
+        <div id="updateNotification" class="alert alert-info alert-dismissible fade show m-3" role="alert">
             <div class="d-flex align-items-center">
-                <i class="bi bi-exclamation-triangle-fill me-3 fs-4 text-danger"></i>
+                <i class="bi bi-arrow-clockwise me-3 fs-4"></i>
                 <div class="flex-grow-1">
-                    <strong class="text-danger">UPDATE BESCHIKBAAR - MAAK EERST BACKUP!</strong>
-                    <p class="mb-1">Er is een nieuwe versie van de app beschikbaar.</p>
-                    <p class="mb-2"><strong>Belangrijk:</strong> Maak eerst een backup van uw gegevens voordat u update!</p>
-                    <div class="mt-2">
-                        <button id="goToBackupBtn" class="btn btn-sm btn-outline-danger me-2">
-                            <i class="bi bi-download me-1"></i>Maak Backup
-                        </button>
-                        <button id="updateNowBtn" class="btn btn-sm btn-success me-2">
-                            <i class="bi bi-arrow-clockwise me-1"></i>Nu Updaten
-                        </button>
-                        <button id="laterBtn" class="btn btn-sm btn-secondary">
-                            <i class="bi bi-clock me-1"></i>Later
-                        </button>
-                    </div>
+                    <strong>Nieuwe versie beschikbaar!</strong>
+                    <p class="mb-0">Er is een nieuwe versie van de app beschikbaar.</p>
                 </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <div>
+                    <button id="reloadPageBtn" class="btn btn-sm btn-outline-info me-2">
+                        Nu bijwerken
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
             </div>
         </div>
     `;
@@ -125,39 +136,25 @@ function showBackupWarningNotification(registration) {
     const container = document.querySelector('.container') || document.body;
     container.insertAdjacentHTML('afterbegin', notificationHTML);
     
-    // Setup knoppen
-    document.getElementById('goToBackupBtn').addEventListener('click', () => {
-        // Navigeer naar backup functie
-        if (window.uiHandler && window.uiHandler.showModal) {
-            window.uiHandler.showModal('data');
-        }
-        hideBackupWarning();
-    });
-    
-    document.getElementById('updateNowBtn').addEventListener('click', () => {
-        console.log('Start update proces');
+    // Setup herlaad knop
+    document.getElementById('reloadPageBtn').addEventListener('click', () => {
         if (registration && registration.waiting) {
+            // Stuur skip waiting bericht naar SW
             registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-            
-            // Wacht even en herlaad
-            setTimeout(() => {
-                window.location.reload();
-            }, 500);
         }
+        
+        // Herlaad de pagina
+        window.location.reload();
     });
     
-    document.getElementById('laterBtn').addEventListener('click', hideBackupWarning);
-}
-
-/**
- * Verberg backup waarschuwing
- */
-function hideBackupWarning() {
-    const notif = document.getElementById('backupWarningNotification');
-    if (notif) {
-        const bsAlert = new bootstrap.Alert(notif);
-        bsAlert.close();
-    }
+    // Auto-verberg na 30 seconden
+    setTimeout(() => {
+        const notif = document.getElementById('updateNotification');
+        if (notif) {
+            const bsAlert = new bootstrap.Alert(notif);
+            bsAlert.close();
+        }
+    }, 30000);
 }
 
 /**
@@ -265,6 +262,8 @@ function showOfflineNotification() {
         // Toon bovenaan de pagina
         const container = document.querySelector('.container') || document.body;
         container.insertAdjacentElement('afterbegin', notification);
+        
+        // Auto-verberg niet - blijf tonen zolang offline
     }
 }
 
@@ -317,11 +316,16 @@ function setupPWAInstallation() {
     let installBtn;
     
     window.addEventListener('beforeinstallprompt', (e) => {
+        // Voorkom dat de browser de install prompt toont
         e.preventDefault();
+        // Bewaar het event voor later gebruik
         deferredPrompt = e;
+        
+        // Toon installatie knop
         showInstallButton();
     });
     
+    // Track of de app al geïnstalleerd is
     window.addEventListener('appinstalled', (evt) => {
         console.log('PWA succesvol geïnstalleerd');
         if (installBtn) {
@@ -331,11 +335,14 @@ function setupPWAInstallation() {
     });
     
     function showInstallButton() {
+        // Controleer of app al geïnstalleerd is
         if (window.matchMedia('(display-mode: standalone)').matches || 
             window.navigator.standalone === true) {
+            console.log('App is al geïnstalleerd');
             return;
         }
         
+        // Controleer of knop al bestaat
         if (document.getElementById('installPWAButton')) {
             return;
         }
@@ -351,7 +358,10 @@ function setupPWAInstallation() {
             if (!deferredPrompt) return;
             
             try {
+                // Toon de install prompt
                 deferredPrompt.prompt();
+                
+                // Wacht op gebruiker reactie
                 const { outcome } = await deferredPrompt.userChoice;
                 console.log(`Gebruiker keuze: ${outcome}`);
                 
@@ -372,11 +382,13 @@ function setupPWAInstallation() {
                 showError('Installatie mislukt. Probeer het opnieuw.');
             }
             
+            // Reset de prompt
             deferredPrompt = null;
         });
         
         document.body.appendChild(installBtn);
         
+        // Verberg knop na 24 uur (cookie gebruiken voor persistentie)
         setTimeout(() => {
             if (installBtn && installBtn.parentNode) {
                 installBtn.remove();
@@ -413,6 +425,7 @@ function showAppInfo() {
     console.table(info);
     console.groupEnd();
     
+    // Toon ook in debug mode
     if (window.location.hash === '#debug') {
         const debugInfo = document.createElement('div');
         debugInfo.className = 'card mt-3';
@@ -451,27 +464,39 @@ export {
 };
 
 // ========== MODAL FIX VOOR ALLE MODALS ==========
+// Dit is de ENIGE toevoeging aan je bestand
 
 (function() {
     console.log('Modal fix installeren...');
     
+    // Wacht tot DOM en Bootstrap geladen zijn
     document.addEventListener('DOMContentLoaded', function() {
+        // Wacht tot Bootstrap beschikbaar is
         const checkBootstrap = setInterval(function() {
             if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
                 clearInterval(checkBootstrap);
                 
+                // Patch Bootstrap's hide() methode
                 const originalHide = bootstrap.Modal.prototype.hide;
                 bootstrap.Modal.prototype.hide = function() {
                     const modal = this._element;
                     
+                    // VERWIJDER FOCUS VOOR ALLE MODALS
                     if (modal) {
+                        // Verwijder focus van close button
                         const focused = modal.querySelector(':focus');
                         if (focused) {
                             focused.blur();
                         }
+                        
+                        // Forceer focus op body
                         document.body.focus();
+                        
+                        // Verwijder aria-hidden
                         modal.removeAttribute('aria-hidden');
                     }
+                    
+                    // Roep originele hide aan
                     return originalHide.call(this);
                 };
                 
