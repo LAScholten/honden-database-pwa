@@ -1,7 +1,6 @@
 // sw.js - ECHTE SERVICE WORKER voor Honden Database PWA
 const CACHE_NAME = 'honden-database-v2.0';
 const APP_VERSION = '2.0';
-const NEW_VERSION_AVAILABLE = 'new-version-available';
 
 // ESSENTIËLE bestanden die offline MOETEN werken
 const CORE_ASSETS = [
@@ -55,7 +54,7 @@ self.addEventListener('install', function(event) {
   );
 });
 
-// ACTIVATE - Oude caches opruimen + update melding
+// ACTIVATE - Oude caches opruimen
 self.addEventListener('activate', function(event) {
   console.log('SW: Activeren - opruimen oude caches');
   
@@ -71,16 +70,6 @@ self.addEventListener('activate', function(event) {
       );
     })
     .then(() => {
-      // UPDATE MELDING NAAR CLIENTS
-      self.clients.matchAll().then(clients => {
-        clients.forEach(client => {
-          client.postMessage({
-            type: NEW_VERSION_AVAILABLE,
-            version: APP_VERSION
-          });
-        });
-      });
-      
       console.log('SW: Claim clients');
       return self.clients.claim();
     })
@@ -131,7 +120,7 @@ self.addEventListener('fetch', function(event) {
   );
 });
 
-// CONTROLLED UPDATE CHECK - NIEUWE FUNCTIE
+// MESSAGE - voor gecontroleerde updates
 self.addEventListener('message', function(event) {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     console.log('SW: Update bevestigd - skipping waiting');
