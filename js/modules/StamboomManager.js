@@ -598,7 +598,7 @@ class StamboomManager extends BaseModule {
             </div>
             
             <style>
-                /* ZELFDE LAYOUT OP ALLE SCHERMEN */
+                /* ZELFDE LAYOUT OP ALLE SCHERMEN - GEEN HORIZONTALE SCROLL MEER */
                 .pedigree-container-compact {
                     padding: 20px;
                     background: #f8f9fa;
@@ -607,6 +607,7 @@ class StamboomManager extends BaseModule {
                     display: flex;
                     flex-direction: column;
                     align-items: center;
+                    width: 100%;
                 }
                 
                 .pedigree-grid-compact {
@@ -618,49 +619,29 @@ class StamboomManager extends BaseModule {
                     margin: 0 auto;
                 }
                 
-                /* GENERATIE RIJS - ZELFDE OP ALLE SCHERMEN */
+                /* GENERATIE RIJS - NOOIT SCROLLEN, ALTIJD PASSEN */
                 .pedigree-generation-row {
                     display: flex;
-                    flex-wrap: nowrap; /* NOOIT wrap, altijd zelfde layout */
+                    flex-wrap: nowrap;
                     gap: 10px;
                     width: 100%;
                     justify-content: center;
-                    overflow-x: auto; /* Horizontale scroll op kleine schermen */
                     padding-bottom: 10px;
+                    overflow: visible !important; /* GEEN SCROLL */
                 }
                 
-                /* Zorg dat horizontale scroll werkt op mobiel */
-                .pedigree-generation-row::-webkit-scrollbar {
-                    height: 6px;
-                }
-                
-                .pedigree-generation-row::-webkit-scrollbar-track {
-                    background: #f1f1f1;
-                    border-radius: 3px;
-                }
-                
-                .pedigree-generation-row::-webkit-scrollbar-thumb {
-                    background: #888;
-                    border-radius: 3px;
-                }
-                
-                .pedigree-generation-row::-webkit-scrollbar-thumb:hover {
-                    background: #555;
-                }
-                
-                /* COMPACT CARDS - ALTIJD zelfde breedtes */
+                /* COMPACT CARDS - ALTIJD zelfde proporties */
                 .pedigree-card-compact {
                     background: white;
                     border-radius: 8px;
                     border: 1px solid #dee2e6;
                     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                    overflow: hidden;
                     cursor: pointer;
                     transition: all 0.2s;
                     min-height: 140px;
                     display: flex;
                     flex-direction: column;
-                    flex-shrink: 0; /* Voorkom dat cards krimpen */
+                    overflow: hidden;
                 }
                 
                 .pedigree-card-compact:hover {
@@ -736,14 +717,13 @@ class StamboomManager extends BaseModule {
                     flex-shrink: 0;
                 }
                 
-                /* Card body - ZORG DAT ALLE TEKST ZICHTBAAR IS */
+                /* Card body */
                 .pedigree-card-body-compact {
                     padding: 12px;
                     flex: 1;
                     display: flex;
                     flex-direction: column;
                     overflow: hidden;
-                    min-height: 100px;
                 }
                 
                 .dog-name-compact {
@@ -800,15 +780,15 @@ class StamboomManager extends BaseModule {
                     line-height: 1.2;
                 }
                 
-                /* PROPORTIONELE BREEDTES - EXACT ZOALS GEVRAAGD */
-                /* Generation 0: Main dog - 50% breedte, gecentreerd */
+                /* PROPORTIONELE BREEDTES - EXACT ZOALS GEVRAAGD - ALLE SCHERMEN */
+                /* Generation 0: Main dog - 50% breedte */
                 .pedigree-generation-row.gen0 {
                     justify-content: center;
                 }
                 
                 .pedigree-card-compact.gen0 {
+                    width: 50%;
                     flex: 0 0 50%;
-                    max-width: 600px;
                 }
                 
                 /* Generation 1: Parents - beide 50% breedte */
@@ -817,26 +797,30 @@ class StamboomManager extends BaseModule {
                 }
                 
                 .pedigree-card-compact.gen1 {
+                    width: 50%;
                     flex: 0 0 50%;
-                    max-width: 600px;
                 }
                 
                 /* Generation 2: Grandparents - allemaal 25% breedte */
                 .pedigree-card-compact.gen2 {
+                    width: 25%;
                     flex: 0 0 25%;
-                    min-width: 200px;
                 }
                 
                 /* Generation 3: Great-grandparents - allemaal 12.5% breedte */
                 .pedigree-card-compact.gen3 {
+                    width: 12.5%;
                     flex: 0 0 12.5%;
-                    min-width: 150px;
                 }
                 
-                /* Zorg voor goede hoogtes op alle schermen */
+                /* MOBIEL: ZELFDE PROPORTIES, TEXT KLEINER MAAR GEEN BREEDTE AANPASSING */
                 @media (max-width: 768px) {
                     .pedigree-container-compact {
                         padding: 15px;
+                    }
+                    
+                    .pedigree-generation-row {
+                        gap: 8px;
                     }
                     
                     .pedigree-card-compact {
@@ -856,24 +840,43 @@ class StamboomManager extends BaseModule {
                         font-size: 0.8rem;
                     }
                     
-                    /* Kleine aanpassingen voor mobiel */
-                    .pedigree-card-compact.gen0,
+                    .relation-compact {
+                        font-size: 0.75rem;
+                    }
+                    
+                    .click-hint-compact {
+                        font-size: 0.7rem;
+                    }
+                    
+                    /* ZELFDE BREEDTES - GEEN AANPASSING */
+                    .pedigree-card-compact.gen0 {
+                        width: 50%;
+                        flex: 0 0 50%;
+                    }
+                    
                     .pedigree-card-compact.gen1 {
-                        flex: 0 0 48%; /* Iets smaller voor betere padding */
+                        width: 50%;
+                        flex: 0 0 50%;
                     }
                     
                     .pedigree-card-compact.gen2 {
-                        flex: 0 0 24%; /* Iets smaller voor betere padding */
+                        width: 25%;
+                        flex: 0 0 25%;
                     }
                     
                     .pedigree-card-compact.gen3 {
-                        flex: 0 0 12%; /* Iets smaller voor betere padding */
+                        width: 12.5%;
+                        flex: 0 0 12.5%;
                     }
                 }
                 
                 @media (max-width: 480px) {
                     .pedigree-container-compact {
                         padding: 10px;
+                    }
+                    
+                    .pedigree-generation-row {
+                        gap: 6px;
                     }
                     
                     .pedigree-card-compact {
@@ -891,6 +894,101 @@ class StamboomManager extends BaseModule {
                     .dog-pedigree-compact,
                     .dog-breed-compact {
                         font-size: 0.75rem;
+                    }
+                    
+                    .relation-compact {
+                        font-size: 0.7rem;
+                    }
+                    
+                    .click-hint-compact {
+                        font-size: 0.65rem;
+                    }
+                    
+                    /* STILL ZELFDE BREEDTES */
+                    .pedigree-card-compact.gen0 {
+                        width: 50%;
+                        flex: 0 0 50%;
+                    }
+                    
+                    .pedigree-card-compact.gen1 {
+                        width: 50%;
+                        flex: 0 0 50%;
+                    }
+                    
+                    .pedigree-card-compact.gen2 {
+                        width: 25%;
+                        flex: 0 0 25%;
+                    }
+                    
+                    .pedigree-card-compact.gen3 {
+                        width: 12.5%;
+                        flex: 0 0 12.5%;
+                    }
+                }
+                
+                /* EXTRAME KLEINE SCHERMEN: FORCEREN DAT HET WERKT */
+                @media (max-width: 360px) {
+                    .pedigree-container-compact {
+                        padding: 8px;
+                    }
+                    
+                    .pedigree-generation-row {
+                        gap: 4px;
+                    }
+                    
+                    .pedigree-card-compact {
+                        min-height: 110px;
+                    }
+                    
+                    .dog-name-compact {
+                        font-size: 0.75rem;
+                    }
+                    
+                    .dog-kennel-compact {
+                        font-size: 0.7rem;
+                    }
+                    
+                    .dog-pedigree-compact,
+                    .dog-breed-compact {
+                        font-size: 0.7rem;
+                    }
+                    
+                    .relation-compact {
+                        font-size: 0.65rem;
+                    }
+                    
+                    .click-hint-compact {
+                        font-size: 0.6rem;
+                    }
+                    
+                    .pedigree-card-header-compact {
+                        padding: 6px 8px;
+                        font-size: 0.65rem;
+                    }
+                    
+                    .pedigree-card-body-compact {
+                        padding: 8px;
+                    }
+                    
+                    /* NOG STEEDS ZELFDE BREEDTES */
+                    .pedigree-card-compact.gen0 {
+                        width: 50%;
+                        flex: 0 0 50%;
+                    }
+                    
+                    .pedigree-card-compact.gen1 {
+                        width: 50%;
+                        flex: 0 0 50%;
+                    }
+                    
+                    .pedigree-card-compact.gen2 {
+                        width: 25%;
+                        flex: 0 0 25%;
+                    }
+                    
+                    .pedigree-card-compact.gen3 {
+                        width: 12.5%;
+                        flex: 0 0 12.5%;
                     }
                 }
                 
