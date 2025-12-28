@@ -1,1379 +1,1622 @@
 /**
- * Search Manager Module
- * Beheert het zoeken naar honden met real-time filtering op naam en kennelnaam
+ * Stamboom Manager Module
+ * Beheert 4-generatie stambomen voor honden - Zelfde layout op alle schermen
  */
 
-class SearchManager extends BaseModule {
-    constructor() {
+class StamboomManager extends BaseModule {
+    constructor(db, currentLang = 'nl') {
         super();
-        this.currentLang = localStorage.getItem('appLanguage') || 'nl';
+        this.db = db;
+        this.currentLang = currentLang;
         this.allDogs = [];
-        this.filteredDogs = [];
-        this.searchType = 'name'; // 'name' of 'kennel'
-        this.stamboomManager = null; // Wordt later geïnitialiseerd
-        
-        // Vertalingen uitgebreid met pedigree knop
         this.translations = {
             nl: {
-                searchDog: "Hond Zoeken",
-                searchName: "Zoek hond op naam",
-                searchKennel: "Zoek hond op kennelnaam",
-                searchPlaceholder: "Typ hondennaam...",
-                kennelPlaceholder: "Typ kennelnaam...",
-                noDogsFound: "Geen honden gevonden",
-                typeToSearch: "Begin met typen om te zoeken",
-                typeToSearchKennel: "Typ een kennelnaam om te zoeken",
-                searchResults: "Zoekresultaten",
-                found: "gevonden",
+                pedigreeTitle: "Stamboom van {name}",
+                pedigree4Gen: "4-generatie stamboom",
+                generatingPedigree: "Stamboom genereren...",
+                close: "Sluiten",
+                print: "Afdrukken",
+                noData: "Geen gegevens",
+                unknown: "Onbekend",
+                
+                // Familierelaties
+                currentDog: "Huidige hond",
+                mainDog: "Hoofdhond",
+                father: "Vader",
+                mother: "Moeder",
+                grandfather: "Grootvader",
+                grandmother: "Grootmoeder",
+                greatGrandfather: "Overgrootvader",
+                greatGrandmother: "Overgrootmoeder",
+                
+                // Hond gegevens
                 name: "Naam",
+                kennel: "Kennel",
                 pedigreeNumber: "Stamboomnummer",
                 breed: "Ras",
                 gender: "Geslacht",
-                close: "Sluiten",
-                dogDetails: "Hond Details",
-                father: "Vader",
-                mother: "Moeder",
-                parentsUnknown: "Onbekend",
-                male: "Reu",
-                female: "Teef",
-                unknown: "Onbekend",
-                loading: "Honden laden...",
-                backToSearch: "Terug naar zoeken",
-                viewingParent: "Bekijkt ouder",
-                clickToView: "Klik om details te bekijken",
-                parents: "Ouders",
-                noHealthInfo: "Geen gezondheidsinformatie beschikbaar",
-                noAdditionalInfo: "Geen extra informatie beschikbaar",
-                selectDogToView: "Selecteer een hond om details te zien",
-                
-                // Hond gegevens
                 birthDate: "Geboortedatum",
                 deathDate: "Overlijdensdatum",
+                coatColor: "Vachtkleur",
+                country: "Land",
+                zipCode: "Postcode",
+                
+                // Gezondheid
+                healthInfo: "Gezondheidsinformatie",
                 hipDysplasia: "Heupdysplasie",
                 elbowDysplasia: "Elleboogdysplasie",
                 patellaLuxation: "Patella Luxatie",
                 eyes: "Ogen",
-                eyesExplanation: "Verklaring ogen",
                 dandyWalker: "Dandy Walker Malformation",
                 thyroid: "Schildklier",
+                eyesExplanation: "Verklaring ogen",
                 thyroidExplanation: "Toelichting schildklier",
-                country: "Land",
-                zipCode: "Postcode",
-                remarks: "Opmerkingen",
-                healthInfo: "Gezondheidsinformatie",
-                additionalInfo: "Extra informatie",
                 
-                // Gezondheidsstatussen
-                hipGrades: {
-                    A: "A - Geen tekenen van HD",
-                    B: "B - Overgangsvorm",
-                    C: "C - Lichte HD",
-                    D: "D - Matige HD", 
-                    E: "E - Ernstige HD"
-                },
-                elbowGrades: {
-                    "0": "0 - Geen ED",
-                    "1": "1 - Milde ED",
-                    "2": "2 - Matige ED",
-                    "3": "3 - Ernstige ED",
-                    "NB": "NB - Niet bekend"
-                },
-                patellaGrades: {
-                    "0": "0 - Geen PL",
-                    "1": "1 - Af en toe luxatie",
-                    "2": "2 - Regelmatig luxatie",
-                    "3": "3 - Constante luxation"
-                },
-                eyeStatus: {
-                    "Vrij": "Vrij",
-                    "Distichiasis": "Distichiasis",
-                    "Overig": "Overig"
-                },
-                dandyStatus: {
-                    "Vrij op DNA": "Vrij op DNA",
-                    "Vrij op ouders": "Vrij op ouders", 
-                    "Drager": "Drager",
-                    "Lijder": "Lijder"
-                },
-                thyroidStatus: {
-                    "Negatief": "Tgaa Negatief",
-                    "Positief": "Tgaa Positief"
-                },
+                // Geslacht
+                male: "Reu",
+                female: "Teef",
                 
                 // Labels
-                grade: "Graad",
-                status: "Status",
-                notApplicable: "Niet van toepassing",
-                viewMore: "Meer details",
-                
-                // Stamboom knoppen
-                pedigreeButton: "Stamboom",
-                pedigreeTitle: "Stamboom van {name}",
-                generatingPedigree: "Stamboom genereren...",
-                openPedigree: "Stamboom openen",
-                pedigree4Gen: "4-generatie stamboom",
-                
-                // Familierelaties voor stamboom
-                greatGrandfather: "Overgrootvader",
-                greatGrandmother: "Overgrootmoeder",
-                grandfather: "Grootvader",
-                grandmother: "Grootmoeder"
+                paternal: "Paternaal",
+                maternal: "Maternaal",
+                clickForDetails: "Klik voor details",
+                closePopup: "Sluiten",
+                remarks: "Opmerkingen",
+                noRemarks: "Geen opmerkingen"
             },
             en: {
-                searchDog: "Search Dog",
-                searchName: "Search dog by name",
-                searchKennel: "Search dog by kennel name",
-                searchPlaceholder: "Type dog name...",
-                kennelPlaceholder: "Type kennel name...",
-                noDogsFound: "No dogs found",
-                typeToSearch: "Start typing to search",
-                typeToSearchKennel: "Type a kennel name to search",
-                searchResults: "Search Results",
-                found: "found",
+                pedigreeTitle: "Pedigree of {name}",
+                pedigree4Gen: "4-generation pedigree",
+                generatingPedigree: "Generating pedigree...",
+                close: "Close",
+                print: "Print",
+                noData: "No data",
+                unknown: "Unknown",
+                
+                // Family relations
+                currentDog: "Current Dog",
+                mainDog: "Main Dog",
+                father: "Father",
+                mother: "Mother",
+                grandfather: "Grandfather",
+                grandmother: "Grandmother",
+                greatGrandfather: "Great Grandfather",
+                greatGrandmother: "Great Grandmother",
+                
+                // Dog details
                 name: "Name",
+                kennel: "Kennel",
                 pedigreeNumber: "Pedigree number",
                 breed: "Breed",
                 gender: "Gender",
-                close: "Close",
-                dogDetails: "Dog Details",
-                father: "Father",
-                mother: "Mother",
-                parentsUnknown: "Unknown",
-                male: "Male",
-                female: "Female",
-                unknown: "Unknown",
-                loading: "Loading dogs...",
-                backToSearch: "Back to search",
-                viewingParent: "Viewing parent",
-                clickToView: "Click to view details",
-                parents: "Parents",
-                noHealthInfo: "No health information available",
-                noAdditionalInfo: "No additional information available",
-                selectDogToView: "Select a dog to view details",
-                
-                // Dog details
                 birthDate: "Birth date",
                 deathDate: "Death date",
+                coatColor: "Coat color",
+                country: "Country",
+                zipCode: "Zip code",
+                
+                // Health
+                healthInfo: "Health Information",
                 hipDysplasia: "Hip Dysplasia",
                 elbowDysplasia: "Elbow Dysplasia",
                 patellaLuxation: "Patella Luxation",
                 eyes: "Eyes",
-                eyesExplanation: "Eye explanation",
                 dandyWalker: "Dandy Walker Malformation",
                 thyroid: "Thyroid",
+                eyesExplanation: "Eye explanation",
                 thyroidExplanation: "Thyroid explanation",
-                country: "Country",
-                zipCode: "Zip code",
-                remarks: "Remarks",
-                healthInfo: "Health Information",
-                additionalInfo: "Additional Information",
                 
-                // Health statuses
-                hipGrades: {
-                    A: "A - No signs of HD",
-                    B: "B - Borderline",
-                    C: "C - Mild HD",
-                    D: "D - Moderate HD",
-                    E: "E - Severe HD"
-                },
-                elbowGrades: {
-                    "0": "0 - No ED",
-                    "1": "1 - Mild ED",
-                    "2": "2 - Moderate ED",
-                    "3": "3 - Severe ED",
-                    "NB": "NB - Not known"
-                },
-                patellaGrades: {
-                    "0": "0 - No PL",
-                    "1": "1 - Occasional luxation",
-                    "2": "2 - Frequent luxation",
-                    "3": "3 - Constant luxation"
-                },
-                eyeStatus: {
-                    "Vrij": "Free",
-                    "Distichiasis": "Distichiasis",
-                    "Overig": "Other"
-                },
-                dandyStatus: {
-                    "Vrij op DNA": "Free on DNA",
-                    "Vrij op ouders": "Free on parents",
-                    "Drager": "Carrier",
-                    "Lijder": "Affected"
-                },
-                thyroidStatus: {
-                    "Negatief": "Tgaa Negative",
-                    "Positief": "Tgaa Positive"
-                },
+                // Gender
+                male: "Male",
+                female: "Female",
                 
                 // Labels
-                grade: "Grade",
-                status: "Status",
-                notApplicable: "Not applicable",
-                viewMore: "View details",
-                
-                // Stamboom buttons
-                pedigreeButton: "Pedigree",
-                pedigreeTitle: "Pedigree of {name}",
-                generatingPedigree: "Generating pedigree...",
-                openPedigree: "Open pedigree",
-                pedigree4Gen: "4-generation pedigree",
-                
-                // Family relations for pedigree
-                greatGrandfather: "Great Grandfather",
-                greatGrandmother: "Great Grandmother",
-                grandfather: "Grandfather",
-                grandmother: "Grandmother"
+                paternal: "Paternal",
+                maternal: "Maternaal",
+                clickForDetails: "Click for details",
+                closePopup: "Close",
+                remarks: "Remarks",
+                noRemarks: "No remarks"
             },
             de: {
-                searchDog: "Hund suchen",
-                searchName: "Hund nach Namen suchen",
-                searchKennel: "Hund nach Kennelname suchen",
-                searchPlaceholder: "Hundenamen eingeben...",
-                kennelPlaceholder: "Kennelnamen eingeben...",
-                noDogsFound: "Keine Hunde gefunden",
-                typeToSearch: "Beginnen Sie mit der Eingabe, um zu suchen",
-                typeToSearchKennel: "Kennelnamen eingeben um zu suchen",
-                searchResults: "Suchergebnisse",
-                found: "gefunden",
+                pedigreeTitle: "Ahnentafel von {name}",
+                pedigree4Gen: "4-Generationen Ahnentafel",
+                generatingPedigree: "Ahnentafel wird generiert...",
+                close: "Schließen",
+                print: "Drucken",
+                noData: "Keine Daten",
+                unknown: "Unbekannt",
+                
+                // Familienbeziehungen
+                currentDog: "Aktueller Hund",
+                mainDog: "Haupt-Hund",
+                father: "Vater",
+                mother: "Mutter",
+                grandfather: "Großvater",
+                grandmother: "Großmutter",
+                greatGrandfather: "Urgroßvater",
+                greatGrandmother: "Urgroßmutter",
+                
+                // Hund Details
                 name: "Name",
+                kennel: "Kennel",
                 pedigreeNumber: "Stammbaum-Nummer",
                 breed: "Rasse",
                 gender: "Geschlecht",
-                close: "Schließen",
-                dogDetails: "Hund Details",
-                father: "Vater",
-                mother: "Mutter",
-                parentsUnknown: "Unbekannt",
-                male: "Rüde",
-                female: "Hündin",
-                unknown: "Unbekannt",
-                loading: "Hunde laden...",
-                backToSearch: "Zurück zur Suche",
-                viewingParent: "Elternteil ansehen",
-                clickToView: "Klicken für Details",
-                parents: "Eltern",
-                noHealthInfo: "Keine Gesundheitsinformationen verfügbar",
-                noAdditionalInfo: "Keine zusätzlichen Informationen verfügbar",
-                selectDogToView: "Wählen Sie einen Hund, um Details zu sehen",
-                
-                // Hund Details
                 birthDate: "Geburtsdatum",
                 deathDate: "Sterbedatum",
+                coatColor: "Fellfarbe",
+                country: "Land",
+                zipCode: "Postleitzahl",
+                
+                // Gesundheit
+                healthInfo: "Gesundheitsinformationen",
                 hipDysplasia: "Hüftdysplasie",
                 elbowDysplasia: "Ellbogendysplasie",
                 patellaLuxation: "Patella Luxation",
                 eyes: "Augen",
-                eyesExplanation: "Augenerklärung",
                 dandyWalker: "Dandy Walker Malformation",
                 thyroid: "Schilddrüse",
+                eyesExplanation: "Augenerklärung",
                 thyroidExplanation: "Schilddrüse Erklärung",
-                country: "Land",
-                zipCode: "Postleitzahl",
+                
+                // Geschlecht
+                male: "Rüde",
+                female: "Hündin",
+                
+                // Labels
+                paternal: "Väterlich",
+                maternal: "Mütterlich",
+                clickForDetails: "Klicken für Details",
+                closePopup: "Schließen",
                 remarks: "Bemerkungen",
-                healthInfo: "Gesundheitsinformationen",
-                additionalInfo: "Zusätzliche informatie",
-                
-                // Stamboom buttons
-                pedigreeButton: "Ahnentafel",
-                pedigreeTitle: "Ahnentafel von {name}",
-                generatingPedigree: "Ahnentafel wird generiert...",
-                openPedigree: "Ahnentafel öffnen",
-                pedigree4Gen: "4-Generationen Ahnentafel",
-                
-                // Familienbeziehungen voor Ahnentafel
-                greatGrandfather: "Urgroßvater",
-                greatGrandmother: "Urgroßmutter",
-                grandfather: "Großvater",
-                grandmother: "Großmutter"
+                noRemarks: "Keine Bemerkungen"
             }
         };
     }
     
-    // NIEUW: Inject dependencies method voor UIHandler compatibiliteit
-    injectDependencies(db, auth) {
-        this.db = db;
-        this.auth = auth;
-        console.log('SearchManager: dependencies geïnjecteerd');
-    }
-    
-    // NIEUW: Initialize method voor UIHandler compatibiliteit
-    initialize() {
-        console.log('SearchManager: initializing...');
-        // Laad honden niet vooraf om performance te verbeteren
-        // Ze worden geladen wanneer de gebruiker voor het eerst zoekt
-        return Promise.resolve();
-    }
-    
-    t(key, subKey = null) {
-        if (subKey && this.translations[this.currentLang][key] && typeof this.translations[this.currentLang][key] === 'object') {
-            return this.translations[this.currentLang][key][subKey] || subKey;
-        }
+    t(key) {
         return this.translations[this.currentLang][key] || key;
     }
     
-    getModalHTML() {
-        const t = this.t.bind(this);
+    async initialize() {
+        this.allDogs = await this.db.getHonden();
+        console.log(`${this.allDogs.length} honden geladen voor stambomen`);
+    }
+    
+    getDogById(id) {
+        return this.allDogs.find(dog => dog.id === id);
+    }
+    
+    buildPedigreeTree(dogId) {
+        const pedigreeTree = {
+            mainDog: null,
+            father: null,
+            mother: null,
+            paternalGrandfather: null,
+            paternalGrandmother: null,
+            maternalGrandfather: null,
+            maternalGrandmother: null,
+            paternalGreatGrandfather1: null,
+            paternalGreatGrandmother1: null,
+            paternalGreatGrandfather2: null,
+            paternalGreatGrandmother2: null,
+            maternalGreatGrandfather1: null,
+            maternalGreatGrandmother1: null,
+            maternalGreatGrandfather2: null,
+            maternalGreatGrandmother2: null
+        };
+        
+        const mainDog = this.getDogById(dogId);
+        if (!mainDog) return null;
+        
+        pedigreeTree.mainDog = mainDog;
+        
+        // Ouders
+        if (mainDog.vaderId) {
+            pedigreeTree.father = this.getDogById(mainDog.vaderId);
+        }
+        
+        if (mainDog.moederId) {
+            pedigreeTree.mother = this.getDogById(mainDog.moederId);
+        }
+        
+        // Grootouders
+        if (pedigreeTree.father && pedigreeTree.father.vaderId) {
+            pedigreeTree.paternalGrandfather = this.getDogById(pedigreeTree.father.vaderId);
+        }
+        
+        if (pedigreeTree.father && pedigreeTree.father.moederId) {
+            pedigreeTree.paternalGrandmother = this.getDogById(pedigreeTree.father.moederId);
+        }
+        
+        if (pedigreeTree.mother && pedigreeTree.mother.vaderId) {
+            pedigreeTree.maternalGrandfather = this.getDogById(pedigreeTree.mother.vaderId);
+        }
+        
+        if (pedigreeTree.mother && pedigreeTree.mother.moederId) {
+            pedigreeTree.maternalGrandmother = this.getDogById(pedigreeTree.mother.moederId);
+        }
+        
+        // Overgrootouders
+        if (pedigreeTree.paternalGrandfather && pedigreeTree.paternalGrandfather.vaderId) {
+            pedigreeTree.paternalGreatGrandfather1 = this.getDogById(pedigreeTree.paternalGrandfather.vaderId);
+        }
+        
+        if (pedigreeTree.paternalGrandfather && pedigreeTree.paternalGrandfather.moederId) {
+            pedigreeTree.paternalGreatGrandmother1 = this.getDogById(pedigreeTree.paternalGrandfather.moederId);
+        }
+        
+        if (pedigreeTree.paternalGrandmother && pedigreeTree.paternalGrandmother.vaderId) {
+            pedigreeTree.paternalGreatGrandfather2 = this.getDogById(pedigreeTree.paternalGrandmother.vaderId);
+        }
+        
+        if (pedigreeTree.paternalGrandmother && pedigreeTree.paternalGrandmother.moederId) {
+            pedigreeTree.paternalGreatGrandmother2 = this.getDogById(pedigreeTree.paternalGrandmother.moederId);
+        }
+        
+        if (pedigreeTree.maternalGrandfather && pedigreeTree.maternalGrandfather.vaderId) {
+            pedigreeTree.maternalGreatGrandfather1 = this.getDogById(pedigreeTree.maternalGrandfather.vaderId);
+        }
+        
+        if (pedigreeTree.maternalGrandfather && pedigreeTree.maternalGrandfather.moederId) {
+            pedigreeTree.maternalGreatGrandmother1 = this.getDogById(pedigreeTree.maternalGrandfather.moederId);
+        }
+        
+        if (pedigreeTree.maternalGrandmother && pedigreeTree.maternalGrandmother.vaderId) {
+            pedigreeTree.maternalGreatGrandfather2 = this.getDogById(pedigreeTree.maternalGrandmother.vaderId);
+        }
+        
+        if (pedigreeTree.maternalGrandmother && pedigreeTree.maternalGrandmother.moederId) {
+            pedigreeTree.maternalGreatGrandmother2 = this.getDogById(pedigreeTree.maternalGrandmother.moederId);
+        }
+        
+        return pedigreeTree;
+    }
+    
+    formatDate(dateString) {
+        if (!dateString) return '';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString(this.currentLang === 'nl' ? 'nl-NL' : 
+                                          this.currentLang === 'de' ? 'de-DE' : 'en-US');
+        } catch {
+            return dateString;
+        }
+    }
+    
+    getHealthBadge(value, type) {
+        if (!value || value === '') {
+            return `<span class="badge bg-secondary">${this.t('unknown')}</span>`;
+        }
+        
+        let badgeClass = 'badge ';
+        switch(type) {
+            case 'hip': badgeClass += 'badge-hd'; break;
+            case 'elbow': badgeClass += 'badge-ed'; break;
+            case 'patella': badgeClass += 'badge-pl'; break;
+            case 'eyes': badgeClass += 'badge-eyes'; break;
+            case 'dandy': badgeClass += 'badge-dandy'; break;
+            case 'thyroid': badgeClass += 'badge-thyroid'; break;
+            default: badgeClass += 'bg-secondary';
+        }
+        
+        return `<span class="${badgeClass}">${value}</span>`;
+    }
+    
+    // COMPACTE CARD VOOR STAMBOOM
+    getDogCompactCardHTML(dog, relation = '', isMainDog = false) {
+        if (!dog) {
+            return `
+                <div class="pedigree-card-compact empty" data-dog-id="0">
+                    <div class="pedigree-card-header-compact">
+                        <div class="relation-compact">${relation}</div>
+                    </div>
+                    <div class="pedigree-card-body-compact text-center py-3">
+                        <div class="no-data-text">${this.t('noData')}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        const genderIcon = dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 
+                          dog.geslacht === 'teven' ? 'bi-gender-female text-danger' : 'bi-question-circle text-secondary';
+        
+        const mainDogClass = isMainDog ? 'main-dog-compact' : '';
+        const headerColor = isMainDog ? 'bg-primary' : 'bg-secondary';
         
         return `
-            <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-xl">
+            <div class="pedigree-card-compact ${dog.geslacht === 'reuen' ? 'male' : 'female'} ${mainDogClass}" 
+                 data-dog-id="${dog.id}" 
+                 data-dog-name="${dog.naam || ''}"
+                 data-relation="${relation}">
+                <div class="pedigree-card-header-compact ${headerColor}">
+                    <div class="relation-compact">
+                        <span class="relation-text">${relation}</span>
+                        ${isMainDog ? '<span class="main-dot">★</span>' : ''}
+                    </div>
+                    <div class="gender-icon-compact">
+                        <i class="bi ${genderIcon}"></i>
+                    </div>
+                </div>
+                <div class="pedigree-card-body-compact">
+                    <!-- ALTIJD naam en kennelnaam tonen -->
+                    <div class="dog-name-compact" title="${dog.naam || this.t('unknown')}">
+                        ${dog.naam || this.t('unknown')}
+                    </div>
+                    
+                    <div class="dog-kennel-compact" title="${dog.kennelnaam || ''}">
+                        ${dog.kennelnaam || ''}
+                    </div>
+                    
+                    ${dog.stamboomnr ? `
+                    <div class="dog-pedigree-compact">
+                        ${dog.stamboomnr}
+                    </div>
+                    ` : ''}
+                    
+                    ${dog.ras ? `
+                    <div class="dog-breed-compact">
+                        ${dog.ras}
+                    </div>
+                    ` : ''}
+                    
+                    <!-- Klik hint -->
+                    <div class="click-hint-compact">
+                        <i class="bi bi-info-circle"></i> ${this.t('clickForDetails')}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // DETAIL POPUP voor wanneer op card geklikt wordt
+    getDogDetailPopupHTML(dog, relation = '') {
+        if (!dog) return '';
+        
+        const genderText = dog.geslacht === 'reuen' ? this.t('male') : 
+                          dog.geslacht === 'teven' ? this.t('female') : this.t('unknown');
+        
+        return `
+            <div class="dog-detail-popup">
+                <div class="popup-header">
+                    <h5 class="popup-title">
+                        <i class="bi ${dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 'bi-gender-female text-danger'} me-2"></i>
+                        ${relation}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white popup-close"></button>
+                </div>
+                <div class="popup-body">
+                    <div class="dog-popup-name mb-2">
+                        <h4>${dog.naam || this.t('unknown')}</h4>
+                        ${dog.kennelnaam ? `<div class="text-muted">${dog.kennelnaam}</div>` : ''}
+                    </div>
+                    
+                    <div class="info-section mb-3">
+                        <h6><i class="bi bi-card-text me-1"></i> Basisgegevens</h6>
+                        <div class="info-grid">
+                            ${dog.stamboomnr ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('pedigreeNumber')}:</span>
+                                <span class="info-value">${dog.stamboomnr}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.ras ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('breed')}:</span>
+                                <span class="info-value">${dog.ras}</span>
+                            </div>
+                            ` : ''}
+                            
+                            <div class="info-item">
+                                <span class="info-label">${this.t('gender')}:</span>
+                                <span class="info-value">${genderText}</span>
+                            </div>
+                            
+                            ${dog.vachtkleur ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('coatColor')}:</span>
+                                <span class="info-value">${dog.vachtkleur}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.geboortedatum ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('birthDate')}:</span>
+                                <span class="info-value">${this.formatDate(dog.geboortedatum)}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.overlijdensdatum ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('deathDate')}:</span>
+                                <span class="info-value">${this.formatDate(dog.overlijdensdatum)}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.land ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('country')}:</span>
+                                <span class="info-value">${dog.land}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.postcode ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('zipCode')}:</span>
+                                <span class="info-value">${dog.postcode}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="info-section mb-3">
+                        <h6><i class="bi bi-heart-pulse me-1"></i> ${this.t('healthInfo')}</h6>
+                        <div class="info-grid">
+                            ${dog.heupdysplasie ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('hipDysplasia')}:</span>
+                                <span class="info-value">${this.getHealthBadge(dog.heupdysplasie, 'hip')}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.elleboogdysplasie ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('elbowDysplasia')}:</span>
+                                <span class="info-value">${this.getHealthBadge(dog.elleboogdysplasie, 'elbow')}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.patella ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('patellaLuxation')}:</span>
+                                <span class="info-value">${this.getHealthBadge(dog.patella, 'patella')}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.ogen ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('eyes')}:</span>
+                                <span class="info-value">${this.getHealthBadge(dog.ogen, 'eyes')}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.ogenVerklaring ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('eyesExplanation')}:</span>
+                                <span class="info-value">${dog.ogenVerklaring}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.dandyWalker ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('dandyWalker')}:</span>
+                                <span class="info-value">${this.getHealthBadge(dog.dandyWalker, 'dandy')}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.schildklier ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('thyroid')}:</span>
+                                <span class="info-value">${this.getHealthBadge(dog.schildklier, 'thyroid')}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.schildklierVerklaring ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('thyroidExplanation')}:</span>
+                                <span class="info-value">${dog.schildklierVerklaring}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    ${dog.opmerkingen ? `
+                    <div class="info-section mb-3">
+                        <h6><i class="bi bi-chat-text me-1"></i> ${this.t('remarks')}</h6>
+                        <div class="remarks-box">
+                            ${dog.opmerkingen}
+                        </div>
+                    </div>
+                    ` : `
+                    <div class="info-section mb-3">
+                        <h6><i class="bi bi-chat-text me-1"></i> ${this.t('remarks')}</h6>
+                        <div class="text-muted">${this.t('noRemarks')}</div>
+                    </div>
+                    `}
+                </div>
+                <div class="popup-footer">
+                    <button type="button" class="btn btn-secondary popup-close-btn">
+                        <i class="bi bi-x-circle me-1"></i> ${this.t('closePopup')}
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+    
+    showPedigree(dog) {
+        if (!document.getElementById('pedigreeModal')) {
+            this.createPedigreeModal();
+        }
+        
+        const pedigreeTree = this.buildPedigreeTree(dog.id);
+        if (!pedigreeTree) {
+            this.showError("Kon stamboom niet genereren");
+            return;
+        }
+        
+        const title = this.t('pedigreeTitle').replace('{name}', dog.naam || this.t('unknown'));
+        document.getElementById('pedigreeModalLabel').textContent = title;
+        
+        this.renderCompactPedigree(pedigreeTree);
+        
+        const modal = new bootstrap.Modal(document.getElementById('pedigreeModal'));
+        modal.show();
+    }
+    
+    createPedigreeModal() {
+        const modalHTML = `
+            <div class="modal fade" id="pedigreeModal" tabindex="-1" aria-labelledby="pedigreeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-fullscreen">
                     <div class="modal-content">
-                        <div class="modal-header bg-info text-white">
-                            <h5 class="modal-title" id="searchModalLabel">
-                                <i class="bi bi-search me-2"></i> ${t('searchDog')}
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title" id="pedigreeModalLabel">
+                                <i class="bi bi-diagram-3 me-2"></i> ${this.t('pedigree4Gen')}
                             </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${t('close')}"></button>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-light btn-print">
+                                    <i class="bi bi-printer me-1"></i> ${this.t('print')}
+                                </button>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${this.t('close')}"></button>
+                            </div>
                         </div>
                         <div class="modal-body p-0">
-                            <div class="container-fluid">
-                                <div class="row">
-                                    <!-- Zoekkolom -->
-                                    <div class="col-md-5 border-end p-3" id="searchColumn">
-                                        <div class="sticky-top" style="top: 15px;">
-                                            <!-- Tab knoppen voor zoektype -->
-                                            <div class="d-flex mb-3 border-bottom">
-                                                <button type="button" class="btn btn-search-type btn-outline-info active me-2" data-search-type="name">
-                                                    ${t('searchName')}
-                                                </button>
-                                                <button type="button" class="btn btn-search-type btn-outline-info" data-search-type="kennel">
-                                                    ${t('searchKennel')}
-                                                </button>
-                                            </div>
-                                            
-                                            <!-- Zoekveld voor naam -->
-                                            <div class="mb-4" id="nameSearchField">
-                                                <label for="searchNameInput" class="form-label fw-bold">${t('searchName')}</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text bg-white border-end-0">
-                                                        <i class="bi bi-person text-muted"></i>
-                                                    </span>
-                                                    <input type="text" class="form-control search-input border-start-0 ps-0" 
-                                                           id="searchNameInput" 
-                                                           placeholder="${t('searchPlaceholder')}" 
-                                                           autocomplete="off">
-                                                </div>
-                                                <div class="form-text mt-1">${t('typeToSearch')}</div>
-                                            </div>
-                                            
-                                            <!-- Zoekveld voor kennelnaam -->
-                                            <div class="mb-4 d-none" id="kennelSearchField">
-                                                <label for="searchKennelInput" class="form-label fw-bold">${t('searchKennel')}</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text bg-white border-end-0">
-                                                        <i class="bi bi-house text-muted"></i>
-                                                    </span>
-                                                    <input type="text" class="form-control search-input border-start-0 ps-0" 
-                                                           id="searchKennelInput" 
-                                                           placeholder="${t('kennelPlaceholder')}" 
-                                                           autocomplete="off">
-                                                </div>
-                                                <div class="form-text mt-1">${t('typeToSearchKennel')}</div>
-                                            </div>
-                                            
-                                            <div id="searchResultsContainer">
-                                                <div class="text-center py-5">
-                                                    <i class="bi bi-search display-1 text-muted opacity-50"></i>
-                                                    <p class="mt-3 text-muted">${t('typeToSearch')}</p>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <div class="pedigree-container-compact" id="pedigreeContainer">
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">${this.t('generatingPedigree')}</span>
                                     </div>
-                                    
-                                    <!-- Details kolom -->
-                                    <div class="col-md-7 p-3" id="detailsColumn">
-                                        <div id="detailsContainer">
-                                            <div class="text-center py-5">
-                                                <i class="bi bi-eye display-1 text-muted opacity-50"></i>
-                                                <p class="mt-3 text-muted">${t('selectDogToView')}</p>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <p class="mt-3">${this.t('generatingPedigree')}</p>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                <i class="bi bi-x-circle me-1"></i> ${t('close')}
+                                <i class="bi bi-x-circle me-1"></i> ${this.t('close')}
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- RESET CSS VOOR STAMBOOMMODAL DIE VANUIT DEZE MODAL WORDT GESTART -->
+            <!-- Popup overlay voor hond details -->
+            <div class="pedigree-popup-overlay" id="pedigreePopupOverlay" style="display: none;">
+                <div class="pedigree-popup-container" id="pedigreePopupContainer">
+                    <!-- Hier komt de popup content -->
+                </div>
+            </div>
+            
             <style>
-                /* RESET VOOR STAMBOOM MODAL */
-                .modal-dialog.modal-fullscreen .modal-content {
-                    padding: 0 !important;
+                /* AGRESSIEVE RESET - OVERSCHRIJF ALLE BOOTSTRAP STYLES */
+                #pedigreeModal.modal.fade .modal-dialog.modal-fullscreen {
+                    width: 100vw !important;
+                    height: 100vh !important;
                     margin: 0 !important;
+                    max-width: none !important;
+                    padding: 0 !important;
+                }
+                
+                #pedigreeModal.modal.fade .modal-content {
+                    width: 100vw !important;
+                    height: 100vh !important;
+                    margin: 0 !important;
+                    padding: 0 !important;
                     border: none !important;
+                    border-radius: 0 !important;
                 }
                 
-                .modal-dialog.modal-fullscreen .modal-body {
+                #pedigreeModal.modal.fade .modal-header {
+                    margin: 0 !important;
+                    padding: 1rem !important;
+                    border: none !important;
+                    width: 100vw !important;
+                }
+                
+                #pedigreeModal.modal.fade .modal-body {
+                    width: 100vw !important;
                     padding: 0 !important;
                     margin: 0 !important;
+                    flex: 1 1 auto !important;
                 }
                 
+                #pedigreeModal.modal.fade .modal-footer {
+                    margin: 0 !important;
+                    padding: 1rem !important;
+                    border: none !important;
+                    width: 100vw !important;
+                }
+                
+                /* PEDIGREE CONTAINER - ABSOLUUT GEEN PADDING */
                 .pedigree-container-compact {
                     padding: 0 !important;
                     margin: 0 !important;
                     width: 100vw !important;
-                    max-width: 100vw !important;
+                    height: calc(100vh - 120px) !important;
+                    background: #f8f9fa;
+                    overflow: auto;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    position: relative;
+                    left: 0;
+                    top: 0;
                 }
                 
                 .pedigree-grid-compact {
-                    padding: 0 !important;
-                    margin: 0 !important;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 15px;
                     width: 100vw !important;
+                    margin: 0 !important;
+                    padding: 10px !important;
+                    max-width: 100vw !important;
+                    box-sizing: border-box !important;
                 }
                 
+                /* GENERATIE RIJS - ABSOLUUT TEGEN LINKERKANT */
                 .pedigree-generation-row {
+                    display: flex;
+                    flex-wrap: nowrap;
+                    width: 100vw !important;
+                    justify-content: flex-start;
                     padding: 0 !important;
                     margin: 0 !important;
+                    overflow: visible !important;
+                    border: none !important;
+                    position: relative;
+                    left: 0;
                 }
                 
-                /* SEARCH MANAGER STYLES */
-                .search-input {
-                    font-size: 1.1rem;
-                    padding: 10px 15px;
-                    border: 2px solid #dee2e6;
-                    border-radius: 8px;
-                    transition: all 0.3s;
-                }
-                
-                .search-input:focus {
-                    border-color: #0d6efd;
-                    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-                }
-                
-                .btn-search-type {
-                    flex: 1;
-                    border-radius: 8px;
-                    padding: 8px 12px;
-                    transition: all 0.3s;
-                }
-                
-                .btn-search-type.active {
-                    background-color: #0d6efd;
-                    color: white;
-                    border-color: #0d6efd;
-                }
-                
-                .dog-result-item {
+                /* COMPACT CARDS - TEGEN ELKAAR AAN, GEEN RUIMTE */
+                .pedigree-card-compact {
+                    background: white;
+                    border-radius: 0;
+                    border: 1px solid #dee2e6;
+                    border-left: none;
+                    border-right: 1px solid #dee2e6;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
                     cursor: pointer;
                     transition: all 0.2s;
-                    border: 1px solid #dee2e6;
-                    border-radius: 8px;
-                    margin-bottom: 8px;
-                    padding: 12px 15px;
-                    background: white;
+                    min-height: 140px;
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    flex-shrink: 0;
                 }
                 
-                .dog-result-item:hover {
-                    background-color: #f8f9fa;
-                    border-color: #0d6efd;
-                    transform: translateX(3px);
+                /* Eerste card - border links */
+                .pedigree-card-compact:first-child {
+                    border-left: 1px solid #dee2e6 !important;
                 }
                 
-                .dog-result-item.selected {
-                    background-color: #e8f4fd;
-                    border-color: #0d6efd;
-                    border-left: 4px solid #0d6efd;
+                /* Laatste card - border rechts */
+                .pedigree-card-compact:last-child {
+                    border-right: 1px solid #dee2e6 !important;
                 }
                 
-                .dog-name-line {
-                    font-size: 1.1rem;
-                    font-weight: 700;
+                /* Gender borders */
+                .pedigree-card-compact.male:first-child {
+                    border-left: 4px solid #0d6efd !important;
+                }
+                
+                .pedigree-card-compact.female:first-child {
+                    border-left: 4px solid #dc3545 !important;
+                }
+                
+                .pedigree-card-compact.male:not(:first-child) {
+                    border-left: 4px solid #0d6efd !important;
+                }
+                
+                .pedigree-card-compact.female:not(:first-child) {
+                    border-left: 4px solid #dc3545 !important;
+                }
+                
+                .pedigree-card-compact:hover {
+                    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+                    transform: translateY(-2px);
+                    z-index: 1;
+                    position: relative;
+                }
+                
+                .pedigree-card-compact.main-dog-compact {
+                    border: 2px solid #0d6efd !important;
+                    background: #f0f7ff;
+                }
+                
+                .pedigree-card-compact.empty {
+                    background: #f8f9fa;
+                    cursor: default;
+                    opacity: 0.6;
+                }
+                
+                .pedigree-card-compact.empty:hover {
+                    transform: none !important;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+                }
+                
+                /* Card header */
+                .pedigree-card-header-compact {
+                    color: white;
+                    padding: 8px 10px;
+                    font-size: 0.8rem;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    min-height: 32px;
+                }
+                
+                .pedigree-card-header-compact.bg-primary {
+                    background: #0d6efd !important;
+                }
+                
+                .pedigree-card-header-compact.bg-secondary {
+                    background: #6c757d !important;
+                }
+                
+                .relation-compact {
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    font-weight: 600;
+                    overflow: hidden;
+                }
+                
+                .relation-text {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    flex: 1;
+                }
+                
+                .main-dot {
+                    color: #ffc107;
+                    font-size: 0.9rem;
+                }
+                
+                .gender-icon-compact {
+                    font-size: 0.9rem;
+                    flex-shrink: 0;
+                }
+                
+                /* Card body */
+                .pedigree-card-body-compact {
+                    padding: 10px;
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                }
+                
+                .dog-name-compact {
+                    font-weight: 600;
+                    font-size: 0.95rem;
                     color: #0d6efd;
                     margin-bottom: 4px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    line-height: 1.2;
                 }
                 
-                .dog-name {
-                    font-weight: 700;
-                    color: #0d6efd;
-                }
-                
-                .dog-kennel-line {
-                    font-size: 0.95rem;
-                    color: #6c757d;
-                    margin-bottom: 8px;
-                    font-style: italic;
-                }
-                
-                .dog-details-line {
-                    color: #495057;
-                    font-size: 0.95rem;
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 12px;
-                    align-items: center;
-                }
-                
-                .dog-details-line .stamboom {
-                    font-weight: 700;
-                    color: #212529;
-                }
-                
-                .search-stats {
+                .dog-kennel-compact {
                     font-size: 0.85rem;
                     color: #6c757d;
-                    margin-bottom: 12px;
-                    padding-bottom: 8px;
-                    border-bottom: 1px solid #dee2e6;
+                    font-style: italic;
+                    margin-bottom: 4px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    line-height: 1.2;
                 }
                 
-                .details-card {
-                    border-radius: 8px;
-                    border: 1px solid #dee2e6;
-                    background: white;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                .dog-pedigree-compact {
+                    font-size: 0.85rem;
+                    font-weight: 600;
+                    color: #495057;
+                    margin-bottom: 4px;
+                    line-height: 1.2;
                 }
                 
-                .details-header {
+                .dog-breed-compact {
+                    font-size: 0.85rem;
+                    color: #28a745;
+                    margin-bottom: 6px;
+                    line-height: 1.2;
+                }
+                
+                .no-data-text {
+                    font-size: 0.85rem;
+                    color: #6c757d;
+                    font-style: italic;
+                    line-height: 1.4;
+                }
+                
+                .click-hint-compact {
+                    font-size: 0.75rem;
+                    color: #6c757d;
+                    margin-top: auto;
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    line-height: 1.2;
+                }
+                
+                /* PROPORTIONELE BREEDTES - EXACT ZOALS GEVRAAGD - ALLE SCHERMEN */
+                /* Generation 0: Main dog - 50% breedte */
+                .pedigree-generation-row.gen0 {
+                    justify-content: center;
+                }
+                
+                .pedigree-card-compact.gen0 {
+                    width: 50vw !important;
+                    flex: 0 0 50vw !important;
+                }
+                
+                /* Generation 1: Parents - beide 50% breedte */
+                .pedigree-generation-row.gen1 {
+                    justify-content: center;
+                }
+                
+                .pedigree-card-compact.gen1 {
+                    width: 50vw !important;
+                    flex: 0 0 50vw !important;
+                }
+                
+                /* Generation 2: Grandparents - allemaal 25% breedte */
+                .pedigree-card-compact.gen2 {
+                    width: 25vw !important;
+                    flex: 0 0 25vw !important;
+                }
+                
+                /* Generation 3: Great-grandparents - allemaal 12.5% breedte */
+                .pedigree-card-compact.gen3 {
+                    width: 12.5vw !important;
+                    flex: 0 0 12.5vw !important;
+                }
+                
+                /* MOBIEL: CARDS BLIJVEN TEGEN ELKAAR, TEXT 25% KLEINER VOOR GROOT- EN OVERGROOTOUDERS */
+                @media (max-width: 768px) {
+                    .pedigree-container-compact {
+                        height: calc(100vh - 120px) !important;
+                    }
+                    
+                    .pedigree-grid-compact {
+                        gap: 12px;
+                        padding: 8px !important;
+                    }
+                    
+                    .pedigree-card-compact {
+                        min-height: 130px;
+                    }
+                    
+                    /* Ouders en hoofdhond normale grootte */
+                    .pedigree-card-compact.gen0 .dog-name-compact,
+                    .pedigree-card-compact.gen1 .dog-name-compact {
+                        font-size: 0.9rem;
+                    }
+                    
+                    .pedigree-card-compact.gen0 .dog-kennel-compact,
+                    .pedigree-card-compact.gen1 .dog-kennel-compact {
+                        font-size: 0.8rem;
+                    }
+                    
+                    .pedigree-card-compact.gen0 .dog-pedigree-compact,
+                    .pedigree-card-compact.gen1 .dog-pedigree-compact,
+                    .pedigree-card-compact.gen0 .dog-breed-compact,
+                    .pedigree-card-compact.gen1 .dog-breed-compact {
+                        font-size: 0.8rem;
+                    }
+                    
+                    .pedigree-card-compact.gen0 .click-hint-compact,
+                    .pedigree-card-compact.gen1 .click-hint-compact {
+                        font-size: 0.75rem;
+                    }
+                    
+                    /* GROOTOUDERS: 25% kleiner */
+                    .pedigree-card-compact.gen2 .dog-name-compact {
+                        font-size: 0.675rem; /* 25% kleiner dan 0.9rem */
+                    }
+                    
+                    .pedigree-card-compact.gen2 .dog-kennel-compact {
+                        font-size: 0.6rem; /* 25% kleiner dan 0.8rem */
+                    }
+                    
+                    .pedigree-card-compact.gen2 .dog-pedigree-compact,
+                    .pedigree-card-compact.gen2 .dog-breed-compact {
+                        font-size: 0.6rem; /* 25% kleiner */
+                    }
+                    
+                    .pedigree-card-compact.gen2 .click-hint-compact {
+                        font-size: 0.5625rem; /* 25% kleiner */
+                    }
+                    
+                    /* OVERGROOTOUDERS: 25% kleiner */
+                    .pedigree-card-compact.gen3 .dog-name-compact {
+                        font-size: 0.675rem; /* 25% kleiner dan 0.9rem */
+                    }
+                    
+                    .pedigree-card-compact.gen3 .dog-kennel-compact {
+                        font-size: 0.6rem; /* 25% kleiner dan 0.8rem */
+                    }
+                    
+                    .pedigree-card-compact.gen3 .dog-pedigree-compact,
+                    .pedigree-card-compact.gen3 .dog-breed-compact {
+                        font-size: 0.6rem; /* 25% kleiner */
+                    }
+                    
+                    .pedigree-card-compact.gen3 .click-hint-compact {
+                        font-size: 0.5625rem; /* 25% kleiner */
+                    }
+                    
+                    /* Kleinere header voor groot- en overgrootouders op mobiel - 25% kleiner */
+                    .pedigree-card-compact.gen2 .pedigree-card-header-compact,
+                    .pedigree-card-compact.gen3 .pedigree-card-header-compact {
+                        padding: 6px 8px;
+                        font-size: 0.6rem; /* 25% kleiner */
+                        min-height: 28px;
+                    }
+                    
+                    .pedigree-card-compact.gen2 .relation-compact,
+                    .pedigree-card-compact.gen3 .relation-compact {
+                        font-size: 0.6rem; /* 25% kleiner */
+                    }
+                    
+                    .pedigree-card-compact.gen2 .gender-icon-compact,
+                    .pedigree-card-compact.gen3 .gender-icon-compact {
+                        font-size: 0.675rem; /* 25% kleiner */
+                    }
+                    
+                    /* ZELFDE BREEDTES - VW EENHEDEN */
+                    .pedigree-card-compact.gen0 {
+                        width: 50vw !important;
+                        flex: 0 0 50vw !important;
+                    }
+                    
+                    .pedigree-card-compact.gen1 {
+                        width: 50vw !important;
+                        flex: 0 0 50vw !important;
+                    }
+                    
+                    .pedigree-card-compact.gen2 {
+                        width: 25vw !important;
+                        flex: 0 0 25vw !important;
+                    }
+                    
+                    .pedigree-card-compact.gen3 {
+                        width: 12.5vw !important;
+                        flex: 0 0 12.5vw !important;
+                    }
+                }
+                
+                @media (max-width: 480px) {
+                    .pedigree-container-compact {
+                        height: calc(100vh - 120px) !important;
+                    }
+                    
+                    .pedigree-grid-compact {
+                        gap: 10px;
+                        padding: 6px !important;
+                    }
+                    
+                    .pedigree-card-compact {
+                        min-height: 120px;
+                    }
+                    
+                    /* Ouders en hoofdhond normale grootte */
+                    .pedigree-card-compact.gen0 .dog-name-compact,
+                    .pedigree-card-compact.gen1 .dog-name-compact {
+                        font-size: 0.85rem;
+                    }
+                    
+                    .pedigree-card-compact.gen0 .dog-kennel-compact,
+                    .pedigree-card-compact.gen1 .dog-kennel-compact {
+                        font-size: 0.75rem;
+                    }
+                    
+                    .pedigree-card-compact.gen0 .dog-pedigree-compact,
+                    .pedigree-card-compact.gen1 .dog-pedigree-compact,
+                    .pedigree-card-compact.gen0 .dog-breed-compact,
+                    .pedigree-card-compact.gen1 .dog-breed-compact {
+                        font-size: 0.75rem;
+                    }
+                    
+                    .pedigree-card-compact.gen0 .click-hint-compact,
+                    .pedigree-card-compact.gen1 .click-hint-compact {
+                        font-size: 0.7rem;
+                    }
+                    
+                    /* GROOTOUDERS: 25% kleiner */
+                    .pedigree-card-compact.gen2 .dog-name-compact {
+                        font-size: 0.6375rem; /* 25% kleiner dan 0.85rem */
+                    }
+                    
+                    .pedigree-card-compact.gen2 .dog-kennel-compact {
+                        font-size: 0.5625rem; /* 25% kleiner dan 0.75rem */
+                    }
+                    
+                    .pedigree-card-compact.gen2 .dog-pedigree-compact,
+                    .pedigree-card-compact.gen2 .dog-breed-compact {
+                        font-size: 0.5625rem; /* 25% kleiner */
+                    }
+                    
+                    .pedigree-card-compact.gen2 .click-hint-compact {
+                        font-size: 0.525rem; /* 25% kleiner */
+                    }
+                    
+                    /* OVERGROOTOUDERS: 25% kleiner */
+                    .pedigree-card-compact.gen3 .dog-name-compact {
+                        font-size: 0.6375rem; /* 25% kleiner dan 0.85rem */
+                    }
+                    
+                    .pedigree-card-compact.gen3 .dog-kennel-compact {
+                        font-size: 0.5625rem; /* 25% kleiner dan 0.75rem */
+                    }
+                    
+                    .pedigree-card-compact.gen3 .dog-pedigree-compact,
+                    .pedigree-card-compact.gen3 .dog-breed-compact {
+                        font-size: 0.5625rem; /* 25% kleiner */
+                    }
+                    
+                    .pedigree-card-compact.gen3 .click-hint-compact {
+                        font-size: 0.525rem; /* 25% kleiner */
+                    }
+                    
+                    /* Kleinere header voor groot- en overgrootouders - 25% kleiner */
+                    .pedigree-card-compact.gen2 .pedigree-card-header-compact,
+                    .pedigree-card-compact.gen3 .pedigree-card-header-compact {
+                        padding: 5px 6px;
+                        font-size: 0.5625rem; /* 25% kleiner */
+                        min-height: 26px;
+                    }
+                    
+                    .pedigree-card-compact.gen2 .relation-compact,
+                    .pedigree-card-compact.gen3 .relation-compact {
+                        font-size: 0.5625rem; /* 25% kleiner */
+                    }
+                    
+                    .pedigree-card-compact.gen2 .gender-icon-compact,
+                    .pedigree-card-compact.gen3 .gender-icon-compact {
+                        font-size: 0.6375rem; /* 25% kleiner */
+                    }
+                    
+                    /* STILL ZELFDE BREEDTES - VW EENHEDEN */
+                    .pedigree-card-compact.gen0 {
+                        width: 50vw !important;
+                        flex: 0 0 50vw !important;
+                    }
+                    
+                    .pedigree-card-compact.gen1 {
+                        width: 50vw !important;
+                        flex: 0 0 50vw !important;
+                    }
+                    
+                    .pedigree-card-compact.gen2 {
+                        width: 25vw !important;
+                        flex: 0 0 25vw !important;
+                    }
+                    
+                    .pedigree-card-compact.gen3 {
+                        width: 12.5vw !important;
+                        flex: 0 0 12.5vw !important;
+                    }
+                }
+                
+                /* EXTRAME KLEINE SCHERMEN */
+                @media (max-width: 360px) {
+                    .pedigree-container-compact {
+                        height: calc(100vh - 120px) !important;
+                    }
+                    
+                    .pedigree-grid-compact {
+                        gap: 8px;
+                        padding: 4px !important;
+                    }
+                    
+                    .pedigree-card-compact {
+                        min-height: 110px;
+                    }
+                    
+                    /* Ouders en hoofdhond normale grootte */
+                    .pedigree-card-compact.gen0 .dog-name-compact,
+                    .pedigree-card-compact.gen1 .dog-name-compact {
+                        font-size: 0.8rem;
+                    }
+                    
+                    .pedigree-card-compact.gen0 .dog-kennel-compact,
+                    .pedigree-card-compact.gen1 .dog-kennel-compact {
+                        font-size: 0.7rem;
+                    }
+                    
+                    .pedigree-card-compact.gen0 .dog-pedigree-compact,
+                    .pedigree-card-compact.gen1 .dog-pedigree-compact,
+                    .pedigree-card-compact.gen0 .dog-breed-compact,
+                    .pedigree-card-compact.gen1 .dog-breed-compact {
+                        font-size: 0.7rem;
+                    }
+                    
+                    .pedigree-card-compact.gen0 .click-hint-compact,
+                    .pedigree-card-compact.gen1 .click-hint-compact {
+                        font-size: 0.65rem;
+                    }
+                    
+                    /* GROOTOUDERS: 25% kleiner */
+                    .pedigree-card-compact.gen2 .dog-name-compact {
+                        font-size: 0.6rem; /* 25% kleiner dan 0.8rem */
+                    }
+                    
+                    .pedigree-card-compact.gen2 .dog-kennel-compact {
+                        font-size: 0.525rem; /* 25% kleiner dan 0.7rem */
+                    }
+                    
+                    .pedigree-card-compact.gen2 .dog-pedigree-compact,
+                    .pedigree-card-compact.gen2 .dog-breed-compact {
+                        font-size: 0.525rem; /* 25% kleiner */
+                    }
+                    
+                    .pedigree-card-compact.gen2 .click-hint-compact {
+                        font-size: 0.4875rem; /* 25% kleiner */
+                    }
+                    
+                    /* OVERGROOTOUDERS: 25% kleiner */
+                    .pedigree-card-compact.gen3 .dog-name-compact {
+                        font-size: 0.6rem; /* 25% kleiner dan 0.8rem */
+                    }
+                    
+                    .pedigree-card-compact.gen3 .dog-kennel-compact {
+                        font-size: 0.525rem; /* 25% kleiner dan 0.7rem */
+                    }
+                    
+                    .pedigree-card-compact.gen3 .dog-pedigree-compact,
+                    .pedigree-card-compact.gen3 .dog-breed-compact {
+                        font-size: 0.525rem; /* 25% kleiner */
+                    }
+                    
+                    .pedigree-card-compact.gen3 .click-hint-compact {
+                        font-size: 0.4875rem; /* 25% kleiner */
+                    }
+                    
+                    /* Kleinere header voor groot- en overgrootouders - 25% kleiner */
+                    .pedigree-card-compact.gen2 .pedigree-card-header-compact,
+                    .pedigree-card-compact.gen3 .pedigree-card-header-compact {
+                        padding: 4px 5px;
+                        font-size: 0.525rem; /* 25% kleiner */
+                        min-height: 24px;
+                    }
+                    
+                    .pedigree-card-compact.gen2 .relation-compact,
+                    .pedigree-card-compact.gen3 .relation-compact {
+                        font-size: 0.525rem; /* 25% kleiner */
+                    }
+                    
+                    .pedigree-card-compact.gen2 .gender-icon-compact,
+                    .pedigree-card-compact.gen3 .gender-icon-compact {
+                        font-size: 0.6rem; /* 25% kleiner */
+                    }
+                    
+                    .pedigree-card-header-compact {
+                        padding: 6px 8px;
+                        font-size: 0.63rem;
+                    }
+                    
+                    .pedigree-card-body-compact {
+                        padding: 8px;
+                    }
+                    
+                    /* NOG STEEDS ZELFDE BREEDTES - VW EENHEDEN */
+                    .pedigree-card-compact.gen0 {
+                        width: 50vw !important;
+                        flex: 0 0 50vw !important;
+                    }
+                    
+                    .pedigree-card-compact.gen1 {
+                        width: 50vw !important;
+                        flex: 0 0 50vw !important;
+                    }
+                    
+                    .pedigree-card-compact.gen2 {
+                        width: 25vw !important;
+                        flex: 0 0 25vw !important;
+                    }
+                    
+                    .pedigree-card-compact.gen3 {
+                        width: 12.5vw !important;
+                        flex: 0 0 12.5vw !important;
+                    }
+                }
+                
+                /* POPUP STYLES */
+                .pedigree-popup-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.7);
+                    z-index: 1060;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 15px;
+                    animation: fadeIn 0.3s;
+                    overflow-y: auto;
+                }
+                
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                
+                .pedigree-popup-container {
                     background: white;
-                    color: #212529;
+                    border-radius: 12px;
+                    width: 100%;
+                    max-width: 500px;
+                    max-height: 85vh;
+                    overflow-y: auto;
+                    animation: slideUp 0.3s;
+                    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+                    margin: auto;
+                    position: relative;
+                }
+                
+                @keyframes slideUp {
+                    from { 
+                        opacity: 0;
+                        transform: translateY(30px);
+                    }
+                    to { 
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                
+                .dog-detail-popup {
+                    display: flex;
+                    flex-direction: column;
+                    height: 100%;
+                }
+                
+                .popup-header {
+                    background: #0d6efd;
+                    color: white;
+                    padding: 16px 20px;
+                    border-radius: 12px 12px 0 0;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    position: sticky;
+                    top: 0;
+                    z-index: 10;
+                }
+                
+                .popup-title {
+                    margin: 0;
+                    font-size: 1.1rem;
+                    display: flex;
+                    align-items: center;
+                    flex: 1;
+                }
+                
+                .popup-close {
+                    background: none;
+                    border: none;
+                    font-size: 1.3rem;
+                    cursor: pointer;
+                    opacity: 0.8;
+                    color: white;
+                    flex-shrink: 0;
+                    margin-left: 15px;
+                    padding: 0;
+                    width: 30px;
+                    height: 30px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                
+                .popup-close:hover {
+                    opacity: 1;
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 50%;
+                }
+                
+                .popup-body {
                     padding: 20px;
-                    border-radius: 8px 8px 0 0;
-                    border-bottom: 1px solid #dee2e6;
+                    flex: 1;
+                    overflow-y: auto;
+                    -webkit-overflow-scrolling: touch;
                 }
                 
-                .details-body {
-                    padding: 20px;
-                    background: white;
-                }
-                
-                .info-group {
+                .dog-popup-name {
                     margin-bottom: 20px;
                 }
                 
-                .info-group-title {
-                    font-size: 0.9rem;
-                    text-transform: uppercase;
-                    color: #6c757d;
-                    letter-spacing: 1px;
-                    margin-bottom: 10px;
-                    padding-bottom: 5px;
-                    border-bottom: 1px solid #f0f0f0;
+                .dog-popup-name h4 {
+                    color: #0d6efd;
+                    margin-bottom: 8px;
+                    font-size: 1.4rem;
                 }
                 
-                .info-row {
+                .info-section {
+                    margin-bottom: 25px;
+                }
+                
+                .info-section h6 {
+                    color: #495057;
+                    margin-bottom: 12px;
+                    padding-bottom: 8px;
+                    border-bottom: 2px solid #e9ecef;
                     display: flex;
-                    margin-bottom: 8px;
+                    align-items: center;
+                    font-size: 1rem;
+                }
+                
+                .info-grid {
+                    display: grid;
+                    grid-template-columns: 1fr;
+                    gap: 12px;
+                }
+                
+                @media (min-width: 400px) {
+                    .info-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                    }
+                }
+                
+                .info-item {
+                    display: flex;
+                    flex-direction: column;
                     padding: 8px 0;
-                    border-bottom: 1px solid #f8f9fa;
                 }
                 
                 .info-label {
                     font-weight: 600;
                     color: #495057;
-                    width: 180px;
-                    min-width: 180px;
+                    font-size: 0.9rem;
+                    margin-bottom: 4px;
+                    line-height: 1.3;
                 }
                 
                 .info-value {
                     color: #212529;
-                    flex: 1;
-                }
-                
-                .badge-hd {
-                    background-color: #20c997;
-                    color: white;
-                }
-                
-                .badge-ed {
-                    background-color: #6f42c1;
-                    color: white;
-                }
-                
-                .badge-pl {
-                    background-color: #fd7e14;
-                    color: white;
-                }
-                
-                .badge-eyes {
-                    background-color: #17a2b8;
-                    color: white;
-                }
-                
-                .badge-dandy {
-                    background-color: #e83e8c;
-                    color: white;
-                }
-                
-                .badge-thyroid {
-                    background-color: #28a745;
-                    color: white;
-                }
-                
-                .father-card {
-                    background: #e8f4fd;
-                    border: 1px solid #cfe2ff;
-                    padding: 15px;
-                    border-radius: 6px;
-                    margin-bottom: 15px;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                }
-                
-                .father-card:hover {
-                    background: #d1e7ff;
-                    transform: translateY(-2px);
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                }
-                
-                .mother-card {
-                    background: #fce8f1;
-                    border: 1px solid #f8d7e3;
-                    padding: 15px;
-                    border-radius: 6px;
-                    margin-bottom: 15px;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                }
-                
-                .mother-card:hover {
-                    background: #f9d9e9;
-                    transform: translateY(-2px);
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                }
-                
-                .parent-name {
-                    font-size: 1.1rem;
-                    font-weight: 600;
-                    color: #0d6efd;
-                    margin-bottom: 5px;
-                }
-                
-                .parent-mother-name {
-                    font-size: 1.1rem;
-                    font-weight: 600;
-                    color: #dc3545;
-                    margin-bottom: 5px;
-                }
-                
-                .parent-info {
-                    color: #6c757d;
-                    font-size: 0.85rem;
-                }
-                
-                .click-hint {
-                    font-size: 0.75rem;
-                    color: #6c757d;
-                    margin-top: 8px;
-                    display: flex;
-                    align-items: center;
-                    gap: 4px;
-                }
-                
-                .back-button {
-                    margin-bottom: 15px;
+                    font-size: 0.95rem;
+                    line-height: 1.4;
+                    word-break: break-word;
                 }
                 
                 .remarks-box {
                     background: #f8f9fa;
                     border: 1px solid #dee2e6;
-                    padding: 15px;
+                    padding: 12px;
                     border-radius: 6px;
                     font-style: italic;
                     color: #495057;
+                    font-size: 0.95rem;
+                    line-height: 1.5;
                 }
                 
-                .empty-state {
-                    color: #adb5bd;
-                    font-style: italic;
-                }
-                
-                .dog-name-header {
-                    color: #0d6efd;
-                    font-size: 1.5rem;
-                    font-weight: 700;
-                    margin-bottom: 5px;
-                }
-                
-                .dog-detail-header-line {
+                .popup-footer {
+                    padding: 16px 20px;
+                    border-top: 1px solid #dee2e6;
                     display: flex;
-                    flex-wrap: wrap;
-                    gap: 12px;
-                    align-items: center;
-                    margin-top: 8px;
-                    color: #495057;
+                    justify-content: center;
+                    background: #f8f9fa;
+                    border-radius: 0 0 12px 12px;
                 }
                 
-                .dog-detail-header-line .geslacht {
-                    font-weight: 600;
-                    color: #0d6efd;
+                .popup-close-btn {
+                    min-width: 130px;
+                    padding: 10px 25px;
+                    font-size: 1rem;
                 }
                 
-                .dog-detail-header-line .ras {
-                    font-weight: 500;
-                }
-                
-                .dog-detail-header-line .stamboom {
-                    font-weight: 700;
-                    color: #212529;
-                }
-                
-                .dog-detail-header-line .vachtkleur {
-                    color: #d63384;
-                    font-weight: 500;
-                }
-                
-                @media (max-width: 768px) {
-                    .modal-body {
-                        max-height: calc(100vh - 200px);
-                        overflow-y: auto;
+                /* Print styles */
+                @media print {
+                    .modal-dialog {
+                        max-width: none;
+                        margin: 0;
                     }
                     
-                    .info-row {
-                        flex-direction: column;
+                    .modal-header, .modal-footer {
+                        display: none !important;
                     }
                     
-                    .info-label {
-                        width: 100%;
-                        margin-bottom: 4px;
+                    .pedigree-container-compact {
+                        padding: 0;
+                        background: white;
                     }
                     
-                    .dog-name-line {
-                        flex-direction: column;
-                        align-items: flex-start;
-                        gap: 4px;
+                    .pedigree-generation-row {
+                        display: block !important;
+                        overflow-x: visible !important;
                     }
                     
-                    .dog-details-line {
-                        flex-direction: column;
-                        align-items: flex-start;
-                        gap: 4px;
+                    .pedigree-card-compact {
+                        break-inside: avoid;
+                        box-shadow: none;
+                        border: 1px solid #ccc !important;
+                        margin-bottom: 15px;
+                        width: 100% !important;
+                        min-height: auto;
                     }
                     
-                    .dog-detail-header-line {
-                        flex-direction: column;
-                        align-items: flex-start;
-                        gap: 4px;
+                    .main-dog-compact {
+                        border: 2px solid #000 !important;
                     }
                 }
             </style>
         `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        this.setupPedigreeModalEvents();
     }
     
-    setupEvents() {
-        this.setupSearch();
-    }
-    
-    setupSearch() {
-        document.querySelectorAll('.btn-search-type').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const searchType = e.target.getAttribute('data-search-type');
-                this.switchSearchType(searchType);
+    setupPedigreeModalEvents() {
+        const modal = document.getElementById('pedigreeModal');
+        if (!modal) return;
+        
+        // Print functionaliteit
+        const printBtn = modal.querySelector('.btn-print');
+        if (printBtn) {
+            printBtn.addEventListener('click', () => {
+                window.print();
             });
-        });
-        
-        this.setupNameSearch();
-        this.setupKennelSearch();
-    }
-    
-    switchSearchType(type) {
-        this.searchType = type;
-        
-        document.querySelectorAll('.btn-search-type').forEach(btn => {
-            const btnType = btn.getAttribute('data-search-type');
-            if (btnType === type) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
-        
-        const nameField = document.getElementById('nameSearchField');
-        const kennelField = document.getElementById('kennelSearchField');
-        
-        if (type === 'name') {
-            nameField.classList.remove('d-none');
-            kennelField.classList.add('d-none');
-            document.getElementById('searchNameInput').focus();
-        } else {
-            nameField.classList.add('d-none');
-            kennelField.classList.remove('d-none');
-            document.getElementById('searchKennelInput').focus();
-        }
-        
-        this.showInitialView();
-        this.clearDetails();
-    }
-    
-    setupNameSearch() {
-        const searchInput = document.getElementById('searchNameInput');
-        if (!searchInput) return;
-        
-        searchInput.addEventListener('focus', async () => {
-            if (this.allDogs.length === 0) {
-                await this.loadSearchData();
-            }
-        });
-        
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase().trim();
-            
-            if (searchTerm.length >= 1) {
-                this.filterDogsByName(searchTerm);
-            } else {
-                this.showInitialView();
-                this.clearDetails();
-            }
-        });
-        
-        searchInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && this.filteredDogs.length > 0) {
-                e.preventDefault();
-                this.selectDog(this.filteredDogs[0]);
-            }
-        });
-    }
-    
-    setupKennelSearch() {
-        const searchInput = document.getElementById('searchKennelInput');
-        if (!searchInput) return;
-        
-        searchInput.addEventListener('focus', async () => {
-            if (this.allDogs.length === 0) {
-                await this.loadSearchData();
-            }
-        });
-        
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.toLowerCase().trim();
-            
-            if (searchTerm.length >= 1) {
-                this.filterDogsByKennel(searchTerm);
-            } else {
-                this.showInitialView();
-                this.clearDetails();
-            }
-        });
-        
-        searchInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && this.filteredDogs.length > 0) {
-                e.preventDefault();
-                this.selectDog(this.filteredDogs[0]);
-            }
-        });
-    }
-    
-    showInitialView() {
-        const container = document.getElementById('searchResultsContainer');
-        const t = this.t.bind(this);
-        
-        const message = this.searchType === 'name' ? t('typeToSearch') : t('typeToSearchKennel');
-        
-        container.innerHTML = `
-            <div class="text-center py-5">
-                <i class="bi bi-search display-1 text-muted opacity-50"></i>
-                <p class="mt-3 text-muted">${message}</p>
-            </div>
-        `;
-    }
-    
-    clearDetails() {
-        const container = document.getElementById('detailsContainer');
-        const t = this.t.bind(this);
-        
-        container.innerHTML = `
-            <div class="text-center py-5">
-                <i class="bi bi-eye display-1 text-muted opacity-50"></i>
-                <p class="mt-3 text-muted">${t('selectDogToView')}</p>
-            </div>
-        `;
-    }
-    
-    async loadSearchData() {
-        this.showProgress(this.t('loading'));
-        
-        try {
-            if (!this.db) {
-                console.error('Database niet beschikbaar in SearchManager');
-                this.hideProgress();
-                return;
-            }
-            
-            this.allDogs = await this.db.getHonden();
-            this.allDogs.sort((a, b) => a.naam.localeCompare(b.naam));
-            this.hideProgress();
-            
-            console.log(`${this.allDogs.length} honden geladen voor zoeken`);
-            
-        } catch (error) {
-            this.hideProgress();
-            this.showError(`Laden mislukt: ${error.message}`);
         }
     }
     
-    filterDogsByName(searchTerm = '') {
-        this.filteredDogs = this.allDogs.filter(dog => {
-            const naam = dog.naam ? dog.naam.toLowerCase() : '';
-            return naam.startsWith(searchTerm);
-        });
-        
-        this.displaySearchResults();
-    }
-    
-    filterDogsByKennel(searchTerm = '') {
-        this.filteredDogs = this.allDogs.filter(dog => {
-            const kennelnaam = dog.kennelnaam ? dog.kennelnaam.toLowerCase() : '';
-            return kennelnaam.startsWith(searchTerm);
-        });
-        
-        this.filteredDogs.sort((a, b) => {
-            const naamA = a.naam ? a.naam.toLowerCase() : '';
-            const naamB = b.naam ? b.naam.toLowerCase() : '';
-            return naamA.localeCompare(naamB);
-        });
-        
-        this.displaySearchResults();
-    }
-    
-    displaySearchResults() {
-        const t = this.t.bind(this);
-        const container = document.getElementById('searchResultsContainer');
+    renderCompactPedigree(pedigreeTree) {
+        const container = document.getElementById('pedigreeContainer');
         if (!container) return;
         
-        if (this.filteredDogs.length === 0) {
-            container.innerHTML = `
-                <div class="text-center py-5">
-                    <i class="bi bi-search-x display-1 text-muted opacity-50"></i>
-                    <p class="mt-3 text-muted">${t('noDogsFound')}</p>
-                </div>
-            `;
-            return;
-        }
-        
-        let html = `
-            <div class="search-stats">
-                <i class="bi bi-info-circle me-1"></i>
-                ${this.filteredDogs.length} ${t('found')}
-            </div>
-        `;
-        
-        this.filteredDogs.forEach(dog => {
-            const genderText = dog.geslacht === 'reuen' ? t('male') : 
-                             dog.geslacht === 'teven' ? t('female') : t('unknown');
-            
-            html += `
-                <div class="dog-result-item" data-id="${dog.id}">
-                    <!-- REGEL 1: Alleen naam -->
-                    <div class="dog-name-line">
-                        <span class="dog-name">${dog.naam || t('unknown')}</span>
-                    </div>
-                    
-                    <!-- REGEL 2: Kennelnaam -->
-                    ${dog.kennelnaam ? `
-                    <div class="dog-kennel-line">
-                        ${dog.kennelnaam}
-                    </div>
-                    ` : ''}
-                    
-                    <!-- REGEL 3: Stamboomnummer + Ras + Geslacht (GEEN vachtkleur in zoekresultaten) -->
-                    <div class="dog-details-line">
-                        ${dog.stamboomnr ? `<span class="stamboom">${dog.stamboomnr}</span>` : ''}
-                        ${dog.ras ? `<span class="ras">${dog.ras}</span>` : ''}
-                        <span class="geslacht">${genderText}</span>
-                    </div>
-                </div>
-            `;
-        });
-        
-        container.innerHTML = html;
-        
-        document.querySelectorAll('.dog-result-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                const hondId = parseInt(item.getAttribute('data-id'));
-                this.selectDogById(hondId);
-            });
-        });
-    }
-    
-    selectDog(dog) {
-        document.querySelectorAll('.dog-result-item').forEach(item => {
-            item.classList.remove('selected');
-            if (parseInt(item.getAttribute('data-id')) === dog.id) {
-                item.classList.add('selected');
-            }
-        });
-        
-        this.showDogDetails(dog);
-    }
-    
-    selectDogById(hondId) {
-        const dog = this.allDogs.find(h => h.id === hondId);
-        if (dog) {
-            this.selectDog(dog);
-        }
-    }
-    
-    showDogDetails(dog, isParentView = false, originalDogId = null) {
-        const t = this.t.bind(this);
-        const container = document.getElementById('detailsContainer');
-        
-        if (!container) return;
-        
-        let fatherInfo = { id: null, naam: t('parentsUnknown'), stamboomnr: '', ras: '', kennelnaam: '' };
-        let motherInfo = { id: null, naam: t('parentsUnknown'), stamboomnr: '', ras: '', kennelnaam: '' };
-        
-        if (dog.vaderId) {
-            const father = this.allDogs.find(d => d.id === dog.vaderId);
-            if (father) {
-                fatherInfo = { 
-                    id: father.id,
-                    naam: father.naam || t('unknown'),
-                    stamboomnr: father.stamboomnr || '',
-                    ras: father.ras || '',
-                    kennelnaam: father.kennelnaam || ''
-                };
-            }
-        }
-        
-        if (dog.moederId) {
-            const mother = this.allDogs.find(d => d.id === dog.moederId);
-            if (mother) {
-                motherInfo = { 
-                    id: mother.id,
-                    naam: mother.naam || t('unknown'),
-                    stamboomnr: mother.stamboomnr || '',
-                    ras: mother.ras || '',
-                    kennelnaam: mother.kennelnaam || ''
-                };
-            }
-        }
-        
-        const formatDate = (dateString) => {
-            if (!dateString) return '';
-            const date = new Date(dateString);
-            return date.toLocaleDateString(this.currentLang === 'nl' ? 'nl-NL' : 
-                                          this.currentLang === 'de' ? 'de-DE' : 'en-US');
-        };
-        
-        const getHealthBadge = (value, type) => {
-            if (!value || value === '') {
-                return `<span class="badge bg-secondary">${t('unknown')}</span>`;
-            }
-            
-            let badgeClass = '';
-            let badgeText = value;
-            
-            switch(type) {
-                case 'hip':
-                    badgeClass = 'badge-hd';
-                    badgeText = t('hipGrades', value) || value;
-                    break;
-                case 'elbow':
-                    badgeClass = 'badge-ed';
-                    badgeText = t('elbowGrades', value) || value;
-                    break;
-                case 'patella':
-                    badgeClass = 'badge-pl';
-                    badgeText = t('patellaGrades', value) || value;
-                    break;
-                case 'eyes':
-                    badgeClass = 'badge-eyes';
-                    badgeText = t('eyeStatus', value) || value;
-                    break;
-                case 'dandy':
-                    badgeClass = 'badge-dandy';
-                    badgeText = t('dandyStatus', value) || value;
-                    break;
-                case 'thyroid':
-                    badgeClass = 'badge-thyroid';
-                    badgeText = t('thyroidStatus', value) || value;
-                    break;
-                default:
-                    badgeClass = 'badge bg-secondary';
-            }
-            
-            return `<span class="badge ${badgeClass}">${badgeText}</span>`;
-        };
-        
-        const displayValue = (value) => {
-            return value && value !== '' ? value : t('unknown');
-        };
-        
-        const genderText = dog.geslacht === 'reuen' ? t('male') : 
-                          dog.geslacht === 'teven' ? t('female') : t('unknown');
-        
-        const html = `
-            <div class="details-card">
-                ${isParentView ? `
-                <div class="details-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <button class="btn btn-sm btn-outline-secondary back-button" data-original-dog="${originalDogId}">
-                            <i class="bi bi-arrow-left me-1"></i> ${t('backToSearch')}
-                        </button>
-                        <div class="text-muted small">
-                            <i class="bi bi-info-circle me-1"></i> ${t('viewingParent')}
-                        </div>
-                    </div>
-                </div>
-                ` : ''}
-                
-                <div class="details-header ${isParentView ? 'pt-0' : ''}">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="dog-name-header">${displayValue(dog.naam)}</div>
-                            ${dog.kennelnaam ? `<div class="text-muted mb-2">${displayValue(dog.kennelnaam)}</div>` : ''}
-                            
-                            <!-- VOLGORDE: Stamboomnummer + Ras + Geslacht + Vachtkleur (zoals in 2e image) -->
-                            <div class="dog-detail-header-line mt-2">
-                                ${dog.stamboomnr ? `<span class="stamboom">${dog.stamboomnr}</span>` : ''}
-                                ${dog.ras ? `<span class="ras">${dog.ras}</span>` : ''}
-                                <span class="geslacht">${genderText}</span>
-                                ${dog.vachtkleur && dog.vachtkleur.trim() !== '' ? 
-                                  `<span class="vachtkleur">${dog.vachtkleur}</span>` : 
-                                  `<span class="text-muted fst-italic">geen vachtkleur</span>`}
-                            </div>
-                        </div>
-                        <div class="text-end">
-                            <!-- Geboortedatum - behouden -->
-                            ${dog.geboortedatum ? `
-                            <div class="text-muted">
-                                <i class="bi bi-calendar me-1"></i>
-                                ${formatDate(dog.geboortedatum)}
-                            </div>
-                            ` : ''}
-                            
-                            <!-- Overlijdensdatum - behouden -->
-                            ${dog.overlijdensdatum ? `
-                            <div class="text-muted ${dog.geboortedatum ? 'mt-1' : ''}">
-                                <i class="bi bi-calendar-x me-1"></i>
-                                ${formatDate(dog.overlijdensdatum)}
-                            </div>
-                            ` : ''}
-                            
-                            <!-- Stamboom knop -->
-                            <button class="btn btn-sm btn-outline-primary mt-2 btn-pedigree" data-dog-id="${dog.id}">
-                                <i class="bi bi-diagram-3 me-1"></i> ${t('pedigreeButton')}
-                            </button>
-                        </div>
+        const gridHTML = `
+            <div class="pedigree-grid-compact">
+                <!-- Generatie 0: Hoofdhond -->
+                <div class="pedigree-generation-row gen0">
+                    <div class="pedigree-card-compact gen0 main-dog-compact">
+                        ${this.getDogCompactCardHTML(pedigreeTree.mainDog, this.t('mainDog'), true)}
                     </div>
                 </div>
                 
-                <div class="details-body">
-                    <div class="info-group">
-                        <div class="info-group-title d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="bi bi-people me-1"></i> ${t('parents')}
-                            </div>
-                            <button class="btn btn-sm btn-outline-primary btn-pedigree" data-dog-id="${dog.id}">
-                                <i class="bi bi-diagram-3 me-1"></i> ${t('pedigreeButton')}
-                            </button>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <div class="father-card" ${fatherInfo.id ? `data-parent-id="${fatherInfo.id}" data-original-dog="${dog.id}"` : ''}>
-                                    <div class="fw-bold mb-1 text-primary">
-                                        <i class="bi bi-gender-male me-1"></i> ${t('father')}
-                                    </div>
-                                    <div class="parent-name">${fatherInfo.naam} ${fatherInfo.kennelnaam}</div>
-                                    ${fatherInfo.stamboomnr ? `<div class="parent-info">${fatherInfo.stamboomnr}</div>` : ''}
-                                    ${fatherInfo.ras ? `<div class="parent-info">${fatherInfo.ras}</div>` : ''}
-                                    ${fatherInfo.id ? `
-                                    <div class="click-hint">
-                                        <i class="bi bi-arrow-right-circle"></i>
-                                        ${t('clickToView')}
-                                    </div>
-                                    ` : ''}
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <div class="mother-card" ${motherInfo.id ? `data-parent-id="${motherInfo.id}" data-original-dog="${dog.id}"` : ''}>
-                                    <div class="fw-bold mb-1 text-danger">
-                                        <i class="bi bi-gender-female me-1"></i> ${t('mother')}
-                                    </div>
-                                    <div class="parent-mother-name">${motherInfo.naam} ${motherInfo.kennelnaam}</div>
-                                    ${motherInfo.stamboomnr ? `<div class="parent-info">${motherInfo.stamboomnr}</div>` : ''}
-                                    ${motherInfo.ras ? `<div class="parent-info">${motherInfo.ras}</div>` : ''}
-                                    ${motherInfo.id ? `
-                                    <div class="click-hint">
-                                        <i class="bi bi-arrow-right-circle"></i>
-                                        ${t('clickToView')}
-                                    </div>
-                                    ` : ''}
-                                </div>
-                            </div>
-                        </div>
+                <!-- Generatie 1: Ouders -->
+                <div class="pedigree-generation-row gen1">
+                    <div class="pedigree-card-compact gen1">
+                        ${this.getDogCompactCardHTML(pedigreeTree.father, this.t('father'))}
                     </div>
-                    
-                    <div class="info-group">
-                        <div class="info-group-title">
-                            <i class="bi bi-heart-pulse me-1"></i> ${t('healthInfo')}
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <div class="fw-bold mb-1">${t('hipDysplasia')}</div>
-                                <div>${getHealthBadge(dog.heupdysplasie, 'hip')}</div>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <div class="fw-bold mb-1">${t('elbowDysplasia')}</div>
-                                <div>${getHealthBadge(dog.elleboogdysplasie, 'elbow')}</div>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <div class="fw-bold mb-1">${t('patellaLuxation')}</div>
-                                <div>${getHealthBadge(dog.patella, 'patella')}</div>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <div class="fw-bold mb-1">${t('eyes')}</div>
-                                <div>${getHealthBadge(dog.ogen, 'eyes')}</div>
-                                ${dog.ogenVerklaring ? `<div class="text-muted small mt-1">${dog.ogenVerklaring}</div>` : ''}
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <div class="fw-bold mb-1">${t('dandyWalker')}</div>
-                                <div>${getHealthBadge(dog.dandyWalker, 'dandy')}</div>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <div class="fw-bold mb-1">${t('thyroid')}</div>
-                                <div>${getHealthBadge(dog.schildklier, 'thyroid')}</div>
-                                ${dog.schildklierVerklaring ? `<div class="text-muted small mt-1">${dog.schildklierVerklaring}</div>` : ''}
-                            </div>
-                        </div>
+                    <div class="pedigree-card-compact gen1">
+                        ${this.getDogCompactCardHTML(pedigreeTree.mother, this.t('mother'))}
                     </div>
-                    
-                    <div class="info-group">
-                        <div class="info-group-title">
-                            <i class="bi bi-info-circle me-1"></i> ${t('additionalInfo')}
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <div class="fw-bold mb-1">${t('country')}</div>
-                                <div>${displayValue(dog.land)}</div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <div class="fw-bold mb-1">${t('zipCode')}</div>
-                                <div>${displayValue(dog.postcode)}</div>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-3">
-                            <div class="fw-bold mb-2">${t('remarks')}</div>
-                            <div class="remarks-box">
-                                ${dog.opmerkingen ? dog.opmerkingen : t('noAdditionalInfo')}
-                            </div>
-                        </div>
+                </div>
+                
+                <!-- Generatie 2: Grootouders -->
+                <div class="pedigree-generation-row gen2">
+                    <div class="pedigree-card-compact gen2">
+                        ${this.getDogCompactCardHTML(pedigreeTree.paternalGrandfather, this.t('grandfather'))}
                     </div>
-                    
-                    ${dog.createdAt || dog.updatedAt ? `
-                    <div class="info-group">
-                        <div class="info-group-title">
-                            <i class="bi bi-clock-history me-1"></i> Systeem informatie
-                        </div>
-                        <div class="row">
-                            ${dog.createdAt ? `
-                            <div class="col-md-6">
-                                <div class="text-muted small">Aangemaakt</div>
-                                <div class="small">${formatDate(dog.createdAt)}</div>
-                            </div>
-                            ` : ''}
-                            ${dog.updatedAt ? `
-                            <div class="col-md-6">
-                                <div class="text-muted small">Laatst bijgewerkt</div>
-                                <div class="small">${formatDate(dog.updatedAt)}</div>
-                            </div>
-                            ` : ''}
-                        </div>
+                    <div class="pedigree-card-compact gen2">
+                        ${this.getDogCompactCardHTML(pedigreeTree.paternalGrandmother, this.t('grandmother'))}
                     </div>
-                    ` : ''}
+                    <div class="pedigree-card-compact gen2">
+                        ${this.getDogCompactCardHTML(pedigreeTree.maternalGrandfather, this.t('grandfather'))}
+                    </div>
+                    <div class="pedigree-card-compact gen2">
+                        ${this.getDogCompactCardHTML(pedigreeTree.maternalGrandmother, this.t('grandmother'))}
+                    </div>
+                </div>
+                
+                <!-- Generatie 3: Overgrootouders -->
+                <div class="pedigree-generation-row gen3">
+                    <div class="pedigree-card-compact gen3">
+                        ${this.getDogCompactCardHTML(pedigreeTree.paternalGreatGrandfather1, this.t('greatGrandfather'))}
+                    </div>
+                    <div class="pedigree-card-compact gen3">
+                        ${this.getDogCompactCardHTML(pedigreeTree.paternalGreatGrandmother1, this.t('greatGrandmother'))}
+                    </div>
+                    <div class="pedigree-card-compact gen3">
+                        ${this.getDogCompactCardHTML(pedigreeTree.paternalGreatGrandfather2, this.t('greatGrandfather'))}
+                    </div>
+                    <div class="pedigree-card-compact gen3">
+                        ${this.getDogCompactCardHTML(pedigreeTree.paternalGreatGrandmother2, this.t('greatGrandmother'))}
+                    </div>
+                    <div class="pedigree-card-compact gen3">
+                        ${this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandfather1, this.t('greatGrandfather'))}
+                    </div>
+                    <div class="pedigree-card-compact gen3">
+                        ${this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandmother1, this.t('greatGrandmother'))}
+                    </div>
+                    <div class="pedigree-card-compact gen3">
+                        ${this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandfather2, this.t('greatGrandfather'))}
+                    </div>
+                    <div class="pedigree-card-compact gen3">
+                        ${this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandmother2, this.t('greatGrandmother'))}
+                    </div>
                 </div>
             </div>
         `;
         
-        container.innerHTML = html;
+        container.innerHTML = gridHTML;
         
-        if (fatherInfo.id) {
-            const fatherCard = document.querySelector('.father-card');
-            if (fatherCard) {
-                fatherCard.addEventListener('click', (e) => {
-                    const parentId = parseInt(fatherCard.getAttribute('data-parent-id'));
-                    const originalDogId = parseInt(fatherCard.getAttribute('data-original-dog'));
-                    this.showParentDetails(parentId, originalDogId);
-                });
-            }
-        }
+        // Add click events to cards
+        this.setupCardClickEvents();
+    }
+    
+    setupCardClickEvents() {
+        const cards = document.querySelectorAll('.pedigree-card-compact:not(.empty)');
+        cards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                const dogId = parseInt(card.getAttribute('data-dog-id'));
+                if (dogId === 0) return; // Skip empty cards
+                
+                const dog = this.getDogById(dogId);
+                if (!dog) return;
+                
+                const relation = card.getAttribute('data-relation') || '';
+                this.showDogDetailPopup(dog, relation);
+            });
+        });
+    }
+    
+    showDogDetailPopup(dog, relation) {
+        const overlay = document.getElementById('pedigreePopupOverlay');
+        const container = document.getElementById('pedigreePopupContainer');
         
-        if (motherInfo.id) {
-            const motherCard = document.querySelector('.mother-card');
-            if (motherCard) {
-                motherCard.addEventListener('click', (e) => {
-                    const parentId = parseInt(motherCard.getAttribute('data-parent-id'));
-                    const originalDogId = parseInt(motherCard.getAttribute('data-original-dog'));
-                    this.showParentDetails(parentId, originalDogId);
-                });
-            }
-        }
+        if (!overlay || !container) return;
         
-        // Event listeners voor stamboom knoppen
-        document.querySelectorAll('.btn-pedigree').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                const dogId = parseInt(btn.getAttribute('data-dog-id'));
-                await this.openPedigree(dogId);
+        const popupHTML = this.getDogDetailPopupHTML(dog, relation);
+        container.innerHTML = popupHTML;
+        
+        // Show overlay - center in viewport
+        overlay.style.display = 'flex';
+        
+        // Ensure popup is visible and centered
+        setTimeout(() => {
+            container.style.marginTop = '0';
+            container.style.transform = 'translateY(0)';
+        }, 10);
+        
+        // Add close event listeners
+        const closeButtons = container.querySelectorAll('.popup-close, .popup-close-btn');
+        closeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                overlay.style.display = 'none';
             });
         });
         
-        if (isParentView) {
-            const backButton = document.querySelector('.back-button');
-            if (backButton) {
-                backButton.addEventListener('click', (e) => {
-                    const originalDogId = parseInt(backButton.getAttribute('data-original-dog'));
-                    const originalDog = this.allDogs.find(d => d.id === originalDogId);
-                    if (originalDog) {
-                        this.showDogDetails(originalDog);
-                    }
-                });
+        // Close when clicking outside popup
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.style.display = 'none';
             }
-        }
-    }
-    
-    showParentDetails(parentId, originalDogId) {
-        const parent = this.allDogs.find(d => d.id === parentId);
-        if (parent) {
-            this.showDogDetails(parent, true, originalDogId);
-            
-            document.querySelectorAll('.dog-result-item').forEach(item => {
-                item.classList.remove('selected');
-                if (parseInt(item.getAttribute('data-id')) === parentId) {
-                    item.classList.add('selected');
-                }
-            });
-        }
-    }
-    
-    // NIEUWE METHODE: Stamboom openen
-    async openPedigree(dogId) {
-        try {
-            // Initialiseer stamboom manager als nog niet gedaan
-            if (!this.stamboomManager) {
-                console.log('Initializing StamboomManager...');
-                this.stamboomManager = new StamboomManager(this.db, this.currentLang);
-                await this.stamboomManager.initialize();
+        });
+        
+        // Close with Escape key
+        const closeOnEscape = (e) => {
+            if (e.key === 'Escape') {
+                overlay.style.display = 'none';
+                document.removeEventListener('keydown', closeOnEscape);
             }
-            
-            // Zoek de hond
-            const dog = this.allDogs.find(d => d.id === dogId);
-            if (!dog) {
-                this.showError("Hond niet gevonden");
-                return;
+        };
+        document.addEventListener('keydown', closeOnEscape);
+        
+        // Clean up event listener when popup closes
+        overlay.addEventListener('animationend', function handler() {
+            if (overlay.style.display === 'none') {
+                document.removeEventListener('keydown', closeOnEscape);
+                overlay.removeEventListener('animationend', handler);
             }
-            
-            // Toon stamboom modal
-            this.stamboomManager.showPedigree(dog);
-            
-        } catch (error) {
-            console.error('Fout bij openen stamboom:', error);
-            this.showError(`Fout bij openen stamboom: ${error.message}`);
-        }
+        });
     }
     
     // Helper methodes van BaseModule
