@@ -143,7 +143,7 @@ class StamboomManager extends BaseModule {
                 pedigreeNumber: "Stammbaum-Nummer",
                 breed: "Rasse",
                 gender: "Geschlecht",
-                birthDate: "Geburtsdatum",
+                birthDate: "Geboortedatum",
                 deathDate: "Sterbedatum",
                 coatColor: "Fellfarbe",
                 country: "Land",
@@ -637,14 +637,16 @@ class StamboomManager extends BaseModule {
                     width: 100vw !important;
                 }
                 
-                /* PEDIGREE CONTAINER - CENTRALE UITLIJNING */
+                /* PEDIGREE CONTAINER - GEEN HORIZONTALE SCROLL */
                 .pedigree-container-compact {
                     padding: 0 !important;
                     margin: 0 !important;
                     width: 100vw !important;
+                    max-width: 100vw !important;
                     height: calc(100vh - 120px) !important;
                     background: #f8f9fa;
-                    overflow: auto;
+                    overflow-x: hidden !important; /* GEEN horizontale scroll */
+                    overflow-y: auto;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
@@ -658,27 +660,28 @@ class StamboomManager extends BaseModule {
                     flex-direction: column;
                     gap: 15px;
                     width: 100% !important;
+                    max-width: 100vw !important;
                     margin: 0 !important;
                     padding: 10px !important;
                     box-sizing: border-box !important;
                     align-items: center;
                 }
                 
-                /* GENERATIE RIJS - CENTRALE UITLIJNING */
+                /* GENERATIE RIJS - CENTRALE UITLIJNING ZONDER SCROLL */
                 .pedigree-generation-row {
                     display: flex;
                     flex-wrap: nowrap;
                     width: 100% !important;
+                    max-width: 100vw !important;
                     justify-content: center;
                     padding: 0 !important;
                     margin: 0 !important;
-                    overflow: visible !important;
+                    overflow: hidden !important; /* GEEN overflow */
                     border: none !important;
                     position: relative;
-                    left: 0;
                 }
                 
-                /* COMPACT CARDS - OPTIMALE BREEDTE VOOR SCHERM */
+                /* COMPACT CARDS - OPTIMALE BREEDTE ZONDER SCROLL */
                 .pedigree-card-compact {
                     background: white;
                     border-radius: 0;
@@ -695,7 +698,7 @@ class StamboomManager extends BaseModule {
                     flex-shrink: 0;
                 }
                 
-                /* Cards staan nu tegen elkaar aan */
+                /* Cards staan tegen elkaar aan */
                 .pedigree-card-compact:not(:last-child) {
                     border-right: none !important;
                 }
@@ -839,29 +842,57 @@ class StamboomManager extends BaseModule {
                     line-height: 1.2;
                 }
                 
-                /* OPTIMALE BREEDTES VOOR PERFECTE PAS - ALLE SCHERMEN */
-                /* Generation 0: Main dog - 48% breedte */
+                /* DESKTOP BREEDTES - OPTIMAAL VOOR 1920px SCHERM */
+                /* Generation 0: Main dog - 30% breedte */
                 .pedigree-card-compact.gen0 {
-                    width: 48vw !important;
-                    flex: 0 0 48vw !important;
+                    width: 30vw !important;
+                    flex: 0 0 30vw !important;
+                    max-width: 576px !important; /* Max breedte voor grote schermen */
                 }
                 
-                /* Generation 1: Parents - beide 24% breedte */
+                /* Generation 1: Parents - beide 15% breedte */
                 .pedigree-card-compact.gen1 {
-                    width: 24vw !important;
-                    flex: 0 0 24vw !important;
+                    width: 15vw !important;
+                    flex: 0 0 15vw !important;
+                    max-width: 288px !important;
                 }
                 
-                /* Generation 2: Grandparents - allemaal 12% breedte */
+                /* Generation 2: Grandparents - allemaal 7.5% breedte */
                 .pedigree-card-compact.gen2 {
-                    width: 12vw !important;
-                    flex: 0 0 12vw !important;
+                    width: 7.5vw !important;
+                    flex: 0 0 7.5vw !important;
+                    max-width: 144px !important;
                 }
                 
-                /* Generation 3: Great-grandparents - allemaal 6% breedte */
+                /* Generation 3: Great-grandparents - allemaal 3.75% breedte */
                 .pedigree-card-compact.gen3 {
-                    width: 6vw !important;
-                    flex: 0 0 6vw !important;
+                    width: 3.75vw !important;
+                    flex: 0 0 3.75vw !important;
+                    max-width: 72px !important;
+                }
+                
+                /* MOBIEL BREAKPOINT */
+                @media (max-width: 1024px) {
+                    /* Tablet/laptop: Iets grotere cards */
+                    .pedigree-card-compact.gen0 {
+                        width: 35vw !important;
+                        flex: 0 0 35vw !important;
+                    }
+                    
+                    .pedigree-card-compact.gen1 {
+                        width: 17.5vw !important;
+                        flex: 0 0 17.5vw !important;
+                    }
+                    
+                    .pedigree-card-compact.gen2 {
+                        width: 8.75vw !important;
+                        flex: 0 0 8.75vw !important;
+                    }
+                    
+                    .pedigree-card-compact.gen3 {
+                        width: 4.375vw !important;
+                        flex: 0 0 4.375vw !important;
+                    }
                 }
                 
                 /* MOBIEL: OPTIMALE PAS MET CENTRALE UITLIJNING */
@@ -877,6 +908,27 @@ class StamboomManager extends BaseModule {
                     
                     .pedigree-card-compact {
                         min-height: 130px;
+                    }
+                    
+                    /* BREEDTES VOOR MOBIEL - VEEL GROTER VOOR LEESBAARHEID */
+                    .pedigree-card-compact.gen0 {
+                        width: 48vw !important;
+                        flex: 0 0 48vw !important;
+                    }
+                    
+                    .pedigree-card-compact.gen1 {
+                        width: 24vw !important;
+                        flex: 0 0 24vw !important;
+                    }
+                    
+                    .pedigree-card-compact.gen2 {
+                        width: 12vw !important;
+                        flex: 0 0 12vw !important;
+                    }
+                    
+                    .pedigree-card-compact.gen3 {
+                        width: 6vw !important;
+                        flex: 0 0 6vw !important;
                     }
                     
                     /* Ouders en hoofdhond normale grootte */
@@ -955,8 +1007,23 @@ class StamboomManager extends BaseModule {
                     .pedigree-card-compact.gen3 .gender-icon-compact {
                         font-size: 0.675rem;
                     }
+                }
+                
+                @media (max-width: 480px) {
+                    .pedigree-container-compact {
+                        height: calc(100vh - 120px) !important;
+                    }
                     
-                    /* BREEDTES VOOR PERFECTE PAS OP MOBIEL */
+                    .pedigree-grid-compact {
+                        gap: 10px;
+                        padding: 6px !important;
+                    }
+                    
+                    .pedigree-card-compact {
+                        min-height: 120px;
+                    }
+                    
+                    /* BREEDTES VOOR KLEIN MOBIEL */
                     .pedigree-card-compact.gen0 {
                         width: 48vw !important;
                         flex: 0 0 48vw !important;
@@ -975,21 +1042,6 @@ class StamboomManager extends BaseModule {
                     .pedigree-card-compact.gen3 {
                         width: 6vw !important;
                         flex: 0 0 6vw !important;
-                    }
-                }
-                
-                @media (max-width: 480px) {
-                    .pedigree-container-compact {
-                        height: calc(100vh - 120px) !important;
-                    }
-                    
-                    .pedigree-grid-compact {
-                        gap: 10px;
-                        padding: 6px !important;
-                    }
-                    
-                    .pedigree-card-compact {
-                        min-height: 120px;
                     }
                     
                     /* Ouders en hoofdhond normale grootte */
@@ -1068,8 +1120,24 @@ class StamboomManager extends BaseModule {
                     .pedigree-card-compact.gen3 .gender-icon-compact {
                         font-size: 0.6375rem;
                     }
+                }
+                
+                /* EXTRAME KLEINE SCHERMEN */
+                @media (max-width: 360px) {
+                    .pedigree-container-compact {
+                        height: calc(100vh - 120px) !important;
+                    }
                     
-                    /* BREEDTES VOOR PERFECTE PAS OP KLEIN MOBIEL */
+                    .pedigree-grid-compact {
+                        gap: 8px;
+                        padding: 4px !important;
+                    }
+                    
+                    .pedigree-card-compact {
+                        min-height: 110px;
+                    }
+                    
+                    /* BREEDTES VOOR EXTRAME KLEIN SCHERM */
                     .pedigree-card-compact.gen0 {
                         width: 48vw !important;
                         flex: 0 0 48vw !important;
@@ -1088,22 +1156,6 @@ class StamboomManager extends BaseModule {
                     .pedigree-card-compact.gen3 {
                         width: 6vw !important;
                         flex: 0 0 6vw !important;
-                    }
-                }
-                
-                /* EXTRAME KLEINE SCHERMEN */
-                @media (max-width: 360px) {
-                    .pedigree-container-compact {
-                        height: calc(100vh - 120px) !important;
-                    }
-                    
-                    .pedigree-grid-compact {
-                        gap: 8px;
-                        padding: 4px !important;
-                    }
-                    
-                    .pedigree-card-compact {
-                        min-height: 110px;
                     }
                     
                     /* Ouders en hoofdhond normale grootte */
@@ -1191,30 +1243,9 @@ class StamboomManager extends BaseModule {
                     .pedigree-card-body-compact {
                         padding: 8px;
                     }
-                    
-                    /* BREEDTES VOOR PERFECTE PAS OP EXTRAME KLEIN SCHERM */
-                    .pedigree-card-compact.gen0 {
-                        width: 48vw !important;
-                        flex: 0 0 48vw !important;
-                    }
-                    
-                    .pedigree-card-compact.gen1 {
-                        width: 24vw !important;
-                        flex: 0 0 24vw !important;
-                    }
-                    
-                    .pedigree-card-compact.gen2 {
-                        width: 12vw !important;
-                        flex: 0 0 12vw !important;
-                    }
-                    
-                    .pedigree-card-compact.gen3 {
-                        width: 6vw !important;
-                        flex: 0 0 6vw !important;
-                    }
                 }
                 
-                /* POPUP STYLES */
+                /* POPUP STYLES - AANPASSING VOOR DESKTOP */
                 .pedigree-popup-overlay {
                     position: fixed;
                     top: 0;
@@ -1226,7 +1257,7 @@ class StamboomManager extends BaseModule {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    padding: 15px;
+                    padding: 20px;
                     animation: fadeIn 0.3s;
                     overflow-y: auto;
                 }
@@ -1239,7 +1270,7 @@ class StamboomManager extends BaseModule {
                 .pedigree-popup-container {
                     background: white;
                     border-radius: 12px;
-                    width: 100%;
+                    width: 90%;
                     max-width: 500px;
                     max-height: 85vh;
                     overflow-y: auto;
@@ -1247,6 +1278,21 @@ class StamboomManager extends BaseModule {
                     box-shadow: 0 8px 30px rgba(0,0,0,0.3);
                     margin: auto;
                     position: relative;
+                }
+                
+                /* DESKTOP: GROTERE POPUP MAAR NOG STEEDS RESPONSIVE */
+                @media (min-width: 768px) {
+                    .pedigree-popup-container {
+                        width: 80%;
+                        max-width: 600px;
+                    }
+                }
+                
+                @media (min-width: 1024px) {
+                    .pedigree-popup-container {
+                        width: 70%;
+                        max-width: 700px;
+                    }
                 }
                 
                 @keyframes slideUp {
@@ -1350,6 +1396,12 @@ class StamboomManager extends BaseModule {
                 @media (min-width: 400px) {
                     .info-grid {
                         grid-template-columns: repeat(2, 1fr);
+                    }
+                }
+                
+                @media (min-width: 768px) {
+                    .info-grid {
+                        grid-template-columns: repeat(3, 1fr);
                     }
                 }
                 
