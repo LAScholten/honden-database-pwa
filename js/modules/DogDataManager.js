@@ -355,10 +355,10 @@ class DogDataManager extends BaseModule {
                 deleteFailed: "Fehler beim Löschen des Hundes: ",
                 photoError: "Fehler beim Hochladen des Fotos: ",
                 fieldsRequired: "Name, Stammbaum-Nummer en Rasse sind Pflichtfelder",
-                dogNotFound: "Hund nicht gefonden",
+                dogNotFound: "Hund niet gefonden",
                 adminOnly: "Nur Administratoren kunnen Hunde bearbeiten",
                 invalidId: "Ungültige Hunde-ID",
-                dateFormatError: "Datum muss im Format TT-MM-JJJJ sein",
+                dateFormatError: "Datum moet im Format TT-MM-JJJJ sein",
                 deathBeforeBirthError: "Sterbedatum kan niet vor dem Geburtsdatum liegen"
             }
         };
@@ -903,6 +903,15 @@ class DogDataManager extends BaseModule {
                 .autocomplete-item .dog-name {
                     font-weight: 600;
                     font-size: 0.9rem;
+                    color: #212529;
+                    margin-bottom: 2px;
+                }
+                
+                .autocomplete-item .dog-name .kennel-name {
+                    font-weight: 400;
+                    font-size: 0.9rem;
+                    color: #6c757d;
+                    margin-left: 8px;
                 }
                 
                 .autocomplete-item .dog-info {
@@ -1276,7 +1285,10 @@ class DogDataManager extends BaseModule {
             
             html += `
                 <div class="search-result-item" data-id="${dog.id}">
-                    <div class="dog-name">${dog.naam || 'Onbekend'}</div>
+                    <div class="dog-name">
+                        ${dog.naam || 'Onbekend'}
+                        ${dog.kennelnaam ? `<span class="kennel-name">(${dog.kennelnaam})</span>` : ''}
+                    </div>
                     <div class="dog-info">
                         ${dog.ras ? `
                         <span><i class="bi bi-tag me-1"></i>${dog.ras}</span>
@@ -1284,10 +1296,6 @@ class DogDataManager extends BaseModule {
                         
                         ${dog.stamboomnr ? `
                         <span><i class="bi bi-hash me-1"></i>${dog.stamboomnr}</span>
-                        ` : ''}
-                        
-                        ${dog.kennelnaam ? `
-                        <span><i class="bi bi-house me-1"></i>${dog.kennelnaam}</span>
                         ` : ''}
                         
                         ${coatColorText}
@@ -1859,9 +1867,12 @@ class DogDataManager extends BaseModule {
         suggestions.forEach(dog => {
             html += `
                 <div class="autocomplete-item" data-id="${dog.id}" data-name="${dog.naam}">
-                    <div class="dog-name">${dog.naam}</div>
+                    <div class="dog-name">
+                        ${dog.naam}
+                        ${dog.kennelnaam ? `<span class="kennel-name">(${dog.kennelnaam})</span>` : ''}
+                    </div>
                     <div class="dog-info">
-                        ${dog.kennelnaam ? `${dog.kennelnaam} | ` : ''}${dog.ras || 'Onbekend ras'} | ${dog.stamboomnr || 'Geen stamboom'}
+                        ${dog.ras || 'Onbekend ras'} | ${dog.stamboomnr || 'Geen stamboom'}
                     </div>
                 </div>
             `;
