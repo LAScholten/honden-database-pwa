@@ -657,11 +657,11 @@ class StamboomManager extends BaseModule {
                 .pedigree-grid-compact {
                     display: flex;
                     flex-direction: column;
-                    gap: 20px;
+                    gap: 25px;
                     width: 100% !important;
                     max-width: 100% !important;
                     margin: 0 !important;
-                    padding: 20px !important;
+                    padding: 30px 20px 50px 20px !important;
                     box-sizing: border-box !important;
                     align-items: center;
                     min-height: fit-content !important;
@@ -940,8 +940,8 @@ class StamboomManager extends BaseModule {
                     }
                     
                     .pedigree-grid-compact {
-                        gap: 15px;
-                        padding: 15px !important;
+                        gap: 20px;
+                        padding: 25px 15px 40px 15px !important;
                     }
                     
                     .pedigree-card-compact {
@@ -983,8 +983,8 @@ class StamboomManager extends BaseModule {
                     }
                     
                     .pedigree-grid-compact {
-                        gap: 12px;
-                        padding: 12px !important;
+                        gap: 15px;
+                        padding: 20px 10px 35px 10px !important;
                     }
                     
                     .pedigree-card-compact {
@@ -1044,8 +1044,8 @@ class StamboomManager extends BaseModule {
                     }
                     
                     .pedigree-grid-compact {
-                        gap: 10px;
-                        padding: 10px !important;
+                        gap: 12px;
+                        padding: 15px 8px 30px 8px !important;
                     }
                     
                     .pedigree-card-compact {
