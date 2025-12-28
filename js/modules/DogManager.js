@@ -318,7 +318,7 @@ class DogManager extends BaseModule {
                 // Meldungen
                 adminOnly: "Nur Administratoren können Hunde hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer en Rasse zijn Pflichtfelder",
-                savingDog: "Hund wordt gespeichert...",
+                savingDog: "Hund wird gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
                 dogUpdated: "Hund erfolgreich aktualisiert!",
                 dogDeleted: "Hund erfolgreich gelöscht!",
@@ -1307,7 +1307,7 @@ class DogManager extends BaseModule {
         // Filter honden voor autocomplete (alleen reuen voor vader, teven voor moeder)
         const suggestions = this.allDogs.filter(dog => {
             const dogName = dog.naam.toLowerCase();
-            const matchesSearch = dogName.includes(searchTerm);
+            const matchesSearch = dogName.startsWith(searchTerm);
             
             // Filter op geslacht
             if (parentType === 'father') {
