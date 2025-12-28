@@ -280,7 +280,7 @@ class SearchManager extends BaseModule {
                 openPedigree: "Ahnentafel öffnen",
                 pedigree4Gen: "4-Generationen Ahnentafel",
                 
-                // Familienbeziehungen für Ahnentafel
+                // Familienbeziehungen voor Ahnentafel
                 greatGrandfather: "Urgroßvater",
                 greatGrandmother: "Urgroßmutter",
                 grandfather: "Großvater",
@@ -400,7 +400,39 @@ class SearchManager extends BaseModule {
                 </div>
             </div>
             
+            <!-- RESET CSS VOOR STAMBOOMMODAL DIE VANUIT DEZE MODAL WORDT GESTART -->
             <style>
+                /* RESET VOOR STAMBOOM MODAL */
+                .modal-dialog.modal-fullscreen .modal-content {
+                    padding: 0 !important;
+                    margin: 0 !important;
+                    border: none !important;
+                }
+                
+                .modal-dialog.modal-fullscreen .modal-body {
+                    padding: 0 !important;
+                    margin: 0 !important;
+                }
+                
+                .pedigree-container-compact {
+                    padding: 0 !important;
+                    margin: 0 !important;
+                    width: 100vw !important;
+                    max-width: 100vw !important;
+                }
+                
+                .pedigree-grid-compact {
+                    padding: 0 !important;
+                    margin: 0 !important;
+                    width: 100vw !important;
+                }
+                
+                .pedigree-generation-row {
+                    padding: 0 !important;
+                    margin: 0 !important;
+                }
+                
+                /* SEARCH MANAGER STYLES */
                 .search-input {
                     font-size: 1.1rem;
                     padding: 10px 15px;
