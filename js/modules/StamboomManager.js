@@ -133,7 +133,7 @@ class StamboomManager extends BaseModule {
                 father: "Vater",
                 mother: "Mutter",
                 grandfather: "Großvater",
-                grandmother: "Großmutter",
+                grandmother: "Großmoeder",
                 greatGrandfather: "Urgroßvater",
                 greatGrandmother: "Urgroßmutter",
                 
@@ -855,36 +855,36 @@ class StamboomManager extends BaseModule {
                 }
                 
                 /* PROPORTIONELE BREEDTES - EXACT ZOALS GEVRAAGD - ALLE SCHERMEN */
-                /* Generation 0: Main dog - 50% breedte */
+                /* Generation 0: Main dog - 49% breedte (1% kleiner) */
                 .pedigree-generation-row.gen0 {
                     justify-content: center;
                 }
                 
                 .pedigree-card-compact.gen0 {
-                    width: 50vw !important;
-                    flex: 0 0 50vw !important;
+                    width: 49vw !important;
+                    flex: 0 0 49vw !important;
                 }
                 
-                /* Generation 1: Parents - beide 50% breedte */
+                /* Generation 1: Parents - beide 49% breedte (1% kleiner) */
                 .pedigree-generation-row.gen1 {
                     justify-content: center;
                 }
                 
                 .pedigree-card-compact.gen1 {
-                    width: 50vw !important;
-                    flex: 0 0 50vw !important;
+                    width: 49vw !important;
+                    flex: 0 0 49vw !important;
                 }
                 
-                /* Generation 2: Grandparents - allemaal 25% breedte */
+                /* Generation 2: Grandparents - allemaal 24% breedte (1% kleiner) */
                 .pedigree-card-compact.gen2 {
-                    width: 25vw !important;
-                    flex: 0 0 25vw !important;
+                    width: 24vw !important;
+                    flex: 0 0 24vw !important;
                 }
                 
-                /* Generation 3: Great-grandparents - allemaal 12.5% breedte */
+                /* Generation 3: Great-grandparents - allemaal 12% breedte (0.5% kleiner) */
                 .pedigree-card-compact.gen3 {
-                    width: 12.5vw !important;
-                    flex: 0 0 12.5vw !important;
+                    width: 12vw !important;
+                    flex: 0 0 12vw !important;
                 }
                 
                 /* MOBIEL: CARDS BLIJVEN TEGEN ELKAAR, TEXT 25% KLEINER VOOR GROOT- EN OVERGROOTOUDERS */
@@ -981,23 +981,23 @@ class StamboomManager extends BaseModule {
                     
                     /* ZELFDE BREEDTES - VW EENHEDEN */
                     .pedigree-card-compact.gen0 {
-                        width: 50vw !important;
-                        flex: 0 0 50vw !important;
+                        width: 49vw !important;
+                        flex: 0 0 49vw !important;
                     }
                     
                     .pedigree-card-compact.gen1 {
-                        width: 50vw !important;
-                        flex: 0 0 50vw !important;
+                        width: 49vw !important;
+                        flex: 0 0 49vw !important;
                     }
                     
                     .pedigree-card-compact.gen2 {
-                        width: 25vw !important;
-                        flex: 0 0 25vw !important;
+                        width: 24vw !important;
+                        flex: 0 0 24vw !important;
                     }
                     
                     .pedigree-card-compact.gen3 {
-                        width: 12.5vw !important;
-                        flex: 0 0 12.5vw !important;
+                        width: 12vw !important;
+                        flex: 0 0 12vw !important;
                     }
                 }
                 
@@ -1094,23 +1094,23 @@ class StamboomManager extends BaseModule {
                     
                     /* STILL ZELFDE BREEDTES - VW EENHEDEN */
                     .pedigree-card-compact.gen0 {
-                        width: 50vw !important;
-                        flex: 0 0 50vw !important;
+                        width: 49vw !important;
+                        flex: 0 0 49vw !important;
                     }
                     
                     .pedigree-card-compact.gen1 {
-                        width: 50vw !important;
-                        flex: 0 0 50vw !important;
+                        width: 49vw !important;
+                        flex: 0 0 49vw !important;
                     }
                     
                     .pedigree-card-compact.gen2 {
-                        width: 25vw !important;
-                        flex: 0 0 25vw !important;
+                        width: 24vw !important;
+                        flex: 0 0 24vw !important;
                     }
                     
                     .pedigree-card-compact.gen3 {
-                        width: 12.5vw !important;
-                        flex: 0 0 12.5vw !important;
+                        width: 12vw !important;
+                        flex: 0 0 12vw !important;
                     }
                 }
                 
@@ -1217,23 +1217,23 @@ class StamboomManager extends BaseModule {
                     
                     /* NOG STEEDS ZELFDE BREEDTES - VW EENHEDEN */
                     .pedigree-card-compact.gen0 {
-                        width: 50vw !important;
-                        flex: 0 0 50vw !important;
+                        width: 49vw !important;
+                        flex: 0 0 49vw !important;
                     }
                     
                     .pedigree-card-compact.gen1 {
-                        width: 50vw !important;
-                        flex: 0 0 50vw !important;
+                        width: 49vw !important;
+                        flex: 0 0 49vw !important;
                     }
                     
                     .pedigree-card-compact.gen2 {
-                        width: 25vw !important;
-                        flex: 0 0 25vw !important;
+                        width: 24vw !important;
+                        flex: 0 0 24vw !important;
                     }
                     
                     .pedigree-card-compact.gen3 {
-                        width: 12.5vw !important;
-                        flex: 0 0 12.5vw !important;
+                        width: 12vw !important;
+                        flex: 0 0 12vw !important;
                     }
                 }
                 
