@@ -628,6 +628,7 @@ class StamboomManager extends BaseModule {
                     padding: 0 !important;
                     margin: 0 !important;
                     flex: 1 1 auto !important;
+                    overflow: hidden !important;
                 }
                 
                 #pedigreeModal.modal.fade .modal-footer {
@@ -637,7 +638,7 @@ class StamboomManager extends BaseModule {
                     width: 100% !important;
                 }
                 
-                /* PEDIGREE CONTAINER - GEEN SCROLL */
+                /* PEDIGREE CONTAINER - ALLEEN VERTICALE SCROLL */
                 .pedigree-container-compact {
                     padding: 0 !important;
                     margin: 0 !important;
@@ -646,7 +647,7 @@ class StamboomManager extends BaseModule {
                     height: calc(100vh - 120px) !important;
                     background: #f8f9fa;
                     overflow-x: hidden !important;
-                    overflow-y: auto;
+                    overflow-y: auto !important;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
@@ -674,10 +675,9 @@ class StamboomManager extends BaseModule {
                     justify-content: center;
                     padding: 0 !important;
                     margin: 0 !important;
-                    overflow-x: auto !important;
+                    overflow-x: hidden !important;
                     overflow-y: hidden !important;
                     border: none !important;
-                    -webkit-overflow-scrolling: touch;
                 }
                 
                 /* COMPACT CARDS - ALLEMAAL EVEN GROOT OP DESKTOP */
