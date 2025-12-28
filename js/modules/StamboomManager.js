@@ -1,6 +1,6 @@
 /**
  * Stamboom Manager Module
- * Beheert 4-generatie stambomen voor honden
+ * Beheert 4-generatie stambomen voor honden - Compacte versie
  */
 
 class StamboomManager extends BaseModule {
@@ -16,11 +16,10 @@ class StamboomManager extends BaseModule {
                 generatingPedigree: "Stamboom genereren...",
                 close: "Sluiten",
                 print: "Afdrukken",
-                exportPDF: "Exporteer PDF",
                 zoomIn: "Vergroot",
                 zoomOut: "Verklein",
                 resetZoom: "Reset zoom",
-                noData: "Geen gegevens beschikbaar",
+                noData: "Geen gegevens",
                 unknown: "Onbekend",
                 
                 // Familierelaties
@@ -33,7 +32,7 @@ class StamboomManager extends BaseModule {
                 greatGrandfather: "Overgrootvader",
                 greatGrandmother: "Overgrootmoeder",
                 
-                // Hond gegevens
+                // Hond gegevens (voor popup)
                 name: "Naam",
                 kennel: "Kennel",
                 pedigreeNumber: "Stamboomnummer",
@@ -43,29 +42,30 @@ class StamboomManager extends BaseModule {
                 deathDate: "Overlijdensdatum",
                 coatColor: "Vachtkleur",
                 country: "Land",
+                zipCode: "Postcode",
                 
                 // Gezondheid
                 healthInfo: "Gezondheidsinformatie",
-                hipDysplasia: "HD",
-                elbowDysplasia: "ED",
-                patellaLuxation: "PL",
+                hipDysplasia: "Heupdysplasie",
+                elbowDysplasia: "Elleboogdysplasie",
+                patellaLuxation: "Patella Luxatie",
                 eyes: "Ogen",
-                dandyWalker: "DWM",
+                dandyWalker: "Dandy Walker Malformation",
                 thyroid: "Schildklier",
+                eyesExplanation: "Verklaring ogen",
+                thyroidExplanation: "Toelichting schildklier",
                 
                 // Geslacht
                 male: "Reu",
                 female: "Teef",
                 
-                // Generaties
-                generation1: "Generatie 1 (Huidige hond)",
-                generation2: "Generatie 2 (Ouders)",
-                generation3: "Generatie 3 (Grootouders)",
-                generation4: "Generatie 4 (Overgrootouders)",
-                
-                // Relatie aanduidingen
+                // Labels
                 paternal: "Paternaal",
-                maternal: "Maternaal"
+                maternal: "Maternaal",
+                clickForDetails: "Klik voor details",
+                closePopup: "Sluiten",
+                remarks: "Opmerkingen",
+                noRemarks: "Geen opmerkingen"
             },
             en: {
                 pedigreeTitle: "Pedigree of {name}",
@@ -73,11 +73,10 @@ class StamboomManager extends BaseModule {
                 generatingPedigree: "Generating pedigree...",
                 close: "Close",
                 print: "Print",
-                exportPDF: "Export PDF",
                 zoomIn: "Zoom In",
                 zoomOut: "Zoom Out",
                 resetZoom: "Reset Zoom",
-                noData: "No data available",
+                noData: "No data",
                 unknown: "Unknown",
                 
                 // Family relations
@@ -90,7 +89,7 @@ class StamboomManager extends BaseModule {
                 greatGrandfather: "Great Grandfather",
                 greatGrandmother: "Great Grandmother",
                 
-                // Dog details
+                // Dog details (for popup)
                 name: "Name",
                 kennel: "Kennel",
                 pedigreeNumber: "Pedigree number",
@@ -100,29 +99,30 @@ class StamboomManager extends BaseModule {
                 deathDate: "Death date",
                 coatColor: "Coat color",
                 country: "Country",
+                zipCode: "Zip code",
                 
                 // Health
                 healthInfo: "Health Information",
-                hipDysplasia: "HD",
-                elbowDysplasia: "ED",
-                patellaLuxation: "PL",
+                hipDysplasia: "Hip Dysplasia",
+                elbowDysplasia: "Elbow Dysplasia",
+                patellaLuxation: "Patella Luxation",
                 eyes: "Eyes",
-                dandyWalker: "DWM",
+                dandyWalker: "Dandy Walker Malformation",
                 thyroid: "Thyroid",
+                eyesExplanation: "Eye explanation",
+                thyroidExplanation: "Thyroid explanation",
                 
                 // Gender
                 male: "Male",
                 female: "Female",
                 
-                // Generations
-                generation1: "Generation 1 (Current Dog)",
-                generation2: "Generation 2 (Parents)",
-                generation3: "Generation 3 (Grandparents)",
-                generation4: "Generation 4 (Great Grandparents)",
-                
-                // Relation indicators
+                // Labels
                 paternal: "Paternal",
-                maternal: "Maternal"
+                maternal: "Maternaal",
+                clickForDetails: "Click for details",
+                closePopup: "Close",
+                remarks: "Remarks",
+                noRemarks: "No remarks"
             },
             de: {
                 pedigreeTitle: "Ahnentafel von {name}",
@@ -130,11 +130,10 @@ class StamboomManager extends BaseModule {
                 generatingPedigree: "Ahnentafel wird generiert...",
                 close: "Schließen",
                 print: "Drucken",
-                exportPDF: "PDF exportieren",
                 zoomIn: "Vergrößern",
                 zoomOut: "Verkleinern",
                 resetZoom: "Zoom zurücksetzen",
-                noData: "Keine Daten verfügbar",
+                noData: "Keine Daten",
                 unknown: "Unbekannt",
                 
                 // Familienbeziehungen
@@ -147,7 +146,7 @@ class StamboomManager extends BaseModule {
                 greatGrandfather: "Urgroßvater",
                 greatGrandmother: "Urgroßmutter",
                 
-                // Hund Details
+                // Hund Details (für Popup)
                 name: "Name",
                 kennel: "Kennel",
                 pedigreeNumber: "Stammbaum-Nummer",
@@ -157,29 +156,30 @@ class StamboomManager extends BaseModule {
                 deathDate: "Sterbedatum",
                 coatColor: "Fellfarbe",
                 country: "Land",
+                zipCode: "Postleitzahl",
                 
                 // Gesundheit
                 healthInfo: "Gesundheitsinformationen",
-                hipDysplasia: "HD",
-                elbowDysplasia: "ED",
-                patellaLuxation: "PL",
+                hipDysplasia: "Hüftdysplasie",
+                elbowDysplasia: "Ellbogendysplasie",
+                patellaLuxation: "Patella Luxation",
                 eyes: "Augen",
-                dandyWalker: "DWM",
+                dandyWalker: "Dandy Walker Malformation",
                 thyroid: "Schilddrüse",
+                eyesExplanation: "Augenerklärung",
+                thyroidExplanation: "Schilddrüse Erklärung",
                 
                 // Geschlecht
                 male: "Rüde",
                 female: "Hündin",
                 
-                // Generationen
-                generation1: "Generation 1 (Aktueller Hund)",
-                generation2: "Generation 2 (Eltern)",
-                generation3: "Generation 3 (Großeltern)",
-                generation4: "Generation 4 (Urgroßeltern)",
-                
-                // Relations
+                // Labels
                 paternal: "Väterlich",
-                maternal: "Mütterlich"
+                maternal: "Mütterlich",
+                clickForDetails: "Klicken für Details",
+                closePopup: "Schließen",
+                remarks: "Bemerkungen",
+                noRemarks: "Keine Bemerkungen"
             }
         };
     }
@@ -199,30 +199,29 @@ class StamboomManager extends BaseModule {
     
     buildPedigreeTree(dogId) {
         const pedigreeTree = {
-            mainDog: null,           // Generatie 0: Hoofdhond (bovenaan)
-            father: null,           // Generatie 1: Vader
-            mother: null,           // Generatie 1: Moeder
-            paternalGrandfather: null,   // Generatie 2: Paternale grootvader
-            paternalGrandmother: null,   // Generatie 2: Paternale grootmoeder
-            maternalGrandfather: null,   // Generatie 2: Maternale grootvader
-            maternalGrandmother: null,   // Generatie 2: Maternale grootmoeder
-            paternalGreatGrandfather1: null,  // Generatie 3: Paternale overgrootvader (vaders vader)
-            paternalGreatGrandmother1: null,  // Generatie 3: Paternale overgrootmoeder (vaders vader)
-            paternalGreatGrandfather2: null,  // Generatie 3: Paternale overgrootvader (vaders moeder)
-            paternalGreatGrandmother2: null,  // Generatie 3: Paternale overgrootmoeder (vaders moeder)
-            maternalGreatGrandfather1: null,  // Generatie 3: Maternale overgrootvader (moeders vader)
-            maternalGreatGrandmother1: null,  // Generatie 3: Maternale overgrootmoeder (moeders vader)
-            maternalGreatGrandfather2: null,  // Generatie 3: Maternale overgrootvader (moeders moeder)
-            maternalGreatGrandmother2: null   // Generatie 3: Maternale overgrootmoeder (moeders moeder)
+            mainDog: null,
+            father: null,
+            mother: null,
+            paternalGrandfather: null,
+            paternalGrandmother: null,
+            maternalGrandfather: null,
+            maternalGrandmother: null,
+            paternalGreatGrandfather1: null,
+            paternalGreatGrandmother1: null,
+            paternalGreatGrandfather2: null,
+            paternalGreatGrandmother2: null,
+            maternalGreatGrandfather1: null,
+            maternalGreatGrandmother1: null,
+            maternalGreatGrandfather2: null,
+            maternalGreatGrandmother2: null
         };
         
-        // Haal de hoofdhond op
         const mainDog = this.getDogById(dogId);
         if (!mainDog) return null;
         
         pedigreeTree.mainDog = mainDog;
         
-        // Generatie 1: Ouders
+        // Ouders
         if (mainDog.vaderId) {
             pedigreeTree.father = this.getDogById(mainDog.vaderId);
         }
@@ -231,7 +230,7 @@ class StamboomManager extends BaseModule {
             pedigreeTree.mother = this.getDogById(mainDog.moederId);
         }
         
-        // Generatie 2: Grootouders (paternale kant)
+        // Grootouders - paternale kant
         if (pedigreeTree.father && pedigreeTree.father.vaderId) {
             pedigreeTree.paternalGrandfather = this.getDogById(pedigreeTree.father.vaderId);
         }
@@ -240,7 +239,7 @@ class StamboomManager extends BaseModule {
             pedigreeTree.paternalGrandmother = this.getDogById(pedigreeTree.father.moederId);
         }
         
-        // Generatie 2: Grootouders (maternale kant)
+        // Grootouders - maternale kant
         if (pedigreeTree.mother && pedigreeTree.mother.vaderId) {
             pedigreeTree.maternalGrandfather = this.getDogById(pedigreeTree.mother.vaderId);
         }
@@ -249,7 +248,7 @@ class StamboomManager extends BaseModule {
             pedigreeTree.maternalGrandmother = this.getDogById(pedigreeTree.mother.moederId);
         }
         
-        // Generatie 3: Overgrootouders (paternale vader kant)
+        // Overgrootouders
         if (pedigreeTree.paternalGrandfather && pedigreeTree.paternalGrandfather.vaderId) {
             pedigreeTree.paternalGreatGrandfather1 = this.getDogById(pedigreeTree.paternalGrandfather.vaderId);
         }
@@ -258,7 +257,6 @@ class StamboomManager extends BaseModule {
             pedigreeTree.paternalGreatGrandmother1 = this.getDogById(pedigreeTree.paternalGrandfather.moederId);
         }
         
-        // Generatie 3: Overgrootouders (paternale moeder kant)
         if (pedigreeTree.paternalGrandmother && pedigreeTree.paternalGrandmother.vaderId) {
             pedigreeTree.paternalGreatGrandfather2 = this.getDogById(pedigreeTree.paternalGrandmother.vaderId);
         }
@@ -267,7 +265,6 @@ class StamboomManager extends BaseModule {
             pedigreeTree.paternalGreatGrandmother2 = this.getDogById(pedigreeTree.paternalGrandmother.moederId);
         }
         
-        // Generatie 3: Overgrootouders (maternale vader kant)
         if (pedigreeTree.maternalGrandfather && pedigreeTree.maternalGrandfather.vaderId) {
             pedigreeTree.maternalGreatGrandfather1 = this.getDogById(pedigreeTree.maternalGrandfather.vaderId);
         }
@@ -276,7 +273,6 @@ class StamboomManager extends BaseModule {
             pedigreeTree.maternalGreatGrandmother1 = this.getDogById(pedigreeTree.maternalGrandfather.moederId);
         }
         
-        // Generatie 3: Overgrootouders (maternale moeder kant)
         if (pedigreeTree.maternalGrandmother && pedigreeTree.maternalGrandmother.vaderId) {
             pedigreeTree.maternalGreatGrandfather2 = this.getDogById(pedigreeTree.maternalGrandmother.vaderId);
         }
@@ -290,9 +286,13 @@ class StamboomManager extends BaseModule {
     
     formatDate(dateString) {
         if (!dateString) return '';
-        const date = new Date(dateString);
-        return date.toLocaleDateString(this.currentLang === 'nl' ? 'nl-NL' : 
-                                      this.currentLang === 'de' ? 'de-DE' : 'en-US');
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString(this.currentLang === 'nl' ? 'nl-NL' : 
+                                          this.currentLang === 'de' ? 'de-DE' : 'en-US');
+        } catch {
+            return dateString;
+        }
     }
     
     getHealthBadge(value, type) {
@@ -314,159 +314,255 @@ class StamboomManager extends BaseModule {
         return `<span class="${badgeClass}">${value}</span>`;
     }
     
-    getDogCardHTML(dog, relation = '', isMainDog = false) {
+    // COMPACTE CARD VOOR STAMBOOM
+    getDogCompactCardHTML(dog, relation = '', isMainDog = false) {
         if (!dog) {
             return `
-                <div class="pedigree-card empty">
-                    <div class="pedigree-card-header">
-                        <div class="relation">${relation}</div>
+                <div class="pedigree-card-compact empty" data-dog-id="0">
+                    <div class="pedigree-card-header-compact">
+                        <div class="relation-compact">${relation}</div>
                     </div>
-                    <div class="pedigree-card-body text-center py-4">
-                        <i class="bi bi-question-circle display-4 text-muted opacity-50"></i>
-                        <div class="mt-2">${this.t('noData')}</div>
+                    <div class="pedigree-card-body-compact text-center py-3">
+                        <div class="no-data-text">${this.t('noData')}</div>
                     </div>
                 </div>
             `;
         }
         
-        const genderText = dog.geslacht === 'reuen' ? this.t('male') : 
-                          dog.geslacht === 'teven' ? this.t('female') : this.t('unknown');
+        const genderIcon = dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 
+                          dog.geslacht === 'teven' ? 'bi-gender-female text-danger' : 'bi-question-circle text-secondary';
         
-        // Speciale styling voor hoofdhond
-        const mainDogClass = isMainDog ? 'main-dog' : '';
+        const mainDogClass = isMainDog ? 'main-dog-compact' : '';
         const headerColor = isMainDog ? 'bg-primary' : 'bg-secondary';
         
         return `
-            <div class="pedigree-card ${dog.geslacht === 'reuen' ? 'male' : 'female'} ${mainDogClass}">
-                <div class="pedigree-card-header ${headerColor}">
-                    <div class="relation">
-                        ${relation}
-                        ${isMainDog ? '<div class="main-dog-badge"><i class="bi bi-star-fill"></i></div>' : ''}
+            <div class="pedigree-card-compact ${dog.geslacht === 'reuen' ? 'male' : 'female'} ${mainDogClass}" 
+                 data-dog-id="${dog.id}" 
+                 data-dog-name="${dog.naam || ''}"
+                 data-relation="${relation}">
+                <div class="pedigree-card-header-compact ${headerColor}">
+                    <div class="relation-compact">
+                        <span class="relation-text">${relation}</span>
+                        ${isMainDog ? '<span class="main-dot">★</span>' : ''}
                     </div>
-                    <div class="gender-badge">
-                        <i class="bi ${dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 'bi-gender-female text-danger'}"></i>
+                    <div class="gender-icon-compact">
+                        <i class="bi ${genderIcon}"></i>
                     </div>
                 </div>
-                <div class="pedigree-card-body">
-                    <div class="dog-name mb-2">
-                        <strong>${dog.naam || this.t('unknown')}</strong>
-                        ${dog.kennelnaam ? `<div class="kennel-name text-muted small">${dog.kennelnaam}</div>` : ''}
+                <div class="pedigree-card-body-compact">
+                    <!-- Alleen belangrijke informatie in compacte weergave -->
+                    <div class="dog-name-compact" title="${dog.naam || this.t('unknown')}">
+                        ${dog.naam || this.t('unknown')}
                     </div>
                     
-                    <div class="dog-details">
-                        ${dog.stamboomnr ? `
-                        <div class="detail-row">
-                            <span class="detail-label">${this.t('pedigreeNumber')}:</span>
-                            <span class="detail-value">${dog.stamboomnr}</span>
-                        </div>
-                        ` : ''}
-                        
-                        ${dog.ras ? `
-                        <div class="detail-row">
-                            <span class="detail-label">${this.t('breed')}:</span>
-                            <span class="detail-value">${dog.ras}</span>
-                        </div>
-                        ` : ''}
-                        
-                        <div class="detail-row">
-                            <span class="detail-label">${this.t('gender')}:</span>
-                            <span class="detail-value">${genderText}</span>
-                        </div>
-                        
-                        ${dog.vachtkleur ? `
-                        <div class="detail-row">
-                            <span class="detail-label">${this.t('coatColor')}:</span>
-                            <span class="detail-value">${dog.vachtkleur}</span>
-                        </div>
-                        ` : ''}
-                        
-                        ${dog.geboortedatum ? `
-                        <div class="detail-row">
-                            <span class="detail-label">${this.t('birthDate')}:</span>
-                            <span class="detail-value">${this.formatDate(dog.geboortedatum)}</span>
-                        </div>
-                        ` : ''}
-                        
-                        ${dog.overlijdensdatum ? `
-                        <div class="detail-row">
-                            <span class="detail-label">${this.t('deathDate')}:</span>
-                            <span class="detail-value">${this.formatDate(dog.overlijdensdatum)}</span>
-                        </div>
-                        ` : ''}
+                    ${dog.kennelnaam ? `
+                    <div class="dog-kennel-compact" title="${dog.kennelnaam}">
+                        ${dog.kennelnaam}
                     </div>
+                    ` : ''}
                     
-                    <div class="health-info mt-3">
-                        <div class="health-title mb-2">${this.t('healthInfo')}:</div>
-                        <div class="health-badges">
-                            ${dog.heupdysplasie ? `
-                            <div class="health-badge-item">
-                                <span class="badge-label">${this.t('hipDysplasia')}:</span>
-                                ${this.getHealthBadge(dog.heupdysplasie, 'hip')}
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.elleboogdysplasie ? `
-                            <div class="health-badge-item">
-                                <span class="badge-label">${this.t('elbowDysplasia')}:</span>
-                                ${this.getHealthBadge(dog.elleboogdysplasie, 'elbow')}
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.patella ? `
-                            <div class="health-badge-item">
-                                <span class="badge-label">${this.t('patellaLuxation')}:</span>
-                                ${this.getHealthBadge(dog.patella, 'patella')}
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.ogen ? `
-                            <div class="health-badge-item">
-                                <span class="badge-label">${this.t('eyes')}:</span>
-                                ${this.getHealthBadge(dog.ogen, 'eyes')}
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.dandyWalker ? `
-                            <div class="health-badge-item">
-                                <span class="badge-label">${this.t('dandyWalker')}:</span>
-                                ${this.getHealthBadge(dog.dandyWalker, 'dandy')}
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.schildklier ? `
-                            <div class="health-badge-item">
-                                <span class="badge-label">${this.t('thyroid')}:</span>
-                                ${this.getHealthBadge(dog.schildklier, 'thyroid')}
-                            </div>
-                            ` : ''}
-                        </div>
+                    ${dog.stamboomnr ? `
+                    <div class="dog-pedigree-compact">
+                        ${dog.stamboomnr}
+                    </div>
+                    ` : ''}
+                    
+                    ${dog.ras ? `
+                    <div class="dog-breed-compact">
+                        ${dog.ras}
+                    </div>
+                    ` : ''}
+                    
+                    <!-- Klik hint -->
+                    <div class="click-hint-compact">
+                        <i class="bi bi-info-circle"></i> ${this.t('clickForDetails')}
                     </div>
                 </div>
             </div>
         `;
     }
     
+    // DETAIL POPUP voor wanneer op card geklikt wordt
+    getDogDetailPopupHTML(dog, relation = '') {
+        if (!dog) return '';
+        
+        const genderText = dog.geslacht === 'reuen' ? this.t('male') : 
+                          dog.geslacht === 'teven' ? this.t('female') : this.t('unknown');
+        
+        return `
+            <div class="dog-detail-popup">
+                <div class="popup-header">
+                    <h5 class="popup-title">
+                        <i class="bi ${dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 'bi-gender-female text-danger'} me-2"></i>
+                        ${relation}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white popup-close"></button>
+                </div>
+                <div class="popup-body">
+                    <div class="dog-popup-name mb-2">
+                        <h4>${dog.naam || this.t('unknown')}</h4>
+                        ${dog.kennelnaam ? `<div class="text-muted">${dog.kennelnaam}</div>` : ''}
+                    </div>
+                    
+                    <div class="info-section mb-3">
+                        <h6><i class="bi bi-card-text me-1"></i> Basisgegevens</h6>
+                        <div class="info-grid">
+                            ${dog.stamboomnr ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('pedigreeNumber')}:</span>
+                                <span class="info-value">${dog.stamboomnr}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.ras ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('breed')}:</span>
+                                <span class="info-value">${dog.ras}</span>
+                            </div>
+                            ` : ''}
+                            
+                            <div class="info-item">
+                                <span class="info-label">${this.t('gender')}:</span>
+                                <span class="info-value">${genderText}</span>
+                            </div>
+                            
+                            ${dog.vachtkleur ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('coatColor')}:</span>
+                                <span class="info-value">${dog.vachtkleur}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.geboortedatum ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('birthDate')}:</span>
+                                <span class="info-value">${this.formatDate(dog.geboortedatum)}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.overlijdensdatum ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('deathDate')}:</span>
+                                <span class="info-value">${this.formatDate(dog.overlijdensdatum)}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.land ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('country')}:</span>
+                                <span class="info-value">${dog.land}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.postcode ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('zipCode')}:</span>
+                                <span class="info-value">${dog.postcode}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="info-section mb-3">
+                        <h6><i class="bi bi-heart-pulse me-1"></i> ${this.t('healthInfo')}</h6>
+                        <div class="info-grid">
+                            ${dog.heupdysplasie ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('hipDysplasia')}:</span>
+                                <span class="info-value">${this.getHealthBadge(dog.heupdysplasie, 'hip')}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.elleboogdysplasie ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('elbowDysplasia')}:</span>
+                                <span class="info-value">${this.getHealthBadge(dog.elleboogdysplasie, 'elbow')}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.patella ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('patellaLuxation')}:</span>
+                                <span class="info-value">${this.getHealthBadge(dog.patella, 'patella')}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.ogen ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('eyes')}:</span>
+                                <span class="info-value">${this.getHealthBadge(dog.ogen, 'eyes')}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.ogenVerklaring ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('eyesExplanation')}:</span>
+                                <span class="info-value">${dog.ogenVerklaring}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.dandyWalker ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('dandyWalker')}:</span>
+                                <span class="info-value">${this.getHealthBadge(dog.dandyWalker, 'dandy')}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.schildklier ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('thyroid')}:</span>
+                                <span class="info-value">${this.getHealthBadge(dog.schildklier, 'thyroid')}</span>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.schildklierVerklaring ? `
+                            <div class="info-item">
+                                <span class="info-label">${this.t('thyroidExplanation')}:</span>
+                                <span class="info-value">${dog.schildklierVerklaring}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    ${dog.opmerkingen ? `
+                    <div class="info-section mb-3">
+                        <h6><i class="bi bi-chat-text me-1"></i> ${this.t('remarks')}</h6>
+                        <div class="remarks-box">
+                            ${dog.opmerkingen}
+                        </div>
+                    </div>
+                    ` : `
+                    <div class="info-section mb-3">
+                        <h6><i class="bi bi-chat-text me-1"></i> ${this.t('remarks')}</h6>
+                        <div class="text-muted">${this.t('noRemarks')}</div>
+                    </div>
+                    `}
+                </div>
+                <div class="popup-footer">
+                    <button type="button" class="btn btn-secondary popup-close-btn">
+                        <i class="bi bi-x-circle me-1"></i> ${this.t('closePopup')}
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+    
     showPedigree(dog) {
-        // Maak modal HTML als die nog niet bestaat
         if (!document.getElementById('pedigreeModal')) {
             this.createPedigreeModal();
         }
         
-        // Bouw de stamboom
         const pedigreeTree = this.buildPedigreeTree(dog.id);
         if (!pedigreeTree) {
             this.showError("Kon stamboom niet genereren");
             return;
         }
         
-        // Update modal titel
         const title = this.t('pedigreeTitle').replace('{name}', dog.naam || this.t('unknown'));
         document.getElementById('pedigreeModalLabel').textContent = title;
         
-        // Vul de stamboom in - NIEUWE LAYOUT MET HOOFDHOND BOVENAAN
-        this.renderPedigree(pedigreeTree);
+        this.renderCompactPedigree(pedigreeTree);
         
-        // Toon de modal
         const modal = new bootstrap.Modal(document.getElementById('pedigreeModal'));
         modal.show();
     }
@@ -488,7 +584,7 @@ class StamboomManager extends BaseModule {
                             </div>
                         </div>
                         <div class="modal-body p-0">
-                            <div class="pedigree-container" id="pedigreeContainer">
+                            <div class="pedigree-container-compact" id="pedigreeContainer">
                                 <div class="text-center py-5">
                                     <div class="spinner-border text-primary" role="status">
                                         <span class="visually-hidden">${this.t('generatingPedigree')}</span>
@@ -500,13 +596,13 @@ class StamboomManager extends BaseModule {
                         <div class="modal-footer">
                             <div class="zoom-controls me-auto">
                                 <button class="btn btn-sm btn-outline-secondary btn-zoom-out">
-                                    <i class="bi bi-zoom-out"></i>
+                                    <i class="bi bi-dash-lg"></i>
                                 </button>
                                 <button class="btn btn-sm btn-outline-secondary btn-zoom-reset mx-2">
-                                    <i class="bi bi-zoom-in"></i> 100%
+                                    100%
                                 </button>
                                 <button class="btn btn-sm btn-outline-secondary btn-zoom-in">
-                                    <i class="bi bi-zoom-in"></i>
+                                    <i class="bi bi-plus-lg"></i>
                                 </button>
                             </div>
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -517,230 +613,420 @@ class StamboomManager extends BaseModule {
                 </div>
             </div>
             
+            <!-- Popup overlay voor hond details -->
+            <div class="pedigree-popup-overlay" id="pedigreePopupOverlay" style="display: none;">
+                <div class="pedigree-popup-container" id="pedigreePopupContainer">
+                    <!-- Hier komt de popup content -->
+                </div>
+            </div>
+            
             <style>
-                .pedigree-container {
-                    padding: 20px;
+                /* MOBILE-FRIENDLY COMPACT STYLES */
+                .pedigree-container-compact {
+                    padding: 15px;
                     background: #f8f9fa;
-                    min-height: 600px;
+                    min-height: 500px;
                     overflow: auto;
                     transition: transform 0.3s;
                 }
                 
-                .pedigree-grid {
+                .pedigree-grid-compact {
                     display: grid;
-                    grid-template-columns: repeat(15, 1fr);
-                    grid-template-rows: repeat(8, auto);
-                    gap: 15px;
-                    min-width: 1400px;
+                    grid-template-columns: repeat(5, 1fr);
+                    grid-auto-rows: minmax(120px, auto);
+                    gap: 8px;
+                    min-width: 100%;
                     transform-origin: top left;
+                    padding: 10px;
                 }
                 
-                .pedigree-card {
+                /* COMPACT CARDS */
+                .pedigree-card-compact {
                     background: white;
-                    border-radius: 8px;
-                    border: 2px solid #dee2e6;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    border-radius: 6px;
+                    border: 1px solid #dee2e6;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
                     overflow: hidden;
-                    transition: all 0.3s;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    min-height: 120px;
+                    display: flex;
+                    flex-direction: column;
                 }
                 
-                .pedigree-card:hover {
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+                .pedigree-card-compact:hover {
+                    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
                     transform: translateY(-2px);
                 }
                 
-                .pedigree-card.male {
-                    border-color: #cfe2ff;
-                    background: linear-gradient(to bottom, #ffffff, #f0f7ff);
+                .pedigree-card-compact.male {
+                    border-left: 3px solid #0d6efd;
                 }
                 
-                .pedigree-card.female {
-                    border-color: #f8d7da;
-                    background: linear-gradient(to bottom, #ffffff, #fff0f3);
+                .pedigree-card-compact.female {
+                    border-left: 3px solid #dc3545;
                 }
                 
-                .pedigree-card.empty {
-                    border-color: #e9ecef;
+                .pedigree-card-compact.main-dog-compact {
+                    border: 2px solid #0d6efd;
+                    background: #f0f7ff;
+                }
+                
+                .pedigree-card-compact.empty {
                     background: #f8f9fa;
+                    cursor: default;
+                    opacity: 0.6;
                 }
                 
-                /* Hoofdhond styling */
-                .pedigree-card.main-dog {
-                    border-color: #0d6efd;
-                    border-width: 3px;
-                    background: linear-gradient(to bottom, #e8f4fd, #ffffff);
-                    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+                .pedigree-card-compact.empty:hover {
+                    transform: none;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
                 }
                 
-                .pedigree-card-header {
+                /* Card header */
+                .pedigree-card-header-compact {
                     color: white;
-                    padding: 10px 12px;
+                    padding: 6px 8px;
+                    font-size: 0.7rem;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    min-height: 28px;
+                }
+                
+                .pedigree-card-header-compact.bg-primary {
+                    background: #0d6efd !important;
+                }
+                
+                .pedigree-card-header-compact.bg-secondary {
+                    background: #6c757d !important;
+                }
+                
+                .relation-compact {
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    font-weight: 600;
+                    overflow: hidden;
+                }
+                
+                .relation-text {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    flex: 1;
+                }
+                
+                .main-dot {
+                    color: #ffc107;
+                    font-size: 0.8rem;
+                }
+                
+                .gender-icon-compact {
+                    font-size: 0.8rem;
+                    flex-shrink: 0;
+                }
+                
+                /* Card body */
+                .pedigree-card-body-compact {
+                    padding: 8px;
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                }
+                
+                .dog-name-compact {
+                    font-weight: 600;
                     font-size: 0.85rem;
+                    color: #0d6efd;
+                    margin-bottom: 2px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                
+                .dog-kennel-compact {
+                    font-size: 0.75rem;
+                    color: #6c757d;
+                    font-style: italic;
+                    margin-bottom: 2px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                
+                .dog-pedigree-compact {
+                    font-size: 0.75rem;
+                    font-weight: 600;
+                    color: #495057;
+                    margin-bottom: 2px;
+                }
+                
+                .dog-breed-compact {
+                    font-size: 0.75rem;
+                    color: #28a745;
+                    margin-bottom: 4px;
+                }
+                
+                .no-data-text {
+                    font-size: 0.8rem;
+                    color: #6c757d;
+                    font-style: italic;
+                }
+                
+                .click-hint-compact {
+                    font-size: 0.65rem;
+                    color: #6c757d;
+                    margin-top: auto;
+                    display: flex;
+                    align-items: center;
+                    gap: 3px;
+                }
+                
+                /* Grid positions for mobile-first design */
+                /* Generation 0: Main dog - center top */
+                .gen0-compact { grid-column: 1 / -1; grid-row: 1; }
+                
+                /* Generation 1: Parents - two columns */
+                .gen1-father-compact { grid-column: 1 / 3; grid-row: 2; }
+                .gen1-mother-compact { grid-column: 4 / 6; grid-row: 2; }
+                
+                /* Generation 2: Grandparents - four columns */
+                .gen2-paternal-grandfather-compact { grid-column: 1 / 2; grid-row: 3; }
+                .gen2-paternal-grandmother-compact { grid-column: 2 / 3; grid-row: 3; }
+                .gen2-maternal-grandfather-compact { grid-column: 4 / 5; grid-row: 3; }
+                .gen2-maternal-grandmother-compact { grid-column: 5 / 6; grid-row: 3; }
+                
+                /* Generation 3: Great-grandparents - eight columns spread over two rows */
+                .gen3-paternal-great-grandfather1-compact { grid-column: 1; grid-row: 4; }
+                .gen3-paternal-great-grandmother1-compact { grid-column: 1; grid-row: 5; }
+                .gen3-paternal-great-grandfather2-compact { grid-column: 2; grid-row: 4; }
+                .gen3-paternal-great-grandmother2-compact { grid-column: 2; grid-row: 5; }
+                .gen3-maternal-great-grandfather1-compact { grid-column: 4; grid-row: 4; }
+                .gen3-maternal-great-grandmother1-compact { grid-column: 4; grid-row: 5; }
+                .gen3-maternal-great-grandfather2-compact { grid-column: 5; grid-row: 4; }
+                .gen3-maternal-great-grandmother2-compact { grid-column: 5; grid-row: 5; }
+                
+                /* For larger screens - adjust columns */
+                @media (min-width: 768px) {
+                    .pedigree-grid-compact {
+                        grid-template-columns: repeat(9, 1fr);
+                        gap: 10px;
+                    }
+                    
+                    /* Generation 0 */
+                    .gen0-compact { grid-column: 4 / 7; grid-row: 1; }
+                    
+                    /* Generation 1 */
+                    .gen1-father-compact { grid-column: 2 / 4; grid-row: 2; }
+                    .gen1-mother-compact { grid-column: 6 / 8; grid-row: 2; }
+                    
+                    /* Generation 2 */
+                    .gen2-paternal-grandfather-compact { grid-column: 1 / 3; grid-row: 3; }
+                    .gen2-paternal-grandmother-compact { grid-column: 3 / 5; grid-row: 3; }
+                    .gen2-maternal-grandfather-compact { grid-column: 5 / 7; grid-row: 3; }
+                    .gen2-maternal-grandmother-compact { grid-column: 7 / 9; grid-row: 3; }
+                    
+                    /* Generation 3 */
+                    .gen3-paternal-great-grandfather1-compact { grid-column: 1 / 2; grid-row: 4; }
+                    .gen3-paternal-great-grandmother1-compact { grid-column: 2 / 3; grid-row: 4; }
+                    .gen3-paternal-great-grandfather2-compact { grid-column: 3 / 4; grid-row: 4; }
+                    .gen3-paternal-great-grandmother2-compact { grid-column: 4 / 5; grid-row: 4; }
+                    .gen3-maternal-great-grandfather1-compact { grid-column: 5 / 6; grid-row: 4; }
+                    .gen3-maternal-great-grandmother1-compact { grid-column: 6 / 7; grid-row: 4; }
+                    .gen3-maternal-great-grandfather2-compact { grid-column: 7 / 8; grid-row: 4; }
+                    .gen3-maternal-great-grandmother2-compact { grid-column: 8 / 9; grid-row: 4; }
+                }
+                
+                @media (min-width: 1200px) {
+                    .pedigree-grid-compact {
+                        grid-template-columns: repeat(15, 1fr);
+                    }
+                    
+                    /* Generation 0 */
+                    .gen0-compact { grid-column: 7 / 10; grid-row: 1; }
+                    
+                    /* Generation 1 */
+                    .gen1-father-compact { grid-column: 3 / 6; grid-row: 2; }
+                    .gen1-mother-compact { grid-column: 11 / 14; grid-row: 2; }
+                    
+                    /* Generation 2 */
+                    .gen2-paternal-grandfather-compact { grid-column: 1 / 4; grid-row: 3; }
+                    .gen2-paternal-grandmother-compact { grid-column: 5 / 8; grid-row: 3; }
+                    .gen2-maternal-grandfather-compact { grid-column: 10 / 13; grid-row: 3; }
+                    .gen2-maternal-grandmother-compact { grid-column: 14 / 17; grid-row: 3; }
+                    
+                    /* Generation 3 */
+                    .gen3-paternal-great-grandfather1-compact { grid-column: 1 / 3; grid-row: 4; }
+                    .gen3-paternal-great-grandmother1-compact { grid-column: 3 / 5; grid-row: 4; }
+                    .gen3-paternal-great-grandfather2-compact { grid-column: 5 / 7; grid-row: 4; }
+                    .gen3-paternal-great-grandmother2-compact { grid-column: 7 / 9; grid-row: 4; }
+                    .gen3-maternal-great-grandfather1-compact { grid-column: 10 / 12; grid-row: 4; }
+                    .gen3-maternal-great-grandmother1-compact { grid-column: 12 / 14; grid-row: 4; }
+                    .gen3-maternal-great-grandfather2-compact { grid-column: 14 / 16; grid-row: 4; }
+                    .gen3-maternal-great-grandmother2-compact { grid-column: 16 / 18; grid-row: 4; }
+                }
+                
+                /* POPUP STYLES */
+                .pedigree-popup-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.7);
+                    z-index: 1060;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 20px;
+                    animation: fadeIn 0.3s;
+                }
+                
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                
+                .pedigree-popup-container {
+                    background: white;
+                    border-radius: 10px;
+                    max-width: 500px;
+                    width: 100%;
+                    max-height: 90vh;
+                    overflow-y: auto;
+                    animation: slideUp 0.3s;
+                    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+                }
+                
+                @keyframes slideUp {
+                    from { 
+                        opacity: 0;
+                        transform: translateY(20px);
+                    }
+                    to { 
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                
+                .dog-detail-popup {
+                    display: flex;
+                    flex-direction: column;
+                    height: 100%;
+                }
+                
+                .popup-header {
+                    background: #0d6efd;
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 10px 10px 0 0;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
                 }
                 
-                .pedigree-card-header.bg-primary {
-                    background: #0d6efd !important;
-                }
-                
-                .pedigree-card-header.bg-secondary {
-                    background: #6c757d !important;
-                }
-                
-                .relation {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    font-weight: 600;
-                }
-                
-                .main-dog-badge {
-                    background: #ffc107;
-                    color: #212529;
-                    border-radius: 50%;
-                    width: 20px;
-                    height: 20px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 0.7rem;
-                }
-                
-                .pedigree-card-body {
-                    padding: 15px;
-                }
-                
-                .dog-name {
-                    font-size: 1.1rem;
-                    font-weight: 600;
-                    color: #0d6efd;
-                }
-                
-                .main-dog .dog-name {
-                    color: #0d6efd;
+                .popup-title {
+                    margin: 0;
                     font-size: 1.2rem;
-                }
-                
-                .kennel-name {
-                    font-style: italic;
-                    color: #6c757d;
-                }
-                
-                .detail-row {
-                    display: flex;
-                    margin-bottom: 4px;
-                    font-size: 0.85rem;
-                }
-                
-                .detail-label {
-                    font-weight: 600;
-                    color: #495057;
-                    width: 110px;
-                    min-width: 110px;
-                }
-                
-                .detail-value {
-                    color: #212529;
-                    flex: 1;
-                }
-                
-                .health-info {
-                    border-top: 1px solid #dee2e6;
-                    padding-top: 8px;
-                    margin-top: 8px;
-                }
-                
-                .health-title {
-                    font-size: 0.85rem;
-                    font-weight: 600;
-                    color: #495057;
-                }
-                
-                .health-badges {
-                    display: grid;
-                    grid-template-columns: repeat(2, 1fr);
-                    gap: 4px;
-                }
-                
-                .health-badge-item {
                     display: flex;
                     align-items: center;
-                    gap: 4px;
                 }
                 
-                .badge-label {
-                    font-size: 0.75rem;
-                    color: #6c757d;
-                    white-space: nowrap;
+                .popup-close {
+                    background: none;
+                    border: none;
+                    font-size: 1.5rem;
+                    cursor: pointer;
+                    opacity: 0.8;
                 }
                 
-                /* NIEUWE LAYOUT: Generatie 0 bovenaan (rij 1) */
-                .gen0 { grid-column: 7 / 10; grid-row: 1 / 3; }
-                
-                /* Generatie 1: Ouders (rij 2-3) */
-                .gen1-father { grid-column: 3 / 6; grid-row: 3 / 5; }
-                .gen1-mother { grid-column: 11 / 14; grid-row: 3 / 5; }
-                
-                /* Generatie 2: Grootouders (rij 4-5) */
-                .gen2-paternal-grandfather { grid-column: 1 / 4; grid-row: 5 / 7; }
-                .gen2-paternal-grandmother { grid-column: 5 / 8; grid-row: 5 / 7; }
-                .gen2-maternal-grandfather { grid-column: 10 / 13; grid-row: 5 / 7; }
-                .gen2-maternal-grandmother { grid-column: 14 / 17; grid-row: 5 / 7; }
-                
-                /* Generatie 3: Overgrootouders (rij 6-8) */
-                .gen3-paternal-great-grandfather1 { grid-column: 1 / 3; grid-row: 7 / 9; }
-                .gen3-paternal-great-grandmother1 { grid-column: 3 / 5; grid-row: 7 / 9; }
-                .gen3-paternal-great-grandfather2 { grid-column: 5 / 7; grid-row: 7 / 9; }
-                .gen3-paternal-great-grandmother2 { grid-column: 7 / 9; grid-row: 7 / 9; }
-                .gen3-maternal-great-grandfather1 { grid-column: 10 / 12; grid-row: 7 / 9; }
-                .gen3-maternal-great-grandmother1 { grid-column: 12 / 14; grid-row: 7 / 9; }
-                .gen3-maternal-great-grandfather2 { grid-column: 14 / 16; grid-row: 7 / 9; }
-                .gen3-maternal-great-grandmother2 { grid-column: 16 / 18; grid-row: 7 / 9; }
-                
-                /* Verbindingslijnen styling */
-                .pedigree-lines {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    pointer-events: none;
-                    z-index: -1;
+                .popup-close:hover {
+                    opacity: 1;
                 }
                 
-                .line {
-                    position: absolute;
-                    background-color: #6c757d;
+                .popup-body {
+                    padding: 20px;
+                    flex: 1;
+                    overflow-y: auto;
                 }
                 
-                .line.horizontal {
-                    height: 2px;
+                .dog-popup-name h4 {
+                    color: #0d6efd;
+                    margin-bottom: 5px;
                 }
                 
-                .line.vertical {
-                    width: 2px;
+                .info-section {
+                    margin-bottom: 20px;
                 }
                 
-                .zoom-controls .btn {
-                    padding: 4px 8px;
-                    font-size: 0.875rem;
+                .info-section h6 {
+                    color: #495057;
+                    margin-bottom: 10px;
+                    padding-bottom: 5px;
+                    border-bottom: 1px solid #dee2e6;
+                    display: flex;
+                    align-items: center;
                 }
                 
-                /* Generatie labels */
-                .generation-label {
-                    grid-column: 1 / -1;
-                    text-align: center;
-                    padding: 5px;
-                    background: #f8f9fa;
-                    border-radius: 4px;
-                    margin: 5px 0;
+                .info-grid {
+                    display: grid;
+                    grid-template-columns: 1fr;
+                    gap: 8px;
+                }
+                
+                @media (min-width: 576px) {
+                    .info-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                    }
+                }
+                
+                .info-item {
+                    display: flex;
+                    flex-direction: column;
+                    padding: 5px 0;
+                }
+                
+                .info-label {
                     font-weight: 600;
                     color: #495057;
                     font-size: 0.9rem;
+                    margin-bottom: 2px;
                 }
                 
+                .info-value {
+                    color: #212529;
+                    font-size: 0.95rem;
+                }
+                
+                .remarks-box {
+                    background: #f8f9fa;
+                    border: 1px solid #dee2e6;
+                    padding: 10px;
+                    border-radius: 5px;
+                    font-style: italic;
+                    color: #495057;
+                }
+                
+                .popup-footer {
+                    padding: 15px 20px;
+                    border-top: 1px solid #dee2e6;
+                    display: flex;
+                    justify-content: flex-end;
+                }
+                
+                .popup-close-btn {
+                    min-width: 100px;
+                }
+                
+                /* Zoom controls */
+                .zoom-controls .btn {
+                    padding: 4px 10px;
+                    font-size: 0.875rem;
+                }
+                
+                /* Print styles */
                 @media print {
                     .modal-dialog {
                         max-width: none;
@@ -751,24 +1037,20 @@ class StamboomManager extends BaseModule {
                         display: none !important;
                     }
                     
-                    .pedigree-container {
+                    .pedigree-container-compact {
                         padding: 0;
                         background: white;
                     }
                     
-                    .pedigree-grid {
-                        gap: 8px;
-                        min-width: auto;
-                    }
-                    
-                    .pedigree-card {
+                    .pedigree-card-compact {
                         break-inside: avoid;
                         box-shadow: none;
-                        border: 1px solid #dee2e6;
+                        border: 1px solid #ccc !important;
+                        min-height: 100px;
                     }
                     
-                    .main-dog {
-                        border: 2px solid #0d6efd !important;
+                    .main-dog-compact {
+                        border: 2px solid #000 !important;
                     }
                 }
             </style>
@@ -791,141 +1073,169 @@ class StamboomManager extends BaseModule {
         }
         
         // Zoom functionaliteit
-        let currentZoom = 1;
-        const container = modal.querySelector('#pedigreeContainer');
-        
         const setupZoom = () => {
-            const grid = container.querySelector('.pedigree-grid');
-            if (grid) {
-                modal.querySelector('.btn-zoom-in').addEventListener('click', () => {
-                    currentZoom = Math.min(currentZoom + 0.1, 2);
+            const container = document.getElementById('pedigreeContainer');
+            const grid = container.querySelector('.pedigree-grid-compact');
+            if (!grid) return;
+            
+            let currentZoom = 1;
+            
+            const zoomInBtn = modal.querySelector('.btn-zoom-in');
+            const zoomOutBtn = modal.querySelector('.btn-zoom-out');
+            const zoomResetBtn = modal.querySelector('.btn-zoom-reset');
+            
+            if (zoomInBtn) {
+                zoomInBtn.addEventListener('click', () => {
+                    currentZoom = Math.min(currentZoom + 0.1, 1.5);
                     grid.style.transform = `scale(${currentZoom})`;
                 });
-                
-                modal.querySelector('.btn-zoom-out').addEventListener('click', () => {
-                    currentZoom = Math.max(currentZoom - 0.1, 0.5);
+            }
+            
+            if (zoomOutBtn) {
+                zoomOutBtn.addEventListener('click', () => {
+                    currentZoom = Math.max(currentZoom - 0.1, 0.7);
                     grid.style.transform = `scale(${currentZoom})`;
                 });
-                
-                modal.querySelector('.btn-zoom-reset').addEventListener('click', () => {
+            }
+            
+            if (zoomResetBtn) {
+                zoomResetBtn.addEventListener('click', () => {
                     currentZoom = 1;
                     grid.style.transform = 'scale(1)';
                 });
             }
         };
         
-        // Setup zoom wanneer grid beschikbaar is
+        // Setup zoom when grid is available
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
-                if (container.querySelector('.pedigree-grid')) {
+                if (document.getElementById('pedigreeContainer').querySelector('.pedigree-grid-compact')) {
                     setupZoom();
                     observer.disconnect();
                 }
             });
         });
         
-        observer.observe(container, { childList: true, subtree: true });
+        observer.observe(document.getElementById('pedigreeContainer'), { childList: true, subtree: true });
     }
     
-    renderPedigree(pedigreeTree) {
+    renderCompactPedigree(pedigreeTree) {
         const container = document.getElementById('pedigreeContainer');
         if (!container) return;
         
         const gridHTML = `
-            <div class="pedigree-grid">
+            <div class="pedigree-grid-compact">
                 <!-- Generatie 0: Hoofdhond (bovenaan) -->
-                <div class="pedigree-card gen0 main-dog">
-                    ${this.getDogCardHTML(pedigreeTree.mainDog, this.t('mainDog'), true)}
+                <div class="pedigree-card-compact gen0-compact main-dog-compact">
+                    ${this.getDogCompactCardHTML(pedigreeTree.mainDog, this.t('mainDog'), true)}
                 </div>
                 
                 <!-- Generatie 1: Ouders -->
-                <div class="pedigree-card gen1-father">
-                    ${this.getDogCardHTML(pedigreeTree.father, this.t('father'))}
+                <div class="pedigree-card-compact gen1-father-compact">
+                    ${this.getDogCompactCardHTML(pedigreeTree.father, this.t('father'))}
                 </div>
-                <div class="pedigree-card gen1-mother">
-                    ${this.getDogCardHTML(pedigreeTree.mother, this.t('mother'))}
+                <div class="pedigree-card-compact gen1-mother-compact">
+                    ${this.getDogCompactCardHTML(pedigreeTree.mother, this.t('mother'))}
                 </div>
                 
                 <!-- Generatie 2: Grootouders -->
-                <div class="pedigree-card gen2-paternal-grandfather">
-                    ${this.getDogCardHTML(pedigreeTree.paternalGrandfather, 
-                                          `${this.t('paternal')} ${this.t('grandfather')}`)}
+                <div class="pedigree-card-compact gen2-paternal-grandfather-compact">
+                    ${this.getDogCompactCardHTML(pedigreeTree.paternalGrandfather, this.t('grandfather'))}
                 </div>
-                <div class="pedigree-card gen2-paternal-grandmother">
-                    ${this.getDogCardHTML(pedigreeTree.paternalGrandmother, 
-                                          `${this.t('paternal')} ${this.t('grandmother')}`)}
+                <div class="pedigree-card-compact gen2-paternal-grandmother-compact">
+                    ${this.getDogCompactCardHTML(pedigreeTree.paternalGrandmother, this.t('grandmother'))}
                 </div>
-                <div class="pedigree-card gen2-maternal-grandfather">
-                    ${this.getDogCardHTML(pedigreeTree.maternalGrandfather, 
-                                          `${this.t('maternal')} ${this.t('grandfather')}`)}
+                <div class="pedigree-card-compact gen2-maternal-grandfather-compact">
+                    ${this.getDogCompactCardHTML(pedigreeTree.maternalGrandfather, this.t('grandfather'))}
                 </div>
-                <div class="pedigree-card gen2-maternal-grandmother">
-                    ${this.getDogCardHTML(pedigreeTree.maternalGrandmother, 
-                                          `${this.t('maternal')} ${this.t('grandmother')}`)}
+                <div class="pedigree-card-compact gen2-maternal-grandmother-compact">
+                    ${this.getDogCompactCardHTML(pedigreeTree.maternalGrandmother, this.t('grandmother'))}
                 </div>
                 
                 <!-- Generatie 3: Overgrootouders -->
-                <div class="pedigree-card gen3-paternal-great-grandfather1">
-                    ${this.getDogCardHTML(pedigreeTree.paternalGreatGrandfather1, 
-                                          `${this.t('paternal')} ${this.t('greatGrandfather')}`)}
+                <div class="pedigree-card-compact gen3-paternal-great-grandfather1-compact">
+                    ${this.getDogCompactCardHTML(pedigreeTree.paternalGreatGrandfather1, this.t('greatGrandfather'))}
                 </div>
-                <div class="pedigree-card gen3-paternal-great-grandmother1">
-                    ${this.getDogCardHTML(pedigreeTree.paternalGreatGrandmother1, 
-                                          `${this.t('paternal')} ${this.t('greatGrandmother')}`)}
+                <div class="pedigree-card-compact gen3-paternal-great-grandmother1-compact">
+                    ${this.getDogCompactCardHTML(pedigreeTree.paternalGreatGrandmother1, this.t('greatGrandmother'))}
                 </div>
-                <div class="pedigree-card gen3-paternal-great-grandfather2">
-                    ${this.getDogCardHTML(pedigreeTree.paternalGreatGrandfather2, 
-                                          `${this.t('paternal')} ${this.t('greatGrandfather')}`)}
+                <div class="pedigree-card-compact gen3-paternal-great-grandfather2-compact">
+                    ${this.getDogCompactCardHTML(pedigreeTree.paternalGreatGrandfather2, this.t('greatGrandfather'))}
                 </div>
-                <div class="pedigree-card gen3-paternal-great-grandmother2">
-                    ${this.getDogCardHTML(pedigreeTree.paternalGreatGrandmother2, 
-                                          `${this.t('paternal')} ${this.t('greatGrandmother')}`)}
+                <div class="pedigree-card-compact gen3-paternal-great-grandmother2-compact">
+                    ${this.getDogCompactCardHTML(pedigreeTree.paternalGreatGrandmother2, this.t('greatGrandmother'))}
                 </div>
-                
-                <div class="pedigree-card gen3-maternal-great-grandfather1">
-                    ${this.getDogCardHTML(pedigreeTree.maternalGreatGrandfather1, 
-                                          `${this.t('maternal')} ${this.t('greatGrandfather')}`)}
+                <div class="pedigree-card-compact gen3-maternal-great-grandfather1-compact">
+                    ${this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandfather1, this.t('greatGrandfather'))}
                 </div>
-                <div class="pedigree-card gen3-maternal-great-grandmother1">
-                    ${this.getDogCardHTML(pedigreeTree.maternalGreatGrandmother1, 
-                                          `${this.t('maternal')} ${this.t('greatGrandmother')}`)}
+                <div class="pedigree-card-compact gen3-maternal-great-grandmother1-compact">
+                    ${this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandmother1, this.t('greatGrandmother'))}
                 </div>
-                <div class="pedigree-card gen3-maternal-great-grandfather2">
-                    ${this.getDogCardHTML(pedigreeTree.maternalGreatGrandfather2, 
-                                          `${this.t('maternal')} ${this.t('greatGrandfather')}`)}
+                <div class="pedigree-card-compact gen3-maternal-great-grandfather2-compact">
+                    ${this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandfather2, this.t('greatGrandfather'))}
                 </div>
-                <div class="pedigree-card gen3-maternal-great-grandmother2">
-                    ${this.getDogCardHTML(pedigreeTree.maternalGreatGrandmother2, 
-                                          `${this.t('maternal')} ${this.t('greatGrandmother')}`)}
+                <div class="pedigree-card-compact gen3-maternal-great-grandmother2-compact">
+                    ${this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandmother2, this.t('greatGrandmother'))}
                 </div>
             </div>
         `;
         
         container.innerHTML = gridHTML;
         
-        // Voeg visuele lijnen toe (optioneel)
-        this.addPedigreeLines();
+        // Add click events to cards
+        this.setupCardClickEvents();
     }
     
-    addPedigreeLines() {
-        // Deze functie voegt visuele verbindingslijnen toe tussen de kaarten
-        // Voor nu houden we het simpel, maar je kunt SVG lijnen toevoegen
+    setupCardClickEvents() {
+        const cards = document.querySelectorAll('.pedigree-card-compact:not(.empty)');
+        cards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                const dogId = parseInt(card.getAttribute('data-dog-id'));
+                if (dogId === 0) return; // Skip empty cards
+                
+                const dog = this.getDogById(dogId);
+                if (!dog) return;
+                
+                const relation = card.getAttribute('data-relation') || '';
+                this.showDogDetailPopup(dog, relation);
+            });
+        });
+    }
+    
+    showDogDetailPopup(dog, relation) {
+        const overlay = document.getElementById('pedigreePopupOverlay');
+        const container = document.getElementById('pedigreePopupContainer');
         
-        setTimeout(() => {
-            const container = document.getElementById('pedigreeContainer');
-            const grid = container.querySelector('.pedigree-grid');
-            
-            if (!grid) return;
-            
-            // Maak een div voor de lijnen
-            const linesDiv = document.createElement('div');
-            linesDiv.className = 'pedigree-lines';
-            grid.appendChild(linesDiv);
-            
-            // Hier zou je logica komen om lijnen tussen de kaarten te tekenen
-            // Dit vereist het berekenen van posities van de kaarten
-            
-        }, 100);
+        if (!overlay || !container) return;
+        
+        const popupHTML = this.getDogDetailPopupHTML(dog, relation);
+        container.innerHTML = popupHTML;
+        
+        // Show overlay
+        overlay.style.display = 'flex';
+        
+        // Add close event listeners
+        const closeButtons = container.querySelectorAll('.popup-close, .popup-close-btn');
+        closeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                overlay.style.display = 'none';
+            });
+        });
+        
+        // Close when clicking outside popup
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.style.display = 'none';
+            }
+        });
+        
+        // Close with Escape key
+        document.addEventListener('keydown', function closeOnEscape(e) {
+            if (e.key === 'Escape') {
+                overlay.style.display = 'none';
+                document.removeEventListener('keydown', closeOnEscape);
+            }
+        });
     }
     
     // Helper methodes van BaseModule
