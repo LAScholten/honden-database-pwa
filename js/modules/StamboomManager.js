@@ -1,6 +1,6 @@
 /**
  * Stamboom Manager Module
- * Beheert 4-generatie stambomen voor honden - Compacte versie
+ * Beheert 4-generatie stambomen voor honden - Mobile Optimized
  */
 
 class StamboomManager extends BaseModule {
@@ -32,7 +32,7 @@ class StamboomManager extends BaseModule {
                 greatGrandfather: "Overgrootvader",
                 greatGrandmother: "Overgrootmoeder",
                 
-                // Hond gegevens (voor popup)
+                // Hond gegevens
                 name: "Naam",
                 kennel: "Kennel",
                 pedigreeNumber: "Stamboomnummer",
@@ -89,7 +89,7 @@ class StamboomManager extends BaseModule {
                 greatGrandfather: "Great Grandfather",
                 greatGrandmother: "Great Grandmother",
                 
-                // Dog details (for popup)
+                // Dog details
                 name: "Name",
                 kennel: "Kennel",
                 pedigreeNumber: "Pedigree number",
@@ -146,7 +146,7 @@ class StamboomManager extends BaseModule {
                 greatGrandfather: "Urgroßvater",
                 greatGrandmother: "Urgroßmutter",
                 
-                // Hund Details (für Popup)
+                // Hund Details
                 name: "Name",
                 kennel: "Kennel",
                 pedigreeNumber: "Stammbaum-Nummer",
@@ -230,7 +230,7 @@ class StamboomManager extends BaseModule {
             pedigreeTree.mother = this.getDogById(mainDog.moederId);
         }
         
-        // Grootouders - paternale kant
+        // Grootouders
         if (pedigreeTree.father && pedigreeTree.father.vaderId) {
             pedigreeTree.paternalGrandfather = this.getDogById(pedigreeTree.father.vaderId);
         }
@@ -239,7 +239,6 @@ class StamboomManager extends BaseModule {
             pedigreeTree.paternalGrandmother = this.getDogById(pedigreeTree.father.moederId);
         }
         
-        // Grootouders - maternale kant
         if (pedigreeTree.mother && pedigreeTree.mother.vaderId) {
             pedigreeTree.maternalGrandfather = this.getDogById(pedigreeTree.mother.vaderId);
         }
@@ -621,9 +620,9 @@ class StamboomManager extends BaseModule {
             </div>
             
             <style>
-                /* MOBILE-FRIENDLY COMPACT STYLES */
+                /* MOBILE-FIRST COMPACT STYLES - VERBETERDE MOBIEL LAYOUT */
                 .pedigree-container-compact {
-                    padding: 15px;
+                    padding: 10px;
                     background: #f8f9fa;
                     min-height: 500px;
                     overflow: auto;
@@ -632,12 +631,13 @@ class StamboomManager extends BaseModule {
                 
                 .pedigree-grid-compact {
                     display: grid;
-                    grid-template-columns: repeat(5, 1fr);
-                    grid-auto-rows: minmax(120px, auto);
+                    grid-template-columns: 1fr;
+                    grid-auto-rows: minmax(110px, auto);
                     gap: 8px;
-                    min-width: 100%;
+                    width: 100%;
+                    max-width: 100%;
                     transform-origin: top left;
-                    padding: 10px;
+                    padding: 5px;
                 }
                 
                 /* COMPACT CARDS */
@@ -649,9 +649,10 @@ class StamboomManager extends BaseModule {
                     overflow: hidden;
                     cursor: pointer;
                     transition: all 0.2s;
-                    min-height: 120px;
+                    min-height: 110px;
                     display: flex;
                     flex-direction: column;
+                    width: 100%;
                 }
                 
                 .pedigree-card-compact:hover {
@@ -691,7 +692,7 @@ class StamboomManager extends BaseModule {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    min-height: 28px;
+                    min-height: 26px;
                 }
                 
                 .pedigree-card-header-compact.bg-primary {
@@ -784,91 +785,124 @@ class StamboomManager extends BaseModule {
                     gap: 3px;
                 }
                 
-                /* Grid positions for mobile-first design */
-                /* Generation 0: Main dog - center top */
-                .gen0-compact { grid-column: 1 / -1; grid-row: 1; }
+                /* MOBIEL LAYOUT - FULL WIDTH VOOR ALLE GENERATIES */
+                /* Generation 0: Main dog - full width */
+                .gen0-compact { grid-column: 1; grid-row: 1; }
                 
-                /* Generation 1: Parents - two columns */
-                .gen1-father-compact { grid-column: 1 / 3; grid-row: 2; }
-                .gen1-mother-compact { grid-column: 4 / 6; grid-row: 2; }
+                /* Generation 1: Parents - beide full width onder elkaar */
+                .gen1-father-compact { grid-column: 1; grid-row: 2; }
+                .gen1-mother-compact { grid-column: 1; grid-row: 3; }
                 
-                /* Generation 2: Grandparents - four columns */
-                .gen2-paternal-grandfather-compact { grid-column: 1 / 2; grid-row: 3; }
-                .gen2-paternal-grandmother-compact { grid-column: 2 / 3; grid-row: 3; }
-                .gen2-maternal-grandfather-compact { grid-column: 4 / 5; grid-row: 3; }
-                .gen2-maternal-grandmother-compact { grid-column: 5 / 6; grid-row: 3; }
+                /* Generation 2: Grandparents - allemaal full width onder elkaar */
+                .gen2-paternal-grandfather-compact { grid-column: 1; grid-row: 4; }
+                .gen2-paternal-grandmother-compact { grid-column: 1; grid-row: 5; }
+                .gen2-maternal-grandfather-compact { grid-column: 1; grid-row: 6; }
+                .gen2-maternal-grandmother-compact { grid-column: 1; grid-row: 7; }
                 
-                /* Generation 3: Great-grandparents - eight columns spread over two rows */
-                .gen3-paternal-great-grandfather1-compact { grid-column: 1; grid-row: 4; }
-                .gen3-paternal-great-grandmother1-compact { grid-column: 1; grid-row: 5; }
-                .gen3-paternal-great-grandfather2-compact { grid-column: 2; grid-row: 4; }
-                .gen3-paternal-great-grandmother2-compact { grid-column: 2; grid-row: 5; }
-                .gen3-maternal-great-grandfather1-compact { grid-column: 4; grid-row: 4; }
-                .gen3-maternal-great-grandmother1-compact { grid-column: 4; grid-row: 5; }
-                .gen3-maternal-great-grandfather2-compact { grid-column: 5; grid-row: 4; }
-                .gen3-maternal-great-grandmother2-compact { grid-column: 5; grid-row: 5; }
+                /* Generation 3: Great-grandparents - allemaal full width onder elkaar */
+                .gen3-paternal-great-grandfather1-compact { grid-column: 1; grid-row: 8; }
+                .gen3-paternal-great-grandmother1-compact { grid-column: 1; grid-row: 9; }
+                .gen3-paternal-great-grandfather2-compact { grid-column: 1; grid-row: 10; }
+                .gen3-paternal-great-grandmother2-compact { grid-column: 1; grid-row: 11; }
+                .gen3-maternal-great-grandfather1-compact { grid-column: 1; grid-row: 12; }
+                .gen3-maternal-great-grandmother1-compact { grid-column: 1; grid-row: 13; }
+                .gen3-maternal-great-grandfather2-compact { grid-column: 1; grid-row: 14; }
+                .gen3-maternal-great-grandmother2-compact { grid-column: 1; grid-row: 15; }
                 
-                /* For larger screens - adjust columns */
-                @media (min-width: 768px) {
+                /* TABLET LAYOUT (2 kolommen) */
+                @media (min-width: 576px) {
                     .pedigree-grid-compact {
-                        grid-template-columns: repeat(9, 1fr);
+                        grid-template-columns: repeat(2, 1fr);
                         gap: 10px;
                     }
                     
-                    /* Generation 0 */
-                    .gen0-compact { grid-column: 4 / 7; grid-row: 1; }
+                    /* Generation 0: Main dog - full width boven */
+                    .gen0-compact { grid-column: 1 / -1; grid-row: 1; }
                     
-                    /* Generation 1 */
-                    .gen1-father-compact { grid-column: 2 / 4; grid-row: 2; }
-                    .gen1-mother-compact { grid-column: 6 / 8; grid-row: 2; }
+                    /* Generation 1: Parents - naast elkaar op rij 2 */
+                    .gen1-father-compact { grid-column: 1; grid-row: 2; }
+                    .gen1-mother-compact { grid-column: 2; grid-row: 2; }
                     
-                    /* Generation 2 */
+                    /* Generation 2: Grandparents - 2 per rij */
+                    .gen2-paternal-grandfather-compact { grid-column: 1; grid-row: 3; }
+                    .gen2-paternal-grandmother-compact { grid-column: 2; grid-row: 3; }
+                    .gen2-maternal-grandfather-compact { grid-column: 1; grid-row: 4; }
+                    .gen2-maternal-grandmother-compact { grid-column: 2; grid-row: 4; }
+                    
+                    /* Generation 3: Great-grandparents - 2 per rij */
+                    .gen3-paternal-great-grandfather1-compact { grid-column: 1; grid-row: 5; }
+                    .gen3-paternal-great-grandmother1-compact { grid-column: 2; grid-row: 5; }
+                    .gen3-paternal-great-grandfather2-compact { grid-column: 1; grid-row: 6; }
+                    .gen3-paternal-great-grandmother2-compact { grid-column: 2; grid-row: 6; }
+                    .gen3-maternal-great-grandfather1-compact { grid-column: 1; grid-row: 7; }
+                    .gen3-maternal-great-grandmother1-compact { grid-column: 2; grid-row: 7; }
+                    .gen3-maternal-great-grandfather2-compact { grid-column: 1; grid-row: 8; }
+                    .gen3-maternal-great-grandmother2-compact { grid-column: 2; grid-row: 8; }
+                }
+                
+                /* DESKTOP LAYOUT (4 kolommen) */
+                @media (min-width: 992px) {
+                    .pedigree-grid-compact {
+                        grid-template-columns: repeat(4, 1fr);
+                        gap: 12px;
+                    }
+                    
+                    /* Generation 0: Main dog - full width boven */
+                    .gen0-compact { grid-column: 1 / -1; grid-row: 1; }
+                    
+                    /* Generation 1: Parents - middelste 2 kolommen */
+                    .gen1-father-compact { grid-column: 2; grid-row: 2; }
+                    .gen1-mother-compact { grid-column: 3; grid-row: 2; }
+                    
+                    /* Generation 2: Grandparents - 4 kolommen naast elkaar */
+                    .gen2-paternal-grandfather-compact { grid-column: 1; grid-row: 3; }
+                    .gen2-paternal-grandmother-compact { grid-column: 2; grid-row: 3; }
+                    .gen2-maternal-grandfather-compact { grid-column: 3; grid-row: 3; }
+                    .gen2-maternal-grandmother-compact { grid-column: 4; grid-row: 3; }
+                    
+                    /* Generation 3: Great-grandparents - 4 kolommen, 2 rijen */
+                    .gen3-paternal-great-grandfather1-compact { grid-column: 1; grid-row: 4; }
+                    .gen3-paternal-great-grandmother1-compact { grid-column: 2; grid-row: 4; }
+                    .gen3-paternal-great-grandfather2-compact { grid-column: 3; grid-row: 4; }
+                    .gen3-paternal-great-grandmother2-compact { grid-column: 4; grid-row: 4; }
+                    .gen3-maternal-great-grandfather1-compact { grid-column: 1; grid-row: 5; }
+                    .gen3-maternal-great-grandmother1-compact { grid-column: 2; grid-row: 5; }
+                    .gen3-maternal-great-grandfather2-compact { grid-column: 3; grid-row: 5; }
+                    .gen3-maternal-great-grandmother2-compact { grid-column: 4; grid-row: 5; }
+                }
+                
+                /* GROTE DESKTOP LAYOUT (6-8 kolommen) */
+                @media (min-width: 1400px) {
+                    .pedigree-grid-compact {
+                        grid-template-columns: repeat(8, 1fr);
+                        gap: 15px;
+                    }
+                    
+                    /* Generation 0: Main dog - full width boven */
+                    .gen0-compact { grid-column: 1 / -1; grid-row: 1; }
+                    
+                    /* Generation 1: Parents - breder in het midden */
+                    .gen1-father-compact { grid-column: 3 / 5; grid-row: 2; }
+                    .gen1-mother-compact { grid-column: 5 / 7; grid-row: 2; }
+                    
+                    /* Generation 2: Grandparents - 4 cards, ieder 2 kolommen breed */
                     .gen2-paternal-grandfather-compact { grid-column: 1 / 3; grid-row: 3; }
                     .gen2-paternal-grandmother-compact { grid-column: 3 / 5; grid-row: 3; }
                     .gen2-maternal-grandfather-compact { grid-column: 5 / 7; grid-row: 3; }
                     .gen2-maternal-grandmother-compact { grid-column: 7 / 9; grid-row: 3; }
                     
-                    /* Generation 3 */
-                    .gen3-paternal-great-grandfather1-compact { grid-column: 1 / 2; grid-row: 4; }
-                    .gen3-paternal-great-grandmother1-compact { grid-column: 2 / 3; grid-row: 4; }
-                    .gen3-paternal-great-grandfather2-compact { grid-column: 3 / 4; grid-row: 4; }
-                    .gen3-paternal-great-grandmother2-compact { grid-column: 4 / 5; grid-row: 4; }
-                    .gen3-maternal-great-grandfather1-compact { grid-column: 5 / 6; grid-row: 4; }
-                    .gen3-maternal-great-grandmother1-compact { grid-column: 6 / 7; grid-row: 4; }
-                    .gen3-maternal-great-grandfather2-compact { grid-column: 7 / 8; grid-row: 4; }
-                    .gen3-maternal-great-grandmother2-compact { grid-column: 8 / 9; grid-row: 4; }
+                    /* Generation 3: Great-grandparents - 8 cards, ieder 1 kolom breed */
+                    .gen3-paternal-great-grandfather1-compact { grid-column: 1; grid-row: 4; }
+                    .gen3-paternal-great-grandmother1-compact { grid-column: 2; grid-row: 4; }
+                    .gen3-paternal-great-grandfather2-compact { grid-column: 3; grid-row: 4; }
+                    .gen3-paternal-great-grandmother2-compact { grid-column: 4; grid-row: 4; }
+                    .gen3-maternal-great-grandfather1-compact { grid-column: 5; grid-row: 4; }
+                    .gen3-maternal-great-grandmother1-compact { grid-column: 6; grid-row: 4; }
+                    .gen3-maternal-great-grandfather2-compact { grid-column: 7; grid-row: 4; }
+                    .gen3-maternal-great-grandmother2-compact { grid-column: 8; grid-row: 4; }
                 }
                 
-                @media (min-width: 1200px) {
-                    .pedigree-grid-compact {
-                        grid-template-columns: repeat(15, 1fr);
-                    }
-                    
-                    /* Generation 0 */
-                    .gen0-compact { grid-column: 7 / 10; grid-row: 1; }
-                    
-                    /* Generation 1 */
-                    .gen1-father-compact { grid-column: 3 / 6; grid-row: 2; }
-                    .gen1-mother-compact { grid-column: 11 / 14; grid-row: 2; }
-                    
-                    /* Generation 2 */
-                    .gen2-paternal-grandfather-compact { grid-column: 1 / 4; grid-row: 3; }
-                    .gen2-paternal-grandmother-compact { grid-column: 5 / 8; grid-row: 3; }
-                    .gen2-maternal-grandfather-compact { grid-column: 10 / 13; grid-row: 3; }
-                    .gen2-maternal-grandmother-compact { grid-column: 14 / 17; grid-row: 3; }
-                    
-                    /* Generation 3 */
-                    .gen3-paternal-great-grandfather1-compact { grid-column: 1 / 3; grid-row: 4; }
-                    .gen3-paternal-great-grandmother1-compact { grid-column: 3 / 5; grid-row: 4; }
-                    .gen3-paternal-great-grandfather2-compact { grid-column: 5 / 7; grid-row: 4; }
-                    .gen3-paternal-great-grandmother2-compact { grid-column: 7 / 9; grid-row: 4; }
-                    .gen3-maternal-great-grandfather1-compact { grid-column: 10 / 12; grid-row: 4; }
-                    .gen3-maternal-great-grandmother1-compact { grid-column: 12 / 14; grid-row: 4; }
-                    .gen3-maternal-great-grandfather2-compact { grid-column: 14 / 16; grid-row: 4; }
-                    .gen3-maternal-great-grandmother2-compact { grid-column: 16 / 18; grid-row: 4; }
-                }
-                
-                /* POPUP STYLES */
+                /* POPUP STYLES - MOBILE FRIENDLY & CENTERED */
                 .pedigree-popup-overlay {
                     position: fixed;
                     top: 0;
@@ -880,8 +914,9 @@ class StamboomManager extends BaseModule {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    padding: 20px;
+                    padding: 15px;
                     animation: fadeIn 0.3s;
+                    overflow-y: auto;
                 }
                 
                 @keyframes fadeIn {
@@ -892,12 +927,15 @@ class StamboomManager extends BaseModule {
                 .pedigree-popup-container {
                     background: white;
                     border-radius: 10px;
-                    max-width: 500px;
                     width: 100%;
+                    max-width: 500px;
                     max-height: 90vh;
                     overflow-y: auto;
                     animation: slideUp 0.3s;
                     box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+                    margin: auto;
+                    display: flex;
+                    flex-direction: column;
                 }
                 
                 @keyframes slideUp {
@@ -915,31 +953,40 @@ class StamboomManager extends BaseModule {
                     display: flex;
                     flex-direction: column;
                     height: 100%;
+                    max-height: 90vh;
                 }
                 
                 .popup-header {
                     background: #0d6efd;
                     color: white;
-                    padding: 15px 20px;
+                    padding: 15px;
                     border-radius: 10px 10px 0 0;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
+                    flex-shrink: 0;
+                    position: sticky;
+                    top: 0;
+                    z-index: 10;
                 }
                 
                 .popup-title {
                     margin: 0;
-                    font-size: 1.2rem;
+                    font-size: 1.1rem;
                     display: flex;
                     align-items: center;
+                    flex: 1;
                 }
                 
                 .popup-close {
                     background: none;
                     border: none;
-                    font-size: 1.5rem;
+                    font-size: 1.2rem;
                     cursor: pointer;
                     opacity: 0.8;
+                    color: white;
+                    flex-shrink: 0;
+                    margin-left: 10px;
                 }
                 
                 .popup-close:hover {
@@ -947,14 +994,20 @@ class StamboomManager extends BaseModule {
                 }
                 
                 .popup-body {
-                    padding: 20px;
+                    padding: 15px;
                     flex: 1;
                     overflow-y: auto;
+                    -webkit-overflow-scrolling: touch;
+                }
+                
+                .dog-popup-name {
+                    margin-bottom: 15px;
                 }
                 
                 .dog-popup-name h4 {
                     color: #0d6efd;
                     margin-bottom: 5px;
+                    font-size: 1.3rem;
                 }
                 
                 .info-section {
@@ -968,15 +1021,16 @@ class StamboomManager extends BaseModule {
                     border-bottom: 1px solid #dee2e6;
                     display: flex;
                     align-items: center;
+                    font-size: 0.95rem;
                 }
                 
                 .info-grid {
                     display: grid;
                     grid-template-columns: 1fr;
-                    gap: 8px;
+                    gap: 10px;
                 }
                 
-                @media (min-width: 576px) {
+                @media (min-width: 400px) {
                     .info-grid {
                         grid-template-columns: repeat(2, 1fr);
                     }
@@ -985,19 +1039,23 @@ class StamboomManager extends BaseModule {
                 .info-item {
                     display: flex;
                     flex-direction: column;
-                    padding: 5px 0;
+                    padding: 8px 0;
+                    min-height: 40px;
                 }
                 
                 .info-label {
                     font-weight: 600;
                     color: #495057;
-                    font-size: 0.9rem;
-                    margin-bottom: 2px;
+                    font-size: 0.85rem;
+                    margin-bottom: 3px;
+                    line-height: 1.2;
                 }
                 
                 .info-value {
                     color: #212529;
-                    font-size: 0.95rem;
+                    font-size: 0.9rem;
+                    line-height: 1.3;
+                    word-break: break-word;
                 }
                 
                 .remarks-box {
@@ -1007,23 +1065,34 @@ class StamboomManager extends BaseModule {
                     border-radius: 5px;
                     font-style: italic;
                     color: #495057;
+                    font-size: 0.9rem;
+                    line-height: 1.4;
                 }
                 
                 .popup-footer {
-                    padding: 15px 20px;
+                    padding: 15px;
                     border-top: 1px solid #dee2e6;
                     display: flex;
-                    justify-content: flex-end;
+                    justify-content: center;
+                    flex-shrink: 0;
                 }
                 
                 .popup-close-btn {
-                    min-width: 100px;
+                    min-width: 120px;
+                    padding: 8px 20px;
                 }
                 
                 /* Zoom controls */
+                .zoom-controls {
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                }
+                
                 .zoom-controls .btn {
                     padding: 4px 10px;
-                    font-size: 0.875rem;
+                    font-size: 0.85rem;
+                    min-width: 40px;
                 }
                 
                 /* Print styles */
@@ -1040,6 +1109,11 @@ class StamboomManager extends BaseModule {
                     .pedigree-container-compact {
                         padding: 0;
                         background: white;
+                    }
+                    
+                    .pedigree-grid-compact {
+                        grid-template-columns: repeat(2, 1fr) !important;
+                        gap: 10px;
                     }
                     
                     .pedigree-card-compact {
@@ -1125,7 +1199,7 @@ class StamboomManager extends BaseModule {
         
         const gridHTML = `
             <div class="pedigree-grid-compact">
-                <!-- Generatie 0: Hoofdhond (bovenaan) -->
+                <!-- Generatie 0: Hoofdhond (full width bovenaan) -->
                 <div class="pedigree-card-compact gen0-compact main-dog-compact">
                     ${this.getDogCompactCardHTML(pedigreeTree.mainDog, this.t('mainDog'), true)}
                 </div>
@@ -1211,8 +1285,14 @@ class StamboomManager extends BaseModule {
         const popupHTML = this.getDogDetailPopupHTML(dog, relation);
         container.innerHTML = popupHTML;
         
-        // Show overlay
+        // Show overlay - center in viewport
         overlay.style.display = 'flex';
+        
+        // Ensure popup is visible and centered
+        setTimeout(() => {
+            container.style.marginTop = '0';
+            container.style.transform = 'translateY(0)';
+        }, 10);
         
         // Add close event listeners
         const closeButtons = container.querySelectorAll('.popup-close, .popup-close-btn');
@@ -1230,10 +1310,19 @@ class StamboomManager extends BaseModule {
         });
         
         // Close with Escape key
-        document.addEventListener('keydown', function closeOnEscape(e) {
+        const closeOnEscape = (e) => {
             if (e.key === 'Escape') {
                 overlay.style.display = 'none';
                 document.removeEventListener('keydown', closeOnEscape);
+            }
+        };
+        document.addEventListener('keydown', closeOnEscape);
+        
+        // Clean up event listener when popup closes
+        overlay.addEventListener('animationend', function handler() {
+            if (overlay.style.display === 'none') {
+                document.removeEventListener('keydown', closeOnEscape);
+                overlay.removeEventListener('animationend', handler);
             }
         });
     }
