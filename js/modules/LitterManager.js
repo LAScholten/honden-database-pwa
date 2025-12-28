@@ -1674,7 +1674,7 @@ class LitterManager {
         suggestions.forEach(dog => {
             html += `
                 <div class="autocomplete-item" data-id="${dog.id}" data-name="${dog.naam}" data-pedigree="${dog.stamboomnr || ''}">
-                    <div class="dog-name">${dog.naam}</div>
+                    <div class="dog-name">${dog.naam} ${dog.kennelnaam ? dog.kennelnaam : ''}</div>
                     <div class="dog-info">
                         ${dog.ras || 'Onbekend ras'} | ${dog.stamboomnr || 'Geen stamboom'}
                     </div>
