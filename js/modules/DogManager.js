@@ -290,7 +290,7 @@ class DogManager extends BaseModule {
                 chooseFile: "Datei wählen",
                 noFileChosen: "Keine Datei gewählt",
                 remarks: "Bemerkungen",
-                requiredFields: "Felder mit * zijn Pflichtfelder",
+                requiredFields: "Felder met * zijn Pflichtfelder",
                 saveDog: "Hund speichern",
                 cancel: "Abbrechen",
                 delete: "Löschen",
@@ -318,7 +318,7 @@ class DogManager extends BaseModule {
                 // Meldungen
                 adminOnly: "Nur Administratoren können Hunde hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer en Rasse zijn Pflichtfelder",
-                savingDog: "Hund wird gespeichert...",
+                savingDog: "Hund wordt gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
                 dogUpdated: "Hund erfolgreich aktualisiert!",
                 dogDeleted: "Hund erfolgreich gelöscht!",
@@ -1327,7 +1327,7 @@ class DogManager extends BaseModule {
         suggestions.forEach(dog => {
             html += `
                 <div class="autocomplete-item" data-id="${dog.id}" data-name="${dog.naam}" data-pedigree="${dog.stamboomnr || ''}">
-                    <div class="dog-name">${dog.naam} ${dog.kennelnaam ? `(${dog.kennelnaam})` : ''}</div>
+                    <div class="dog-name">${dog.naam} ${dog.kennelnaam ? dog.kennelnaam : ''}</div>
                     <div class="dog-info">
                         ${dog.ras || 'Onbekend ras'} | ${dog.stamboomnr || 'Geen stamboom'}
                     </div>
