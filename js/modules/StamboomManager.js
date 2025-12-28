@@ -133,7 +133,7 @@ class StamboomManager extends BaseModule {
                 father: "Vater",
                 mother: "Mutter",
                 grandfather: "Großvater",
-                grandmother: "Großmoeder",
+                grandmother: "Großmutter",
                 greatGrandfather: "Urgroßvater",
                 greatGrandmother: "Urgroßmutter",
                 
@@ -167,7 +167,7 @@ class StamboomManager extends BaseModule {
                 // Labels
                 paternal: "Väterlich",
                 maternal: "Mütterlich",
-                clickForDetails: "Klicken für Details",
+                clickForDetails: "Klicken voor Details",
                 closePopup: "Schließen",
                 remarks: "Bemerkungen",
                 noRemarks: "Keine Bemerkungen"
@@ -637,7 +637,7 @@ class StamboomManager extends BaseModule {
                     width: 100vw !important;
                 }
                 
-                /* PEDIGREE CONTAINER - ABSOLUUT GEEN PADDING */
+                /* PEDIGREE CONTAINER - CENTRALE UITLIJNING */
                 .pedigree-container-compact {
                     padding: 0 !important;
                     margin: 0 !important;
@@ -657,19 +657,19 @@ class StamboomManager extends BaseModule {
                     display: flex;
                     flex-direction: column;
                     gap: 15px;
-                    width: 100vw !important;
+                    width: 100% !important;
                     margin: 0 !important;
                     padding: 10px !important;
-                    max-width: 100vw !important;
                     box-sizing: border-box !important;
+                    align-items: center;
                 }
                 
-                /* GENERATIE RIJS - ABSOLUUT TEGEN LINKERKANT */
+                /* GENERATIE RIJS - CENTRALE UITLIJNING */
                 .pedigree-generation-row {
                     display: flex;
                     flex-wrap: nowrap;
-                    width: 100vw !important;
-                    justify-content: flex-start;
+                    width: 100% !important;
+                    justify-content: center;
                     padding: 0 !important;
                     margin: 0 !important;
                     overflow: visible !important;
@@ -678,13 +678,11 @@ class StamboomManager extends BaseModule {
                     left: 0;
                 }
                 
-                /* COMPACT CARDS - TEGEN ELKAAR AAN, GEEN RUIMTE */
+                /* COMPACT CARDS - OPTIMALE BREEDTE VOOR SCHERM */
                 .pedigree-card-compact {
                     background: white;
                     border-radius: 0;
                     border: 1px solid #dee2e6;
-                    border-left: none;
-                    border-right: 1px solid #dee2e6;
                     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
                     cursor: pointer;
                     transition: all 0.2s;
@@ -697,30 +695,17 @@ class StamboomManager extends BaseModule {
                     flex-shrink: 0;
                 }
                 
-                /* Eerste card - border links */
-                .pedigree-card-compact:first-child {
-                    border-left: 1px solid #dee2e6 !important;
-                }
-                
-                /* Laatste card - border rechts */
-                .pedigree-card-compact:last-child {
-                    border-right: 1px solid #dee2e6 !important;
+                /* Cards staan nu tegen elkaar aan */
+                .pedigree-card-compact:not(:last-child) {
+                    border-right: none !important;
                 }
                 
                 /* Gender borders */
-                .pedigree-card-compact.male:first-child {
+                .pedigree-card-compact.male {
                     border-left: 4px solid #0d6efd !important;
                 }
                 
-                .pedigree-card-compact.female:first-child {
-                    border-left: 4px solid #dc3545 !important;
-                }
-                
-                .pedigree-card-compact.male:not(:first-child) {
-                    border-left: 4px solid #0d6efd !important;
-                }
-                
-                .pedigree-card-compact.female:not(:first-child) {
+                .pedigree-card-compact.female {
                     border-left: 4px solid #dc3545 !important;
                 }
                 
@@ -854,40 +839,32 @@ class StamboomManager extends BaseModule {
                     line-height: 1.2;
                 }
                 
-                /* PROPORTIONELE BREEDTES - EXACT ZOALS GEVRAAGD - ALLE SCHERMEN */
-                /* Generation 0: Main dog - 49% breedte (1% kleiner) */
-                .pedigree-generation-row.gen0 {
-                    justify-content: center;
-                }
-                
+                /* OPTIMALE BREEDTES VOOR PERFECTE PAS - ALLE SCHERMEN */
+                /* Generation 0: Main dog - 48% breedte */
                 .pedigree-card-compact.gen0 {
-                    width: 49vw !important;
-                    flex: 0 0 49vw !important;
+                    width: 48vw !important;
+                    flex: 0 0 48vw !important;
                 }
                 
-                /* Generation 1: Parents - beide 49% breedte (1% kleiner) */
-                .pedigree-generation-row.gen1 {
-                    justify-content: center;
-                }
-                
+                /* Generation 1: Parents - beide 24% breedte */
                 .pedigree-card-compact.gen1 {
-                    width: 49vw !important;
-                    flex: 0 0 49vw !important;
-                }
-                
-                /* Generation 2: Grandparents - allemaal 24% breedte (1% kleiner) */
-                .pedigree-card-compact.gen2 {
                     width: 24vw !important;
                     flex: 0 0 24vw !important;
                 }
                 
-                /* Generation 3: Great-grandparents - allemaal 12% breedte (0.5% kleiner) */
-                .pedigree-card-compact.gen3 {
+                /* Generation 2: Grandparents - allemaal 12% breedte */
+                .pedigree-card-compact.gen2 {
                     width: 12vw !important;
                     flex: 0 0 12vw !important;
                 }
                 
-                /* MOBIEL: CARDS BLIJVEN TEGEN ELKAAR, TEXT 25% KLEINER VOOR GROOT- EN OVERGROOTOUDERS */
+                /* Generation 3: Great-grandparents - allemaal 6% breedte */
+                .pedigree-card-compact.gen3 {
+                    width: 6vw !important;
+                    flex: 0 0 6vw !important;
+                }
+                
+                /* MOBIEL: OPTIMALE PAS MET CENTRALE UITLIJNING */
                 @media (max-width: 768px) {
                     .pedigree-container-compact {
                         height: calc(100vh - 120px) !important;
@@ -927,77 +904,77 @@ class StamboomManager extends BaseModule {
                     
                     /* GROOTOUDERS: 25% kleiner */
                     .pedigree-card-compact.gen2 .dog-name-compact {
-                        font-size: 0.675rem; /* 25% kleiner dan 0.9rem */
+                        font-size: 0.675rem;
                     }
                     
                     .pedigree-card-compact.gen2 .dog-kennel-compact {
-                        font-size: 0.6rem; /* 25% kleiner dan 0.8rem */
+                        font-size: 0.6rem;
                     }
                     
                     .pedigree-card-compact.gen2 .dog-pedigree-compact,
                     .pedigree-card-compact.gen2 .dog-breed-compact {
-                        font-size: 0.6rem; /* 25% kleiner */
+                        font-size: 0.6rem;
                     }
                     
                     .pedigree-card-compact.gen2 .click-hint-compact {
-                        font-size: 0.5625rem; /* 25% kleiner */
+                        font-size: 0.5625rem;
                     }
                     
                     /* OVERGROOTOUDERS: 25% kleiner */
                     .pedigree-card-compact.gen3 .dog-name-compact {
-                        font-size: 0.675rem; /* 25% kleiner dan 0.9rem */
+                        font-size: 0.675rem;
                     }
                     
                     .pedigree-card-compact.gen3 .dog-kennel-compact {
-                        font-size: 0.6rem; /* 25% kleiner dan 0.8rem */
+                        font-size: 0.6rem;
                     }
                     
                     .pedigree-card-compact.gen3 .dog-pedigree-compact,
                     .pedigree-card-compact.gen3 .dog-breed-compact {
-                        font-size: 0.6rem; /* 25% kleiner */
+                        font-size: 0.6rem;
                     }
                     
                     .pedigree-card-compact.gen3 .click-hint-compact {
-                        font-size: 0.5625rem; /* 25% kleiner */
+                        font-size: 0.5625rem;
                     }
                     
-                    /* Kleinere header voor groot- en overgrootouders op mobiel - 25% kleiner */
+                    /* Kleinere header voor groot- en overgrootouders op mobiel */
                     .pedigree-card-compact.gen2 .pedigree-card-header-compact,
                     .pedigree-card-compact.gen3 .pedigree-card-header-compact {
                         padding: 6px 8px;
-                        font-size: 0.6rem; /* 25% kleiner */
+                        font-size: 0.6rem;
                         min-height: 28px;
                     }
                     
                     .pedigree-card-compact.gen2 .relation-compact,
                     .pedigree-card-compact.gen3 .relation-compact {
-                        font-size: 0.6rem; /* 25% kleiner */
+                        font-size: 0.6rem;
                     }
                     
                     .pedigree-card-compact.gen2 .gender-icon-compact,
                     .pedigree-card-compact.gen3 .gender-icon-compact {
-                        font-size: 0.675rem; /* 25% kleiner */
+                        font-size: 0.675rem;
                     }
                     
-                    /* ZELFDE BREEDTES - VW EENHEDEN */
+                    /* BREEDTES VOOR PERFECTE PAS OP MOBIEL */
                     .pedigree-card-compact.gen0 {
-                        width: 49vw !important;
-                        flex: 0 0 49vw !important;
+                        width: 48vw !important;
+                        flex: 0 0 48vw !important;
                     }
                     
                     .pedigree-card-compact.gen1 {
-                        width: 49vw !important;
-                        flex: 0 0 49vw !important;
-                    }
-                    
-                    .pedigree-card-compact.gen2 {
                         width: 24vw !important;
                         flex: 0 0 24vw !important;
                     }
                     
-                    .pedigree-card-compact.gen3 {
+                    .pedigree-card-compact.gen2 {
                         width: 12vw !important;
                         flex: 0 0 12vw !important;
+                    }
+                    
+                    .pedigree-card-compact.gen3 {
+                        width: 6vw !important;
+                        flex: 0 0 6vw !important;
                     }
                 }
                 
@@ -1040,77 +1017,77 @@ class StamboomManager extends BaseModule {
                     
                     /* GROOTOUDERS: 25% kleiner */
                     .pedigree-card-compact.gen2 .dog-name-compact {
-                        font-size: 0.6375rem; /* 25% kleiner dan 0.85rem */
+                        font-size: 0.6375rem;
                     }
                     
                     .pedigree-card-compact.gen2 .dog-kennel-compact {
-                        font-size: 0.5625rem; /* 25% kleiner dan 0.75rem */
+                        font-size: 0.5625rem;
                     }
                     
                     .pedigree-card-compact.gen2 .dog-pedigree-compact,
                     .pedigree-card-compact.gen2 .dog-breed-compact {
-                        font-size: 0.5625rem; /* 25% kleiner */
+                        font-size: 0.5625rem;
                     }
                     
                     .pedigree-card-compact.gen2 .click-hint-compact {
-                        font-size: 0.525rem; /* 25% kleiner */
+                        font-size: 0.525rem;
                     }
                     
                     /* OVERGROOTOUDERS: 25% kleiner */
                     .pedigree-card-compact.gen3 .dog-name-compact {
-                        font-size: 0.6375rem; /* 25% kleiner dan 0.85rem */
+                        font-size: 0.6375rem;
                     }
                     
                     .pedigree-card-compact.gen3 .dog-kennel-compact {
-                        font-size: 0.5625rem; /* 25% kleiner dan 0.75rem */
+                        font-size: 0.5625rem;
                     }
                     
                     .pedigree-card-compact.gen3 .dog-pedigree-compact,
                     .pedigree-card-compact.gen3 .dog-breed-compact {
-                        font-size: 0.5625rem; /* 25% kleiner */
+                        font-size: 0.5625rem;
                     }
                     
                     .pedigree-card-compact.gen3 .click-hint-compact {
-                        font-size: 0.525rem; /* 25% kleiner */
+                        font-size: 0.525rem;
                     }
                     
-                    /* Kleinere header voor groot- en overgrootouders - 25% kleiner */
+                    /* Kleinere header voor groot- en overgrootouders */
                     .pedigree-card-compact.gen2 .pedigree-card-header-compact,
                     .pedigree-card-compact.gen3 .pedigree-card-header-compact {
                         padding: 5px 6px;
-                        font-size: 0.5625rem; /* 25% kleiner */
+                        font-size: 0.5625rem;
                         min-height: 26px;
                     }
                     
                     .pedigree-card-compact.gen2 .relation-compact,
                     .pedigree-card-compact.gen3 .relation-compact {
-                        font-size: 0.5625rem; /* 25% kleiner */
+                        font-size: 0.5625rem;
                     }
                     
                     .pedigree-card-compact.gen2 .gender-icon-compact,
                     .pedigree-card-compact.gen3 .gender-icon-compact {
-                        font-size: 0.6375rem; /* 25% kleiner */
+                        font-size: 0.6375rem;
                     }
                     
-                    /* STILL ZELFDE BREEDTES - VW EENHEDEN */
+                    /* BREEDTES VOOR PERFECTE PAS OP KLEIN MOBIEL */
                     .pedigree-card-compact.gen0 {
-                        width: 49vw !important;
-                        flex: 0 0 49vw !important;
+                        width: 48vw !important;
+                        flex: 0 0 48vw !important;
                     }
                     
                     .pedigree-card-compact.gen1 {
-                        width: 49vw !important;
-                        flex: 0 0 49vw !important;
-                    }
-                    
-                    .pedigree-card-compact.gen2 {
                         width: 24vw !important;
                         flex: 0 0 24vw !important;
                     }
                     
-                    .pedigree-card-compact.gen3 {
+                    .pedigree-card-compact.gen2 {
                         width: 12vw !important;
                         flex: 0 0 12vw !important;
+                    }
+                    
+                    .pedigree-card-compact.gen3 {
+                        width: 6vw !important;
+                        flex: 0 0 6vw !important;
                     }
                 }
                 
@@ -1154,56 +1131,56 @@ class StamboomManager extends BaseModule {
                     
                     /* GROOTOUDERS: 25% kleiner */
                     .pedigree-card-compact.gen2 .dog-name-compact {
-                        font-size: 0.6rem; /* 25% kleiner dan 0.8rem */
+                        font-size: 0.6rem;
                     }
                     
                     .pedigree-card-compact.gen2 .dog-kennel-compact {
-                        font-size: 0.525rem; /* 25% kleiner dan 0.7rem */
+                        font-size: 0.525rem;
                     }
                     
                     .pedigree-card-compact.gen2 .dog-pedigree-compact,
                     .pedigree-card-compact.gen2 .dog-breed-compact {
-                        font-size: 0.525rem; /* 25% kleiner */
+                        font-size: 0.525rem;
                     }
                     
                     .pedigree-card-compact.gen2 .click-hint-compact {
-                        font-size: 0.4875rem; /* 25% kleiner */
+                        font-size: 0.4875rem;
                     }
                     
                     /* OVERGROOTOUDERS: 25% kleiner */
                     .pedigree-card-compact.gen3 .dog-name-compact {
-                        font-size: 0.6rem; /* 25% kleiner dan 0.8rem */
+                        font-size: 0.6rem;
                     }
                     
                     .pedigree-card-compact.gen3 .dog-kennel-compact {
-                        font-size: 0.525rem; /* 25% kleiner dan 0.7rem */
+                        font-size: 0.525rem;
                     }
                     
                     .pedigree-card-compact.gen3 .dog-pedigree-compact,
                     .pedigree-card-compact.gen3 .dog-breed-compact {
-                        font-size: 0.525rem; /* 25% kleiner */
+                        font-size: 0.525rem;
                     }
                     
                     .pedigree-card-compact.gen3 .click-hint-compact {
-                        font-size: 0.4875rem; /* 25% kleiner */
+                        font-size: 0.4875rem;
                     }
                     
-                    /* Kleinere header voor groot- en overgrootouders - 25% kleiner */
+                    /* Kleinere header voor groot- en overgrootouders */
                     .pedigree-card-compact.gen2 .pedigree-card-header-compact,
                     .pedigree-card-compact.gen3 .pedigree-card-header-compact {
                         padding: 4px 5px;
-                        font-size: 0.525rem; /* 25% kleiner */
+                        font-size: 0.525rem;
                         min-height: 24px;
                     }
                     
                     .pedigree-card-compact.gen2 .relation-compact,
                     .pedigree-card-compact.gen3 .relation-compact {
-                        font-size: 0.525rem; /* 25% kleiner */
+                        font-size: 0.525rem;
                     }
                     
                     .pedigree-card-compact.gen2 .gender-icon-compact,
                     .pedigree-card-compact.gen3 .gender-icon-compact {
-                        font-size: 0.6rem; /* 25% kleiner */
+                        font-size: 0.6rem;
                     }
                     
                     .pedigree-card-header-compact {
@@ -1215,25 +1192,25 @@ class StamboomManager extends BaseModule {
                         padding: 8px;
                     }
                     
-                    /* NOG STEEDS ZELFDE BREEDTES - VW EENHEDEN */
+                    /* BREEDTES VOOR PERFECTE PAS OP EXTRAME KLEIN SCHERM */
                     .pedigree-card-compact.gen0 {
-                        width: 49vw !important;
-                        flex: 0 0 49vw !important;
+                        width: 48vw !important;
+                        flex: 0 0 48vw !important;
                     }
                     
                     .pedigree-card-compact.gen1 {
-                        width: 49vw !important;
-                        flex: 0 0 49vw !important;
-                    }
-                    
-                    .pedigree-card-compact.gen2 {
                         width: 24vw !important;
                         flex: 0 0 24vw !important;
                     }
                     
-                    .pedigree-card-compact.gen3 {
+                    .pedigree-card-compact.gen2 {
                         width: 12vw !important;
                         flex: 0 0 12vw !important;
+                    }
+                    
+                    .pedigree-card-compact.gen3 {
+                        width: 6vw !important;
+                        flex: 0 0 6vw !important;
                     }
                 }
                 
