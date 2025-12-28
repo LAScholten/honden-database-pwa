@@ -1,27 +1,19 @@
 // sw.js - ECHTE SERVICE WORKER voor Honden Database PWA
 const CACHE_NAME = 'honden-database-v2.0';
 const APP_VERSION = '2.0';
+const NEW_VERSION_AVAILABLE = 'new-version-available';
 
 // ESSENTIËLE bestanden die offline MOETEN werken
 const CORE_ASSETS = [
-  // Hoofdpagina's
   './index.html',
   './app.html',
-  
-  // Core CSS
   './css/style.css',
-  
-  // Core JavaScript
   './js/auth.js',
   './js/database.js',
   './js/ui-handler.js',
   './js/modules/BaseModule.js',
-  
-  // Manifest (belangrijk voor PWA)
   './manifest.json',
-  
-  // Favicon/logo
-  './img/logo.png' // als je die hebt
+  './img/logo.png'
 ];
 
 // Dynamische caching voor deze externe bestanden
@@ -41,12 +33,9 @@ self.addEventListener('install', function(event) {
     caches.open(CACHE_NAME)
       .then(function(cache) {
         console.log('SW: Cache geopend - toevoegen core assets');
-        
-        // Voeg CORE_ASSETS toe aan cache
         return cache.addAll(CORE_ASSETS)
           .then(() => {
             console.log('SW: Core assets gecached');
-            // Externe assets proberen (maar niet falen als ze niet laden)
             return Promise.all(
               EXTERNAL_ASSETS.map(url => 
                 fetch(url)
@@ -66,7 +55,7 @@ self.addEventListener('install', function(event) {
   );
 });
 
-// ACTIVATE - Oude caches opruimen
+// ACTIVATE - Oude caches opruimen + update melding
 self.addEventListener('activate', function(event) {
   console.log('SW: Activeren - opruimen oude caches');
   
@@ -82,6 +71,16 @@ self.addEventListener('activate', function(event) {
       );
     })
     .then(() => {
+      // UPDATE MELDING NAAR CLIENTS
+      self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          client.postMessage({
+            type: NEW_VERSION_AVAILABLE,
+            version: APP_VERSION
+          });
+        });
+      });
+      
       console.log('SW: Claim clients');
       return self.clients.claim();
     })
@@ -90,24 +89,18 @@ self.addEventListener('activate', function(event) {
 
 // FETCH - Serveer uit cache OF haal van netwerk
 self.addEventListener('fetch', function(event) {
-  // Skip niet-GET requests en chrome-extension requests
   if (event.request.method !== 'GET') return;
   if (event.request.url.startsWith('chrome-extension://')) return;
   
   event.respondWith(
     caches.match(event.request)
       .then(function(response) {
-        // Cache hit - return cached response
         if (response) {
-          console.log('SW: Cache hit voor:', event.request.url);
           return response;
         }
         
-        // Cache miss - haal van netwerk
-        console.log('SW: Cache miss voor:', event.request.url);
         return fetch(event.request)
           .then(function(networkResponse) {
-            // Cache de response voor toekomstig gebruik
             if (event.request.url.startsWith('http') && 
                 !event.request.url.includes('sockjs-node') &&
                 networkResponse.status === 200) {
@@ -116,16 +109,11 @@ self.addEventListener('fetch', function(event) {
               caches.open(CACHE_NAME)
                 .then(function(cache) {
                   cache.put(event.request, responseToCache);
-                  console.log('SW: Nieuwe resource gecached:', event.request.url);
                 });
             }
             return networkResponse;
           })
           .catch(function(error) {
-            // NETWERK FOUT - toon offline pagina
-            console.log('SW: Network error, offline modus:', error);
-            
-            // Voor HTML pagina's: toon offline bericht
             if (event.request.headers.get('accept').includes('text/html')) {
               return caches.match('./index.html')
                 .then(response => response || new Response(
@@ -134,7 +122,6 @@ self.addEventListener('fetch', function(event) {
                 ));
             }
             
-            // Voor andere assets: toon error
             return new Response('Offline - Geen verbinding', {
               status: 503,
               statusText: 'Service Unavailable'
@@ -144,16 +131,22 @@ self.addEventListener('fetch', function(event) {
   );
 });
 
+// CONTROLLED UPDATE CHECK - NIEUWE FUNCTIE
+self.addEventListener('message', function(event) {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('SW: Update bevestigd - skipping waiting');
+    self.skipWaiting();
+  }
+});
+
 // PERIODIEKE SYNC (voor toekomstige uitbreidingen)
 self.addEventListener('sync', function(event) {
   if (event.tag === 'sync-backup') {
     console.log('SW: Background sync - backup');
-    // Hier kun je background sync implementeren
   }
 });
 
 // PUSH NOTIFICATIES (voor toekomstige uitbreidingen)
 self.addEventListener('push', function(event) {
   console.log('SW: Push notification ontvangen');
-  // Push notification logica hier
 });

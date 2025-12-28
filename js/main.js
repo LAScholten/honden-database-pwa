@@ -56,9 +56,16 @@ async function registerServiceWorker() {
             
             console.log('Service Worker geregistreerd met scope:', registration.scope);
             
+            // LUISTER NAAR UPDATE MELDINGEN VAN SERVICE WORKER
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data && event.data.type === 'new-version-available') {
+                    showBackupWarningNotification(registration);
+                }
+            });
+            
             // Controleer op updates
             if (registration.waiting) {
-                showUpdateNotification(registration);
+                showBackupWarningNotification(registration);
             }
             
             // Luister voor updates
@@ -71,13 +78,7 @@ async function registerServiceWorker() {
                     
                     if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                         // Nieuwe update beschikbaar
-                        showUpdateNotification(registration);
-                    }
-                    
-                    if (newWorker.state === 'activated') {
-                        console.log('Nieuwe Service Worker geactiveerd');
-                        // Optioneel: pagina herladen om nieuwe SW te gebruiken
-                        // window.location.reload();
+                        showBackupWarningNotification(registration);
                     }
                 });
             });
@@ -85,20 +86,14 @@ async function registerServiceWorker() {
             // Luister voor controller change
             navigator.serviceWorker.addEventListener('controllerchange', () => {
                 console.log('Nieuwe Service Worker heeft controle over pagina');
-                // Optioneel: update UI of toon melding
+                // Toon melding dat update voltooid is
+                showUpdateCompleteNotification();
             });
             
             return registration;
             
         } catch (error) {
             console.error('Service Worker registratie mislukt:', error);
-            
-            // Toon gebruikersvriendelijke melding
-            if (error.message.includes('MIME type') || error.message.includes('script')) {
-                console.warn('Service Worker MIME type probleem. Controleer server configuratie.');
-            }
-            
-            // Probeer de pagina toch te laten werken zonder SW
             return null;
         }
     } else {
@@ -108,26 +103,33 @@ async function registerServiceWorker() {
 }
 
 /**
- * Toon update notificatie en vraag om te herladen
+ * Toon BACKUP WAARSCHUWING voordat update wordt uitgevoerd
  */
-function showUpdateNotification(registration) {
+function showBackupWarningNotification(registration) {
     // Controleer of we al een notificatie hebben
-    if (document.getElementById('updateNotification')) return;
+    if (document.getElementById('backupWarningNotification')) return;
     
     const notificationHTML = `
-        <div id="updateNotification" class="alert alert-info alert-dismissible fade show m-3" role="alert">
+        <div id="backupWarningNotification" class="alert alert-warning alert-dismissible fade show m-3" role="alert" style="z-index: 9999;">
             <div class="d-flex align-items-center">
-                <i class="bi bi-arrow-clockwise me-3 fs-4"></i>
+                <i class="bi bi-exclamation-triangle-fill me-3 fs-4 text-danger"></i>
                 <div class="flex-grow-1">
-                    <strong>Nieuwe versie beschikbaar!</strong>
-                    <p class="mb-0">Er is een nieuwe versie van de app beschikbaar.</p>
+                    <strong class="text-danger">UPDATE BESCHIKBAAR - MAAK EERST BACKUP!</strong>
+                    <p class="mb-1">Er is een nieuwe versie van de app beschikbaar.</p>
+                    <p class="mb-2"><strong>Belangrijk:</strong> Maak eerst een backup van uw gegevens voordat u update!</p>
+                    <div class="mt-2">
+                        <button id="goToBackupBtn" class="btn btn-sm btn-outline-danger me-2">
+                            <i class="bi bi-download me-1"></i>Maak Backup
+                        </button>
+                        <button id="updateNowBtn" class="btn btn-sm btn-success me-2">
+                            <i class="bi bi-arrow-clockwise me-1"></i>Nu Updaten
+                        </button>
+                        <button id="laterBtn" class="btn btn-sm btn-secondary">
+                            <i class="bi bi-clock me-1"></i>Later
+                        </button>
+                    </div>
                 </div>
-                <div>
-                    <button id="reloadPageBtn" class="btn btn-sm btn-outline-info me-2">
-                        Nu bijwerken
-                    </button>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </div>
     `;
@@ -136,8 +138,16 @@ function showUpdateNotification(registration) {
     const container = document.querySelector('.container') || document.body;
     container.insertAdjacentHTML('afterbegin', notificationHTML);
     
-    // Setup herlaad knop
-    document.getElementById('reloadPageBtn').addEventListener('click', () => {
+    // Setup knoppen
+    document.getElementById('goToBackupBtn').addEventListener('click', () => {
+        // Navigeer naar backup functie
+        if (window.uiHandler && window.uiHandler.showModal) {
+            window.uiHandler.showModal('data');
+        }
+        hideBackupWarning();
+    });
+    
+    document.getElementById('updateNowBtn').addEventListener('click', () => {
         if (registration && registration.waiting) {
             // Stuur skip waiting bericht naar SW
             registration.waiting.postMessage({ type: 'SKIP_WAITING' });
@@ -147,14 +157,50 @@ function showUpdateNotification(registration) {
         window.location.reload();
     });
     
-    // Auto-verberg na 30 seconden
+    document.getElementById('laterBtn').addEventListener('click', hideBackupWarning);
+    
+    // Auto-verberg niet - blijf tonen tot gebruiker actie onderneemt
+}
+
+/**
+ * Toon update voltooid melding
+ */
+function showUpdateCompleteNotification() {
+    const notificationHTML = `
+        <div id="updateCompleteNotification" class="alert alert-success alert-dismissible fade show m-3" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-check-circle-fill me-3 fs-4"></i>
+                <div class="flex-grow-1">
+                    <strong>Update voltooid!</strong>
+                    <p class="mb-0">De nieuwe versie is succesvol geïnstalleerd.</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+    `;
+    
+    const container = document.querySelector('.container') || document.body;
+    container.insertAdjacentHTML('afterbegin', notificationHTML);
+    
+    // Auto-verberg na 10 seconden
     setTimeout(() => {
-        const notif = document.getElementById('updateNotification');
+        const notif = document.getElementById('updateCompleteNotification');
         if (notif) {
             const bsAlert = new bootstrap.Alert(notif);
             bsAlert.close();
         }
-    }, 30000);
+    }, 10000);
+}
+
+/**
+ * Verberg backup waarschuwing
+ */
+function hideBackupWarning() {
+    const notif = document.getElementById('backupWarningNotification');
+    if (notif) {
+        const bsAlert = new bootstrap.Alert(notif);
+        bsAlert.close();
+    }
 }
 
 /**
@@ -388,7 +434,7 @@ function setupPWAInstallation() {
         
         document.body.appendChild(installBtn);
         
-        // Verberg knop na 24 uur (cookie gebruiken voor persistentie)
+        // Verberg knop na 24 uur
         setTimeout(() => {
             if (installBtn && installBtn.parentNode) {
                 installBtn.remove();
@@ -464,7 +510,6 @@ export {
 };
 
 // ========== MODAL FIX VOOR ALLE MODALS ==========
-// Dit is de ENIGE toevoeging aan je bestand
 
 (function() {
     console.log('Modal fix installeren...');
@@ -483,20 +528,13 @@ export {
                     
                     // VERWIJDER FOCUS VOOR ALLE MODALS
                     if (modal) {
-                        // Verwijder focus van close button
                         const focused = modal.querySelector(':focus');
                         if (focused) {
                             focused.blur();
                         }
-                        
-                        // Forceer focus op body
                         document.body.focus();
-                        
-                        // Verwijder aria-hidden
                         modal.removeAttribute('aria-hidden');
                     }
-                    
-                    // Roep originele hide aan
                     return originalHide.call(this);
                 };
                 
