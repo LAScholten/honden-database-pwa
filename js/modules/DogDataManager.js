@@ -907,13 +907,6 @@ class DogDataManager extends BaseModule {
                     margin-bottom: 2px;
                 }
                 
-                .autocomplete-item .dog-name .kennel-name {
-                    font-weight: 400;
-                    font-size: 0.9rem;
-                    color: #6c757d;
-                    margin-left: 8px;
-                }
-                
                 .autocomplete-item .dog-info {
                     font-size: 0.8rem;
                     color: #666;
@@ -1285,10 +1278,7 @@ class DogDataManager extends BaseModule {
             
             html += `
                 <div class="search-result-item" data-id="${dog.id}">
-                    <div class="dog-name">
-                        ${dog.naam || 'Onbekend'}
-                        ${dog.kennelnaam ? `<span class="kennel-name">(${dog.kennelnaam})</span>` : ''}
-                    </div>
+                    <div class="dog-name">${dog.naam || 'Onbekend'} ${dog.kennelnaam ? dog.kennelnaam : ''}</div>
                     <div class="dog-info">
                         ${dog.ras ? `
                         <span><i class="bi bi-tag me-1"></i>${dog.ras}</span>
@@ -1867,10 +1857,7 @@ class DogDataManager extends BaseModule {
         suggestions.forEach(dog => {
             html += `
                 <div class="autocomplete-item" data-id="${dog.id}" data-name="${dog.naam}">
-                    <div class="dog-name">
-                        ${dog.naam}
-                        ${dog.kennelnaam ? `<span class="kennel-name">(${dog.kennelnaam})</span>` : ''}
-                    </div>
+                    <div class="dog-name">${dog.naam} ${dog.kennelnaam ? dog.kennelnaam : ''}</div>
                     <div class="dog-info">
                         ${dog.ras || 'Onbekend ras'} | ${dog.stamboomnr || 'Geen stamboom'}
                     </div>
