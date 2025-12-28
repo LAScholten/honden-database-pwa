@@ -135,7 +135,7 @@ class StamboomManager extends BaseModule {
                 grandfather: "Großvater",
                 grandmother: "Großmoeder",
                 greatGrandfather: "Urgroßvater",
-                greatGrandmother: "Urgroßmoeder",
+                greatGrandmother: "Urgroßmutter",
                 
                 // Hund Details
                 name: "Name",
@@ -558,7 +558,7 @@ class StamboomManager extends BaseModule {
     createPedigreeModal() {
         const modalHTML = `
             <div class="modal fade" id="pedigreeModal" tabindex="-1" aria-labelledby="pedigreeModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-fullscreen">
+                <div class="modal-dialog modal-xl">
                     <div class="modal-content">
                         <div class="modal-header bg-primary text-white">
                             <h5 class="modal-title" id="pedigreeModalLabel">
@@ -598,17 +598,14 @@ class StamboomManager extends BaseModule {
             </div>
             
             <style>
-                /* BEHOUD DE ORIGINELE LAYOUT */
+                /* CONTAINER - net als SearchManager */
                 .pedigree-container-compact {
                     padding: 20px;
                     background: #f8f9fa;
-                    min-height: calc(100vh - 120px);
-                    overflow-y: auto;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
+                    min-height: 600px;
                     width: 100%;
                     box-sizing: border-box;
+                    overflow-y: auto;
                 }
                 
                 .pedigree-grid-compact {
@@ -616,24 +613,23 @@ class StamboomManager extends BaseModule {
                     flex-direction: column;
                     gap: 20px;
                     width: 100%;
-                    max-width: 1400px;
                     margin: 0 auto;
                 }
                 
-                /* GENERATIE RIJS - BEHOUD OUDE LAYOUT */
+                /* GENERATIE RIJS - tegen elkaar aan */
                 .pedigree-generation-row {
                     display: flex;
                     flex-wrap: nowrap;
-                    gap: 10px;
+                    gap: 0; /* GEEN GAP - TEGEN ELKAAR AAN */
                     width: 100%;
                     justify-content: center;
                     padding-bottom: 10px;
                 }
                 
-                /* COMPACT CARDS - BEHOUD OUDE LAYOUT */
+                /* COMPACT CARDS */
                 .pedigree-card-compact {
                     background: white;
-                    border-radius: 8px;
+                    border-radius: 0;
                     border: 1px solid #dee2e6;
                     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
                     cursor: pointer;
@@ -781,66 +777,42 @@ class StamboomManager extends BaseModule {
                 }
                 
                 /* PROPORTIONELE BREEDTES - EXACT ZOALS GEVRAAGD */
-                /* Generation 0: Main dog - 50% breedte */
+                /* Generation 0: Main dog - 50% breedte, in het midden */
                 .pedigree-generation-row.gen0 {
                     justify-content: center;
                 }
                 
                 .pedigree-card-compact.gen0 {
                     flex: 0 0 50%;
-                    max-width: 600px;
+                    width: 50%;
                 }
                 
-                /* Generation 1: Parents - beide 50% breedte */
+                /* Generation 1: Parents - beide 50% breedte, tegen elkaar aan */
                 .pedigree-generation-row.gen1 {
                     justify-content: center;
                 }
                 
                 .pedigree-card-compact.gen1 {
                     flex: 0 0 50%;
-                    max-width: 600px;
+                    width: 50%;
                 }
                 
-                /* Generation 2: Grandparents - allemaal 25% breedte */
+                /* Generation 2: Grandparents - allemaal 25% breedte, tegen elkaar aan */
                 .pedigree-card-compact.gen2 {
                     flex: 0 0 25%;
-                    min-width: 200px;
+                    width: 25%;
                 }
                 
-                /* Generation 3: Great-grandparents - allemaal 12.5% breedte */
+                /* Generation 3: Great-grandparents - allemaal 12.5% breedte, tegen elkaar aan */
                 .pedigree-card-compact.gen3 {
                     flex: 0 0 12.5%;
-                    min-width: 150px;
+                    width: 12.5%;
                 }
                 
-                /* GEEN horizontale scroll - cards passen binnen container */
-                @media (max-width: 1400px) {
-                    .pedigree-container-compact {
-                        padding: 15px;
-                    }
-                    
-                    .pedigree-generation-row {
-                        flex-wrap: wrap;
-                        justify-content: flex-start;
-                    }
-                    
-                    .pedigree-card-compact.gen3 {
-                        min-width: 120px;
-                    }
-                }
-                
-                /* MOBIEL: BEHOUD 25% KLEINERE LETTERS VOOR GROOT- EN OVERGROOTOUDERS */
+                /* MOBIEL: ZELFDE LAYOUT, LETTERS 25% KLEINER VOOR GROOT- EN OVERGROOTOUDERS */
                 @media (max-width: 768px) {
                     .pedigree-container-compact {
-                        padding: 10px;
-                    }
-                    
-                    .pedigree-generation-row {
-                        gap: 8px;
-                    }
-                    
-                    .pedigree-card-compact {
-                        min-height: 130px;
+                        padding: 15px;
                     }
                     
                     /* Ouders en hoofdhond normale grootte */
@@ -912,37 +884,33 @@ class StamboomManager extends BaseModule {
                         font-size: 0.5625rem; /* 25% kleiner */
                     }
                     
-                    /* MOBIEL: BREEDTES AANPASSEN VOOR MOBIEL ZONDER SCROLL */
-                    .pedigree-generation-row.gen2 {
-                        flex-wrap: wrap;
-                        justify-content: center;
-                    }
-                    
-                    .pedigree-card-compact.gen2 {
-                        flex: 0 0 calc(50% - 8px); /* 2 per rij op mobiel */
-                        min-width: 0;
-                        max-width: calc(50% - 8px);
-                    }
-                    
-                    .pedigree-generation-row.gen3 {
-                        flex-wrap: wrap;
-                        justify-content: center;
-                    }
-                    
-                    .pedigree-card-compact.gen3 {
-                        flex: 0 0 calc(25% - 8px); /* 4 per rij op mobiel */
-                        min-width: 0;
-                        max-width: calc(25% - 8px);
+                    /* MOBIEL: BREEDTES VOOR SMALLE SCHERMEN */
+                    @media (max-width: 576px) {
+                        .pedigree-card-compact.gen0 {
+                            flex: 0 0 80%;
+                            width: 80%;
+                        }
+                        
+                        .pedigree-card-compact.gen1 {
+                            flex: 0 0 calc(50% - 2px);
+                            width: calc(50% - 2px);
+                        }
+                        
+                        .pedigree-card-compact.gen2 {
+                            flex: 0 0 calc(25% - 2px);
+                            width: calc(25% - 2px);
+                        }
+                        
+                        .pedigree-card-compact.gen3 {
+                            flex: 0 0 calc(12.5% - 2px);
+                            width: calc(12.5% - 2px);
+                        }
                     }
                 }
                 
                 @media (max-width: 480px) {
                     .pedigree-container-compact {
-                        padding: 8px;
-                    }
-                    
-                    .pedigree-generation-row {
-                        gap: 6px;
+                        padding: 10px;
                     }
                     
                     .pedigree-card-compact {
@@ -1018,37 +986,31 @@ class StamboomManager extends BaseModule {
                         font-size: 0.525rem; /* 25% kleiner */
                     }
                     
-                    /* KLEINERE SCHERMEN: AANPASSINGEN */
                     .pedigree-card-compact.gen0 {
-                        flex: 0 0 80%;
-                        max-width: 80%;
+                        flex: 0 0 90%;
+                        width: 90%;
                     }
                     
                     .pedigree-card-compact.gen1 {
-                        flex: 0 0 calc(50% - 6px);
-                        max-width: calc(50% - 6px);
+                        flex: 0 0 calc(50% - 1px);
+                        width: calc(50% - 1px);
                     }
                     
                     .pedigree-card-compact.gen2 {
-                        flex: 0 0 calc(50% - 6px);
-                        min-width: 0;
-                        max-width: calc(50% - 6px);
+                        flex: 0 0 calc(25% - 1px);
+                        width: calc(25% - 1px);
                     }
                     
                     .pedigree-card-compact.gen3 {
-                        flex: 0 0 calc(25% - 6px);
-                        min-width: 0;
-                        max-width: calc(25% - 6px);
+                        flex: 0 0 calc(12.5% - 1px);
+                        width: calc(12.5% - 1px);
                     }
                 }
                 
+                /* EXTRA KLEINE SCHERMEN */
                 @media (max-width: 360px) {
                     .pedigree-container-compact {
-                        padding: 6px;
-                    }
-                    
-                    .pedigree-generation-row {
-                        gap: 4px;
+                        padding: 8px;
                     }
                     
                     .pedigree-card-compact {
@@ -1131,29 +1093,6 @@ class StamboomManager extends BaseModule {
                     
                     .pedigree-card-body-compact {
                         padding: 8px;
-                    }
-                    
-                    /* ZEER KLEINE SCHERMEN */
-                    .pedigree-card-compact.gen0 {
-                        flex: 0 0 90%;
-                        max-width: 90%;
-                    }
-                    
-                    .pedigree-card-compact.gen1 {
-                        flex: 0 0 calc(50% - 4px);
-                        max-width: calc(50% - 4px);
-                    }
-                    
-                    .pedigree-card-compact.gen2 {
-                        flex: 0 0 calc(50% - 4px);
-                        min-width: 0;
-                        max-width: calc(50% - 4px);
-                    }
-                    
-                    .pedigree-card-compact.gen3 {
-                        flex: 0 0 calc(25% - 4px);
-                        min-width: 0;
-                        max-width: calc(25% - 4px);
                     }
                 }
                 
@@ -1405,63 +1344,33 @@ class StamboomManager extends BaseModule {
             <div class="pedigree-grid-compact">
                 <!-- Generatie 0: Hoofdhond -->
                 <div class="pedigree-generation-row gen0">
-                    <div class="pedigree-card-compact gen0 main-dog-compact">
-                        ${this.getDogCompactCardHTML(pedigreeTree.mainDog, this.t('mainDog'), true)}
-                    </div>
+                    ${this.getDogCompactCardHTML(pedigreeTree.mainDog, this.t('mainDog'), true)}
                 </div>
                 
                 <!-- Generatie 1: Ouders -->
                 <div class="pedigree-generation-row gen1">
-                    <div class="pedigree-card-compact gen1">
-                        ${this.getDogCompactCardHTML(pedigreeTree.father, this.t('father'))}
-                    </div>
-                    <div class="pedigree-card-compact gen1">
-                        ${this.getDogCompactCardHTML(pedigreeTree.mother, this.t('mother'))}
-                    </div>
+                    ${this.getDogCompactCardHTML(pedigreeTree.father, this.t('father'))}
+                    ${this.getDogCompactCardHTML(pedigreeTree.mother, this.t('mother'))}
                 </div>
                 
                 <!-- Generatie 2: Grootouders -->
                 <div class="pedigree-generation-row gen2">
-                    <div class="pedigree-card-compact gen2">
-                        ${this.getDogCompactCardHTML(pedigreeTree.paternalGrandfather, this.t('grandfather'))}
-                    </div>
-                    <div class="pedigree-card-compact gen2">
-                        ${this.getDogCompactCardHTML(pedigreeTree.paternalGrandmother, this.t('grandmother'))}
-                    </div>
-                    <div class="pedigree-card-compact gen2">
-                        ${this.getDogCompactCardHTML(pedigreeTree.maternalGrandfather, this.t('grandfather'))}
-                    </div>
-                    <div class="pedigree-card-compact gen2">
-                        ${this.getDogCompactCardHTML(pedigreeTree.maternalGrandmother, this.t('grandmother'))}
-                    </div>
+                    ${this.getDogCompactCardHTML(pedigreeTree.paternalGrandfather, this.t('grandfather'))}
+                    ${this.getDogCompactCardHTML(pedigreeTree.paternalGrandmother, this.t('grandmother'))}
+                    ${this.getDogCompactCardHTML(pedigreeTree.maternalGrandfather, this.t('grandfather'))}
+                    ${this.getDogCompactCardHTML(pedigreeTree.maternalGrandmother, this.t('grandmother'))}
                 </div>
                 
                 <!-- Generatie 3: Overgrootouders -->
                 <div class="pedigree-generation-row gen3">
-                    <div class="pedigree-card-compact gen3">
-                        ${this.getDogCompactCardHTML(pedigreeTree.paternalGreatGrandfather1, this.t('greatGrandfather'))}
-                    </div>
-                    <div class="pedigree-card-compact gen3">
-                        ${this.getDogCompactCardHTML(pedigreeTree.paternalGreatGrandmother1, this.t('greatGrandmother'))}
-                    </div>
-                    <div class="pedigree-card-compact gen3">
-                        ${this.getDogCompactCardHTML(pedigreeTree.paternalGreatGrandfather2, this.t('greatGrandfather'))}
-                    </div>
-                    <div class="pedigree-card-compact gen3">
-                        ${this.getDogCompactCardHTML(pedigreeTree.paternalGreatGrandmother2, this.t('greatGrandmother'))}
-                    </div>
-                    <div class="pedigree-card-compact gen3">
-                        ${this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandfather1, this.t('greatGrandfather'))}
-                    </div>
-                    <div class="pedigree-card-compact gen3">
-                        ${this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandmother1, this.t('greatGrandmother'))}
-                    </div>
-                    <div class="pedigree-card-compact gen3">
-                        ${this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandfather2, this.t('greatGrandfather'))}
-                    </div>
-                    <div class="pedigree-card-compact gen3">
-                        ${this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandmother2, this.t('greatGrandmother'))}
-                    </div>
+                    ${this.getDogCompactCardHTML(pedigreeTree.paternalGreatGrandfather1, this.t('greatGrandfather'))}
+                    ${this.getDogCompactCardHTML(pedigreeTree.paternalGreatGrandmother1, this.t('greatGrandmother'))}
+                    ${this.getDogCompactCardHTML(pedigreeTree.paternalGreatGrandfather2, this.t('greatGrandfather'))}
+                    ${this.getDogCompactCardHTML(pedigreeTree.paternalGreatGrandmother2, this.t('greatGrandmother'))}
+                    ${this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandfather1, this.t('greatGrandfather'))}
+                    ${this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandmother1, this.t('greatGrandmother'))}
+                    ${this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandfather2, this.t('greatGrandfather'))}
+                    ${this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandmother2, this.t('greatGrandmother'))}
                 </div>
             </div>
         `;
