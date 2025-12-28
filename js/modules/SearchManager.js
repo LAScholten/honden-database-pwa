@@ -918,8 +918,8 @@ class SearchManager extends BaseModule {
         
         if (!container) return;
         
-        let fatherInfo = { id: null, naam: t('parentsUnknown'), stamboomnr: '', ras: '' };
-        let motherInfo = { id: null, naam: t('parentsUnknown'), stamboomnr: '', ras: '' };
+        let fatherInfo = { id: null, naam: t('parentsUnknown'), stamboomnr: '', ras: '', kennelnaam: '' };
+        let motherInfo = { id: null, naam: t('parentsUnknown'), stamboomnr: '', ras: '', kennelnaam: '' };
         
         if (dog.vaderId) {
             const father = this.allDogs.find(d => d.id === dog.vaderId);
@@ -928,7 +928,8 @@ class SearchManager extends BaseModule {
                     id: father.id,
                     naam: father.naam || t('unknown'),
                     stamboomnr: father.stamboomnr || '',
-                    ras: father.ras || ''
+                    ras: father.ras || '',
+                    kennelnaam: father.kennelnaam || ''
                 };
             }
         }
@@ -940,7 +941,8 @@ class SearchManager extends BaseModule {
                     id: mother.id,
                     naam: mother.naam || t('unknown'),
                     stamboomnr: mother.stamboomnr || '',
-                    ras: mother.ras || ''
+                    ras: mother.ras || '',
+                    kennelnaam: mother.kennelnaam || ''
                 };
             }
         }
@@ -1061,7 +1063,7 @@ class SearchManager extends BaseModule {
                                     <div class="fw-bold mb-1 text-primary">
                                         <i class="bi bi-gender-male me-1"></i> ${t('father')}
                                     </div>
-                                    <div class="parent-name">${fatherInfo.naam}</div>
+                                    <div class="parent-name">${fatherInfo.naam} ${fatherInfo.kennelnaam}</div>
                                     ${fatherInfo.stamboomnr ? `<div class="parent-info">${fatherInfo.stamboomnr}</div>` : ''}
                                     ${fatherInfo.ras ? `<div class="parent-info">${fatherInfo.ras}</div>` : ''}
                                     ${fatherInfo.id ? `
@@ -1077,7 +1079,7 @@ class SearchManager extends BaseModule {
                                     <div class="fw-bold mb-1 text-danger">
                                         <i class="bi bi-gender-female me-1"></i> ${t('mother')}
                                     </div>
-                                    <div class="parent-mother-name">${motherInfo.naam}</div>
+                                    <div class="parent-mother-name">${motherInfo.naam} ${motherInfo.kennelnaam}</div>
                                     ${motherInfo.stamboomnr ? `<div class="parent-info">${motherInfo.stamboomnr}</div>` : ''}
                                     ${motherInfo.ras ? `<div class="parent-info">${motherInfo.ras}</div>` : ''}
                                     ${motherInfo.id ? `
