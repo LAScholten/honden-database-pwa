@@ -986,8 +986,75 @@ class SearchManager extends BaseModule {
             item.addEventListener('click', (e) => {
                 const hondId = parseInt(item.getAttribute('data-id'));
                 this.selectDogById(hondId);
+                
+                // Verberg de dropdown op mobiele apparaten
+                if (window.innerWidth <= 768) {
+                    this.collapseSearchResultsOnMobile();
+                }
             });
         });
+    }
+    
+    collapseSearchResultsOnMobile() {
+        // Op mobiel schermen, toon alleen de details en verberg de zoekresultaten
+        if (window.innerWidth <= 768) {
+            const searchColumn = document.getElementById('searchColumn');
+            const detailsColumn = document.getElementById('detailsColumn');
+            
+            if (searchColumn && detailsColumn) {
+                searchColumn.classList.add('d-none');
+                detailsColumn.classList.remove('col-md-7');
+                detailsColumn.classList.add('col-12');
+                
+                // Voeg een terugknop toe voor mobiele weergave
+                this.addMobileBackButton();
+            }
+        }
+    }
+    
+    addMobileBackButton() {
+        const detailsContainer = document.getElementById('detailsContainer');
+        if (!detailsContainer) return;
+        
+        const backButton = document.createElement('button');
+        backButton.className = 'btn btn-sm btn-outline-secondary mb-3';
+        backButton.innerHTML = '<i class="bi bi-arrow-left me-1"></i> Terug naar zoeken';
+        backButton.onclick = () => {
+            this.restoreSearchViewOnMobile();
+        };
+        
+        // Voeg de knop toe aan het begin van de details
+        const firstChild = detailsContainer.firstChild;
+        if (firstChild) {
+            detailsContainer.insertBefore(backButton, firstChild);
+        } else {
+            detailsContainer.appendChild(backButton);
+        }
+    }
+    
+    restoreSearchViewOnMobile() {
+        const searchColumn = document.getElementById('searchColumn');
+        const detailsColumn = document.getElementById('detailsColumn');
+        
+        if (searchColumn && detailsColumn) {
+            searchColumn.classList.remove('d-none');
+            detailsColumn.classList.remove('col-12');
+            detailsColumn.classList.add('col-md-7');
+            
+            // Wis de terugknop
+            const backButton = detailsContainer.querySelector('button.btn-outline-secondary');
+            if (backButton && backButton.textContent.includes('Terug naar zoeken')) {
+                backButton.remove();
+            }
+            
+            // Herstel de zoekfunctie
+            const searchInput = this.searchType === 'name' ? 
+                document.getElementById('searchNameInput') : 
+                document.getElementById('searchKennelInput');
+            if (searchInput) {
+                searchInput.focus();
+            }
+        }
     }
     
     selectDog(dog) {
@@ -999,6 +1066,11 @@ class SearchManager extends BaseModule {
         });
         
         this.showDogDetails(dog);
+        
+        // Verberg de dropdown op mobiele apparaten
+        if (window.innerWidth <= 768) {
+            this.collapseSearchResultsOnMobile();
+        }
     }
     
     selectDogById(hondId) {
@@ -1290,6 +1362,11 @@ class SearchManager extends BaseModule {
         `;
         
         container.innerHTML = html;
+        
+        // Voeg terugknop toe voor mobiele weergave (als we in collapsed modus zijn)
+        if (window.innerWidth <= 768) {
+            this.addMobileBackButton();
+        }
         
         if (fatherInfo.id) {
             const fatherCard = document.querySelector('.father-card');
