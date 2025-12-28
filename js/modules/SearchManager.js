@@ -486,12 +486,7 @@ class SearchManager extends BaseModule {
                     font-size: 1.1rem;
                     font-weight: 700;
                     color: #0d6efd;
-                    margin-bottom: 4px;
-                }
-                
-                .dog-name {
-                    font-weight: 700;
-                    color: #0d6efd;
+                    margin-bottom: 8px;
                 }
                 
                 .dog-kennel-line {
@@ -508,11 +503,6 @@ class SearchManager extends BaseModule {
                     flex-wrap: wrap;
                     gap: 12px;
                     align-items: center;
-                }
-                
-                .dog-details-line .stamboom {
-                    font-weight: 700;
-                    color: #212529;
                 }
                 
                 .search-stats {
@@ -969,19 +959,13 @@ class SearchManager extends BaseModule {
             
             html += `
                 <div class="dog-result-item" data-id="${dog.id}">
-                    <!-- REGEL 1: Alleen naam -->
+                    <!-- REGEL 1: Naam + Kennelnaam -->
                     <div class="dog-name-line">
                         <span class="dog-name">${dog.naam || t('unknown')}</span>
+                        ${dog.kennelnaam ? `<span class="text-muted ms-2">${dog.kennelnaam}</span>` : ''}
                     </div>
                     
-                    <!-- REGEL 2: Kennelnaam -->
-                    ${dog.kennelnaam ? `
-                    <div class="dog-kennel-line">
-                        ${dog.kennelnaam}
-                    </div>
-                    ` : ''}
-                    
-                    <!-- REGEL 3: Stamboomnummer + Ras + Geslacht (GEEN vachtkleur in zoekresultaten) -->
+                    <!-- REGEL 2: Stamboomnummer + Ras + Geslacht -->
                     <div class="dog-details-line">
                         ${dog.stamboomnr ? `<span class="stamboom">${dog.stamboomnr}</span>` : ''}
                         ${dog.ras ? `<span class="ras">${dog.ras}</span>` : ''}
@@ -1001,7 +985,7 @@ class SearchManager extends BaseModule {
                 // Verberg de dropdown op mobiele apparaten
                 if (window.innerWidth <= 768) {
                     this.collapseSearchResultsOnMobile();
-                }
+                });
             });
         });
     }
