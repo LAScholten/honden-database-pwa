@@ -25,6 +25,7 @@ class StamboomManager extends BaseModule {
                 
                 // Familierelaties
                 currentDog: "Huidige hond",
+                mainDog: "Hoofdhond",
                 father: "Vader",
                 mother: "Moeder",
                 grandfather: "Grootvader",
@@ -60,7 +61,11 @@ class StamboomManager extends BaseModule {
                 generation1: "Generatie 1 (Huidige hond)",
                 generation2: "Generatie 2 (Ouders)",
                 generation3: "Generatie 3 (Grootouders)",
-                generation4: "Generatie 4 (Overgrootouders)"
+                generation4: "Generatie 4 (Overgrootouders)",
+                
+                // Relatie aanduidingen
+                paternal: "Paternaal",
+                maternal: "Maternaal"
             },
             en: {
                 pedigreeTitle: "Pedigree of {name}",
@@ -77,6 +82,7 @@ class StamboomManager extends BaseModule {
                 
                 // Family relations
                 currentDog: "Current Dog",
+                mainDog: "Main Dog",
                 father: "Father",
                 mother: "Mother",
                 grandfather: "Grandfather",
@@ -112,7 +118,11 @@ class StamboomManager extends BaseModule {
                 generation1: "Generation 1 (Current Dog)",
                 generation2: "Generation 2 (Parents)",
                 generation3: "Generation 3 (Grandparents)",
-                generation4: "Generation 4 (Great Grandparents)"
+                generation4: "Generation 4 (Great Grandparents)",
+                
+                // Relation indicators
+                paternal: "Paternal",
+                maternal: "Maternal"
             },
             de: {
                 pedigreeTitle: "Ahnentafel von {name}",
@@ -129,6 +139,7 @@ class StamboomManager extends BaseModule {
                 
                 // Familienbeziehungen
                 currentDog: "Aktueller Hund",
+                mainDog: "Haupt-Hund",
                 father: "Vater",
                 mother: "Mutter",
                 grandfather: "Großvater",
@@ -164,7 +175,11 @@ class StamboomManager extends BaseModule {
                 generation1: "Generation 1 (Aktueller Hund)",
                 generation2: "Generation 2 (Eltern)",
                 generation3: "Generation 3 (Großeltern)",
-                generation4: "Generation 4 (Urgroßeltern)"
+                generation4: "Generation 4 (Urgroßeltern)",
+                
+                // Relations
+                paternal: "Väterlich",
+                maternal: "Mütterlich"
             }
         };
     }
@@ -182,32 +197,32 @@ class StamboomManager extends BaseModule {
         return this.allDogs.find(dog => dog.id === id);
     }
     
-    buildPedigreeTree(dogId, generations = 4) {
+    buildPedigreeTree(dogId) {
         const pedigreeTree = {
-            dog: null,
-            father: null,
-            mother: null,
-            paternalGrandfather: null,
-            paternalGrandmother: null,
-            maternalGrandfather: null,
-            maternalGrandmother: null,
-            paternalGreatGrandfather1: null,
-            paternalGreatGrandmother1: null,
-            paternalGreatGrandfather2: null,
-            paternalGreatGrandmother2: null,
-            maternalGreatGrandfather1: null,
-            maternalGreatGrandmother1: null,
-            maternalGreatGrandfather2: null,
-            maternalGreatGrandmother2: null
+            mainDog: null,           // Generatie 0: Hoofdhond (bovenaan)
+            father: null,           // Generatie 1: Vader
+            mother: null,           // Generatie 1: Moeder
+            paternalGrandfather: null,   // Generatie 2: Paternale grootvader
+            paternalGrandmother: null,   // Generatie 2: Paternale grootmoeder
+            maternalGrandfather: null,   // Generatie 2: Maternale grootvader
+            maternalGrandmother: null,   // Generatie 2: Maternale grootmoeder
+            paternalGreatGrandfather1: null,  // Generatie 3: Paternale overgrootvader (vaders vader)
+            paternalGreatGrandmother1: null,  // Generatie 3: Paternale overgrootmoeder (vaders vader)
+            paternalGreatGrandfather2: null,  // Generatie 3: Paternale overgrootvader (vaders moeder)
+            paternalGreatGrandmother2: null,  // Generatie 3: Paternale overgrootmoeder (vaders moeder)
+            maternalGreatGrandfather1: null,  // Generatie 3: Maternale overgrootvader (moeders vader)
+            maternalGreatGrandmother1: null,  // Generatie 3: Maternale overgrootmoeder (moeders vader)
+            maternalGreatGrandfather2: null,  // Generatie 3: Maternale overgrootvader (moeders moeder)
+            maternalGreatGrandmother2: null   // Generatie 3: Maternale overgrootmoeder (moeders moeder)
         };
         
         // Haal de hoofdhond op
         const mainDog = this.getDogById(dogId);
         if (!mainDog) return null;
         
-        pedigreeTree.dog = mainDog;
+        pedigreeTree.mainDog = mainDog;
         
-        // Gen 2: Ouders
+        // Generatie 1: Ouders
         if (mainDog.vaderId) {
             pedigreeTree.father = this.getDogById(mainDog.vaderId);
         }
@@ -216,7 +231,7 @@ class StamboomManager extends BaseModule {
             pedigreeTree.mother = this.getDogById(mainDog.moederId);
         }
         
-        // Gen 3: Grootouders (paternale kant)
+        // Generatie 2: Grootouders (paternale kant)
         if (pedigreeTree.father && pedigreeTree.father.vaderId) {
             pedigreeTree.paternalGrandfather = this.getDogById(pedigreeTree.father.vaderId);
         }
@@ -225,7 +240,7 @@ class StamboomManager extends BaseModule {
             pedigreeTree.paternalGrandmother = this.getDogById(pedigreeTree.father.moederId);
         }
         
-        // Gen 3: Grootouders (maternale kant)
+        // Generatie 2: Grootouders (maternale kant)
         if (pedigreeTree.mother && pedigreeTree.mother.vaderId) {
             pedigreeTree.maternalGrandfather = this.getDogById(pedigreeTree.mother.vaderId);
         }
@@ -234,7 +249,7 @@ class StamboomManager extends BaseModule {
             pedigreeTree.maternalGrandmother = this.getDogById(pedigreeTree.mother.moederId);
         }
         
-        // Gen 4: Overgrootouders (paternale vader kant)
+        // Generatie 3: Overgrootouders (paternale vader kant)
         if (pedigreeTree.paternalGrandfather && pedigreeTree.paternalGrandfather.vaderId) {
             pedigreeTree.paternalGreatGrandfather1 = this.getDogById(pedigreeTree.paternalGrandfather.vaderId);
         }
@@ -243,7 +258,7 @@ class StamboomManager extends BaseModule {
             pedigreeTree.paternalGreatGrandmother1 = this.getDogById(pedigreeTree.paternalGrandfather.moederId);
         }
         
-        // Gen 4: Overgrootouders (paternale moeder kant)
+        // Generatie 3: Overgrootouders (paternale moeder kant)
         if (pedigreeTree.paternalGrandmother && pedigreeTree.paternalGrandmother.vaderId) {
             pedigreeTree.paternalGreatGrandfather2 = this.getDogById(pedigreeTree.paternalGrandmother.vaderId);
         }
@@ -252,7 +267,7 @@ class StamboomManager extends BaseModule {
             pedigreeTree.paternalGreatGrandmother2 = this.getDogById(pedigreeTree.paternalGrandmother.moederId);
         }
         
-        // Gen 4: Overgrootouders (maternale vader kant)
+        // Generatie 3: Overgrootouders (maternale vader kant)
         if (pedigreeTree.maternalGrandfather && pedigreeTree.maternalGrandfather.vaderId) {
             pedigreeTree.maternalGreatGrandfather1 = this.getDogById(pedigreeTree.maternalGrandfather.vaderId);
         }
@@ -261,7 +276,7 @@ class StamboomManager extends BaseModule {
             pedigreeTree.maternalGreatGrandmother1 = this.getDogById(pedigreeTree.maternalGrandfather.moederId);
         }
         
-        // Gen 4: Overgrootouders (maternale moeder kant)
+        // Generatie 3: Overgrootouders (maternale moeder kant)
         if (pedigreeTree.maternalGrandmother && pedigreeTree.maternalGrandmother.vaderId) {
             pedigreeTree.maternalGreatGrandfather2 = this.getDogById(pedigreeTree.maternalGrandmother.vaderId);
         }
@@ -299,7 +314,7 @@ class StamboomManager extends BaseModule {
         return `<span class="${badgeClass}">${value}</span>`;
     }
     
-    getDogCardHTML(dog, relation = '') {
+    getDogCardHTML(dog, relation = '', isMainDog = false) {
         if (!dog) {
             return `
                 <div class="pedigree-card empty">
@@ -317,10 +332,17 @@ class StamboomManager extends BaseModule {
         const genderText = dog.geslacht === 'reuen' ? this.t('male') : 
                           dog.geslacht === 'teven' ? this.t('female') : this.t('unknown');
         
+        // Speciale styling voor hoofdhond
+        const mainDogClass = isMainDog ? 'main-dog' : '';
+        const headerColor = isMainDog ? 'bg-primary' : 'bg-secondary';
+        
         return `
-            <div class="pedigree-card ${dog.geslacht === 'reuen' ? 'male' : 'female'}">
-                <div class="pedigree-card-header">
-                    <div class="relation">${relation}</div>
+            <div class="pedigree-card ${dog.geslacht === 'reuen' ? 'male' : 'female'} ${mainDogClass}">
+                <div class="pedigree-card-header ${headerColor}">
+                    <div class="relation">
+                        ${relation}
+                        ${isMainDog ? '<div class="main-dog-badge"><i class="bi bi-star-fill"></i></div>' : ''}
+                    </div>
                     <div class="gender-badge">
                         <i class="bi ${dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 'bi-gender-female text-danger'}"></i>
                     </div>
@@ -441,7 +463,7 @@ class StamboomManager extends BaseModule {
         const title = this.t('pedigreeTitle').replace('{name}', dog.naam || this.t('unknown'));
         document.getElementById('pedigreeModalLabel').textContent = title;
         
-        // Vul de stamboom in
+        // Vul de stamboom in - NIEUWE LAYOUT MET HOOFDHOND BOVENAAN
         this.renderPedigree(pedigreeTree);
         
         // Toon de modal
@@ -507,9 +529,9 @@ class StamboomManager extends BaseModule {
                 .pedigree-grid {
                     display: grid;
                     grid-template-columns: repeat(15, 1fr);
-                    grid-template-rows: repeat(7, auto);
-                    gap: 10px;
-                    min-width: 1200px;
+                    grid-template-rows: repeat(8, auto);
+                    gap: 15px;
+                    min-width: 1400px;
                     transform-origin: top left;
                 }
                 
@@ -542,18 +564,52 @@ class StamboomManager extends BaseModule {
                     background: #f8f9fa;
                 }
                 
+                /* Hoofdhond styling */
+                .pedigree-card.main-dog {
+                    border-color: #0d6efd;
+                    border-width: 3px;
+                    background: linear-gradient(to bottom, #e8f4fd, #ffffff);
+                    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+                }
+                
                 .pedigree-card-header {
-                    background: #6c757d;
                     color: white;
-                    padding: 8px 12px;
+                    padding: 10px 12px;
                     font-size: 0.85rem;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
                 }
                 
+                .pedigree-card-header.bg-primary {
+                    background: #0d6efd !important;
+                }
+                
+                .pedigree-card-header.bg-secondary {
+                    background: #6c757d !important;
+                }
+                
+                .relation {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-weight: 600;
+                }
+                
+                .main-dog-badge {
+                    background: #ffc107;
+                    color: #212529;
+                    border-radius: 50%;
+                    width: 20px;
+                    height: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.7rem;
+                }
+                
                 .pedigree-card-body {
-                    padding: 12px;
+                    padding: 15px;
                 }
                 
                 .dog-name {
@@ -562,8 +618,14 @@ class StamboomManager extends BaseModule {
                     color: #0d6efd;
                 }
                 
+                .main-dog .dog-name {
+                    color: #0d6efd;
+                    font-size: 1.2rem;
+                }
+                
                 .kennel-name {
                     font-style: italic;
+                    color: #6c757d;
                 }
                 
                 .detail-row {
@@ -614,46 +676,69 @@ class StamboomManager extends BaseModule {
                     white-space: nowrap;
                 }
                 
-                .connection-line {
+                /* NIEUWE LAYOUT: Generatie 0 bovenaan (rij 1) */
+                .gen0 { grid-column: 7 / 10; grid-row: 1 / 3; }
+                
+                /* Generatie 1: Ouders (rij 2-3) */
+                .gen1-father { grid-column: 3 / 6; grid-row: 3 / 5; }
+                .gen1-mother { grid-column: 11 / 14; grid-row: 3 / 5; }
+                
+                /* Generatie 2: Grootouders (rij 4-5) */
+                .gen2-paternal-grandfather { grid-column: 1 / 4; grid-row: 5 / 7; }
+                .gen2-paternal-grandmother { grid-column: 5 / 8; grid-row: 5 / 7; }
+                .gen2-maternal-grandfather { grid-column: 10 / 13; grid-row: 5 / 7; }
+                .gen2-maternal-grandmother { grid-column: 14 / 17; grid-row: 5 / 7; }
+                
+                /* Generatie 3: Overgrootouders (rij 6-8) */
+                .gen3-paternal-great-grandfather1 { grid-column: 1 / 3; grid-row: 7 / 9; }
+                .gen3-paternal-great-grandmother1 { grid-column: 3 / 5; grid-row: 7 / 9; }
+                .gen3-paternal-great-grandfather2 { grid-column: 5 / 7; grid-row: 7 / 9; }
+                .gen3-paternal-great-grandmother2 { grid-column: 7 / 9; grid-row: 7 / 9; }
+                .gen3-maternal-great-grandfather1 { grid-column: 10 / 12; grid-row: 7 / 9; }
+                .gen3-maternal-great-grandmother1 { grid-column: 12 / 14; grid-row: 7 / 9; }
+                .gen3-maternal-great-grandfather2 { grid-column: 14 / 16; grid-row: 7 / 9; }
+                .gen3-maternal-great-grandmother2 { grid-column: 16 / 18; grid-row: 7 / 9; }
+                
+                /* Verbindingslijnen styling */
+                .pedigree-lines {
                     position: absolute;
-                    background: #6c757d;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    pointer-events: none;
+                    z-index: -1;
                 }
                 
-                .connection-line.horizontal {
+                .line {
+                    position: absolute;
+                    background-color: #6c757d;
+                }
+                
+                .line.horizontal {
                     height: 2px;
                 }
                 
-                .connection-line.vertical {
+                .line.vertical {
                     width: 2px;
                 }
-                
-                /* Grid positions voor 4-generatie stamboom */
-                /* Gen 1: Huidige hond - midden onder */
-                .gen1 { grid-column: 7 / 10; grid-row: 6 / 8; }
-                
-                /* Gen 2: Ouders */
-                .gen2-father { grid-column: 3 / 6; grid-row: 4 / 6; }
-                .gen2-mother { grid-column: 11 / 14; grid-row: 4 / 6; }
-                
-                /* Gen 3: Grootouders */
-                .gen3-paternal-grandfather { grid-column: 1 / 4; grid-row: 2 / 4; }
-                .gen3-paternal-grandmother { grid-column: 5 / 8; grid-row: 2 / 4; }
-                .gen3-maternal-grandfather { grid-column: 10 / 13; grid-row: 2 / 4; }
-                .gen3-maternal-grandmother { grid-column: 14 / 17; grid-row: 2 / 4; }
-                
-                /* Gen 4: Overgrootouders */
-                .gen4-paternal-great-grandfather1 { grid-column: 1 / 3; grid-row: 1; }
-                .gen4-paternal-great-grandmother1 { grid-column: 3 / 5; grid-row: 1; }
-                .gen4-paternal-great-grandfather2 { grid-column: 5 / 7; grid-row: 1; }
-                .gen4-paternal-great-grandmother2 { grid-column: 7 / 9; grid-row: 1; }
-                .gen4-maternal-great-grandfather1 { grid-column: 10 / 12; grid-row: 1; }
-                .gen4-maternal-great-grandmother1 { grid-column: 12 / 14; grid-row: 1; }
-                .gen4-maternal-great-grandfather2 { grid-column: 14 / 16; grid-row: 1; }
-                .gen4-maternal-great-grandmother2 { grid-column: 16 / 18; grid-row: 1; }
                 
                 .zoom-controls .btn {
                     padding: 4px 8px;
                     font-size: 0.875rem;
+                }
+                
+                /* Generatie labels */
+                .generation-label {
+                    grid-column: 1 / -1;
+                    text-align: center;
+                    padding: 5px;
+                    background: #f8f9fa;
+                    border-radius: 4px;
+                    margin: 5px 0;
+                    font-weight: 600;
+                    color: #495057;
+                    font-size: 0.9rem;
                 }
                 
                 @media print {
@@ -672,13 +757,18 @@ class StamboomManager extends BaseModule {
                     }
                     
                     .pedigree-grid {
-                        gap: 5px;
+                        gap: 8px;
                         min-width: auto;
                     }
                     
                     .pedigree-card {
                         break-inside: avoid;
                         box-shadow: none;
+                        border: 1px solid #dee2e6;
+                    }
+                    
+                    .main-dog {
+                        border: 2px solid #0d6efd !important;
                     }
                 }
             </style>
@@ -703,24 +793,38 @@ class StamboomManager extends BaseModule {
         // Zoom functionaliteit
         let currentZoom = 1;
         const container = modal.querySelector('#pedigreeContainer');
-        const grid = container.querySelector('.pedigree-grid');
         
-        if (grid) {
-            modal.querySelector('.btn-zoom-in').addEventListener('click', () => {
-                currentZoom = Math.min(currentZoom + 0.1, 2);
-                grid.style.transform = `scale(${currentZoom})`;
+        const setupZoom = () => {
+            const grid = container.querySelector('.pedigree-grid');
+            if (grid) {
+                modal.querySelector('.btn-zoom-in').addEventListener('click', () => {
+                    currentZoom = Math.min(currentZoom + 0.1, 2);
+                    grid.style.transform = `scale(${currentZoom})`;
+                });
+                
+                modal.querySelector('.btn-zoom-out').addEventListener('click', () => {
+                    currentZoom = Math.max(currentZoom - 0.1, 0.5);
+                    grid.style.transform = `scale(${currentZoom})`;
+                });
+                
+                modal.querySelector('.btn-zoom-reset').addEventListener('click', () => {
+                    currentZoom = 1;
+                    grid.style.transform = 'scale(1)';
+                });
+            }
+        };
+        
+        // Setup zoom wanneer grid beschikbaar is
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (container.querySelector('.pedigree-grid')) {
+                    setupZoom();
+                    observer.disconnect();
+                }
             });
-            
-            modal.querySelector('.btn-zoom-out').addEventListener('click', () => {
-                currentZoom = Math.max(currentZoom - 0.1, 0.5);
-                grid.style.transform = `scale(${currentZoom})`;
-            });
-            
-            modal.querySelector('.btn-zoom-reset').addEventListener('click', () => {
-                currentZoom = 1;
-                grid.style.transform = 'scale(1)';
-            });
-        }
+        });
+        
+        observer.observe(container, { childList: true, subtree: true });
     }
     
     renderPedigree(pedigreeTree) {
@@ -729,71 +833,130 @@ class StamboomManager extends BaseModule {
         
         const gridHTML = `
             <div class="pedigree-grid">
-                <!-- Generatie 4: Overgrootouders (rij 1) -->
-                <div class="pedigree-card gen4-paternal-great-grandfather1">
-                    ${this.getDogCardHTML(pedigreeTree.paternalGreatGrandfather1, this.t('greatGrandfather'))}
-                </div>
-                <div class="pedigree-card gen4-paternal-great-grandmother1">
-                    ${this.getDogCardHTML(pedigreeTree.paternalGreatGrandmother1, this.t('greatGrandmother'))}
-                </div>
-                <div class="pedigree-card gen4-paternal-great-grandfather2">
-                    ${this.getDogCardHTML(pedigreeTree.paternalGreatGrandfather2, this.t('greatGrandfather'))}
-                </div>
-                <div class="pedigree-card gen4-paternal-great-grandmother2">
-                    ${this.getDogCardHTML(pedigreeTree.paternalGreatGrandmother2, this.t('greatGrandmother'))}
+                <!-- Generatie 0: Hoofdhond (bovenaan) -->
+                <div class="pedigree-card gen0 main-dog">
+                    ${this.getDogCardHTML(pedigreeTree.mainDog, this.t('mainDog'), true)}
                 </div>
                 
-                <div class="pedigree-card gen4-maternal-great-grandfather1">
-                    ${this.getDogCardHTML(pedigreeTree.maternalGreatGrandfather1, this.t('greatGrandfather'))}
-                </div>
-                <div class="pedigree-card gen4-maternal-great-grandmother1">
-                    ${this.getDogCardHTML(pedigreeTree.maternalGreatGrandmother1, this.t('greatGrandmother'))}
-                </div>
-                <div class="pedigree-card gen4-maternal-great-grandfather2">
-                    ${this.getDogCardHTML(pedigreeTree.maternalGreatGrandfather2, this.t('greatGrandfather'))}
-                </div>
-                <div class="pedigree-card gen4-maternal-great-grandmother2">
-                    ${this.getDogCardHTML(pedigreeTree.maternalGreatGrandmother2, this.t('greatGrandmother'))}
-                </div>
-                
-                <!-- Generatie 3: Grootouders (rij 2-3) -->
-                <div class="pedigree-card gen3-paternal-grandfather">
-                    ${this.getDogCardHTML(pedigreeTree.paternalGrandfather, this.t('grandfather'))}
-                </div>
-                <div class="pedigree-card gen3-paternal-grandmother">
-                    ${this.getDogCardHTML(pedigreeTree.paternalGrandmother, this.t('grandmother'))}
-                </div>
-                <div class="pedigree-card gen3-maternal-grandfather">
-                    ${this.getDogCardHTML(pedigreeTree.maternalGrandfather, this.t('grandfather'))}
-                </div>
-                <div class="pedigree-card gen3-maternal-grandmother">
-                    ${this.getDogCardHTML(pedigreeTree.maternalGrandmother, this.t('grandmother'))}
-                </div>
-                
-                <!-- Generatie 2: Ouders (rij 4-5) -->
-                <div class="pedigree-card gen2-father">
+                <!-- Generatie 1: Ouders -->
+                <div class="pedigree-card gen1-father">
                     ${this.getDogCardHTML(pedigreeTree.father, this.t('father'))}
                 </div>
-                <div class="pedigree-card gen2-mother">
+                <div class="pedigree-card gen1-mother">
                     ${this.getDogCardHTML(pedigreeTree.mother, this.t('mother'))}
                 </div>
                 
-                <!-- Generatie 1: Huidige hond (rij 6-7) -->
-                <div class="pedigree-card gen1">
-                    ${this.getDogCardHTML(pedigreeTree.dog, this.t('currentDog'))}
+                <!-- Generatie 2: Grootouders -->
+                <div class="pedigree-card gen2-paternal-grandfather">
+                    ${this.getDogCardHTML(pedigreeTree.paternalGrandfather, 
+                                          `${this.t('paternal')} ${this.t('grandfather')}`)}
+                </div>
+                <div class="pedigree-card gen2-paternal-grandmother">
+                    ${this.getDogCardHTML(pedigreeTree.paternalGrandmother, 
+                                          `${this.t('paternal')} ${this.t('grandmother')}`)}
+                </div>
+                <div class="pedigree-card gen2-maternal-grandfather">
+                    ${this.getDogCardHTML(pedigreeTree.maternalGrandfather, 
+                                          `${this.t('maternal')} ${this.t('grandfather')}`)}
+                </div>
+                <div class="pedigree-card gen2-maternal-grandmother">
+                    ${this.getDogCardHTML(pedigreeTree.maternalGrandmother, 
+                                          `${this.t('maternal')} ${this.t('grandmother')}`)}
+                </div>
+                
+                <!-- Generatie 3: Overgrootouders -->
+                <div class="pedigree-card gen3-paternal-great-grandfather1">
+                    ${this.getDogCardHTML(pedigreeTree.paternalGreatGrandfather1, 
+                                          `${this.t('paternal')} ${this.t('greatGrandfather')}`)}
+                </div>
+                <div class="pedigree-card gen3-paternal-great-grandmother1">
+                    ${this.getDogCardHTML(pedigreeTree.paternalGreatGrandmother1, 
+                                          `${this.t('paternal')} ${this.t('greatGrandmother')}`)}
+                </div>
+                <div class="pedigree-card gen3-paternal-great-grandfather2">
+                    ${this.getDogCardHTML(pedigreeTree.paternalGreatGrandfather2, 
+                                          `${this.t('paternal')} ${this.t('greatGrandfather')}`)}
+                </div>
+                <div class="pedigree-card gen3-paternal-great-grandmother2">
+                    ${this.getDogCardHTML(pedigreeTree.paternalGreatGrandmother2, 
+                                          `${this.t('paternal')} ${this.t('greatGrandmother')}`)}
+                </div>
+                
+                <div class="pedigree-card gen3-maternal-great-grandfather1">
+                    ${this.getDogCardHTML(pedigreeTree.maternalGreatGrandfather1, 
+                                          `${this.t('maternal')} ${this.t('greatGrandfather')}`)}
+                </div>
+                <div class="pedigree-card gen3-maternal-great-grandmother1">
+                    ${this.getDogCardHTML(pedigreeTree.maternalGreatGrandmother1, 
+                                          `${this.t('maternal')} ${this.t('greatGrandmother')}`)}
+                </div>
+                <div class="pedigree-card gen3-maternal-great-grandfather2">
+                    ${this.getDogCardHTML(pedigreeTree.maternalGreatGrandfather2, 
+                                          `${this.t('maternal')} ${this.t('greatGrandfather')}`)}
+                </div>
+                <div class="pedigree-card gen3-maternal-great-grandmother2">
+                    ${this.getDogCardHTML(pedigreeTree.maternalGreatGrandmother2, 
+                                          `${this.t('maternal')} ${this.t('greatGrandmother')}`)}
                 </div>
             </div>
         `;
         
         container.innerHTML = gridHTML;
         
-        // Voeg verbindingslijnen toe
-        this.addConnectionLines();
+        // Voeg visuele lijnen toe (optioneel)
+        this.addPedigreeLines();
     }
     
-    addConnectionLines() {
-        // Deze functie zou SVG lijnen kunnen toevoegen tussen de kaarten
-        // Voor nu houden we het simpel zonder visuele lijnen
-        // Kan later uitgebreid worden met SVG graphics
+    addPedigreeLines() {
+        // Deze functie voegt visuele verbindingslijnen toe tussen de kaarten
+        // Voor nu houden we het simpel, maar je kunt SVG lijnen toevoegen
+        
+        setTimeout(() => {
+            const container = document.getElementById('pedigreeContainer');
+            const grid = container.querySelector('.pedigree-grid');
+            
+            if (!grid) return;
+            
+            // Maak een div voor de lijnen
+            const linesDiv = document.createElement('div');
+            linesDiv.className = 'pedigree-lines';
+            grid.appendChild(linesDiv);
+            
+            // Hier zou je logica komen om lijnen tussen de kaarten te tekenen
+            // Dit vereist het berekenen van posities van de kaarten
+            
+        }, 100);
+    }
+    
+    // Helper methodes van BaseModule
+    showProgress(message) {
+        if (typeof super.showProgress === 'function') {
+            super.showProgress(message);
+        } else {
+            console.log('Progress:', message);
+        }
+    }
+    
+    hideProgress() {
+        if (typeof super.hideProgress === 'function') {
+            super.hideProgress();
+        }
+    }
+    
+    showError(message) {
+        if (typeof super.showError === 'function') {
+            super.showError(message);
+        } else {
+            console.error('Error:', message);
+            alert(message);
+        }
+    }
+    
+    showSuccess(message) {
+        if (typeof super.showSuccess === 'function') {
+            super.showSuccess(message);
+        } else {
+            console.log('Success:', message);
+        }
     }
 }
