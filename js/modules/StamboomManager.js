@@ -15,7 +15,7 @@ class StamboomManager extends BaseModule {
         this.allDogs = [];
         this.translations = {
             nl: {
-                pedigreeTitle: "Stamboom van {name}",
+                pedigreeTitle: "StamPboom van {name}",
                 pedigree4Gen: "4-generatie stamboom",
                 generatingPedigree: "Stamboom genereren...",
                 close: "Sluiten",
@@ -1154,22 +1154,22 @@ class StamboomManager extends BaseModule {
                     
                     /* WIGVORM POSITIONERING OP MOBIEL */
                     .pedigree-generation-col.gen0 {
-                        margin-top: 0px !important;
+                        margin-top: 90px !important;
                         gap: 0 !important;
                     }
                     
                     .pedigree-generation-col.gen1 {
-                        margin-top: 30px !important;
+                        margin-top: 60px !important;
                         gap: 10px !important;
                     }
                     
                     .pedigree-generation-col.gen2 {
-                        margin-top: 60px !important;
+                        margin-top: 30px !important;
                         gap: 6px !important;
                     }
                     
                     .pedigree-generation-col.gen3 {
-                        margin-top: 90px !important;
+                        margin-top: 0px !important;
                         gap: 3px !important;
                     }
                     
@@ -1250,20 +1250,20 @@ class StamboomManager extends BaseModule {
                     }
                     
                     .pedigree-grid-compact {
-                        padding: 150px 12px 40px 12px !important;
+                        padding: 200px 12px 40px 12px !important;
                         gap: 12px !important;
                     }
                     
                     .pedigree-generation-col.gen1 {
-                        margin-top: 75px !important;
+                        margin-top: 60px !important;
                     }
                     
                     .pedigree-generation-col.gen2 {
-                        margin-top: 45px !important;
+                        margin-top: 30px !important;
                     }
                     
                     .pedigree-generation-col.gen3 {
-                        margin-top: 5px !important;
+                        margin-top: 1px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen0,
