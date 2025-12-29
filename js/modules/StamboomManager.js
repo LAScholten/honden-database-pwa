@@ -13,7 +13,7 @@ class StamboomManager extends BaseModule {
         this.allDogs = [];
         this.translations = {
             nl: {
-                pedigreeTitle: "StamPboom van {name}",
+                pedigreeTitle: "Stamboom van {name}",
                 pedigree4Gen: "4-generatie stamboom",
                 generatingPedigree: "Stamboom genereren...",
                 close: "Sluiten",
@@ -601,6 +601,7 @@ class StamboomManager extends BaseModule {
                                 </div>
                             </div>
                         </div>
+                        <!-- FOOTER VERWIJDERD -->
                     </div>
                 </div>
             </div>
@@ -1222,11 +1223,6 @@ class StamboomManager extends BaseModule {
                         margin-bottom: 5px !important;
                         white-space: nowrap !important;
                     }
-                    
-                    /* Footer volledig verwijderd op mobiel */
-                    .popup-footer {
-                        display: none !important;
-                    }
                 }
                 
                 @media (max-width: 480px) {
@@ -1263,11 +1259,6 @@ class StamboomManager extends BaseModule {
                     .generation-label {
                         font-size: 0.65rem !important;
                         padding: 2px 5px !important;
-                    }
-                    
-                    /* Footer volledig verwijderd op mobiel */
-                    .popup-footer {
-                        display: none !important;
                     }
                 }
                 
