@@ -13,7 +13,7 @@ class StamboomManager extends BaseModule {
         this.allDogs = [];
         this.translations = {
             nl: {
-                pedigreeTitle: "Stamboom van {name}",
+                pedigreeTitle: "StamPboom van {name}",
                 pedigree4Gen: "4-generatie stamboom",
                 generatingPedigree: "Stamboom genereren...",
                 close: "Sluiten",
@@ -653,42 +653,45 @@ class StamboomManager extends BaseModule {
                     min-height: 0 !important;
                 }
                 
-                /* HORIZONTALE PEDIGREE CONTAINER - MAXIMALE RUIMTE */
+                /* HORIZONTALE PEDIGREE CONTAINER - BEREKENDE HOOGTE */
                 .pedigree-container-compact {
                     padding: 0 !important;
                     margin: 0 !important;
                     width: 100% !important;
-                    height: calc(100vh - 60px) !important;
+                    /* 
+                    BEREKENING voor mobiele weergave:
+                    - 8 overgrootouders cards van 66px = 528px
+                    - 7 tussenruimtes van 4px = 28px
+                    - Generation label: 40px (margin + padding + font)
+                    - Boven/boven padding: 40px
+                    - Extra ruimte: 50px
+                    TOTAAL: 528 + 28 + 40 + 40 + 50 = 686px
+                    Voor desktop houden we de oude hoogte aan
+                    */
+                    height: calc(100vh - 60px) !important; /* Voor desktop */
                     background: #f8f9fa;
                     overflow-x: auto !important;
                     overflow-y: hidden !important;
-                    display: flex;
-                    align-items: center;
                     position: relative;
-                    min-height: 0 !important;
-                    min-width: 0 !important;
                 }
                 
                 .pedigree-grid-compact {
                     display: flex;
                     flex-direction: row;
-                    height: 100%;
-                    min-width: fit-content;
-                    padding: 0 20px !important;
+                    min-width: max-content;
+                    padding: 20px;
                     gap: 25px;
+                    height: 100%;
                     align-items: center;
-                    box-sizing: border-box !important;
-                    margin: 0 auto;
                 }
                 
-                /* GENERATIE KOLOM - VERTICALE STACK VAN LIGGENDE CARDS */
+                /* GENERATIE KOLOM - VOLLEDIGE HOOGTE */
                 .pedigree-generation-col {
                     display: flex;
                     flex-direction: column;
                     height: 100%;
-                    justify-content: center;
+                    justify-content: flex-start;
                     min-width: 0;
-                    box-sizing: border-box !important;
                 }
                 
                 /* VERSCHILLENDE SPACING PER GENERATIE */
@@ -1112,28 +1115,23 @@ class StamboomManager extends BaseModule {
                     }
                 }
                 
-                /* MOBIEL/TELEFOON AANPASSINGEN - ZELFDE LAYOUT MET HORIZONTALE SCROLL */
+                /* MOBIEL/TELEFOON AANPASSINGEN - BEREKENDE HOOGTE */
                 @media (max-width: 767px) {
                     #pedigreeModal.modal.fade .modal-body {
                         padding: 0 !important;
                         margin: 0 !important;
                         overflow: hidden !important;
-                        display: flex !important;
-                        flex-direction: column !important;
                     }
                     
-                    /* EENVOUDIGE OPLOSSING: VOLLEDIGE HOOGTE ZONDER CALC */
+                    /* CONTAINER MET BEREKENDE HOOGTE VOOR MOBIEL */
                     .pedigree-container-compact {
-                        height: 100% !important;
-                        min-height: 100% !important;
-                        max-height: 100% !important;
+                        height: 686px !important; /* BEREKENDE HOOGTE */
+                        min-height: 686px !important;
+                        max-height: 686px !important;
                         overflow-x: auto !important;
                         overflow-y: hidden !important;
-                        align-items: center !important;
-                        padding: 0 !important;
-                        display: flex !important;
-                        flex: 1 !important;
                         background: #f8f9fa !important;
+                        display: block !important;
                     }
                     
                     .pedigree-grid-compact {
@@ -1141,24 +1139,27 @@ class StamboomManager extends BaseModule {
                         flex-wrap: nowrap !important;
                         width: auto !important;
                         min-width: max-content !important;
-                        height: auto !important;
-                        min-height: auto !important;
-                        padding: 15px 15px 30px 15px !important; /* MEER PADDING ONDERIN */
+                        height: 100% !important;
+                        min-height: 100% !important;
+                        padding: 20px !important;
                         gap: 15px !important;
                         margin: 0 !important;
-                        align-items: center !important;
-                        flex-shrink: 0 !important;
+                        align-items: flex-start !important; /* Vanaf de bovenkant beginnen */
+                        box-sizing: border-box !important;
                     }
                     
                     .pedigree-generation-col {
                         flex-direction: column !important;
-                        height: auto !important;
-                        justify-content: flex-start !important; /* VERANDERD VAN center NAAR flex-start */
+                        height: 100% !important;
+                        min-height: 100% !important;
+                        justify-content: flex-start !important; /* Vanaf de bovenkant */
                         min-width: auto !important;
                         width: auto !important;
                         flex-shrink: 0 !important;
                         padding: 0 !important;
                         margin: 0 !important;
+                        position: relative !important;
+                        box-sizing: border-box !important;
                     }
                     
                     .pedigree-generation-col.gen0 {
@@ -1200,11 +1201,11 @@ class StamboomManager extends BaseModule {
                         flex-shrink: 0 !important;
                     }
                     
-                    /* Generation labels */
+                    /* Generation labels - ZORG DAT DIT BOVENAAN STAAT */
                     .generation-label {
                         font-size: 0.7rem !important;
-                        padding: 4px 8px !important;
-                        margin-bottom: 10px !important; /* MEER RUIMTE */
+                        padding: 8px 12px !important;
+                        margin-bottom: 15px !important;
                         white-space: nowrap !important;
                         flex-shrink: 0 !important;
                         background: #e9ecef !important;
@@ -1213,6 +1214,14 @@ class StamboomManager extends BaseModule {
                         display: block !important;
                         width: 100% !important;
                         box-sizing: border-box !important;
+                        font-weight: bold !important;
+                        color: #495057 !important;
+                        border: 1px solid #dee2e6 !important;
+                    }
+                    
+                    /* ZORG DAT DE CARDS NA HET LABEL KOMEN */
+                    .pedigree-generation-col > .pedigree-card-compact.horizontal {
+                        margin-top: 0 !important;
                     }
                     
                     /* Mobiel tekstgrootte */
@@ -1256,22 +1265,18 @@ class StamboomManager extends BaseModule {
                 }
                 
                 @media (max-width: 480px) {
-                    /* EENVOUDIGE OPLOSSING: VOLLEDIGE HOOGTE ZONDER CALC */
+                    /* CONTAINER MET BEREKENDE HOOGTE VOOR KLEINE TELEFOONS */
                     .pedigree-container-compact {
-                        height: 100% !important;
-                        min-height: 100% !important;
-                        max-height: 100% !important;
+                        height: 686px !important; /* ZELFDE BEREKENDE HOOGTE */
+                        min-height: 686px !important;
+                        max-height: 686px !important;
                         overflow-x: auto !important;
                         overflow-y: hidden !important;
-                        align-items: center !important;
-                        padding: 0 !important;
-                        display: flex !important;
-                        flex: 1 !important;
                         background: #f8f9fa !important;
                     }
                     
                     .pedigree-grid-compact {
-                        padding: 15px 12px 30px 12px !important; /* MEER PADDING ONDERIN */
+                        padding: 15px !important;
                         gap: 12px !important;
                     }
                     
@@ -1294,8 +1299,8 @@ class StamboomManager extends BaseModule {
                     
                     .generation-label {
                         font-size: 0.65rem !important;
-                        padding: 3px 6px !important;
-                        margin-bottom: 8px !important;
+                        padding: 6px 10px !important;
+                        margin-bottom: 12px !important;
                     }
                 }
                 
