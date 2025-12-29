@@ -1259,7 +1259,7 @@ class StamboomManager extends BaseModule {
                     }
                     
                     .pedigree-generation-col.gen2 {
-                        margin-top: 40px !important;
+                        margin-top: 45px !important;
                     }
                     
                     .pedigree-generation-col.gen3 {
