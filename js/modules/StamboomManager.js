@@ -129,7 +129,7 @@ class StamboomManager extends BaseModule {
             de: {
                 pedigreeTitle: "Ahnentafel von {name}",
                 pedigree4Gen: "4-Generationen Ahnentafel",
-                generatingPedigree: "Ahnentafel wird generiert...",
+                generatingPedigree: "Ahnentafel wordt generiert...",
                 close: "Schließen",
                 print: "Drucken",
                 noData: "Keine Daten",
@@ -601,11 +601,6 @@ class StamboomManager extends BaseModule {
                                 </div>
                             </div>
                         </div>
-                        <div class="modal-footer bg-primary text-white" style="padding: 0.75rem 1rem; min-height: auto; border-top: none;">
-                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">
-                                <i class="bi bi-x-circle me-1"></i> ${this.t('close')}
-                            </button>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -657,25 +652,12 @@ class StamboomManager extends BaseModule {
                     min-height: 0 !important;
                 }
                 
-                #pedigreeModal.modal.fade .modal-footer {
-                    margin: 0 !important;
-                    padding: 0.75rem 1rem !important;
-                    border: none !important;
-                    width: 100% !important;
-                    flex-shrink: 0 !important;
-                    min-height: auto !important;
-                    background: #0d6efd !important;
-                    border-top: none !important;
-                    position: relative;
-                    z-index: 1;
-                }
-                
                 /* HORIZONTALE PEDIGREE CONTAINER - MAXIMALE RUIMTE */
                 .pedigree-container-compact {
                     padding: 0 !important;
                     margin: 0 !important;
                     width: 100% !important;
-                    height: calc(100vh - 110px) !important; /* Aangepast voor header en footer */
+                    height: calc(100vh - 60px) !important;
                     background: #f8f9fa;
                     overflow-x: auto !important;
                     overflow-y: hidden !important;
@@ -995,7 +977,7 @@ class StamboomManager extends BaseModule {
                 /* Voor grote schermen */
                 @media (min-width: 1920px) {
                     .pedigree-container-compact {
-                        height: calc(100vh - 120px) !important;
+                        height: calc(100vh - 60px) !important;
                     }
                     
                     .pedigree-grid-compact {
@@ -1070,7 +1052,7 @@ class StamboomManager extends BaseModule {
                 
                 @media (min-width: 1024px) and (max-width: 1365px) {
                     .pedigree-container-compact {
-                        height: calc(100vh - 100px) !important;
+                        height: calc(100vh - 60px) !important;
                     }
                     
                     .pedigree-grid-compact {
@@ -1098,7 +1080,7 @@ class StamboomManager extends BaseModule {
                 
                 @media (min-width: 768px) and (max-width: 1023px) {
                     .pedigree-container-compact {
-                        height: calc(100vh - 95px) !important;
+                        height: calc(100vh - 60px) !important;
                     }
                     
                     .pedigree-grid-compact {
@@ -1126,7 +1108,7 @@ class StamboomManager extends BaseModule {
                 
                 @media (max-width: 767px) {
                     .pedigree-container-compact {
-                        height: calc(100vh - 110px) !important;
+                        height: calc(100vh - 60px) !important;
                     }
                     
                     /* Op mobiel: verander naar verticale layout */
@@ -1193,7 +1175,7 @@ class StamboomManager extends BaseModule {
                 
                 @media (max-width: 480px) {
                     .pedigree-container-compact {
-                        height: calc(100vh - 100px) !important;
+                        height: calc(100vh - 60px) !important;
                     }
                     
                     .pedigree-grid-compact {
@@ -1428,7 +1410,7 @@ class StamboomManager extends BaseModule {
                         margin: 0;
                     }
                     
-                    .modal-header, .modal-footer {
+                    .modal-header {
                         display: none !important;
                     }
                     
