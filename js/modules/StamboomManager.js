@@ -1250,20 +1250,20 @@ class StamboomManager extends BaseModule {
                     }
                     
                     .pedigree-grid-compact {
-                        padding: 125px 12px 40px 12px !important;
+                        padding: 150px 12px 40px 12px !important;
                         gap: 12px !important;
                     }
                     
                     .pedigree-generation-col.gen1 {
-                        margin-top: 100px !important;
-                    }
-                    
-                    .pedigree-generation-col.gen2 {
                         margin-top: 75px !important;
                     }
                     
+                    .pedigree-generation-col.gen2 {
+                        margin-top: 40px !important;
+                    }
+                    
                     .pedigree-generation-col.gen3 {
-                        margin-top: 50px !important;
+                        margin-top: 5px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen0,
