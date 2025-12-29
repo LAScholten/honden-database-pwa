@@ -666,6 +666,7 @@ class StamboomManager extends BaseModule {
                     align-items: center;
                     position: relative;
                     min-height: 0 !important;
+                    min-width: 0 !important;
                 }
                 
                 .pedigree-grid-compact {
@@ -687,6 +688,7 @@ class StamboomManager extends BaseModule {
                     height: 100%;
                     justify-content: center;
                     min-width: 0;
+                    box-sizing: border-box !important;
                 }
                 
                 /* VERSCHILLENDE SPACING PER GENERATIE */
@@ -837,6 +839,7 @@ class StamboomManager extends BaseModule {
                     flex-direction: column;
                     overflow: hidden;
                     flex: 1;
+                    min-height: 0;
                 }
                 
                 /* Body voor gen0, gen1, gen2 */
@@ -858,6 +861,7 @@ class StamboomManager extends BaseModule {
                     align-items: center;
                     gap: 6px;
                     overflow: hidden;
+                    flex-shrink: 0;
                 }
                 
                 .card-row-1 {
@@ -870,6 +874,7 @@ class StamboomManager extends BaseModule {
                 
                 .card-row-3 {
                     margin-top: auto;
+                    flex-shrink: 0;
                 }
                 
                 /* TEKST GROOTTES PER GENERATIE */
@@ -1109,12 +1114,24 @@ class StamboomManager extends BaseModule {
                 
                 /* MOBIEL/TELEFOON AANPASSINGEN - ZELFDE LAYOUT MET HORIZONTALE SCROLL */
                 @media (max-width: 767px) {
+                    #pedigreeModal.modal.fade .modal-body {
+                        padding: 0 !important;
+                        margin: 0 !important;
+                        overflow: hidden !important;
+                    }
+                    
                     .pedigree-container-compact {
                         height: calc(100vh - 60px) !important;
                         overflow-x: auto !important;
                         overflow-y: hidden !important;
                         align-items: center !important;
                         padding: 0 !important;
+                        min-height: 0 !important;
+                        position: relative !important;
+                        display: flex !important;
+                        flex: 1 !important;
+                        min-width: 0 !important;
+                        max-height: 100% !important;
                     }
                     
                     .pedigree-grid-compact {
@@ -1122,21 +1139,30 @@ class StamboomManager extends BaseModule {
                         flex-wrap: nowrap !important;
                         width: auto !important;
                         min-width: max-content !important;
-                        height: 100% !important;
-                        padding: 0 15px !important;
-                        gap: 20px !important;
+                        height: auto !important;
+                        max-height: 100% !important;
+                        padding: 10px 15px !important;
+                        gap: 15px !important;
                         margin: 0 !important;
                         align-items: center !important;
+                        flex-shrink: 0 !important;
+                        position: relative !important;
+                        min-height: 0 !important;
                     }
                     
                     .pedigree-generation-col {
                         flex-direction: column !important;
-                        height: 100% !important;
+                        height: auto !important;
+                        max-height: 100% !important;
                         justify-content: center !important;
                         min-width: auto !important;
                         width: auto !important;
                         flex-shrink: 0 !important;
                         padding: 0 !important;
+                        margin: 0 !important;
+                        position: relative !important;
+                        box-sizing: border-box !important;
+                        overflow: visible !important;
                     }
                     
                     .pedigree-generation-col.gen0 {
@@ -1222,6 +1248,7 @@ class StamboomManager extends BaseModule {
                         padding: 3px 6px !important;
                         margin-bottom: 5px !important;
                         white-space: nowrap !important;
+                        flex-shrink: 0 !important;
                     }
                 }
                 
@@ -1232,11 +1259,12 @@ class StamboomManager extends BaseModule {
                         overflow-y: hidden !important;
                         align-items: center !important;
                         padding: 0 !important;
+                        min-height: 0 !important;
                     }
                     
                     .pedigree-grid-compact {
-                        padding: 0 12px !important;
-                        gap: 15px !important;
+                        padding: 10px 12px !important;
+                        gap: 12px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen0,
