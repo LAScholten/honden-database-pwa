@@ -13,7 +13,7 @@ class StamboomManager extends BaseModule {
         this.allDogs = [];
         this.translations = {
             nl: {
-                pedigreeTitle: "Stamboom van {name}",
+                pedigreeTitle: "StamPboom van {name}",
                 pedigree4Gen: "4-generatie stamboom",
                 generatingPedigree: "Stamboom genereren...",
                 close: "Sluiten",
@@ -1120,8 +1120,9 @@ class StamboomManager extends BaseModule {
                         overflow: hidden !important;
                     }
                     
+                    /* CONTAINER 3 CM LANGER VOOR MOBIEL */
                     .pedigree-container-compact {
-                        height: calc(100vh - 60px) !important;
+                        height: calc(100vh - 60px + 30px) !important; /* 3 cm extra (30px) */
                         overflow-x: auto !important;
                         overflow-y: hidden !important;
                         align-items: center !important;
@@ -1131,7 +1132,8 @@ class StamboomManager extends BaseModule {
                         display: flex !important;
                         flex: 1 !important;
                         min-width: 0 !important;
-                        max-height: 100% !important;
+                        max-height: none !important;
+                        background: #f8f9fa !important;
                     }
                     
                     .pedigree-grid-compact {
@@ -1139,21 +1141,21 @@ class StamboomManager extends BaseModule {
                         flex-wrap: nowrap !important;
                         width: auto !important;
                         min-width: max-content !important;
-                        height: auto !important;
-                        max-height: 100% !important;
-                        padding: 10px 15px !important;
+                        height: 100% !important;
+                        min-height: 100% !important;
+                        padding: 20px 15px !important;
                         gap: 15px !important;
                         margin: 0 !important;
                         align-items: center !important;
                         flex-shrink: 0 !important;
                         position: relative !important;
-                        min-height: 0 !important;
+                        box-sizing: border-box !important;
                     }
                     
                     .pedigree-generation-col {
                         flex-direction: column !important;
-                        height: auto !important;
-                        max-height: 100% !important;
+                        height: 100% !important;
+                        min-height: 100% !important;
                         justify-content: center !important;
                         min-width: auto !important;
                         width: auto !important;
@@ -1204,6 +1206,19 @@ class StamboomManager extends BaseModule {
                         flex-shrink: 0 !important;
                     }
                     
+                    /* Generation labels - meer ruimte */
+                    .generation-label {
+                        font-size: 0.7rem !important;
+                        padding: 4px 8px !important;
+                        margin-bottom: 8px !important;
+                        white-space: nowrap !important;
+                        flex-shrink: 0 !important;
+                        background: #e9ecef !important;
+                        border-radius: 4px !important;
+                        text-align: center !important;
+                        display: block !important;
+                    }
+                    
                     /* Mobiel tekstgrootte */
                     .pedigree-card-compact.horizontal.gen0 .dog-name-compact,
                     .pedigree-card-compact.horizontal.gen1 .dog-name-compact,
@@ -1242,19 +1257,12 @@ class StamboomManager extends BaseModule {
                     .pedigree-card-compact.horizontal.gen3 .click-hint-compact {
                         font-size: 0.48rem !important;
                     }
-                    
-                    .generation-label {
-                        font-size: 0.7rem !important;
-                        padding: 3px 6px !important;
-                        margin-bottom: 5px !important;
-                        white-space: nowrap !important;
-                        flex-shrink: 0 !important;
-                    }
                 }
                 
                 @media (max-width: 480px) {
+                    /* CONTAINER 3 CM LANGER VOOR MOBIEL */
                     .pedigree-container-compact {
-                        height: calc(100vh - 60px) !important;
+                        height: calc(100vh - 60px + 30px) !important; /* 3 cm extra (30px) */
                         overflow-x: auto !important;
                         overflow-y: hidden !important;
                         align-items: center !important;
@@ -1263,7 +1271,7 @@ class StamboomManager extends BaseModule {
                     }
                     
                     .pedigree-grid-compact {
-                        padding: 10px 12px !important;
+                        padding: 20px 12px !important;
                         gap: 12px !important;
                     }
                     
@@ -1286,7 +1294,8 @@ class StamboomManager extends BaseModule {
                     
                     .generation-label {
                         font-size: 0.65rem !important;
-                        padding: 2px 5px !important;
+                        padding: 3px 6px !important;
+                        margin-bottom: 6px !important;
                     }
                 }
                 
