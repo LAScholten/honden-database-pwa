@@ -13,7 +13,7 @@ class StamboomManager extends BaseModule {
         this.allDogs = [];
         this.translations = {
             nl: {
-                pedigreeTitle: "StamPboom van {name}",
+                pedigreeTitle: "Stamboom van {name}",
                 pedigree4Gen: "4-generatie stamboom",
                 generatingPedigree: "Stamboom genereren...",
                 close: "Sluiten",
@@ -1223,15 +1223,19 @@ class StamboomManager extends BaseModule {
                         white-space: nowrap !important;
                     }
                     
-                    /* Footer volledig verwijderd op mobiel */
-                    .popup-footer {
+                    /* HEADER FOOTER VERWIJDERD OP MOBIEL */
+                    #pedigreeModal .modal-header {
                         display: none !important;
+                    }
+                    
+                    .pedigree-container-compact {
+                        height: 100vh !important;
                     }
                 }
                 
                 @media (max-width: 480px) {
                     .pedigree-container-compact {
-                        height: calc(100vh - 60px) !important;
+                        height: 100vh !important;
                         overflow-x: auto !important;
                         overflow-y: hidden !important;
                         align-items: center !important;
@@ -1265,9 +1269,13 @@ class StamboomManager extends BaseModule {
                         padding: 2px 5px !important;
                     }
                     
-                    /* Footer volledig verwijderd op mobiel */
-                    .popup-footer {
+                    /* HEADER FOOTER VERWIJDERD OP MOBIEL */
+                    #pedigreeModal .modal-header {
                         display: none !important;
+                    }
+                    
+                    .pedigree-container-compact {
+                        height: 100vh !important;
                     }
                 }
                 
