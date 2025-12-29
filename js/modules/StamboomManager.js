@@ -1,8 +1,8 @@
 /**
  * Stamboom Manager Module
- * Beheert 4-generatie stambomen voor honden - Zelfde layout op alle schermen
- * HORIZONTALE LAYOUT - Van links naar rechts met liggende cards
- * Overgrootouders 60% hoogte, zelfde breedte voor alle generaties
+ * Beheert 4-generatie stambomen voor honden - Responsive layout
+ * Mobiele weergave: Vergelijkbaar met searchmanager container
+ * Desktop weergave: Horizontale layout van links naar rechts
  */
 
 class StamboomManager extends BaseModule {
@@ -11,9 +11,13 @@ class StamboomManager extends BaseModule {
         this.db = db;
         this.currentLang = currentLang;
         this.allDogs = [];
+        this.isMobile = window.innerWidth <= 768;
+        this.isTablet = window.innerWidth <= 1024 && window.innerWidth > 768;
+        
+        // Vertalingen
         this.translations = {
             nl: {
-                pedigreeTitle: "StamPboom van {name}",
+                pedigreeTitle: "Stamboom van {name}",
                 pedigree4Gen: "4-generatie stamboom",
                 generatingPedigree: "Stamboom genereren...",
                 close: "Sluiten",
@@ -67,7 +71,22 @@ class StamboomManager extends BaseModule {
                 noRemarks: "Geen opmerkingen",
                 parents: "Ouders",
                 grandparents: "Grootouders",
-                greatGrandparents: "Overgrootouders"
+                greatGrandparents: "Overgrootouders",
+                
+                // Mobiele weergave
+                mobileView: "Mobiele weergave",
+                desktopView: "Desktop weergave",
+                generation: "Generatie",
+                switchToDesktop: "Desktop weergave",
+                switchToMobile: "Mobiele weergave",
+                zoomIn: "Vergroten",
+                zoomOut: "Verkleinen",
+                resetZoom: "Zoom resetten",
+                
+                // Search manager stijl
+                selectDogToView: "Selecteer een hond om details te zien",
+                dogDetails: "Hond Details",
+                backToSearch: "Terug naar overzicht"
             },
             en: {
                 pedigreeTitle: "Pedigree of {name}",
@@ -124,12 +143,27 @@ class StamboomManager extends BaseModule {
                 noRemarks: "No remarks",
                 parents: "Parents",
                 grandparents: "Grandparents",
-                greatGrandparents: "Great Grandparents"
+                greatGrandparents: "Great Grandparents",
+                
+                // Mobile view
+                mobileView: "Mobile view",
+                desktopView: "Desktop view",
+                generation: "Generation",
+                switchToDesktop: "Desktop view",
+                switchToMobile: "Mobile view",
+                zoomIn: "Zoom in",
+                zoomOut: "Zoom out",
+                resetZoom: "Reset zoom",
+                
+                // Search manager style
+                selectDogToView: "Select a dog to view details",
+                dogDetails: "Dog Details",
+                backToSearch: "Back to overview"
             },
             de: {
                 pedigreeTitle: "Ahnentafel von {name}",
                 pedigree4Gen: "4-Generationen Ahnentafel",
-                generatingPedigree: "Ahnentafel wordt generiert...",
+                generatingPedigree: "Ahnentafel wird generiert...",
                 close: "Schließen",
                 print: "Drucken",
                 noData: "Keine Daten",
@@ -175,15 +209,36 @@ class StamboomManager extends BaseModule {
                 // Labels
                 paternal: "Väterlich",
                 maternal: "Mütterlich",
-                clickForDetails: "Klicken voor Details",
+                clickForDetails: "Klicken für Details",
                 closePopup: "Schließen",
                 remarks: "Bemerkungen",
                 noRemarks: "Keine Bemerkungen",
                 parents: "Eltern",
                 grandparents: "Großeltern",
-                greatGrandparents: "Urgroßeltern"
+                greatGrandparents: "Urgroßeltern",
+                
+                // Mobile Ansicht
+                mobileView: "Mobile Ansicht",
+                desktopView: "Desktop Ansicht",
+                generation: "Generation",
+                switchToDesktop: "Desktop Ansicht",
+                switchToMobile: "Mobile Ansicht",
+                zoomIn: "Vergrößern",
+                zoomOut: "Verkleinern",
+                resetZoom: "Zoom zurücksetzen",
+                
+                // Search manager style
+                selectDogToView: "Wählen Sie einen Hund, um Details zu sehen",
+                dogDetails: "Hund Details",
+                backToSearch: "Zurück zur Übersicht"
             }
         };
+        
+        // Check schermgrootte bij resize
+        window.addEventListener('resize', () => {
+            this.isMobile = window.innerWidth <= 768;
+            this.isTablet = window.innerWidth <= 1024 && window.innerWidth > 768;
+        });
     }
     
     t(key) {
@@ -296,35 +351,269 @@ class StamboomManager extends BaseModule {
         }
     }
     
-    getHealthBadge(value, type) {
-        if (!value || value === '') {
-            return `<span class="badge bg-secondary">${this.t('unknown')}</span>`;
+    // RENDER DE PEDIGREE OP BASIS VAN SCHERMGROOTTE
+    renderPedigree(pedigreeTree) {
+        if (this.isMobile) {
+            return this.renderMobilePedigree(pedigreeTree);
+        } else if (this.isTablet) {
+            return this.renderTabletPedigree(pedigreeTree);
+        } else {
+            return this.renderDesktopPedigree(pedigreeTree);
         }
-        
-        let badgeClass = 'badge ';
-        switch(type) {
-            case 'hip': badgeClass += 'badge-hd'; break;
-            case 'elbow': badgeClass += 'badge-ed'; break;
-            case 'patella': badgeClass += 'badge-pl'; break;
-            case 'eyes': badgeClass += 'badge-eyes'; break;
-            case 'dandy': badgeClass += 'badge-dandy'; break;
-            case 'thyroid': badgeClass += 'badge-thyroid'; break;
-            default: badgeClass += 'bg-secondary';
-        }
-        
-        return `<span class="${badgeClass}">${value}</span>`;
     }
     
-    // LIGGENDE CARD VOOR STAMBOOM - overgrootouders kleinere hoogte
-    getDogCompactCardHTML(dog, relation = '', isMainDog = false, generation = 0) {
+    // MOBIELE WEERGAVE - Zoals SearchManager container
+    renderMobilePedigree(pedigreeTree) {
+        const t = this.t.bind(this);
+        
+        // Maak een lijst van alle honden in de stamboom
+        const dogs = [
+            { dog: pedigreeTree.mainDog, relation: t('currentDog'), generation: 0 },
+            { dog: pedigreeTree.father, relation: t('father'), generation: 1 },
+            { dog: pedigreeTree.mother, relation: t('mother'), generation: 1 },
+            { dog: pedigreeTree.paternalGrandfather, relation: t('grandfather'), generation: 2 },
+            { dog: pedigreeTree.paternalGrandmother, relation: t('grandmother'), generation: 2 },
+            { dog: pedigreeTree.maternalGrandfather, relation: t('grandfather'), generation: 2 },
+            { dog: pedigreeTree.maternalGrandmother, relation: t('grandmother'), generation: 2 },
+            { dog: pedigreeTree.paternalGreatGrandfather1, relation: t('greatGrandfather'), generation: 3 },
+            { dog: pedigreeTree.paternalGreatGrandmother1, relation: t('greatGrandmother'), generation: 3 },
+            { dog: pedigreeTree.paternalGreatGrandfather2, relation: t('greatGrandfather'), generation: 3 },
+            { dog: pedigreeTree.paternalGreatGrandmother2, relation: t('greatGrandmother'), generation: 3 },
+            { dog: pedigreeTree.maternalGreatGrandfather1, relation: t('greatGrandfather'), generation: 3 },
+            { dog: pedigreeTree.maternalGreatGrandmother1, relation: t('greatGrandmother'), generation: 3 },
+            { dog: pedigreeTree.maternalGreatGrandfather2, relation: t('greatGrandfather'), generation: 3 },
+            { dog: pedigreeTree.maternalGreatGrandmother2, relation: t('greatGrandmother'), generation: 3 }
+        ];
+        
+        let html = `
+            <div class="pedigree-mobile-container">
+                <!-- Header met hoofdhond informatie -->
+                <div class="pedigree-mobile-header">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h4 class="mb-1">${pedigreeTree.mainDog?.naam || t('unknown')}</h4>
+                            <div class="text-muted small">
+                                ${t('pedigree4Gen')}
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button class="btn btn-sm btn-outline-primary btn-switch-view">
+                                <i class="bi bi-laptop"></i> ${t('switchToDesktop')}
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Generatie navigatie -->
+                    <div class="generation-navigation mb-3">
+                        <div class="d-flex flex-wrap gap-2">
+                            <button class="btn btn-sm btn-outline-secondary btn-generation active" data-generation="all">
+                                ${t('all')}
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary btn-generation" data-generation="0">
+                                ${t('generation')} 0
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary btn-generation" data-generation="1">
+                                ${t('generation')} 1
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary btn-generation" data-generation="2">
+                                ${t('generation')} 2
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary btn-generation" data-generation="3">
+                                ${t('generation')} 3
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Lijst van honden in stamboom -->
+                <div class="pedigree-mobile-list" id="pedigreeMobileList">
+        `;
+        
+        dogs.forEach(item => {
+            if (!item.dog) {
+                html += `
+                    <div class="pedigree-mobile-item empty" data-generation="${item.generation}">
+                        <div class="pedigree-item-header">
+                            <div class="relation-label">${item.relation}</div>
+                        </div>
+                        <div class="pedigree-item-body">
+                            <div class="text-muted fst-italic">${t('noData')}</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                const genderIcon = item.dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 
+                                 item.dog.geslacht === 'teven' ? 'bi-gender-female text-danger' : 'bi-question-circle text-secondary';
+                
+                html += `
+                    <div class="pedigree-mobile-item" data-dog-id="${item.dog.id}" data-generation="${item.generation}">
+                        <div class="pedigree-item-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="relation-label">
+                                    <i class="bi ${genderIcon} me-1"></i>
+                                    ${item.relation}
+                                </div>
+                                <span class="generation-badge">G${item.generation}</span>
+                            </div>
+                        </div>
+                        <div class="pedigree-item-body">
+                            <div class="dog-name-line">
+                                <strong>${item.dog.naam || t('unknown')}</strong>
+                                ${item.dog.kennelnaam ? `<span class="text-muted ms-2">${item.dog.kennelnaam}</span>` : ''}
+                            </div>
+                            <div class="dog-details-line">
+                                ${item.dog.stamboomnr ? `<span class="stamboom">${item.dog.stamboomnr}</span>` : ''}
+                                ${item.dog.ras ? `<span class="ras">${item.dog.ras}</span>` : ''}
+                                <span class="geslacht">
+                                    ${item.dog.geslacht === 'reuen' ? t('male') : 
+                                      item.dog.geslacht === 'teven' ? t('female') : t('unknown')}
+                                </span>
+                            </div>
+                            <div class="click-hint">
+                                <i class="bi bi-info-circle"></i> ${t('clickForDetails')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+        
+        html += `
+                </div>
+            </div>
+        `;
+        
+        return html;
+    }
+    
+    // TABLET WEERGAVE - Compacte horizontale layout
+    renderTabletPedigree(pedigreeTree) {
+        const t = this.t.bind(this);
+        
+        return `
+            <div class="pedigree-tablet-container">
+                <div class="pedigree-tablet-header mb-3">
+                    <h4>${t('pedigree4Gen')}</h4>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-primary btn-switch-view">
+                            <i class="bi bi-phone"></i> ${t('switchToMobile')}
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary btn-zoom-control" data-action="zoomOut">
+                            <i class="bi bi-dash-lg"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary btn-zoom-control" data-action="resetZoom">
+                            <i class="bi bi-zoom-reset"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary btn-zoom-control" data-action="zoomIn">
+                            <i class="bi bi-plus-lg"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="pedigree-tablet-grid">
+                    <!-- Generatie 0 -->
+                    <div class="generation-col">
+                        <div class="generation-label">${t('generation')} 0</div>
+                        ${this.getCompactCardHTML(pedigreeTree.mainDog, t('mainDog'), true)}
+                    </div>
+                    
+                    <!-- Generatie 1 -->
+                    <div class="generation-col">
+                        <div class="generation-label">${t('generation')} 1</div>
+                        ${this.getCompactCardHTML(pedigreeTree.father, t('father'))}
+                        ${this.getCompactCardHTML(pedigreeTree.mother, t('mother'))}
+                    </div>
+                    
+                    <!-- Generatie 2 -->
+                    <div class="generation-col">
+                        <div class="generation-label">${t('generation')} 2</div>
+                        ${this.getCompactCardHTML(pedigreeTree.paternalGrandfather, t('grandfather'))}
+                        ${this.getCompactCardHTML(pedigreeTree.paternalGrandmother, t('grandmother'))}
+                        ${this.getCompactCardHTML(pedigreeTree.maternalGrandfather, t('grandfather'))}
+                        ${this.getCompactCardHTML(pedigreeTree.maternalGrandmother, t('grandmother'))}
+                    </div>
+                    
+                    <!-- Generatie 3 -->
+                    <div class="generation-col">
+                        <div class="generation-label">${t('generation')} 3</div>
+                        ${this.getCompactCardHTML(pedigreeTree.paternalGreatGrandfather1, t('greatGrandfather'))}
+                        ${this.getCompactCardHTML(pedigreeTree.paternalGreatGrandmother1, t('greatGrandmother'))}
+                        ${this.getCompactCardHTML(pedigreeTree.paternalGreatGrandfather2, t('greatGrandfather'))}
+                        ${this.getCompactCardHTML(pedigreeTree.paternalGreatGrandmother2, t('greatGrandmother'))}
+                        ${this.getCompactCardHTML(pedigreeTree.maternalGreatGrandfather1, t('greatGrandfather'))}
+                        ${this.getCompactCardHTML(pedigreeTree.maternalGreatGrandmother1, t('greatGrandmother'))}
+                        ${this.getCompactCardHTML(pedigreeTree.maternalGreatGrandfather2, t('greatGrandfather'))}
+                        ${this.getCompactCardHTML(pedigreeTree.maternalGreatGrandmother2, t('greatGrandmother'))}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // DESKTOP WEERGAVE - Horizontale layout
+    renderDesktopPedigree(pedigreeTree) {
+        const t = this.t.bind(this);
+        
+        return `
+            <div class="pedigree-desktop-container">
+                <div class="pedigree-desktop-header mb-3">
+                    <button class="btn btn-sm btn-outline-primary btn-switch-view">
+                        <i class="bi bi-phone"></i> ${t('switchToMobile')}
+                    </button>
+                </div>
+                
+                <div class="pedigree-desktop-grid">
+                    <!-- Generatie 0 -->
+                    <div class="generation-desktop-col">
+                        <div class="generation-label">${t('currentDog')}</div>
+                        ${this.getDesktopCardHTML(pedigreeTree.mainDog, t('mainDog'), true)}
+                    </div>
+                    
+                    <!-- Generatie 1 -->
+                    <div class="generation-desktop-col">
+                        <div class="generation-label">${t('parents')}</div>
+                        ${this.getDesktopCardHTML(pedigreeTree.father, t('father'))}
+                        ${this.getDesktopCardHTML(pedigreeTree.mother, t('mother'))}
+                    </div>
+                    
+                    <!-- Generatie 2 -->
+                    <div class="generation-desktop-col">
+                        <div class="generation-label">${t('grandparents')}</div>
+                        ${this.getDesktopCardHTML(pedigreeTree.paternalGrandfather, t('grandfather'))}
+                        ${this.getDesktopCardHTML(pedigreeTree.paternalGrandmother, t('grandmother'))}
+                        ${this.getDesktopCardHTML(pedigreeTree.maternalGrandfather, t('grandfather'))}
+                        ${this.getDesktopCardHTML(pedigreeTree.maternalGrandmother, t('grandmother'))}
+                    </div>
+                    
+                    <!-- Generatie 3 -->
+                    <div class="generation-desktop-col">
+                        <div class="generation-label">${t('greatGrandparents')}</div>
+                        ${this.getDesktopCardHTML(pedigreeTree.paternalGreatGrandfather1, t('greatGrandfather'))}
+                        ${this.getDesktopCardHTML(pedigreeTree.paternalGreatGrandmother1, t('greatGrandmother'))}
+                        ${this.getDesktopCardHTML(pedigreeTree.paternalGreatGrandfather2, t('greatGrandfather'))}
+                        ${this.getDesktopCardHTML(pedigreeTree.paternalGreatGrandmother2, t('greatGrandmother'))}
+                        ${this.getDesktopCardHTML(pedigreeTree.maternalGreatGrandfather1, t('greatGrandfather'))}
+                        ${this.getDesktopCardHTML(pedigreeTree.maternalGreatGrandmother1, t('greatGrandmother'))}
+                        ${this.getDesktopCardHTML(pedigreeTree.maternalGreatGrandfather2, t('greatGrandfather'))}
+                        ${this.getDesktopCardHTML(pedigreeTree.maternalGreatGrandmother2, t('greatGrandmother'))}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    // Helper methods voor kaarten
+    getCompactCardHTML(dog, relation, isMain = false) {
+        const t = this.t.bind(this);
+        
         if (!dog) {
             return `
-                <div class="pedigree-card-compact horizontal empty gen${generation}" data-dog-id="0">
-                    <div class="pedigree-card-header-compact horizontal">
+                <div class="pedigree-card-compact empty">
+                    <div class="card-header-compact">
                         <div class="relation-compact">${relation}</div>
                     </div>
-                    <div class="pedigree-card-body-compact horizontal text-center py-3">
-                        <div class="no-data-text">${this.t('noData')}</div>
+                    <div class="card-body-compact">
+                        <div class="text-muted fst-italic">${t('noData')}</div>
                     </div>
                 </div>
             `;
@@ -333,57 +622,63 @@ class StamboomManager extends BaseModule {
         const genderIcon = dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 
                           dog.geslacht === 'teven' ? 'bi-gender-female text-danger' : 'bi-question-circle text-secondary';
         
-        const mainDogClass = isMainDog ? 'main-dog-compact' : '';
-        const headerColor = isMainDog ? 'bg-primary' : 'bg-secondary';
-        
         return `
-            <div class="pedigree-card-compact horizontal ${dog.geslacht === 'reuen' ? 'male' : 'female'} ${mainDogClass} gen${generation}" 
-                 data-dog-id="${dog.id}" 
-                 data-dog-name="${dog.naam || ''}"
-                 data-relation="${relation}"
-                 data-generation="${generation}">
-                <div class="pedigree-card-header-compact horizontal ${headerColor}">
+            <div class="pedigree-card-compact ${isMain ? 'main-dog' : ''}" data-dog-id="${dog.id}">
+                <div class="card-header-compact ${isMain ? 'bg-primary' : 'bg-secondary'}">
                     <div class="relation-compact">
-                        <span class="relation-text">${relation}</span>
-                        ${isMainDog ? '<span class="main-dot">★</span>' : ''}
-                    </div>
-                    <div class="gender-icon-compact">
-                        <i class="bi ${genderIcon}"></i>
+                        <i class="bi ${genderIcon} me-1"></i>
+                        ${relation}
                     </div>
                 </div>
-                <div class="pedigree-card-body-compact horizontal">
-                    <!-- Regel 1: Naam en kennelnaam -->
-                    <div class="card-row card-row-1">
-                        <div class="dog-name-compact" title="${dog.naam || this.t('unknown')}">
-                            ${dog.naam || this.t('unknown')}
-                        </div>
-                        ${dog.kennelnaam ? `
-                        <div class="dog-kennel-compact" title="${dog.kennelnaam}">
-                            ${dog.kennelnaam}
-                        </div>
-                        ` : ''}
+                <div class="card-body-compact">
+                    <div class="dog-name-compact">${dog.naam || t('unknown')}</div>
+                    ${dog.stamboomnr ? `<div class="dog-pedigree-compact">${dog.stamboomnr}</div>` : ''}
+                    <div class="click-hint-compact">
+                        <i class="bi bi-info-circle"></i> ${t('clickForDetails')}
                     </div>
-                    
-                    <!-- Regel 2: Stamboomnummer en ras -->
-                    <div class="card-row card-row-2">
-                        ${dog.stamboomnr ? `
-                        <div class="dog-pedigree-compact" title="${dog.stamboomnr}">
-                            ${dog.stamboomnr}
-                        </div>
-                        ` : ''}
-                        
-                        ${dog.ras ? `
-                        <div class="dog-breed-compact" title="${dog.ras}">
-                            ${dog.ras}
-                        </div>
-                        ` : ''}
+                </div>
+            </div>
+        `;
+    }
+    
+    getDesktopCardHTML(dog, relation, isMain = false) {
+        const t = this.t.bind(this);
+        
+        if (!dog) {
+            return `
+                <div class="pedigree-card-desktop empty">
+                    <div class="card-header-desktop">
+                        ${relation}
                     </div>
-                    
-                    <!-- Regel 3: Klik hint -->
-                    <div class="card-row card-row-3">
-                        <div class="click-hint-compact">
-                            <i class="bi bi-info-circle"></i> ${this.t('clickForDetails')}
+                    <div class="card-body-desktop">
+                        <div class="text-muted fst-italic">${t('noData')}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        const genderIcon = dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 
+                          dog.geslacht === 'teven' ? 'bi-gender-female text-danger' : 'bi-question-circle text-secondary';
+        
+        return `
+            <div class="pedigree-card-desktop ${isMain ? 'main-dog' : ''}" data-dog-id="${dog.id}">
+                <div class="card-header-desktop ${isMain ? 'bg-primary' : 'bg-secondary'}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="bi ${genderIcon} me-1"></i>
+                            ${relation}
                         </div>
+                        ${dog.kennelnaam ? `<div class="kennel-name">${dog.kennelnaam}</div>` : ''}
+                    </div>
+                </div>
+                <div class="card-body-desktop">
+                    <div class="dog-name-desktop">${dog.naam || t('unknown')}</div>
+                    <div class="dog-details-desktop">
+                        ${dog.stamboomnr ? `<div class="pedigree-nr">${dog.stamboomnr}</div>` : ''}
+                        ${dog.ras ? `<div class="breed">${dog.ras}</div>` : ''}
+                    </div>
+                    <div class="click-hint-desktop">
+                        <i class="bi bi-info-circle"></i> ${t('clickForDetails')}
                     </div>
                 </div>
             </div>
@@ -394,8 +689,9 @@ class StamboomManager extends BaseModule {
     getDogDetailPopupHTML(dog, relation = '') {
         if (!dog) return '';
         
-        const genderText = dog.geslacht === 'reuen' ? this.t('male') : 
-                          dog.geslacht === 'teven' ? this.t('female') : this.t('unknown');
+        const t = this.t.bind(this);
+        const genderText = dog.geslacht === 'reuen' ? t('male') : 
+                          dog.geslacht === 'teven' ? t('female') : t('unknown');
         
         return `
             <div class="dog-detail-popup">
@@ -407,8 +703,8 @@ class StamboomManager extends BaseModule {
                     <button type="button" class="btn-close btn-close-white popup-close"></button>
                 </div>
                 <div class="popup-body">
-                    <div class="dog-popup-name mb-2">
-                        <h4>${dog.naam || this.t('unknown')}</h4>
+                    <div class="dog-popup-name mb-3">
+                        <h4>${dog.naam || t('unknown')}</h4>
                         ${dog.kennelnaam ? `<div class="text-muted">${dog.kennelnaam}</div>` : ''}
                     </div>
                     
@@ -417,116 +713,41 @@ class StamboomManager extends BaseModule {
                         <div class="info-grid">
                             ${dog.stamboomnr ? `
                             <div class="info-item">
-                                <span class="info-label">${this.t('pedigreeNumber')}:</span>
+                                <span class="info-label">${t('pedigreeNumber')}:</span>
                                 <span class="info-value">${dog.stamboomnr}</span>
                             </div>
                             ` : ''}
                             
                             ${dog.ras ? `
                             <div class="info-item">
-                                <span class="info-label">${this.t('breed')}:</span>
+                                <span class="info-label">${t('breed')}:</span>
                                 <span class="info-value">${dog.ras}</span>
                             </div>
                             ` : ''}
                             
                             <div class="info-item">
-                                <span class="info-label">${this.t('gender')}:</span>
+                                <span class="info-label">${t('gender')}:</span>
                                 <span class="info-value">${genderText}</span>
                             </div>
                             
                             ${dog.vachtkleur ? `
                             <div class="info-item">
-                                <span class="info-label">${this.t('coatColor')}:</span>
+                                <span class="info-label">${t('coatColor')}:</span>
                                 <span class="info-value">${dog.vachtkleur}</span>
                             </div>
                             ` : ''}
                             
                             ${dog.geboortedatum ? `
                             <div class="info-item">
-                                <span class="info-label">${this.t('birthDate')}:</span>
+                                <span class="info-label">${t('birthDate')}:</span>
                                 <span class="info-value">${this.formatDate(dog.geboortedatum)}</span>
                             </div>
                             ` : ''}
                             
                             ${dog.overlijdensdatum ? `
                             <div class="info-item">
-                                <span class="info-label">${this.t('deathDate')}:</span>
+                                <span class="info-label">${t('deathDate')}:</span>
                                 <span class="info-value">${this.formatDate(dog.overlijdensdatum)}</span>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.land ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('country')}:</span>
-                                <span class="info-value">${dog.land}</span>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.postcode ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('zipCode')}:</span>
-                                <span class="info-value">${dog.postcode}</span>
-                            </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                    
-                    <div class="info-section mb-3">
-                        <h6><i class="bi bi-heart-pulse me-1"></i> ${this.t('healthInfo')}</h6>
-                        <div class="info-grid">
-                            ${dog.heupdysplasie ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('hipDysplasia')}:</span>
-                                <span class="info-value">${this.getHealthBadge(dog.heupdysplasie, 'hip')}</span>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.elleboogdysplasie ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('elbowDysplasia')}:</span>
-                                <span class="info-value">${this.getHealthBadge(dog.elleboogdysplasie, 'elbow')}</span>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.patella ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('patellaLuxation')}:</span>
-                                <span class="info-value">${this.getHealthBadge(dog.patella, 'patella')}</span>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.ogen ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('eyes')}:</span>
-                                <span class="info-value">${this.getHealthBadge(dog.ogen, 'eyes')}</span>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.ogenVerklaring ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('eyesExplanation')}:</span>
-                                <span class="info-value">${dog.ogenVerklaring}</span>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.dandyWalker ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('dandyWalker')}:</span>
-                                <span class="info-value">${this.getHealthBadge(dog.dandyWalker, 'dandy')}</span>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.schildklier ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('thyroid')}:</span>
-                                <span class="info-value">${this.getHealthBadge(dog.schildklier, 'thyroid')}</span>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.schildklierVerklaring ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('thyroidExplanation')}:</span>
-                                <span class="info-value">${dog.schildklierVerklaring}</span>
                             </div>
                             ` : ''}
                         </div>
@@ -534,21 +755,16 @@ class StamboomManager extends BaseModule {
                     
                     ${dog.opmerkingen ? `
                     <div class="info-section mb-3">
-                        <h6><i class="bi bi-chat-text me-1"></i> ${this.t('remarks')}</h6>
+                        <h6><i class="bi bi-chat-text me-1"></i> ${t('remarks')}</h6>
                         <div class="remarks-box">
                             ${dog.opmerkingen}
                         </div>
                     </div>
-                    ` : `
-                    <div class="info-section mb-3">
-                        <h6><i class="bi bi-chat-text me-1"></i> ${this.t('remarks')}</h6>
-                        <div class="text-muted">${this.t('noRemarks')}</div>
-                    </div>
-                    `}
+                    ` : ''}
                 </div>
                 <div class="popup-footer">
                     <button type="button" class="btn btn-secondary popup-close-btn">
-                        <i class="bi bi-x-circle me-1"></i> ${this.t('closePopup')}
+                        <i class="bi bi-x-circle me-1"></i> ${t('closePopup')}
                     </button>
                 </div>
             </div>
@@ -569,39 +785,44 @@ class StamboomManager extends BaseModule {
         const title = this.t('pedigreeTitle').replace('{name}', dog.naam || this.t('unknown'));
         document.getElementById('pedigreeModalLabel').textContent = title;
         
-        this.renderCompactPedigree(pedigreeTree);
+        const container = document.getElementById('pedigreeContainer');
+        container.innerHTML = this.renderPedigree(pedigreeTree);
+        
+        // Setup events
+        this.setupPedigreeEvents(pedigreeTree);
         
         const modal = new bootstrap.Modal(document.getElementById('pedigreeModal'));
         modal.show();
     }
     
     createPedigreeModal() {
+        const t = this.t.bind(this);
+        
         const modalHTML = `
             <div class="modal fade" id="pedigreeModal" tabindex="-1" aria-labelledby="pedigreeModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-fullscreen">
                     <div class="modal-content">
                         <div class="modal-header bg-primary text-white">
                             <h5 class="modal-title" id="pedigreeModalLabel">
-                                <i class="bi bi-diagram-3 me-2"></i> ${this.t('pedigree4Gen')}
+                                <i class="bi bi-diagram-3 me-2"></i> ${t('pedigree4Gen')}
                             </h5>
                             <div class="d-flex gap-2">
                                 <button class="btn btn-sm btn-light btn-print">
-                                    <i class="bi bi-printer me-1"></i> ${this.t('print')}
+                                    <i class="bi bi-printer me-1"></i> ${t('print')}
                                 </button>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${this.t('close')}"></button>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${t('close')}"></button>
                             </div>
                         </div>
-                        <div class="modal-body p-0" style="overflow: hidden;">
-                            <div class="pedigree-container-compact" id="pedigreeContainer">
+                        <div class="modal-body p-3">
+                            <div class="pedigree-container" id="pedigreeContainer">
                                 <div class="text-center py-5">
                                     <div class="spinner-border text-primary" role="status">
-                                        <span class="visually-hidden">${this.t('generatingPedigree')}</span>
+                                        <span class="visually-hidden">${t('generatingPedigree')}</span>
                                     </div>
-                                    <p class="mt-3">${this.t('generatingPedigree')}</p>
+                                    <p class="mt-3">${t('generatingPedigree')}</p>
                                 </div>
                             </div>
                         </div>
-                        <!-- FOOTER VERWIJDERD -->
                     </div>
                 </div>
             </div>
@@ -614,652 +835,320 @@ class StamboomManager extends BaseModule {
             </div>
             
             <style>
-                /* AGRESSIEVE RESET - OVERSCHRIJF ALLE BOOTSTRAP STYLES */
-                #pedigreeModal.modal.fade .modal-dialog.modal-fullscreen {
-                    width: 100vw !important;
-                    height: 100vh !important;
-                    margin: 0 !important;
-                    max-width: none !important;
-                    padding: 0 !important;
+                /* GEMEENSCHAPPELIJKE STYLES */
+                .pedigree-container {
+                    height: calc(100vh - 150px);
+                    overflow-y: auto;
                 }
                 
-                #pedigreeModal.modal.fade .modal-content {
-                    width: 100% !important;
-                    height: 100vh !important;
-                    margin: 0 !important;
-                    padding: 0 !important;
-                    border: none !important;
-                    border-radius: 0 !important;
-                    display: flex !important;
-                    flex-direction: column !important;
+                /* MOBIELE WEERGAVE STYLES - SearchManager stijl */
+                .pedigree-mobile-container {
+                    padding: 10px;
                 }
                 
-                #pedigreeModal.modal.fade .modal-header {
-                    margin: 0 !important;
-                    padding: 0.75rem 1rem !important;
-                    border: none !important;
-                    width: 100% !important;
-                    flex-shrink: 0 !important;
-                    min-height: auto !important;
-                    z-index: 1;
+                .pedigree-mobile-header {
+                    background: white;
+                    padding: 15px;
+                    border-radius: 8px;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                    margin-bottom: 15px;
                 }
                 
-                #pedigreeModal.modal.fade .modal-body {
-                    width: 100% !important;
-                    padding: 0 !important;
-                    margin: 0 !important;
-                    flex: 1 1 auto !important;
-                    overflow: hidden !important;
-                    min-height: 0 !important;
+                .generation-navigation {
+                    border-top: 1px solid #dee2e6;
+                    padding-top: 10px;
                 }
                 
-                /* HORIZONTALE PEDIGREE CONTAINER - MAXIMALE RUIMTE */
-                .pedigree-container-compact {
-                    padding: 0 !important;
-                    margin: 0 !important;
-                    width: 100% !important;
-                    height: calc(100vh - 60px) !important;
-                    background: #f8f9fa;
-                    overflow-x: auto !important;
-                    overflow-y: hidden !important;
-                    display: flex;
-                    align-items: center;
-                    position: relative;
-                    min-height: 0 !important;
+                .btn-generation {
+                    border-radius: 20px;
+                    padding: 4px 12px;
+                    font-size: 0.8rem;
                 }
                 
-                .pedigree-grid-compact {
-                    display: flex;
-                    flex-direction: row;
-                    height: 100%;
-                    min-width: fit-content;
-                    padding: 0 20px !important;
-                    gap: 25px;
-                    align-items: center;
-                    box-sizing: border-box !important;
-                    margin: 0 auto;
+                .btn-generation.active {
+                    background-color: #0d6efd;
+                    color: white;
+                    border-color: #0d6efd;
                 }
                 
-                /* GENERATIE KOLOM - VERTICALE STACK VAN LIGGENDE CARDS */
-                .pedigree-generation-col {
+                .pedigree-mobile-list {
                     display: flex;
                     flex-direction: column;
-                    height: 100%;
-                    justify-content: center;
-                    min-width: 0;
-                }
-                
-                /* VERSCHILLENDE SPACING PER GENERATIE */
-                .pedigree-generation-col.gen0 {
-                    gap: 0;
-                }
-                
-                .pedigree-generation-col.gen1 {
-                    gap: 15px;
-                }
-                
-                .pedigree-generation-col.gen2 {
                     gap: 10px;
                 }
                 
-                .pedigree-generation-col.gen3 {
-                    gap: 4px;  /* Kleinere spacing voor overgrootouders */
-                }
-                
-                /* BASIS LIGGENDE CARDS */
-                .pedigree-card-compact.horizontal {
+                .pedigree-mobile-item {
                     background: white;
-                    border-radius: 6px;
                     border: 1px solid #dee2e6;
-                    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+                    border-radius: 8px;
+                    padding: 15px;
                     cursor: pointer;
                     transition: all 0.2s;
-                    display: flex;
-                    flex-direction: column;
-                    overflow: hidden;
-                    margin: 0 !important;
-                    padding: 0 !important;
-                    flex-shrink: 0;
                 }
                 
-                /* ZELFDE BREEDTE VOOR ALLE GENERATIES - ANDERE HOOGTE VOOR OVERGROOTOUDERS */
-                .pedigree-card-compact.horizontal.gen0,
-                .pedigree-card-compact.horizontal.gen1,
-                .pedigree-card-compact.horizontal.gen2 {
-                    width: 180px !important;
-                    height: 110px !important;
+                .pedigree-mobile-item:hover {
+                    background-color: #f8f9fa;
+                    border-color: #0d6efd;
+                    transform: translateX(3px);
                 }
                 
-                /* OVERGROOTOUDERS: 60% HOOGTE VAN NORMALE CARDS */
-                .pedigree-card-compact.horizontal.gen3 {
-                    width: 180px !important;
-                    height: 66px !important;  /* 60% van 110px */
-                }
-                
-                /* Hoofdhond extra styling */
-                .pedigree-card-compact.horizontal.main-dog-compact {
-                    border: 2px solid #0d6efd !important;
-                    background: #f0f7ff;
-                    width: 190px !important;
-                    height: 120px !important;
-                }
-                
-                /* Geslacht kleuren */
-                .pedigree-card-compact.horizontal.male {
-                    border-left: 4px solid #0d6efd !important;
-                }
-                
-                .pedigree-card-compact.horizontal.female {
-                    border-left: 4px solid #dc3545 !important;
-                }
-                
-                .pedigree-card-compact.horizontal:hover {
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.12);
-                    transform: translateY(-1px);
-                    z-index: 1;
-                    position: relative;
-                }
-                
-                .pedigree-card-compact.horizontal.empty {
-                    background: #f8f9fa;
-                    cursor: default;
+                .pedigree-mobile-item.empty {
                     opacity: 0.6;
+                    cursor: default;
                 }
                 
-                .pedigree-card-compact.horizontal.empty:hover {
-                    transform: none !important;
-                    box-shadow: 0 1px 2px rgba(0,0,0,0.08) !important;
+                .pedigree-mobile-item.empty:hover {
+                    transform: none;
+                    border-color: #dee2e6;
+                    background: white;
                 }
                 
-                /* CARD HEADER - VERSCHILLENDE GROOTTES PER GENERATIE */
-                .pedigree-card-header-compact.horizontal {
+                .pedigree-item-header {
+                    margin-bottom: 10px;
+                    padding-bottom: 8px;
+                    border-bottom: 1px solid #f0f0f0;
+                }
+                
+                .relation-label {
+                    font-weight: 600;
+                    color: #495057;
+                    font-size: 0.9rem;
+                }
+                
+                .generation-badge {
+                    background: #6c757d;
                     color: white;
+                    font-size: 0.7rem;
+                    padding: 2px 6px;
+                    border-radius: 10px;
+                }
+                
+                .pedigree-item-body {
+                    font-size: 0.9rem;
+                }
+                
+                .dog-name-line {
+                    font-size: 1rem;
+                    font-weight: 700;
+                    color: #0d6efd;
+                    margin-bottom: 8px;
+                }
+                
+                .dog-details-line {
+                    color: #495057;
+                    font-size: 0.85rem;
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                    align-items: center;
+                    margin-bottom: 8px;
+                }
+                
+                .stamboom {
+                    font-weight: 600;
+                }
+                
+                .ras {
+                    font-style: italic;
+                }
+                
+                .geslacht {
+                    color: #6c757d;
+                }
+                
+                .click-hint {
+                    font-size: 0.75rem;
+                    color: #6c757d;
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                }
+                
+                /* TABLET WEERGAVE STYLES */
+                .pedigree-tablet-container {
+                    padding: 10px;
+                }
+                
+                .pedigree-tablet-header {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
+                    margin-bottom: 20px;
+                }
+                
+                .pedigree-tablet-grid {
+                    display: flex;
+                    gap: 15px;
+                    overflow-x: auto;
+                    padding: 10px 0;
+                }
+                
+                .generation-col {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                    min-width: 160px;
+                }
+                
+                .generation-label {
+                    font-weight: bold;
+                    color: #495057;
+                    text-align: center;
+                    margin-bottom: 8px;
+                    font-size: 0.9rem;
+                    background: #e9ecef;
+                    padding: 5px 10px;
+                    border-radius: 4px;
+                }
+                
+                .pedigree-card-compact {
+                    background: white;
+                    border: 1px solid #dee2e6;
+                    border-radius: 6px;
                     overflow: hidden;
-                    flex-shrink: 0;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    min-height: 80px;
                 }
                 
-                /* Header voor gen0, gen1, gen2 */
-                .pedigree-card-compact.horizontal.gen0 .pedigree-card-header-compact.horizontal,
-                .pedigree-card-compact.horizontal.gen1 .pedigree-card-header-compact.horizontal,
-                .pedigree-card-compact.horizontal.gen2 .pedigree-card-header-compact.horizontal {
-                    padding: 5px 8px;
-                    font-size: 0.7rem;
-                    min-height: 24px;
+                .pedigree-card-compact:hover {
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                    transform: translateY(-2px);
                 }
                 
-                /* Header voor gen3 (overgrootouders) - 60% van normale grootte */
-                .pedigree-card-compact.horizontal.gen3 .pedigree-card-header-compact.horizontal {
-                    padding: 3px 6px;
-                    font-size: 0.56rem;  /* 80% van 0.7rem */
-                    min-height: 18px;
+                .pedigree-card-compact.empty {
+                    opacity: 0.6;
+                    cursor: default;
                 }
                 
-                .pedigree-card-header-compact.horizontal.bg-primary {
-                    background: #0d6efd !important;
+                .pedigree-card-compact.empty:hover {
+                    transform: none;
+                    box-shadow: none;
                 }
                 
-                .pedigree-card-header-compact.horizontal.bg-secondary {
-                    background: #6c757d !important;
+                .pedigree-card-compact.main-dog {
+                    border: 2px solid #0d6efd;
+                }
+                
+                .card-header-compact {
+                    color: white;
+                    padding: 8px 10px;
+                    font-size: 0.8rem;
                 }
                 
                 .relation-compact {
                     display: flex;
                     align-items: center;
-                    gap: 3px;
-                    font-weight: 600;
-                    overflow: hidden;
-                    flex: 1;
                 }
                 
-                .relation-text {
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
+                .card-body-compact {
+                    padding: 10px;
                 }
                 
-                .main-dot {
-                    color: #ffc107;
-                    font-size: 0.7rem;
-                    flex-shrink: 0;
-                }
-                
-                .gender-icon-compact {
-                    flex-shrink: 0;
-                    margin-left: 4px;
-                }
-                
-                /* CARD BODY - VERSCHILLENDE PADDING PER GENERATIE */
-                .pedigree-card-body-compact.horizontal {
-                    display: flex;
-                    flex-direction: column;
-                    overflow: hidden;
-                    flex: 1;
-                }
-                
-                /* Body voor gen0, gen1, gen2 */
-                .pedigree-card-compact.horizontal.gen0 .pedigree-card-body-compact.horizontal,
-                .pedigree-card-compact.horizontal.gen1 .pedigree-card-body-compact.horizontal,
-                .pedigree-card-compact.horizontal.gen2 .pedigree-card-body-compact.horizontal {
-                    padding: 6px 8px;
-                }
-                
-                /* Body voor gen3 (overgrootouders) - 60% van normale grootte */
-                .pedigree-card-compact.horizontal.gen3 .pedigree-card-body-compact.horizontal {
-                    padding: 4px 6px;
-                }
-                
-                /* CARD ROWS voor liggende layout */
-                .card-row {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    gap: 6px;
-                    overflow: hidden;
-                }
-                
-                .card-row-1 {
-                    margin-bottom: 3px;
-                }
-                
-                .card-row-2 {
-                    margin-bottom: 3px;
-                }
-                
-                .card-row-3 {
-                    margin-top: auto;
-                }
-                
-                /* TEKST GROOTTES PER GENERATIE */
-                /* Hoofdhond, ouders en grootouders (gen0, gen1, gen2) */
-                .pedigree-card-compact.horizontal.gen0 .dog-name-compact,
-                .pedigree-card-compact.horizontal.gen1 .dog-name-compact,
-                .pedigree-card-compact.horizontal.gen2 .dog-name-compact {
-                    font-size: 0.8rem;
-                }
-                
-                .pedigree-card-compact.horizontal.gen0 .dog-kennel-compact,
-                .pedigree-card-compact.horizontal.gen1 .dog-kennel-compact,
-                .pedigree-card-compact.horizontal.gen2 .dog-kennel-compact,
-                .pedigree-card-compact.horizontal.gen0 .dog-pedigree-compact,
-                .pedigree-card-compact.horizontal.gen1 .dog-pedigree-compact,
-                .pedigree-card-compact.horizontal.gen2 .dog-pedigree-compact,
-                .pedigree-card-compact.horizontal.gen0 .dog-breed-compact,
-                .pedigree-card-compact.horizontal.gen1 .dog-breed-compact,
-                .pedigree-card-compact.horizontal.gen2 .dog-breed-compact {
-                    font-size: 0.7rem;
-                }
-                
-                .pedigree-card-compact.horizontal.gen0 .click-hint-compact,
-                .pedigree-card-compact.horizontal.gen1 .click-hint-compact,
-                .pedigree-card-compact.horizontal.gen2 .click-hint-compact {
-                    font-size: 0.6rem;
-                }
-                
-                /* Overgrootouders (gen3): 60% van normale tekstgrootte */
-                .pedigree-card-compact.horizontal.gen3 .dog-name-compact {
-                    font-size: 0.64rem;  /* 80% van 0.8rem (iets groter dan 60% voor leesbaarheid) */
-                }
-                
-                .pedigree-card-compact.horizontal.gen3 .dog-kennel-compact,
-                .pedigree-card-compact.horizontal.gen3 .dog-pedigree-compact,
-                .pedigree-card-compact.horizontal.gen3 .dog-breed-compact {
-                    font-size: 0.56rem;  /* 80% van 0.7rem */
-                }
-                
-                .pedigree-card-compact.horizontal.gen3 .click-hint-compact {
-                    font-size: 0.48rem;  /* 80% van 0.6rem */
-                }
-                
-                /* Algemene tekst styling */
                 .dog-name-compact {
                     font-weight: 600;
                     color: #0d6efd;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    line-height: 1.1;
-                    flex: 1;
-                }
-                
-                .dog-kennel-compact {
-                    color: #6c757d;
-                    font-style: italic;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    line-height: 1.1;
-                    flex: 1;
-                    text-align: right;
+                    margin-bottom: 5px;
+                    font-size: 0.85rem;
                 }
                 
                 .dog-pedigree-compact {
-                    font-weight: 600;
-                    color: #495057;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    line-height: 1.1;
-                    flex: 1;
-                }
-                
-                .dog-breed-compact {
-                    color: #28a745;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    line-height: 1.1;
-                    flex: 1;
-                    text-align: right;
-                }
-                
-                .no-data-text {
-                    color: #6c757d;
-                    font-style: italic;
-                    line-height: 1.3;
                     font-size: 0.75rem;
+                    color: #6c757d;
+                    margin-bottom: 5px;
                 }
                 
                 .click-hint-compact {
+                    font-size: 0.65rem;
                     color: #6c757d;
                     display: flex;
                     align-items: center;
-                    justify-content: center;
                     gap: 3px;
-                    line-height: 1;
-                    width: 100%;
-                    padding-top: 3px;
-                    border-top: 1px dashed #dee2e6;
                 }
                 
-                /* RESPONSIVE STYLES */
-                /* Voor grote schermen */
-                @media (min-width: 1920px) {
-                    .pedigree-container-compact {
-                        height: calc(100vh - 60px) !important;
-                    }
-                    
-                    .pedigree-grid-compact {
-                        gap: 30px;
-                        padding: 0 25px !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen0,
-                    .pedigree-card-compact.horizontal.gen1,
-                    .pedigree-card-compact.horizontal.gen2 {
-                        width: 200px !important;
-                        height: 120px !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen3 {
-                        width: 200px !important;
-                        height: 72px !important;  /* 60% van 120px */
-                    }
-                    
-                    .pedigree-card-compact.horizontal.main-dog-compact {
-                        width: 210px !important;
-                        height: 130px !important;
-                    }
-                    
-                    /* Tekst voor grote schermen */
-                    .pedigree-card-compact.horizontal.gen0 .dog-name-compact,
-                    .pedigree-card-compact.horizontal.gen1 .dog-name-compact,
-                    .pedigree-card-compact.horizontal.gen2 .dog-name-compact {
-                        font-size: 0.85rem;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen0 .dog-kennel-compact,
-                    .pedigree-card-compact.horizontal.gen1 .dog-kennel-compact,
-                    .pedigree-card-compact.horizontal.gen2 .dog-kennel-compact,
-                    .pedigree-card-compact.horizontal.gen0 .dog-pedigree-compact,
-                    .pedigree-card-compact.horizontal.gen1 .dog-pedigree-compact,
-                    .pedigree-card-compact.horizontal.gen2 .dog-pedigree-compact,
-                    .pedigree-card-compact.horizontal.gen0 .dog-breed-compact,
-                    .pedigree-card-compact.horizontal.gen1 .dog-breed-compact,
-                    .pedigree-card-compact.horizontal.gen2 .dog-breed-compact {
-                        font-size: 0.75rem;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen0 .click-hint-compact,
-                    .pedigree-card-compact.horizontal.gen1 .click-hint-compact,
-                    .pedigree-card-compact.horizontal.gen2 .click-hint-compact {
-                        font-size: 0.65rem;
-                    }
-                    
-                    /* Overgrootouders tekst op grote schermen */
-                    .pedigree-card-compact.horizontal.gen3 .dog-name-compact {
-                        font-size: 0.68rem;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen3 .dog-kennel-compact,
-                    .pedigree-card-compact.horizontal.gen3 .dog-pedigree-compact,
-                    .pedigree-card-compact.horizontal.gen3 .dog-breed-compact {
-                        font-size: 0.6rem;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen3 .click-hint-compact {
-                        font-size: 0.52rem;
-                    }
+                /* DESKTOP WEERGAVE STYLES */
+                .pedigree-desktop-container {
+                    padding: 20px;
                 }
                 
-                @media (min-width: 1366px) and (max-width: 1599px) {
-                    .pedigree-grid-compact {
-                        gap: 18px;
-                        padding: 0 15px !important;
-                    }
+                .pedigree-desktop-header {
+                    text-align: right;
                 }
                 
-                @media (min-width: 1024px) and (max-width: 1365px) {
-                    .pedigree-container-compact {
-                        height: calc(100vh - 60px) !important;
-                    }
-                    
-                    .pedigree-grid-compact {
-                        gap: 15px;
-                        padding: 0 12px !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen0,
-                    .pedigree-card-compact.horizontal.gen1,
-                    .pedigree-card-compact.horizontal.gen2 {
-                        width: 170px !important;
-                        height: 105px !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen3 {
-                        width: 170px !important;
-                        height: 63px !important;  /* 60% van 105px */
-                    }
-                    
-                    .pedigree-card-compact.horizontal.main-dog-compact {
-                        width: 180px !important;
-                        height: 115px !important;
-                    }
+                .pedigree-desktop-grid {
+                    display: flex;
+                    justify-content: center;
+                    gap: 25px;
+                    margin-top: 30px;
                 }
                 
-                @media (min-width: 768px) and (max-width: 1023px) {
-                    .pedigree-container-compact {
-                        height: calc(100vh - 60px) !important;
-                    }
-                    
-                    .pedigree-grid-compact {
-                        gap: 12px;
-                        padding: 0 10px !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen0,
-                    .pedigree-card-compact.horizontal.gen1,
-                    .pedigree-card-compact.horizontal.gen2 {
-                        width: 160px !important;
-                        height: 100px !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen3 {
-                        width: 160px !important;
-                        height: 60px !important;  /* 60% van 100px */
-                    }
-                    
-                    .pedigree-card-compact.horizontal.main-dog-compact {
-                        width: 170px !important;
-                        height: 110px !important;
-                    }
+                .generation-desktop-col {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 15px;
                 }
                 
-                /* MOBIEL/TELEFOON AANPASSINGEN - ZELFDE LAYOUT MET HORIZONTALE SCROLL */
-                @media (max-width: 767px) {
-                    .pedigree-container-compact {
-                        height: calc(100vh - 60px) !important;
-                        overflow-x: auto !important;
-                        overflow-y: hidden !important;
-                        align-items: center !important;
-                        padding: 0 !important;
-                    }
-                    
-                    .pedigree-grid-compact {
-                        flex-direction: row !important;
-                        flex-wrap: nowrap !important;
-                        width: auto !important;
-                        min-width: max-content !important;
-                        height: 100% !important;
-                        padding: 0 15px !important;
-                        gap: 20px !important;
-                        margin: 0 !important;
-                        align-items: center !important;
-                    }
-                    
-                    .pedigree-generation-col {
-                        flex-direction: column !important;
-                        height: 100% !important;
-                        justify-content: center !important;
-                        min-width: auto !important;
-                        width: auto !important;
-                        flex-shrink: 0 !important;
-                        padding: 0 !important;
-                    }
-                    
-                    .pedigree-generation-col.gen0 {
-                        gap: 0 !important;
-                    }
-                    
-                    .pedigree-generation-col.gen1 {
-                        gap: 15px !important;
-                    }
-                    
-                    .pedigree-generation-col.gen2 {
-                        gap: 10px !important;
-                    }
-                    
-                    .pedigree-generation-col.gen3 {
-                        gap: 4px !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen0,
-                    .pedigree-card-compact.horizontal.gen1,
-                    .pedigree-card-compact.horizontal.gen2 {
-                        width: 180px !important;
-                        height: 110px !important;
-                        margin: 0 !important;
-                        flex-shrink: 0 !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen3 {
-                        width: 180px !important;
-                        height: 66px !important;  /* 60% van 110px */
-                        margin: 0 !important;
-                        flex-shrink: 0 !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.main-dog-compact {
-                        width: 190px !important;
-                        height: 120px !important;
-                        margin: 0 !important;
-                        flex-shrink: 0 !important;
-                    }
-                    
-                    /* Mobiel tekstgrootte */
-                    .pedigree-card-compact.horizontal.gen0 .dog-name-compact,
-                    .pedigree-card-compact.horizontal.gen1 .dog-name-compact,
-                    .pedigree-card-compact.horizontal.gen2 .dog-name-compact {
-                        font-size: 0.8rem !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen0 .dog-kennel-compact,
-                    .pedigree-card-compact.horizontal.gen1 .dog-kennel-compact,
-                    .pedigree-card-compact.horizontal.gen2 .dog-kennel-compact,
-                    .pedigree-card-compact.horizontal.gen0 .dog-pedigree-compact,
-                    .pedigree-card-compact.horizontal.gen1 .dog-pedigree-compact,
-                    .pedigree-card-compact.horizontal.gen2 .dog-pedigree-compact,
-                    .pedigree-card-compact.horizontal.gen0 .dog-breed-compact,
-                    .pedigree-card-compact.horizontal.gen1 .dog-breed-compact,
-                    .pedigree-card-compact.horizontal.gen2 .dog-breed-compact {
-                        font-size: 0.7rem !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen0 .click-hint-compact,
-                    .pedigree-card-compact.horizontal.gen1 .click-hint-compact,
-                    .pedigree-card-compact.horizontal.gen2 .click-hint-compact {
-                        font-size: 0.6rem !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen3 .dog-name-compact {
-                        font-size: 0.64rem !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen3 .dog-kennel-compact,
-                    .pedigree-card-compact.horizontal.gen3 .dog-pedigree-compact,
-                    .pedigree-card-compact.horizontal.gen3 .dog-breed-compact {
-                        font-size: 0.56rem !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen3 .click-hint-compact {
-                        font-size: 0.48rem !important;
-                    }
-                    
-                    .generation-label {
-                        font-size: 0.7rem !important;
-                        padding: 3px 6px !important;
-                        margin-bottom: 5px !important;
-                        white-space: nowrap !important;
-                    }
+                .pedigree-card-desktop {
+                    background: white;
+                    border: 1px solid #dee2e6;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    width: 200px;
+                    cursor: pointer;
+                    transition: all 0.2s;
                 }
                 
-                @media (max-width: 480px) {
-                    .pedigree-container-compact {
-                        height: calc(100vh - 60px) !important;
-                        overflow-x: auto !important;
-                        overflow-y: hidden !important;
-                        align-items: center !important;
-                        padding: 0 !important;
-                    }
-                    
-                    .pedigree-grid-compact {
-                        padding: 0 12px !important;
-                        gap: 15px !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen0,
-                    .pedigree-card-compact.horizontal.gen1,
-                    .pedigree-card-compact.horizontal.gen2 {
-                        width: 180px !important;
-                        height: 110px !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen3 {
-                        width: 180px !important;
-                        height: 66px !important;  /* 60% van 110px */
-                    }
-                    
-                    .pedigree-card-compact.horizontal.main-dog-compact {
-                        width: 190px !important;
-                        height: 120px !important;
-                    }
-                    
-                    .generation-label {
-                        font-size: 0.65rem !important;
-                        padding: 2px 5px !important;
-                    }
+                .pedigree-card-desktop:hover {
+                    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+                    transform: translateY(-3px);
+                }
+                
+                .pedigree-card-desktop.empty {
+                    opacity: 0.6;
+                    cursor: default;
+                }
+                
+                .pedigree-card-desktop.main-dog {
+                    border: 3px solid #0d6efd;
+                    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);
+                }
+                
+                .card-header-desktop {
+                    color: white;
+                    padding: 10px 15px;
+                    font-size: 0.9rem;
+                }
+                
+                .kennel-name {
+                    font-size: 0.75rem;
+                    opacity: 0.9;
+                }
+                
+                .card-body-desktop {
+                    padding: 15px;
+                }
+                
+                .dog-name-desktop {
+                    font-weight: 700;
+                    color: #0d6efd;
+                    margin-bottom: 8px;
+                    font-size: 1rem;
+                }
+                
+                .dog-details-desktop {
+                    display: flex;
+                    justify-content: space-between;
+                    font-size: 0.8rem;
+                    color: #6c757d;
+                    margin-bottom: 10px;
+                }
+                
+                .click-hint-desktop {
+                    font-size: 0.75rem;
+                    color: #6c757d;
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
                 }
                 
                 /* POPUP STYLES */
@@ -1276,12 +1165,6 @@ class StamboomManager extends BaseModule {
                     justify-content: center;
                     padding: 20px;
                     animation: fadeIn 0.3s;
-                    overflow-y: auto;
-                }
-                
-                @keyframes fadeIn {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
                 }
                 
                 .pedigree-popup-container {
@@ -1293,8 +1176,11 @@ class StamboomManager extends BaseModule {
                     overflow-y: auto;
                     animation: slideUp 0.3s;
                     box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-                    margin: auto;
-                    position: relative;
+                }
+                
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
                 }
                 
                 @keyframes slideUp {
@@ -1332,7 +1218,6 @@ class StamboomManager extends BaseModule {
                     font-size: 1.1rem;
                     display: flex;
                     align-items: center;
-                    flex: 1;
                 }
                 
                 .popup-close {
@@ -1342,27 +1227,16 @@ class StamboomManager extends BaseModule {
                     cursor: pointer;
                     opacity: 0.8;
                     color: white;
-                    flex-shrink: 0;
-                    margin-left: 15px;
-                    padding: 0;
-                    width: 30px;
-                    height: 30px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
                 }
                 
                 .popup-close:hover {
                     opacity: 1;
-                    background: rgba(255, 255, 255, 0.1);
-                    border-radius: 50%;
                 }
                 
                 .popup-body {
                     padding: 20px;
                     flex: 1;
                     overflow-y: auto;
-                    -webkit-overflow-scrolling: touch;
                 }
                 
                 .dog-popup-name {
@@ -1372,7 +1246,6 @@ class StamboomManager extends BaseModule {
                 .dog-popup-name h4 {
                     color: #0d6efd;
                     margin-bottom: 8px;
-                    font-size: 1.4rem;
                 }
                 
                 .info-section {
@@ -1386,19 +1259,12 @@ class StamboomManager extends BaseModule {
                     border-bottom: 2px solid #e9ecef;
                     display: flex;
                     align-items: center;
-                    font-size: 1rem;
                 }
                 
                 .info-grid {
                     display: grid;
                     grid-template-columns: 1fr;
                     gap: 12px;
-                }
-                
-                @media (min-width: 400px) {
-                    .info-grid {
-                        grid-template-columns: repeat(2, 1fr);
-                    }
                 }
                 
                 .info-item {
@@ -1412,13 +1278,11 @@ class StamboomManager extends BaseModule {
                     color: #495057;
                     font-size: 0.9rem;
                     margin-bottom: 4px;
-                    line-height: 1.3;
                 }
                 
                 .info-value {
                     color: #212529;
                     font-size: 0.95rem;
-                    line-height: 1.4;
                     word-break: break-word;
                 }
                 
@@ -1444,96 +1308,80 @@ class StamboomManager extends BaseModule {
                 
                 .popup-close-btn {
                     min-width: 130px;
-                    padding: 10px 25px;
-                    font-size: 1rem;
+                }
+                
+                /* RESPONSIVE BREAKPOINTS */
+                @media (max-width: 768px) {
+                    .pedigree-desktop-container,
+                    .pedigree-tablet-container {
+                        display: none;
+                    }
+                    
+                    .pedigree-mobile-container {
+                        display: block;
+                    }
+                    
+                    .pedigree-container {
+                        height: calc(100vh - 120px);
+                    }
+                }
+                
+                @media (min-width: 769px) and (max-width: 1024px) {
+                    .pedigree-desktop-container,
+                    .pedigree-mobile-container {
+                        display: none;
+                    }
+                    
+                    .pedigree-tablet-container {
+                        display: block;
+                    }
+                    
+                    .pedigree-container {
+                        height: calc(100vh - 140px);
+                    }
+                }
+                
+                @media (min-width: 1025px) {
+                    .pedigree-mobile-container,
+                    .pedigree-tablet-container {
+                        display: none;
+                    }
+                    
+                    .pedigree-desktop-container {
+                        display: block;
+                    }
+                    
+                    .pedigree-container {
+                        height: calc(100vh - 160px);
+                    }
                 }
                 
                 /* Print styles */
                 @media print {
-                    .modal-dialog {
-                        max-width: none;
-                        margin: 0;
-                    }
-                    
                     .modal-header {
                         display: none !important;
                     }
                     
-                    .pedigree-container-compact {
-                        padding: 0;
-                        background: white;
-                        height: auto !important;
-                        overflow-x: visible !important;
-                        height: 100vh !important;
-                    }
-                    
-                    .pedigree-grid-compact {
-                        flex-direction: row !important;
+                    .pedigree-container {
                         height: auto;
-                        padding: 20px !important;
-                        gap: 15px;
+                        overflow: visible;
                     }
                     
-                    .pedigree-generation-col {
-                        flex-direction: column;
+                    .btn-switch-view,
+                    .btn-zoom-control,
+                    .btn-print {
+                        display: none !important;
+                    }
+                    
+                    .pedigree-desktop-grid {
+                        display: flex !important;
+                        flex-wrap: wrap;
                         gap: 10px;
                     }
                     
-                    .pedigree-card-compact.horizontal {
+                    .generation-desktop-col {
                         break-inside: avoid;
-                        box-shadow: none;
-                        border: 1px solid #ccc !important;
-                        margin-bottom: 10px;
                     }
-                    
-                    .main-dog-compact {
-                        border: 2px solid #000 !important;
-                    }
-                }
-                
-                /* Generation labels styling */
-                .generation-label {
-                    font-weight: bold;
-                    color: #495057;
-                    text-align: center;
-                    margin-bottom: 8px;
-                    font-size: 0.8rem;
-                    background: #e9ecef;
-                    padding: 4px 8px;
-                    border-radius: 4px;
-                    white-space: nowrap;
-                }
-                
-                /* Lege card styling */
-                .pedigree-card-compact.horizontal.empty {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                
-                /* VISUELE VERBINDINGEN */
-                .pedigree-generation-col {
-                    position: relative;
-                }
-                
-                .pedigree-generation-col:not(:first-child)::before {
-                    content: '';
-                    position: absolute;
-                    left: -10px;
-                    top: 50%;
-                    width: 10px;
-                    height: 1px;
-                    background: #adb5bd;
-                    opacity: 0.5;
-                }
-                
-                /* Overgrootouder styling - subtiele opacity */
-                .pedigree-card-compact.horizontal.gen3 {
-                    opacity: 0.9;
-                }
-                
-                .pedigree-card-compact.horizontal.gen3:hover {
-                    opacity: 1;
                 }
             </style>
         `;
@@ -1555,67 +1403,86 @@ class StamboomManager extends BaseModule {
         }
     }
     
-    renderCompactPedigree(pedigreeTree) {
-        const container = document.getElementById('pedigreeContainer');
-        if (!container) return;
-        
-        const gridHTML = `
-            <div class="pedigree-grid-compact">
-                <!-- Generatie 0: Hoofdhond -->
-                <div class="pedigree-generation-col gen0">
-                    <div class="generation-label">${this.t('currentDog')}</div>
-                    ${this.getDogCompactCardHTML(pedigreeTree.mainDog, this.t('mainDog'), true, 0)}
-                </div>
-                
-                <!-- Generatie 1: Ouders -->
-                <div class="pedigree-generation-col gen1">
-                    <div class="generation-label">${this.t('parents')}</div>
-                    ${this.getDogCompactCardHTML(pedigreeTree.father, this.t('father'), false, 1)}
-                    ${this.getDogCompactCardHTML(pedigreeTree.mother, this.t('mother'), false, 1)}
-                </div>
-                
-                <!-- Generatie 2: Grootouders -->
-                <div class="pedigree-generation-col gen2">
-                    <div class="generation-label">${this.t('grandparents')}</div>
-                    ${this.getDogCompactCardHTML(pedigreeTree.paternalGrandfather, this.t('grandfather'), false, 2)}
-                    ${this.getDogCompactCardHTML(pedigreeTree.paternalGrandmother, this.t('grandmother'), false, 2)}
-                    ${this.getDogCompactCardHTML(pedigreeTree.maternalGrandfather, this.t('grandfather'), false, 2)}
-                    ${this.getDogCompactCardHTML(pedigreeTree.maternalGrandmother, this.t('grandmother'), false, 2)}
-                </div>
-                
-                <!-- Generatie 3: Overgrootouders -->
-                <div class="pedigree-generation-col gen3">
-                    <div class="generation-label">${this.t('greatGrandparents')}</div>
-                    ${this.getDogCompactCardHTML(pedigreeTree.paternalGreatGrandfather1, this.t('greatGrandfather'), false, 3)}
-                    ${this.getDogCompactCardHTML(pedigreeTree.paternalGreatGrandmother1, this.t('greatGrandmother'), false, 3)}
-                    ${this.getDogCompactCardHTML(pedigreeTree.paternalGreatGrandfather2, this.t('greatGrandfather'), false, 3)}
-                    ${this.getDogCompactCardHTML(pedigreeTree.paternalGreatGrandmother2, this.t('greatGrandmother'), false, 3)}
-                    ${this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandfather1, this.t('greatGrandfather'), false, 3)}
-                    ${this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandmother1, this.t('greatGrandmother'), false, 3)}
-                    ${this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandfather2, this.t('greatGrandfather'), false, 3)}
-                    ${this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandmother2, this.t('greatGrandmother'), false, 3)}
-                </div>
-            </div>
-        `;
-        
-        container.innerHTML = gridHTML;
-        
-        // Add click events to cards
-        this.setupCardClickEvents();
-    }
-    
-    setupCardClickEvents() {
-        const cards = document.querySelectorAll('.pedigree-card-compact.horizontal:not(.empty)');
+    setupPedigreeEvents(pedigreeTree) {
+        // Click events voor honden kaarten
+        const cards = document.querySelectorAll('[data-dog-id]');
         cards.forEach(card => {
-            card.addEventListener('click', (e) => {
-                const dogId = parseInt(card.getAttribute('data-dog-id'));
-                if (dogId === 0) return; // Skip empty cards
+            const dogId = parseInt(card.getAttribute('data-dog-id'));
+            if (dogId > 0) {
+                card.addEventListener('click', () => {
+                    const dog = this.getDogById(dogId);
+                    if (dog) {
+                        const relation = card.querySelector('.relation-compact, .relation-label, .card-header-desktop')?.textContent || '';
+                        this.showDogDetailPopup(dog, relation.trim());
+                    }
+                });
+            }
+        });
+        
+        // Generatie filter voor mobiele weergave
+        const generationButtons = document.querySelectorAll('.btn-generation');
+        generationButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const generation = e.target.getAttribute('data-generation');
                 
-                const dog = this.getDogById(dogId);
-                if (!dog) return;
+                // Update active state
+                generationButtons.forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
                 
-                const relation = card.getAttribute('data-relation') || '';
-                this.showDogDetailPopup(dog, relation);
+                // Filter honden op generatie
+                const items = document.querySelectorAll('.pedigree-mobile-item');
+                items.forEach(item => {
+                    const itemGen = item.getAttribute('data-generation');
+                    if (generation === 'all' || itemGen === generation) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+        
+        // Switch view button
+        const switchButtons = document.querySelectorAll('.btn-switch-view');
+        switchButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Toggle tussen mobiel/desktop modus
+                this.isMobile = !this.isMobile;
+                
+                // Herlaad de pedigree
+                const container = document.getElementById('pedigreeContainer');
+                container.innerHTML = this.renderPedigree(pedigreeTree);
+                
+                // Herstel events
+                this.setupPedigreeEvents(pedigreeTree);
+            });
+        });
+        
+        // Zoom controls voor tablet
+        const zoomControls = document.querySelectorAll('.btn-zoom-control');
+        zoomControls.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const action = e.target.getAttribute('data-action');
+                const grid = document.querySelector('.pedigree-tablet-grid');
+                
+                if (!grid) return;
+                
+                let currentScale = parseFloat(grid.style.transform?.replace('scale(', '')?.replace(')', '')) || 1;
+                
+                switch(action) {
+                    case 'zoomIn':
+                        currentScale = Math.min(currentScale + 0.1, 2);
+                        break;
+                    case 'zoomOut':
+                        currentScale = Math.max(currentScale - 0.1, 0.5);
+                        break;
+                    case 'resetZoom':
+                        currentScale = 1;
+                        break;
+                }
+                
+                grid.style.transform = `scale(${currentScale})`;
+                grid.style.transformOrigin = 'center center';
             });
         });
     }
@@ -1629,14 +1496,7 @@ class StamboomManager extends BaseModule {
         const popupHTML = this.getDogDetailPopupHTML(dog, relation);
         container.innerHTML = popupHTML;
         
-        // Show overlay - center in viewport
         overlay.style.display = 'flex';
-        
-        // Ensure popup is visible and centered
-        setTimeout(() => {
-            container.style.marginTop = '0';
-            container.style.transform = 'translateY(0)';
-        }, 10);
         
         // Add close event listeners
         const closeButtons = container.querySelectorAll('.popup-close, .popup-close-btn');
@@ -1661,14 +1521,6 @@ class StamboomManager extends BaseModule {
             }
         };
         document.addEventListener('keydown', closeOnEscape);
-        
-        // Clean up event listener when popup closes
-        overlay.addEventListener('animationend', function handler() {
-            if (overlay.style.display === 'none') {
-                document.removeEventListener('keydown', closeOnEscape);
-                overlay.removeEventListener('animationend', handler);
-            }
-        });
     }
     
     // Helper methodes van BaseModule
@@ -1683,8 +1535,6 @@ class StamboomManager extends BaseModule {
     hideProgress() {
         if (typeof super.hideProgress === 'function') {
             super.hideProgress();
-        } else {
-            console.log('Progress hidden');
         }
     }
     
