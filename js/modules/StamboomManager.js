@@ -601,8 +601,8 @@ class StamboomManager extends BaseModule {
                                 </div>
                             </div>
                         </div>
-                        <div class="modal-footer" style="padding: 0.5rem 1rem; min-height: auto;">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <div class="modal-footer bg-primary text-white" style="padding: 0.75rem 1rem; min-height: auto; border-top: none;">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">
                                 <i class="bi bi-x-circle me-1"></i> ${this.t('close')}
                             </button>
                         </div>
@@ -645,6 +645,7 @@ class StamboomManager extends BaseModule {
                     width: 100% !important;
                     flex-shrink: 0 !important;
                     min-height: auto !important;
+                    z-index: 1;
                 }
                 
                 #pedigreeModal.modal.fade .modal-body {
@@ -658,12 +659,15 @@ class StamboomManager extends BaseModule {
                 
                 #pedigreeModal.modal.fade .modal-footer {
                     margin: 0 !important;
-                    padding: 0.5rem 1rem !important;
+                    padding: 0.75rem 1rem !important;
                     border: none !important;
                     width: 100% !important;
                     flex-shrink: 0 !important;
                     min-height: auto !important;
-                    background: #f8f9fa !important;
+                    background: #0d6efd !important;
+                    border-top: none !important;
+                    position: relative;
+                    z-index: 1;
                 }
                 
                 /* HORIZONTALE PEDIGREE CONTAINER - MAXIMALE RUIMTE */
@@ -671,7 +675,7 @@ class StamboomManager extends BaseModule {
                     padding: 0 !important;
                     margin: 0 !important;
                     width: 100% !important;
-                    height: 100% !important;
+                    height: calc(100vh - 110px) !important; /* Aangepast voor header en footer */
                     background: #f8f9fa;
                     overflow-x: auto !important;
                     overflow-y: hidden !important;
@@ -686,10 +690,11 @@ class StamboomManager extends BaseModule {
                     flex-direction: row;
                     height: 100%;
                     min-width: fit-content;
-                    padding: 15px 20px !important;
-                    gap: 20px;
+                    padding: 20px !important;
+                    gap: 25px;
                     align-items: center;
                     box-sizing: border-box !important;
+                    margin: 0 auto;
                 }
                 
                 /* GENERATIE KOLOM - VERTICALE STACK VAN LIGGENDE CARDS */
@@ -989,9 +994,13 @@ class StamboomManager extends BaseModule {
                 /* RESPONSIVE STYLES */
                 /* Voor grote schermen */
                 @media (min-width: 1920px) {
+                    .pedigree-container-compact {
+                        height: calc(100vh - 120px) !important;
+                    }
+                    
                     .pedigree-grid-compact {
-                        gap: 25px;
-                        padding: 20px 30px !important;
+                        gap: 30px;
+                        padding: 25px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen0,
@@ -1055,14 +1064,18 @@ class StamboomManager extends BaseModule {
                 @media (min-width: 1366px) and (max-width: 1599px) {
                     .pedigree-grid-compact {
                         gap: 18px;
-                        padding: 15px 20px !important;
+                        padding: 15px !important;
                     }
                 }
                 
                 @media (min-width: 1024px) and (max-width: 1365px) {
+                    .pedigree-container-compact {
+                        height: calc(100vh - 100px) !important;
+                    }
+                    
                     .pedigree-grid-compact {
                         gap: 15px;
-                        padding: 12px 15px !important;
+                        padding: 12px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen0,
@@ -1084,9 +1097,13 @@ class StamboomManager extends BaseModule {
                 }
                 
                 @media (min-width: 768px) and (max-width: 1023px) {
+                    .pedigree-container-compact {
+                        height: calc(100vh - 95px) !important;
+                    }
+                    
                     .pedigree-grid-compact {
                         gap: 12px;
-                        padding: 10px 12px !important;
+                        padding: 10px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen0,
@@ -1108,6 +1125,10 @@ class StamboomManager extends BaseModule {
                 }
                 
                 @media (max-width: 767px) {
+                    .pedigree-container-compact {
+                        height: calc(100vh - 110px) !important;
+                    }
+                    
                     /* Op mobiel: verander naar verticale layout */
                     .pedigree-container-compact {
                         overflow-x: hidden !important;
@@ -1171,6 +1192,10 @@ class StamboomManager extends BaseModule {
                 }
                 
                 @media (max-width: 480px) {
+                    .pedigree-container-compact {
+                        height: calc(100vh - 100px) !important;
+                    }
+                    
                     .pedigree-grid-compact {
                         padding: 8px !important;
                         gap: 12px;
@@ -1412,6 +1437,7 @@ class StamboomManager extends BaseModule {
                         background: white;
                         height: auto !important;
                         overflow-x: visible !important;
+                        height: 100vh !important;
                     }
                     
                     .pedigree-grid-compact {
