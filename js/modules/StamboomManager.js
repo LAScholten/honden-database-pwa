@@ -13,7 +13,7 @@ class StamboomManager extends BaseModule {
         this.allDogs = [];
         this.translations = {
             nl: {
-                pedigreeTitle: "StamPboom van {name}",
+                pedigreeTitle: "Stamboom van {name}",
                 pedigree4Gen: "4-generatie stamboom",
                 generatingPedigree: "Stamboom genereren...",
                 close: "Sluiten",
@@ -1118,21 +1118,21 @@ class StamboomManager extends BaseModule {
                         padding: 0 !important;
                         margin: 0 !important;
                         overflow: hidden !important;
+                        display: flex !important;
+                        flex-direction: column !important;
                     }
                     
-                    /* CONTAINER 3 CM LANGER VOOR MOBIEL */
+                    /* EENVOUDIGE OPLOSSING: VOLLEDIGE HOOGTE ZONDER CALC */
                     .pedigree-container-compact {
-                        height: calc(100vh - 60px + 30px) !important; /* 3 cm extra (30px) */
+                        height: 100% !important;
+                        min-height: 100% !important;
+                        max-height: 100% !important;
                         overflow-x: auto !important;
                         overflow-y: hidden !important;
                         align-items: center !important;
                         padding: 0 !important;
-                        min-height: 0 !important;
-                        position: relative !important;
                         display: flex !important;
                         flex: 1 !important;
-                        min-width: 0 !important;
-                        max-height: none !important;
                         background: #f8f9fa !important;
                     }
                     
@@ -1141,30 +1141,24 @@ class StamboomManager extends BaseModule {
                         flex-wrap: nowrap !important;
                         width: auto !important;
                         min-width: max-content !important;
-                        height: 100% !important;
-                        min-height: 100% !important;
-                        padding: 20px 15px !important;
+                        height: auto !important;
+                        min-height: auto !important;
+                        padding: 15px 15px 30px 15px !important; /* MEER PADDING ONDERIN */
                         gap: 15px !important;
                         margin: 0 !important;
                         align-items: center !important;
                         flex-shrink: 0 !important;
-                        position: relative !important;
-                        box-sizing: border-box !important;
                     }
                     
                     .pedigree-generation-col {
                         flex-direction: column !important;
-                        height: 100% !important;
-                        min-height: 100% !important;
-                        justify-content: center !important;
+                        height: auto !important;
+                        justify-content: flex-start !important; /* VERANDERD VAN center NAAR flex-start */
                         min-width: auto !important;
                         width: auto !important;
                         flex-shrink: 0 !important;
                         padding: 0 !important;
                         margin: 0 !important;
-                        position: relative !important;
-                        box-sizing: border-box !important;
-                        overflow: visible !important;
                     }
                     
                     .pedigree-generation-col.gen0 {
@@ -1206,17 +1200,19 @@ class StamboomManager extends BaseModule {
                         flex-shrink: 0 !important;
                     }
                     
-                    /* Generation labels - meer ruimte */
+                    /* Generation labels */
                     .generation-label {
                         font-size: 0.7rem !important;
                         padding: 4px 8px !important;
-                        margin-bottom: 8px !important;
+                        margin-bottom: 10px !important; /* MEER RUIMTE */
                         white-space: nowrap !important;
                         flex-shrink: 0 !important;
                         background: #e9ecef !important;
                         border-radius: 4px !important;
                         text-align: center !important;
                         display: block !important;
+                        width: 100% !important;
+                        box-sizing: border-box !important;
                     }
                     
                     /* Mobiel tekstgrootte */
@@ -1260,18 +1256,22 @@ class StamboomManager extends BaseModule {
                 }
                 
                 @media (max-width: 480px) {
-                    /* CONTAINER 3 CM LANGER VOOR MOBIEL */
+                    /* EENVOUDIGE OPLOSSING: VOLLEDIGE HOOGTE ZONDER CALC */
                     .pedigree-container-compact {
-                        height: calc(100vh - 60px + 30px) !important; /* 3 cm extra (30px) */
+                        height: 100% !important;
+                        min-height: 100% !important;
+                        max-height: 100% !important;
                         overflow-x: auto !important;
                         overflow-y: hidden !important;
                         align-items: center !important;
                         padding: 0 !important;
-                        min-height: 0 !important;
+                        display: flex !important;
+                        flex: 1 !important;
+                        background: #f8f9fa !important;
                     }
                     
                     .pedigree-grid-compact {
-                        padding: 20px 12px !important;
+                        padding: 15px 12px 30px 12px !important; /* MEER PADDING ONDERIN */
                         gap: 12px !important;
                     }
                     
@@ -1295,7 +1295,7 @@ class StamboomManager extends BaseModule {
                     .generation-label {
                         font-size: 0.65rem !important;
                         padding: 3px 6px !important;
-                        margin-bottom: 6px !important;
+                        margin-bottom: 8px !important;
                     }
                 }
                 
