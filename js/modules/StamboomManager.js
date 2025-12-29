@@ -3,7 +3,6 @@
  * Beheert 4-generatie stambomen voor honden - Zelfde layout op alle schermen
  * HORIZONTALE LAYOUT - Van links naar rechts met liggende cards
  * Overgrootouders 60% hoogte, zelfde breedte voor alle generaties
- * MOBIELE WEERGAVE: Wigvorm met trapsgewijze hoogte
  */
 
 class StamboomManager extends BaseModule {
@@ -130,7 +129,7 @@ class StamboomManager extends BaseModule {
             de: {
                 pedigreeTitle: "Ahnentafel von {name}",
                 pedigree4Gen: "4-Generationen Ahnentafel",
-                generatingPedigree: "Ahnentafel wird generiert...",
+                generatingPedigree: "Ahnentafel wordt generiert...",
                 close: "Schließen",
                 print: "Drucken",
                 noData: "Keine Daten",
@@ -642,62 +641,42 @@ class StamboomManager extends BaseModule {
                     box-sizing: border-box !important;
                 }
                 
-                /* WIGVORM CONTAINER - trapsgewijze layout */
-                .pedigree-grid-wigvorm {
+                .pedigree-grid-compact {
                     display: flex;
                     flex-direction: row;
                     height: auto;
                     min-width: fit-content;
-                    padding: 20px 15px 40px 15px !important;
-                    gap: 15px;
+                    padding: 10px 15px !important;
+                    gap: 20px;
                     align-items: flex-start;
                     box-sizing: border-box !important;
                     margin: 0 auto;
-                    position: relative;
                 }
                 
-                /* GENERATIE KOLOM - WIGVORM POSITIONERING */
+                /* GENERATIE KOLOM - VERTICALE STACK VAN LIGGENDE CARDS */
                 .pedigree-generation-col {
                     display: flex;
                     flex-direction: column;
                     height: auto;
                     justify-content: flex-start;
                     min-width: 0;
-                    position: relative;
                 }
                 
-                /* WIGVORM: Elke generatie iets lager */
+                /* VERSCHILLENDE SPACING PER GENERATIE */
                 .pedigree-generation-col.gen0 {
-                    margin-top: 0px;
                     gap: 0;
                 }
                 
                 .pedigree-generation-col.gen1 {
-                    margin-top: 25px;  /* Ouders 25px lager */
                     gap: 12px;
                 }
                 
                 .pedigree-generation-col.gen2 {
-                    margin-top: 50px;  /* Grootouders 50px lager */
                     gap: 8px;
                 }
                 
                 .pedigree-generation-col.gen3 {
-                    margin-top: 75px;  /* Overgrootouders 75px lager */
-                    gap: 4px;
-                }
-                
-                /* VERBINDINGSLIJNEN voor de wigvorm */
-                .pedigree-generation-col:not(:first-child)::before {
-                    content: '';
-                    position: absolute;
-                    left: -12px;
-                    top: 50%;
-                    width: 12px;
-                    height: 1px;
-                    background: #adb5bd;
-                    opacity: 0.5;
-                    z-index: 1;
+                    gap: 4px;  /* Kleinere spacing voor overgrootouders */
                 }
                 
                 /* BASIS LIGGENDE CARDS */
@@ -714,30 +693,28 @@ class StamboomManager extends BaseModule {
                     margin: 0 !important;
                     padding: 0 !important;
                     flex-shrink: 0;
-                    position: relative;
-                    z-index: 2;
                 }
                 
                 /* ZELFDE BREEDTE VOOR ALLE GENERATIES - ANDERE HOOGTE VOOR OVERGROOTOUDERS */
                 .pedigree-card-compact.horizontal.gen0,
                 .pedigree-card-compact.horizontal.gen1,
                 .pedigree-card-compact.horizontal.gen2 {
-                    width: 150px !important;
-                    height: 95px !important;
+                    width: 160px !important;
+                    height: 100px !important;
                 }
                 
                 /* OVERGROOTOUDERS: 60% HOOGTE VAN NORMALE CARDS */
                 .pedigree-card-compact.horizontal.gen3 {
-                    width: 150px !important;
-                    height: 57px !important;  /* 60% van 95px */
+                    width: 160px !important;
+                    height: 60px !important;  /* 60% van 100px */
                 }
                 
                 /* Hoofdhond extra styling */
                 .pedigree-card-compact.horizontal.main-dog-compact {
                     border: 2px solid #0d6efd !important;
                     background: #f0f7ff;
-                    width: 160px !important;
-                    height: 105px !important;
+                    width: 170px !important;
+                    height: 110px !important;
                 }
                 
                 /* Geslacht kleuren */
@@ -752,7 +729,7 @@ class StamboomManager extends BaseModule {
                 .pedigree-card-compact.horizontal:hover {
                     box-shadow: 0 2px 5px rgba(0,0,0,0.12);
                     transform: translateY(-1px);
-                    z-index: 3;
+                    z-index: 1;
                     position: relative;
                 }
                 
@@ -982,11 +959,9 @@ class StamboomManager extends BaseModule {
                     border-radius: 4px;
                     white-space: nowrap;
                     flex-shrink: 0;
-                    position: relative;
-                    z-index: 2;
                 }
                 
-                /* MOBIEL/TELEFOON AANPASSINGEN - WIGVORM LAYOUT */
+                /* MOBIEL/TELEFOON AANPASSINGEN - HORIZONTALE SCROLL CONTAINER */
                 @media (max-width: 767px) {
                     /* AGRESSIEVE RESET - OVERSCHRIJF ALLE BOOTSTRAP STYLES */
                     #pedigreeModal.modal.fade .modal-dialog.modal-fullscreen {
@@ -1049,7 +1024,7 @@ class StamboomManager extends BaseModule {
                         width: auto !important;
                         min-width: max-content !important;
                         height: auto !important;
-                        padding: 20px 15px 50px 15px !important; /* Meer padding onderaan voor de wigvorm */
+                        padding: 10px 15px !important;
                         gap: 15px !important;
                         margin: 0 !important;
                         align-items: flex-start !important;
@@ -1063,64 +1038,45 @@ class StamboomManager extends BaseModule {
                         width: auto !important;
                         flex-shrink: 0 !important;
                         padding: 0 !important;
-                        position: relative;
                     }
                     
-                    /* WIGVORM POSITIONERING OP MOBIEL */
                     .pedigree-generation-col.gen0 {
-                        margin-top: 0px !important;
                         gap: 0 !important;
                     }
                     
                     .pedigree-generation-col.gen1 {
-                        margin-top: 30px !important;  /* Ouders 30px lager */
                         gap: 10px !important;
                     }
                     
                     .pedigree-generation-col.gen2 {
-                        margin-top: 60px !important;  /* Grootouders 60px lager */
                         gap: 6px !important;
                     }
                     
                     .pedigree-generation-col.gen3 {
-                        margin-top: 90px !important;  /* Overgrootouders 90px lager */
                         gap: 3px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen0,
                     .pedigree-card-compact.horizontal.gen1,
                     .pedigree-card-compact.horizontal.gen2 {
-                        width: 140px !important;
-                        height: 90px !important;
+                        width: 150px !important;
+                        height: 95px !important;
                         margin: 0 !important;
                         flex-shrink: 0 !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen3 {
-                        width: 140px !important;
-                        height: 54px !important;  /* 60% van 90px */
+                        width: 150px !important;
+                        height: 57px !important;  /* 60% van 95px */
                         margin: 0 !important;
                         flex-shrink: 0 !important;
                     }
                     
                     .pedigree-card-compact.horizontal.main-dog-compact {
-                        width: 150px !important;
-                        height: 100px !important;
+                        width: 160px !important;
+                        height: 105px !important;
                         margin: 0 !important;
                         flex-shrink: 0 !important;
-                    }
-                    
-                    /* Verbindingslijnen voor wigvorm op mobiel */
-                    .pedigree-generation-col:not(:first-child)::before {
-                        content: '';
-                        position: absolute;
-                        left: -10px;
-                        top: 50%;
-                        width: 10px;
-                        height: 1px;
-                        background: #adb5bd;
-                        opacity: 0.5;
-                        z-index: 1;
                     }
                     
                     /* Mobiel tekstgrootte */
@@ -1177,37 +1133,25 @@ class StamboomManager extends BaseModule {
                     }
                     
                     .pedigree-grid-compact {
-                        padding: 15px 12px 40px 12px !important;
+                        padding: 8px 12px !important;
                         gap: 12px !important;
-                    }
-                    
-                    .pedigree-generation-col.gen1 {
-                        margin-top: 25px !important;
-                    }
-                    
-                    .pedigree-generation-col.gen2 {
-                        margin-top: 50px !important;
-                    }
-                    
-                    .pedigree-generation-col.gen3 {
-                        margin-top: 75px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen0,
                     .pedigree-card-compact.horizontal.gen1,
                     .pedigree-card-compact.horizontal.gen2 {
-                        width: 130px !important;
-                        height: 85px !important;
+                        width: 140px !important;
+                        height: 90px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen3 {
-                        width: 130px !important;
-                        height: 51px !important;  /* 60% van 85px */
+                        width: 140px !important;
+                        height: 54px !important;  /* 60% van 90px */
                     }
                     
                     .pedigree-card-compact.horizontal.main-dog-compact {
-                        width: 140px !important;
-                        height: 95px !important;
+                        width: 150px !important;
+                        height: 100px !important;
                     }
                     
                     .generation-label {
@@ -1216,7 +1160,7 @@ class StamboomManager extends BaseModule {
                     }
                 }
                 
-                /* DESKTOP STYLES (behouden originele layout) */
+                /* DESKTOP STYLES (behouden) */
                 @media (min-width: 768px) {
                     #pedigreeModal.modal.fade .modal-dialog.modal-fullscreen {
                         width: 100vw !important;
@@ -1269,7 +1213,6 @@ class StamboomManager extends BaseModule {
                         display: flex;
                     }
                     
-                    /* Terug naar originele grid (geen wigvorm) voor desktop */
                     .pedigree-grid-compact {
                         flex-direction: row;
                         height: 100%;
@@ -1287,14 +1230,6 @@ class StamboomManager extends BaseModule {
                         height: 100%;
                         justify-content: center;
                         min-width: 0;
-                    }
-                    
-                    /* Geen margin-top voor desktop (geen wigvorm) */
-                    .pedigree-generation-col.gen0,
-                    .pedigree-generation-col.gen1,
-                    .pedigree-generation-col.gen2,
-                    .pedigree-generation-col.gen3 {
-                        margin-top: 0 !important;
                     }
                     
                     .pedigree-generation-col.gen0 {
@@ -1637,6 +1572,22 @@ class StamboomManager extends BaseModule {
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                }
+                
+                /* VISUELE VERBINDINGEN */
+                .pedigree-generation-col {
+                    position: relative;
+                }
+                
+                .pedigree-generation-col:not(:first-child)::before {
+                    content: '';
+                    position: absolute;
+                    left: -10px;
+                    top: 50%;
+                    width: 10px;
+                    height: 1px;
+                    background: #adb5bd;
+                    opacity: 0.5;
                 }
                 
                 /* Overgrootouder styling - subtiele opacity */
