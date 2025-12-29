@@ -1106,114 +1106,197 @@ class StamboomManager extends BaseModule {
                     }
                 }
                 
+                /* MOBIEL/TELEFOON AANPASSINGEN - ZELFDE LAYOUT MET HORIZONTALE SCROLL */
                 @media (max-width: 767px) {
                     .pedigree-container-compact {
                         height: calc(100vh - 60px) !important;
-                    }
-                    
-                    /* Op mobiel: verander naar verticale layout */
-                    .pedigree-container-compact {
-                        overflow-x: hidden !important;
-                        overflow-y: auto !important;
-                        align-items: flex-start;
+                        overflow-x: auto !important;
+                        overflow-y: hidden !important;
+                        align-items: center !important;
+                        padding: 0 !important;
                     }
                     
                     .pedigree-grid-compact {
-                        flex-direction: column !important;
-                        width: 100% !important;
-                        min-width: 100% !important;
-                        padding: 10px !important;
-                        gap: 15px;
-                        height: auto;
+                        flex-direction: row !important;
+                        flex-wrap: nowrap !important;
+                        width: auto !important;
+                        min-width: max-content !important;
+                        height: 100% !important;
+                        padding: 15px !important;
+                        gap: 20px !important;
+                        margin: 0 !important;
+                        align-items: center !important;
                     }
                     
                     .pedigree-generation-col {
-                        width: 100% !important;
-                        min-width: 100% !important;
-                        flex-direction: row !important;
-                        flex-wrap: wrap;
-                        gap: 10px;
-                        justify-content: center;
-                        height: auto;
+                        flex-direction: column !important;
+                        height: 100% !important;
+                        justify-content: center !important;
+                        min-width: auto !important;
+                        width: auto !important;
+                        flex-shrink: 0 !important;
+                        padding: 10px 0 !important;
+                    }
+                    
+                    .pedigree-generation-col.gen0 {
+                        gap: 5px !important;
                     }
                     
                     .pedigree-generation-col.gen1 {
-                        gap: 10px;
+                        gap: 12px !important;
                     }
                     
                     .pedigree-generation-col.gen2 {
-                        gap: 8px;
+                        gap: 8px !important;
                     }
                     
                     .pedigree-generation-col.gen3 {
-                        gap: 5px;
+                        gap: 4px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen0,
                     .pedigree-card-compact.horizontal.gen1,
                     .pedigree-card-compact.horizontal.gen2 {
-                        width: 48% !important;
-                        max-width: 180px !important;
-                        height: 100px !important;
+                        width: 150px !important;
+                        height: 95px !important;
                         margin: 0 !important;
+                        flex-shrink: 0 !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen3 {
-                        width: 48% !important;
-                        max-width: 180px !important;
-                        height: 60px !important;
+                        width: 150px !important;
+                        height: 57px !important;  /* 60% van 95px */
                         margin: 0 !important;
+                        flex-shrink: 0 !important;
                     }
                     
                     .pedigree-card-compact.horizontal.main-dog-compact {
-                        width: 90% !important;
-                        max-width: 190px !important;
-                        height: 110px !important;
-                        margin: 0 auto !important;
+                        width: 160px !important;
+                        height: 105px !important;
+                        margin: 0 !important;
+                        flex-shrink: 0 !important;
+                    }
+                    
+                    /* Mobiel tekstgrootte */
+                    .pedigree-card-compact.horizontal.gen0 .dog-name-compact,
+                    .pedigree-card-compact.horizontal.gen1 .dog-name-compact,
+                    .pedigree-card-compact.horizontal.gen2 .dog-name-compact {
+                        font-size: 0.75rem !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen0 .dog-kennel-compact,
+                    .pedigree-card-compact.horizontal.gen1 .dog-kennel-compact,
+                    .pedigree-card-compact.horizontal.gen2 .dog-kennel-compact,
+                    .pedigree-card-compact.horizontal.gen0 .dog-pedigree-compact,
+                    .pedigree-card-compact.horizontal.gen1 .dog-pedigree-compact,
+                    .pedigree-card-compact.horizontal.gen2 .dog-pedigree-compact,
+                    .pedigree-card-compact.horizontal.gen0 .dog-breed-compact,
+                    .pedigree-card-compact.horizontal.gen1 .dog-breed-compact,
+                    .pedigree-card-compact.horizontal.gen2 .dog-breed-compact {
+                        font-size: 0.65rem !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen0 .click-hint-compact,
+                    .pedigree-card-compact.horizontal.gen1 .click-hint-compact,
+                    .pedigree-card-compact.horizontal.gen2 .click-hint-compact {
+                        font-size: 0.55rem !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen3 .dog-name-compact {
+                        font-size: 0.6rem !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen3 .dog-kennel-compact,
+                    .pedigree-card-compact.horizontal.gen3 .dog-pedigree-compact,
+                    .pedigree-card-compact.horizontal.gen3 .dog-breed-compact {
+                        font-size: 0.52rem !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen3 .click-hint-compact {
+                        font-size: 0.44rem !important;
+                    }
+                    
+                    .generation-label {
+                        font-size: 0.7rem !important;
+                        padding: 3px 6px !important;
+                        margin-bottom: 5px !important;
+                        white-space: nowrap !important;
                     }
                 }
                 
                 @media (max-width: 480px) {
                     .pedigree-container-compact {
                         height: calc(100vh - 60px) !important;
+                        overflow-x: auto !important;
+                        overflow-y: hidden !important;
+                        align-items: center !important;
+                        padding: 0 !important;
                     }
                     
                     .pedigree-grid-compact {
-                        padding: 8px !important;
-                        gap: 12px;
-                    }
-                    
-                    .pedigree-generation-col {
-                        gap: 6px;
-                    }
-                    
-                    .pedigree-generation-col.gen1 {
-                        gap: 8px;
-                    }
-                    
-                    .pedigree-generation-col.gen2 {
-                        gap: 6px;
-                    }
-                    
-                    .pedigree-generation-col.gen3 {
-                        gap: 4px;
+                        padding: 12px !important;
+                        gap: 15px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen0,
                     .pedigree-card-compact.horizontal.gen1,
                     .pedigree-card-compact.horizontal.gen2 {
-                        width: 48% !important;
+                        width: 140px !important;
                         height: 90px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen3 {
-                        width: 48% !important;
+                        width: 140px !important;
                         height: 54px !important;  /* 60% van 90px */
                     }
                     
                     .pedigree-card-compact.horizontal.main-dog-compact {
-                        width: 95% !important;
+                        width: 150px !important;
                         height: 100px !important;
+                    }
+                    
+                    /* Kleinere tekst voor heel kleine schermen */
+                    .pedigree-card-compact.horizontal.gen0 .dog-name-compact,
+                    .pedigree-card-compact.horizontal.gen1 .dog-name-compact,
+                    .pedigree-card-compact.horizontal.gen2 .dog-name-compact {
+                        font-size: 0.7rem !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen0 .dog-kennel-compact,
+                    .pedigree-card-compact.horizontal.gen1 .dog-kennel-compact,
+                    .pedigree-card-compact.horizontal.gen2 .dog-kennel-compact,
+                    .pedigree-card-compact.horizontal.gen0 .dog-pedigree-compact,
+                    .pedigree-card-compact.horizontal.gen1 .dog-pedigree-compact,
+                    .pedigree-card-compact.horizontal.gen2 .dog-pedigree-compact,
+                    .pedigree-card-compact.horizontal.gen0 .dog-breed-compact,
+                    .pedigree-card-compact.horizontal.gen1 .dog-breed-compact,
+                    .pedigree-card-compact.horizontal.gen2 .dog-breed-compact {
+                        font-size: 0.6rem !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen0 .click-hint-compact,
+                    .pedigree-card-compact.horizontal.gen1 .click-hint-compact,
+                    .pedigree-card-compact.horizontal.gen2 .click-hint-compact {
+                        font-size: 0.5rem !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen3 .dog-name-compact {
+                        font-size: 0.56rem !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen3 .dog-kennel-compact,
+                    .pedigree-card-compact.horizontal.gen3 .dog-pedigree-compact,
+                    .pedigree-card-compact.horizontal.gen3 .dog-breed-compact {
+                        font-size: 0.48rem !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen3 .click-hint-compact {
+                        font-size: 0.4rem !important;
+                    }
+                    
+                    .generation-label {
+                        font-size: 0.65rem !important;
+                        padding: 2px 5px !important;
                     }
                 }
                 
@@ -1638,6 +1721,8 @@ class StamboomManager extends BaseModule {
     hideProgress() {
         if (typeof super.hideProgress === 'function') {
             super.hideProgress();
+        } else {
+            console.log('Progress hidden');
         }
     }
     
