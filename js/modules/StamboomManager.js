@@ -13,7 +13,7 @@ class StamboomManager extends BaseModule {
         this.allDogs = [];
         this.translations = {
             nl: {
-                pedigreeTitle: "StamPboom van {name}",
+                pedigreeTitle: "Stamboom van {name}",
                 pedigree4Gen: "4-generatie stamboom",
                 generatingPedigree: "Stamboom genereren...",
                 close: "Sluiten",
