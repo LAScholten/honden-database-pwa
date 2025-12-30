@@ -8,6 +8,7 @@ class LitterManager {
         console.log('LitterManager constructor aangeroepen');
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';
         this.lastBreeds = JSON.parse(localStorage.getItem('lastBreeds') || '[]');
+        this.lastCoatColors = JSON.parse(localStorage.getItem('lastCoatColors') || '[]'); // NIEUW: recente vachtkleuren
         this.allDogs = []; // Voor autocomplete van ouders
         this.currentLitterDogs = []; // Houdt de ingevoerde honden van het huidige nest bij
         this.translations = {
@@ -31,6 +32,7 @@ class LitterManager {
                 father: "Vader *",
                 mother: "Moeder *",
                 coatColor: "Vachtkleur",
+                recentCoatColors: "Recente vachtkleuren:", // NIEUW
                 birthDate: "Geboortedatum",
                 deathDate: "Overlijdensdatum",
                 gender: "Geslacht",
@@ -144,6 +146,7 @@ class LitterManager {
                 father: "Father *",
                 mother: "Mother *",
                 coatColor: "Coat Color",
+                recentCoatColors: "Recent coat colors:", // NIEUW
                 birthDate: "Birth date",
                 deathDate: "Death date",
                 gender: "Gender",
@@ -257,6 +260,7 @@ class LitterManager {
                 father: "Vater *",
                 mother: "Mutter *",
                 coatColor: "Fellfarbe",
+                recentCoatColors: "Kürzliche Fellfarben:", // NIEUW
                 birthDate: "Geburtsdatum",
                 deathDate: "Sterbedatum",
                 gender: "Geschlecht",
@@ -316,7 +320,7 @@ class LitterManager {
                 
                 // Validierung
                 dateFormatError: "Datum muss im Format TT-MM-JJJJ sein",
-                deathBeforeBirthError: "Sterbedatum kann nicht vor dem Geburtsdatum liegen",
+                deathBeforeBirthError: "Sterbedatum kann niet vor dem Geburtsdatum liegen",
                 
                 // Zugangskontrolle Popup Texte
                 insufficientPermissions: "Unzureichende Berechtigungen",
@@ -332,7 +336,7 @@ class LitterManager {
                 // Meldungen
                 adminOnly: "Nur Administratoren können Würfe hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer, Rasse, Vater und Mutter sind Pflichtfelder",
-                savingDog: "Hund wird gespeichert...",
+                savingDog: "Hund wordt gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
                 dogUpdated: "Hund erfolgreich aktualisiert!",
                 dogDeleted: "Hund erfolgreich gelöscht!",
@@ -550,6 +554,39 @@ class LitterManager {
                     .dog-item span {
                         margin-right: 10px;
                     }
+                    
+                    /* Mobiele layout voor vachtkleur en knoppen */
+                    .coat-color-container {
+                        flex-direction: column;
+                    }
+                    
+                    .coat-color-input-container {
+                        width: 100% !important;
+                        margin-bottom: 10px;
+                    }
+                    
+                    .coat-color-buttons-container {
+                        width: 100% !important;
+                    }
+                    
+                    .recent-coat-colors-label {
+                        font-size: 0.8em !important;
+                    }
+                    
+                    .recent-coat-color-btn {
+                        font-size: 0.75em !important;
+                        padding: 3px 6px !important;
+                    }
+                    
+                    /* Mobiele layout voor opslaan knoppen */
+                    .save-buttons-container {
+                        flex-direction: column;
+                        gap: 10px;
+                    }
+                    
+                    .save-buttons-container .btn {
+                        width: 100%;
+                    }
                 }
                 
                 /* Desktop styling */
@@ -592,6 +629,33 @@ class LitterManager {
                     
                     .dog-item span {
                         margin-right: 15px;
+                    }
+                    
+                    /* Desktop layout voor vachtkleur en knoppen */
+                    .coat-color-container {
+                        flex-direction: row;
+                        align-items: center;
+                    }
+                    
+                    .coat-color-input-container {
+                        width: auto;
+                        flex: 1;
+                        margin-right: 20px;
+                    }
+                    
+                    .coat-color-buttons-container {
+                        width: auto;
+                    }
+                    
+                    /* Desktop layout voor opslaan knoppen */
+                    .save-buttons-container {
+                        flex-direction: row;
+                        justify-content: flex-end;
+                        gap: 10px;
+                    }
+                    
+                    .save-buttons-container .btn {
+                        width: auto;
                     }
                 }
                 
@@ -650,27 +714,21 @@ class LitterManager {
                     position: relative;
                 }
                 
-                /* Breed container voor 1-lijn layout - nu altijd op 1 regel */
+                /* Breed container voor onder het invulveld */
                 .breed-container {
                     display: flex;
-                    align-items: center;
-                    gap: 10px;
-                    flex-wrap: nowrap;
-                    width: 100%;
+                    flex-direction: column;
+                    gap: 8px;
                 }
                 
                 .breed-input-container {
-                    flex: 0 0 220px;
-                    min-width: 220px;
+                    width: 100%;
                 }
                 
                 .recent-breeds-container {
                     display: flex;
                     align-items: center;
-                    gap: 5px;
-                    flex: 1;
-                    min-width: 0;
-                    overflow: visible;
+                    gap: 8px;
                 }
                 
                 .recent-breeds-label {
@@ -678,44 +736,69 @@ class LitterManager {
                     color: #6c757d;
                     white-space: nowrap;
                     margin-bottom: 0;
-                    flex-shrink: 0;
                 }
                 
                 .recent-breeds-buttons {
                     display: flex;
-                    flex-wrap: nowrap;
+                    flex-wrap: wrap;
                     gap: 4px;
-                    overflow-x: auto;
-                    overflow-y: hidden;
-                    padding-bottom: 2px;
-                    flex: 1;
-                    min-width: 0;
                 }
                 
                 .recent-breed-btn {
                     white-space: nowrap;
-                    flex-shrink: 0;
                     font-size: 0.8em;
                     padding: 4px 8px;
                 }
                 
-                /* Custom scrollbar voor recent breed buttons */
-                .recent-breeds-buttons::-webkit-scrollbar {
-                    height: 4px;
+                /* Vachtkleur container */
+                .coat-color-container {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                    margin-top: 10px;
                 }
                 
-                .recent-breeds-buttons::-webkit-scrollbar-track {
-                    background: #f1f1f1;
-                    border-radius: 2px;
+                .coat-color-input-container {
+                    flex: 1;
+                    min-width: 200px;
                 }
                 
-                .recent-breeds-buttons::-webkit-scrollbar-thumb {
-                    background: #c1c1c1;
-                    border-radius: 2px;
+                .coat-color-buttons-container {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 5px;
+                    min-width: 200px;
                 }
                 
-                .recent-breeds-buttons::-webkit-scrollbar-thumb:hover {
-                    background: #a8a8a8;
+                .recent-coat-colors-container {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                
+                .recent-coat-colors-label {
+                    font-size: 0.875em;
+                    color: #6c757d;
+                    white-space: nowrap;
+                    margin-bottom: 0;
+                }
+                
+                .recent-coat-colors-buttons {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 4px;
+                }
+                
+                .recent-coat-color-btn {
+                    white-space: nowrap;
+                    font-size: 0.8em;
+                    padding: 4px 8px;
+                }
+                
+                /* Opslaan knoppen container */
+                .save-buttons-container {
+                    display: flex;
+                    margin-top: 20px;
                 }
                 
                 /* Datum input styling */
@@ -831,7 +914,7 @@ class LitterManager {
         const birthDateValue = formatDateForDisplay(data.geboortedatum);
         const deathDateValue = formatDateForDisplay(data.overlijdensdatum);
         
-        // Genereer recente rassen knoppen
+        // Genereer recente rassen knoppen (onder het invulveld)
         let recentBreedsHTML = '';
         if (this.lastBreeds && this.lastBreeds.length > 0) {
             recentBreedsHTML = `
@@ -847,6 +930,27 @@ class LitterManager {
                 `;
             });
             recentBreedsHTML += `
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Genereer recente vachtkleur knoppen (onder het vachtkleur veld)
+        let recentCoatColorsHTML = '';
+        if (this.lastCoatColors && this.lastCoatColors.length > 0) {
+            recentCoatColorsHTML = `
+                <div class="recent-coat-colors-container">
+                    <div class="recent-coat-colors-label">${t('recentCoatColors')}</div>
+                    <div class="recent-coat-colors-buttons">
+            `;
+            this.lastCoatColors.slice(0, 4).forEach(color => {
+                recentCoatColorsHTML += `
+                    <button type="button" class="btn btn-sm btn-outline-info recent-coat-color-btn" data-coat-color="${color}">
+                        ${color}
+                    </button>
+                `;
+            });
+            recentCoatColorsHTML += `
                     </div>
                 </div>
             `;
@@ -967,12 +1071,19 @@ class LitterManager {
                         </div>
                     </div>
                     
-                    <!-- NIEUW: Vachtkleur veld -->
+                    <!-- Vachtkleur veld met recente vachtkleuren -->
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-12">
                             <div class="mb-3">
                                 <label for="coatColor" class="form-label">${t('coatColor')}</label>
-                                <input type="text" class="form-control" id="coatColor" value="${data.vachtkleur || ''}">
+                                <div class="coat-color-container">
+                                    <div class="coat-color-input-container">
+                                        <input type="text" class="form-control" id="coatColor" value="${data.vachtkleur || ''}">
+                                    </div>
+                                    <div class="coat-color-buttons-container">
+                                        ${recentCoatColorsHTML}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1125,9 +1236,12 @@ class LitterManager {
                     ${t('requiredFields')}
                 </div>
                 
-                <!-- Opslaan knop -->
-                <div class="text-end">
+                <!-- Opslaan knoppen -->
+                <div class="save-buttons-container">
                     <button type="button" class="btn btn-primary" id="saveDogBtn">
+                        ${t('saveDog')}
+                    </button>
+                    <button type="button" class="btn btn-primary" id="saveDogBtn2">
                         ${t('saveDog')}
                     </button>
                 </div>
@@ -1214,26 +1328,27 @@ class LitterManager {
         // Laad honden voor autocomplete
         this.loadAllDogs();
         
-        // Event listeners voor formulier
+        // Event listeners voor beide opslaan knoppen
         const saveBtn = document.getElementById('saveDogBtn');
+        const saveBtn2 = document.getElementById('saveDogBtn2');
+        
+        const saveHandler = () => {
+            console.log('LitterManager: Save button geklikt');
+            this.saveDog();
+        };
+        
         if (saveBtn) {
-            console.log('LitterManager: Save button gevonden');
-            saveBtn.addEventListener('click', () => {
-                console.log('LitterManager: Save button geklikt');
-                this.saveDog();
-            });
+            console.log('LitterManager: Save button 1 gevonden');
+            saveBtn.addEventListener('click', saveHandler);
         } else {
-            console.error('LitterManager: Save button niet gevonden!');
-            // Probeer opnieuw na korte vertraging
-            setTimeout(() => {
-                const retryBtn = document.getElementById('saveDogBtn');
-                if (retryBtn) {
-                    console.log('LitterManager: Save button gevonden na retry');
-                    retryBtn.addEventListener('click', () => {
-                        this.saveDog();
-                    });
-                }
-            }, 500);
+            console.error('LitterManager: Save button 1 niet gevonden!');
+        }
+        
+        if (saveBtn2) {
+            console.log('LitterManager: Save button 2 gevonden');
+            saveBtn2.addEventListener('click', saveHandler);
+        } else {
+            console.error('LitterManager: Save button 2 niet gevonden!');
         }
         
         // Eyes dropdown handler
@@ -1270,6 +1385,16 @@ class LitterManager {
                 if (breedInput) {
                     breedInput.value = breed;
                     console.log('LitterManager: Ras geselecteerd:', breed);
+                }
+            }
+            
+            // Recente vachtkleur knoppen - Delegatie gebruiken
+            if (e.target.classList.contains('recent-coat-color-btn')) {
+                const coatColor = e.target.dataset.coatColor;
+                const coatColorInput = document.getElementById('coatColor');
+                if (coatColorInput) {
+                    coatColorInput.value = coatColor;
+                    console.log('LitterManager: Vachtkleur geselecteerd:', coatColor);
                 }
             }
         });
@@ -1538,6 +1663,32 @@ class LitterManager {
         
         localStorage.setItem('lastBreeds', JSON.stringify(this.lastBreeds));
         console.log('LitterManager: Ras toegevoegd aan recente rassen:', breedStr);
+    }
+    
+    addToLastCoatColors(coatColor) {
+        if (!coatColor || coatColor.trim() === '') return;
+        
+        const coatColorStr = coatColor.trim();
+        
+        // Initialiseer this.lastCoatColors als het niet bestaat
+        if (!this.lastCoatColors) {
+            this.lastCoatColors = [];
+        }
+        
+        const index = this.lastCoatColors.indexOf(coatColorStr);
+        
+        if (index > -1) {
+            this.lastCoatColors.splice(index, 1);
+        }
+        
+        this.lastCoatColors.unshift(coatColorStr);
+        
+        if (this.lastCoatColors.length > 4) {
+            this.lastCoatColors = this.lastCoatColors.slice(0, 4);
+        }
+        
+        localStorage.setItem('lastCoatColors', JSON.stringify(this.lastCoatColors));
+        console.log('LitterManager: Vachtkleur toegevoegd aan recente vachtkleuren:', coatColorStr);
     }
     
     async loadAllDogs() {
@@ -1812,6 +1963,11 @@ class LitterManager {
         
         // Voeg ras toe aan recente rassen
         this.addToLastBreeds(dogData.ras);
+        
+        // Voeg vachtkleur toe aan recente vachtkleuren
+        if (dogData.vachtkleur) {
+            this.addToLastCoatColors(dogData.vachtkleur);
+        }
         
         this.showProgress(this.t('savingDog'));
         
