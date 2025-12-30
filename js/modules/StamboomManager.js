@@ -996,7 +996,7 @@ class StamboomManager extends BaseModule {
                         flex: 1 1 auto;
                         overflow: hidden;
                         min-height: 0;
-                        max-height: 494px; /* 6.5 inch = 494px (6.5 * 96 DPI) */
+                        max-height: 800px; /*/
                     }
                     
                     .pedigree-mobile-wrapper {
@@ -1009,7 +1009,7 @@ class StamboomManager extends BaseModule {
                     
                     /* CONTAINER MET 6.5 INCH HOOGTE */
                     .pedigree-container-compact {
-                        height: 494px !important; /* 6.5 inch = 494px */
+                        height: 800px !important; /**/
                         overflow-x: auto !important; /* Horizontale scroll */
                         overflow-y: hidden !important; /* Geen verticale scroll */
                         padding: 10px !important;
