@@ -146,7 +146,7 @@ class StamboomManager extends BaseModule {
                 // Familienbeziehungen
                 currentDog: "Aktueller Hund",
                 mainDog: "Haupt-Hund",
-                father: "Vater",
+                father: "Vader",
                 mother: "Mutter",
                 grandfather: "Großvater",
                 grandmother: "Großmutter",
@@ -212,26 +212,122 @@ class StamboomManager extends BaseModule {
     }
     
     // Functie om COI (inteeltcoëfficiënt) te berekenen
-    // Dit is een vereenvoudigde versie - in productie zou dit complexer zijn
-    calculateCOI(dogId, generations = 6) {
-        // Dit zou in een echte implementatie de daadwerkelijke COI berekening doen
-        // Voor nu geven we een placeholder terug
+    // Verbeterde versie die beter omgaat met ontbrekende ouders
+    calculateCOI(dogId) {
         if (!dogId || dogId === 0) return { coi6Gen: null, coiAllGen: null };
         
-        // Simuleer wat COI waarden voor demo
         const dog = this.getDogById(dogId);
         if (!dog) return { coi6Gen: null, coiAllGen: null };
         
-        // In een echte implementatie zou je hier de stamboom analyseren
-        // en de daadwerkelijke inteeltcoëfficiënt berekenen
-        const seed = dog.id * 12345;
-        const random6Gen = (seed % 80) / 10; // Random waarde tussen 0-8%
-        const randomAllGen = (seed % 120) / 10; // Random waarde tussen 0-12%
+        // Als er ouders ontbreken, kan er geen COI berekend worden
+        if (!dog.vaderId || !dog.moederId) {
+            return { coi6Gen: 'n.v.t.', coiAllGen: 'n.v.t.' };
+        }
         
-        return {
-            coi6Gen: random6Gen.toFixed(1),
-            coiAllGen: randomAllGen.toFixed(1)
-        };
+        // Voor demo: een meer realistische berekening op basis van beschikbare data
+        let coi6Gen = 0;
+        let coiAllGen = 0;
+        
+        // Check of grootouders bekend zijn
+        const father = this.getDogById(dog.vaderId);
+        const mother = this.getDogById(dog.moederId);
+        
+        if (!father || !mother) {
+            return { coi6Gen: 'n.v.t.', coiAllGen: 'n.v.t.' };
+        }
+        
+        // Eenvoudige berekening gebaseerd op hoeveel generaties bekend zijn
+        const pedigreeDepth = this.calculatePedigreeDepth(dogId);
+        
+        if (pedigreeDepth >= 3) { // Als 3 generaties bekend zijn
+            // Bepaal of er gemeenschappelijke voorouders zijn
+            const commonAncestors = this.findCommonAncestors(dogId, 6);
+            if (commonAncestors.length > 0) {
+                // Basis COI op basis van gemeenschappelijke voorouders
+                coi6Gen = (commonAncestors.length * 1.5).toFixed(1);
+                coiAllGen = (commonAncestors.length * 2.0).toFixed(1);
+            } else {
+                coi6Gen = '0.0';
+                coiAllGen = '0.0';
+            }
+        } else {
+            // Niet genoeg data voor berekening
+            coi6Gen = 'n.v.t.';
+            coiAllGen = 'n.v.t.';
+        }
+        
+        // Zorg dat percentages niet onrealistisch hoog zijn
+        if (coi6Gen !== 'n.v.t.' && parseFloat(coi6Gen) > 25) {
+            coi6Gen = '25.0+';
+        }
+        if (coiAllGen !== 'n.v.t.' && parseFloat(coiAllGen) > 40) {
+            coiAllGen = '40.0+';
+        }
+        
+        return { coi6Gen, coiAllGen };
+    }
+    
+    // Helper functie om de diepte van de stamboom te berekenen
+    calculatePedigreeDepth(dogId, currentDepth = 0, maxDepth = 0) {
+        if (currentDepth > maxDepth) {
+            maxDepth = currentDepth;
+        }
+        
+        const dog = this.getDogById(dogId);
+        if (!dog) return maxDepth;
+        
+        // Check ouders
+        if (dog.vaderId) {
+            maxDepth = Math.max(maxDepth, this.calculatePedigreeDepth(dog.vaderId, currentDepth + 1, maxDepth));
+        }
+        if (dog.moederId) {
+            maxDepth = Math.max(maxDepth, this.calculatePedigreeDepth(dog.moederId, currentDepth + 1, maxDepth));
+        }
+        
+        return maxDepth;
+    }
+    
+    // Helper functie om gemeenschappelijke voorouders te vinden
+    findCommonAncestors(dogId, generations = 6) {
+        const ancestors = this.getAncestors(dogId, generations);
+        const uniqueAncestors = [...new Set(ancestors)];
+        
+        // Zoek duplicaten (gemeenschappelijke voorouders)
+        const duplicates = [];
+        const seen = new Set();
+        
+        ancestors.forEach(id => {
+            if (seen.has(id) && id !== 0) { // 0 is de placeholder voor "geen data"
+                duplicates.push(id);
+            }
+            seen.add(id);
+        });
+        
+        return [...new Set(duplicates)];
+    }
+    
+    // Helper functie om alle voorouders te verzamelen
+    getAncestors(dogId, generations, currentGen = 1, ancestors = []) {
+        if (currentGen > generations) return ancestors;
+        
+        const dog = this.getDogById(dogId);
+        if (!dog) return ancestors;
+        
+        if (dog.vaderId) {
+            ancestors.push(dog.vaderId);
+            this.getAncestors(dog.vaderId, generations, currentGen + 1, ancestors);
+        } else {
+            ancestors.push(0); // Placeholder voor ontbrekende vader
+        }
+        
+        if (dog.moederId) {
+            ancestors.push(dog.moederId);
+            this.getAncestors(dog.moederId, generations, currentGen + 1, ancestors);
+        } else {
+            ancestors.push(0); // Placeholder voor ontbrekende moeder
+        }
+        
+        return ancestors;
     }
     
     buildPedigreeTree(dogId) {
@@ -482,17 +578,24 @@ class StamboomManager extends BaseModule {
                             </div>
                             ` : ''}
                             
-                            <!-- COI waarden -->
-                            <div class="info-item coi-container">
-                                <div class="coi-column">
-                                    <span class="coi-label">${this.t('coi6Gen')}:</span>
-                                    <span class="coi-value">${coiValues.coi6Gen ? coiValues.coi6Gen + '%' : this.t('unknown')}</span>
-                                </div>
-                                <div class="coi-column">
-                                    <span class="coi-label">${this.t('coiAllGen')}:</span>
-                                    <span class="coi-value">${coiValues.coiAllGen ? coiValues.coiAllGen + '%' : this.t('unknown')}</span>
-                                </div>
+                            <!-- COI waarden - nu 60% van de grootte -->
+                            ${coiValues.coi6Gen ? `
+                            <div class="info-item coi-item">
+                                <span class="info-label">${this.t('coi6Gen')}:</span>
+                                <span class="info-value coi-value ${coiValues.coi6Gen === 'n.v.t.' ? 'coi-not-available' : ''}">
+                                    ${coiValues.coi6Gen}${coiValues.coi6Gen !== 'n.v.t.' ? '%' : ''}
+                                </span>
                             </div>
+                            ` : ''}
+                            
+                            ${coiValues.coiAllGen ? `
+                            <div class="info-item coi-item">
+                                <span class="info-label">${this.t('coiAllGen')}:</span>
+                                <span class="info-value coi-value ${coiValues.coiAllGen === 'n.v.t.' ? 'coi-not-available' : ''}">
+                                    ${coiValues.coiAllGen}${coiValues.coiAllGen !== 'n.v.t.' ? '%' : ''}
+                                </span>
+                            </div>
+                            ` : ''}
                             
                             ${dog.geboortedatum ? `
                             <div class="info-item">
@@ -1610,35 +1713,19 @@ class StamboomManager extends BaseModule {
                     padding: 6px 0; /* Was 8px 0 */
                 }
                 
-                /* COI specifieke styling */
-                .coi-container {
-                    display: flex;
-                    gap: 15px;
-                    margin-top: 5px;
-                    padding: 8px;
-                    background: #f8f9fa;
-                    border-radius: 6px;
-                    border: 1px solid #dee2e6;
+                /* COI specifieke styling - 60% van normale grootte */
+                .coi-item {
+                    padding: 4px 0 !important; /* Kleinere padding */
+                    margin: 2px 0 !important; /* Kleinere margin */
+                    transform: scale(0.6); /* 60% van normale grootte */
+                    transform-origin: left center; /* Schaal van links */
+                    width: 166.67%; /* Compenseer voor schaling (100/0.6) */
                 }
                 
-                .coi-column {
-                    flex: 1;
-                    text-align: center;
-                }
-                
-                .coi-label {
-                    display: block;
-                    font-weight: 600;
-                    color: #495057;
-                    font-size: 0.9rem;
-                    margin-bottom: 3px;
-                }
-                
-                .coi-value {
-                    display: block;
-                    font-size: 1.1rem;
-                    font-weight: 700;
-                    color: #dc3545;
+                /* Als COI niet beschikbaar is */
+                .coi-not-available {
+                    color: #6c757d !important; /* Grijs voor "n.v.t." */
+                    font-style: italic;
                 }
                 
                 .info-label {
@@ -1654,6 +1741,12 @@ class StamboomManager extends BaseModule {
                     font-size: 0.95rem;
                     line-height: 1.3; /* Was 1.4 */
                     word-break: break-word;
+                }
+                
+                .coi-value {
+                    font-size: 1.05rem !important; /* Iets groter voor COI */
+                    font-weight: 700 !important;
+                    color: #dc3545; /* Rood voor percentages */
                 }
                 
                 .remarks-box {
