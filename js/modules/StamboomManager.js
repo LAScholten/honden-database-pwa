@@ -13,7 +13,7 @@ class StamboomManager extends BaseModule {
         this.allDogs = [];
         this.translations = {
             nl: {
-                pedigreeTitle: "StamPboom van {name}",
+                pedigreeTitle: "Stamboom van {name}",
                 pedigree4Gen: "4-generatie stamboom",
                 generatingPedigree: "Stamboom genereren...",
                 close: "Sluiten",
@@ -150,7 +150,7 @@ class StamboomManager extends BaseModule {
                 kennel: "Kennel",
                 pedigreeNumber: "Stammbaum-Nummer",
                 breed: "Rasse",
-                gender: "Geschlecht",
+                gender: "Geslacht",
                 birthDate: "Geboortedatum",
                 deathDate: "Sterbedatum",
                 coatColor: "Fellfarbe",
@@ -936,12 +936,12 @@ class StamboomManager extends BaseModule {
                     border-top: 1px dashed #dee2e6;
                 }
                 
-                /* Generation labels styling */
+                /* Generation labels styling - GELIJKE RUIMTE VOOR ALLE GENERATIES */
                 .generation-label {
                     font-weight: bold;
                     color: #495057;
                     text-align: center;
-                    margin-bottom: 8px;
+                    margin-bottom: 8px !important; /* Gelijk voor alle generaties */
                     font-size: 0.75rem;
                     background: #e9ecef;
                     padding: 4px 8px;
@@ -988,7 +988,7 @@ class StamboomManager extends BaseModule {
                         flex: 1 1 auto;
                         overflow: hidden;
                         min-height: 0;
-                        max-height: 640px;
+                        max-height: 600px;
                         border-radius: 0 0 12px 12px; /* Afgeronde onderhoeken */
                     }
                     
@@ -1003,7 +1003,7 @@ class StamboomManager extends BaseModule {
                     
                     /* CONTAINER HOOGTE */
                     .pedigree-container-compact {
-                        height: 640px !important;
+                        height: 600px !important;
                         overflow-x: auto !important; /* Horizontale scroll */
                         overflow-y: hidden !important; /* Geen verticale scroll */
                         padding: 10px !important;
@@ -1119,11 +1119,11 @@ class StamboomManager extends BaseModule {
                         margin-top: 4px !important; /* Vierde paar: 4px onder midden */
                     }
                     
-                    /* Generation labels */
+                    /* Generation labels - GELIJKE RUIMTE VOOR ALLE GENERATIES */
                     .pedigree-generation-col .generation-label {
                         font-size: 0.7rem !important;
                         padding: 3px 6px !important;
-                        margin-bottom: 8px !important;
+                        margin-bottom: 8px !important; /* Gelijk voor alle generaties */
                         white-space: nowrap !important;
                         width: 100%;
                         text-align: center;
@@ -1164,7 +1164,7 @@ class StamboomManager extends BaseModule {
                 /* Kleine mobiele schermen */
                 @media (max-width: 480px) {
                     .pedigree-container-compact {
-                        height: 640px !important; /* Blijft */
+                        height: 600px !important; /* Blijft */
                         padding: 8px !important;
                     }
                     
@@ -1207,6 +1207,7 @@ class StamboomManager extends BaseModule {
                     .generation-label {
                         font-size: 0.65rem !important;
                         padding: 2px 5px !important;
+                        margin-bottom: 8px !important; /* Gelijk voor alle generaties */
                     }
                 }
                 /* ============================================= */
@@ -1362,6 +1363,7 @@ class StamboomManager extends BaseModule {
                     .generation-label {
                         font-size: 0.8rem;
                         padding: 4px 8px;
+                        margin-bottom: 8px !important; /* Gelijk voor alle generaties */
                     }
                 }
                 
