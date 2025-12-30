@@ -13,7 +13,7 @@ class StamboomManager extends BaseModule {
         this.allDogs = [];
         this.translations = {
             nl: {
-                pedigreeTitle: "StamPboom van {name}",
+                pedigreeTitle: "Stamboom van {name}",
                 pedigree4Gen: "4-generatie stamboom",
                 generatingPedigree: "Stamboom genereren...",
                 close: "Sluiten",
@@ -1011,120 +1011,125 @@ class StamboomManager extends BaseModule {
                         background: #f8f9fa;
                     }
                     
-                    /* BELANGRIJK: Behoud horizontale layout zoals in afbeelding */
+                    /* VERTICALE CONTAINER MET HORIZONTALE SCROLL */
                     .pedigree-container-compact {
                         height: calc(100vh - 120px) !important;
-                        overflow-x: auto !important;
-                        overflow-y: auto !important;
+                        overflow-x: auto !important; /* Horizontale scroll */
+                        overflow-y: hidden !important; /* Geen verticale scroll */
                         padding: 10px !important;
                         -webkit-overflow-scrolling: touch;
                         display: flex;
-                        justify-content: flex-start;
-                        align-items: flex-start;
+                        flex-direction: column;
                     }
                     
-                    /* Horizontale grid - zoals in afbeelding */
+                    /* Horizontale grid - generaties naast elkaar */
                     .pedigree-grid-compact {
                         display: flex !important;
                         flex-direction: row !important;
                         flex-wrap: nowrap !important;
-                        height: auto !important;
+                        height: 100% !important;
                         min-width: max-content !important;
                         padding: 10px 15px !important;
                         gap: 15px !important;
                         margin: 0 !important;
-                        align-items: flex-start !important;
+                        align-items: stretch !important;
                         box-sizing: border-box !important;
                         width: auto !important;
                     }
                     
-                    /* Elke generatie kolom */
+                    /* Elke generatie kolom - centraal uitlijnen van cards */
                     .pedigree-generation-col {
                         display: flex !important;
                         flex-direction: column !important;
-                        height: auto !important;
+                        height: 100% !important;
                         flex-shrink: 0 !important;
                         padding: 0 !important;
                         margin: 0 !important;
+                        position: relative;
+                        justify-content: flex-start;
                     }
                     
-                    /* SPECIFIEKE AANPASSINGEN VOOR POSITIONERING OP MOBIEL */
-                    /* Generatie 0: Huidige hond - 15 lager (150px) */
+                    /* Generatie 0: Huidige hond - links in het midden */
                     .pedigree-generation-col.gen0 {
-                        padding-top: 150px !important; /* 150px */
+                        justify-content: center !important;
+                        align-items: flex-start !important;
+                        min-width: 170px !important;
+                        width: 170px !important;
                         gap: 0 !important;
-                        min-width: 200px !important; /* 1cm breder */
-                        width: 200px !important;
                     }
                     
-                    /* Generatie 1: Ouders - 7,5 lager (75px) */
+                    /* Generatie 1: Ouders - vader boven midden, moeder onder midden */
                     .pedigree-generation-col.gen1 {
-                        padding-top: 75px !important; /* 75px */
-                        gap: 12px !important;
-                        min-width: 200px !important; /* 1cm breder */
-                        width: 200px !important;
+                        justify-content: center !important;
+                        align-items: flex-start !important;
+                        min-width: 170px !important;
+                        width: 170px !important;
+                        gap: 24px !important; /* Ruimte tussen vader en moeder */
                     }
                     
-                    /* Generatie 2: Grootouders - 32 lager (32px) */
+                    /* Vader: 2px boven het midden */
+                    .pedigree-generation-col.gen1 .pedigree-card-compact.horizontal:nth-child(2) {
+                        margin-bottom: 24px !important; /* Ruimte voor moeder */
+                        align-self: flex-start !important;
+                    }
+                    
+                    /* Moeder: 2px onder het midden - komt automatisch door de gap */
+                    
+                    /* Generatie 2: Grootouders - 4 cards gestapeld */
                     .pedigree-generation-col.gen2 {
-                        padding-top: 32px !important; /* 32px */
+                        justify-content: flex-start !important;
+                        align-items: flex-start !important;
+                        min-width: 170px !important;
+                        width: 170px !important;
                         gap: 8px !important;
-                        min-width: 200px !important; /* 1cm breder */
-                        width: 200px !important;
                     }
                     
-                    /* Generatie 3: Overgrootouders - zelfde positie */
+                    /* Generatie 3: Overgrootouders - 8 cards gestapeld */
                     .pedigree-generation-col.gen3 {
-                        padding-top: 0 !important;
+                        justify-content: flex-start !important;
+                        align-items: flex-start !important;
+                        min-width: 170px !important;
+                        width: 170px !important;
                         gap: 4px !important;
-                        min-width: 200px !important; /* 1cm breder */
-                        width: 200px !important;
                     }
                     
-                    /* CARDS 1 CM BREEDER OP MOBIEL */
-                    .pedigree-card-compact.horizontal.gen0,
-                    .pedigree-card-compact.horizontal.gen1,
-                    .pedigree-card-compact.horizontal.gen2 {
-                        width: 200px !important; /* (200px) */
-                        height: 100px !important;
-                        margin: 0 !important;
-                        flex-shrink: 0 !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen3 {
-                        width: 200px !important; /* (200px) */
-                        height: 62px !important;  /* 62% van 100px */
-                        margin: 0 !important;
-                        flex-shrink: 0 !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.main-dog-compact {
-                        width: 210px !important; /* (210px) */
-                        height: 110px !important;
-                        margin: 0 !important;
-                        flex-shrink: 0 !important;
-                    }
-                    
-                    /* Generation label styling voor mobiel */
-                    .generation-label {
+                    /* Generation labels */
+                    .pedigree-generation-col .generation-label {
                         font-size: 0.7rem !important;
                         padding: 3px 6px !important;
                         margin-bottom: 8px !important;
                         white-space: nowrap !important;
                         width: 100%;
                         text-align: center;
-                        position: relative;
-                        top: 0;
-                        z-index: 2;
-                    }
-                    
-                    /* Zorg dat de generation labels niet mee verplaatst worden met de padding */
-                    .pedigree-generation-col .generation-label {
-                        margin-top: 0 !important;
                         position: static !important;
+                        margin-top: 0 !important;
                     }
                     
-                    /* Zorg dat de cards goed gestacked zijn binnen elke generatie kolom */
+                    /* CARDS 1 CM BREEDER OP MOBIEL */
+                    .pedigree-card-compact.horizontal.gen0,
+                    .pedigree-card-compact.horizontal.gen1,
+                    .pedigree-card-compact.horizontal.gen2 {
+                        width: 170px !important; /* 1cm breder (was 160px) */
+                        height: 100px !important;
+                        margin: 0 !important;
+                        flex-shrink: 0 !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen3 {
+                        width: 170px !important; /* 1cm breder (was 160px) */
+                        height: 60px !important;  /* 60% van 100px */
+                        margin: 0 !important;
+                        flex-shrink: 0 !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.main-dog-compact {
+                        width: 180px !important; /* 1cm breder (was 170px) */
+                        height: 110px !important;
+                        margin: 0 !important;
+                        flex-shrink: 0 !important;
+                    }
+                    
+                    /* Zorg dat alle cards in hun kolom blijven */
                     .pedigree-generation-col > * {
                         width: 100% !important;
                     }
@@ -1165,17 +1170,12 @@ class StamboomManager extends BaseModule {
                         width: 160px !important;
                     }
                     
-                    /* Aanpassen padding voor kleinere schermen */
-                    .pedigree-generation-col.gen0 {
-                        padding-top: 80px !important; /* 8cm = 80px */
-                    }
-                    
-                    .pedigree-generation-col.gen1 {
-                        padding-top: 60px !important; /* 6cm = 60px */
-                    }
-                    
-                    .pedigree-generation-col.gen2 {
-                        padding-top: 16px !important; /* 1.6cm = 16px */
+                    .pedigree-generation-col.gen0,
+                    .pedigree-generation-col.gen1,
+                    .pedigree-generation-col.gen2,
+                    .pedigree-generation-col.gen3 {
+                        min-width: 160px !important;
+                        width: 160px !important;
                     }
                     
                     .generation-label {
