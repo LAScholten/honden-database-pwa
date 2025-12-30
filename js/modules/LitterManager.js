@@ -503,6 +503,25 @@ class LitterManager {
                         padding: 3px 6px !important;
                     }
                     
+                    /* Vachtkleur container voor mobiel */
+                    .coat-color-container {
+                        gap: 8px !important;
+                    }
+                    
+                    .coat-color-input-container {
+                        flex: 0 0 180px !important;
+                        min-width: 180px !important;
+                    }
+                    
+                    .recent-coat-colors-label {
+                        font-size: 0.8em !important;
+                    }
+                    
+                    .recent-coat-color-btn {
+                        font-size: 0.75em !important;
+                        padding: 3px 6px !important;
+                    }
+                    
                     /* Geboortedatum input styling voor mobiel */
                     .date-input-wrapper {
                         position: relative;
@@ -555,33 +574,14 @@ class LitterManager {
                         margin-right: 10px;
                     }
                     
-                    /* Mobiele layout voor vachtkleur en opslaan knop */
-                    .coat-color-save-container {
+                    /* Mobiele layout voor opslaan knoppen */
+                    .save-buttons-container {
                         flex-direction: column;
+                        gap: 10px;
                     }
                     
-                    .coat-color-input-container {
-                        width: 100% !important;
-                        margin-bottom: 10px;
-                    }
-                    
-                    .coat-color-buttons-container {
-                        width: 100% !important;
-                        margin-bottom: 15px;
-                    }
-                    
-                    .recent-coat-colors-label {
-                        font-size: 0.8em !important;
-                    }
-                    
-                    .recent-coat-color-btn {
-                        font-size: 0.75em !important;
-                        padding: 3px 6px !important;
-                    }
-                    
-                    .coat-color-save-btn {
-                        width: 100% !important;
-                        margin-top: 10px;
+                    .save-buttons-container .btn {
+                        width: 100%;
                     }
                 }
                 
@@ -627,25 +627,15 @@ class LitterManager {
                         margin-right: 15px;
                     }
                     
-                    /* Desktop layout voor vachtkleur en opslaan knop */
-                    .coat-color-save-container {
+                    /* Desktop layout voor opslaan knoppen */
+                    .save-buttons-container {
                         flex-direction: row;
-                        align-items: flex-end;
+                        justify-content: flex-end;
+                        gap: 10px;
                     }
                     
-                    .coat-color-input-container {
-                        flex: 1;
-                        margin-right: 15px;
-                    }
-                    
-                    .coat-color-buttons-container {
-                        flex: 1;
-                        margin-right: 15px;
-                    }
-                    
-                    .coat-color-save-btn {
-                        width: auto !important;
-                        margin-top: 0;
+                    .save-buttons-container .btn {
+                        width: auto;
                     }
                 }
                 
@@ -740,23 +730,15 @@ class LitterManager {
                     padding: 4px 8px;
                 }
                 
-                /* Vachtkleur container met opslaan knop */
-                .coat-color-save-container {
+                /* Vachtkleur container voor onder het invulveld (zelfde stijl als ras) */
+                .coat-color-container {
                     display: flex;
-                    flex-wrap: wrap;
-                    gap: 10px;
-                    margin-top: 10px;
+                    flex-direction: column;
+                    gap: 8px;
                 }
                 
                 .coat-color-input-container {
-                    min-width: 200px;
-                }
-                
-                .coat-color-buttons-container {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 5px;
-                    min-width: 200px;
+                    width: 100%;
                 }
                 
                 .recent-coat-colors-container {
@@ -782,6 +764,12 @@ class LitterManager {
                     white-space: nowrap;
                     font-size: 0.8em;
                     padding: 4px 8px;
+                }
+                
+                /* Opslaan knoppen container */
+                .save-buttons-container {
+                    display: flex;
+                    margin-top: 20px;
                 }
                 
                 /* Datum input styling */
@@ -918,7 +906,7 @@ class LitterManager {
             `;
         }
         
-        // Genereer recente vachtkleur knoppen (onder het vachtkleur veld)
+        // Genereer recente vachtkleur knoppen (onder het vachtkleur veld, op dezelfde manier als ras)
         let recentCoatColorsHTML = '';
         if (this.lastCoatColors && this.lastCoatColors.length > 0) {
             recentCoatColorsHTML = `
@@ -1054,22 +1042,31 @@ class LitterManager {
                         </div>
                     </div>
                     
-                    <!-- Vachtkleur veld met recente vachtkleuren en opslaan knop -->
+                    <!-- Vachtkleur veld met recente vachtkleuren -->
                     <div class="row">
-                        <div class="col-12">
+                        <div class="col-12 col-md-6">
                             <div class="mb-3">
                                 <label for="coatColor" class="form-label">${t('coatColor')}</label>
-                                <div class="coat-color-save-container">
+                                <div class="coat-color-container">
                                     <div class="coat-color-input-container">
                                         <input type="text" class="form-control" id="coatColor" value="${data.vachtkleur || ''}">
                                     </div>
-                                    <div class="coat-color-buttons-container">
-                                        ${recentCoatColorsHTML}
-                                    </div>
-                                    <button type="button" class="btn btn-primary coat-color-save-btn" id="saveDogBtn2">
-                                        ${t('saveDog')}
-                                    </button>
+                                    ${recentCoatColorsHTML}
                                 </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <!-- Tweede opslaan knop naast vachtkleur op desktop, onder op mobiel -->
+                            <div class="mb-3 d-none d-md-block">
+                                <label class="form-label d-block" style="visibility: hidden;">${t('saveDog')}</label>
+                                <button type="button" class="btn btn-primary w-100" id="saveDogBtn2">
+                                    ${t('saveDog')}
+                                </button>
+                            </div>
+                            <div class="mb-3 d-md-none">
+                                <button type="button" class="btn btn-primary w-100" id="saveDogBtn2Mobile">
+                                    ${t('saveDog')}
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -1223,7 +1220,7 @@ class LitterManager {
                 </div>
                 
                 <!-- Opslaan knop onderaan -->
-                <div class="text-end">
+                <div class="save-buttons-container">
                     <button type="button" class="btn btn-primary" id="saveDogBtn">
                         ${t('saveDog')}
                     </button>
@@ -1311,9 +1308,10 @@ class LitterManager {
         // Laad honden voor autocomplete
         this.loadAllDogs();
         
-        // Event listeners voor beide opslaan knoppen
+        // Event listeners voor alle drie opslaan knoppen
         const saveBtn = document.getElementById('saveDogBtn');
         const saveBtn2 = document.getElementById('saveDogBtn2');
+        const saveBtn2Mobile = document.getElementById('saveDogBtn2Mobile');
         
         const saveHandler = () => {
             console.log('LitterManager: Save button geklikt');
@@ -1328,10 +1326,17 @@ class LitterManager {
         }
         
         if (saveBtn2) {
-            console.log('LitterManager: Save button 2 gevonden');
+            console.log('LitterManager: Save button 2 (desktop) gevonden');
             saveBtn2.addEventListener('click', saveHandler);
         } else {
-            console.error('LitterManager: Save button 2 niet gevonden!');
+            console.error('LitterManager: Save button 2 (desktop) niet gevonden!');
+        }
+        
+        if (saveBtn2Mobile) {
+            console.log('LitterManager: Save button 2 (mobile) gevonden');
+            saveBtn2Mobile.addEventListener('click', saveHandler);
+        } else {
+            console.error('LitterManager: Save button 2 (mobile) niet gevonden!');
         }
         
         // Eyes dropdown handler
