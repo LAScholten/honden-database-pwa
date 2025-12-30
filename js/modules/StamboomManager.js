@@ -129,7 +129,7 @@ class StamboomManager extends BaseModule {
             de: {
                 pedigreeTitle: "Ahnentafel von {name}",
                 pedigree4Gen: "4-Generationen Ahnentafel",
-                generatingPedigree: "Ahnentafel wordt generiert...",
+                generatingPedigree: "Ahnentafel wird generiert...",
                 close: "Schließen",
                 print: "Drucken",
                 noData: "Keine Daten",
@@ -175,7 +175,7 @@ class StamboomManager extends BaseModule {
                 // Labels
                 paternal: "Väterlich",
                 maternal: "Mütterlich",
-                clickForDetails: "Klicken voor Details",
+                clickForDetails: "Klicken für Details",
                 closePopup: "Schließen",
                 remarks: "Bemerkungen",
                 noRemarks: "Keine Bemerkungen",
@@ -1046,23 +1046,30 @@ class StamboomManager extends BaseModule {
                         flex-shrink: 0 !important;
                         padding: 0 !important;
                         margin: 0 !important;
-                        gap: 10px !important;
                     }
                     
-                    /* Specifieke spacing per generatie */
+                    /* SPECIFIEKE AANPASSINGEN VOOR POSITIONERING OP MOBIEL */
+                    /* Generatie 0: Huidige hond - 4cm lager (40px) */
                     .pedigree-generation-col.gen0 {
+                        padding-top: 40px !important; /* 4cm = 40px */
                         gap: 0 !important;
                     }
                     
+                    /* Generatie 1: Ouders - 3cm lager (30px) */
                     .pedigree-generation-col.gen1 {
+                        padding-top: 30px !important; /* 3cm = 30px */
                         gap: 12px !important;
                     }
                     
+                    /* Generatie 2: Grootouders - 0.8cm lager (8px) */
                     .pedigree-generation-col.gen2 {
+                        padding-top: 8px !important; /* 0.8cm = 8px */
                         gap: 8px !important;
                     }
                     
+                    /* Generatie 3: Overgrootouders - zelfde positie */
                     .pedigree-generation-col.gen3 {
+                        padding-top: 0 !important;
                         gap: 4px !important;
                     }
                     
@@ -1098,6 +1105,15 @@ class StamboomManager extends BaseModule {
                         white-space: nowrap !important;
                         width: 100%;
                         text-align: center;
+                        position: relative;
+                        top: 0;
+                        z-index: 2;
+                    }
+                    
+                    /* Zorg dat de generation labels niet mee verplaatst worden met de padding */
+                    .pedigree-generation-col .generation-label {
+                        margin-top: 0 !important;
+                        position: static !important;
                     }
                     
                     /* Zorg dat de cards goed gestacked zijn binnen elke generatie kolom */
@@ -1139,6 +1155,19 @@ class StamboomManager extends BaseModule {
                     .pedigree-generation-col {
                         min-width: 150px !important;
                         width: 150px !important;
+                    }
+                    
+                    /* Aanpassen padding voor kleinere schermen */
+                    .pedigree-generation-col.gen0 {
+                        padding-top: 40px !important; /* 4cm = 40px */
+                    }
+                    
+                    .pedigree-generation-col.gen1 {
+                        padding-top: 30px !important; /* 3cm = 30px */
+                    }
+                    
+                    .pedigree-generation-col.gen2 {
+                        padding-top: 8px !important; /* 0.8cm = 8px */
                     }
                     
                     .generation-label {
