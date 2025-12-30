@@ -11,8 +11,194 @@ class StamboomManager extends BaseModule {
         this.db = db;
         this.currentLang = currentLang;
         this.allDogs = [];
-        this.coiCache = new Map(); // Cache voor COI berekeningen
-        // ... (translaties blijven hetzelfde)
+        this.translations = {
+            nl: {
+                pedigreeTitle: "Stamboom van {name}",
+                pedigree4Gen: "4-generatie stamboom",
+                generatingPedigree: "Stamboom genereren...",
+                close: "Sluiten",
+                print: "Afdrukken",
+                noData: "Geen gegevens",
+                unknown: "Onbekend",
+                
+                // Familierelaties
+                currentDog: "Huidige hond",
+                mainDog: "Hoofdhond",
+                father: "Vader",
+                mother: "Moeder",
+                grandfather: "Grootvader",
+                grandmother: "Grootmoeder",
+                greatGrandfather: "Overgrootvader",
+                greatGrandmother: "Overgrootmoeder",
+                
+                // Hond gegevens
+                name: "Naam",
+                kennel: "Kennel",
+                pedigreeNumber: "Stamboomnummer",
+                breed: "Ras",
+                gender: "Geslacht",
+                birthDate: "Geboortedatum",
+                deathDate: "Overlijdensdatum",
+                coatColor: "Vachtkleur",
+                country: "Land",
+                zipCode: "Postcode",
+                
+                // Gezondheid
+                healthInfo: "Gezondheidsinformatie",
+                hipDysplasia: "Heupdysplasie",
+                elbowDysplasia: "Elleboogdysplasie",
+                patellaLuxation: "Patella Luxatie",
+                eyes: "Ogen",
+                dandyWalker: "Dandy Walker Malformation",
+                thyroid: "Schildklier",
+                eyesExplanation: "Verklaring ogen",
+                thyroidExplanation: "Toelichting schildklier",
+                
+                // COI
+                coi: "Inteeltcoëfficiënt",
+                coi6Gen: "COI 6 Gen",
+                coiAllGen: "COI All Gen",
+                
+                // Geslacht
+                male: "Reu",
+                female: "Teef",
+                
+                // Labels
+                paternal: "Paternaal",
+                maternal: "Maternaal",
+                clickForDetails: "Klik voor details",
+                closePopup: "Sluiten",
+                remarks: "Opmerkingen",
+                noRemarks: "Geen opmerkingen",
+                parents: "Ouders",
+                grandparents: "Grootouders",
+                greatGrandparents: "Overgrootouders"
+            },
+            en: {
+                pedigreeTitle: "Pedigree of {name}",
+                pedigree4Gen: "4-generation pedigree",
+                generatingPedigree: "Generating pedigree...",
+                close: "Close",
+                print: "Print",
+                noData: "No data",
+                unknown: "Unknown",
+                
+                // Family relations
+                currentDog: "Current Dog",
+                mainDog: "Main Dog",
+                father: "Father",
+                mother: "Mother",
+                grandfather: "Grandfather",
+                grandmother: "Grandmother",
+                greatGrandfather: "Great Grandfather",
+                greatGrandmother: "Great Grandmother",
+                
+                // Dog details
+                name: "Name",
+                kennel: "Kennel",
+                pedigreeNumber: "Pedigree number",
+                breed: "Breed",
+                gender: "Gender",
+                birthDate: "Birth date",
+                deathDate: "Death date",
+                coatColor: "Coat color",
+                country: "Country",
+                zipCode: "Zip code",
+                
+                // Health
+                healthInfo: "Health Information",
+                hipDysplasia: "Hip Dysplasia",
+                elbowDysplasia: "Elbow Dysplasia",
+                patellaLuxation: "Patella Luxation",
+                eyes: "Eyes",
+                dandyWalker: "Dandy Walker Malformation",
+                thyroid: "Thyroid",
+                eyesExplanation: "Eye explanation",
+                thyroidExplanation: "Thyroid explanation",
+                
+                // COI
+                coi: "Inbreeding Coefficient",
+                coi6Gen: "COI 6 Gen",
+                coiAllGen: "COI All Gen",
+                
+                // Gender
+                male: "Male",
+                female: "Female",
+                
+                // Labels
+                paternal: "Paternal",
+                maternal: "Maternaal",
+                clickForDetails: "Click for details",
+                closePopup: "Close",
+                remarks: "Remarks",
+                noRemarks: "No remarks",
+                parents: "Parents",
+                grandparents: "Grandparents",
+                greatGrandparents: "Great Grandparents"
+            },
+            de: {
+                pedigreeTitle: "Ahnentafel von {name}",
+                pedigree4Gen: "4-Generationen Ahnentafel",
+                generatingPedigree: "Ahnentafel wird generiert...",
+                close: "Schließen",
+                print: "Drucken",
+                noData: "Keine Daten",
+                unknown: "Unbekannt",
+                
+                // Familienbeziehungen
+                currentDog: "Aktueller Hund",
+                mainDog: "Haupt-Hund",
+                father: "Vater",
+                mother: "Mutter",
+                grandfather: "Großvater",
+                grandmother: "Großmutter",
+                greatGrandfather: "Urgroßvater",
+                greatGrandmother: "Urgroßmutter",
+                
+                // Hund Details
+                name: "Name",
+                kennel: "Kennel",
+                pedigreeNumber: "Stammbaum-Nummer",
+                breed: "Rasse",
+                gender: "Geslacht",
+                birthDate: "Geboortedatum",
+                deathDate: "Sterbedatum",
+                coatColor: "Fellfarbe",
+                country: "Country",
+                zipCode: "Postleitzahl",
+                
+                // Gesundheit
+                healthInfo: "Gesundheitsinformationen",
+                hipDysplasia: "Hüftdysplasie",
+                elbowDysplasia: "Ellbogendysplasie",
+                patellaLuxation: "Patella Luxation",
+                eyes: "Augen",
+                dandyWalker: "Dandy Walker Malformation",
+                thyroid: "Schilddrüse",
+                eyesExplanation: "Augenerklärung",
+                thyroidExplanation: "Schilddrüse Erklärung",
+                
+                // COI
+                coi: "Inzuchtkoeffizient",
+                coi6Gen: "COI 6 Gen",
+                coiAllGen: "COI All Gen",
+                
+                // Geschlecht
+                male: "Rüde",
+                female: "Hündin",
+                
+                // Labels
+                paternal: "Väterlich",
+                maternal: "Mütterlich",
+                clickForDetails: "Klicken voor Details",
+                closePopup: "Schließen",
+                remarks: "Bemerkungen",
+                noRemarks: "Keine Bemerkungen",
+                parents: "Eltern",
+                grandparents: "Großeltern",
+                greatGrandparents: "Urgroßeltern"
+            }
+        };
     }
     
     t(key) {
@@ -28,214 +214,134 @@ class StamboomManager extends BaseModule {
         return this.allDogs.find(dog => dog.id === id);
     }
     
-    // WERKENDE COI BEREKENING
-    calculateInbreedingCoefficient(dogId) {
-        // Check cache eerst
-        const cacheKey = `coi_${dogId}`;
-        if (this.coiCache.has(cacheKey)) {
-            return this.coiCache.get(cacheKey);
-        }
-        
-        if (!dogId) {
-            const result = { coi6Gen: 0, coiAllGen: 0 };
-            this.coiCache.set(cacheKey, result);
-            return result;
-        }
+    // NIEUWE METHODE: Bereken inteeltcoëfficiënt
+    calculateInbreedingCoefficient(dogId, maxGenerations = 6) {
+        if (!dogId) return 0;
         
         const dog = this.getDogById(dogId);
-        if (!dog) {
-            const result = { coi6Gen: 0, coiAllGen: 0 };
-            this.coiCache.set(cacheKey, result);
-            return result;
-        }
+        if (!dog) return 0;
         
-        try {
-            // Bereken COI voor 6 generaties
-            const coi6Gen = this.calculateCoi(dogId, 6);
-            // Bereken COI voor alle generaties (max 12)
-            const coiAllGen = this.calculateCoi(dogId, 12);
+        // Verzameld alle voorouders tot maxGenerations diepte
+        const ancestors = this.getAllAncestors(dogId, maxGenerations);
+        
+        // Zoek gemeenschappelijke voorouders in beide ouderlijnen
+        const commonAncestors = this.findCommonAncestors(ancestors.paternal, ancestors.maternal);
+        
+        // Bereken COI met formule van Wright
+        let coi = 0;
+        
+        commonAncestors.forEach(ancestor => {
+            const paternalPath = ancestors.paternal.get(ancestor.id);
+            const maternalPath = ancestors.maternal.get(ancestor.id);
             
-            const result = {
-                coi6Gen: Math.round(coi6Gen * 10000) / 100,
-                coiAllGen: Math.round(coiAllGen * 10000) / 100
-            };
-            
-            this.coiCache.set(cacheKey, result);
-            return result;
-            
-        } catch (error) {
-            console.error("Fout bij COI berekening voor hond", dogId, error);
-            const result = { coi6Gen: 0, coiAllGen: 0 };
-            this.coiCache.set(cacheKey, result);
-            return result;
-        }
-    }
-    
-    // SIMPELE EN WERKENDE COI BEREKENING
-    calculateCoi(dogId, maxGenerations = 6) {
-        if (!dogId || maxGenerations <= 0) return 0;
-        
-        const dog = this.getDogById(dogId);
-        if (!dog || !dog.vaderId || !dog.moederId) return 0;
-        
-        const fatherId = dog.vaderId;
-        const motherId = dog.moederId;
-        
-        // 1. Zelfde vader en moeder (25%)
-        if (fatherId === motherId) {
-            return 0.25;
-        }
-        
-        const father = this.getDogById(fatherId);
-        const mother = this.getDogById(motherId);
-        
-        if (!father || !mother) return 0;
-        
-        // 2. Vader x dochter (25%)
-        if (fatherId === dogId) {
-            return 0.25;
-        }
-        
-        // 3. Moeder x zoon (25%)
-        if (motherId === dogId) {
-            return 0.25;
-        }
-        
-        // 4. Broer x zus (25%)
-        if (father.vaderId && father.moederId && 
-            mother.vaderId && mother.moederId &&
-            father.vaderId === mother.vaderId && 
-            father.moederId === mother.moederId) {
-            return 0.25;
-        }
-        
-        // 5. Halfbroer x halfzus - zelfde vader (12.5%)
-        if (father.vaderId && mother.vaderId && 
-            father.vaderId === mother.vaderId) {
-            return 0.125;
-        }
-        
-        // 6. Halfbroer x halfzus - zelfde moeder (12.5%)
-        if (father.moederId && mother.moederId && 
-            father.moederId === mother.moederId) {
-            return 0.125;
-        }
-        
-        // 7. Grootouder x kleinkind (12.5%)
-        // Via vader
-        if (father.vaderId === dogId || father.moederId === dogId) {
-            return 0.125;
-        }
-        // Via moeder
-        if (mother.vaderId === dogId || mother.moederId === dogId) {
-            return 0.125;
-        }
-        
-        // Voor complexere gevallen: eenvoudige benadering
-        // Zoek gemeenschappelijke voorouders
-        const paternalAncestors = this.getAncestors(fatherId, maxGenerations - 1);
-        const maternalAncestors = this.getAncestors(motherId, maxGenerations - 1);
-        
-        // Tel gemeenschappelijke voorouders
-        let commonCount = 0;
-        paternalAncestors.forEach(ancestorId => {
-            if (maternalAncestors.has(ancestorId)) {
-                commonCount++;
+            if (paternalPath && maternalPath) {
+                const n = paternalPath.generations;
+                const m = maternalPath.generations;
+                const fa = this.calculateInbreedingCoefficient(ancestor.id, maxGenerations - 1);
+                
+                coi += Math.pow(0.5, n + m + 1) * (1 + fa);
             }
         });
         
-        if (commonCount === 0) return 0;
+        // Bereken ook voor alle generaties (complete database)
+        const allAncestors = this.getAllAncestors(dogId, 999); // Hoog getal voor alle generaties
+        const allCommonAncestors = this.findCommonAncestors(allAncestors.paternal, allAncestors.maternal);
         
-        // Simpele schatting: elke gemeenschappelijke voorouder draagt ongeveer 6% bij
-        // Dit is een vereenvoudiging maar geeft redelijke resultaten
-        const estimatedCoi = Math.min(commonCount * 0.06, 0.5);
-        return estimatedCoi;
+        let allGenCoi = 0;
+        
+        allCommonAncestors.forEach(ancestor => {
+            const paternalPath = allAncestors.paternal.get(ancestor.id);
+            const maternalPath = allAncestors.maternal.get(ancestor.id);
+            
+            if (paternalPath && maternalPath) {
+                const n = paternalPath.generations;
+                const m = maternalPath.generations;
+                const fa = this.calculateInbreedingCoefficient(ancestor.id, 999);
+                
+                allGenCoi += Math.pow(0.5, n + m + 1) * (1 + fa);
+            }
+        });
+        
+        return {
+            coi6Gen: Math.round(coi * 10000) / 100, // Afronden op 2 decimalen
+            coiAllGen: Math.round(allGenCoi * 10000) / 100
+        };
     }
     
-    // Verzamel voorouders (eenvoudige versie)
-    getAncestors(startId, maxDepth) {
-        const ancestors = new Set();
-        const queue = [{ id: startId, depth: 0 }];
+    // Helper methodes voor COI berekening
+    getAllAncestors(dogId, maxDepth, currentDepth = 1, side = 'both') {
+        const ancestors = {
+            paternal: new Map(),
+            maternal: new Map()
+        };
         
-        while (queue.length > 0) {
-            const current = queue.shift();
-            
-            if (current.depth >= maxDepth) continue;
-            
-            const currentDog = this.getDogById(current.id);
-            if (!currentDog) continue;
-            
-            // Voeg vader toe
-            if (currentDog.vaderId) {
-                ancestors.add(currentDog.vaderId);
-                queue.push({ id: currentDog.vaderId, depth: current.depth + 1 });
-            }
-            
-            // Voeg moeder toe
-            if (currentDog.moederId) {
-                ancestors.add(currentDog.moederId);
-                queue.push({ id: currentDog.moederId, depth: current.depth + 1 });
-            }
+        if (currentDepth > maxDepth || !dogId) return ancestors;
+        
+        const dog = this.getDogById(dogId);
+        if (!dog) return ancestors;
+        
+        // Voeg huidige hond toe aan juiste map
+        const ancestorData = {
+            dog: dog,
+            generations: currentDepth - 1,
+            side: side
+        };
+        
+        if (side === 'paternal' || side === 'both') {
+            ancestors.paternal.set(dogId, ancestorData);
+        }
+        if (side === 'maternal' || side === 'both') {
+            ancestors.maternal.set(dogId, ancestorData);
+        }
+        
+        // Recursief voorouders verzamelen
+        if (dog.vaderId) {
+            const paternalAncestors = this.getAllAncestors(
+                dog.vaderId, 
+                maxDepth, 
+                currentDepth + 1, 
+                side === 'both' ? 'paternal' : side
+            );
+            this.mergeAncestorMaps(ancestors.paternal, paternalAncestors.paternal);
+            this.mergeAncestorMaps(ancestors.maternal, paternalAncestors.maternal);
+        }
+        
+        if (dog.moederId) {
+            const maternalAncestors = this.getAllAncestors(
+                dog.moederId, 
+                maxDepth, 
+                currentDepth + 1, 
+                side === 'both' ? 'maternal' : side
+            );
+            this.mergeAncestorMaps(ancestors.paternal, maternalAncestors.paternal);
+            this.mergeAncestorMaps(ancestors.maternal, maternalAncestors.maternal);
         }
         
         return ancestors;
     }
     
-    // DEBUG: Toon COI berekening voor specifieke hond
-    debugCoi(dogId) {
-        const dog = this.getDogById(dogId);
-        if (!dog) {
-            console.log("Hond niet gevonden");
-            return;
-        }
-        
-        console.log(`=== COI DEBUG: ${dog.naam} ===`);
-        
-        if (!dog.vaderId || !dog.moederId) {
-            console.log("Geen ouders -> 0%");
-            return;
-        }
-        
-        console.log(`Vader ID: ${dog.vaderId}`);
-        console.log(`Moeder ID: ${dog.moederId}`);
-        
-        // Check directe gevallen
-        if (dog.vaderId === dog.moederId) {
-            console.log("Zelfde vader en moeder -> 25%");
-        }
-        
-        if (dog.vaderId === dogId) {
-            console.log("Vader x dochter -> 25%");
-        }
-        
-        if (dog.moederId === dogId) {
-            console.log("Moeder x zoon -> 25%");
-        }
-        
-        const father = this.getDogById(dog.vaderId);
-        const mother = this.getDogById(dog.moederId);
-        
-        if (father && mother) {
-            if (father.vaderId && mother.vaderId && father.vaderId === mother.vaderId &&
-                father.moederId && mother.moederId && father.moederId === mother.moederId) {
-                console.log("Broer x zus -> 25%");
+    mergeAncestorMaps(targetMap, sourceMap) {
+        sourceMap.forEach((value, key) => {
+            if (!targetMap.has(key)) {
+                targetMap.set(key, value);
             }
-            
-            if (father.vaderId === dogId || father.moederId === dogId ||
-                mother.vaderId === dogId || mother.moederId === dogId) {
-                console.log("Grootouder x kleinkind -> 12.5%");
-            }
-        }
-        
-        const coi = this.calculateCoi(dogId, 6);
-        console.log(`Berekende COI: ${(coi * 100).toFixed(2)}%`);
-        
-        return coi * 100;
+        });
     }
     
-    // Wis cache wanneer nodig
-    clearCoiCache() {
-        this.coiCache.clear();
+    findCommonAncestors(paternalMap, maternalMap) {
+        const commonAncestors = [];
+        
+        paternalMap.forEach((paternalData, dogId) => {
+            if (maternalMap.has(dogId)) {
+                const maternalData = maternalMap.get(dogId);
+                // Alleen als de voorouder via verschillende lijnen komt
+                if (paternalData.side !== maternalData.side) {
+                    commonAncestors.push(paternalData.dog);
+                }
+            }
+        });
+        
+        return commonAncestors;
     }
     
     buildPedigreeTree(dogId) {
@@ -355,10 +461,6 @@ class StamboomManager extends BaseModule {
     }
     
     getCoiBadge(coiValue) {
-        if (coiValue === null || coiValue === undefined || isNaN(coiValue)) {
-            return `<span class="badge bg-secondary">${this.t('calculating')}</span>`;
-        }
-        
         let badgeClass = 'badge ';
         if (coiValue === 0) {
             badgeClass += 'bg-success';
@@ -366,14 +468,10 @@ class StamboomManager extends BaseModule {
             badgeClass += 'bg-info';
         } else if (coiValue < 10) {
             badgeClass += 'bg-warning';
-        } else if (coiValue < 20) {
-            badgeClass += 'bg-warning';
-        } else if (coiValue < 30) {
-            badgeClass += 'bg-orange';
         } else {
             badgeClass += 'bg-danger';
         }
-        return `<span class="${badgeClass}">${coiValue.toFixed(2)}%</span>`;
+        return `<span class="${badgeClass}">${coiValue}%</span>`;
     }
     
     // LIGGENDE CARD VOOR STAMBOOM - overgrootouders kleinere hoogte
@@ -1467,13 +1565,13 @@ class StamboomManager extends BaseModule {
                     .pedigree-card-compact.horizontal.gen2 .dog-pedigree-compact,
                     .pedigree-card-compact.horizontal.gen0 .dog-breed-compact,
                     .pedigree-card-compact.horizontal.gen1 .dog-breed-compact,
-                    .pedigree.card.compact.horizontal.gen2 .dog-breed-compact {
+                    .pedigree-card-compact.horizontal.gen2 .dog-breed-compact {
                         font-size: 0.7rem;
                     }
                     
                     .pedigree-card-compact.horizontal.gen0 .click-hint-compact,
                     .pedigree-card-compact.horizontal.gen1 .click-hint-compact,
-                    .pedigree.card.compact.horizontal.gen2 .click-hint-compact {
+                    .pedigree-card-compact.horizontal.gen2 .click-hint-compact {
                         font-size: 0.6rem;
                     }
                     
