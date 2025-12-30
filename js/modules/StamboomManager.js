@@ -13,7 +13,7 @@ class StamboomManager extends BaseModule {
         this.allDogs = [];
         this.translations = {
             nl: {
-                pedigreeTitle: "Stampboom van {name}",
+                pedigreeTitle: "Stamboom van {name}",
                 pedigree4Gen: "4-generatie stamboom",
                 generatingPedigree: "Stamboom genereren...",
                 close: "Sluiten",
@@ -1047,7 +1047,7 @@ class StamboomManager extends BaseModule {
                         align-items: flex-start !important;
                         min-width: 220px !important;
                         width: 220px !important;
-                        gap: 12px !important; /* Gelijk aan andere generaties */
+                        gap: 4px !important; /* Gelijk aan andere generaties */
                     }
                     
                     /* Generatie 1: Ouders - vader boven midden, moeder onder midden */
@@ -1056,7 +1056,7 @@ class StamboomManager extends BaseModule {
                         align-items: flex-start !important;
                         min-width: 220px !important;
                         width: 220px !important;
-                        gap: 12px !important; /* Gelijk aan andere generaties */
+                        gap: 4px !important; /* Gelijk aan andere generaties */
                     }
                     
                     /* Vader: 2px boven het midden */
@@ -1075,7 +1075,7 @@ class StamboomManager extends BaseModule {
                         align-items: flex-start !important;
                         min-width: 220px !important;
                         width: 220px !important;
-                        gap: 12px !important; /* Gelijk aan andere generaties */
+                        gap: 4px !important; /* Gelijk aan andere generaties */
                     }
                     
                     /* Grootouders: eerste 2 cards iets boven midden, laatste 2 cards iets onder midden */
@@ -1095,7 +1095,7 @@ class StamboomManager extends BaseModule {
                         align-items: flex-start !important;
                         min-width: 220px !important;
                         width: 220px !important;
-                        gap: 12px !important; /* Gelijk aan andere generaties */
+                        gap: 4px !important; /* Gelijk aan andere generaties */
                     }
                     
                     /* Overgrootouders: verdeel de 8 cards symmetrisch rond het midden */
@@ -1170,7 +1170,7 @@ class StamboomManager extends BaseModule {
                     
                     .pedigree-grid-compact {
                         padding: 8px 12px !important;
-                        gap: 12px !important;
+                        gap: 4px !important;
                     }
                     
                     /* Cards blijven 220px breed, maar kolommen iets smaller */
@@ -1292,19 +1292,19 @@ class StamboomManager extends BaseModule {
                     
                     /* ZELFDE GAP VOOR ALLE GENERATIES OP DESKTOP */
                     .pedigree-generation-col.gen0 {
-                        gap: 12px !important;
+                        gap: 4px !important;
                     }
                     
                     .pedigree-generation-col.gen1 {
-                        gap: 12px !important;
+                        gap: 4px !important;
                     }
                     
                     .pedigree-generation-col.gen2 {
-                        gap: 12px !important;
+                        gap: 4px !important;
                     }
                     
                     .pedigree-generation-col.gen3 {
-                        gap: 12px !important;
+                        gap: 4px !important;
                         justify-content: center; /* Overgrootouders centreren op desktop */
                     }
                     
