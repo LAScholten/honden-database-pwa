@@ -319,8 +319,8 @@ class LitterManager {
                 back: "Zurück",
                 
                 // Validierung
-                dateFormatError: "Datum muss im Format TT-MM-JJJJ sein",
-                deathBeforeBirthError: "Sterbedatum kann niet vor dem Geburtsdatum liegen",
+                dateFormatError: "Datum moet im Format TT-MM-JJJJ sein",
+                deathBeforeBirthError: "Sterbedatum kan niet vor dem Geburtsdatum liegen",
                 
                 // Zugangskontrolle Popup Texte
                 insufficientPermissions: "Unzureichende Berechtigungen",
@@ -335,7 +335,7 @@ class LitterManager {
                 
                 // Meldungen
                 adminOnly: "Nur Administratoren können Würfe hinzufügen/bearbeiten",
-                fieldsRequired: "Name, Stammbaum-Nummer, Rasse, Vater und Mutter sind Pflichtfelder",
+                fieldsRequired: "Name, Stammbaum-Nummer, Rasse, Vater en Mutter sind Pflichtfelder",
                 savingDog: "Hund wordt gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
                 dogUpdated: "Hund erfolgreich aktualisiert!",
@@ -555,8 +555,8 @@ class LitterManager {
                         margin-right: 10px;
                     }
                     
-                    /* Mobiele layout voor vachtkleur en knoppen */
-                    .coat-color-container {
+                    /* Mobiele layout voor vachtkleur en opslaan knop */
+                    .coat-color-save-container {
                         flex-direction: column;
                     }
                     
@@ -567,6 +567,7 @@ class LitterManager {
                     
                     .coat-color-buttons-container {
                         width: 100% !important;
+                        margin-bottom: 15px;
                     }
                     
                     .recent-coat-colors-label {
@@ -578,14 +579,9 @@ class LitterManager {
                         padding: 3px 6px !important;
                     }
                     
-                    /* Mobiele layout voor opslaan knoppen */
-                    .save-buttons-container {
-                        flex-direction: column;
-                        gap: 10px;
-                    }
-                    
-                    .save-buttons-container .btn {
-                        width: 100%;
+                    .coat-color-save-btn {
+                        width: 100% !important;
+                        margin-top: 10px;
                     }
                 }
                 
@@ -631,31 +627,25 @@ class LitterManager {
                         margin-right: 15px;
                     }
                     
-                    /* Desktop layout voor vachtkleur en knoppen */
-                    .coat-color-container {
+                    /* Desktop layout voor vachtkleur en opslaan knop */
+                    .coat-color-save-container {
                         flex-direction: row;
-                        align-items: center;
+                        align-items: flex-end;
                     }
                     
                     .coat-color-input-container {
-                        width: auto;
                         flex: 1;
-                        margin-right: 20px;
+                        margin-right: 15px;
                     }
                     
                     .coat-color-buttons-container {
-                        width: auto;
+                        flex: 1;
+                        margin-right: 15px;
                     }
                     
-                    /* Desktop layout voor opslaan knoppen */
-                    .save-buttons-container {
-                        flex-direction: row;
-                        justify-content: flex-end;
-                        gap: 10px;
-                    }
-                    
-                    .save-buttons-container .btn {
-                        width: auto;
+                    .coat-color-save-btn {
+                        width: auto !important;
+                        margin-top: 0;
                     }
                 }
                 
@@ -750,8 +740,8 @@ class LitterManager {
                     padding: 4px 8px;
                 }
                 
-                /* Vachtkleur container */
-                .coat-color-container {
+                /* Vachtkleur container met opslaan knop */
+                .coat-color-save-container {
                     display: flex;
                     flex-wrap: wrap;
                     gap: 10px;
@@ -759,7 +749,6 @@ class LitterManager {
                 }
                 
                 .coat-color-input-container {
-                    flex: 1;
                     min-width: 200px;
                 }
                 
@@ -793,12 +782,6 @@ class LitterManager {
                     white-space: nowrap;
                     font-size: 0.8em;
                     padding: 4px 8px;
-                }
-                
-                /* Opslaan knoppen container */
-                .save-buttons-container {
-                    display: flex;
-                    margin-top: 20px;
                 }
                 
                 /* Datum input styling */
@@ -1071,18 +1054,21 @@ class LitterManager {
                         </div>
                     </div>
                     
-                    <!-- Vachtkleur veld met recente vachtkleuren -->
+                    <!-- Vachtkleur veld met recente vachtkleuren en opslaan knop -->
                     <div class="row">
                         <div class="col-12">
                             <div class="mb-3">
                                 <label for="coatColor" class="form-label">${t('coatColor')}</label>
-                                <div class="coat-color-container">
+                                <div class="coat-color-save-container">
                                     <div class="coat-color-input-container">
                                         <input type="text" class="form-control" id="coatColor" value="${data.vachtkleur || ''}">
                                     </div>
                                     <div class="coat-color-buttons-container">
                                         ${recentCoatColorsHTML}
                                     </div>
+                                    <button type="button" class="btn btn-primary coat-color-save-btn" id="saveDogBtn2">
+                                        ${t('saveDog')}
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -1236,12 +1222,9 @@ class LitterManager {
                     ${t('requiredFields')}
                 </div>
                 
-                <!-- Opslaan knoppen -->
-                <div class="save-buttons-container">
+                <!-- Opslaan knop onderaan -->
+                <div class="text-end">
                     <button type="button" class="btn btn-primary" id="saveDogBtn">
-                        ${t('saveDog')}
-                    </button>
-                    <button type="button" class="btn btn-primary" id="saveDogBtn2">
                         ${t('saveDog')}
                     </button>
                 </div>
