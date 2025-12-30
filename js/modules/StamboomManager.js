@@ -216,10 +216,10 @@ class StamboomManager extends BaseModule {
     
     // NIEUWE METHODE: Bereken inteeltcoëfficiënt
     calculateInbreedingCoefficient(dogId, maxGenerations = 6) {
-        if (!dogId) return 0;
+        if (!dogId || dogId === 0) return { coi6Gen: 0, coiAllGen: 0 };
         
         const dog = this.getDogById(dogId);
-        if (!dog) return 0;
+        if (!dog) return { coi6Gen: 0, coiAllGen: 0 };
         
         // Verzameld alle voorouders tot maxGenerations diepte
         const ancestors = this.getAllAncestors(dogId, maxGenerations);
@@ -237,7 +237,9 @@ class StamboomManager extends BaseModule {
             if (paternalPath && maternalPath) {
                 const n = paternalPath.generations;
                 const m = maternalPath.generations;
-                const fa = this.calculateInbreedingCoefficient(ancestor.id, maxGenerations - 1);
+                // Bereken COI van de voorouder (recursief met 1 minder generatie)
+                const ancestorCoi = this.calculateInbreedingCoefficient(ancestor.id, Math.max(maxGenerations - 1, 1));
+                const fa = ancestorCoi.coi6Gen / 100; // Converteer percentage naar decimaal
                 
                 coi += Math.pow(0.5, n + m + 1) * (1 + fa);
             }
@@ -256,7 +258,9 @@ class StamboomManager extends BaseModule {
             if (paternalPath && maternalPath) {
                 const n = paternalPath.generations;
                 const m = maternalPath.generations;
-                const fa = this.calculateInbreedingCoefficient(ancestor.id, 999);
+                // Bereken COI van de voorouder (recursief)
+                const ancestorCoi = this.calculateInbreedingCoefficient(ancestor.id, 999);
+                const fa = ancestorCoi.coiAllGen / 100; // Converteer percentage naar decimaal
                 
                 allGenCoi += Math.pow(0.5, n + m + 1) * (1 + fa);
             }
@@ -461,6 +465,10 @@ class StamboomManager extends BaseModule {
     }
     
     getCoiBadge(coiValue) {
+        if (isNaN(coiValue) || coiValue === undefined || coiValue === null) {
+            return `<span class="badge bg-secondary">0%</span>`;
+        }
+        
         let badgeClass = 'badge ';
         if (coiValue === 0) {
             badgeClass += 'bg-success';
