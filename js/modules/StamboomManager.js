@@ -667,19 +667,19 @@ class StamboomManager extends BaseModule {
                 
                 /* ZELFDE SPACING PER GENERATIE - ALLES GELIJK ZETTEN */
                 .pedigree-generation-col.gen0 {
-                    gap: 12px !important; /* Gelijk aan andere generaties */
+                    gap: 4px !important; /* Gelijk aan andere generaties */
                 }
                 
                 .pedigree-generation-col.gen1 {
-                    gap: 12px !important;
+                    gap: 4px !important;
                 }
                 
                 .pedigree-generation-col.gen2 {
-                    gap: 12px !important;
+                    gap: 4px !important;
                 }
                 
                 .pedigree-generation-col.gen3 {
-                    gap: 12px !important;  /* Gelijk aan andere generaties */
+                    gap: 4px !important;  /* Gelijk aan andere generaties */
                 }
                 
                 /* BASIS LIGGENDE CARDS */
