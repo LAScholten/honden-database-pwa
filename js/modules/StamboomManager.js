@@ -703,7 +703,7 @@ class StamboomManager extends BaseModule {
                 .pedigree-card-compact.horizontal.gen1,
                 .pedigree-card-compact.horizontal.gen2 {
                     width: 160px !important;
-                    height: 100px !important;
+                    height: 120px !important;
                 }
                 
                 /* OVERGROOTOUDERS: 60% HOOGTE VAN NORMALE CARDS */
