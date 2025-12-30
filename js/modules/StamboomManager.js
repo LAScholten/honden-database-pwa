@@ -214,7 +214,7 @@ class StamboomManager extends BaseModule {
         return this.allDogs.find(dog => dog.id === id);
     }
     
-    // NIEUWE METHODE: Bereken inteeltcoëfficiënt
+    // NIEUWE METHODE: Bereken inteeltcoëfficiënt - GECORRIGEERDE VERSIE
     calculateInbreedingCoefficient(dogId, maxGenerations = 6) {
         if (!dogId || dogId === 0) return { coi6Gen: 0, coiAllGen: 0 };
         
@@ -237,16 +237,16 @@ class StamboomManager extends BaseModule {
             if (paternalPath && maternalPath) {
                 const n = paternalPath.generations;
                 const m = maternalPath.generations;
-                // Bereken COI van de voorouder (recursief)
-                const ancestorCoi = this.calculateInbreedingCoefficient(ancestor.id, maxGenerations - 1);
+                // Bereken COI van de voorouder (recursief met 1 minder generatie)
+                const ancestorCoi = this.calculateInbreedingCoefficient(ancestor.id, Math.max(maxGenerations - 1, 1));
                 const fa = ancestorCoi.coi6Gen / 100; // Converteer percentage naar decimaal
                 
                 coi += Math.pow(0.5, n + m + 1) * (1 + fa);
             }
         });
         
-        // Bereken voor alle generaties
-        const allAncestors = this.getAllAncestors(dogId, 999);
+        // Bereken ook voor alle generaties (complete database)
+        const allAncestors = this.getAllAncestors(dogId, 999); // Hoog getal voor alle generaties
         const allCommonAncestors = this.findCommonAncestors(allAncestors.paternal, allAncestors.maternal);
         
         let allGenCoi = 0;
@@ -258,7 +258,7 @@ class StamboomManager extends BaseModule {
             if (paternalPath && maternalPath) {
                 const n = paternalPath.generations;
                 const m = maternalPath.generations;
-                // Bereken COI van de voorouder (recursief)
+                // Bereken COI van de voorouder (recursief met 999 generaties)
                 const ancestorCoi = this.calculateInbreedingCoefficient(ancestor.id, 999);
                 const fa = ancestorCoi.coiAllGen / 100; // Converteer percentage naar decimaal
                 
@@ -266,6 +266,7 @@ class StamboomManager extends BaseModule {
             }
         });
         
+        // Return de berekende waarden
         return {
             coi6Gen: Math.round(coi * 10000) / 100, // Afronden op 2 decimalen
             coiAllGen: Math.round(allGenCoi * 10000) / 100
@@ -338,7 +339,10 @@ class StamboomManager extends BaseModule {
         paternalMap.forEach((paternalData, dogId) => {
             if (maternalMap.has(dogId)) {
                 const maternalData = maternalMap.get(dogId);
-                commonAncestors.push(paternalData.dog);
+                // Alleen als de voorouder via verschillende lijnen komt
+                if (paternalData.side !== maternalData.side) {
+                    commonAncestors.push(paternalData.dog);
+                }
             }
         });
         
@@ -476,7 +480,7 @@ class StamboomManager extends BaseModule {
         } else {
             badgeClass += 'bg-danger';
         }
-        return `<span class="${badgeClass}">${coiValue.toFixed(2)}%</span>`;
+        return `<span class="${badgeClass}">${coiValue}%</span>`;
     }
     
     // LIGGENDE CARD VOOR STAMBOOM - overgrootouders kleinere hoogte
@@ -1940,25 +1944,6 @@ class StamboomManager extends BaseModule {
                 window.print();
             });
         }
-        
-        // Event delegation voor card clicks - CRUCIALE FIX!
-        const container = document.getElementById('pedigreeContainer');
-        if (container) {
-            container.addEventListener('click', (e) => {
-                // Zoek de dichtstbijzijnde card
-                const card = e.target.closest('.pedigree-card-compact.horizontal:not(.empty)');
-                if (!card) return;
-                
-                const dogId = parseInt(card.getAttribute('data-dog-id'));
-                if (dogId === 0) return; // Skip empty cards
-                
-                const dog = this.getDogById(dogId);
-                if (!dog) return;
-                
-                const relation = card.getAttribute('data-relation') || '';
-                this.showDogDetailPopup(dog, relation);
-            });
-        }
     }
     
     renderCompactPedigree(pedigreeTree) {
@@ -2006,7 +1991,24 @@ class StamboomManager extends BaseModule {
         
         container.innerHTML = gridHTML;
         
-        // GEEN aparte click events meer nodig - event delegation in setupPedigreeModalEvents
+        // Add click events to cards - PRECIES ZOALS IN HET ORIGINELE BESTAND
+        this.setupCardClickEvents();
+    }
+    
+    setupCardClickEvents() {
+        const cards = document.querySelectorAll('.pedigree-card-compact.horizontal:not(.empty)');
+        cards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                const dogId = parseInt(card.getAttribute('data-dog-id'));
+                if (dogId === 0) return; // Skip empty cards
+                
+                const dog = this.getDogById(dogId);
+                if (!dog) return;
+                
+                const relation = card.getAttribute('data-relation') || '';
+                this.showDogDetailPopup(dog, relation);
+            });
+        });
     }
     
     showDogDetailPopup(dog, relation) {
@@ -2018,10 +2020,16 @@ class StamboomManager extends BaseModule {
         const popupHTML = this.getDogDetailPopupHTML(dog, relation);
         container.innerHTML = popupHTML;
         
-        // Show overlay
+        // Show overlay - center in viewport
         overlay.style.display = 'flex';
         
-        // Add close event listeners - DEZE MOETEN DUIDELIJK ZIJN
+        // Ensure popup is visible and centered
+        setTimeout(() => {
+            container.style.marginTop = '0';
+            container.style.transform = 'translateY(0)';
+        }, 10);
+        
+        // Add close event listeners
         const closeButtons = container.querySelectorAll('.popup-close, .popup-close-btn');
         closeButtons.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -2046,10 +2054,10 @@ class StamboomManager extends BaseModule {
         document.addEventListener('keydown', closeOnEscape);
         
         // Clean up event listener when popup closes
-        overlay.addEventListener('transitionend', function handler() {
+        overlay.addEventListener('animationend', function handler() {
             if (overlay.style.display === 'none') {
                 document.removeEventListener('keydown', closeOnEscape);
-                overlay.removeEventListener('transitionend', handler);
+                overlay.removeEventListener('animationend', handler);
             }
         });
     }
