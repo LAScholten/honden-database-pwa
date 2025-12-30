@@ -1049,21 +1049,21 @@ class StamboomManager extends BaseModule {
                     }
                     
                     /* SPECIFIEKE AANPASSINGEN VOOR POSITIONERING OP MOBIEL */
-                    /* Generatie 0: Huidige hond - 4cm lager (40px) */
+                    /* Generatie 0: Huidige hond - 8cm lager (80px) */
                     .pedigree-generation-col.gen0 {
-                        padding-top: 40px !important; /* 4cm = 40px */
+                        padding-top: 80px !important; /* 8cm = 80px */
                         gap: 0 !important;
                     }
                     
-                    /* Generatie 1: Ouders - 3cm lager (30px) */
+                    /* Generatie 1: Ouders - 6cm lager (60px) */
                     .pedigree-generation-col.gen1 {
-                        padding-top: 30px !important; /* 3cm = 30px */
+                        padding-top: 60px !important; /* 6cm = 60px */
                         gap: 12px !important;
                     }
                     
-                    /* Generatie 2: Grootouders - 0.8cm lager (8px) */
+                    /* Generatie 2: Grootouders - 1.6cm lager (16px) */
                     .pedigree-generation-col.gen2 {
-                        padding-top: 8px !important; /* 0.8cm = 8px */
+                        padding-top: 16px !important; /* 1.6cm = 16px */
                         gap: 8px !important;
                     }
                     
