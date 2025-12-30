@@ -13,7 +13,7 @@ class StamboomManager extends BaseModule {
         this.allDogs = [];
         this.translations = {
             nl: {
-                pedigreeTitle: "StamPboom van {name}",
+                pedigreeTitle: "Stamboom van {name}",
                 pedigree4Gen: "4-generatie stamboom",
                 generatingPedigree: "Stamboom genereren...",
                 close: "Sluiten",
@@ -592,7 +592,7 @@ class StamboomManager extends BaseModule {
                             </div>
                         </div>
                         <div class="modal-body p-0" style="overflow: hidden;">
-                            <!-- MOBIELE CONTAINER - zoals in searchmanager -->
+                            <!-- MOBIELE CONTAINER - 6.5 inch hoog -->
                             <div class="pedigree-mobile-wrapper" id="pedigreeMobileWrapper">
                                 <div class="pedigree-container-compact" id="pedigreeContainer">
                                     <div class="text-center py-5">
@@ -617,25 +617,23 @@ class StamboomManager extends BaseModule {
             </div>
             
             <style>
-                /* MOBIELE WRAPPER - zoals searchmanager container */
+                /* MOBIELE WRAPPER */
                 .pedigree-mobile-wrapper {
                     width: 100%;
-                    height: 100%;
                     display: flex;
                     flex-direction: column;
                     background: #f8f9fa;
                     position: relative;
                 }
                 
-                /* HORIZONTALE PEDIGREE CONTAINER - aangepast voor mobiel */
+                /* HORIZONTALE PEDIGREE CONTAINER */
                 .pedigree-container-compact {
                     padding: 15px !important;
                     margin: 0 !important;
                     width: 100% !important;
-                    height: calc(100vh - 120px) !important;
                     background: #f8f9fa;
                     overflow-x: auto !important;
-                    overflow-y: auto !important; /* Zowel horizontaal als verticaal scrollen */
+                    overflow-y: auto !important;
                     position: relative;
                     min-height: 0 !important;
                     box-sizing: border-box !important;
@@ -965,42 +963,40 @@ class StamboomManager extends BaseModule {
                 /* START MOBIELE AANPASSINGEN (max-width: 767px) */
                 /* ============================================= */
                 @media (max-width: 767px) {
-                    #pedigreeModal.modal.fade .modal-dialog.modal-fullscreen {
-                        width: 100vw !important;
-                        height: 100vh !important;
-                        margin: 0 !important;
-                        max-width: none !important;
-                        padding: 0 !important;
+                    /* EENVOUDIGE MODAL ZONDER FULLSCREEN */
+                    #pedigreeModal.modal.fade .modal-dialog {
+                        max-width: 100%;
+                        margin: 0.5rem auto;
+                        height: auto;
                     }
                     
                     #pedigreeModal.modal.fade .modal-content {
-                        width: 100% !important;
-                        height: 100vh !important;
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        border: none !important;
-                        border-radius: 0 !important;
-                        display: flex !important;
-                        flex-direction: column !important;
+                        width: 100%;
+                        height: auto;
+                        margin: 0;
+                        border-radius: 8px;
+                        display: flex;
+                        flex-direction: column;
                     }
                     
                     #pedigreeModal.modal.fade .modal-header {
-                        margin: 0 !important;
-                        padding: 0.75rem 1rem !important;
-                        border: none !important;
-                        width: 100% !important;
-                        flex-shrink: 0 !important;
-                        min-height: auto !important;
+                        margin: 0;
+                        padding: 0.75rem 1rem;
+                        border: none;
+                        width: 100%;
+                        flex-shrink: 0;
+                        min-height: auto;
                         z-index: 1;
                     }
                     
                     #pedigreeModal.modal.fade .modal-body {
-                        width: 100% !important;
-                        padding: 0 !important;
-                        margin: 0 !important;
-                        flex: 1 1 auto !important;
-                        overflow: hidden !important;
-                        min-height: 0 !important;
+                        width: 100%;
+                        padding: 0;
+                        margin: 0;
+                        flex: 1 1 auto;
+                        overflow: hidden;
+                        min-height: 0;
+                        max-height: 494px; /* 6.5 inch = 494px (6.5 * 96 DPI) */
                     }
                     
                     .pedigree-mobile-wrapper {
@@ -1011,9 +1007,9 @@ class StamboomManager extends BaseModule {
                         background: #f8f9fa;
                     }
                     
-                    /* VERTICALE CONTAINER MET HORIZONTALE SCROLL */
+                    /* CONTAINER MET 6.5 INCH HOOGTE */
                     .pedigree-container-compact {
-                        height: calc(100vh - 120px) !important;
+                        height: 494px !important; /* 6.5 inch = 494px */
                         overflow-x: auto !important; /* Horizontale scroll */
                         overflow-y: hidden !important; /* Geen verticale scroll */
                         padding: 10px !important;
@@ -1151,7 +1147,7 @@ class StamboomManager extends BaseModule {
                 /* Kleine mobiele schermen */
                 @media (max-width: 480px) {
                     .pedigree-container-compact {
-                        height: calc(100vh - 120px) !important;
+                        height: 494px !important; /* Blijft 6.5 inch */
                         padding: 8px !important;
                     }
                     
