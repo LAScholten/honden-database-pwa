@@ -129,7 +129,7 @@ class StamboomManager extends BaseModule {
             de: {
                 pedigreeTitle: "Ahnentafel von {name}",
                 pedigree4Gen: "4-Generationen Ahnentafel",
-                generatingPedigree: "Ahnentafel wird generiert...",
+                generatingPedigree: "Ahnentafel wordt generiert...",
                 close: "Schließen",
                 print: "Drucken",
                 noData: "Keine Daten",
@@ -336,6 +336,14 @@ class StamboomManager extends BaseModule {
         const mainDogClass = isMainDog ? 'main-dog-compact' : '';
         const headerColor = isMainDog ? 'bg-primary' : 'bg-secondary';
         
+        // Bepaal of we de kennelnaam moeten tonen
+        const showKennel = dog.kennelnaam && dog.kennelnaam.trim() !== '';
+        
+        // Maak een gecombineerde naam+kennel string voor automatische aanpassing
+        const combinedName = dog.naam || this.t('unknown');
+        const kennelSuffix = showKennel ? ` ${dog.kennelnaam}` : '';
+        const fullDisplayText = combinedName + kennelSuffix;
+        
         return `
             <div class="pedigree-card-compact horizontal ${dog.geslacht === 'reuen' ? 'male' : 'female'} ${mainDogClass} gen${generation}" 
                  data-dog-id="${dog.id}" 
@@ -352,16 +360,11 @@ class StamboomManager extends BaseModule {
                     </div>
                 </div>
                 <div class="pedigree-card-body-compact horizontal">
-                    <!-- Regel 1: Naam en kennelnaam -->
+                    <!-- Regel 1: Naam en kennelnaam in één regel -->
                     <div class="card-row card-row-1">
-                        <div class="dog-name-compact" title="${dog.naam || this.t('unknown')}">
-                            ${dog.naam || this.t('unknown')}
+                        <div class="dog-name-kennel-compact" title="${fullDisplayText}">
+                            ${fullDisplayText}
                         </div>
-                        ${dog.kennelnaam ? `
-                        <div class="dog-kennel-compact" title="${dog.kennelnaam}">
-                            ${dog.kennelnaam}
-                        </div>
-                        ` : ''}
                     </div>
                     
                     <!-- Regel 2: Stamboomnummer en ras -->
@@ -843,17 +846,25 @@ class StamboomManager extends BaseModule {
                     margin-top: auto;
                 }
                 
+                /* NAAM + KENNEL COMBINATIE STYLING */
+                .dog-name-kennel-compact {
+                    font-weight: 600;
+                    color: #0d6efd;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    line-height: 1.1;
+                    width: 100%;
+                }
+                
                 /* TEKST GROOTTES PER GENERATIE */
                 /* Hoofdhond, ouders en grootouders (gen0, gen1, gen2) */
-                .pedigree-card-compact.horizontal.gen0 .dog-name-compact,
-                .pedigree-card-compact.horizontal.gen1 .dog-name-compact,
-                .pedigree-card-compact.horizontal.gen2 .dog-name-compact {
+                .pedigree-card-compact.horizontal.gen0 .dog-name-kennel-compact,
+                .pedigree-card-compact.horizontal.gen1 .dog-name-kennel-compact,
+                .pedigree-card-compact.horizontal.gen2 .dog-name-kennel-compact {
                     font-size: 0.75rem;
                 }
                 
-                .pedigree-card-compact.horizontal.gen0 .dog-kennel-compact,
-                .pedigree-card-compact.horizontal.gen1 .dog-kennel-compact,
-                .pedigree-card-compact.horizontal.gen2 .dog-kennel-compact,
                 .pedigree-card-compact.horizontal.gen0 .dog-pedigree-compact,
                 .pedigree-card-compact.horizontal.gen1 .dog-pedigree-compact,
                 .pedigree-card-compact.horizontal.gen2 .dog-pedigree-compact,
@@ -870,11 +881,10 @@ class StamboomManager extends BaseModule {
                 }
                 
                 /* Overgrootouders (gen3): 60% van normale tekstgrootte */
-                .pedigree-card-compact.horizontal.gen3 .dog-name-compact {
+                .pedigree-card-compact.horizontal.gen3 .dog-name-kennel-compact {
                     font-size: 0.6rem;
                 }
                 
-                .pedigree-card-compact.horizontal.gen3 .dog-kennel-compact,
                 .pedigree-card-compact.horizontal.gen3 .dog-pedigree-compact,
                 .pedigree-card-compact.horizontal.gen3 .dog-breed-compact {
                     font-size: 0.52rem;
@@ -884,28 +894,7 @@ class StamboomManager extends BaseModule {
                     font-size: 0.44rem;
                 }
                 
-                /* Algemene tekst styling */
-                .dog-name-compact {
-                    font-weight: 600;
-                    color: #0d6efd;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    line-height: 1.1;
-                    flex: 1;
-                }
-                
-                .dog-kennel-compact {
-                    color: #6c757d;
-                    font-style: italic;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    line-height: 1.1;
-                    flex: 1;
-                    text-align: right;
-                }
-                
+                /* Algemene tekst styling voor andere elementen */
                 .dog-pedigree-compact {
                     font-weight: 600;
                     color: #495057;
@@ -1305,15 +1294,12 @@ class StamboomManager extends BaseModule {
                     }
                     
                     /* Desktop tekstgrootte */
-                    .pedigree-card-compact.horizontal.gen0 .dog-name-compact,
-                    .pedigree-card-compact.horizontal.gen1 .dog-name-compact,
-                    .pedigree-card-compact.horizontal.gen2 .dog-name-compact {
+                    .pedigree-card-compact.horizontal.gen0 .dog-name-kennel-compact,
+                    .pedigree-card-compact.horizontal.gen1 .dog-name-kennel-compact,
+                    .pedigree-card-compact.horizontal.gen2 .dog-name-kennel-compact {
                         font-size: 0.8rem;
                     }
                     
-                    .pedigree-card-compact.horizontal.gen0 .dog-kennel-compact,
-                    .pedigree-card-compact.horizontal.gen1 .dog-kennel-compact,
-                    .pedigree-card-compact.horizontal.gen2 .dog-kennel-compact,
                     .pedigree-card-compact.horizontal.gen0 .dog-pedigree-compact,
                     .pedigree-card-compact.horizontal.gen1 .dog-pedigree-compact,
                     .pedigree-card-compact.horizontal.gen2 .dog-pedigree-compact,
@@ -1329,11 +1315,10 @@ class StamboomManager extends BaseModule {
                         font-size: 0.6rem;
                     }
                     
-                    .pedigree-card-compact.horizontal.gen3 .dog-name-compact {
+                    .pedigree-card-compact.horizontal.gen3 .dog-name-kennel-compact {
                         font-size: 0.64rem;
                     }
                     
-                    .pedigree-card-compact.horizontal.gen3 .dog-kennel-compact,
                     .pedigree-card-compact.horizontal.gen3 .dog-pedigree-compact,
                     .pedigree-card-compact.horizontal.gen3 .dog-breed-compact {
                         font-size: 0.56rem;
