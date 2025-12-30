@@ -13,7 +13,7 @@ class StamboomManager extends BaseModule {
         this.allDogs = [];
         this.translations = {
             nl: {
-                pedigreeTitle: "StamPboom van {name}",
+                pedigreeTitle: "Stamboom van {name}",
                 pedigree4Gen: "4-generatie stamboom",
                 generatingPedigree: "Stamboom genereren...",
                 close: "Sluiten",
@@ -996,7 +996,7 @@ class StamboomManager extends BaseModule {
                         flex: 1 1 auto;
                         overflow: hidden;
                         min-height: 0;
-                        max-height: 700px; /*  */
+                        max-height: 600px; /*  */
                     }
                     
                     .pedigree-mobile-wrapper {
@@ -1009,7 +1009,7 @@ class StamboomManager extends BaseModule {
                     
                     /* CONTAINER HOOGTE */
                     .pedigree-container-compact {
-                        height: 700px !important; /* */
+                        height: 600px !important; /* */
                         overflow-x: auto !important; /* Horizontale scroll */
                         overflow-y: hidden !important; /* Geen verticale scroll */
                         padding: 10px !important;
@@ -1147,7 +1147,7 @@ class StamboomManager extends BaseModule {
                 /* Kleine mobiele schermen */
                 @media (max-width: 480px) {
                     .pedigree-container-compact {
-                        height: 700px !important; /* Blijft */
+                        height: 600px !important; /* Blijft */
                         padding: 8px !important;
                     }
                     
