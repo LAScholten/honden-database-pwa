@@ -13,7 +13,7 @@ class StamboomManager extends BaseModule {
         this.allDogs = [];
         this.translations = {
             nl: {
-                pedigreeTitle: "Stamboom van {name}",
+                pedigreeTitle: "StamPboom van {name}",
                 pedigree4Gen: "4-generatie stamboom",
                 generatingPedigree: "Stamboom genereren...",
                 close: "Sluiten",
@@ -627,6 +627,7 @@ class StamboomManager extends BaseModule {
                     flex-direction: column;
                     background: #f8f9fa;
                     position: relative;
+                    border-radius: 12px;
                 }
                 
                 /* HORIZONTALE PEDIGREE CONTAINER */
@@ -640,6 +641,7 @@ class StamboomManager extends BaseModule {
                     position: relative;
                     min-height: 0 !important;
                     box-sizing: border-box !important;
+                    border-radius: inherit;
                 }
                 
                 .pedigree-grid-compact {
@@ -963,7 +965,7 @@ class StamboomManager extends BaseModule {
                         width: 100%;
                         height: auto;
                         margin: 0;
-                        border-radius: 8px;
+                        border-radius: 12px; /* Afgeronde hoeken */
                         display: flex;
                         flex-direction: column;
                     }
@@ -976,6 +978,7 @@ class StamboomManager extends BaseModule {
                         flex-shrink: 0;
                         min-height: auto;
                         z-index: 1;
+                        border-radius: 12px 12px 0 0; /* Afgeronde bovenhoeken */
                     }
                     
                     #pedigreeModal.modal.fade .modal-body {
@@ -985,7 +988,8 @@ class StamboomManager extends BaseModule {
                         flex: 1 1 auto;
                         overflow: hidden;
                         min-height: 0;
-                        max-height: 600px; /*  */
+                        max-height: 640px;
+                        border-radius: 0 0 12px 12px; /* Afgeronde onderhoeken */
                     }
                     
                     .pedigree-mobile-wrapper {
@@ -994,17 +998,19 @@ class StamboomManager extends BaseModule {
                         display: flex;
                         flex-direction: column;
                         background: #f8f9fa;
+                        border-radius: 0 0 12px 12px; /* Afgeronde onderhoeken */
                     }
                     
                     /* CONTAINER HOOGTE */
                     .pedigree-container-compact {
-                        height: 600px !important; /* */
+                        height: 640px !important;
                         overflow-x: auto !important; /* Horizontale scroll */
                         overflow-y: hidden !important; /* Geen verticale scroll */
                         padding: 10px !important;
                         -webkit-overflow-scrolling: touch;
                         display: flex;
                         flex-direction: column;
+                        border-radius: 0 0 12px 12px; /* Afgeronde onderhoeken */
                     }
                     
                     /* Horizontale grid - generaties naast elkaar */
@@ -1031,14 +1037,15 @@ class StamboomManager extends BaseModule {
                         padding: 0 !important;
                         margin: 0 !important;
                         position: relative;
-                        justify-content: flex-start;
+                        justify-content: center !important; /* Centreren voor alle generaties */
+                        align-items: flex-start !important;
                     }
                     
                     /* Generatie 0: Huidige hond - links in het midden */
                     .pedigree-generation-col.gen0 {
                         justify-content: center !important;
                         align-items: flex-start !important;
-                        min-width: 220px !important; /*  */
+                        min-width: 220px !important;
                         width: 220px !important;
                         gap: 0 !important;
                     }
@@ -1082,13 +1089,34 @@ class StamboomManager extends BaseModule {
                         margin-top: 4px !important; /* Onderste paar */
                     }
                     
-                    /* Generatie 3: Overgrootouders - 8 cards gestapeld met kleinere ruimte */
+                    /* Generatie 3: Overgrootouders - 8 cards centraal uitgelijnd */
                     .pedigree-generation-col.gen3 {
-                        justify-content: flex-start !important;
+                        justify-content: center !important; /* CENTREREN net als andere generaties */
                         align-items: flex-start !important;
                         min-width: 220px !important;
                         width: 220px !important;
-                        gap: 2px !important; /* 2px kleiner (was 4px) */
+                        gap: 2px !important; /* Kleinere gap voor overgrootouders */
+                    }
+                    
+                    /* Overgrootouders: verdeel de 8 cards symmetrisch rond het midden */
+                    .pedigree-generation-col.gen3 > .pedigree-card-compact.horizontal:nth-child(2),
+                    .pedigree-generation-col.gen3 > .pedigree-card-compact.horizontal:nth-child(3) {
+                        margin-top: -8px !important; /* Eerste paar: 8px boven midden */
+                    }
+                    
+                    .pedigree-generation-col.gen3 > .pedigree-card-compact.horizontal:nth-child(4),
+                    .pedigree-generation-col.gen3 > .pedigree-card-compact.horizontal:nth-child(5) {
+                        margin-top: -4px !important; /* Tweede paar: 4px boven midden */
+                    }
+                    
+                    .pedigree-generation-col.gen3 > .pedigree-card-compact.horizontal:nth-child(6),
+                    .pedigree-generation-col.gen3 > .pedigree-card-compact.horizontal:nth-child(7) {
+                        margin-top: 0px !important; /* Derde paar: exact midden */
+                    }
+                    
+                    .pedigree-generation-col.gen3 > .pedigree-card-compact.horizontal:nth-child(8),
+                    .pedigree-generation-col.gen3 > .pedigree-card-compact.horizontal:nth-child(9) {
+                        margin-top: 4px !important; /* Vierde paar: 4px onder midden */
                     }
                     
                     /* Generation labels */
@@ -1136,7 +1164,7 @@ class StamboomManager extends BaseModule {
                 /* Kleine mobiele schermen */
                 @media (max-width: 480px) {
                     .pedigree-container-compact {
-                        height: 600px !important; /* Blijft */
+                        height: 640px !important; /* Blijft */
                         padding: 8px !important;
                     }
                     
@@ -1229,6 +1257,7 @@ class StamboomManager extends BaseModule {
                     
                     .pedigree-mobile-wrapper {
                         height: 100%;
+                        border-radius: 0;
                     }
                     
                     .pedigree-container-compact {
@@ -1238,6 +1267,7 @@ class StamboomManager extends BaseModule {
                         align-items: center;
                         padding: 0 !important;
                         display: flex;
+                        border-radius: 0;
                     }
                     
                     .pedigree-grid-compact {
@@ -1273,6 +1303,7 @@ class StamboomManager extends BaseModule {
                     
                     .pedigree-generation-col.gen3 {
                         gap: 4px;
+                        justify-content: center; /* Overgrootouders centreren op desktop */
                     }
                     
                     /* Desktop cards - originele grootte (geen 200px op desktop) */
