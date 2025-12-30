@@ -1940,6 +1940,25 @@ class StamboomManager extends BaseModule {
                 window.print();
             });
         }
+        
+        // Event delegation voor card clicks - CRUCIALE FIX!
+        const container = document.getElementById('pedigreeContainer');
+        if (container) {
+            container.addEventListener('click', (e) => {
+                // Zoek de dichtstbijzijnde card
+                const card = e.target.closest('.pedigree-card-compact.horizontal:not(.empty)');
+                if (!card) return;
+                
+                const dogId = parseInt(card.getAttribute('data-dog-id'));
+                if (dogId === 0) return; // Skip empty cards
+                
+                const dog = this.getDogById(dogId);
+                if (!dog) return;
+                
+                const relation = card.getAttribute('data-relation') || '';
+                this.showDogDetailPopup(dog, relation);
+            });
+        }
     }
     
     renderCompactPedigree(pedigreeTree) {
@@ -1987,24 +2006,7 @@ class StamboomManager extends BaseModule {
         
         container.innerHTML = gridHTML;
         
-        // Add click events to cards
-        this.setupCardClickEvents();
-    }
-    
-    setupCardClickEvents() {
-        const cards = document.querySelectorAll('.pedigree-card-compact.horizontal:not(.empty)');
-        cards.forEach(card => {
-            card.addEventListener('click', (e) => {
-                const dogId = parseInt(card.getAttribute('data-dog-id'));
-                if (dogId === 0) return; // Skip empty cards
-                
-                const dog = this.getDogById(dogId);
-                if (!dog) return;
-                
-                const relation = card.getAttribute('data-relation') || '';
-                this.showDogDetailPopup(dog, relation);
-            });
-        });
+        // GEEN aparte click events meer nodig - event delegation in setupPedigreeModalEvents
     }
     
     showDogDetailPopup(dog, relation) {
@@ -2016,16 +2018,10 @@ class StamboomManager extends BaseModule {
         const popupHTML = this.getDogDetailPopupHTML(dog, relation);
         container.innerHTML = popupHTML;
         
-        // Show overlay - center in viewport
+        // Show overlay
         overlay.style.display = 'flex';
         
-        // Ensure popup is visible and centered
-        setTimeout(() => {
-            container.style.marginTop = '0';
-            container.style.transform = 'translateY(0)';
-        }, 10);
-        
-        // Add close event listeners
+        // Add close event listeners - DEZE MOETEN DUIDELIJK ZIJN
         const closeButtons = container.querySelectorAll('.popup-close, .popup-close-btn');
         closeButtons.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -2050,10 +2046,10 @@ class StamboomManager extends BaseModule {
         document.addEventListener('keydown', closeOnEscape);
         
         // Clean up event listener when popup closes
-        overlay.addEventListener('animationend', function handler() {
+        overlay.addEventListener('transitionend', function handler() {
             if (overlay.style.display === 'none') {
                 document.removeEventListener('keydown', closeOnEscape);
-                overlay.removeEventListener('animationend', handler);
+                overlay.removeEventListener('transitionend', handler);
             }
         });
     }
