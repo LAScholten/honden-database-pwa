@@ -214,56 +214,20 @@ class StamboomManager extends BaseModule {
         return this.allDogs.find(dog => dog.id === id);
     }
     
-    // NIEUWE METHODE: Bereken inteeltcoëfficiënt - GECORRIGEERDE VERSIE
+    // NIEUWE METHODE: Bereken inteeltcoëfficiënt
     calculateInbreedingCoefficient(dogId, maxGenerations = 6) {
         if (!dogId || dogId === 0) return { coi6Gen: 0, coiAllGen: 0 };
         
         const dog = this.getDogById(dogId);
         if (!dog) return { coi6Gen: 0, coiAllGen: 0 };
         
-        // Voor vader-dochter combinatie: 25%
-        if (dog.vaderId && dog.moederId) {
-            const father = this.getDogById(dog.vaderId);
-            const mother = this.getDogById(dog.moederId);
-            
-            // Vader-dochter combinatie
-            if (father && mother && father.moederId && mother.moederId) {
-                // Vader van pup = grootvader van moeder
-                if (father.vaderId === mother.vaderId && father.vaderId) {
-                    return { coi6Gen: 25.0, coiAllGen: 25.0 };
-                }
-                // Vader van pup = grootmoeder van moeder
-                if (father.vaderId === mother.moederId && father.vaderId) {
-                    return { coi6Gen: 25.0, coiAllGen: 25.0 };
-                }
-                // Vader van pup = vader van moeder
-                if (father.id === mother.vaderId) {
-                    return { coi6Gen: 25.0, coiAllGen: 25.0 };
-                }
-                // Broer-zus combinatie
-                if (father.vaderId && mother.vaderId && 
-                    father.vaderId === mother.vaderId && 
-                    father.moederId && mother.moederId && 
-                    father.moederId === mother.moederId) {
-                    return { coi6Gen: 25.0, coiAllGen: 25.0 };
-                }
-                // Half-broer-half-zus (zelfde vader)
-                if (father.vaderId && mother.vaderId && 
-                    father.vaderId === mother.vaderId) {
-                    return { coi6Gen: 12.5, coiAllGen: 12.5 };
-                }
-                // Half-broer-half-zus (zelfde moeder)
-                if (father.moederId && mother.moederId && 
-                    father.moederId === mother.moederId) {
-                    return { coi6Gen: 12.5, coiAllGen: 12.5 };
-                }
-            }
-        }
-        
-        // Standaard Wright's formule voor andere gevallen
+        // Verzamel alle voorouders tot maxGeneraties diepte
         const ancestors = this.getAllAncestors(dogId, maxGenerations);
+        
+        // Zoek gemeenschappelijke voorouders in beide ouderlijnen
         const commonAncestors = this.findCommonAncestors(ancestors.paternal, ancestors.maternal);
         
+        // Bereken COI met formule van Wright
         let coi = 0;
         
         commonAncestors.forEach(ancestor => {
@@ -273,15 +237,16 @@ class StamboomManager extends BaseModule {
             if (paternalPath && maternalPath) {
                 const n = paternalPath.generations;
                 const m = maternalPath.generations;
-                const ancestorCoi = this.calculateInbreedingCoefficient(ancestor.id, Math.max(maxGenerations - 1, 1));
-                const fa = ancestorCoi.coi6Gen / 100;
+                // Bereken COI van de voorouder (recursief)
+                const ancestorCoi = this.calculateInbreedingCoefficient(ancestor.id, maxGenerations - 1);
+                const fa = ancestorCoi.coi6Gen / 100; // Converteer percentage naar decimaal
                 
                 coi += Math.pow(0.5, n + m + 1) * (1 + fa);
             }
         });
         
         // Bereken voor alle generaties
-        const allAncestors = this.getAllAncestors(dogId, 10); // 10 generaties is genoeg
+        const allAncestors = this.getAllAncestors(dogId, 999);
         const allCommonAncestors = this.findCommonAncestors(allAncestors.paternal, allAncestors.maternal);
         
         let allGenCoi = 0;
@@ -293,26 +258,16 @@ class StamboomManager extends BaseModule {
             if (paternalPath && maternalPath) {
                 const n = paternalPath.generations;
                 const m = maternalPath.generations;
-                const ancestorCoi = this.calculateInbreedingCoefficient(ancestor.id, 10);
-                const fa = ancestorCoi.coiAllGen / 100;
+                // Bereken COI van de voorouder (recursief)
+                const ancestorCoi = this.calculateInbreedingCoefficient(ancestor.id, 999);
+                const fa = ancestorCoi.coiAllGen / 100; // Converteer percentage naar decimaal
                 
                 allGenCoi += Math.pow(0.5, n + m + 1) * (1 + fa);
             }
         });
         
-        // Vader-dochter: direct 25% (geval waar vader = grootvader van moeder via moeder's vader)
-        if (dog.vaderId && dog.moederId) {
-            const mother = this.getDogById(dog.moederId);
-            if (mother && dog.vaderId === mother.vaderId) {
-                return { 
-                    coi6Gen: 25.0, 
-                    coiAllGen: Math.max(25.0, Math.round(allGenCoi * 10000) / 100)
-                };
-            }
-        }
-        
         return {
-            coi6Gen: Math.round(coi * 10000) / 100,
+            coi6Gen: Math.round(coi * 10000) / 100, // Afronden op 2 decimalen
             coiAllGen: Math.round(allGenCoi * 10000) / 100
         };
     }
