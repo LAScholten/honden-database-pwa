@@ -211,123 +211,123 @@ class StamboomManager extends BaseModule {
         return this.allDogs.find(dog => dog.id === id);
     }
     
-    // Functie om COI (inteeltcoëfficiënt) te berekenen
-    // Verbeterde versie die beter omgaat met ontbrekende ouders
+    // Eenvoudige maar realistische COI berekening
     calculateCOI(dogId) {
-        if (!dogId || dogId === 0) return { coi6Gen: null, coiAllGen: null };
+        if (!dogId || dogId === 0) return { coi6Gen: '0.0', coiAllGen: '0.0' };
         
         const dog = this.getDogById(dogId);
-        if (!dog) return { coi6Gen: null, coiAllGen: null };
+        if (!dog) return { coi6Gen: '0.0', coiAllGen: '0.0' };
         
-        // Als er ouders ontbreken, kan er geen COI berekend worden
+        // Als er geen ouders zijn, is COI altijd 0%
         if (!dog.vaderId || !dog.moederId) {
-            return { coi6Gen: 'n.v.t.', coiAllGen: 'n.v.t.' };
+            return { coi6Gen: '0.0', coiAllGen: '0.0' };
         }
         
-        // Voor demo: een meer realistische berekening op basis van beschikbare data
+        // Bepaal of de ouders dezelfde hond zijn (directe inteelt)
+        if (dog.vaderId === dog.moederId) {
+            return { coi6Gen: '25.0', coiAllGen: '25.0' };
+        }
+        
+        // Zoek gemeenschappelijke voorouders in 6 generaties
+        const commonAncestors6Gen = this.findCommonAncestors(dogId, 6);
+        // Zoek gemeenschappelijke voorouders in alle generaties
+        const commonAncestorsAll = this.findCommonAncestors(dogId, 10); // 10 generaties = "alle"
+        
+        // Bereken COI op basis van gemeenschappelijke voorouders
         let coi6Gen = 0;
         let coiAllGen = 0;
         
-        // Check of grootouders bekend zijn
-        const father = this.getDogById(dog.vaderId);
-        const mother = this.getDogById(dog.moederId);
-        
-        if (!father || !mother) {
-            return { coi6Gen: 'n.v.t.', coiAllGen: 'n.v.t.' };
-        }
-        
-        // Eenvoudige berekening gebaseerd op hoeveel generaties bekend zijn
-        const pedigreeDepth = this.calculatePedigreeDepth(dogId);
-        
-        if (pedigreeDepth >= 3) { // Als 3 generaties bekend zijn
-            // Bepaal of er gemeenschappelijke voorouders zijn
-            const commonAncestors = this.findCommonAncestors(dogId, 6);
-            if (commonAncestors.length > 0) {
-                // Basis COI op basis van gemeenschappelijke voorouders
-                coi6Gen = (commonAncestors.length * 1.5).toFixed(1);
-                coiAllGen = (commonAncestors.length * 2.0).toFixed(1);
-            } else {
-                coi6Gen = '0.0';
-                coiAllGen = '0.0';
+        // Voor elke gemeenschappelijke voorouder, bereken bijdrage
+        commonAncestors6Gen.forEach(ancestorId => {
+            const depth = this.getAncestorDepth(dogId, ancestorId, 6);
+            if (depth > 0) {
+                // Wright's formule: (0.5)^(n1+n2+1) * (1+FA)
+                // Vereenvoudigd: basis bijdrage per generatie
+                const contribution = Math.pow(0.5, depth + 1);
+                coi6Gen += contribution;
             }
-        } else {
-            // Niet genoeg data voor berekening
-            coi6Gen = 'n.v.t.';
-            coiAllGen = 'n.v.t.';
-        }
+        });
         
-        // Zorg dat percentages niet onrealistisch hoog zijn
-        if (coi6Gen !== 'n.v.t.' && parseFloat(coi6Gen) > 25) {
-            coi6Gen = '25.0+';
-        }
-        if (coiAllGen !== 'n.v.t.' && parseFloat(coiAllGen) > 40) {
-            coiAllGen = '40.0+';
-        }
+        commonAncestorsAll.forEach(ancestorId => {
+            const depth = this.getAncestorDepth(dogId, ancestorId, 10);
+            if (depth > 0) {
+                const contribution = Math.pow(0.5, depth + 1);
+                coiAllGen += contribution;
+            }
+        });
+        
+        // Convert to percentage and limit to reasonable values
+        coi6Gen = Math.min(coi6Gen * 100, 50).toFixed(1);
+        coiAllGen = Math.min(coiAllGen * 100, 50).toFixed(1);
         
         return { coi6Gen, coiAllGen };
     }
     
-    // Helper functie om de diepte van de stamboom te berekenen
-    calculatePedigreeDepth(dogId, currentDepth = 0, maxDepth = 0) {
-        if (currentDepth > maxDepth) {
-            maxDepth = currentDepth;
-        }
+    // Helper: zoek gemeenschappelijke voorouders
+    findCommonAncestors(dogId, maxGenerations) {
+        if (!dogId || maxGenerations <= 0) return [];
         
         const dog = this.getDogById(dogId);
-        if (!dog) return maxDepth;
+        if (!dog || !dog.vaderId || !dog.moederId) return [];
         
-        // Check ouders
-        if (dog.vaderId) {
-            maxDepth = Math.max(maxDepth, this.calculatePedigreeDepth(dog.vaderId, currentDepth + 1, maxDepth));
-        }
-        if (dog.moederId) {
-            maxDepth = Math.max(maxDepth, this.calculatePedigreeDepth(dog.moederId, currentDepth + 1, maxDepth));
-        }
+        // Verzamel voorouders van vaders kant
+        const paternalAncestors = this.collectAncestors(dog.vaderId, maxGenerations - 1);
+        // Verzamel voorouders van moeders kant
+        const maternalAncestors = this.collectAncestors(dog.moederId, maxGenerations - 1);
         
-        return maxDepth;
-    }
-    
-    // Helper functie om gemeenschappelijke voorouders te vinden
-    findCommonAncestors(dogId, generations = 6) {
-        const ancestors = this.getAncestors(dogId, generations);
-        const uniqueAncestors = [...new Set(ancestors)];
+        // Vind gemeenschappelijke voorouders
+        const common = [];
+        const paternalSet = new Set(paternalAncestors);
         
-        // Zoek duplicaten (gemeenschappelijke voorouders)
-        const duplicates = [];
-        const seen = new Set();
-        
-        ancestors.forEach(id => {
-            if (seen.has(id) && id !== 0) { // 0 is de placeholder voor "geen data"
-                duplicates.push(id);
+        maternalAncestors.forEach(ancestorId => {
+            if (paternalSet.has(ancestorId)) {
+                common.push(ancestorId);
             }
-            seen.add(id);
         });
         
-        return [...new Set(duplicates)];
+        return common;
     }
     
-    // Helper functie om alle voorouders te verzamelen
-    getAncestors(dogId, generations, currentGen = 1, ancestors = []) {
-        if (currentGen > generations) return ancestors;
+    // Helper: verzamel alle voorouders tot bepaalde diepte
+    collectAncestors(dogId, depth, ancestors = new Set()) {
+        if (depth <= 0 || !dogId) return ancestors;
         
         const dog = this.getDogById(dogId);
         if (!dog) return ancestors;
         
-        if (dog.vaderId) {
-            ancestors.push(dog.vaderId);
-            this.getAncestors(dog.vaderId, generations, currentGen + 1, ancestors);
-        } else {
-            ancestors.push(0); // Placeholder voor ontbrekende vader
-        }
+        // Voeg huidige hond toe (als voorouder voor volgende niveaus)
+        ancestors.add(dogId);
         
+        // Recursief ouders toevoegen
+        if (dog.vaderId) {
+            this.collectAncestors(dog.vaderId, depth - 1, ancestors);
+        }
         if (dog.moederId) {
-            ancestors.push(dog.moederId);
-            this.getAncestors(dog.moederId, generations, currentGen + 1, ancestors);
-        } else {
-            ancestors.push(0); // Placeholder voor ontbrekende moeder
+            this.collectAncestors(dog.moederId, depth - 1, ancestors);
         }
         
         return ancestors;
+    }
+    
+    // Helper: bereken diepte van voorouder
+    getAncestorDepth(dogId, ancestorId, maxDepth, currentDepth = 1) {
+        if (currentDepth > maxDepth || !dogId) return 0;
+        
+        const dog = this.getDogById(dogId);
+        if (!dog) return 0;
+        
+        // Check ouders
+        if (dog.vaderId === ancestorId || dog.moederId === ancestorId) {
+            return currentDepth;
+        }
+        
+        // Recursief zoeken in ouders
+        const fatherDepth = dog.vaderId ? 
+            this.getAncestorDepth(dog.vaderId, ancestorId, maxDepth, currentDepth + 1) : 0;
+        const motherDepth = dog.moederId ? 
+            this.getAncestorDepth(dog.moederId, ancestorId, maxDepth, currentDepth + 1) : 0;
+        
+        return Math.max(fatherDepth, motherDepth);
     }
     
     buildPedigreeTree(dogId) {
@@ -531,7 +531,7 @@ class StamboomManager extends BaseModule {
         const genderText = dog.geslacht === 'reuen' ? this.t('male') : 
                           dog.geslacht === 'teven' ? this.t('female') : this.t('unknown');
         
-        // Bereken COI waarden
+        // Bereken COI waarden - nu met realistische berekening
         const coiValues = this.calculateCOI(dog.id);
         
         return `
@@ -578,24 +578,16 @@ class StamboomManager extends BaseModule {
                             </div>
                             ` : ''}
                             
-                            <!-- COI waarden - nu 60% van de grootte -->
-                            ${coiValues.coi6Gen ? `
-                            <div class="info-item coi-item">
+                            <!-- COI waarden - eenvoudige weergave -->
+                            <div class="info-item">
                                 <span class="info-label">${this.t('coi6Gen')}:</span>
-                                <span class="info-value coi-value ${coiValues.coi6Gen === 'n.v.t.' ? 'coi-not-available' : ''}">
-                                    ${coiValues.coi6Gen}${coiValues.coi6Gen !== 'n.v.t.' ? '%' : ''}
-                                </span>
+                                <span class="info-value coi-value">${coiValues.coi6Gen}%</span>
                             </div>
-                            ` : ''}
                             
-                            ${coiValues.coiAllGen ? `
-                            <div class="info-item coi-item">
+                            <div class="info-item">
                                 <span class="info-label">${this.t('coiAllGen')}:</span>
-                                <span class="info-value coi-value ${coiValues.coiAllGen === 'n.v.t.' ? 'coi-not-available' : ''}">
-                                    ${coiValues.coiAllGen}${coiValues.coiAllGen !== 'n.v.t.' ? '%' : ''}
-                                </span>
+                                <span class="info-value coi-value">${coiValues.coiAllGen}%</span>
                             </div>
-                            ` : ''}
                             
                             ${dog.geboortedatum ? `
                             <div class="info-item">
@@ -1713,19 +1705,16 @@ class StamboomManager extends BaseModule {
                     padding: 6px 0; /* Was 8px 0 */
                 }
                 
-                /* COI specifieke styling - 60% van normale grootte */
-                .coi-item {
-                    padding: 4px 0 !important; /* Kleinere padding */
-                    margin: 2px 0 !important; /* Kleinere margin */
-                    transform: scale(0.6); /* 60% van normale grootte */
-                    transform-origin: left center; /* Schaal van links */
-                    width: 166.67%; /* Compenseer voor schaling (100/0.6) */
+                /* COI waarden styling - simpel en compact */
+                .coi-value {
+                    font-size: 1.05rem !important;
+                    font-weight: 700 !important;
+                    color: #dc3545; /* Rood voor percentages */
                 }
                 
-                /* Als COI niet beschikbaar is */
-                .coi-not-available {
-                    color: #6c757d !important; /* Grijs voor "n.v.t." */
-                    font-style: italic;
+                /* Als COI 0.0% is, maak het groen */
+                .coi-value[data-coi="0.0"] {
+                    color: #28a745 !important;
                 }
                 
                 .info-label {
@@ -1741,12 +1730,6 @@ class StamboomManager extends BaseModule {
                     font-size: 0.95rem;
                     line-height: 1.3; /* Was 1.4 */
                     word-break: break-word;
-                }
-                
-                .coi-value {
-                    font-size: 1.05rem !important; /* Iets groter voor COI */
-                    font-weight: 700 !important;
-                    color: #dc3545; /* Rood voor percentages */
                 }
                 
                 .remarks-box {
