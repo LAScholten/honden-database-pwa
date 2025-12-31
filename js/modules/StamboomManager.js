@@ -1737,6 +1737,7 @@ collectAllAncestors(dogId, maxGenerations) {
                     box-shadow: 0 8px 30px rgba(0,0,0,0.3);
                     margin: 0 auto; /* Centreer automatisch */
                     position: relative;
+                    left: 10px; /* NIEUW: 10px van de linkerzijde */
                 }
                 
                 /* Centreren voor alle schermgroottes */
@@ -1744,13 +1745,14 @@ collectAllAncestors(dogId, maxGenerations) {
                     .pedigree-popup-overlay {
                         padding: 10px;
                         align-items: center;
-                        justify-content: center;
+                        justify-content: flex-start; /* NIEUW: Links uitlijnen */
                     }
                     
                     .pedigree-popup-container {
                         width: calc(100% - 20px); /* Zorg voor 10px marge aan beide kanten */
                         max-width: 350px;
-                        margin: auto; /* Dit centreert de popup */
+                        margin: 0; /* NIEUW: Geen auto margin meer */
+                        left: 10px; /* NIEUW: 10px van de linkerzijde */
                     }
                 }
                 
