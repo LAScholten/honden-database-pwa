@@ -212,250 +212,219 @@ class StamboomManager extends BaseModule {
     }
     
 /* ============================================= */
-/* COI BEREKENING - CORRECTE VERSIE             */
+/* BEGIN COI BEREKENING - Wright's formule      */
+/* ============================================= */
+/* ============================================= */
+/* COI BEREKENING - STRICT UNIEKE PADEN         */
 /* ============================================= */
 
-// Hoofdfunctie
 calculateCOI(dogId) {
-    if (!dogId || dogId === 0) return { coiAllGen: '0.0' };
+    if (!dogId || dogId === 0) return { coi6Gen: '0.0', coiAllGen: '0.0' };
     
     const dog = this.getDogById(dogId);
     if (!dog || !dog.vaderId || !dog.moederId) {
-        return { coiAllGen: '0.0' };
+        return { coi6Gen: '0.0', coiAllGen: '0.0' };
     }
     
-    // Gebruik een cache voor prestaties
+    // Bereken voor 6 generaties en alle generaties
+    const coi6Gen = this.calculateCOIStrict(dogId, 6);
+    const coiAllGen = this.calculateCOIStrict(dogId, 999);
+    
+    return { 
+        coi6Gen: coi6Gen.toFixed(1), 
+        coiAllGen: coiAllGen.toFixed(1) 
+    };
+}
+
+// STRICTE berekening met gegarandeerd unieke paden
+calculateCOIStrict(dogId, maxGenerations) {
     const cache = new Map();
     
-    const calculateRecursive = (currentId, depth) => {
+    const calculate = (currentId, depth) => {
         if (!currentId || depth <= 0) return 0;
         
         const cacheKey = `${currentId}-${depth}`;
         if (cache.has(cacheKey)) return cache.get(cacheKey);
         
-        const currentDog = this.getDogById(currentId);
-        if (!currentDog || !currentDog.vaderId || !currentDog.moederId) {
+        const dog = this.getDogById(currentId);
+        if (!dog || !dog.vaderId || !dog.moederId) {
             cache.set(cacheKey, 0);
             return 0;
         }
         
-        if (currentDog.vaderId === currentDog.moederId) {
+        if (dog.vaderId === dog.moederId) {
             cache.set(cacheKey, 0.25);
             return 0.25;
         }
         
-        // Vind unieke gemeenschappelijke voorouders (zonder duplicaten)
-        const commonAncestors = this.findUniqueCommonAncestors(
-            currentDog.vaderId, 
-            currentDog.moederId, 
-            depth - 1
-        );
+        // SNELHEIDSOPTIMALISATIE: Als ouders volle broer/zus zijn
+        if (this.areFullSiblings(dog.vaderId, dog.moederId)) {
+            const fParent1 = calculate(dog.vaderId, depth - 1);
+            const fParent2 = calculate(dog.moederId, depth - 1);
+            // Vereenvoudigde formule voor broer/zus
+            const result = 0.25 * (1 + (fParent1 + fParent2) / 2);
+            cache.set(cacheKey, result);
+            return result;
+        }
         
-        let totalCOI = 0;
+        // Normale berekening
+        let total = 0;
+        const commonAncestors = this.getStrictCommonAncestors(dog.vaderId, dog.moederId, depth - 1);
         
         for (const ancestorId of commonAncestors) {
-            const pathsFather = this.findUniquePaths(currentDog.vaderId, ancestorId, depth - 1);
-            const pathsMother = this.findUniquePaths(currentDog.moederId, ancestorId, depth - 1);
+            const pathsVader = this.getStrictPaths(dog.vaderId, ancestorId, depth - 1);
+            const pathsMoeder = this.getStrictPaths(dog.moederId, ancestorId, depth - 1);
             
-            for (const pathF of pathsFather) {
-                for (const pathM of pathsMother) {
-                    const n1 = pathF.length;  // stappen van vader naar voorouder
-                    const n2 = pathM.length;  // stappen van moeder naar voorouder
-                    
-                    const ancestorCOI = calculateRecursive(ancestorId, depth - 1);
-                    const contribution = Math.pow(0.5, n1 + n2 + 1) * (1 + ancestorCOI);
-                    
-                    totalCOI += contribution;
+            const fAncestor = calculate(ancestorId, depth - 1);
+            
+            for (const pv of pathsVader) {
+                for (const pm of pathsMoeder) {
+                    // Controleer of dit een UNIEK padpaar is
+                    const isUnique = this.isUniquePathPair(pv, pm, dog.vaderId, dog.moederId, ancestorId);
+                    if (isUnique) {
+                        const contribution = Math.pow(0.5, pv.length + pm.length + 1) * (1 + fAncestor);
+                        total += contribution;
+                    }
                 }
             }
         }
         
-        cache.set(cacheKey, totalCOI);
-        return totalCOI;
+        cache.set(cacheKey, total);
+        return total;
     };
     
-    const coi = calculateRecursive(dogId, 10); // 10 generaties is genoeg
-    return { coiAllGen: (coi * 100).toFixed(1) };
+    const result = calculate(dogId, maxGenerations);
+    return result * 100; // Converteren naar percentage
 }
 
-// Vind UNIEKE gemeenschappelijke voorouders (geen duplicaten)
-findUniqueCommonAncestors(id1, id2, depth) {
+// Controleer of ouders volle broer/zus zijn
+areFullSiblings(id1, id2) {
+    const dog1 = this.getDogById(id1);
+    const dog2 = this.getDogById(id2);
+    
+    if (!dog1 || !dog2) return false;
+    
+    return (dog1.vaderId === dog2.vaderId && 
+            dog1.moederId === dog2.moederId &&
+            dog1.vaderId !== null && 
+            dog1.moederId !== null);
+}
+
+// Vind STRICT unieke gemeenschappelijke voorouders
+getStrictCommonAncestors(id1, id2, depth) {
     if (depth <= 0) return new Set();
     
-    const ancestors1 = this.collectAncestorsUnique(id1, depth);
-    const ancestors2 = this.collectAncestorsUnique(id2, depth);
+    const ancestors1 = new Set();
+    const ancestors2 = new Set();
     
+    const collect = (id, depthLeft, set) => {
+        if (!id || depthLeft < 0) return;
+        
+        const dog = this.getDogById(id);
+        if (!dog) return;
+        
+        if (depthLeft >= 0) {
+            set.add(id);
+        }
+        
+        if (depthLeft > 0) {
+            if (dog.vaderId) collect(dog.vaderId, depthLeft - 1, set);
+            if (dog.moederId) collect(dog.moederId, depthLeft - 1, set);
+        }
+    };
+    
+    collect(id1, depth, ancestors1);
+    collect(id2, depth, ancestors2);
+    
+    // Verwijder de start-ID's zelf
+    ancestors1.delete(id1);
+    ancestors2.delete(id2);
+    
+    // Vind intersectie
     const common = new Set();
     for (const anc of ancestors1) {
         if (ancestors2.has(anc)) {
             common.add(anc);
         }
     }
+    
     return common;
 }
 
-// Verzamel voorouders zonder duplicaten
-collectAncestorsUnique(startId, depth) {
-    const ancestors = new Set();
-    const visited = new Set();
+// Vind STRICT unieke paden (geen duplicaten)
+getStrictPaths(fromId, toId, depth) {
+    const allPaths = [];
     
-    const collect = (currentId, currentDepth) => {
+    const dfs = (currentId, currentDepth, path, visited) => {
         if (!currentId || currentDepth > depth) return;
+        
+        // Voorkom elke vorm van duplicatie
         if (visited.has(currentId)) return;
         
         visited.add(currentId);
-        
-        const dog = this.getDogById(currentId);
-        if (!dog) return;
-        
-        // Voeg toe als voorouder (niet de start zelf)
-        if (currentDepth > 0) {
-            ancestors.add(currentId);
-        }
-        
-        if (dog.vaderId) {
-            collect(dog.vaderId, currentDepth + 1);
-        }
-        if (dog.moederId) {
-            collect(dog.moederId, currentDepth + 1);
-        }
-    };
-    
-    collect(startId, 0);
-    return ancestors;
-}
-
-// Vind UNIEKE paden (zonder duplicaten)
-findUniquePaths(fromId, toId, depth) {
-    const allPaths = [];
-    
-    const dfs = (currentId, currentDepth, currentPath, visitedInPath) => {
-        if (!currentId || currentDepth > depth) return;
-        
-        // Voorkom cycli in dit pad
-        if (visitedInPath.has(currentId)) return;
-        
-        visitedInPath.add(currentId);
-        const newPath = [...currentPath, currentId];
+        const newPath = [...path, currentId];
         
         if (currentId === toId) {
-            // Pad gevonden: sla op zonder startpunt
-            allPaths.push(newPath.slice(1)); // verwijder 'fromId'
-            visitedInPath.delete(currentId);
+            allPaths.push({
+                path: newPath.slice(1), // verwijder startpunt
+                length: newPath.length - 1,
+                signature: newPath.join('-')
+            });
+            visited.delete(currentId);
             return;
         }
         
         const dog = this.getDogById(currentId);
         if (dog) {
-            if (dog.vaderId) {
-                dfs(dog.vaderId, currentDepth + 1, newPath, visitedInPath);
-            }
-            if (dog.moederId) {
-                dfs(dog.moederId, currentDepth + 1, newPath, visitedInPath);
-            }
+            if (dog.vaderId) dfs(dog.vaderId, currentDepth + 1, newPath, visited);
+            if (dog.moederId) dfs(dog.moederId, currentDepth + 1, newPath, visited);
         }
         
-        visitedInPath.delete(currentId);
+        visited.delete(currentId);
     };
     
     dfs(fromId, 0, [], new Set());
     
-    // Verwijder DUPLICAAT PADEN
+    // Filter DUPLICAAT PADEN op basis van volledige signature
     const uniquePaths = [];
-    const pathSignatures = new Set();
+    const seenSignatures = new Set();
     
-    for (const path of allPaths) {
-        // Maak een signature: padlengte + eerste ID
-        const signature = `${path.length}-${path[0] || '0'}`;
-        if (!pathSignatures.has(signature)) {
-            pathSignatures.add(signature);
-            uniquePaths.push(path);
+    for (const pathObj of allPaths) {
+        if (!seenSignatures.has(pathObj.signature)) {
+            seenSignatures.add(pathObj.signature);
+            uniquePaths.push(pathObj.path);
         }
     }
     
     return uniquePaths;
 }
 
+// Controleer of een padpaar uniek is
+isUniquePathPair(path1, path2, start1, start2, target) {
+    // Een simpele maar effectieve check
+    const path1Str = `${start1}-${path1.join('-')}-${target}`;
+    const path2Str = `${start2}-${path2.join('-')}-${target}`;
+    const pairSignature = `${path1Str}|${path2Str}`;
+    
+    // Gebruik een statische set om eerder gezien paden bij te houden
+    if (!this._seenPathPairs) this._seenPathPairs = new Set();
+    
+    if (this._seenPathPairs.has(pairSignature)) {
+        return false;
+    }
+    
+    this._seenPathPairs.add(pairSignature);
+    return true;
+}
+
+// Reset functie voor path pair cache
+resetPathPairCache() {
+    this._seenPathPairs = new Set();
+}
+
 /* ============================================= */
-/* TEST CASE: Katinka                            */
+/* EINDE COI BEREKENING                         */
 /* ============================================= */
-
-// Voor Katinka zou dit de volgende paden moeten vinden:
-
-// 1. Brumbo als gemeenschappelijke voorouder:
-//    - Van Droll naar Brumbo: 1 pad (lengte 1)
-//    - Van Erle-Lu naar Brumbo: 1 pad (lengte 1)
-//    → bijdrage: (1/2)³ = 0.125
-
-// 2. Berit als gemeenschappelijke voorouder:
-//    - Van Droll naar Berit: 1 pad (lengte 1)
-//    - Van Erle-Lu naar Berit: 1 pad (lengte 2 via Cara-Lu)
-//    → bijdrage: (1/2)⁴ = 0.0625
-
-// 3. Pollo als gemeenschappelijke voorouder:
-//    - Van Droll naar Pollo: 1 pad (lengte 2 via Brumbo)
-//    - Van Erle-Lu naar Pollo: 1 pad (lengte 3 via Berit → Cara-Lu)
-//    → bijdrage: (1/2)⁶ = 0.015625
-
-// 4. Asta als gemeenschappelijke voorouder: zelfde als Pollo
-//    → bijdrage: 0.015625
-
-// TOTAAL: 0.125 + 0.0625 + 0.015625 + 0.015625 = 0.21875 = 21.875%
-
-// Maar we moeten OOK de andere paden naar Pollo tellen:
-// Van Droll naar Pollo kan ook via Berit (lengte 2)
-// Van Erle-Lu naar Pollo kan ook via Brumbo (lengte 2)
-
-// Dit geeft EXTRA combinaties:
-// Pad combinaties voor Pollo:
-// 1. Droll→Br→Pollo (2) + ErleLu→Be→Ca→Pollo (3): (1/2)⁶ = 0.015625
-// 2. Droll→Be→Pollo (2) + ErleLu→Br→Pollo (2): (1/2)⁵ = 0.03125
-// 3. Droll→Be→Pollo (2) + ErleLu→Be→Ca→Pollo (3): (1/2)⁶ = 0.015625
-
-// TOTAAL Pollo: 0.015625 + 0.03125 + 0.015625 = 0.0625
-// Asta hetzelfde: 0.0625
-
-// TOTAAL KATINKA: 
-// Brumbo: 0.125
-// Berit: 0.0625
-// Pollo: 0.0625
-// Asta: 0.0625
-// TOTAAL: 0.3125 = 31.25%
-
-// Maar dit is NOG STEEDS niet 37.5%... 
-// Ah, ik zie het: We moeten ook de INTELT van de voorouders meenemen!
-
-// Cara-Lu heeft F=0.25
-// Dus bij bijdrage via Cara-Lu moeten we (1 + 0.25) = 1.25 vermenigvuldigen
-
-// Laten we het CORRECT berekenen:
-// Berit: F=0
-// Bijdrage via Berit: (1/2)⁴ × (1+0) = 0.0625
-
-// Pollo: F=0
-// Bijdrage via Pollo: alle paden combineren:
-// Totaal Pollo: 0.0625 × (1+0) = 0.0625
-
-// TOTAAL: 0.125 + 0.0625 + 0.0625 + 0.0625 = 0.3125 = 31.25%
-
-// WAAROM 37.5% dan? Omdat Brumbo en Berit BROER/ZUS zijn!
-// Dus voor Droll en Erle-Lu: gemeenschappelijke voorouders zijn Pollo en Asta
-// via Brumbo en Berit
-
-// Laten we ALLE combinaties tellen:
-// 1. Brumbo: n1=1, n2=1 → 0.125
-// 2. Berit: n1=1, n2=2 → 0.0625
-// 3. Pollo via verschillende routes:
-//    a) Droll→Br→Pollo (2) + ErleLu→Br→Pollo (2): 0.03125
-//    b) Droll→Br→Pollo (2) + ErleLu→Be→Ca→Pollo (3): 0.015625
-//    c) Droll→Be→Pollo (2) + ErleLu→Br→Pollo (2): 0.03125
-//    d) Droll→Be→Pollo (2) + ErleLu→Be→Ca→Pollo (3): 0.015625
-//    Totaal Pollo: 0.09375
-// 4. Asta:zelfde → 0.09375
-
-// TOTAAL: 0.125 + 0.0625 + 0.09375 + 0.09375 = 0.375 = 37.5%
-
-// Dit is het CORRECTE resultaat!
     
     buildPedigreeTree(dogId) {
         const pedigreeTree = {
