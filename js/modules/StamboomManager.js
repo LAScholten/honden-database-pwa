@@ -212,7 +212,7 @@ class StamboomManager extends BaseModule {
     }
     
 /* ============================================= */
-/* BEGIN COI BEREKENING - COMPLETE CORRECTIE    */
+/* BEGIN COI BEREKENING - VERBETERDE VERSIE     */
 /* ============================================= */
 
 // Helper: normaliseer parent ID
@@ -246,9 +246,9 @@ calculateCOI(dogId) {
     }
     
     // Bereken COI voor 6 generaties
-    const coi6Gen = this.calculateDirectCOI(dogId, 6);
+    const coi6Gen = this.calculateCorrectCOI(dogId, 6);
     // Bereken COI voor ALLE generaties
-    const coiAllGen = this.calculateDirectCOI(dogId, 999);
+    const coiAllGen = this.calculateCorrectCOI(dogId, 999);
     
     return { 
         coi6Gen: (coi6Gen * 100).toFixed(1), 
@@ -256,8 +256,8 @@ calculateCOI(dogId) {
     };
 }
 
-// DIRECTE COI BEREKENING - alleen directe gemeenschappelijke voorouders
-calculateDirectCOI(dogId, maxGenerations) {
+// CORRECTE COI BEREKENING - rekent alleen directe gemeenschappelijke voorouders
+calculateCorrectCOI(dogId, maxGenerations) {
     if (!dogId || dogId === 0 || maxGenerations <= 0) return 0;
     
     const dog = this.getDogById(dogId);
@@ -275,61 +275,60 @@ calculateDirectCOI(dogId, maxGenerations) {
         return 0.25;
     }
     
-    // Speciaal geval: als ouders broer/zus zijn
     const vader = this.getDogById(vaderId);
     const moeder = this.getDogById(moederId);
     
-    if (vader && moeder && vader.vaderId === moeder.vaderId && vader.moederId === moeder.moederId) {
-        // Dit is een broer-zus combinatie: 25%
-        return 0.25;
-    }
-    
-    // Zoek gemeenschappelijke voorouders op EEN generatie diepte
-    // Dit voorkomt dat we Indo en Bella vinden als voorouders van Brumbo/Berit
-    const commonAncestors = new Set();
-    
-    // Verzamel ouders van vader
-    const vaderParents = new Set();
-    if (vader) {
-        if (vader.vaderId) vaderParents.add(vader.vaderId);
-        if (vader.moederId) vaderParents.add(vader.moederId);
-    }
-    
-    // Verzamel ouders van moeder
-    const moederParents = new Set();
-    if (moeder) {
-        if (moeder.vaderId) moederParents.add(moeder.vaderId);
-        if (moeder.moederId) moederParents.add(moeder.moederId);
-    }
-    
-    // Vind gemeenschappelijke ouders (grootouders)
-    for (const parent of vaderParents) {
-        if (moederParents.has(parent)) {
-            commonAncestors.add(parent);
-        }
-    }
-    
-    // Als er geen directe gemeenschappelijke grootouders zijn, COI = 0
-    if (commonAncestors.size === 0) {
+    if (!vader || !moeder) {
         return 0;
     }
     
-    // Bereken COI van de hond zelf
-    let totalCOI = 0;
+    // Vind GEMEENSCHAPPELIJKE ouders van vader en moeder
+    const commonParents = new Set();
     
-    for (const ancestorId of commonAncestors) {
-        // Voor elke gemeenschappelijke grootouder:
-        // Pad vader → grootouder: 1 stap
-        // Pad moeder → grootouder: 1 stap
-        // Bijdrage: (½)^(1+1+1) = 0.125
-        
-        totalCOI += 0.125;
+    // Voeg ouders van vader toe aan set
+    if (vader.vaderId) commonParents.add(vader.vaderId);
+    if (vader.moederId) commonParents.add(vader.moederId);
+    
+    // Check welke ouders van moeder al in de set zitten
+    const commonAncestors = new Set();
+    if (moeder.vaderId && commonParents.has(moeder.vaderId)) {
+        commonAncestors.add(moeder.vaderId);
+    }
+    if (moeder.moederId && commonParents.has(moeder.moederId)) {
+        commonAncestors.add(moeder.moederId);
     }
     
-    // Als er 2 gemeenschappelijke grootouders zijn (broer-zus): 0.125 + 0.125 = 0.25
-    // Als er 1 gemeenschappelijke grootouder is: 0.125
+    // Bereken COI van de hond
+    let dogCOI = 0;
     
-    return totalCOI;
+    // Voor elke gemeenschappelijke voorouder (grootouder)
+    for (const ancestorId of commonAncestors) {
+        // Elke gemeenschappelijke grootouder draagt 0.125 bij
+        // (½)^(1+1+1) = 0.125
+        dogCOI += 0.125;
+    }
+    
+    // Als de hond zelf inteelt heeft (dogCOI > 0), 
+    // dan moeten we ook kijken of de GEMEENSCHAPPELIJKE voorouders zelf inteelt hebben
+    if (dogCOI > 0) {
+        let totalCOI = dogCOI;
+        
+        // Voor elke gemeenschappelijke voorouder
+        for (const ancestorId of commonAncestors) {
+            // Bereken COI van die voorouder (recursief)
+            const ancestorCOI = this.calculateCorrectCOI(ancestorId, maxGenerations - 1);
+            
+            // Pas de bijdrage aan: originele bijdrage × (1 + COI van voorouder)
+            // Maar alleen voor de bijdrage van deze specifieke voorouder
+            // Dus: trek originele bijdrage eraf, voeg gecorrigeerde bijdrage toe
+            totalCOI -= 0.125; // Haal originele bijdrage eraf
+            totalCOI += 0.125 * (1 + ancestorCOI); // Voeg gecorrigeerde bijdrage toe
+        }
+        
+        return totalCOI;
+    }
+    
+    return dogCOI;
 }
 
 /* ============================================= */
