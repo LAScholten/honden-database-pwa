@@ -255,22 +255,22 @@ class StamboomManager extends BaseModule {
      * @returns {number} - COI als decimaal tussen 0 en 1 (0-100%)
      */
     calculateCOIForDog(dogId, maxDepth) {
-        if (!dogId || dogId === 0) return ;
+        if (!dogId || dogId === 0) return 0;
         
         const dog = this.getDogById(dogId);
         if (!dog || !dog.vaderId || !dog.moederId) {
-            return ;
+            return 0;
         }
         
         // Directe inteelt: ouders zijn dezelfde hond
         if (dog.vaderId === dog.moederId) {
-            return .25;
+            return 0.25;
         }
         
         // Vind alle gemeenschappelijke voorouders
         const commonAncestors = this.findCommonAncestors(dogId, maxDepth);
         
-        let totalCOI = ;
+        let totalCOI = 0;
         
         // Voor elke gemeenschappelijke voorouder: bereken de bijdrage
         for (const ancestorId of commonAncestors) {
@@ -288,7 +288,7 @@ class StamboomManager extends BaseModule {
                     const n2 = mPath.length;
                     
                     // Basisbijdrage volgens formule van Wright: (½)^(n₁ + n₂ + 1)
-                    const baseContribution = Math.pow(.5, n1 + n2 + 1);
+                    const baseContribution = Math.pow(0.5, n1 + n2 + 1);
                     
                     // Bereken COI van de voorouder zelf (Fₐ)
                     // Voor de voorouder gebruiken we maxDepth - min(n1, n2) als we diepte beperken
