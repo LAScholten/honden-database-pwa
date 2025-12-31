@@ -304,7 +304,7 @@ areSiblings(dogId1, dogId2) {
     // Of als ouders omgewisseld zijn (vader van dog1 = moeder van dog2, etc.)
     const swappedParents = (
         dog1.vaderId && dog2.moederId && dog1.vaderId === dog2.moederId &&
-        dog1.moederId && dog2.vaderId && dog1.moederId === dog2.vaderId
+        dog1.moederId && dog2.vaderId && dog1.moederId === dogId2)
     );
     
     return sameParents || swappedParents;
@@ -1704,7 +1704,7 @@ collectAllAncestors(dogId, maxGenerations) {
                 /* EINDE DESKTOP STYLES */
                 /* ============================================= */
                 
-                /* POPUP STYLES */
+                /* POPUP STYLES - IDENTIEK VOOR MOBIEL EN DESKTOP */
                 .pedigree-popup-overlay {
                     position: fixed;
                     top: 0;
@@ -1716,7 +1716,6 @@ collectAllAncestors(dogId, maxGenerations) {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    padding: 10px; /* Minder padding voor mobiel */
                     animation: fadeIn 0.3s;
                     overflow-y: auto;
                 }
@@ -1729,31 +1728,13 @@ collectAllAncestors(dogId, maxGenerations) {
                 .pedigree-popup-container {
                     background: white;
                     border-radius: 12px;
-                    width: 100%;
-                    max-width: 350px; /* Gelijk voor alle schermen */
+                    max-width: 350px;
                     max-height: 80vh;
                     overflow-y: auto;
                     animation: slideUp 0.3s;
                     box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-                    margin: 0 auto; /* Centreer automatisch */
-                    position: relative;
-                    left: 10px; /* NIEUW: 10px van de linkerzijde */
-                }
-                
-                /* Centreren voor alle schermgroottes */
-                @media (max-width: 767px) {
-                    .pedigree-popup-overlay {
-                        padding: 10px;
-                        align-items: center;
-                        justify-content: flex-start; /* NIEUW: Links uitlijnen */
-                    }
-                    
-                    .pedigree-popup-container {
-                        width: calc(100% - 20px); /* Zorg voor 10px marge aan beide kanten */
-                        max-width: 350px;
-                        margin: 0; /* NIEUW: Geen auto margin meer */
-                        left: 10px; /* NIEUW: 10px van de linkerzijde */
-                    }
+                    width: calc(100% - 20px);
+                    margin: 10px;
                 }
                 
                 @keyframes slideUp {
@@ -1818,7 +1799,7 @@ collectAllAncestors(dogId, maxGenerations) {
                 }
                 
                 .popup-body {
-                    padding: 15px; /* Minder padding voor compactere weergave */
+                    padding: 15px;
                     flex: 1;
                     overflow-y: auto;
                     -webkit-overflow-scrolling: touch;
@@ -1836,13 +1817,13 @@ collectAllAncestors(dogId, maxGenerations) {
                 
                 /* Minder ruimte tussen secties */
                 .info-section {
-                    margin-bottom: 20px; /* Was 25px */
+                    margin-bottom: 20px;
                 }
                 
                 .info-section h6 {
                     color: #495057;
-                    margin-bottom: 10px; /* Was 12px */
-                    padding-bottom: 6px; /* Was 8px */
+                    margin-bottom: 10px;
+                    padding-bottom: 6px;
                     border-bottom: 2px solid #e9ecef;
                     display: flex;
                     align-items: center;
@@ -1852,7 +1833,7 @@ collectAllAncestors(dogId, maxGenerations) {
                 .info-grid {
                     display: grid;
                     grid-template-columns: 1fr;
-                    gap: 8px; /* Was 12px */
+                    gap: 8px;
                 }
                 
                 @media (min-width: 400px) {
@@ -1864,7 +1845,7 @@ collectAllAncestors(dogId, maxGenerations) {
                 .info-item {
                     display: flex;
                     flex-direction: column;
-                    padding: 6px 0; /* Was 8px 0 */
+                    padding: 6px 0;
                 }
                 
                 /* COI waarden styling - met kleurcodering */
@@ -1877,14 +1858,14 @@ collectAllAncestors(dogId, maxGenerations) {
                     font-weight: 600;
                     color: #495057;
                     font-size: 0.9rem;
-                    margin-bottom: 2px; /* Was 4px */
-                    line-height: 1.2; /* Was 1.3 */
+                    margin-bottom: 2px;
+                    line-height: 1.2;
                 }
                 
                 .info-value {
                     color: #212529;
                     font-size: 0.95rem;
-                    line-height: 1.3; /* Was 1.4 */
+                    line-height: 1.3;
                     word-break: break-word;
                 }
                 
@@ -2084,12 +2065,6 @@ collectAllAncestors(dogId, maxGenerations) {
         
         // Show overlay - center in viewport
         overlay.style.display = 'flex';
-        
-        // Ensure popup is visible and centered
-        setTimeout(() => {
-            container.style.marginTop = '0';
-            container.style.transform = 'translateY(0)';
-        }, 10);
         
         // Add close event listeners
         const closeButtons = container.querySelectorAll('.popup-close, .popup-close-btn');
