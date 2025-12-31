@@ -227,17 +227,24 @@ calculateCOI(dogId) {
         return { coi6Gen: '0.0', coiAllGen: '0.0' };
     }
     
-    // Check speciaal geval: ouders zijn broer en zus - FIXED
-    // In dit geval is COI 25% (0.25) ongeacht verdere voorouders
-    if (this.areSiblings(dog.vaderId, dog.moederId)) {
+    // Check speciaal geval: ouders zijn dezelfde hond
+    if (dog.vaderId === dog.moederId) {
         return { 
             coi6Gen: '25.0', 
             coiAllGen: '25.0' 
         };
     }
     
-    // Check speciaal geval: ouders zijn dezelfde hond
-    if (dog.vaderId === dog.moederId) {
+    // NIEUW: Check op directe ouder-kind relaties
+    if (this.isParentChildPair(dog.vaderId, dog.moederId)) {
+        return { 
+            coi6Gen: '25.0', 
+            coiAllGen: '25.0' 
+        };
+    }
+    
+    // Check speciaal geval: ouders zijn broer en zus
+    if (this.areSiblings(dog.vaderId, dog.moederId)) {
         return { 
             coi6Gen: '25.0', 
             coiAllGen: '25.0' 
@@ -253,6 +260,30 @@ calculateCOI(dogId) {
         coi6Gen: (coi6Gen * 100).toFixed(1), 
         coiAllGen: (coiAllGen * 100).toFixed(1) 
     };
+}
+
+// NIEUWE HELPER: controleer of het een ouder-kind paar is
+isParentChildPair(dogId1, dogId2) {
+    if (!dogId1 || !dogId2 || dogId1 === dogId2) return false;
+    
+    const dog1 = this.getDogById(dogId1);
+    const dog2 = this.getDogById(dogId2);
+    
+    if (!dog1 || !dog2) return false;
+    
+    // Controleer of dog1 ouder is van dog2 (vader of moeder)
+    const dog1IsParentOfDog2 = (
+        (dog1.vaderId === dogId2 || dog1.moederId === dogId2) ? false : // dog1 kan niet kind zijn van dog2 als dog2 ouder is
+        (dog2.vaderId === dogId1 || dog2.moederId === dogId1)
+    );
+    
+    // Controleer of dog2 ouder is van dog1
+    const dog2IsParentOfDog1 = (
+        (dog2.vaderId === dogId1 || dog2.moederId === dogId1) ? false :
+        (dog1.vaderId === dogId2 || dog1.moederId === dogId2)
+    );
+    
+    return dog1IsParentOfDog2 || dog2IsParentOfDog1;
 }
 
 // Helper: controleer of twee honden broer en zus zijn (zelfde ouders)
@@ -288,13 +319,18 @@ calculateCOIForGenerations(dogId, maxGenerations) {
         return 0;
     }
     
-    // Check op broer/zus ouders - stop direct
-    if (this.areSiblings(dog.vaderId, dog.moederId)) {
-        return 0.25; // 25% COI voor broer/zus nakomelingen
-    }
-    
     // Check op dezelfde ouders
     if (dog.vaderId === dog.moederId) {
+        return 0.25;
+    }
+    
+    // Check op ouder-kind relaties - stop direct
+    if (this.isParentChildPair(dog.vaderId, dog.moederId)) {
+        return 0.25;
+    }
+    
+    // Check op broer/zus ouders - stop direct
+    if (this.areSiblings(dog.vaderId, dog.moederId)) {
         return 0.25;
     }
     
