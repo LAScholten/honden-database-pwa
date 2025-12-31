@@ -304,7 +304,7 @@ areSiblings(dogId1, dogId2) {
     // Of als ouders omgewisseld zijn (vader van dog1 = moeder van dog2, etc.)
     const swappedParents = (
         dog1.vaderId && dog2.moederId && dog1.vaderId === dog2.moederId &&
-        dog1.moederId && dog2.vaderId && dog1.moederId === dogId2)
+        dog1.moederId && dog2.vaderId && dog1.moederId === dog2.vaderId
     );
     
     return sameParents || swappedParents;
