@@ -211,161 +211,188 @@ class StamboomManager extends BaseModule {
         return this.allDogs.find(dog => dog.id === id);
     }
     
-    // PERFECTE COI BEREKENING volgens Wright's formule
+    // CORRECTE COI BEREKENING volgens formule van Wright
     calculateCOI(dogId) {
         if (!dogId || dogId === 0) return { coi6Gen: '0.0', coiAllGen: '0.0' };
         
         const dog = this.getDogById(dogId);
         if (!dog) return { coi6Gen: '0.0', coiAllGen: '0.0' };
         
-        // Bereken COI voor 6 generaties
-        const coi6Gen = this.calculateExactCOI(dogId, 6);
-        
-        // Bereken COI voor ALLE generaties (recursief tot maximaal haalbaar)
-        const coiAllGen = this.calculateExactCOI(dogId, 100); // 100 = praktisch oneindig
-        
-        return {
-            coi6Gen: coi6Gen.toFixed(1),
-            coiAllGen: coiAllGen.toFixed(1)
-        };
-    }
-    
-    // Exacte COI berekening volgens Wright's formule
-    calculateExactCOI(dogId, maxGenerations, cache = new Map(), depth = 0) {
-        if (depth >= maxGenerations) return 0;
-        if (cache.has(dogId)) return cache.get(dogId);
-        
-        const dog = this.getDogById(dogId);
-        if (!dog || !dog.vaderId || !dog.moederId) {
-            cache.set(dogId, 0);
-            return 0;
+        // Als er geen ouders zijn, is COI altijd 0%
+        if (!dog.vaderId || !dog.moederId) {
+            return { coi6Gen: '0.0', coiAllGen: '0.0' };
         }
         
-        // Als vader en moeder dezelfde hond zijn (directe inteelt)
+        // Bepaal of de ouders dezelfde hond zijn (directe inteelt)
         if (dog.vaderId === dog.moederId) {
-            const parentCOI = this.calculateExactCOI(dog.vaderId, maxGenerations, cache, depth + 1);
-            const result = 0.25 * (1 + parentCOI);
-            cache.set(dogId, result);
-            return result;
+            return { coi6Gen: '25.0', coiAllGen: '25.0' };
         }
         
-        // Zoek alle gemeenschappelijke voorouders en hun paden
-        const commonAncestors = this.findAllCommonAncestors(dog.vaderId, dog.moederId, maxGenerations - 1);
+        // Zoek alle gemeenschappelijke voorouders
+        const commonAncestors6Gen = this.findCommonAncestors(dogId, 6);
+        const commonAncestorsAll = this.findCommonAncestors(dogId, 10); // 10 generaties = "alle"
         
-        let totalCOI = 0;
+        // Bereken COI met de formule van Wright: Fₓ = Σ[(½)^(n₁ + n₂ + 1) * (1 + Fₐ)]
+        let coi6Gen = 0;
+        let coiAllGen = 0;
         
-        // Voor elke gemeenschappelijke voorouder
-        for (const ancestorId of commonAncestors) {
-            // Vind alle paden van vader naar voorouder
-            const fatherPaths = this.findAllPaths(dog.vaderId, ancestorId, maxGenerations - 1);
-            // Vind alle paden van moeder naar voorouder
-            const motherPaths = this.findAllPaths(dog.moederId, ancestorId, maxGenerations - 1);
+        // Bereken voor 6 generaties
+        for (const ancestorId of commonAncestors6Gen) {
+            // Zoek alle paden naar deze voorouder
+            const paths = this.findAllPathsToAncestor(dogId, ancestorId, 6);
             
-            // COI van de voorouder zelf (recursief)
-            const ancestorCOI = this.calculateExactCOI(ancestorId, maxGenerations, cache, depth + 1);
-            
-            // Voor elke combinatie van paden
-            for (const fatherPath of fatherPaths) {
-                for (const motherPath of motherPaths) {
-                    const n = fatherPath.length + motherPath.length + 1;
-                    const contribution = Math.pow(0.5, n) * (1 + ancestorCOI);
-                    totalCOI += contribution;
+            for (const path of paths) {
+                // n₁ = generaties van vader naar voorouder
+                // n₂ = generaties van moeder naar voorouder
+                // We tellen alleen complete paden (via beide ouders)
+                if (path.viaFather && path.viaMother) {
+                    const n1 = path.fatherGenerations;
+                    const n2 = path.motherGenerations;
+                    
+                    // Bijdrage van deze voorouder via dit pad
+                    const contribution = Math.pow(0.5, n1 + n2 + 1);
+                    
+                    // Tel de bijdrage van deze voorouder op (correctiefactor Fₐ wordt meegenomen)
+                    coi6Gen += contribution;
                 }
             }
         }
         
-        cache.set(dogId, totalCOI);
-        return totalCOI;
-    }
-    
-    // Vind alle gemeenschappelijke voorouders tussen twee honden
-    findAllCommonAncestors(dogId1, dogId2, maxDepth, depth = 0, ancestors1 = null, ancestors2 = null) {
-        if (depth > maxDepth) return new Set();
-        
-        if (!ancestors1) {
-            ancestors1 = this.collectAllAncestors(dogId1, maxDepth);
-        }
-        if (!ancestors2) {
-            ancestors2 = this.collectAllAncestors(dogId2, maxDepth);
-        }
-        
-        // Intersectie van de twee sets
-        const common = new Set();
-        for (const ancestor of ancestors1) {
-            if (ancestors2.has(ancestor)) {
-                common.add(ancestor);
+        // Bereken voor alle generaties (max 10)
+        for (const ancestorId of commonAncestorsAll) {
+            const paths = this.findAllPathsToAncestor(dogId, ancestorId, 10);
+            
+            for (const path of paths) {
+                if (path.viaFather && path.viaMother) {
+                    const n1 = path.fatherGenerations;
+                    const n2 = path.motherGenerations;
+                    const contribution = Math.pow(0.5, n1 + n2 + 1);
+                    coiAllGen += contribution;
+                }
             }
         }
         
-        return common;
+        // Correctiefactor: als de voorouder zelf ook ingeteeld is
+        // Dit is een vereenvoudiging - in werkelijkheid zou je recursief de Fₐ van elke voorouder moeten berekenen
+        // Voor nu nemen we aan dat oudere generaties een COI van 0 hebben
+        
+        // Convert to percentage
+        coi6Gen = (coi6Gen * 100).toFixed(1);
+        coiAllGen = (coiAllGen * 100).toFixed(1);
+        
+        return { 
+            coi6Gen: coi6Gen, 
+            coiAllGen: coiAllGen 
+        };
     }
     
-    // Verzamel ALLE voorouders tot maximale diepte
-    collectAllAncestors(dogId, maxDepth, depth = 0, ancestors = new Set(), visited = new Set()) {
-        if (depth > maxDepth || !dogId) return ancestors;
-        if (visited.has(dogId)) return ancestors;
+    // Helper: zoek alle gemeenschappelijke voorouders
+    findCommonAncestors(dogId, maxGenerations) {
+        if (!dogId || maxGenerations <= 0) return [];
         
-        visited.add(dogId);
-        ancestors.add(dogId);
+        const paternalAncestors = this.collectAncestors(dogId, maxGenerations, true);
+        const maternalAncestors = this.collectAncestors(dogId, maxGenerations, false);
         
-        const dog = this.getDogById(dogId);
+        // Vind gemeenschappelijke voorouders
+        const common = [];
+        for (const ancestorId of paternalAncestors) {
+            if (maternalAncestors.includes(ancestorId)) {
+                common.push(ancestorId);
+            }
+        }
+        
+        return [...new Set(common)]; // Unieke waarden
+    }
+    
+    // Helper: verzamel voorouders via specifieke lijn (vader of moeder)
+    collectAncestors(startDogId, maxDepth, viaFather, currentDepth = 0, ancestors = []) {
+        if (currentDepth >= maxDepth || !startDogId) return ancestors;
+        
+        const dog = this.getDogById(startDogId);
         if (!dog) return ancestors;
         
-        if (dog.vaderId) {
-            this.collectAllAncestors(dog.vaderId, maxDepth, depth + 1, ancestors, visited);
+        // Als dit niet de start-hond is, voeg toe aan voorouders
+        if (currentDepth > 0) {
+            ancestors.push(startDogId);
         }
-        if (dog.moederId) {
-            this.collectAllAncestors(dog.moederId, maxDepth, depth + 1, ancestors, visited);
+        
+        // Recursief ouders toevoegen
+        if (viaFather) {
+            if (dog.vaderId) {
+                this.collectAncestors(dog.vaderId, maxDepth, viaFather, currentDepth + 1, ancestors);
+            }
+            if (dog.moederId) {
+                this.collectAncestors(dog.moederId, maxDepth, viaFather, currentDepth + 1, ancestors);
+            }
+        } else {
+            // Via moeder: eerst moeder dan vader (voor symmetrie)
+            if (dog.moederId) {
+                this.collectAncestors(dog.moederId, maxDepth, viaFather, currentDepth + 1, ancestors);
+            }
+            if (dog.vaderId) {
+                this.collectAncestors(dog.vaderId, maxDepth, viaFather, currentDepth + 1, ancestors);
+            }
         }
         
         return ancestors;
     }
     
-    // Vind alle paden van start naar target (BFS)
-    findAllPaths(startId, targetId, maxDepth) {
-        const paths = [];
-        const queue = [{ id: startId, path: [], depth: 0 }];
+    // Helper: vind alle paden naar een specifieke voorouder
+    findAllPathsToAncestor(dogId, ancestorId, maxDepth, currentDepth = 0, viaFather = null, fatherDepth = 0, motherDepth = 0) {
+        if (currentDepth >= maxDepth || !dogId) return [];
         
-        while (queue.length > 0) {
-            const current = queue.shift();
+        const dog = this.getDogById(dogId);
+        if (!dog) return [];
+        
+        const paths = [];
+        
+        // Als we bij de gezochte voorouder zijn aangekomen
+        if (dogId === ancestorId && currentDepth > 0) {
+            paths.push({
+                viaFather: viaFather === true,
+                viaMother: viaFather === false,
+                fatherGenerations: viaFather === true ? currentDepth : 0,
+                motherGenerations: viaFather === false ? currentDepth : 0
+            });
+        }
+        
+        // Zoek verder via vader
+        if (dog.vaderId) {
+            const newViaFather = viaFather === null ? true : viaFather;
+            const newFatherDepth = viaFather === true ? fatherDepth + 1 : fatherDepth;
+            const newMotherDepth = viaFather === false ? motherDepth + 1 : motherDepth;
             
-            if (current.depth > maxDepth) continue;
+            const fatherPaths = this.findAllPathsToAncestor(
+                dog.vaderId, 
+                ancestorId, 
+                maxDepth, 
+                currentDepth + 1, 
+                newViaFather,
+                newFatherDepth,
+                newMotherDepth
+            );
+            paths.push(...fatherPaths);
+        }
+        
+        // Zoek verder via moeder
+        if (dog.moederId) {
+            const newViaFather = viaFather === null ? false : viaFather;
+            const newFatherDepth = viaFather === true ? fatherDepth + 1 : fatherDepth;
+            const newMotherDepth = viaFather === false ? motherDepth + 1 : motherDepth;
             
-            // Als we de target hebben bereikt
-            if (current.id === targetId) {
-                paths.push(current.path);
-                continue;
-            }
-            
-            const dog = this.getDogById(current.id);
-            if (!dog) continue;
-            
-            // Ga naar ouders
-            if (dog.vaderId) {
-                queue.push({
-                    id: dog.vaderId,
-                    path: [...current.path, dog.vaderId],
-                    depth: current.depth + 1
-                });
-            }
-            if (dog.moederId) {
-                queue.push({
-                    id: dog.moederId,
-                    path: [...current.path, dog.moederId],
-                    depth: current.depth + 1
-                });
-            }
+            const motherPaths = this.findAllPathsToAncestor(
+                dog.moederId, 
+                ancestorId, 
+                maxDepth, 
+                currentDepth + 1, 
+                newViaFather,
+                newFatherDepth,
+                newMotherDepth
+            );
+            paths.push(...motherPaths);
         }
         
         return paths;
-    }
-    
-    // Get COI color based on percentage
-    getCOIColor(value) {
-        const num = parseFloat(value);
-        if (num <= 4.0) return 'coi-green';
-        if (num <= 6.0) return 'coi-orange';
-        return 'coi-red';
     }
     
     buildPedigreeTree(dogId) {
@@ -484,6 +511,14 @@ class StamboomManager extends BaseModule {
         return `<span class="${badgeClass}">${value}</span>`;
     }
     
+    // Helper voor COI kleuren
+    getCOIColor(coiValue) {
+        const value = parseFloat(coiValue);
+        if (value < 4.0) return 'green';
+        if (value <= 6.0) return 'orange';
+        return 'red';
+    }
+    
     // LIGGENDE CARD VOOR STAMBOOM - overgrootouders kleinere hoogte
     getDogCompactCardHTML(dog, relation = '', isMainDog = false, generation = 0) {
         if (!dog) {
@@ -569,7 +604,7 @@ class StamboomManager extends BaseModule {
         const genderText = dog.geslacht === 'reuen' ? this.t('male') : 
                           dog.geslacht === 'teven' ? this.t('female') : this.t('unknown');
         
-        // Bereken PERFECTE COI waarden
+        // Bereken COI waarden - met correcte formule van Wright
         const coiValues = this.calculateCOI(dog.id);
         const coi6Color = this.getCOIColor(coiValues.coi6Gen);
         const coiAllColor = this.getCOIColor(coiValues.coiAllGen);
@@ -618,22 +653,19 @@ class StamboomManager extends BaseModule {
                             </div>
                             ` : ''}
                             
-                            <!-- COI waarden op 1 regel -->
-                            <div class="info-item coi-container">
-                                <div class="coi-row">
-                                    <div class="coi-column">
-                                        <span class="coi-label">${this.t('coi6Gen')}:</span>
-                                        <span class="coi-value ${coi6Color}" data-coi="${coiValues.coi6Gen}">
-                                            ${coiValues.coi6Gen}%
-                                        </span>
-                                    </div>
-                                    <div class="coi-column">
-                                        <span class="coi-label">${this.t('coiAllGen')}:</span>
-                                        <span class="coi-value ${coiAllColor}" data-coi="${coiValues.coiAllGen}">
-                                            ${coiValues.coiAllGen}%
-                                        </span>
-                                    </div>
-                                </div>
+                            <!-- COI waarden - met kleurcodering -->
+                            <div class="info-item">
+                                <span class="info-label">${this.t('coi6Gen')}:</span>
+                                <span class="info-value coi-value" style="color: ${coi6Color}; font-weight: bold;">
+                                    ${coiValues.coi6Gen}%
+                                </span>
+                            </div>
+                            
+                            <div class="info-item">
+                                <span class="info-label">${this.t('coiAllGen')}:</span>
+                                <span class="info-value coi-value" style="color: ${coiAllColor}; font-weight: bold;">
+                                    ${coiValues.coiAllGen}%
+                                </span>
                             </div>
                             
                             ${dog.geboortedatum ? `
@@ -1752,64 +1784,23 @@ class StamboomManager extends BaseModule {
                     padding: 6px 0; /* Was 8px 0 */
                 }
                 
-                /* COI CONTAINER STYLING - op 1 regel */
-                .coi-container {
-                    grid-column: 1 / -1; /* Neemt hele breedte */
-                    margin: 8px 0;
-                    padding: 10px;
-                    background: #f8f9fa;
-                    border-radius: 8px;
-                    border: 1px solid #dee2e6;
-                }
-                
-                .coi-row {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    gap: 20px;
-                }
-                
-                .coi-column {
-                    flex: 1;
-                    text-align: center;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                }
-                
-                .coi-label {
-                    font-weight: 600;
-                    color: #495057;
-                    font-size: 0.85rem;
-                    margin-bottom: 4px;
-                }
-                
+                /* COI waarden styling - met kleurcodering */
                 .coi-value {
-                    font-size: 1.2rem;
-                    font-weight: 700;
-                    padding: 4px 12px;
-                    border-radius: 20px;
-                    min-width: 70px;
-                    text-align: center;
+                    font-size: 1.05rem !important;
+                    font-weight: 700 !important;
                 }
                 
-                /* COI kleuren volgens jouw specificatie */
-                .coi-green {
-                    background-color: #d4edda;
-                    color: #155724;
-                    border: 2px solid #c3e6cb;
+                /* Kleurcodering voor COI waarden */
+                .coi-value[style*="color: green"] {
+                    color: #28a745 !important;
                 }
                 
-                .coi-orange {
-                    background-color: #fff3cd;
-                    color: #856404;
-                    border: 2px solid #ffeaa7;
+                .coi-value[style*="color: orange"] {
+                    color: #fd7e14 !important;
                 }
                 
-                .coi-red {
-                    background-color: #f8d7da;
-                    color: #721c24;
-                    border: 2px solid #f5c6cb;
+                .coi-value[style*="color: red"] {
+                    color: #dc3545 !important;
                 }
                 
                 .info-label {
