@@ -216,94 +216,93 @@ class StamboomManager extends BaseModule {
 /* ============================================= */
 
 /* ============================================= */
-/* COI BEREKENING - GECORRIGEERDE VERSIE        */
+/* COI BEREKENING - MINIMALE WERKENDE VERSIE    */
 /* ============================================= */
 
-class COICalculator {
+class StamboomManager {
     constructor(database) {
         this.db = database;
-        this.cache = new Map();
-        this.pathCache = new Map();
+        this.coiCache = new Map();
     }
 
-    // Hoofdfunctie
+    /* ========== COI BEREKENING ========== */
+    
     async calculateCOI(dogId) {
-        if (!dogId) return { coi6Gen: '0.0', coiAllGen: '0.0' };
-        
-        this.cache.clear();
-        this.pathCache.clear();
-        
-        const coi6 = await this.calculateCOIRecursive(dogId, 6);
-        
-        this.cache.clear();
-        this.pathCache.clear();
-        const coiAll = await this.calculateCOIRecursive(dogId, 20);
-        
-        return {
-            coi6Gen: (coi6 * 100).toFixed(1),
-            coiAllGen: (coiAll * 100).toFixed(1)
-        };
+        try {
+            if (!dogId) return { coi6Gen: '0.0', coiAllGen: '0.0' };
+            
+            this.coiCache.clear();
+            
+            // Bereken voor 6 generaties en alle generaties
+            const coi6 = await this.calculateCOIRecursive(dogId, 6, new Set());
+            this.coiCache.clear();
+            const coiAll = await this.calculateCOIRecursive(dogId, 20, new Set());
+            
+            return {
+                coi6Gen: (coi6 * 100).toFixed(1),
+                coiAllGen: (coiAll * 100).toFixed(1)
+            };
+        } catch (error) {
+            console.error('Fout bij COI berekening:', error);
+            return { coi6Gen: '0.0', coiAllGen: '0.0' };
+        }
     }
 
-    // Recursieve berekening
-    async calculateCOIRecursive(dogId, depth) {
+    async calculateCOIRecursive(dogId, depth, visited) {
         if (!dogId || depth <= 0) return 0;
         
         const cacheKey = `${dogId}-${depth}`;
-        if (this.cache.has(cacheKey)) {
-            return this.cache.get(cacheKey);
+        if (this.coiCache.has(cacheKey)) {
+            return this.coiCache.get(cacheKey);
         }
+        
+        // Voorkom oneindige loops
+        if (visited.has(dogId)) return 0;
+        visited.add(dogId);
         
         const dog = await this.db.getHondById(dogId);
         if (!dog || !dog.vaderId || !dog.moederId) {
-            this.cache.set(cacheKey, 0);
+            visited.delete(dogId);
+            this.coiCache.set(cacheKey, 0);
             return 0;
         }
         
         // Directe inteelt
         if (dog.vaderId === dog.moederId) {
-            this.cache.set(cacheKey, 0.25);
+            visited.delete(dogId);
+            this.coiCache.set(cacheKey, 0.25);
             return 0.25;
         }
         
-        // Bereken COI van ouders
-        const fVader = await this.calculateCOIRecursive(dog.vaderId, depth - 1);
-        const fMoeder = await this.calculateCOIRecursive(dog.moederId, depth - 1);
-        
-        // Vind gemeenschappelijke voorouders
-        const commonAncestors = await this.findCommonAncestors(dog.vaderId, dog.moederId, depth - 1);
+        // Zoek gemeenschappelijke voorouders
+        const commonAncestors = await this.findCommonAncestorsSimple(dog.vaderId, dog.moederId, depth - 1, new Set());
         
         let totalCOI = 0;
         
         for (const ancestorId of commonAncestors) {
-            const fAncestor = await this.calculateCOIRecursive(ancestorId, depth - 1);
-            const pathsVader = await this.findPaths(dog.vaderId, ancestorId, depth - 1);
-            const pathsMoeder = await this.findPaths(dog.moederId, ancestorId, depth - 1);
+            const ancestorCOI = await this.calculateCOIRecursive(ancestorId, depth - 1, new Set(visited));
+            const n1 = await this.getPathLength(dog.vaderId, ancestorId, depth - 1, new Set());
+            const n2 = await this.getPathLength(dog.moederId, ancestorId, depth - 1, new Set());
             
-            for (const pv of pathsVader) {
-                for (const pm of pathsMoeder) {
-                    // Wright's formule
-                    const contribution = Math.pow(0.5, pv.length + pm.length + 1) * (1 + fAncestor);
-                    totalCOI += contribution;
-                }
+            if (n1 > 0 && n2 > 0) {
+                const contribution = Math.pow(0.5, n1 + n2 + 1) * (1 + ancestorCOI);
+                totalCOI += contribution;
             }
         }
         
-        this.cache.set(cacheKey, totalCOI);
+        visited.delete(dogId);
+        this.coiCache.set(cacheKey, totalCOI);
         return totalCOI;
     }
 
-    // Vind gemeenschappelijke voorouders
-    async findCommonAncestors(id1, id2, depth) {
+    async findCommonAncestorsSimple(id1, id2, depth, visited) {
         if (depth <= 0) return new Set();
+        if (visited.has(`${id1}-${id2}`)) return new Set();
         
-        const cacheKey = `common-${id1}-${id2}-${depth}`;
-        if (this.pathCache.has(cacheKey)) {
-            return this.pathCache.get(cacheKey);
-        }
+        visited.add(`${id1}-${id2}`);
         
-        const ancestors1 = await this.collectAncestors(id1, depth);
-        const ancestors2 = await this.collectAncestors(id2, depth);
+        const ancestors1 = await this.collectAncestorsSimple(id1, depth);
+        const ancestors2 = await this.collectAncestorsSimple(id2, depth);
         
         const common = new Set();
         for (const anc of ancestors1) {
@@ -312,99 +311,79 @@ class COICalculator {
             }
         }
         
-        this.pathCache.set(cacheKey, common);
         return common;
     }
 
-    // Verzamel alle voorouders
-    async collectAncestors(startId, depth) {
+    async collectAncestorsSimple(startId, depth) {
         const ancestors = new Set();
+        const stack = [{ id: startId, depth: 0 }];
         const visited = new Set();
         
-        const collect = async (currentId, currentDepth) => {
-            if (!currentId || currentDepth > depth) return;
-            if (visited.has(currentId)) return;
+        while (stack.length > 0) {
+            const { id, depth: currentDepth } = stack.pop();
             
-            visited.add(currentId);
+            if (visited.has(id) || currentDepth > depth) continue;
+            visited.add(id);
             
             if (currentDepth > 0) {
-                ancestors.add(currentId);
+                ancestors.add(id);
             }
             
-            const dog = await this.db.getHondById(currentId);
+            const dog = await this.db.getHondById(id);
             if (dog) {
-                if (dog.vaderId) {
-                    await collect(dog.vaderId, currentDepth + 1);
+                if (dog.vaderId && currentDepth < depth) {
+                    stack.push({ id: dog.vaderId, depth: currentDepth + 1 });
                 }
-                if (dog.moederId) {
-                    await collect(dog.moederId, currentDepth + 1);
+                if (dog.moederId && currentDepth < depth) {
+                    stack.push({ id: dog.moederId, depth: currentDepth + 1 });
                 }
             }
-            
-            visited.delete(currentId);
-        };
+        }
         
-        await collect(startId, 0);
         return ancestors;
     }
 
-    // Vind alle paden van start naar target
-    async findPaths(fromId, toId, depth) {
-        const cacheKey = `paths-${fromId}-${toId}-${depth}`;
-        if (this.pathCache.has(cacheKey)) {
-            return this.pathCache.get(cacheKey);
+    async getPathLength(fromId, toId, maxDepth, visited) {
+        if (visited.has(fromId)) return 0;
+        visited.add(fromId);
+        
+        if (fromId === toId) {
+            visited.delete(fromId);
+            return 0; // lengte van fromId naar zichzelf is 0
         }
         
-        const allPaths = [];
-        const visited = new Set();
+        const dog = await this.db.getHondById(fromId);
+        if (!dog || maxDepth <= 0) {
+            visited.delete(fromId);
+            return -1; // niet gevonden
+        }
         
-        const dfs = async (currentId, currentDepth, currentPath) => {
-            if (!currentId || currentDepth > depth) return;
-            if (visited.has(currentId)) return;
-            
-            visited.add(currentId);
-            const newPath = [...currentPath, currentId];
-            
-            if (currentId === toId) {
-                allPaths.push(newPath.slice(1));
-                visited.delete(currentId);
-                return;
-            }
-            
-            const dog = await this.db.getHondById(currentId);
-            if (dog) {
-                if (dog.vaderId) {
-                    await dfs(dog.vaderId, currentDepth + 1, newPath);
-                }
-                if (dog.moederId) {
-                    await dfs(dog.moederId, currentDepth + 1, newPath);
-                }
-            }
-            
-            visited.delete(currentId);
-        };
-        
-        await dfs(fromId, 0, []);
-        
-        // Filter duplicaten
-        const uniquePaths = [];
-        const seen = new Set();
-        
-        for (const path of allPaths) {
-            const sig = path.join(',');
-            if (!seen.has(sig)) {
-                seen.add(sig);
-                uniquePaths.push(path);
+        // Probeer via vader
+        if (dog.vaderId) {
+            const viaVader = await this.getPathLength(dog.vaderId, toId, maxDepth - 1, new Set(visited));
+            if (viaVader >= 0) {
+                visited.delete(fromId);
+                return 1 + viaVader;
             }
         }
         
-        this.pathCache.set(cacheKey, uniquePaths);
-        return uniquePaths;
+        // Probeer via moeder
+        if (dog.moederId) {
+            const viaMoeder = await this.getPathLength(dog.moederId, toId, maxDepth - 1, new Set(visited));
+            if (viaMoeder >= 0) {
+                visited.delete(fromId);
+                return 1 + viaMoeder;
+            }
+        }
+        
+        visited.delete(fromId);
+        return -1; // niet gevonden
     }
 
-    // DEBUG functie
-    async debugCalculation(dogId) {
-        console.log('=== DEBUG COI BEREKENING ===');
+    /* ========== EENVOUDIGE TEST ========== */
+    
+    async testCOIForDog(dogId) {
+        console.log('=== COI TEST ===');
         
         const dog = await this.db.getHondById(dogId);
         if (!dog) {
@@ -412,57 +391,24 @@ class COICalculator {
             return;
         }
         
-        console.log(`Hond: ${dog.naam} (ID: ${dogId})`);
+        console.log(`Test hond: ${dog.naam} (ID: ${dogId})`);
         console.log(`Vader: ${dog.vaderId}, Moeder: ${dog.moederId}`);
         
-        if (dog.vaderId === dog.moederId) {
-            console.log('DIRECTE INTELT: 25%');
-            return;
-        }
-        
-        // Toon eenvoudige stamboom
-        await this.printSimpleTree(dogId, 3);
-        
-        // Bereken COI
         const result = await this.calculateCOI(dogId);
-        console.log('Resultaat:', result);
-    }
-    
-    async printSimpleTree(dogId, maxDepth) {
-        const printRecursive = async (currentId, currentDepth, path) => {
-            if (currentDepth > maxDepth) return;
-            if (path.includes(currentId)) return;
-            
-            const dog = await this.db.getHondById(currentId);
-            if (!dog) return;
-            
-            const indent = '  '.repeat(currentDepth);
-            console.log(`${indent}${dog.naam || `[${currentId}]`} (ID: ${currentId})`);
-            
-            if (dog.vaderId) {
-                await printRecursive(dog.vaderId, currentDepth + 1, [...path, currentId]);
-            }
-            if (dog.moederId) {
-                await printRecursive(dog.moederId, currentDepth + 1, [...path, currentId]);
-            }
-        };
+        console.log('COI Resultaat:', result);
         
-        await printRecursive(dogId, 0, []);
+        return result;
     }
+
+    /* ========== ANDERE STAMBOOM METHODES ========== */
+    
+    // ... je bestaande stamboom methodes hier ...
 }
 
-// Maak een globale instance aan
-const coiCalculator = new COICalculator(db);
-
-// Voeg de calculateCOI methode toe aan je database
-db.calculateCOI = async function(dogId) {
-    return await coiCalculator.calculateCOI(dogId);
-};
-
-// Debug functie voor console
-window.debugCOI = async function(dogId) {
-    await coiCalculator.debugCalculation(dogId);
-};
+// Exporteer de class
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = StamboomManager;
+}
 
 /* ============================================= */
 /* EINDE COI BEREKENING                         */
