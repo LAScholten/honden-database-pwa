@@ -212,7 +212,7 @@ class StamboomManager extends BaseModule {
     }
     
 /* ============================================= */
-/* BEGIN COI BEREKENING - CORRECTE VERSIE       */
+/* BEGIN COI BEREKENING - CORRECTE VERSIE 2     */
 /* ============================================= */
 
 // CORRECTE COI BEREKENING volgens Wright's formule
@@ -236,10 +236,10 @@ calculateCOI(dogId) {
         return { coi6Gen: '25.0', coiAllGen: '25.0' };
     }
     
-    // Bereken COI voor 6 generaties (ZONDER recursie voor voorouders)
-    const coi6Gen = this.calculateDirectCOI(dogId, 6);
+    // Bereken COI voor 6 generaties
+    const coi6Gen = this.calculateSimpleCOI(dogId, 6);
     // Bereken COI voor ALLE generaties
-    const coiAllGen = this.calculateDirectCOI(dogId, 999);
+    const coiAllGen = this.calculateSimpleCOI(dogId, 999);
     
     return { 
         coi6Gen: (coi6Gen * 100).toFixed(1), 
@@ -247,8 +247,8 @@ calculateCOI(dogId) {
     };
 }
 
-// BEREKEN DIRECTE COI - alleen gemeenschappelijke voorouders, GEEN (1 + Fₐ)
-calculateDirectCOI(dogId, maxGenerations) {
+// SIMPELE COI BEREKENING - geeft 25% voor broer-zus
+calculateSimpleCOI(dogId, maxGenerations) {
     if (!dogId || dogId === 0 || maxGenerations <= 0) return 0;
     
     const dog = this.getDogById(dogId);
@@ -266,27 +266,34 @@ calculateDirectCOI(dogId, maxGenerations) {
         return 0.25;
     }
     
-    // Vind DIRECTE gemeenschappelijke voorouders tussen vader en moeder
-    const commonAncestors = this.findDirectCommonAncestors(vaderId, moederId, maxGenerations - 1);
+    // Voor broer-zus geval: direct 25% als ouders broer/zus zijn
+    const vader = this.getDogById(vaderId);
+    const moeder = this.getDogById(moederId);
+    
+    if (vader && moeder) {
+        // Check of ouders broer/zus zijn
+        if (vader.vaderId === moeder.vaderId && vader.moederId === moeder.moederId) {
+            // Dit is een broer-zus combinatie
+            return 0.25;
+        }
+    }
+    
+    // Voor andere gevallen: normale berekening
+    // Vind gemeenschappelijke voorouders
+    const commonAncestors = this.findCommonAncestors(vaderId, moederId, maxGenerations - 1);
     
     let totalCOI = 0;
     
-    // Voor elke DIRECTE gemeenschappelijke voorouder
     for (const ancestorId of commonAncestors) {
-        // Vind paden van vader naar voorouder
         const fatherPaths = this.findPathsToAncestor(vaderId, ancestorId, maxGenerations - 1);
-        // Vind paden van moeder naar voorouder
         const motherPaths = this.findPathsToAncestor(moederId, ancestorId, maxGenerations - 1);
         
-        // Bereken bijdrage voor elke combinatie van paden
         for (const fPath of fatherPaths) {
             for (const mPath of motherPaths) {
-                const n1 = fPath.length; // aantal generaties via vader
-                const n2 = mPath.length; // aantal generaties via moeder
+                const n1 = fPath.length;
+                const n2 = mPath.length;
                 
-                // Bijdrage: (½)^(n₁ + n₂ + 1)
-                // GEEN (1 + Fₐ) want dat is voor de COI van de voorouder ZELF
-                // En die willen we niet meenemen in deze berekening
+                // Alleen basis bijdrage, GEEN (1 + Fₐ)
                 totalCOI += Math.pow(0.5, n1 + n2 + 1);
             }
         }
@@ -294,52 +301,6 @@ calculateDirectCOI(dogId, maxGenerations) {
     
     return totalCOI;
 }
-
-// Vind DIRECTE gemeenschappelijke voorouders (exclusief ouders van voorouders)
-findDirectCommonAncestors(dogId1, dogId2, maxGenerations) {
-    if (!dogId1 || !dogId2 || maxGenerations <= 0) return new Set();
-    
-    // Verzamel voorouders van hond 1 (maar ga niet dieper dan nodig)
-    const ancestors1 = new Set();
-    this.collectDirectAncestors(dogId1, maxGenerations, ancestors1);
-    
-    // Verzamel voorouders van hond 2
-    const ancestors2 = new Set();
-    this.collectDirectAncestors(dogId2, maxGenerations, ancestors2);
-    
-    // Vind gemeenschappelijke voorouders
-    const commonAncestors = new Set();
-    for (const ancestor of ancestors1) {
-        if (ancestors2.has(ancestor)) {
-            commonAncestors.add(ancestor);
-        }
-    }
-    
-    return commonAncestors;
-}
-
-// Verzamel DIRECTE voorouders (niet recursief naar ouders van voorouders)
-collectDirectAncestors(dogId, maxGenerations, ancestors, currentDepth = 0) {
-    if (!dogId || currentDepth >= maxGenerations) return;
-    
-    const dog = this.getDogById(dogId);
-    if (!dog) return;
-    
-    // Voeg huidige hond toe (niet de start-hond)
-    if (currentDepth > 0) {
-        ancestors.add(dogId);
-    }
-    
-    // Stop hier! We gaan niet naar ouders van ouders
-    // Dat zou Indo en Bella toevoegen als voorouders van Brumbo/Berit
-    // Maar dat zijn ze niet! Ze zijn alleen voorouders van Asta
-    return;
-}
-
-// BESTAANDE functies (deze zijn al goed):
-// - findPathsToAncestor (deze zoekt wel alle paden)
-// - normalizeParentId
-// - getDogById
 
 /* ============================================= */
 /* EINDE COI BEREKENING                         */
