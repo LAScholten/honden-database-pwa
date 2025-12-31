@@ -32,7 +32,7 @@ class LitterManager {
                 father: "Vader *",
                 mother: "Moeder *",
                 coatColor: "Vachtkleur",
-                recentCoatColors: "Recente vachtkleuren:", // NIEUW
+                recentCoatColors: "Recent:", // AANGEPAST: "vachtkleuren" verwijderd
                 birthDate: "Geboortedatum",
                 deathDate: "Overlijdensdatum",
                 gender: "Geslacht",
@@ -146,7 +146,7 @@ class LitterManager {
                 father: "Father *",
                 mother: "Mother *",
                 coatColor: "Coat Color",
-                recentCoatColors: "Recent coat colors:", // NIEUW
+                recentCoatColors: "Recent:", // AANGEPAST: "coat colors" verwijderd
                 birthDate: "Birth date",
                 deathDate: "Death date",
                 gender: "Gender",
@@ -260,7 +260,7 @@ class LitterManager {
                 father: "Vater *",
                 mother: "Mutter *",
                 coatColor: "Fellfarbe",
-                recentCoatColors: "Kürzliche Fellfarben:", // NIEUW
+                recentCoatColors: "Kürzlich:", // AANGEPAST: "Fellfarben" verwijderd
                 birthDate: "Geburtsdatum",
                 deathDate: "Sterbedatum",
                 gender: "Geschlecht",
@@ -911,10 +911,10 @@ class LitterManager {
         if (this.lastCoatColors && this.lastCoatColors.length > 0) {
             recentCoatColorsHTML = `
                 <div class="recent-coat-colors-container">
-                    <div class="recent-coat-colors-label">${t('recentCoatColors')}</div>
+                    <div class="recent-coat-colors-label">${t('recent')}</div>
                     <div class="recent-coat-colors-buttons">
             `;
-            this.lastCoatColors.slice(0, 4).forEach(color => {
+            this.lastCoatColors.slice(0, 9).forEach(color => {
                 recentCoatColorsHTML += `
                     <button type="button" class="btn btn-sm btn-outline-info recent-coat-color-btn" data-coat-color="${color}">
                         ${color}
@@ -1665,18 +1665,21 @@ class LitterManager {
         
         const index = this.lastCoatColors.indexOf(coatColorStr);
         
+        // Verwijder als al bestaat
         if (index > -1) {
             this.lastCoatColors.splice(index, 1);
         }
         
+        // Voeg toe aan begin van de lijst
         this.lastCoatColors.unshift(coatColorStr);
         
-        if (this.lastCoatColors.length > 4) {
-            this.lastCoatColors = this.lastCoatColors.slice(0, 4);
+        // Houd maximaal 9 recente vachtkleuren bij (was 4)
+        if (this.lastCoatColors.length > 9) {
+            this.lastCoatColors = this.lastCoatColors.slice(0, 9);
         }
         
         localStorage.setItem('lastCoatColors', JSON.stringify(this.lastCoatColors));
-        console.log('LitterManager: Vachtkleur toegevoegd aan recente vachtkleuren:', coatColorStr);
+        console.log('LitterManager: Vachtkleur toegevoegd aan recente vachtkleuren:', coatColorStr, 'Totaal:', this.lastCoatColors.length);
     }
     
     async loadAllDogs() {
