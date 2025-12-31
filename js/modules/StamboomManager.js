@@ -216,7 +216,7 @@ class StamboomManager extends BaseModule {
 /* ============================================= */
 
 /* ============================================= */
-/* COI BEREKENING - Werkende versie             */
+/* COI BEREKENING - GECORRIGEERDE VERSIE        */
 /* ============================================= */
 
 class COICalculator {
@@ -234,6 +234,7 @@ class COICalculator {
         this.pathCache.clear();
         
         const coi6 = await this.calculateCOIRecursive(dogId, 6);
+        
         this.cache.clear();
         this.pathCache.clear();
         const coiAll = await this.calculateCOIRecursive(dogId, 20);
@@ -318,8 +319,9 @@ class COICalculator {
     // Verzamel alle voorouders
     async collectAncestors(startId, depth) {
         const ancestors = new Set();
+        const visited = new Set();
         
-        const collect = async (currentId, currentDepth, visited) => {
+        const collect = async (currentId, currentDepth) => {
             if (!currentId || currentDepth > depth) return;
             if (visited.has(currentId)) return;
             
@@ -331,14 +333,18 @@ class COICalculator {
             
             const dog = await this.db.getHondById(currentId);
             if (dog) {
-                if (dog.vaderId) await collect(dog.vaderId, currentDepth + 1, visited);
-                if (dog.moederId) await collect(dog.moederId, currentDepth + 1, visited);
+                if (dog.vaderId) {
+                    await collect(dog.vaderId, currentDepth + 1);
+                }
+                if (dog.moederId) {
+                    await collect(dog.moederId, currentDepth + 1);
+                }
             }
             
             visited.delete(currentId);
         };
         
-        await collect(startId, 0, new Set());
+        await collect(startId, 0);
         return ancestors;
     }
 
@@ -350,8 +356,9 @@ class COICalculator {
         }
         
         const allPaths = [];
+        const visited = new Set();
         
-        const dfs = async (currentId, currentDepth, currentPath, visited) => {
+        const dfs = async (currentId, currentDepth, currentPath) => {
             if (!currentId || currentDepth > depth) return;
             if (visited.has(currentId)) return;
             
@@ -366,14 +373,18 @@ class COICalculator {
             
             const dog = await this.db.getHondById(currentId);
             if (dog) {
-                if (dog.vaderId) await dfs(dog.vaderId, currentDepth + 1, newPath, visited);
-                if (dog.moederId) await dfs(dog.moederId, currentDepth + 1, newPath, visited);
+                if (dog.vaderId) {
+                    await dfs(dog.vaderId, currentDepth + 1, newPath);
+                }
+                if (dog.moederId) {
+                    await dfs(dog.moederId, currentDepth + 1, newPath);
+                }
             }
             
             visited.delete(currentId);
         };
         
-        await dfs(fromId, 0, [], new Set());
+        await dfs(fromId, 0, []);
         
         // Filter duplicaten
         const uniquePaths = [];
@@ -391,7 +402,7 @@ class COICalculator {
         return uniquePaths;
     }
 
-    // DEBUG functie om te zien wat er gebeurt
+    // DEBUG functie
     async debugCalculation(dogId) {
         console.log('=== DEBUG COI BEREKENING ===');
         
@@ -409,51 +420,47 @@ class COICalculator {
             return;
         }
         
-        // Toon stamboom
-        await this.printAncestors(dogId, 3);
+        // Toon eenvoudige stamboom
+        await this.printSimpleTree(dogId, 3);
         
         // Bereken COI
         const result = await this.calculateCOI(dogId);
         console.log('Resultaat:', result);
     }
     
-    async printAncestors(dogId, maxDepth, depth = 0, path = []) {
-        if (depth > maxDepth) return;
+    async printSimpleTree(dogId, maxDepth) {
+        const printRecursive = async (currentId, currentDepth, path) => {
+            if (currentDepth > maxDepth) return;
+            if (path.includes(currentId)) return;
+            
+            const dog = await this.db.getHondById(currentId);
+            if (!dog) return;
+            
+            const indent = '  '.repeat(currentDepth);
+            console.log(`${indent}${dog.naam || `[${currentId}]`} (ID: ${currentId})`);
+            
+            if (dog.vaderId) {
+                await printRecursive(dog.vaderId, currentDepth + 1, [...path, currentId]);
+            }
+            if (dog.moederId) {
+                await printRecursive(dog.moederId, currentDepth + 1, [...path, currentId]);
+            }
+        };
         
-        const dog = await this.db.getHondById(dogId);
-        if (!dog) return;
-        
-        const indent = '  '.repeat(depth);
-        console.log(`${indent}${dog.naam || `[${dogId}]`}`);
-        
-        if (dog.vaderId && !path.includes(dog.vaderId)) {
-            await this.printAncestors(dog.vaderId, maxDepth, depth + 1, [...path, dogId]);
-        }
-        if (dog.moederId && !path.includes(dog.moederId)) {
-            await this.printAncestors(dog.moederId, maxDepth, depth + 1, [...path, dogId]);
-        }
+        await printRecursive(dogId, 0, []);
     }
 }
 
-// INITIALISATIE
-// Plaats dit in je main.js of waar je je database initialiseert:
+// Maak een globale instance aan
 const coiCalculator = new COICalculator(db);
 
-// VOEG DEZE METHODE TOE aan je HondenDatabase class:
-HondenDatabase.prototype.calculateCOI = async function(dogId) {
-    if (!coiCalculator) {
-        console.error('COI Calculator niet geïnitialiseerd');
-        return { coi6Gen: '0.0', coiAllGen: '0.0' };
-    }
+// Voeg de calculateCOI methode toe aan je database
+db.calculateCOI = async function(dogId) {
     return await coiCalculator.calculateCOI(dogId);
 };
 
-// VOOR DEBUGGING - roep dit aan vanaf console:
+// Debug functie voor console
 window.debugCOI = async function(dogId) {
-    if (!coiCalculator) {
-        console.error('COI Calculator niet geïnitialiseerd');
-        return;
-    }
     await coiCalculator.debugCalculation(dogId);
 };
 
