@@ -212,7 +212,7 @@ class StamboomManager extends BaseModule {
     }
     
 /* ============================================= */
-/* BEGIN COI BEREKENING - CORRECTE VERSIE       */
+/* BEGIN COI BEREKENING - COMPLETE CORRECTIE    */
 /* ============================================= */
 
 // Helper: normaliseer parent ID
@@ -246,9 +246,9 @@ calculateCOI(dogId) {
     }
     
     // Bereken COI voor 6 generaties
-    const coi6Gen = this.calculateSimpleCOI(dogId, 6);
+    const coi6Gen = this.calculateDirectCOI(dogId, 6);
     // Bereken COI voor ALLE generaties
-    const coiAllGen = this.calculateSimpleCOI(dogId, 999);
+    const coiAllGen = this.calculateDirectCOI(dogId, 999);
     
     return { 
         coi6Gen: (coi6Gen * 100).toFixed(1), 
@@ -256,8 +256,8 @@ calculateCOI(dogId) {
     };
 }
 
-// SIMPELE COI BEREKENING - geeft 25% voor broer-zus
-calculateSimpleCOI(dogId, maxGenerations) {
+// DIRECTE COI BEREKENING - alleen directe gemeenschappelijke voorouders
+calculateDirectCOI(dogId, maxGenerations) {
     if (!dogId || dogId === 0 || maxGenerations <= 0) return 0;
     
     const dog = this.getDogById(dogId);
@@ -275,38 +275,59 @@ calculateSimpleCOI(dogId, maxGenerations) {
         return 0.25;
     }
     
-    // Voor broer-zus geval: direct 25% als ouders broer/zus zijn
+    // Speciaal geval: als ouders broer/zus zijn
     const vader = this.getDogById(vaderId);
     const moeder = this.getDogById(moederId);
     
-    if (vader && moeder) {
-        // Check of ouders broer/zus zijn
-        if (vader.vaderId === moeder.vaderId && vader.moederId === moeder.moederId) {
-            // Dit is een broer-zus combinatie
-            return 0.25;
+    if (vader && moeder && vader.vaderId === moeder.vaderId && vader.moederId === moeder.moederId) {
+        // Dit is een broer-zus combinatie: 25%
+        return 0.25;
+    }
+    
+    // Zoek gemeenschappelijke voorouders op EEN generatie diepte
+    // Dit voorkomt dat we Indo en Bella vinden als voorouders van Brumbo/Berit
+    const commonAncestors = new Set();
+    
+    // Verzamel ouders van vader
+    const vaderParents = new Set();
+    if (vader) {
+        if (vader.vaderId) vaderParents.add(vader.vaderId);
+        if (vader.moederId) vaderParents.add(vader.moederId);
+    }
+    
+    // Verzamel ouders van moeder
+    const moederParents = new Set();
+    if (moeder) {
+        if (moeder.vaderId) moederParents.add(moeder.vaderId);
+        if (moeder.moederId) moederParents.add(moeder.moederId);
+    }
+    
+    // Vind gemeenschappelijke ouders (grootouders)
+    for (const parent of vaderParents) {
+        if (moederParents.has(parent)) {
+            commonAncestors.add(parent);
         }
     }
     
-    // Voor andere gevallen: normale berekening
-    // Vind gemeenschappelijke voorouders
-    const commonAncestors = this.findCommonAncestors(vaderId, moederId, maxGenerations - 1);
+    // Als er geen directe gemeenschappelijke grootouders zijn, COI = 0
+    if (commonAncestors.size === 0) {
+        return 0;
+    }
     
+    // Bereken COI van de hond zelf
     let totalCOI = 0;
     
     for (const ancestorId of commonAncestors) {
-        const fatherPaths = this.findPathsToAncestor(vaderId, ancestorId, maxGenerations - 1);
-        const motherPaths = this.findPathsToAncestor(moederId, ancestorId, maxGenerations - 1);
+        // Voor elke gemeenschappelijke grootouder:
+        // Pad vader → grootouder: 1 stap
+        // Pad moeder → grootouder: 1 stap
+        // Bijdrage: (½)^(1+1+1) = 0.125
         
-        for (const fPath of fatherPaths) {
-            for (const mPath of motherPaths) {
-                const n1 = fPath.length;
-                const n2 = mPath.length;
-                
-                // Alleen basis bijdrage, GEEN (1 + Fₐ)
-                totalCOI += Math.pow(0.5, n1 + n2 + 1);
-            }
-        }
+        totalCOI += 0.125;
     }
+    
+    // Als er 2 gemeenschappelijke grootouders zijn (broer-zus): 0.125 + 0.125 = 0.25
+    // Als er 1 gemeenschappelijke grootouder is: 0.125
     
     return totalCOI;
 }
