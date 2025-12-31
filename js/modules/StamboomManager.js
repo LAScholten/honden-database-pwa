@@ -212,8 +212,17 @@ class StamboomManager extends BaseModule {
     }
     
 /* ============================================= */
-/* BEGIN COI BEREKENING - CORRECTE VERSIE 2     */
+/* BEGIN COI BEREKENING - CORRECTE VERSIE       */
 /* ============================================= */
+
+// Helper: normaliseer parent ID
+normalizeParentId(id) {
+    if (id === null || id === undefined || id === "" || id === "null" || id === 0 || id === "0") {
+        return null;
+    }
+    const parsedId = parseInt(id);
+    return !isNaN(parsedId) && parsedId > 0 ? parsedId : null;
+}
 
 // CORRECTE COI BEREKENING volgens Wright's formule
 calculateCOI(dogId) {
