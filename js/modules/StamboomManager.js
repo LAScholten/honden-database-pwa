@@ -215,132 +215,97 @@ class StamboomManager extends BaseModule {
 /* BEGIN COI BEREKENING - Wright's formule      */
 /* ============================================= */
 /* ============================================= */
-/* COI BEREKENING - STRICT UNIEKE PADEN         */
+/* COI BEREKENING - Volledig recursief correct  */
 /* ============================================= */
 
 calculateCOI(dogId) {
     if (!dogId || dogId === 0) return { coi6Gen: '0.0', coiAllGen: '0.0' };
     
-    const dog = this.getDogById(dogId);
-    if (!dog || !dog.vaderId || !dog.moederId) {
-        return { coi6Gen: '0.0', coiAllGen: '0.0' };
-    }
+    // Reset cache voor nieuwe berekening
+    this.coiCache = new Map();
+    this.pathCache = new Map();
     
-    // Bereken voor 6 generaties en alle generaties
-    const coi6Gen = this.calculateCOIStrict(dogId, 6);
-    const coiAllGen = this.calculateCOIStrict(dogId, 999);
-    
-    return { 
-        coi6Gen: coi6Gen.toFixed(1), 
-        coiAllGen: coiAllGen.toFixed(1) 
-    };
-}
-
-// STRICTE berekening met gegarandeerd unieke paden
-calculateCOIStrict(dogId, maxGenerations) {
-    const cache = new Map();
-    
-    const calculate = (currentId, depth) => {
-        if (!currentId || depth <= 0) return 0;
-        
-        const cacheKey = `${currentId}-${depth}`;
-        if (cache.has(cacheKey)) return cache.get(cacheKey);
+    const calculate = (currentId, generations) => {
+        // Cache check
+        const cacheKey = `${currentId}-${generations}`;
+        if (this.coiCache.has(cacheKey)) {
+            return this.coiCache.get(cacheKey);
+        }
         
         const dog = this.getDogById(currentId);
-        if (!dog || !dog.vaderId || !dog.moederId) {
-            cache.set(cacheKey, 0);
+        if (!dog || !dog.vaderId || !dog.moederId || generations <= 0) {
+            this.coiCache.set(cacheKey, 0);
             return 0;
         }
         
+        // Directe inteelt
         if (dog.vaderId === dog.moederId) {
-            cache.set(cacheKey, 0.25);
+            this.coiCache.set(cacheKey, 0.25);
             return 0.25;
         }
         
-        // SNELHEIDSOPTIMALISATIE: Als ouders volle broer/zus zijn
-        if (this.areFullSiblings(dog.vaderId, dog.moederId)) {
-            const fParent1 = calculate(dog.vaderId, depth - 1);
-            const fParent2 = calculate(dog.moederId, depth - 1);
-            // Vereenvoudigde formule voor broer/zus
-            const result = 0.25 * (1 + (fParent1 + fParent2) / 2);
-            cache.set(cacheKey, result);
-            return result;
-        }
+        // Bereken COI van ouders EERST
+        const fVader = calculate(dog.vaderId, generations - 1);
+        const fMoeder = calculate(dog.moederId, generations - 1);
         
-        // Normale berekening
-        let total = 0;
-        const commonAncestors = this.getStrictCommonAncestors(dog.vaderId, dog.moederId, depth - 1);
+        // Vind alle gemeenschappelijke voorouders van de ouders
+        const commonAncestors = this.getCommonAncestorsOfParents(
+            dog.vaderId, 
+            dog.moederId, 
+            generations - 1
+        );
+        
+        let totalCOI = 0;
         
         for (const ancestorId of commonAncestors) {
-            const pathsVader = this.getStrictPaths(dog.vaderId, ancestorId, depth - 1);
-            const pathsMoeder = this.getStrictPaths(dog.moederId, ancestorId, depth - 1);
+            // Bereken COI van de voorouder RECURSIEF
+            const fAncestor = calculate(ancestorId, generations - 1);
             
-            const fAncestor = calculate(ancestorId, depth - 1);
+            // Vind alle paden van vader naar voorouder
+            const pathsVader = this.getPaths(dog.vaderId, ancestorId, generations - 1);
+            // Vind alle paden van moeder naar voorouder
+            const pathsMoeder = this.getPaths(dog.moederId, ancestorId, generations - 1);
             
+            // Voor elke padcombinatie
             for (const pv of pathsVader) {
                 for (const pm of pathsMoeder) {
-                    // Controleer of dit een UNIEK padpaar is
-                    const isUnique = this.isUniquePathPair(pv, pm, dog.vaderId, dog.moederId, ancestorId);
-                    if (isUnique) {
-                        const contribution = Math.pow(0.5, pv.length + pm.length + 1) * (1 + fAncestor);
-                        total += contribution;
-                    }
+                    const n1 = pv.length;
+                    const n2 = pm.length;
+                    const contribution = Math.pow(0.5, n1 + n2 + 1) * (1 + fAncestor);
+                    totalCOI += contribution;
                 }
             }
         }
         
-        cache.set(cacheKey, total);
-        return total;
+        this.coiCache.set(cacheKey, totalCOI);
+        return totalCOI;
     };
     
-    const result = calculate(dogId, maxGenerations);
-    return result * 100; // Converteren naar percentage
+    // Bereken voor 6 generaties
+    const coi6 = calculate(dogId, 6);
+    // Reset cache voor volledige berekening
+    this.coiCache.clear();
+    // Bereken voor alle generaties (20 is genoeg voor elke stamboom)
+    const coiAll = calculate(dogId, 20);
+    
+    return {
+        coi6Gen: (coi6 * 100).toFixed(1),
+        coiAllGen: (coiAll * 100).toFixed(1)
+    };
 }
 
-// Controleer of ouders volle broer/zus zijn
-areFullSiblings(id1, id2) {
-    const dog1 = this.getDogById(id1);
-    const dog2 = this.getDogById(id2);
-    
-    if (!dog1 || !dog2) return false;
-    
-    return (dog1.vaderId === dog2.vaderId && 
-            dog1.moederId === dog2.moederId &&
-            dog1.vaderId !== null && 
-            dog1.moederId !== null);
-}
-
-// Vind STRICT unieke gemeenschappelijke voorouders
-getStrictCommonAncestors(id1, id2, depth) {
+// Helper: vind gemeenschappelijke voorouders van twee ouders
+getCommonAncestorsOfParents(id1, id2, depth) {
     if (depth <= 0) return new Set();
     
-    const ancestors1 = new Set();
-    const ancestors2 = new Set();
+    const cacheKey = `common-${id1}-${id2}-${depth}`;
+    if (this.pathCache && this.pathCache.has(cacheKey)) {
+        return this.pathCache.get(cacheKey);
+    }
     
-    const collect = (id, depthLeft, set) => {
-        if (!id || depthLeft < 0) return;
-        
-        const dog = this.getDogById(id);
-        if (!dog) return;
-        
-        if (depthLeft >= 0) {
-            set.add(id);
-        }
-        
-        if (depthLeft > 0) {
-            if (dog.vaderId) collect(dog.vaderId, depthLeft - 1, set);
-            if (dog.moederId) collect(dog.moederId, depthLeft - 1, set);
-        }
-    };
+    const ancestors1 = this.getAllAncestors(id1, depth);
+    const ancestors2 = this.getAllAncestors(id2, depth);
     
-    collect(id1, depth, ancestors1);
-    collect(id2, depth, ancestors2);
-    
-    // Verwijder de start-ID's zelf
-    ancestors1.delete(id1);
-    ancestors2.delete(id2);
-    
-    // Vind intersectie
     const common = new Set();
     for (const anc of ancestors1) {
         if (ancestors2.has(anc)) {
@@ -348,28 +313,57 @@ getStrictCommonAncestors(id1, id2, depth) {
         }
     }
     
+    if (this.pathCache) {
+        this.pathCache.set(cacheKey, common);
+    }
+    
     return common;
 }
 
-// Vind STRICT unieke paden (geen duplicaten)
-getStrictPaths(fromId, toId, depth) {
-    const allPaths = [];
+// Helper: verzamel alle voorouders
+getAllAncestors(startId, depth) {
+    const ancestors = new Set();
     
-    const dfs = (currentId, currentDepth, path, visited) => {
+    const collect = (currentId, currentDepth) => {
         if (!currentId || currentDepth > depth) return;
         
-        // Voorkom elke vorm van duplicatie
+        // Voeg toe (maar niet de start zelf)
+        if (currentDepth > 0) {
+            ancestors.add(currentId);
+        }
+        
+        const dog = this.getDogById(currentId);
+        if (dog) {
+            if (dog.vaderId) collect(dog.vaderId, currentDepth + 1);
+            if (dog.moederId) collect(dog.moederId, currentDepth + 1);
+        }
+    };
+    
+    collect(startId, 0);
+    return ancestors;
+}
+
+// Helper: vind paden van start naar target
+getPaths(fromId, toId, depth) {
+    const cacheKey = `paths-${fromId}-${toId}-${depth}`;
+    if (this.pathCache && this.pathCache.has(cacheKey)) {
+        return this.pathCache.get(cacheKey);
+    }
+    
+    const paths = [];
+    
+    const dfs = (currentId, currentDepth, currentPath, visited) => {
+        if (!currentId || currentDepth > depth) return;
+        
+        // Voorkom cycli
         if (visited.has(currentId)) return;
         
         visited.add(currentId);
-        const newPath = [...path, currentId];
+        const newPath = [...currentPath, currentId];
         
         if (currentId === toId) {
-            allPaths.push({
-                path: newPath.slice(1), // verwijder startpunt
-                length: newPath.length - 1,
-                signature: newPath.join('-')
-            });
+            // Pad gevonden
+            paths.push(newPath.slice(1)); // verwijder startpunt
             visited.delete(currentId);
             return;
         }
@@ -385,41 +379,23 @@ getStrictPaths(fromId, toId, depth) {
     
     dfs(fromId, 0, [], new Set());
     
-    // Filter DUPLICAAT PADEN op basis van volledige signature
+    // Filter duplicaten
     const uniquePaths = [];
-    const seenSignatures = new Set();
+    const seen = new Set();
     
-    for (const pathObj of allPaths) {
-        if (!seenSignatures.has(pathObj.signature)) {
-            seenSignatures.add(pathObj.signature);
-            uniquePaths.push(pathObj.path);
+    for (const path of paths) {
+        const sig = path.join(',');
+        if (!seen.has(sig)) {
+            seen.add(sig);
+            uniquePaths.push(path);
         }
     }
     
-    return uniquePaths;
-}
-
-// Controleer of een padpaar uniek is
-isUniquePathPair(path1, path2, start1, start2, target) {
-    // Een simpele maar effectieve check
-    const path1Str = `${start1}-${path1.join('-')}-${target}`;
-    const path2Str = `${start2}-${path2.join('-')}-${target}`;
-    const pairSignature = `${path1Str}|${path2Str}`;
-    
-    // Gebruik een statische set om eerder gezien paden bij te houden
-    if (!this._seenPathPairs) this._seenPathPairs = new Set();
-    
-    if (this._seenPathPairs.has(pairSignature)) {
-        return false;
+    if (this.pathCache) {
+        this.pathCache.set(cacheKey, uniquePaths);
     }
     
-    this._seenPathPairs.add(pairSignature);
-    return true;
-}
-
-// Reset functie voor path pair cache
-resetPathPairCache() {
-    this._seenPathPairs = new Set();
+    return uniquePaths;
 }
 
 /* ============================================= */
