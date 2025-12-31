@@ -13,7 +13,7 @@ class StamboomManager extends BaseModule {
         this.allDogs = [];
         this.translations = {
             nl: {
-                pedigreeTitle: "StamPboom van {name}",
+                pedigreeTitle: "Stamboom van {name}",
                 pedigree4Gen: "4-generatie stamboom",
                 generatingPedigree: "Stamboom genereren...",
                 close: "Sluiten",
@@ -678,7 +678,7 @@ collectAllAncestors(dogId, maxGenerations) {
         `;
     }
     
-    // DETAIL POPUP voor wanneer op card geklikt wordt - IDENTIEK VOOR MOBIEL EN DESKTOP
+    // DETAIL POPUP voor wanneer op card geklikt wordt
     getDogDetailPopupHTML(dog, relation = '') {
         if (!dog) return '';
         
@@ -700,159 +700,189 @@ collectAllAncestors(dogId, maxGenerations) {
                     <button type="button" class="btn-close btn-close-white popup-close"></button>
                 </div>
                 <div class="popup-body">
-                    <div class="dog-popup-name mb-3">
+                    <div class="dog-popup-name mb-2">
                         <h4>${dog.naam || this.t('unknown')}</h4>
                         ${dog.kennelnaam ? `<div class="text-muted">${dog.kennelnaam}</div>` : ''}
                     </div>
                     
-                    <div class="info-section mb-3">
+                    <div class="info-section mb-2">
                         <h6><i class="bi bi-card-text me-1"></i> Basisgegevens</h6>
                         <div class="info-grid">
                             <!-- Stamboomnummer en Ras naast elkaar -->
-                            ${dog.stamboomnr ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('pedigreeNumber')}:</span>
-                                <span class="info-value">${dog.stamboomnr}</span>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.ras ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('breed')}:</span>
-                                <span class="info-value">${dog.ras}</span>
-                            </div>
-                            ` : ''}
-                            
-                            <!-- Geslacht naast lege ruimte of Vachtkleur -->
-                            <div class="info-item">
-                                <span class="info-label">${this.t('gender')}:</span>
-                                <span class="info-value">${genderText}</span>
+                            <div class="info-row">
+                                ${dog.stamboomnr ? `
+                                <div class="info-item info-item-half">
+                                    <span class="info-label">${this.t('pedigreeNumber')}:</span>
+                                    <span class="info-value">${dog.stamboomnr}</span>
+                                </div>
+                                ` : ''}
+                                
+                                ${dog.ras ? `
+                                <div class="info-item info-item-half">
+                                    <span class="info-label">${this.t('breed')}:</span>
+                                    <span class="info-value">${dog.ras}</span>
+                                </div>
+                                ` : ''}
                             </div>
                             
-                            ${dog.vachtkleur ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('coatColor')}:</span>
-                                <span class="info-value">${dog.vachtkleur}</span>
+                            <!-- Geslacht en Vachtkleur naast elkaar -->
+                            <div class="info-row">
+                                <div class="info-item info-item-half">
+                                    <span class="info-label">${this.t('gender')}:</span>
+                                    <span class="info-value">${genderText}</span>
+                                </div>
+                                
+                                ${dog.vachtkleur ? `
+                                <div class="info-item info-item-half">
+                                    <span class="info-label">${this.t('coatColor')}:</span>
+                                    <span class="info-value">${dog.vachtkleur}</span>
+                                </div>
+                                ` : ''}
                             </div>
-                            ` : ''}
                             
                             <!-- Beide COI waarden naast elkaar -->
-                            <div class="info-item">
-                                <span class="info-label">${this.t('coi6Gen')}:</span>
-                                <span class="info-value coi-value" style="color: ${coi6Color}; font-weight: bold;">
-                                    ${coiValues.coi6Gen}%
-                                </span>
-                            </div>
-                            
-                            <div class="info-item">
-                                <span class="info-label">${this.t('coiAllGen')}:</span>
-                                <span class="info-value coi-value" style="color: ${coiAllColor}; font-weight: bold;">
-                                    ${coiValues.coiAllGen}%
-                                </span>
+                            <div class="info-row">
+                                <div class="info-item info-item-half">
+                                    <span class="info-label">${this.t('coi6Gen')}:</span>
+                                    <span class="info-value coi-value" style="color: ${coi6Color}; font-weight: bold;">
+                                        ${coiValues.coi6Gen}%
+                                    </span>
+                                </div>
+                                
+                                <div class="info-item info-item-half">
+                                    <span class="info-label">${this.t('coiAllGen')}:</span>
+                                    <span class="info-value coi-value" style="color: ${coiAllColor}; font-weight: bold;">
+                                        ${coiValues.coiAllGen}%
+                                    </span>
+                                </div>
                             </div>
                             
                             <!-- Datums -->
                             ${dog.geboortedatum ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('birthDate')}:</span>
-                                <span class="info-value">${this.formatDate(dog.geboortedatum)}</span>
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('birthDate')}:</span>
+                                    <span class="info-value">${this.formatDate(dog.geboortedatum)}</span>
+                                </div>
                             </div>
                             ` : ''}
                             
                             ${dog.overlijdensdatum ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('deathDate')}:</span>
-                                <span class="info-value">${this.formatDate(dog.overlijdensdatum)}</span>
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('deathDate')}:</span>
+                                    <span class="info-value">${this.formatDate(dog.overlijdensdatum)}</span>
+                                </div>
                             </div>
                             ` : ''}
                             
                             <!-- Land en postcode -->
                             ${dog.land ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('country')}:</span>
-                                <span class="info-value">${dog.land}</span>
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('country')}:</span>
+                                    <span class="info-value">${dog.land}</span>
+                                </div>
                             </div>
                             ` : ''}
                             
                             ${dog.postcode ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('zipCode')}:</span>
-                                <span class="info-value">${dog.postcode}</span>
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('zipCode')}:</span>
+                                    <span class="info-value">${dog.postcode}</span>
+                                </div>
                             </div>
                             ` : ''}
                         </div>
                     </div>
                     
-                    <div class="info-section mb-3">
+                    <div class="info-section mb-2">
                         <h6><i class="bi bi-heart-pulse me-1"></i> ${this.t('healthInfo')}</h6>
                         <div class="info-grid">
                             ${dog.heupdysplasie ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('hipDysplasia')}:</span>
-                                <span class="info-value">${this.getHealthBadge(dog.heupdysplasie, 'hip')}</span>
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('hipDysplasia')}:</span>
+                                    <span class="info-value">${this.getHealthBadge(dog.heupdysplasie, 'hip')}</span>
+                                </div>
                             </div>
                             ` : ''}
                             
                             ${dog.elleboogdysplasie ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('elbowDysplasia')}:</span>
-                                <span class="info-value">${this.getHealthBadge(dog.elleboogdysplasie, 'elbow')}</span>
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('elbowDysplasia')}:</span>
+                                    <span class="info-value">${this.getHealthBadge(dog.elleboogdysplasie, 'elbow')}</span>
+                                </div>
                             </div>
                             ` : ''}
                             
                             ${dog.patella ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('patellaLuxation')}:</span>
-                                <span class="info-value">${this.getHealthBadge(dog.patella, 'patella')}</span>
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('patellaLuxation')}:</span>
+                                    <span class="info-value">${this.getHealthBadge(dog.patella, 'patella')}</span>
+                                </div>
                             </div>
                             ` : ''}
                             
                             ${dog.ogen ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('eyes')}:</span>
-                                <span class="info-value">${this.getHealthBadge(dog.ogen, 'eyes')}</span>
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('eyes')}:</span>
+                                    <span class="info-value">${this.getHealthBadge(dog.ogen, 'eyes')}</span>
+                                </div>
                             </div>
                             ` : ''}
                             
                             ${dog.ogenVerklaring ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('eyesExplanation')}:</span>
-                                <span class="info-value">${dog.ogenVerklaring}</span>
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('eyesExplanation')}:</span>
+                                    <span class="info-value">${dog.ogenVerklaring}</span>
+                                </div>
                             </div>
                             ` : ''}
                             
                             ${dog.dandyWalker ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('dandyWalker')}:</span>
-                                <span class="info-value">${this.getHealthBadge(dog.dandyWalker, 'dandy')}</span>
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('dandyWalker')}:</span>
+                                    <span class="info-value">${this.getHealthBadge(dog.dandyWalker, 'dandy')}</span>
+                                </div>
                             </div>
                             ` : ''}
                             
                             ${dog.schildklier ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('thyroid')}:</span>
-                                <span class="info-value">${this.getHealthBadge(dog.schildklier, 'thyroid')}</span>
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('thyroid')}:</span>
+                                    <span class="info-value">${this.getHealthBadge(dog.schildklier, 'thyroid')}</span>
+                                </div>
                             </div>
                             ` : ''}
                             
                             ${dog.schildklierVerklaring ? `
-                            <div class="info-item">
-                                <span class="info-label">${this.t('thyroidExplanation')}:</span>
-                                <span class="info-value">${dog.schildklierVerklaring}</span>
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('thyroidExplanation')}:</span>
+                                    <span class="info-value">${dog.schildklierVerklaring}</span>
+                                </div>
                             </div>
                             ` : ''}
                         </div>
                     </div>
                     
                     ${dog.opmerkingen ? `
-                    <div class="info-section mb-3">
+                    <div class="info-section mb-2">
                         <h6><i class="bi bi-chat-text me-1"></i> ${this.t('remarks')}</h6>
                         <div class="remarks-box">
                             ${dog.opmerkingen}
                         </div>
                     </div>
                     ` : `
-                    <div class="info-section mb-3">
+                    <div class="info-section mb-2">
                         <h6><i class="bi bi-chat-text me-1"></i> ${this.t('remarks')}</h6>
                         <div class="text-muted">${this.t('noRemarks')}</div>
                     </div>
@@ -1724,7 +1754,6 @@ collectAllAncestors(dogId, maxGenerations) {
                     justify-content: center;
                     animation: fadeIn 0.3s;
                     overflow-y: auto;
-                    padding: 20px;
                 }
                 
                 @keyframes fadeIn {
@@ -1735,12 +1764,13 @@ collectAllAncestors(dogId, maxGenerations) {
                 .pedigree-popup-container {
                     background: white;
                     border-radius: 12px;
-                    max-width: 400px;
-                    width: 100%;
-                    max-height: 85vh;
+                    max-width: 350px;
+                    max-height: 80vh;
                     overflow-y: auto;
                     animation: slideUp 0.3s;
                     box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+                    width: calc(100% - 20px);
+                    margin: 10px;
                 }
                 
                 @keyframes slideUp {
@@ -1805,14 +1835,14 @@ collectAllAncestors(dogId, maxGenerations) {
                 }
                 
                 .popup-body {
-                    padding: 20px;
+                    padding: 15px;
                     flex: 1;
                     overflow-y: auto;
                     -webkit-overflow-scrolling: touch;
                 }
                 
                 .dog-popup-name {
-                    margin-bottom: 20px;
+                    margin-bottom: 15px;
                 }
                 
                 .dog-popup-name h4 {
@@ -1821,13 +1851,14 @@ collectAllAncestors(dogId, maxGenerations) {
                     font-size: 1.4rem;
                 }
                 
+                /* Minder ruimte tussen secties */
                 .info-section {
                     margin-bottom: 20px;
                 }
                 
                 .info-section h6 {
                     color: #495057;
-                    margin-bottom: 12px;
+                    margin-bottom: 10px;
                     padding-bottom: 6px;
                     border-bottom: 2px solid #e9ecef;
                     display: flex;
@@ -1836,14 +1867,32 @@ collectAllAncestors(dogId, maxGenerations) {
                 }
                 
                 .info-grid {
-                    display: grid;
-                    grid-template-columns: repeat(2, 1fr);
-                    gap: 12px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                }
+                
+                .info-row {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                    margin-bottom: 4px;
                 }
                 
                 .info-item {
                     display: flex;
                     flex-direction: column;
+                    flex: 1;
+                    min-width: 0;
+                }
+                
+                .info-item-half {
+                    flex: 1 1 calc(50% - 4px);
+                    min-width: 120px;
+                }
+                
+                .info-item-full {
+                    flex: 1 1 100%;
                 }
                 
                 /* COI waarden styling - met kleurcodering */
@@ -1856,7 +1905,7 @@ collectAllAncestors(dogId, maxGenerations) {
                     font-weight: 600;
                     color: #495057;
                     font-size: 0.9rem;
-                    margin-bottom: 3px;
+                    margin-bottom: 2px;
                     line-height: 1.2;
                 }
                 
@@ -1891,67 +1940,6 @@ collectAllAncestors(dogId, maxGenerations) {
                     min-width: 130px;
                     padding: 10px 25px;
                     font-size: 1rem;
-                }
-                
-                /* Responsive aanpassingen voor de popup */
-                @media (max-width: 767px) {
-                    .pedigree-popup-container {
-                        max-width: 95%;
-                        max-height: 85vh;
-                        margin: 10px;
-                    }
-                    
-                    .popup-body {
-                        padding: 15px;
-                    }
-                    
-                    .info-grid {
-                        grid-template-columns: repeat(2, 1fr);
-                        gap: 10px;
-                    }
-                    
-                    .dog-popup-name h4 {
-                        font-size: 1.3rem;
-                    }
-                    
-                    .info-section h6 {
-                        font-size: 0.95rem;
-                    }
-                    
-                    .info-label {
-                        font-size: 0.85rem;
-                    }
-                    
-                    .info-value {
-                        font-size: 0.9rem;
-                    }
-                    
-                    .popup-title {
-                        font-size: 1rem;
-                    }
-                }
-                
-                @media (max-width: 480px) {
-                    .info-grid {
-                        grid-template-columns: 1fr;
-                        gap: 8px;
-                    }
-                    
-                    .dog-popup-name h4 {
-                        font-size: 1.2rem;
-                    }
-                    
-                    .popup-header {
-                        padding: 14px 16px;
-                    }
-                    
-                    .popup-body {
-                        padding: 12px;
-                    }
-                    
-                    .popup-footer {
-                        padding: 14px 16px;
-                    }
                 }
                 
                 /* Print styles */
