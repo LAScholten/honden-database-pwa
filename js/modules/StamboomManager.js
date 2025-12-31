@@ -137,7 +137,7 @@ class StamboomManager extends BaseModule {
             de: {
                 pedigreeTitle: "Ahnentafel von {name}",
                 pedigree4Gen: "4-Generationen Ahnentafel",
-                generatingPedigree: "Ahnentafel wird generiert...",
+                generatingPedigree: "Ahnentafel wordt generiert...",
                 close: "Schließen",
                 print: "Drucken",
                 noData: "Keine Daten",
@@ -210,6 +210,10 @@ class StamboomManager extends BaseModule {
     getDogById(id) {
         return this.allDogs.find(dog => dog.id === id);
     }
+    
+    /* ============================================= */
+    /* BEGIN COI BEREKENING - Wright's formule      */
+    /* ============================================= */
     
     // CORRECTE COI BEREKENING volgens formule van Wright - zoals op de website
     calculateCOI(dogId) {
@@ -359,6 +363,10 @@ class StamboomManager extends BaseModule {
         
         return allPaths;
     }
+    
+    /* ============================================= */
+    /* EINDE COI BEREKENING                         */
+    /* ============================================= */
     
     buildPedigreeTree(dogId) {
         const pedigreeTree = {
@@ -1140,7 +1148,7 @@ class StamboomManager extends BaseModule {
                 }
                 
                 /* ============================================= */
-                /* START MOBIELE AANPASSINGEN (max-width: 767px) */
+                /* BEGIN MOBIELE AANPASSINGEN (max-width: 767px) */
                 /* ============================================= */
                 @media (max-width: 767px) {
                     /* EENVOUDIGE MODAL ZONDER FULLSCREEN */
@@ -1404,7 +1412,7 @@ class StamboomManager extends BaseModule {
                 /* ============================================= */
                 
                 /* ============================================= */
-                /* START DESKTOP STYLES (min-width: 768px) */
+                /* BEGIN DESKTOP STYLES (min-width: 768px) */
                 /* ============================================= */
                 @media (min-width: 768px) {
                     #pedigreeModal.modal.fade .modal-dialog.modal-fullscreen {
