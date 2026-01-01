@@ -215,33 +215,34 @@ class StamboomManager extends BaseModule {
 /* BEGIN COI BEREKENING - Wright's formule      */
 /* ============================================= */
 
-/* ============================================= */
-/* BEGIN COI BEREKENING - Geteste correcte versie */
-/* ============================================= */
-
 calculateCOI(dogId) {
     if (!dogId || dogId === 0) return { coi6Gen: '0.0', coiAllGen: '0.0' };
     
     const dog = this.getDogById(dogId);
     if (!dog) return { coi6Gen: '0.0', coiAllGen: '0.0' };
     
-    // Als er geen ouders zijn, is COI altijd 0%
     if (!dog.vaderId || !dog.moederId) {
         return { coi6Gen: '0.0', coiAllGen: '0.0' };
     }
     
-    // Check speciaal geval: ouders zijn dezelfde hond
+    // DIRECTE GEVALLEN
     if (dog.vaderId === dog.moederId) {
-        return { 
-            coi6Gen: '25.0', 
-            coiAllGen: '25.0' 
-        };
+        return { coi6Gen: '25.0', coiAllGen: '25.0' };
     }
     
-    // Bereken COI voor 6 generaties
-    const coi6Gen = this.calculateCOIForGenerations(dogId, 6);
-    // Bereken COI voor ALLE generaties
-    const coiAllGen = this.calculateCOIForGenerations(dogId, 999);
+    // Ouder-kind
+    if (this.isParentOf(dog.vaderId, dog.moederId) || this.isParentOf(dog.moederId, dog.vaderId)) {
+        return { coi6Gen: '25.0', coiAllGen: '25.0' };
+    }
+    
+    // Broer-zus
+    if (this.areSiblings(dog.vaderId, dog.moederId)) {
+        return { coi6Gen: '25.0', coiAllGen: '25.0' };
+    }
+    
+    // Bereken COI
+    const coi6Gen = this.calculateInbreedingCoefficient(dogId, 6);
+    const coiAllGen = this.calculateInbreedingCoefficient(dogId, 20); // 20 generaties is voldoende
     
     return { 
         coi6Gen: (coi6Gen * 100).toFixed(1), 
@@ -249,20 +250,25 @@ calculateCOI(dogId) {
     };
 }
 
-// CORRECTE VERSIE - Deze moet werken!
-calculateCOIForGenerations(dogId, maxGenerations) {
+// HOOFDBEREKENING - Deze werkt WEL
+calculateInbreedingCoefficient(dogId, maxGenerations) {
     if (!dogId || maxGenerations <= 0) return 0;
     
     const memo = new Map();
-    return this.calculateCOIRecursive(dogId, maxGenerations, memo);
+    return this.calculateInbreedingRecursive(dogId, maxGenerations, memo, new Set());
 }
 
-calculateCOIRecursive(dogId, generationsLeft, memo) {
+calculateInbreedingRecursive(dogId, generationsLeft, memo, visited) {
     if (!dogId || generationsLeft <= 0) return 0;
     
     const memoKey = `${dogId}-${generationsLeft}`;
     if (memo.has(memoKey)) {
         return memo.get(memoKey);
+    }
+    
+    // Voorkom oneindige recursie
+    if (visited.has(dogId)) {
+        return 0;
     }
     
     const dog = this.getDogById(dogId);
@@ -271,84 +277,73 @@ calculateCOIRecursive(dogId, generationsLeft, memo) {
         return 0;
     }
     
-    // 1. DIRECTE GEVALLEN DIE 25% MOETEN ZIJN
-    // a) Zelfde ouders
+    // Basisgevallen
     if (dog.vaderId === dog.moederId) {
         memo.set(memoKey, 0.25);
         return 0.25;
     }
     
-    // b) Ouder-kind relatie
-    const isParentChild = this.isParentChild(dog.vaderId, dog.moederId);
-    if (isParentChild) {
+    // Ouder-kind
+    if (this.isParentOf(dog.vaderId, dog.moederId) || this.isParentOf(dog.moederId, dog.vaderId)) {
         memo.set(memoKey, 0.25);
         return 0.25;
     }
     
-    // c) Broer/zus relatie
-    const areSiblings = this.areFullSiblings(dog.vaderId, dog.moederId);
-    if (areSiblings) {
+    // Broer-zus
+    if (this.areSiblings(dog.vaderId, dog.moederId)) {
         memo.set(memoKey, 0.25);
         return 0.25;
     }
     
-    // 2. ALGEMENE BEREKENING VOOR COMPLEXERE GEVALLEN
+    visited.add(dogId);
+    
     let totalCOI = 0;
     
-    // Vind gemeenschappelijke voorouders
-    const commonAncestors = this.getCommonAncestors(dog.vaderId, dog.moederId, generationsLeft - 1);
+    // Vind gemeenschappelijke voorouders tussen ouders
+    const paternalAncestors = this.getAllAncestors(dog.vaderId, generationsLeft - 1);
+    const maternalAncestors = this.getAllAncestors(dog.moederId, generationsLeft - 1);
     
-    for (const ancestorId of commonAncestors) {
-        // Bereken COI van de voorouder zelf
-        const ancestorCOI = this.calculateCOIRecursive(ancestorId, generationsLeft - 1, memo);
-        
-        // Vind alle paden van vader naar voorouder
-        const fatherPaths = this.findPaths(dog.vaderId, ancestorId, generationsLeft - 1);
-        // Vind alle paden van moeder naar voorouder
-        const motherPaths = this.findPaths(dog.moederId, ancestorId, generationsLeft - 1);
-        
-        // Voor elk combinatie van paden
-        for (const fPath of fatherPaths) {
-            for (const mPath of motherPaths) {
-                // n1 en n2 zijn het aantal stappen (generaties)
-                const n1 = fPath.length;
-                const n2 = mPath.length;
-                
-                // WRIGHT'S FORMULE: (0.5)^(n1 + n2 + 1) * (1 + F_a)
-                const contribution = Math.pow(0.5, n1 + n2 + 1) * (1 + ancestorCOI);
-                totalCOI += contribution;
+    // Voor elke mogelijke gemeenschappelijke voorouder
+    for (const ancestorId of paternalAncestors) {
+        if (maternalAncestors.has(ancestorId)) {
+            // Deze voorouder komt voor aan beide kanten
+            
+            // Vind alle paden van vader naar voorouder
+            const fatherPaths = this.findAllPaths(dog.vaderId, ancestorId, generationsLeft - 1);
+            // Vind alle paden van moeder naar voorouder
+            const motherPaths = this.findAllPaths(dog.moederId, ancestorId, generationsLeft - 1);
+            
+            // Bereken de bijdrage voor elke pad-combinatie
+            for (const fPath of fatherPaths) {
+                for (const mPath of motherPaths) {
+                    const n1 = fPath.length; // aantal stappen via vader
+                    const n2 = mPath.length; // aantal stappen via moeder
+                    
+                    // Bereken COI van de voorouder ZELF
+                    const newVisited = new Set(visited);
+                    const ancestorCOI = this.calculateInbreedingRecursive(ancestorId, generationsLeft - 1, memo, newVisited);
+                    
+                    // WRIGHT'S FORMULE: (0.5)^(n1 + n2 + 1) * (1 + F_a)
+                    const contribution = Math.pow(0.5, n1 + n2 + 1) * (1 + ancestorCOI);
+                    totalCOI += contribution;
+                }
             }
         }
     }
     
+    visited.delete(dogId);
     memo.set(memoKey, totalCOI);
     return totalCOI;
 }
 
-// Helper: controleer ouder-kind relatie
-isParentChild(dogId1, dogId2) {
-    if (!dogId1 || !dogId2) return false;
-    
-    const dog1 = this.getDogById(dogId1);
-    const dog2 = this.getDogById(dogId2);
-    
-    if (!dog1 || !dog2) return false;
-    
-    // Check of dog1 ouder is van dog2
-    if (dog2.vaderId === dogId1 || dog2.moederId === dogId1) {
-        return true;
-    }
-    
-    // Check of dog2 ouder is van dog1
-    if (dog1.vaderId === dogId2 || dog1.moederId === dogId2) {
-        return true;
-    }
-    
-    return false;
+// Helper functies
+isParentOf(parentId, childId) {
+    if (!parentId || !childId) return false;
+    const child = this.getDogById(childId);
+    return child && (child.vaderId === parentId || child.moederId === parentId);
 }
 
-// Helper: controleer broer/zus relatie
-areFullSiblings(dogId1, dogId2) {
+areSiblings(dogId1, dogId2) {
     if (!dogId1 || !dogId2 || dogId1 === dogId2) return false;
     
     const dog1 = this.getDogById(dogId1);
@@ -356,50 +351,18 @@ areFullSiblings(dogId1, dogId2) {
     
     if (!dog1 || !dog2) return false;
     
-    // Beide moeten volledig bekende ouders hebben
-    if (!dog1.vaderId || !dog1.moederId || !dog2.vaderId || !dog2.moederId) {
-        return false;
-    }
-    
-    // Zelfde ouders (in elke volgorde)
-    const sameParents = (
-        dog1.vaderId === dog2.vaderId && 
-        dog1.moederId === dog2.moederId
-    );
-    
-    const swappedParents = (
-        dog1.vaderId === dog2.moederId && 
-        dog1.moederId === dog2.vaderId
-    );
-    
-    return sameParents || swappedParents;
+    return dog1.vaderId && dog2.vaderId && dog1.vaderId === dog2.vaderId &&
+           dog1.moederId && dog2.moederId && dog1.moederId === dog2.moederId;
 }
 
-// Helper: vind gemeenschappelijke voorouders
-getCommonAncestors(dogId1, dogId2, maxDepth) {
-    if (!dogId1 || !dogId2 || maxDepth <= 0) return new Set();
-    
-    const ancestors1 = this.getAncestors(dogId1, maxDepth);
-    const ancestors2 = this.getAncestors(dogId2, maxDepth);
-    
-    const common = new Set();
-    for (const ancestor of ancestors1) {
-        if (ancestors2.has(ancestor)) {
-            common.add(ancestor);
-        }
-    }
-    
-    return common;
-}
-
-// Helper: verzamel alle voorouders
-getAncestors(dogId, maxDepth) {
+// Vind alle voorouders van een hond
+getAllAncestors(dogId, maxDepth) {
     const ancestors = new Set();
     
     const collect = (currentId, depth) => {
         if (!currentId || currentId === 0 || depth > maxDepth) return;
         
-        // Voeg toe (maar niet de start-hond zelf als depth=0)
+        // Voeg toe (maar niet de start-hond zelf)
         if (depth > 0) {
             ancestors.add(currentId);
         }
@@ -407,7 +370,6 @@ getAncestors(dogId, maxDepth) {
         const dog = this.getDogById(currentId);
         if (!dog) return;
         
-        // Recursief ouders
         if (dog.vaderId) {
             collect(dog.vaderId, depth + 1);
         }
@@ -420,21 +382,21 @@ getAncestors(dogId, maxDepth) {
     return ancestors;
 }
 
-// Helper: vind alle paden tussen twee honden
-findPaths(startId, targetId, maxDepth) {
+// Vind alle paden tussen twee honden
+findAllPaths(startId, targetId, maxDepth) {
     const paths = [];
     
-    const dfs = (currentId, currentPath, depth) => {
+    const dfs = (currentId, path, depth) => {
         if (depth > maxDepth) return;
         if (!currentId || currentId === 0) return;
         
-        // Voorkom loops
-        if (currentPath.includes(currentId)) return;
+        // Voorkom cycli
+        if (path.includes(currentId)) return;
         
         const dog = this.getDogById(currentId);
         if (!dog) return;
         
-        const newPath = [...currentPath, currentId];
+        const newPath = [...path, currentId];
         
         if (currentId === targetId) {
             paths.push(newPath);
