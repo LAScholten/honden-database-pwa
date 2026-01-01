@@ -299,7 +299,7 @@ async calculateCOI(dogId) {
 }
 
 // BEREKEN VERWANTSCHAP TUSSEN TWEE HONDEN
-async function berekenVerwantschap(dogId1, dogId2, maxDepth) {
+async berekenVerwantschap(dogId1, dogId2, maxDepth) {
     if (!dogId1 || !dogId2 || maxDepth <= 0) return 0;
     
     // Als het dezelfde hond is
