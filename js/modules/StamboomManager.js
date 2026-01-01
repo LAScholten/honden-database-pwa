@@ -723,7 +723,7 @@ testSpecificDog(dogId, expectedCOI) {
         `;
     }
     
-    // DETAIL POPUP voor wanneer op card geklikt wordt - MET FOTO'S (nu onderaan)
+    // DETAIL POPUP voor wanneer op card geklikt wordt - MET FOTO'S BOVENAAN (nieuwe volgorde)
     async getDogDetailPopupHTML(dog, relation = '') {
         if (!dog) return '';
         
@@ -754,7 +754,34 @@ testSpecificDog(dogId, expectedCOI) {
                     <button type="button" class="btn-close btn-close-white popup-close"></button>
                 </div>
                 <div class="popup-body">
-                    <!-- BASISGEGEVENS BOVENAAN -->
+                    <!-- FOTO'S SECTIE BOVENAAN (indien beschikbaar) -->
+                    ${photos.length > 0 ? `
+                    <div class="info-section mb-3">
+                        <h6><i class="bi bi-camera me-1"></i> ${this.t('photos')} (${photos.length})</h6>
+                        <div class="photos-grid" id="photosGrid${dog.id}">
+                            ${photos.map((photo, index) => `
+                                <div class="photo-thumbnail" 
+                                     data-photo-id="${photo.id}" 
+                                     data-dog-id="${dog.id}" 
+                                     data-photo-index="${index}"
+                                     data-photo-src="${photo.data}">
+                                    <img src="${photo.data}" 
+                                         alt="${dog.naam || ''} - ${photo.filename || ''}" 
+                                         class="thumbnail-img"
+                                         loading="lazy">
+                                    <div class="photo-hover">
+                                        <i class="bi bi-zoom-in"></i>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="photo-hint">
+                            <small class="text-muted"><i class="bi bi-info-circle me-1"></i> ${this.t('clickToEnlarge')}</small>
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    <!-- BASISGEGEVENS NA FOTO'S -->
                     <div class="info-section mb-2">
                         <h6><i class="bi bi-card-text me-1"></i> Basisgegevens</h6>
                         <div class="info-grid">
@@ -937,33 +964,6 @@ testSpecificDog(dogId, expectedCOI) {
                         <div class="text-muted">${this.t('noRemarks')}</div>
                     </div>
                     `}
-                    
-                    <!-- FOTO'S SECTIE ONDERAAN (indien beschikbaar) -->
-                    ${photos.length > 0 ? `
-                    <div class="info-section mb-2">
-                        <h6><i class="bi bi-camera me-1"></i> ${this.t('photos')} (${photos.length})</h6>
-                        <div class="photos-grid" id="photosGrid${dog.id}">
-                            ${photos.map((photo, index) => `
-                                <div class="photo-thumbnail" 
-                                     data-photo-id="${photo.id}" 
-                                     data-dog-id="${dog.id}" 
-                                     data-photo-index="${index}"
-                                     data-photo-src="${photo.data}">
-                                    <img src="${photo.data}" 
-                                         alt="${dog.naam || ''} - ${photo.filename || ''}" 
-                                         class="thumbnail-img"
-                                         loading="lazy">
-                                    <div class="photo-hover">
-                                        <i class="bi bi-zoom-in"></i>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="photo-hint">
-                            <small class="text-muted"><i class="bi bi-info-circle me-1"></i> ${this.t('clickToEnlarge')}</small>
-                        </div>
-                    </div>
-                    ` : ''}
                 </div>
                 <div class="popup-footer">
                     <button type="button" class="btn btn-secondary popup-close-btn">
@@ -1924,7 +1924,7 @@ testSpecificDog(dogId, expectedCOI) {
                 }
                 
                 /* ============================================= */
-                /* DETAIL POPUP STYLES MET FOTO'S ONDERAAN */
+                /* DETAIL POPUP STYLES MET FOTO'S BOVENAAN */
                 /* ============================================= */
                 .pedigree-popup-overlay {
                     position: fixed;
@@ -2104,13 +2104,13 @@ testSpecificDog(dogId, expectedCOI) {
                     line-height: 1.5;
                 }
                 
-                /* FOTO'S SECTIE IN POPUP - KLEINER FORMAAT (80%) */
+                /* FOTO'S SECTIE IN POPUP - BOVENAAN EN KLEINER (60% van huidige grootte) */
                 .photos-grid {
                     display: grid;
                     grid-template-columns: repeat(3, 1fr);
                     gap: 6px;
                     margin-bottom: 10px;
-                    max-width: 320px; /* 80% van 400px */
+                    max-width: 240px; /* 60% van 400px */
                     margin-left: auto;
                     margin-right: auto;
                 }
