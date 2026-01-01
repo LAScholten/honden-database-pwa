@@ -215,114 +215,26 @@ class StamboomManager extends BaseModule {
 /* BEGIN COI BEREKENING - Wright's formule      */
 /* ============================================= */
 
-/* ============================================= */
-/* COI BEREKENING - GEKORRIGEERDE VERSIE */
-/* ============================================= */
+// In je showDogDetailPopup functie of waar je COI nodig hebt:
 
-// Deze functies in je HondenDatabase klasse zetten:
-
-async calculateCOI(dogId) {
-    // 1. Basis checks
-    if (!dogId || dogId === 0) return { coi6Gen: '0.0', coiAllGen: '0.0' };
+async showDogDetailPopup(dogId) {
+    // Je hebt al: this.honden = array met 327 honden
     
-    const dog = await this.getHondById(dogId);
-    if (!dog || !dog.vaderId || !dog.moederId) {
-        return { coi6Gen: '0.0', coiAllGen: '0.0' };
-    }
+    // Bereken COI:
+    const coiResult = await this.calculateCOI(dogId, this.honden);
     
-    // 2. Speciale gevallen - DEZE MOETEN 25% ZIJN
-    // a) Zelfde ouders
-    if (dog.vaderId === dog.moederId) {
-        return { coi6Gen: '25.0', coiAllGen: '25.0' };
-    }
+    // Gebruik het resultaat:
+    console.log('COI 6 generaties:', coiResult.coi6Gen + '%');
+    console.log('COI alle generaties:', coiResult.coiAllGen + '%');
     
-    // b) Ouder-kind
-    const vader = await this.getHondById(dog.vaderId);
-    const moeder = await this.getHondById(dog.moederId);
-    
-    if (!vader || !moeder) {
-        return { coi6Gen: '0.0', coiAllGen: '0.0' };
-    }
-    
-    if (vader.vaderId === dog.moederId || vader.moederId === dog.moederId ||
-        moeder.vaderId === dog.vaderId || moeder.moederId === dog.vaderId) {
-        return { coi6Gen: '25.0', coiAllGen: '25.0' };
-    }
-    
-    // c) Broer/zus
-    if (vader.vaderId && moeder.vaderId && vader.vaderId === moeder.vaderId &&
-        vader.moederId && moeder.moederId && vader.moederId === moeder.moederId) {
-        return { coi6Gen: '25.0', coiAllGen: '25.0' };
-    }
-    
-    // 3. ALGEMENE BEREKENING
-    const relatie6 = await this.berekenVerwantschap(dog.vaderId, dog.moederId, 5);
-    const coi6Gen = 0.5 * relatie6;
-    
-    const relatieAll = await this.berekenVerwantschap(dog.vaderId, dog.moederId, 15);
-    const coiAllGen = 0.5 * relatieAll;
-    
-    return {
-        coi6Gen: (coi6Gen * 100).toFixed(1),
-        coiAllGen: (coiAllGen * 100).toFixed(1)
-    };
-}
-
-async berekenVerwantschap(dogId1, dogId2, maxDepth) {
-    if (!dogId1 || !dogId2 || maxDepth <= 0) return 0;
-    
-    // 1. Zelfde hond
-    if (dogId1 === dogId2) return 1;
-    
-    // 2. Haal honden op
-    const dog1 = await this.getHondById(dogId1);
-    const dog2 = await this.getHondById(dogId2);
-    if (!dog1 || !dog2) return 0;
-    
-    // 3. Directe relaties
-    // a) Volle broer/zus
-    if (dog1.vaderId && dog2.vaderId && dog1.vaderId === dog2.vaderId &&
-        dog1.moederId && dog2.moederId && dog1.moederId === dog2.moederId) {
-        return 0.5;
-    }
-    
-    // b) Ouder-kind
-    if (dog1.vaderId === dogId2 || dog1.moederId === dogId2 ||
-        dog2.vaderId === dogId1 || dog2.moederId === dogId1) {
-        return 0.5;
-    }
-    
-    // c) Half broer/zus
-    if (dog1.vaderId && dog2.vaderId && dog1.vaderId === dog2.vaderId) {
-        return 0.25;
-    }
-    if (dog1.moederId && dog2.moederId && dog1.moederId === dog2.moederId) {
-        return 0.25;
-    }
-    
-    // 4. Complexe relaties: recursie via ouders
-    let totaal = 0;
-    
-    // CORRECTIE: gebruik 'of' in plaats van 'van'
-    const combinaties = [
-        [dog1.vaderId, dog2.vaderId],
-        [dog1.vaderId, dog2.moederId],
-        [dog1.moederId, dog2.vaderId],
-        [dog1.moederId, dog2.moederId]
-    ];
-    
-    // CORRECTIE: gebruik for...of loop
-    for (const combinatie of combinaties) {
-        const id1 = combinatie[0];
-        const id2 = combinatie[1];
-        
-        if (id1 && id2) {
-            const subRelatie = await this.berekenVerwantschap(id1, id2, maxDepth - 1);
-            totaal += 0.25 * subRelatie;
-        }
-    }
-    
-    return totaal;
+    // Toon in popup:
+    const coiHTML = `
+        <div class="coi-info">
+            <strong>Inteeltpercentage (COI):</strong><br>
+            - 6 generaties: <span class="coi-value">${coiResult.coi6Gen}%</span><br>
+            - Alle generaties: <span class="coi-value">${coiResult.coiAllGen}%</span>
+        </div>
+    `;
 }
 
 /* ============================================= */
