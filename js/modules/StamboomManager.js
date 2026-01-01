@@ -150,7 +150,7 @@ class StamboomManager extends BaseModule {
             de: {
                 pedigreeTitle: "Ahnentafel von {name}",
                 pedigree4Gen: "4-Generationen Ahnentafel",
-                generatingPedigree: "Ahnentafel wird generiert...",
+                generatingPedigree: "Ahnentafel wordt generiert...",
                 close: "Schließen",
                 print: "Drucken",
                 noData: "Keine Daten",
@@ -971,7 +971,7 @@ testSpecificDog(dogId, expectedCOI) {
         `;
     }
     
-    // Nieuwe methode: Toon grote foto
+    // Nieuwe methode: Toon grote foto - GEÜPDATEEERDE VERSIE
     showLargePhoto(photoData, dogName = '') {
         console.log('showLargePhoto aangeroepen met:', photoData);
         
@@ -983,7 +983,7 @@ testSpecificDog(dogId, expectedCOI) {
         
         // Maak overlay voor grote foto
         const overlayHTML = `
-            <div class="photo-large-overlay" id="photoLargeOverlay">
+            <div class="photo-large-overlay" id="photoLargeOverlay" style="display: flex;">
                 <div class="photo-large-container" id="photoLargeContainer">
                     <div class="photo-large-header">
                         <button type="button" class="btn-close btn-close-white photo-large-close"></button>
@@ -1008,10 +1008,6 @@ testSpecificDog(dogId, expectedCOI) {
         // Stel foto grootte in op basis van schermgrootte
         const imgElement = document.getElementById('photoLargeImg');
         const container = document.getElementById('photoLargeContainer');
-        
-        // Zorg dat de overlay direct zichtbaar is
-        const overlay = document.getElementById('photoLargeOverlay');
-        overlay.style.display = 'flex';
         
         // Wacht tot de foto geladen is voor sizing
         imgElement.onload = () => {
@@ -1057,23 +1053,32 @@ testSpecificDog(dogId, expectedCOI) {
             }
         };
         
+        // Als de foto al geladen is (cached), forceer dan het onload event
+        if (imgElement.complete) {
+            imgElement.dispatchEvent(new Event('load'));
+        }
+        
         // Voeg event listeners toe voor sluiten
-        const closeButtons = overlay.querySelectorAll('.photo-large-close, .photo-large-close-btn');
+        const closeButtons = document.querySelectorAll('.photo-large-close, .photo-large-close-btn');
         
         closeButtons.forEach(btn => {
             btn.addEventListener('click', () => {
-                overlay.style.display = 'none';
-                setTimeout(() => {
-                    if (overlay.parentNode) {
-                        overlay.parentNode.removeChild(overlay);
-                    }
-                }, 300);
+                const overlay = document.getElementById('photoLargeOverlay');
+                if (overlay) {
+                    overlay.style.display = 'none';
+                    setTimeout(() => {
+                        if (overlay.parentNode) {
+                            overlay.parentNode.removeChild(overlay);
+                        }
+                    }, 300);
+                }
             });
         });
         
-        // Sluit bij klik buiten foto
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) {
+        // Sluit bij klik buiten foto - FIX: gebruik correcte overlay reference
+        document.getElementById('photoLargeOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'photoLargeOverlay') {
+                const overlay = e.target;
                 overlay.style.display = 'none';
                 setTimeout(() => {
                     if (overlay.parentNode) {
@@ -1085,19 +1090,23 @@ testSpecificDog(dogId, expectedCOI) {
         
         // Sluit met Escape key
         const closeOnEscape = (e) => {
-            if (e.key === 'Escape' && overlay) {
-                overlay.style.display = 'none';
-                setTimeout(() => {
-                    if (overlay.parentNode) {
-                        overlay.parentNode.removeChild(overlay);
-                    }
-                }, 300);
-                document.removeEventListener('keydown', closeOnEscape);
+            if (e.key === 'Escape') {
+                const overlay = document.getElementById('photoLargeOverlay');
+                if (overlay) {
+                    overlay.style.display = 'none';
+                    setTimeout(() => {
+                        if (overlay.parentNode) {
+                            overlay.parentNode.removeChild(overlay);
+                        }
+                    }, 300);
+                    document.removeEventListener('keydown', closeOnEscape);
+                }
             }
         };
         document.addEventListener('keydown', closeOnEscape);
         
         // Clean up event listener when overlay closes
+        const overlay = document.getElementById('photoLargeOverlay');
         overlay.addEventListener('animationend', function handler() {
             if (overlay.style.display === 'none') {
                 document.removeEventListener('keydown', closeOnEscape);
@@ -2490,8 +2499,8 @@ testSpecificDog(dogId, expectedCOI) {
         };
         document.addEventListener('keydown', closeOnEscape);
         
-        // Setup photo click events
-        this.setupPhotoClickEvents(dog);
+        // Setup photo click events - FIXED VERSION
+        this.setupPhotoClickEvents();
         
         // Clean up event listener when popup closes
         overlay.addEventListener('animationend', function handler() {
@@ -2502,20 +2511,39 @@ testSpecificDog(dogId, expectedCOI) {
         });
     }
     
-    // Nieuwe methode: Setup photo click events
-    setupPhotoClickEvents(dog) {
-        const photoThumbnails = document.querySelectorAll('.photo-thumbnail');
-        photoThumbnails.forEach(thumbnail => {
-            thumbnail.addEventListener('click', (e) => {
-                const photoSrc = thumbnail.getAttribute('data-photo-src');
-                console.log('Foto geklikt, src:', photoSrc);
+    // FIXED METHOD: Setup photo click events
+    setupPhotoClickEvents() {
+        console.log('setupPhotoClickEvents called');
+        
+        // Gebruik event delegation voor betere performance
+        document.addEventListener('click', (e) => {
+            const thumbnail = e.target.closest('.photo-thumbnail');
+            if (thumbnail) {
+                e.preventDefault();
+                e.stopPropagation();
                 
-                if (photoSrc) {
-                    this.showLargePhoto(photoSrc, dog.naam);
+                const photoSrc = thumbnail.getAttribute('data-photo-src');
+                const imgElement = thumbnail.querySelector('img');
+                const actualSrc = photoSrc || imgElement?.src;
+                
+                console.log('Foto thumbnail geklikt:', {
+                    thumbnail,
+                    photoSrc,
+                    imgSrc: imgElement?.src,
+                    actualSrc
+                });
+                
+                if (actualSrc) {
+                    // Haal hondnaam op uit de popup header
+                    const popupTitle = document.querySelector('.popup-title');
+                    const dogName = popupTitle ? popupTitle.textContent.trim() : '';
+                    
+                    console.log('Toon grote foto voor:', actualSrc);
+                    this.showLargePhoto(actualSrc, dogName);
                 } else {
-                    console.error('Geen foto src gevonden in data-attribuut');
+                    console.error('Geen foto src gevonden');
                 }
-            });
+            }
         });
     }
     
