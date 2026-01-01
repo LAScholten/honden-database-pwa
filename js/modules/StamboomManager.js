@@ -1468,21 +1468,21 @@ testSpecificDog(dogId, expectedCOI) {
                     .pedigree-card-compact.horizontal.gen1,
                     .pedigree-card-compact.horizontal.gen2 {
                         width: 220px !important; /* 220px breed */
-                        height: 120px !important;
+                        height: 130px !important;
                         margin: 0 !important;
                         flex-shrink: 0 !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen3 {
                         width: 220px !important; /* 220px breed */
-                        height: 62px !important;  /* 2px hoger (was 60px) */
+                        height: 65px !important;  /* 2px hoger (was 60px) */
                         margin: 0 !important;
                         flex-shrink: 0 !important;
                     }
                     
                     .pedigree-card-compact.horizontal.main-dog-compact {
                         width: 220px !important; /* 220px */
-                        height: 120px !important;
+                        height: 130px !important;
                         margin: 0 !important;
                         flex-shrink: 0 !important;
                     }
@@ -1496,7 +1496,7 @@ testSpecificDog(dogId, expectedCOI) {
                 /* Kleine mobiele schermen */
                 @media (max-width: 480px) {
                     .pedigree-container-compact {
-                        height: 600px !important; /* Blijft */
+                        height: 640px !important; /* Blijft */
                         padding: 8px !important;
                     }
                     
@@ -1510,17 +1510,17 @@ testSpecificDog(dogId, expectedCOI) {
                     .pedigree-card-compact.horizontal.gen1,
                     .pedigree-card-compact.horizontal.gen2 {
                         width: 220px !important; /* 200px breed */
-                        height: 105px !important;
+                        height: 130px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen3 {
                         width: 220px !important; /* 200px breed */
-                        height: 59px !important;  /* 2px hoger (was 57px) */
+                        height: 65px !important;  /* 2px hoger (was 57px) */
                     }
                     
                     .pedigree-card-compact.horizontal.main-dog-compact {
                         width: 220px !important; /* 220px border */
-                        height: 105px !important;
+                        height: 130px !important;
                     }
                     
                     .pedigree-generation-col {
