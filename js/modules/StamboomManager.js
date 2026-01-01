@@ -720,7 +720,7 @@ testSpecificDog(dogId, expectedCOI) {
         `;
     }
     
-    // DETAIL POPUP voor wanneer op card geklikt wordt - MET FOTO'S
+    // DETAIL POPUP voor wanneer op card geklikt wordt - MET FOTO'S (nu onderaan)
     async getDogDetailPopupHTML(dog, relation = '') {
         if (!dog) return '';
         
@@ -751,29 +751,7 @@ testSpecificDog(dogId, expectedCOI) {
                     <button type="button" class="btn-close btn-close-white popup-close"></button>
                 </div>
                 <div class="popup-body">
-                    <!-- FOTO'S SECTIE (indien beschikbaar) -->
-                    ${photos.length > 0 ? `
-                    <div class="info-section mb-2">
-                        <h6><i class="bi bi-camera me-1"></i> ${this.t('photos')} (${photos.length})</h6>
-                        <div class="photos-grid" id="photosGrid${dog.id}">
-                            ${photos.map((photo, index) => `
-                                <div class="photo-thumbnail" data-photo-id="${photo.id}" data-dog-id="${dog.id}" data-photo-index="${index}">
-                                    <img src="${photo.data}" 
-                                         alt="${dog.naam || ''} - ${photo.filename || ''}" 
-                                         class="thumbnail-img"
-                                         loading="lazy">
-                                    <div class="photo-hover">
-                                        <i class="bi bi-zoom-in"></i>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="photo-hint">
-                            <small class="text-muted"><i class="bi bi-info-circle me-1"></i> ${this.t('clickToEnlarge')}</small>
-                        </div>
-                    </div>
-                    ` : ''}
-                    
+                    <!-- BASISGEGEVENS BOVENAAN -->
                     <div class="info-section mb-2">
                         <h6><i class="bi bi-card-text me-1"></i> Basisgegevens</h6>
                         <div class="info-grid">
@@ -956,6 +934,33 @@ testSpecificDog(dogId, expectedCOI) {
                         <div class="text-muted">${this.t('noRemarks')}</div>
                     </div>
                     `}
+                    
+                    <!-- FOTO'S SECTIE ONDERAAN (indien beschikbaar) -->
+                    ${photos.length > 0 ? `
+                    <div class="info-section mb-2">
+                        <h6><i class="bi bi-camera me-1"></i> ${this.t('photos')} (${photos.length})</h6>
+                        <div class="photos-grid" id="photosGrid${dog.id}">
+                            ${photos.map((photo, index) => `
+                                <div class="photo-thumbnail" 
+                                     data-photo-id="${photo.id}" 
+                                     data-dog-id="${dog.id}" 
+                                     data-photo-index="${index}"
+                                     data-photo-src="${photo.data}">
+                                    <img src="${photo.data}" 
+                                         alt="${dog.naam || ''} - ${photo.filename || ''}" 
+                                         class="thumbnail-img"
+                                         loading="lazy">
+                                    <div class="photo-hover">
+                                        <i class="bi bi-zoom-in"></i>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="photo-hint">
+                            <small class="text-muted"><i class="bi bi-info-circle me-1"></i> ${this.t('clickToEnlarge')}</small>
+                        </div>
+                    </div>
+                    ` : ''}
                 </div>
                 <div class="popup-footer">
                     <button type="button" class="btn btn-secondary popup-close-btn">
@@ -968,6 +973,8 @@ testSpecificDog(dogId, expectedCOI) {
     
     // Nieuwe methode: Toon grote foto
     showLargePhoto(photoData, dogName = '') {
+        console.log('showLargePhoto aangeroepen met:', photoData);
+        
         // Verwijder bestaande foto overlay als die er is
         const existingOverlay = document.getElementById('photoLargeOverlay');
         if (existingOverlay) {
@@ -1002,7 +1009,11 @@ testSpecificDog(dogId, expectedCOI) {
         const imgElement = document.getElementById('photoLargeImg');
         const container = document.getElementById('photoLargeContainer');
         
-        // Wacht tot de foto geladen is
+        // Zorg dat de overlay direct zichtbaar is
+        const overlay = document.getElementById('photoLargeOverlay');
+        overlay.style.display = 'flex';
+        
+        // Wacht tot de foto geladen is voor sizing
         imgElement.onload = () => {
             const screenWidth = window.innerWidth;
             const screenHeight = window.innerHeight;
@@ -1011,6 +1022,7 @@ testSpecificDog(dogId, expectedCOI) {
                 // Mobiel: 90% van scherm
                 container.style.width = '90vw';
                 container.style.maxHeight = '90vh';
+                container.style.maxWidth = '90vw';
             } else {
                 // Desktop/Laptop: 15-25% van scherm, afhankelijk van foto resolutie
                 const imgWidth = imgElement.naturalWidth;
@@ -1019,9 +1031,9 @@ testSpecificDog(dogId, expectedCOI) {
                 // Bepaal grootte op basis van resolutie
                 let targetPercentage;
                 if (imgWidth < 800) {
-                    targetPercentage = 20; // Kleine foto's: 20%
+                    targetPercentage = 25; // Kleine foto's: 25%
                 } else if (imgWidth < 1600) {
-                    targetPercentage = 18; // Middelgrote foto's: 18%
+                    targetPercentage = 20; // Middelgrote foto's: 20%
                 } else {
                     targetPercentage = 15; // Grote foto's: 15%
                 }
@@ -1041,22 +1053,21 @@ testSpecificDog(dogId, expectedCOI) {
                 
                 container.style.width = `${width}px`;
                 container.style.maxHeight = `${maxHeight}px`;
+                container.style.maxWidth = `${width}px`;
             }
-            
-            // Toon de overlay
-            setTimeout(() => {
-                document.getElementById('photoLargeOverlay').style.display = 'flex';
-            }, 10);
         };
         
         // Voeg event listeners toe voor sluiten
-        const overlay = document.getElementById('photoLargeOverlay');
         const closeButtons = overlay.querySelectorAll('.photo-large-close, .photo-large-close-btn');
         
         closeButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 overlay.style.display = 'none';
-                setTimeout(() => overlay.remove(), 300);
+                setTimeout(() => {
+                    if (overlay.parentNode) {
+                        overlay.parentNode.removeChild(overlay);
+                    }
+                }, 300);
             });
         });
         
@@ -1064,7 +1075,11 @@ testSpecificDog(dogId, expectedCOI) {
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) {
                 overlay.style.display = 'none';
-                setTimeout(() => overlay.remove(), 300);
+                setTimeout(() => {
+                    if (overlay.parentNode) {
+                        overlay.parentNode.removeChild(overlay);
+                    }
+                }, 300);
             }
         });
         
@@ -1072,11 +1087,23 @@ testSpecificDog(dogId, expectedCOI) {
         const closeOnEscape = (e) => {
             if (e.key === 'Escape' && overlay) {
                 overlay.style.display = 'none';
-                setTimeout(() => overlay.remove(), 300);
+                setTimeout(() => {
+                    if (overlay.parentNode) {
+                        overlay.parentNode.removeChild(overlay);
+                    }
+                }, 300);
                 document.removeEventListener('keydown', closeOnEscape);
             }
         };
         document.addEventListener('keydown', closeOnEscape);
+        
+        // Clean up event listener when overlay closes
+        overlay.addEventListener('animationend', function handler() {
+            if (overlay.style.display === 'none') {
+                document.removeEventListener('keydown', closeOnEscape);
+                overlay.removeEventListener('animationend', handler);
+            }
+        });
     }
     
     async showPedigree(dog) {
@@ -1901,7 +1928,7 @@ testSpecificDog(dogId, expectedCOI) {
                 }
                 
                 /* ============================================= */
-                /* DETAIL POPUP STYLES MET FOTO'S */
+                /* DETAIL POPUP STYLES MET FOTO'S ONDERAAN */
                 /* ============================================= */
                 .pedigree-popup-overlay {
                     position: fixed;
@@ -2003,63 +2030,6 @@ testSpecificDog(dogId, expectedCOI) {
                     -webkit-overflow-scrolling: touch;
                 }
                 
-                /* FOTO'S SECTIE IN POPUP */
-                .photos-grid {
-                    display: grid;
-                    grid-template-columns: repeat(3, 1fr);
-                    gap: 8px;
-                    margin-bottom: 10px;
-                }
-                
-                .photo-thumbnail {
-                    position: relative;
-                    aspect-ratio: 1 / 1;
-                    border-radius: 6px;
-                    overflow: hidden;
-                    cursor: pointer;
-                    border: 2px solid transparent;
-                    transition: all 0.2s;
-                }
-                
-                .photo-thumbnail:hover {
-                    border-color: #0d6efd;
-                    transform: scale(1.05);
-                }
-                
-                .thumbnail-img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                }
-                
-                .photo-hover {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0, 0, 0, 0.3);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    opacity: 0;
-                    transition: opacity 0.2s;
-                }
-                
-                .photo-thumbnail:hover .photo-hover {
-                    opacity: 1;
-                }
-                
-                .photo-hover i {
-                    color: white;
-                    font-size: 1.5rem;
-                }
-                
-                .photo-hint {
-                    text-align: center;
-                    margin-bottom: 15px;
-                }
-                
                 /* INFO SECTIES */
                 .info-section {
                     margin-bottom: 20px;
@@ -2136,6 +2106,67 @@ testSpecificDog(dogId, expectedCOI) {
                     color: #495057;
                     font-size: 0.95rem;
                     line-height: 1.5;
+                }
+                
+                /* FOTO'S SECTIE IN POPUP - KLEINER FORMAAT (80%) */
+                .photos-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 6px;
+                    margin-bottom: 10px;
+                    max-width: 320px; /* 80% van 400px */
+                    margin-left: auto;
+                    margin-right: auto;
+                }
+                
+                .photo-thumbnail {
+                    position: relative;
+                    aspect-ratio: 1 / 1;
+                    border-radius: 4px;
+                    overflow: hidden;
+                    cursor: pointer;
+                    border: 2px solid transparent;
+                    transition: all 0.2s;
+                }
+                
+                .photo-thumbnail:hover {
+                    border-color: #0d6efd;
+                    transform: scale(1.05);
+                }
+                
+                .thumbnail-img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+                
+                .photo-hover {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    opacity: 0;
+                    transition: opacity 0.2s;
+                }
+                
+                .photo-thumbnail:hover .photo-hover {
+                    opacity: 1;
+                }
+                
+                .photo-hover i {
+                    color: white;
+                    font-size: 1.2rem;
+                }
+                
+                .photo-hint {
+                    text-align: center;
+                    margin-bottom: 15px;
+                    font-size: 0.85rem;
                 }
                 
                 .popup-footer {
@@ -2476,14 +2507,13 @@ testSpecificDog(dogId, expectedCOI) {
         const photoThumbnails = document.querySelectorAll('.photo-thumbnail');
         photoThumbnails.forEach(thumbnail => {
             thumbnail.addEventListener('click', (e) => {
-                const photoId = thumbnail.getAttribute('data-photo-id');
-                const dogId = thumbnail.getAttribute('data-dog-id');
-                const photoIndex = thumbnail.getAttribute('data-photo-index');
+                const photoSrc = thumbnail.getAttribute('data-photo-src');
+                console.log('Foto geklikt, src:', photoSrc);
                 
-                // Haal foto data op uit de thumbnail
-                const imgElement = thumbnail.querySelector('img');
-                if (imgElement && imgElement.src) {
-                    this.showLargePhoto(imgElement.src, dog.naam);
+                if (photoSrc) {
+                    this.showLargePhoto(photoSrc, dog.naam);
+                } else {
+                    console.error('Geen foto src gevonden in data-attribuut');
                 }
             });
         });
