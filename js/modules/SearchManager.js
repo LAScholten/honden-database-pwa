@@ -13,7 +13,7 @@ class SearchManager extends BaseModule {
         this.stamboomManager = null; // Wordt later geïnitialiseerd
         this.isMobileCollapsed = false; // Track of mobiele weergave collapsed is
         
-        // Vertalingen uitgebreid met pedigree knop
+        // Vertalingen uitgebreid met pedigree knop en foto's
         this.translations = {
             nl: {
                 searchDog: "Hond Zoeken",
@@ -118,7 +118,19 @@ class SearchManager extends BaseModule {
                 greatGrandfather: "Overgrootvader",
                 greatGrandmother: "Overgrootmoeder",
                 grandfather: "Grootvader",
-                grandmother: "Grootmoeder"
+                grandmother: "Grootmoeder",
+                
+                // Foto vertalingen
+                photos: "Foto's",
+                viewPhotos: "Bekijk foto's",
+                noPhotosAvailable: "Geen foto's beschikbaar",
+                closePhotos: "Sluiten foto's",
+                photoModalTitle: "Foto's van {name}",
+                previousPhoto: "Vorige",
+                nextPhoto: "Volgende",
+                zoomIn: "Vergroot",
+                zoomOut: "Verklein",
+                downloadPhoto: "Download foto"
             },
             en: {
                 searchDog: "Search Dog",
@@ -223,7 +235,19 @@ class SearchManager extends BaseModule {
                 greatGrandfather: "Great Grandfather",
                 greatGrandmother: "Great Grandmother",
                 grandfather: "Grandfather",
-                grandmother: "Grandmother"
+                grandmother: "Grandmother",
+                
+                // Photo translations
+                photos: "Photos",
+                viewPhotos: "View photos",
+                noPhotosAvailable: "No photos available",
+                closePhotos: "Close photos",
+                photoModalTitle: "Photos of {name}",
+                previousPhoto: "Previous",
+                nextPhoto: "Next",
+                zoomIn: "Zoom in",
+                zoomOut: "Zoom out",
+                downloadPhoto: "Download photo"
             },
             de: {
                 searchDog: "Hund suchen",
@@ -285,7 +309,19 @@ class SearchManager extends BaseModule {
                 greatGrandfather: "Urgroßvater",
                 greatGrandmother: "Urgroßmutter",
                 grandfather: "Großvater",
-                grandmother: "Großmutter"
+                grandmother: "Großmutter",
+                
+                // Foto Übersetzungen
+                photos: "Fotos",
+                viewPhotos: "Fotos ansehen",
+                noPhotosAvailable: "Keine Fotos verfügbar",
+                closePhotos: "Fotos schließen",
+                photoModalTitle: "Fotos von {name}",
+                previousPhoto: "Vorherige",
+                nextPhoto: "Nächste",
+                zoomIn: "Vergrößern",
+                zoomOut: "Verkleinern",
+                downloadPhoto: "Foto herunterladen"
             }
         };
     }
@@ -709,6 +745,290 @@ class SearchManager extends BaseModule {
                     font-weight: 500;
                 }
                 
+                /* FOTO STYLES */
+                .photo-icon-btn {
+                    background: none;
+                    border: none;
+                    color: #0d6efd;
+                    padding: 4px 8px;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                }
+                
+                .photo-icon-btn:hover {
+                    color: #084298;
+                    transform: scale(1.1);
+                }
+                
+                .photo-icon-btn:disabled {
+                    color: #adb5bd;
+                    cursor: not-allowed;
+                }
+                
+                /* Foto modal */
+                .photo-modal .modal-content {
+                    border-radius: 12px;
+                    overflow: hidden;
+                }
+                
+                .photo-modal .modal-header {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border-bottom: none;
+                }
+                
+                .photo-modal .modal-body {
+                    padding: 0;
+                    background-color: #f8f9fa;
+                }
+                
+                .photo-thumbnail-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                    gap: 15px;
+                    padding: 20px;
+                    max-height: calc(100vh - 200px);
+                    overflow-y: auto;
+                }
+                
+                .photo-thumbnail-item {
+                    position: relative;
+                    cursor: pointer;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    transition: all 0.3s ease;
+                    aspect-ratio: 1;
+                }
+                
+                .photo-thumbnail-item:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                }
+                
+                .photo-thumbnail {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    transition: transform 0.3s ease;
+                }
+                
+                .photo-thumbnail-item:hover .photo-thumbnail {
+                    transform: scale(1.05);
+                }
+                
+                .photo-thumbnail-overlay {
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+                    color: white;
+                    padding: 10px;
+                    transform: translateY(100%);
+                    transition: transform 0.3s ease;
+                }
+                
+                .photo-thumbnail-item:hover .photo-thumbnail-overlay {
+                    transform: translateY(0);
+                }
+                
+                .photo-thumbnail-title {
+                    font-size: 12px;
+                    margin: 0;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                
+                /* Fullscreen photo viewer */
+                .photo-viewer-modal .modal-dialog {
+                    max-width: 95vw;
+                    max-height: 95vh;
+                }
+                
+                .photo-viewer-modal .modal-content {
+                    background-color: rgba(0, 0, 0, 0.9);
+                    border: none;
+                }
+                
+                .photo-viewer-modal .modal-header {
+                    background: transparent;
+                    border-bottom: none;
+                    position: absolute;
+                    top: 10px;
+                    right: 10px;
+                    z-index: 1000;
+                }
+                
+                .photo-viewer-modal .modal-header .btn-close {
+                    filter: invert(1);
+                    opacity: 0.8;
+                }
+                
+                .photo-viewer-modal .modal-body {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 20px;
+                }
+                
+                .photo-viewer-container {
+                    position: relative;
+                    width: 100%;
+                    height: calc(90vh - 100px);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                
+                .photo-viewer-image {
+                    max-width: 100%;
+                    max-height: 100%;
+                    object-fit: contain;
+                    transition: transform 0.3s ease;
+                    cursor: grab;
+                }
+                
+                .photo-viewer-image.dragging {
+                    cursor: grabbing;
+                }
+                
+                .photo-viewer-controls {
+                    position: absolute;
+                    bottom: 20px;
+                    left: 0;
+                    right: 0;
+                    display: flex;
+                    justify-content: center;
+                    gap: 10px;
+                    z-index: 100;
+                }
+                
+                .photo-viewer-nav {
+                    position: absolute;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    background: rgba(255, 255, 255, 0.2);
+                    border: none;
+                    color: white;
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    z-index: 100;
+                }
+                
+                .photo-viewer-nav:hover {
+                    background: rgba(255, 255, 255, 0.3);
+                    transform: translateY(-50%) scale(1.1);
+                }
+                
+                .photo-viewer-nav.prev {
+                    left: 20px;
+                }
+                
+                .photo-viewer-nav.next {
+                    right: 20px;
+                }
+                
+                .photo-viewer-nav:disabled {
+                    opacity: 0.3;
+                    cursor: not-allowed;
+                }
+                
+                .photo-viewer-nav:disabled:hover {
+                    transform: translateY(-50%);
+                    background: rgba(255, 255, 255, 0.2);
+                }
+                
+                .photo-viewer-zoom-controls {
+                    position: absolute;
+                    top: 20px;
+                    left: 20px;
+                    display: flex;
+                    gap: 5px;
+                    z-index: 100;
+                }
+                
+                .photo-viewer-info {
+                    position: absolute;
+                    bottom: 20px;
+                    left: 20px;
+                    color: white;
+                    background: rgba(0, 0, 0, 0.5);
+                    padding: 10px 15px;
+                    border-radius: 8px;
+                    max-width: 300px;
+                }
+                
+                .photo-viewer-counter {
+                    color: white;
+                    background: rgba(0, 0, 0, 0.5);
+                    padding: 8px 15px;
+                    border-radius: 20px;
+                    font-size: 14px;
+                }
+                
+                .photo-viewer-btn {
+                    background: rgba(255, 255, 255, 0.2);
+                    border: none;
+                    color: white;
+                    padding: 8px 15px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                }
+                
+                .photo-viewer-btn:hover {
+                    background: rgba(255, 255, 255, 0.3);
+                }
+                
+                /* Loading indicator */
+                .photo-loading {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 200px;
+                }
+                
+                .photo-spinner {
+                    width: 40px;
+                    height: 40px;
+                    border: 4px solid #f3f3f3;
+                    border-top: 4px solid #0d6efd;
+                    border-radius: 50%;
+                    animation: spin 1s linear infinite;
+                }
+                
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+                
+                /* Empty state */
+                .photo-empty-state {
+                    text-align: center;
+                    padding: 40px 20px;
+                    color: #6c757d;
+                }
+                
+                .photo-empty-icon {
+                    font-size: 48px;
+                    margin-bottom: 15px;
+                    opacity: 0.5;
+                }
+                
                 @media (max-width: 768px) {
                     .modal-body {
                         max-height: calc(100vh - 200px);
@@ -750,6 +1070,43 @@ class SearchManager extends BaseModule {
                         padding: 10px 0;
                         margin-bottom: 15px;
                         border-bottom: 1px solid #dee2e6;
+                    }
+                    
+                    /* Responsive photo adjustments */
+                    .photo-thumbnail-grid {
+                        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                        gap: 10px;
+                        padding: 15px;
+                    }
+                    
+                    .photo-viewer-controls {
+                        bottom: 10px;
+                    }
+                    
+                    .photo-viewer-nav {
+                        width: 40px;
+                        height: 40px;
+                        font-size: 14px;
+                    }
+                    
+                    .photo-viewer-nav.prev {
+                        left: 10px;
+                    }
+                    
+                    .photo-viewer-nav.next {
+                        right: 10px;
+                    }
+                    
+                    .photo-viewer-info {
+                        bottom: 10px;
+                        left: 10px;
+                        max-width: 200px;
+                        padding: 8px 12px;
+                    }
+                    
+                    .photo-viewer-zoom-controls {
+                        top: 10px;
+                        left: 10px;
                     }
                 }
             </style>
@@ -1222,7 +1579,7 @@ class SearchManager extends BaseModule {
                             <div class="dog-name-header">${displayValue(dog.naam)}</div>
                             ${dog.kennelnaam ? `<div class="text-muted mb-2">${displayValue(dog.kennelnaam)}</div>` : ''}
                             
-                            <!-- VOLGORDE: Stamboomnummer + Ras + Geslacht + Vachtkleur (zoals in 2e image) -->
+                            <!-- VOLGORDE: Stamboomnummer + Ras + Geslacht + Vachtkleur + Foto icoon -->
                             <div class="dog-detail-header-line mt-2">
                                 ${dog.stamboomnr ? `<span class="stamboom">${dog.stamboomnr}</span>` : ''}
                                 ${dog.ras ? `<span class="ras">${dog.ras}</span>` : ''}
@@ -1230,6 +1587,8 @@ class SearchManager extends BaseModule {
                                 ${dog.vachtkleur && dog.vachtkleur.trim() !== '' ? 
                                   `<span class="vachtkleur">${dog.vachtkleur}</span>` : 
                                   `<span class="text-muted fst-italic">geen vachtkleur</span>`}
+                                <!-- Foto icoon wordt hier ingevoegd via loadAndDisplayPhotoIcon -->
+                                <span class="photo-icon-container" data-dog-id="${dog.id}"></span>
                             </div>
                         </div>
                         <div class="text-end">
@@ -1395,6 +1754,11 @@ class SearchManager extends BaseModule {
         
         container.innerHTML = html;
         
+        // Laad en toon foto icoon
+        setTimeout(() => {
+            this.loadAndDisplayPhotoIcon(dog.id);
+        }, 100);
+        
         // Voeg terugknop toe voor mobiele weergave (als we in collapsed modus zijn)
         if (this.isMobileCollapsed && window.innerWidth <= 768) {
             this.addMobileBackButton();
@@ -1457,6 +1821,443 @@ class SearchManager extends BaseModule {
                 }
             });
         }
+    }
+    
+    // NIEUWE METHODE: Foto icoon laden en tonen
+    async loadAndDisplayPhotoIcon(dogId) {
+        try {
+            const photoIconContainer = document.querySelector(`.photo-icon-container[data-dog-id="${dogId}"]`);
+            if (!photoIconContainer) return;
+            
+            // Controleer of er foto's zijn voor deze hond
+            const photos = await this.getDogPhotos(dogId);
+            
+            if (photos && photos.length > 0) {
+                const t = this.t.bind(this);
+                photoIconContainer.innerHTML = `
+                    <button class="photo-icon-btn" title="${t('viewPhotos')}" data-dog-id="${dogId}">
+                        <i class="bi bi-images"></i>
+                    </button>
+                `;
+                
+                // Voeg event listener toe
+                const photoBtn = photoIconContainer.querySelector('.photo-icon-btn');
+                photoBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.showPhotoModal(dogId);
+                });
+            } else {
+                // Geen foto's beschikbaar, toon niets
+                photoIconContainer.innerHTML = '';
+            }
+        } catch (error) {
+            console.error('Fout bij laden foto icoon:', error);
+        }
+    }
+    
+    // NIEUWE METHODE: Foto's ophalen uit database
+    async getDogPhotos(dogId) {
+        try {
+            if (!this.db) {
+                console.error('Database niet beschikbaar');
+                return [];
+            }
+            
+            // Controleer of de database methode bestaat
+            if (typeof this.db.getFotosByHondId === 'function') {
+                const photos = await this.db.getFotosByHondId(dogId);
+                return photos || [];
+            } else {
+                console.warn('getFotosByHondId methode niet beschikbaar in database');
+                return [];
+            }
+            
+        } catch (error) {
+            console.error('Fout bij ophalen foto\'s:', error);
+            return [];
+        }
+    }
+    
+    // NIEUWE METHODE: Foto modal tonen
+    showPhotoModal(dogId) {
+        const dog = this.allDogs.find(d => d.id === dogId);
+        if (!dog) return;
+        
+        const t = this.t.bind(this);
+        const modalId = `photoModal-${dogId}`;
+        
+        // Verwijder bestaande modal als die er is
+        const existingModal = document.getElementById(modalId);
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Creëer nieuwe modal
+        const modalHTML = `
+            <div class="modal fade photo-modal" id="${modalId}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="bi bi-images me-2"></i>
+                                ${t('photoModalTitle').replace('{name}', dog.naam || t('unknown'))}
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${t('closePhotos')}"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="photo-loading">
+                                <div class="photo-spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Voeg modal toe aan DOM
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        // Toon modal
+        const photoModal = new bootstrap.Modal(document.getElementById(modalId));
+        photoModal.show();
+        
+        // Laad foto's asynchroon
+        this.loadPhotosForModal(dogId, modalId);
+        
+        // Verwijder modal uit DOM wanneer deze wordt verborgen
+        document.getElementById(modalId).addEventListener('hidden.bs.modal', function () {
+            setTimeout(() => {
+                const modal = document.getElementById(modalId);
+                if (modal) modal.remove();
+            }, 300);
+        });
+    }
+    
+    // NIEUWE METHODE: Foto's laden voor modal
+    async loadPhotosForModal(dogId, modalId) {
+        const modalElement = document.getElementById(modalId);
+        if (!modalElement) return;
+        
+        const modalBody = modalElement.querySelector('.modal-body');
+        const t = this.t.bind(this);
+        
+        try {
+            const photos = await this.getDogPhotos(dogId);
+            
+            if (photos.length === 0) {
+                modalBody.innerHTML = `
+                    <div class="photo-empty-state">
+                        <div class="photo-empty-icon">
+                            <i class="bi bi-image"></i>
+                        </div>
+                        <p class="mb-0">${t('noPhotosAvailable')}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Creëer thumbnail grid
+            let thumbnailHTML = '<div class="photo-thumbnail-grid">';
+            
+            photos.forEach((photo, index) => {
+                // Aanname: foto object heeft een 'url', 'filePath' of 'data' property
+                const photoUrl = photo.url || photo.filePath || (photo.data ? `data:${photo.mimeType || 'image/jpeg'};base64,${photo.data}` : '');
+                const photoTitle = photo.title || photo.fileName || `Foto ${index + 1}`;
+                
+                thumbnailHTML += `
+                    <div class="photo-thumbnail-item" data-photo-index="${index}" data-modal-id="${modalId}">
+                        <img src="${photoUrl}" alt="${photoTitle}" class="photo-thumbnail" loading="lazy">
+                        <div class="photo-thumbnail-overlay">
+                            <p class="photo-thumbnail-title mb-0">${photoTitle}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            thumbnailHTML += '</div>';
+            modalBody.innerHTML = thumbnailHTML;
+            
+            // Voeg click event listeners toe aan thumbnails
+            modalBody.querySelectorAll('.photo-thumbnail-item').forEach(thumbnail => {
+                thumbnail.addEventListener('click', (e) => {
+                    const photoIndex = parseInt(thumbnail.getAttribute('data-photo-index'));
+                    const currentModalId = thumbnail.getAttribute('data-modal-id');
+                    this.showFullscreenPhotoViewer(photos, photoIndex, dogId);
+                });
+            });
+            
+        } catch (error) {
+            console.error('Fout bij laden foto\'s voor modal:', error);
+            modalBody.innerHTML = `
+                <div class="photo-empty-state">
+                    <div class="text-danger">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                    <p class="mb-0">Fout bij laden foto's</p>
+                </div>
+            `;
+        }
+    }
+    
+    // NIEUWE METHODE: Fullscreen photo viewer tonen
+    showFullscreenPhotoViewer(photos, startIndex, dogId) {
+        if (photos.length === 0) return;
+        
+        const dog = this.allDogs.find(d => d.id === dogId);
+        const t = this.t.bind(this);
+        const viewerId = `photoViewer-${dogId}-${Date.now()}`;
+        
+        // Verwijder bestaande viewer als die er is
+        const existingViewer = document.getElementById(viewerId);
+        if (existingViewer) {
+            existingViewer.remove();
+        }
+        
+        // Creëer viewer modal
+        const viewerHTML = `
+            <div class="modal fade photo-viewer-modal" id="${viewerId}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-fullscreen">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="${t('close')}"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="photo-viewer-container">
+                                <button class="photo-viewer-nav prev" ${startIndex === 0 ? 'disabled' : ''}>
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+                                
+                                <img src="" alt="" class="photo-viewer-image" id="viewer-image-${viewerId}">
+                                
+                                <button class="photo-viewer-nav next" ${startIndex === photos.length - 1 ? 'disabled' : ''}>
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                                
+                                <div class="photo-viewer-info">
+                                    <div class="photo-viewer-counter">
+                                        ${startIndex + 1} / ${photos.length}
+                                    </div>
+                                </div>
+                                
+                                <div class="photo-viewer-controls">
+                                    <button class="photo-viewer-btn" id="zoom-in-${viewerId}">
+                                        <i class="bi bi-zoom-in"></i> ${t('zoomIn')}
+                                    </button>
+                                    <button class="photo-viewer-btn" id="zoom-out-${viewerId}">
+                                        <i class="bi bi-zoom-out"></i> ${t('zoomOut')}
+                                    </button>
+                                    <button class="photo-viewer-btn" id="download-${viewerId}">
+                                        <i class="bi bi-download"></i> ${t('downloadPhoto')}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Voeg viewer toe aan DOM
+        document.body.insertAdjacentHTML('beforeend', viewerHTML);
+        
+        // Toon viewer
+        const viewerModal = new bootstrap.Modal(document.getElementById(viewerId));
+        viewerModal.show();
+        
+        // Initializeer viewer
+        this.initializePhotoViewer(viewerId, photos, startIndex, dog);
+        
+        // Verwijder viewer uit DOM wanneer deze wordt verborgen
+        document.getElementById(viewerId).addEventListener('hidden.bs.modal', function () {
+            setTimeout(() => {
+                const viewer = document.getElementById(viewerId);
+                if (viewer) viewer.remove();
+            }, 300);
+        });
+    }
+    
+    // NIEUWE METHODE: Photo viewer initialiseren
+    initializePhotoViewer(viewerId, photos, currentIndex, dog) {
+        const viewerElement = document.getElementById(viewerId);
+        if (!viewerElement) return;
+        
+        const imageElement = viewerElement.querySelector(`#viewer-image-${viewerId}`);
+        const prevButton = viewerElement.querySelector('.photo-viewer-nav.prev');
+        const nextButton = viewerElement.querySelector('.photo-viewer-nav.next');
+        const zoomInButton = viewerElement.querySelector(`#zoom-in-${viewerId}`);
+        const zoomOutButton = viewerElement.querySelector(`#zoom-out-${viewerId}`);
+        const downloadButton = viewerElement.querySelector(`#download-${viewerId}`);
+        const counterElement = viewerElement.querySelector('.photo-viewer-counter');
+        
+        let currentZoom = 1;
+        let isDragging = false;
+        let startX, startY, translateX = 0, translateY = 0;
+        
+        // Laad initiële foto
+        const loadPhoto = (index) => {
+            if (index < 0 || index >= photos.length) return;
+            
+            currentIndex = index;
+            const photo = photos[index];
+            const photoUrl = photo.url || photo.filePath || (photo.data ? `data:${photo.mimeType || 'image/jpeg'};base64,${photo.data}` : '');
+            
+            imageElement.src = photoUrl;
+            imageElement.alt = photo.title || photo.fileName || `Foto ${index + 1}`;
+            
+            // Reset zoom en positie
+            currentZoom = 1;
+            translateX = 0;
+            translateY = 0;
+            imageElement.style.transform = 'scale(1) translate(0, 0)';
+            
+            // Update knoppen
+            prevButton.disabled = index === 0;
+            nextButton.disabled = index === photos.length - 1;
+            
+            // Update counter
+            if (counterElement) {
+                counterElement.textContent = `${index + 1} / ${photos.length}`;
+            }
+            
+            // Update download link
+            if (downloadButton) {
+                downloadButton.onclick = () => {
+                    const link = document.createElement('a');
+                    link.href = photoUrl;
+                    link.download = photo.fileName || `foto-${dog?.naam || 'hond'}-${index + 1}.jpg`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                };
+            }
+        };
+        
+        // Navigatie
+        prevButton.addEventListener('click', () => {
+            if (currentIndex > 0) {
+                loadPhoto(currentIndex - 1);
+            }
+        });
+        
+        nextButton.addEventListener('click', () => {
+            if (currentIndex < photos.length - 1) {
+                loadPhoto(currentIndex + 1);
+            }
+        });
+        
+        // Zoom functionaliteit
+        zoomInButton.addEventListener('click', () => {
+            currentZoom = Math.min(currentZoom + 0.25, 3);
+            updateImageTransform();
+        });
+        
+        zoomOutButton.addEventListener('click', () => {
+            currentZoom = Math.max(currentZoom - 0.25, 0.5);
+            updateImageTransform();
+        });
+        
+        // Drag functionaliteit
+        imageElement.addEventListener('mousedown', (e) => {
+            if (currentZoom > 1) {
+                isDragging = true;
+                startX = e.clientX - translateX;
+                startY = e.clientY - translateY;
+                imageElement.classList.add('dragging');
+                e.preventDefault();
+            }
+        });
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            updateImageTransform();
+        });
+        
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            imageElement.classList.remove('dragging');
+        });
+        
+        // Touch events voor mobiel
+        imageElement.addEventListener('touchstart', (e) => {
+            if (currentZoom > 1) {
+                isDragging = true;
+                const touch = e.touches[0];
+                startX = touch.clientX - translateX;
+                startY = touch.clientY - translateY;
+                imageElement.classList.add('dragging');
+            }
+        });
+        
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            
+            const touch = e.touches[0];
+            translateX = touch.clientX - startX;
+            translateY = touch.clientY - startY;
+            updateImageTransform();
+            e.preventDefault();
+        });
+        
+        document.addEventListener('touchend', () => {
+            isDragging = false;
+            imageElement.classList.remove('dragging');
+        });
+        
+        // Zoom met wiel
+        imageElement.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            
+            if (e.deltaY < 0) {
+                // Zoom in
+                currentZoom = Math.min(currentZoom + 0.1, 3);
+            } else {
+                // Zoom out
+                currentZoom = Math.max(currentZoom - 0.1, 0.5);
+            }
+            
+            updateImageTransform();
+        });
+        
+        // Keyboard navigatie
+        document.addEventListener('keydown', (e) => {
+            if (!viewerElement.classList.contains('show')) return;
+            
+            switch(e.key) {
+                case 'ArrowLeft':
+                    if (currentIndex > 0) {
+                        loadPhoto(currentIndex - 1);
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (currentIndex < photos.length - 1) {
+                        loadPhoto(currentIndex + 1);
+                    }
+                    break;
+                case 'Escape':
+                    bootstrap.Modal.getInstance(viewerElement).hide();
+                    break;
+                case '+':
+                case '=':
+                    currentZoom = Math.min(currentZoom + 0.25, 3);
+                    updateImageTransform();
+                    break;
+                case '-':
+                    currentZoom = Math.max(currentZoom - 0.25, 0.5);
+                    updateImageTransform();
+                    break;
+            }
+        });
+        
+        // Update transform functie
+        const updateImageTransform = () => {
+            imageElement.style.transform = `scale(${currentZoom}) translate(${translateX}px, ${translateY}px)`;
+        };
+        
+        // Laad eerste foto
+        loadPhoto(currentIndex);
     }
     
     // NIEUWE METHODE: Stamboom openen
