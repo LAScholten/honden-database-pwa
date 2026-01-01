@@ -316,7 +316,7 @@ class DogManager extends BaseModule {
                 importExport: "Daten importieren/exportieren",
                 
                 // Meldungen
-                adminOnly: "Nur Administratoren können Hunde hinzufügen/bearbeiten",
+                adminOnly: "Nur Administratoren kunnen Hunde hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer en Rasse zijn Pflichtfelder",
                 savingDog: "Hund wird gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
@@ -523,8 +523,12 @@ class DogManager extends BaseModule {
                     line-height: 19px;
                 }
                 
+                .parent-input-wrapper {
+                    position: relative;
+                }
+                
                 .autocomplete-dropdown {
-                    position: absolute;
+                    position: relative;
                     background: white;
                     border: 1px solid #ddd;
                     border-radius: 4px;
@@ -533,6 +537,8 @@ class DogManager extends BaseModule {
                     z-index: 9999;
                     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
                     width: 100%;
+                    margin-top: 2px;
+                    display: none;
                 }
                 
                 .autocomplete-item {
@@ -552,10 +558,6 @@ class DogManager extends BaseModule {
                 .autocomplete-item .dog-info {
                     font-size: 0.85em;
                     color: #666;
-                }
-                
-                .parent-input-wrapper {
-                    position: relative;
                 }
                 
                 /* Datum input styling - gebruik text input voor alle apparaten */
@@ -1372,11 +1374,11 @@ class DogManager extends BaseModule {
         // Positioneer de dropdown correct onder het input veld
         const input = document.getElementById(parentType);
         if (input) {
-            const inputRect = input.getBoundingClientRect();
-            dropdown.style.position = 'absolute';
-            dropdown.style.top = `${inputRect.height + 5}px`;
+            // Verwijder absolute positioning - gebruik relative positioning
+            dropdown.style.position = 'relative';
+            dropdown.style.top = '0';
             dropdown.style.left = '0';
-            dropdown.style.width = `${inputRect.width}px`;
+            dropdown.style.width = '100%';
             dropdown.style.zIndex = '9999';
         }
         
