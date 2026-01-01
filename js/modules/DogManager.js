@@ -773,9 +773,9 @@ class DogManager extends BaseModule {
                     <div class="col-md-6">
                         <div class="mb-3 parent-input-wrapper">
                             <label for="father" class="form-label">${t('father')}</label>
-                            <input type="text" class="form-control" id="father" 
+                            <input type="text" class="form-control parent-search-input" id="father" 
                                    value="${data.vader || ''}" 
-                                   placeholder="Begin met typen om te zoeken..."
+                                   placeholder="Typ naam of 'naam kennelnaam'..."
                                    data-parent-type="father"
                                    autocomplete="off">
                         </div>
@@ -783,9 +783,9 @@ class DogManager extends BaseModule {
                     <div class="col-md-6">
                         <div class="mb-3 parent-input-wrapper">
                             <label for="mother" class="form-label">${t('mother')}</label>
-                            <input type="text" class="form-control" id="mother" 
+                            <input type="text" class="form-control parent-search-input" id="mother" 
                                    value="${data.moeder || ''}" 
-                                   placeholder="Begin met typen om te zoeken..."
+                                   placeholder="Typ naam of 'naam kennelnaam'..."
                                    data-parent-type="mother"
                                    autocomplete="off">
                         </div>
@@ -1029,7 +1029,7 @@ class DogManager extends BaseModule {
             });
         });
         
-        // Setup autocomplete voor ouders
+        // Setup autocomplete voor ouders - MET DE ZOEKFUNCTIE VAN SEARCHMANAGER
         this.setupParentAutocomplete();
         
         // Setup datum velden voor tekst invoer en validatie
@@ -1240,6 +1240,9 @@ class DogManager extends BaseModule {
         }
     }
     
+    /**
+     * Setup autocomplete voor ouders - MET DE ZOEKFUNCTIE VAN SEARCHMANAGER
+     */
     setupParentAutocomplete() {
         // Verwijder bestaande dropdowns
         document.querySelectorAll('.autocomplete-dropdown').forEach(dropdown => {
@@ -1247,40 +1250,62 @@ class DogManager extends BaseModule {
         });
         
         // Maak nieuwe dropdown containers
-        const fatherInputWrapper = document.querySelector('#father').closest('.parent-input-wrapper');
-        const motherInputWrapper = document.querySelector('#mother').closest('.parent-input-wrapper');
+        const fatherInputWrapper = document.querySelector('#father')?.closest('.parent-input-wrapper');
+        const motherInputWrapper = document.querySelector('#mother')?.closest('.parent-input-wrapper');
         
-        const fatherDropdown = document.createElement('div');
-        fatherDropdown.className = 'autocomplete-dropdown';
-        fatherDropdown.id = 'fatherDropdown';
-        fatherDropdown.style.display = 'none';
-        fatherInputWrapper.appendChild(fatherDropdown);
+        if (fatherInputWrapper) {
+            const fatherDropdown = document.createElement('div');
+            fatherDropdown.className = 'autocomplete-dropdown';
+            fatherDropdown.id = 'fatherDropdown';
+            fatherDropdown.style.display = 'none';
+            fatherInputWrapper.appendChild(fatherDropdown);
+        }
         
-        const motherDropdown = document.createElement('div');
-        motherDropdown.className = 'autocomplete-dropdown';
-        motherDropdown.id = 'motherDropdown';
-        motherDropdown.style.display = 'none';
-        motherInputWrapper.appendChild(motherDropdown);
+        if (motherInputWrapper) {
+            const motherDropdown = document.createElement('div');
+            motherDropdown.className = 'autocomplete-dropdown';
+            motherDropdown.id = 'motherDropdown';
+            motherDropdown.style.display = 'none';
+            motherInputWrapper.appendChild(motherDropdown);
+        }
         
-        // Event listeners voor vader en moeder velden
-        document.querySelectorAll('.parent-input-wrapper input').forEach(input => {
-            input.addEventListener('focus', () => {
-                this.loadAllDogs(); // Zorg dat honden geladen zijn
+        // Event listeners voor vader en moeder velden - gebruik de SearchManager logica
+        document.querySelectorAll('#father, #mother').forEach(input => {
+            if (!input) return;
+            
+            input.addEventListener('focus', async () => {
+                if (this.allDogs.length === 0) {
+                    await this.loadAllDogs();
+                }
+                
+                const searchTerm = input.value.toLowerCase().trim();
+                
+                if (searchTerm.length >= 1) {
+                    const parentType = input.id === 'father' ? 'father' : 'mother';
+                    this.showParentAutocomplete(searchTerm, parentType);
+                }
             });
             
             input.addEventListener('input', (e) => {
                 const searchTerm = e.target.value.toLowerCase().trim();
                 const parentType = input.id === 'father' ? 'father' : 'mother';
-                this.showParentAutocomplete(searchTerm, parentType);
+                
+                if (searchTerm.length >= 1) {
+                    this.showParentAutocomplete(searchTerm, parentType);
+                } else {
+                    this.hideParentAutocomplete(parentType);
+                    // Reset hidden ID als het veld leeg is
+                    const idInput = document.getElementById(`${parentType}Id`);
+                    if (idInput) {
+                        idInput.value = '';
+                    }
+                }
             });
             
             input.addEventListener('blur', (e) => {
-                // Wacht even voordat dropdown wordt verborgen (voor klikken op item)
                 setTimeout(() => {
-                    const dropdown = document.getElementById(`${input.id}Dropdown`);
-                    if (dropdown) {
-                        dropdown.style.display = 'none';
-                    }
+                    const parentType = input.id === 'father' ? 'father' : 'mother';
+                    this.hideParentAutocomplete(parentType);
                 }, 200);
             });
         });
@@ -1288,26 +1313,29 @@ class DogManager extends BaseModule {
         // Klik buiten dropdown om te verbergen
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.parent-input-wrapper')) {
-                document.querySelectorAll('.autocomplete-dropdown').forEach(dropdown => {
-                    dropdown.style.display = 'none';
-                });
+                this.hideParentAutocomplete('father');
+                this.hideParentAutocomplete('mother');
             }
         });
     }
     
+    /**
+     * NIEUW: Toon parent autocomplete - MET DE ZOEKFUNCTIE VAN SEARCHMANAGER
+     */
     showParentAutocomplete(searchTerm, parentType) {
         const dropdown = document.getElementById(`${parentType}Dropdown`);
         if (!dropdown) return;
         
-        if (!searchTerm || searchTerm.length < 1) {
-            dropdown.style.display = 'none';
-            return;
-        }
-        
-        // Filter honden voor autocomplete (alleen reuen voor vader, teven voor moeder)
+        // Filter honden voor autocomplete - GEBRUIK DE ZOEKFUNCTIE VAN SEARCHMANAGER
         const suggestions = this.allDogs.filter(dog => {
-            const dogName = dog.naam.toLowerCase();
-            const matchesSearch = dogName.startsWith(searchTerm);
+            const naam = dog.naam ? dog.naam.toLowerCase() : '';
+            const kennelnaam = dog.kennelnaam ? dog.kennelnaam.toLowerCase() : '';
+            
+            // Creëer een gecombineerde string: "naam kennelnaam"
+            const combined = `${naam} ${kennelnaam}`;
+            
+            // Controleer of de gecombineerde string begint met de zoekterm
+            const matchesSearch = combined.startsWith(searchTerm);
             
             // Filter op geslacht
             if (parentType === 'father') {
@@ -1316,7 +1344,7 @@ class DogManager extends BaseModule {
                 return matchesSearch && dog.geslacht === 'teven';
             }
             return matchesSearch;
-        }).slice(0, 8); // Max 8 suggesties
+        }).slice(0, 8); // Beperk tot 8 suggesties
         
         if (suggestions.length === 0) {
             dropdown.style.display = 'none';
@@ -1325,11 +1353,14 @@ class DogManager extends BaseModule {
         
         let html = '';
         suggestions.forEach(dog => {
+            const genderText = dog.geslacht === 'reuen' ? this.t('male') : 
+                             dog.geslacht === 'teven' ? this.t('female') : this.t('unknown');
+            
             html += `
-                <div class="autocomplete-item" data-id="${dog.id}" data-name="${dog.naam}" data-pedigree="${dog.stamboomnr || ''}">
+                <div class="autocomplete-item" data-id="${dog.id}" data-name="${dog.naam}">
                     <div class="dog-name">${dog.naam} ${dog.kennelnaam ? dog.kennelnaam : ''}</div>
                     <div class="dog-info">
-                        ${dog.ras || 'Onbekend ras'} | ${dog.stamboomnr || 'Geen stamboom'}
+                        ${dog.ras || 'Onbekend ras'} | ${dog.stamboomnr || 'Geen stamboom'} | ${genderText}
                     </div>
                 </div>
             `;
@@ -1338,24 +1369,49 @@ class DogManager extends BaseModule {
         dropdown.innerHTML = html;
         dropdown.style.display = 'block';
         
+        // Positioneer de dropdown correct onder het input veld
+        const input = document.getElementById(parentType);
+        if (input) {
+            const inputRect = input.getBoundingClientRect();
+            dropdown.style.position = 'absolute';
+            dropdown.style.top = `${inputRect.height + 5}px`;
+            dropdown.style.left = '0';
+            dropdown.style.width = `${inputRect.width}px`;
+            dropdown.style.zIndex = '9999';
+        }
+        
         // Event listeners voor autocomplete items
         dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 const dogId = item.getAttribute('data-id');
                 const dogName = item.getAttribute('data-name');
-                const input = document.getElementById(parentType);
-                const idInput = document.getElementById(`${parentType}Id`);
                 
-                if (input) {
-                    input.value = dogName;
-                }
+                // Vul het input veld met de volledige naam
+                input.value = dogName;
+                
+                // Vul het hidden ID veld
+                const idInput = document.getElementById(`${parentType}Id`);
                 if (idInput) {
                     idInput.value = dogId;
                 }
                 
-                dropdown.style.display = 'none';
+                // Verberg de dropdown
+                this.hideParentAutocomplete(parentType);
+                
+                // Focus terug op het input veld
+                input.focus();
             });
         });
+    }
+    
+    /**
+     * NIEUW: Verberg parent autocomplete
+     */
+    hideParentAutocomplete(parentType) {
+        const dropdown = document.getElementById(`${parentType}Dropdown`);
+        if (dropdown) {
+            dropdown.style.display = 'none';
+        }
     }
     
     async saveDog() {
