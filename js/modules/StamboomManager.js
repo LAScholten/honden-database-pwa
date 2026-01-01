@@ -137,7 +137,7 @@ class StamboomManager extends BaseModule {
             de: {
                 pedigreeTitle: "Ahnentafel von {name}",
                 pedigree4Gen: "4-Generationen Ahnentafel",
-                generatingPedigree: "Ahnentafel wordt generiert...",
+                generatingPedigree: "Ahnentafel wird generiert...",
                 close: "Schließen",
                 print: "Drucken",
                 noData: "Keine Daten",
@@ -690,21 +690,22 @@ collectAllAncestors(dogId, maxGenerations) {
         const coi6Color = this.getCOIColor(coiValues.coi6Gen);
         const coiAllColor = this.getCOIColor(coiValues.coiAllGen);
         
+        // Maak een gecombineerde naam+kennel string voor de header
+        const combinedName = dog.naam || this.t('unknown');
+        const showKennel = dog.kennelnaam && dog.kennelnaam.trim() !== '';
+        const kennelSuffix = showKennel ? ` ${dog.kennelnaam}` : '';
+        const headerText = combinedName + kennelSuffix;
+        
         return `
             <div class="dog-detail-popup">
                 <div class="popup-header">
                     <h5 class="popup-title">
                         <i class="bi ${dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 'bi-gender-female text-danger'} me-2"></i>
-                        ${relation}
+                        ${headerText}
                     </h5>
                     <button type="button" class="btn-close btn-close-white popup-close"></button>
                 </div>
                 <div class="popup-body">
-                    <div class="dog-popup-name mb-2">
-                        <h4>${dog.naam || this.t('unknown')}</h4>
-                        ${dog.kennelnaam ? `<div class="text-muted">${dog.kennelnaam}</div>` : ''}
-                    </div>
-                    
                     <div class="info-section mb-2">
                         <h6><i class="bi bi-card-text me-1"></i> Basisgegevens</h6>
                         <div class="info-grid">
