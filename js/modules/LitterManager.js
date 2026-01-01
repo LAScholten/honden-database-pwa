@@ -334,7 +334,7 @@ class LitterManager {
                 importExport: "Daten importieren/exportieren",
                 
                 // Meldungen
-                adminOnly: "Nur Administratoren können Würfe hinzufügen/bearbeiten",
+                adminOnly: "Nur Administratoren kunnen Würfe hinzufügen/bearbeiten",
                 fieldsRequired: "Name, Stammbaum-Nummer, Rasse, Vater en Mutter sind Pflichtfelder",
                 savingDog: "Hund wordt gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
@@ -1740,7 +1740,7 @@ class LitterManager {
             }
         }
         
-        // Event listeners voor vader en moeder velden - net zoals in DogManager
+        // Event listeners voor vader en moeder velden - GEBRUIK DEZELFDE LOGICA ALS IN SEARCHMANAGER
         document.querySelectorAll('.parent-input-wrapper input').forEach(input => {
             input.addEventListener('focus', () => {
                 this.loadAllDogs(); // Zorg dat honden geladen zijn
@@ -1789,20 +1789,24 @@ class LitterManager {
         
         console.log('LitterManager: Aantal honden beschikbaar voor autocomplete:', this.allDogs.length);
         
-        // Filter honden voor autocomplete (alleen reuen voor vader, teven voor moeder)
+        // Filter honden voor autocomplete - GEBRUIK DEZELFDE LOGICA ALS IN SEARCHMANAGER
         const suggestions = this.allDogs.filter(dog => {
-            const dogName = dog.naam.toLowerCase();
+            const dogName = dog.naam ? dog.naam.toLowerCase() : '';
+            const kennelName = dog.kennelnaam ? dog.kennelnaam.toLowerCase() : '';
             
-            // Zoek op NAAM die BEGINT met de zoekterm
-            const startsWithSearch = dogName.startsWith(searchTerm.toLowerCase());
+            // Creëer een gecombineerde string: "naam kennelnaam" (zoals in SearchManager)
+            const combined = `${dogName} ${kennelName}`;
+            
+            // Controleer of de gecombineerde string begint met de zoekterm
+            const matchesSearch = combined.startsWith(searchTerm.toLowerCase());
             
             // Filter op geslacht
             if (parentType === 'father') {
-                return startsWithSearch && dog.geslacht === 'reuen';
+                return matchesSearch && dog.geslacht === 'reuen';
             } else if (parentType === 'mother') {
-                return startsWithSearch && dog.geslacht === 'teven';
+                return matchesSearch && dog.geslacht === 'teven';
             }
-            return startsWithSearch;
+            return matchesSearch;
         }).slice(0, 8); // Max 8 suggesties
         
         console.log('LitterManager: Aantal suggesties:', suggestions.length);
