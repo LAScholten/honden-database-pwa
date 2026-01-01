@@ -815,31 +815,8 @@ class SearchManager extends BaseModule {
             const searchTerm = e.target.value.toLowerCase().trim();
             
             if (searchTerm.length >= 1) {
-                // Controleer of de gebruiker een spatie heeft ingetypt (naam + kennelnaam)
-                if (searchTerm.includes(' ')) {
-                    // Splits de zoekterm in delen
-                    const parts = searchTerm.split(' ');
-                    
-                    // Als er minstens 2 delen zijn, dan hebben we een kennelnaam-deel
-                    if (parts.length >= 2) {
-                        // De naam is alle delen behalve het laatste deel
-                        const nameParts = parts.slice(0, parts.length - 1);
-                        const namePart = nameParts.join(' ');
-                        
-                        // Het laatste deel is het eerste deel van de kennelnaam
-                        // Maar we willen het hele kennelnaam-deel hebben voor zoeken
-                        // Dus we nemen alle delen vanaf de eerste spatie als kennel-deel
-                        const kennelPart = parts.slice(1).join(' ');
-                        
-                        this.filterDogsByNameAndKennel(namePart, kennelPart);
-                    } else {
-                        // Alleen op naam zoeken als er maar 1 deel is
-                        this.filterDogsByName(searchTerm);
-                    }
-                } else {
-                    // Alleen op naam zoeken
-                    this.filterDogsByName(searchTerm);
-                }
+                // Gebruik dezelfde logica als de kennelnaam zoekfunctie
+                this.filterDogsForNameField(searchTerm);
             } else {
                 this.showInitialView();
                 this.clearDetails();
@@ -931,31 +908,25 @@ class SearchManager extends BaseModule {
         }
     }
     
-    filterDogsByName(searchTerm = '') {
+    filterDogsForNameField(searchTerm = '') {
         this.filteredDogs = this.allDogs.filter(dog => {
             const naam = dog.naam ? dog.naam.toLowerCase() : '';
-            return naam.startsWith(searchTerm);
+            const kennelnaam = dog.kennelnaam ? dog.kennelnaam.toLowerCase() : '';
+            
+            // Creëer een gecombineerde string: "naam kennelnaam"
+            const combined = `${naam} ${kennelnaam}`;
+            
+            // Controleer of de gecombineerde string begint met de zoekterm
+            return combined.startsWith(searchTerm);
         });
         
         this.displaySearchResults();
     }
     
-    filterDogsByNameAndKennel(dogNamePart = '', kennelNamePart = '') {
+    filterDogsByName(searchTerm = '') {
         this.filteredDogs = this.allDogs.filter(dog => {
             const naam = dog.naam ? dog.naam.toLowerCase() : '';
-            const kennelnaam = dog.kennelnaam ? dog.kennelnaam.toLowerCase() : '';
-            
-            // Controleren of de naam begint met het opgegeven naamdeel
-            if (!naam.startsWith(dogNamePart)) {
-                return false;
-            }
-            
-            // Als er ook een kennelnaamdeel is opgegeven, controleren of de kennelnaam begint hiermee
-            if (kennelNamePart && !kennelnaam.startsWith(kennelNamePart)) {
-                return false;
-            }
-            
-            return true;
+            return naam.startsWith(searchTerm);
         });
         
         this.displaySearchResults();
