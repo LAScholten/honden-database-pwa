@@ -1866,7 +1866,7 @@ collectAllAncestors(dogId, maxGenerations) {
                     font-size: 1rem;
                 }
                 
-                /* BELANGRIJK: flex layout voor mobiel */
+                /* SIMPELE OPLOSSING: flex layout voor alle schermen */
                 .info-grid {
                     display: flex;
                     flex-direction: column;
@@ -1888,7 +1888,7 @@ collectAllAncestors(dogId, maxGenerations) {
                 }
                 
                 .info-item-half {
-                    flex: 0 0 calc(50% - 4px);
+                    flex: 1;
                     min-width: 0;
                 }
                 
@@ -1942,19 +1942,6 @@ collectAllAncestors(dogId, maxGenerations) {
                     min-width: 130px;
                     padding: 10px 25px;
                     font-size: 1rem;
-                }
-                
-                /* Zorg dat op mobiel de items naast elkaar blijven */
-                @media (max-width: 767px) {
-                    .info-row {
-                        display: flex !important;
-                        flex-wrap: nowrap !important;
-                    }
-                    
-                    .info-item-half {
-                        flex: 1 !important;
-                        min-width: 0 !important;
-                    }
                 }
                 
                 /* Print styles */
