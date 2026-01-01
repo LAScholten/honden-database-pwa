@@ -820,15 +820,16 @@ class SearchManager extends BaseModule {
                     // Splits de zoekterm in delen
                     const parts = searchTerm.split(' ');
                     
-                    // Eerste deel is altijd de naam (kan ook meerdere woorden zijn voor complexe namen)
-                    // Laatste deel(s) is/zijn de kennelnaam
+                    // Als er minstens 2 delen zijn, dan hebben we een kennelnaam-deel
                     if (parts.length >= 2) {
-                        // Het laatste deel is het kennelnaam-deel
-                        const kennelPart = parts[parts.length - 1];
-                        
-                        // Alle delen behalve het laatste zijn de naam
+                        // De naam is alle delen behalve het laatste deel
                         const nameParts = parts.slice(0, parts.length - 1);
                         const namePart = nameParts.join(' ');
+                        
+                        // Het laatste deel is het eerste deel van de kennelnaam
+                        // Maar we willen het hele kennelnaam-deel hebben voor zoeken
+                        // Dus we nemen alle delen vanaf de eerste spatie als kennel-deel
+                        const kennelPart = parts.slice(1).join(' ');
                         
                         this.filterDogsByNameAndKennel(namePart, kennelPart);
                     } else {
