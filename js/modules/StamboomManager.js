@@ -216,12 +216,11 @@ class StamboomManager extends BaseModule {
 /* ============================================= */
 
 /* ============================================= */
-/* COI BEREKENING - JUISTE FORMULE */
+/* COI BEREKENING - GEKORRIGEERDE VERSIE */
 /* ============================================= */
 
-// WIL JE DEZE 2 FUNCTIES IN JE DATABASE KLASSE ZETTEN:
+// Deze functies in je HondenDatabase klasse zetten:
 
-// HOOFDFUNCTIE - GEBRUIK DEZE
 async calculateCOI(dogId) {
     // 1. Basis checks
     if (!dogId || dogId === 0) return { coi6Gen: '0.0', coiAllGen: '0.0' };
@@ -256,14 +255,10 @@ async calculateCOI(dogId) {
         return { coi6Gen: '25.0', coiAllGen: '25.0' };
     }
     
-    // 3. ALGEMENE BEREKENING volgens Wright's formule
-    // COI = 0.5 × verwantschapscoëfficiënt tussen ouders
-    
-    // Verwantschap berekenen voor 6 generaties
+    // 3. ALGEMENE BEREKENING
     const relatie6 = await this.berekenVerwantschap(dog.vaderId, dog.moederId, 5);
     const coi6Gen = 0.5 * relatie6;
     
-    // Verwantschap berekenen voor alle generaties
     const relatieAll = await this.berekenVerwantschap(dog.vaderId, dog.moederId, 15);
     const coiAllGen = 0.5 * relatieAll;
     
@@ -273,7 +268,6 @@ async calculateCOI(dogId) {
     };
 }
 
-// HELPER: Bereken verwantschap tussen twee honden
 async berekenVerwantschap(dogId1, dogId2, maxDepth) {
     if (!dogId1 || !dogId2 || maxDepth <= 0) return 0;
     
@@ -285,7 +279,7 @@ async berekenVerwantschap(dogId1, dogId2, maxDepth) {
     const dog2 = await this.getHondById(dogId2);
     if (!dog1 || !dog2) return 0;
     
-    // 3. Directe relaties (GEEN recursie nodig)
+    // 3. Directe relaties
     // a) Volle broer/zus
     if (dog1.vaderId && dog2.vaderId && dog1.vaderId === dog2.vaderId &&
         dog1.moederId && dog2.moederId && dog1.moederId === dog2.moederId) {
@@ -307,11 +301,9 @@ async berekenVerwantschap(dogId1, dogId2, maxDepth) {
     }
     
     // 4. Complexe relaties: recursie via ouders
-    // Formule: relatie = 0.25 × [relatie(vader1, vader2) + relatie(vader1, moeder2) + relatie(moeder1, vader2) + relatie(moeder1, moeder2)]
-    
     let totaal = 0;
     
-    // Alle mogelijke combinaties van ouders
+    // CORRECTIE: gebruik 'of' in plaats van 'van'
     const combinaties = [
         [dog1.vaderId, dog2.vaderId],
         [dog1.vaderId, dog2.moederId],
@@ -319,7 +311,11 @@ async berekenVerwantschap(dogId1, dogId2, maxDepth) {
         [dog1.moederId, dog2.moederId]
     ];
     
-    for (const [id1, id2] van combinaties) {
+    // CORRECTIE: gebruik for...of loop
+    for (const combinatie of combinaties) {
+        const id1 = combinatie[0];
+        const id2 = combinatie[1];
+        
         if (id1 && id2) {
             const subRelatie = await this.berekenVerwantschap(id1, id2, maxDepth - 1);
             totaal += 0.25 * subRelatie;
