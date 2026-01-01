@@ -345,7 +345,7 @@ class DogDataManager extends BaseModule {
                 savingChanges: "Änderungen speichern...",
                 changesSaved: "Änderungen gespeichert!",
                 dogDeleted: "Hund erfolgreich gelöscht!",
-                confirmDelete: "Sind Sie sicher, dass Sie diesen Hund löschen möchten?",
+                confirmDelete: "Sind Sie sicher, dat Sie diesen Hund löschen möchten?",
                 photoAdded: "Foto hinzugefügt",
                 updatingDog: "Hund aktualisieren...",
                 dogUpdated: "Hund aktualisiert!",
@@ -990,7 +990,7 @@ class DogDataManager extends BaseModule {
                     margin-top: 0.25rem;
                 }
                 
-                /* Parent dropdown styling */
+                /* Parent dropdown styling - GECORRIGEERDE POSITIONERING */
                 .parent-autocomplete-dropdown {
                     position: absolute;
                     background: white;
@@ -998,9 +998,12 @@ class DogDataManager extends BaseModule {
                     border-radius: 4px;
                     max-height: 200px;
                     overflow-y: auto;
-                    z-index: 1050;
+                    z-index: 1060;
                     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
                     width: 100%;
+                    top: calc(100% + 2px); /* BELANGRIJK: Plaats onder het input veld */
+                    left: 0;
+                    display: none;
                 }
                 
                 .parent-autocomplete-item {
@@ -1858,6 +1861,15 @@ class DogDataManager extends BaseModule {
         document.querySelectorAll('#father, #mother').forEach(input => {
             if (!input) return;
             
+            // Maak dropdown container als deze nog niet bestaat
+            const wrapper = input.closest('.parent-input-wrapper');
+            if (wrapper && !wrapper.querySelector('.parent-autocomplete-dropdown')) {
+                const dropdown = document.createElement('div');
+                dropdown.className = 'parent-autocomplete-dropdown';
+                dropdown.id = `${input.id}Autocomplete`;
+                wrapper.appendChild(dropdown);
+            }
+            
             input.addEventListener('focus', async () => {
                 if (this.allDogs.length === 0) {
                     await this.loadAllDogs();
@@ -1887,25 +1899,6 @@ class DogDataManager extends BaseModule {
                 }
             });
             
-            input.addEventListener('keydown', (e) => {
-                const parentType = input.id === 'father' ? 'father' : 'mother';
-                const dropdown = document.getElementById(`${parentType}Autocomplete`);
-                
-                if (dropdown && dropdown.style.display !== 'none') {
-                    const items = dropdown.querySelectorAll('.parent-autocomplete-item');
-                    
-                    if (e.key === 'ArrowDown' && items.length > 0) {
-                        e.preventDefault();
-                        items[0].focus();
-                    } else if (e.key === 'Enter') {
-                        e.preventDefault();
-                        if (items.length > 0) {
-                            items[0].click();
-                        }
-                    }
-                }
-            });
-            
             input.addEventListener('blur', (e) => {
                 setTimeout(() => {
                     const parentType = input.id === 'father' ? 'father' : 'mother';
@@ -1930,10 +1923,18 @@ class DogDataManager extends BaseModule {
         const input = document.getElementById(parentType);
         if (!input) return;
         
-        // Verwijder bestaande dropdown als die er is
-        const existingDropdown = document.getElementById(`${parentType}Autocomplete`);
-        if (existingDropdown) {
-            existingDropdown.remove();
+        // Zoek de dropdown
+        let dropdown = document.getElementById(`${parentType}Autocomplete`);
+        if (!dropdown) {
+            const wrapper = input.closest('.parent-input-wrapper');
+            if (wrapper) {
+                dropdown = document.createElement('div');
+                dropdown.className = 'parent-autocomplete-dropdown';
+                dropdown.id = `${parentType}Autocomplete`;
+                wrapper.appendChild(dropdown);
+            } else {
+                return;
+            }
         }
         
         // Filter honden voor autocomplete - GEBRUIK DE ZOEKFUNCTIE VAN SEARCHMANAGER
@@ -1961,11 +1962,6 @@ class DogDataManager extends BaseModule {
             return;
         }
         
-        // Maak nieuwe dropdown
-        const dropdown = document.createElement('div');
-        dropdown.className = 'parent-autocomplete-dropdown';
-        dropdown.id = `${parentType}Autocomplete`;
-        
         let html = '';
         suggestions.forEach(dog => {
             const genderText = dog.geslacht === 'reuen' ? this.t('male') : 
@@ -1982,52 +1978,38 @@ class DogDataManager extends BaseModule {
         });
         
         dropdown.innerHTML = html;
+        dropdown.style.display = 'block';
         
-        // Voeg de dropdown toe aan de juiste wrapper
-        const wrapper = input.closest('.parent-input-wrapper');
-        if (wrapper) {
-            wrapper.appendChild(dropdown);
-            
-            // Positioneer de dropdown onder het input veld
-            const inputRect = input.getBoundingClientRect();
-            dropdown.style.position = 'absolute';
-            dropdown.style.top = `${inputRect.height + 5}px`;
-            dropdown.style.left = '0';
-            dropdown.style.width = `${inputRect.width}px`;
-            dropdown.style.display = 'block';
-            dropdown.style.zIndex = '1050';
-            
-            // Event listeners voor autocomplete items
-            dropdown.querySelectorAll('.parent-autocomplete-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    const dogId = item.getAttribute('data-id');
-                    const dogName = item.getAttribute('data-name');
-                    
-                    // Vul het input veld met de volledige naam
-                    input.value = dogName;
-                    
-                    // Vul het hidden ID veld
-                    const idInput = document.getElementById(`${parentType}Id`);
-                    if (idInput) {
-                        idInput.value = dogId;
-                    }
-                    
-                    // Verberg de dropdown
-                    this.hideParentAutocomplete(parentType);
-                    
-                    // Focus terug op het input veld
-                    input.focus();
-                });
+        // Event listeners voor autocomplete items
+        dropdown.querySelectorAll('.parent-autocomplete-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                const dogId = item.getAttribute('data-id');
+                const dogName = item.getAttribute('data-name');
                 
-                item.addEventListener('mouseenter', () => {
-                    item.style.backgroundColor = '#f8f9fa';
-                });
+                // Vul het input veld met de volledige naam
+                input.value = dogName;
                 
-                item.addEventListener('mouseleave', () => {
-                    item.style.backgroundColor = '';
-                });
+                // Vul het hidden ID veld
+                const idInput = document.getElementById(`${parentType}Id`);
+                if (idInput) {
+                    idInput.value = dogId;
+                }
+                
+                // Verberg de dropdown
+                this.hideParentAutocomplete(parentType);
+                
+                // Focus terug op het input veld
+                input.focus();
             });
-        }
+            
+            item.addEventListener('mouseenter', () => {
+                item.style.backgroundColor = '#f8f9fa';
+            });
+            
+            item.addEventListener('mouseleave', () => {
+                item.style.backgroundColor = '';
+            });
+        });
     }
     
     /**
