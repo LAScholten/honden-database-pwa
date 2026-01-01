@@ -17,9 +17,9 @@ class SearchManager extends BaseModule {
         this.translations = {
             nl: {
                 searchDog: "Hond Zoeken",
-                searchName: "Zoek hond op naam",
+                searchName: "Zoek hond op naam (of naam + kennelnaam)",
                 searchKennel: "Zoek hond op kennelnaam",
-                searchPlaceholder: "Typ hondennaam...",
+                searchPlaceholder: "Typ hondennaam... of 'naam kennelnaam'",
                 kennelPlaceholder: "Typ kennelnaam...",
                 noDogsFound: "Geen honden gevonden",
                 typeToSearch: "Begin met typen om te zoeken",
@@ -122,9 +122,9 @@ class SearchManager extends BaseModule {
             },
             en: {
                 searchDog: "Search Dog",
-                searchName: "Search dog by name",
+                searchName: "Search dog by name (or name + kennel)",
                 searchKennel: "Search dog by kennel name",
-                searchPlaceholder: "Type dog name...",
+                searchPlaceholder: "Type dog name... or 'name kennelname'",
                 kennelPlaceholder: "Type kennel name...",
                 noDogsFound: "No dogs found",
                 typeToSearch: "Start typing to search",
@@ -227,9 +227,9 @@ class SearchManager extends BaseModule {
             },
             de: {
                 searchDog: "Hund suchen",
-                searchName: "Hund nach Namen suchen",
+                searchName: "Hund nach Namen suchen (oder Name + Kennel)",
                 searchKennel: "Hund nach Kennelname suchen",
-                searchPlaceholder: "Hundenamen eingeben...",
+                searchPlaceholder: "Hundenamen eingeben... oder 'Name Kennelname'",
                 kennelPlaceholder: "Kennelnamen eingeben...",
                 noDogsFound: "Keine Hunde gefunden",
                 typeToSearch: "Beginnen Sie mit der Eingabe, um zu suchen",
@@ -815,7 +815,30 @@ class SearchManager extends BaseModule {
             const searchTerm = e.target.value.toLowerCase().trim();
             
             if (searchTerm.length >= 1) {
-                this.filterDogsByName(searchTerm);
+                // Controleer of de gebruiker een spatie heeft ingetypt (naam + kennelnaam)
+                if (searchTerm.includes(' ')) {
+                    // Splits de zoekterm in delen
+                    const parts = searchTerm.split(' ');
+                    
+                    // Eerste deel is altijd de naam (kan ook meerdere woorden zijn voor complexe namen)
+                    // Laatste deel(s) is/zijn de kennelnaam
+                    if (parts.length >= 2) {
+                        // Het laatste deel is het kennelnaam-deel
+                        const kennelPart = parts[parts.length - 1];
+                        
+                        // Alle delen behalve het laatste zijn de naam
+                        const nameParts = parts.slice(0, parts.length - 1);
+                        const namePart = nameParts.join(' ');
+                        
+                        this.filterDogsByNameAndKennel(namePart, kennelPart);
+                    } else {
+                        // Alleen op naam zoeken als er maar 1 deel is
+                        this.filterDogsByName(searchTerm);
+                    }
+                } else {
+                    // Alleen op naam zoeken
+                    this.filterDogsByName(searchTerm);
+                }
             } else {
                 this.showInitialView();
                 this.clearDetails();
@@ -911,6 +934,27 @@ class SearchManager extends BaseModule {
         this.filteredDogs = this.allDogs.filter(dog => {
             const naam = dog.naam ? dog.naam.toLowerCase() : '';
             return naam.startsWith(searchTerm);
+        });
+        
+        this.displaySearchResults();
+    }
+    
+    filterDogsByNameAndKennel(dogNamePart = '', kennelNamePart = '') {
+        this.filteredDogs = this.allDogs.filter(dog => {
+            const naam = dog.naam ? dog.naam.toLowerCase() : '';
+            const kennelnaam = dog.kennelnaam ? dog.kennelnaam.toLowerCase() : '';
+            
+            // Controleren of de naam begint met het opgegeven naamdeel
+            if (!naam.startsWith(dogNamePart)) {
+                return false;
+            }
+            
+            // Als er ook een kennelnaamdeel is opgegeven, controleren of de kennelnaam begint hiermee
+            if (kennelNamePart && !kennelnaam.startsWith(kennelNamePart)) {
+                return false;
+            }
+            
+            return true;
         });
         
         this.displaySearchResults();
