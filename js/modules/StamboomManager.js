@@ -666,7 +666,7 @@ testSpecificDog(dogId, expectedCOI) {
         
         // Check of deze hond foto's heeft
         const hasPhotos = await this.checkDogHasPhotos(dog.id);
-        const cameraIcon = hasPhotos ? '<i class="bi bi-camera text-primary ms-1"></i>' : '';
+        const cameraIcon = hasPhotos ? '<i class="bi bi-camera text-danger ms-1"></i>' : '';
 
         // Maak een gecombineerde naam+kennel string voor automatische aanpassing
         const combinedName = dog.naam || this.t('unknown');
