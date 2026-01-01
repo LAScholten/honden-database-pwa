@@ -666,8 +666,8 @@ testSpecificDog(dogId, expectedCOI) {
         
         // Check of deze hond foto's heeft
         const hasPhotos = await this.checkDogHasPhotos(dog.id);
-        const cameraIcon = hasPhotos ? '<i class="bi bi-camera text-warning ms-1"></i>' : '';
-        
+        const cameraIcon = hasPhotos ? '<i class="bi bi-camera text-primary ms-1"></i>' : '';
+
         // Maak een gecombineerde naam+kennel string voor automatische aanpassing
         const combinedName = dog.naam || this.t('unknown');
         const showKennel = dog.kennelnaam && dog.kennelnaam.trim() !== '';
@@ -1469,7 +1469,7 @@ testSpecificDog(dogId, expectedCOI) {
                 
                 /* Click hint met fototoestelicoon */
                 .click-hint-compact {
-                    color: #1a15f4;
+                    color: #6c757d;
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -1482,7 +1482,7 @@ testSpecificDog(dogId, expectedCOI) {
                 }
                 
                 .click-hint-compact .bi-camera {
-                    color: #ffc107;
+                    color: #1a15f4;
                     font-size: 0.7rem;
                 }
                 
