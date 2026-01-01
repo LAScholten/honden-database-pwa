@@ -1469,7 +1469,7 @@ testSpecificDog(dogId, expectedCOI) {
                 
                 /* Click hint met fototoestelicoon */
                 .click-hint-compact {
-                    color: #6c757d;
+                    color: #1a15f4;
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -1482,7 +1482,7 @@ testSpecificDog(dogId, expectedCOI) {
                 }
                 
                 .click-hint-compact .bi-camera {
-                    color: #283ee4;
+                    color: #ffc107;
                     font-size: 0.7rem;
                 }
                 
