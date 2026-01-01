@@ -215,6 +215,9 @@ class StamboomManager extends BaseModule {
                 closePhoto: "Schließen"
             }
         };
+        
+        // Event delegation setup voor foto clicks
+        this.setupGlobalEventListeners();
     }
     
     t(key) {
@@ -971,17 +974,83 @@ testSpecificDog(dogId, expectedCOI) {
         `;
     }
     
-    // Nieuwe methode: Toon grote foto - GEÜPDATEEERDE VERSIE
-    showLargePhoto(photoData, dogName = '') {
-        console.log('showLargePhoto aangeroepen met:', photoData);
+    // NIEUWE METHODE: Setup globale event listeners eenmalig
+    setupGlobalEventListeners() {
+        // Event delegation voor foto thumbnail clicks
+        document.addEventListener('click', (e) => {
+            const thumbnail = e.target.closest('.photo-thumbnail');
+            if (thumbnail) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const photoSrc = thumbnail.getAttribute('data-photo-src');
+                console.log('Foto geklikt, src:', photoSrc);
+                
+                if (photoSrc && photoSrc.trim() !== '') {
+                    // Haal hondnaam op uit de popup
+                    const popupTitle = document.querySelector('.popup-title');
+                    let dogName = '';
+                    if (popupTitle) {
+                        // Verwijder het geslachtsicoon uit de titel
+                        dogName = popupTitle.textContent.trim();
+                        // Verwijder het icoon als het er is
+                        dogName = dogName.replace(/^[^a-zA-Z]*/, '').trim();
+                    }
+                    
+                    this.showLargePhoto(photoSrc, dogName);
+                } else {
+                    console.error('Geen geldige foto src gevonden:', photoSrc);
+                    // Probeer de img src als fallback
+                    const imgElement = thumbnail.querySelector('img');
+                    if (imgElement && imgElement.src) {
+                        console.log('Gebruik img src als fallback:', imgElement.src);
+                        this.showLargePhoto(imgElement.src, dogName);
+                    }
+                }
+            }
+        });
         
-        // Verwijder bestaande foto overlay als die er is
+        // Event delegation voor grote foto sluitknoppen
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('photo-large-close') || 
+                e.target.classList.contains('photo-large-close-btn') ||
+                e.target.closest('.photo-large-close') ||
+                e.target.closest('.photo-large-close-btn')) {
+                const overlay = document.getElementById('photoLargeOverlay');
+                if (overlay) {
+                    overlay.style.display = 'none';
+                    setTimeout(() => {
+                        if (overlay.parentNode) {
+                            overlay.parentNode.removeChild(overlay);
+                        }
+                    }, 300);
+                }
+            }
+            
+            // Klik buiten de grote foto om te sluiten
+            if (e.target.id === 'photoLargeOverlay') {
+                const overlay = e.target;
+                overlay.style.display = 'none';
+                setTimeout(() => {
+                    if (overlay.parentNode) {
+                        overlay.parentNode.removeChild(overlay);
+                    }
+                }, 300);
+            }
+        });
+    }
+    
+    // SIMPELERE showLargePhoto methode
+    showLargePhoto(photoData, dogName = '') {
+        console.log('Toon grote foto:', photoData);
+        
+        // Verwijder bestaande overlay
         const existingOverlay = document.getElementById('photoLargeOverlay');
         if (existingOverlay) {
             existingOverlay.remove();
         }
         
-        // Maak overlay voor grote foto
+        // Maak nieuwe overlay
         const overlayHTML = `
             <div class="photo-large-overlay" id="photoLargeOverlay" style="display: flex;">
                 <div class="photo-large-container" id="photoLargeContainer">
@@ -990,9 +1059,10 @@ testSpecificDog(dogId, expectedCOI) {
                     </div>
                     <div class="photo-large-content">
                         <img src="${photoData}" 
-                             alt="${dogName || ''}" 
+                             alt="${dogName || 'Foto'}" 
                              class="photo-large-img"
-                             id="photoLargeImg">
+                             id="photoLargeImg"
+                             style="max-width: 90vw; max-height: 80vh; object-fit: contain;">
                     </div>
                     <div class="photo-large-footer">
                         <button type="button" class="btn btn-secondary photo-large-close-btn">
@@ -1004,89 +1074,6 @@ testSpecificDog(dogId, expectedCOI) {
         `;
         
         document.body.insertAdjacentHTML('beforeend', overlayHTML);
-        
-        // Stel foto grootte in op basis van schermgrootte
-        const imgElement = document.getElementById('photoLargeImg');
-        const container = document.getElementById('photoLargeContainer');
-        
-        // Wacht tot de foto geladen is voor sizing
-        imgElement.onload = () => {
-            const screenWidth = window.innerWidth;
-            const screenHeight = window.innerHeight;
-            
-            if (window.innerWidth <= 768) {
-                // Mobiel: 90% van scherm
-                container.style.width = '90vw';
-                container.style.maxHeight = '90vh';
-                container.style.maxWidth = '90vw';
-            } else {
-                // Desktop/Laptop: 15-25% van scherm, afhankelijk van foto resolutie
-                const imgWidth = imgElement.naturalWidth;
-                const imgHeight = imgElement.naturalHeight;
-                
-                // Bepaal grootte op basis van resolutie
-                let targetPercentage;
-                if (imgWidth < 800) {
-                    targetPercentage = 25; // Kleine foto's: 25%
-                } else if (imgWidth < 1600) {
-                    targetPercentage = 20; // Middelgrote foto's: 20%
-                } else {
-                    targetPercentage = 15; // Grote foto's: 15%
-                }
-                
-                // Bereken maximale grootte
-                const maxWidth = (screenWidth * targetPercentage) / 100;
-                const maxHeight = (screenHeight * targetPercentage) / 100;
-                
-                // Behoud aspect ratio
-                let width = maxWidth;
-                let height = (imgHeight / imgWidth) * maxWidth;
-                
-                if (height > maxHeight) {
-                    height = maxHeight;
-                    width = (imgWidth / imgHeight) * maxHeight;
-                }
-                
-                container.style.width = `${width}px`;
-                container.style.maxHeight = `${maxHeight}px`;
-                container.style.maxWidth = `${width}px`;
-            }
-        };
-        
-        // Als de foto al geladen is (cached), forceer dan het onload event
-        if (imgElement.complete) {
-            imgElement.dispatchEvent(new Event('load'));
-        }
-        
-        // Voeg event listeners toe voor sluiten
-        const closeButtons = document.querySelectorAll('.photo-large-close, .photo-large-close-btn');
-        
-        closeButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const overlay = document.getElementById('photoLargeOverlay');
-                if (overlay) {
-                    overlay.style.display = 'none';
-                    setTimeout(() => {
-                        if (overlay.parentNode) {
-                            overlay.parentNode.removeChild(overlay);
-                        }
-                    }, 300);
-                }
-            });
-        });
-        
-        // Sluit bij klik buiten foto - FIX: gebruik correcte overlay reference
-        document.getElementById('photoLargeOverlay').addEventListener('click', (e) => {
-            if (e.target.id === 'photoLargeOverlay') {
-                const overlay = e.target;
-                overlay.style.display = 'none';
-                setTimeout(() => {
-                    if (overlay.parentNode) {
-                        overlay.parentNode.removeChild(overlay);
-                    }
-                }, 300);
-            }
-        });
         
         // Sluit met Escape key
         const closeOnEscape = (e) => {
@@ -1105,7 +1092,7 @@ testSpecificDog(dogId, expectedCOI) {
         };
         document.addEventListener('keydown', closeOnEscape);
         
-        // Clean up event listener when overlay closes
+        // Clean up
         const overlay = document.getElementById('photoLargeOverlay');
         overlay.addEventListener('animationend', function handler() {
             if (overlay.style.display === 'none') {
@@ -2499,50 +2486,11 @@ testSpecificDog(dogId, expectedCOI) {
         };
         document.addEventListener('keydown', closeOnEscape);
         
-        // Setup photo click events - FIXED VERSION
-        this.setupPhotoClickEvents();
-        
         // Clean up event listener when popup closes
         overlay.addEventListener('animationend', function handler() {
             if (overlay.style.display === 'none') {
                 document.removeEventListener('keydown', closeOnEscape);
                 overlay.removeEventListener('animationend', handler);
-            }
-        });
-    }
-    
-    // FIXED METHOD: Setup photo click events
-    setupPhotoClickEvents() {
-        console.log('setupPhotoClickEvents called');
-        
-        // Gebruik event delegation voor betere performance
-        document.addEventListener('click', (e) => {
-            const thumbnail = e.target.closest('.photo-thumbnail');
-            if (thumbnail) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const photoSrc = thumbnail.getAttribute('data-photo-src');
-                const imgElement = thumbnail.querySelector('img');
-                const actualSrc = photoSrc || imgElement?.src;
-                
-                console.log('Foto thumbnail geklikt:', {
-                    thumbnail,
-                    photoSrc,
-                    imgSrc: imgElement?.src,
-                    actualSrc
-                });
-                
-                if (actualSrc) {
-                    // Haal hondnaam op uit de popup header
-                    const popupTitle = document.querySelector('.popup-title');
-                    const dogName = popupTitle ? popupTitle.textContent.trim() : '';
-                    
-                    console.log('Toon grote foto voor:', actualSrc);
-                    this.showLargePhoto(actualSrc, dogName);
-                } else {
-                    console.error('Geen foto src gevonden');
-                }
             }
         });
     }
