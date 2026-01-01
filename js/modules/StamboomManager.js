@@ -1482,7 +1482,7 @@ testSpecificDog(dogId, expectedCOI) {
                 }
                 
                 .click-hint-compact .bi-camera {
-                    color: #ffc107;
+                    color: #283ee4;
                     font-size: 0.7rem;
                 }
                 
