@@ -1866,7 +1866,7 @@ collectAllAncestors(dogId, maxGenerations) {
                     font-size: 1rem;
                 }
                 
-                /* SIMPELE OPLOSSING: flex layout voor alle schermen */
+                /* SIMPELE OPLOSSING: grid layout zoals in cards */
                 .info-grid {
                     display: flex;
                     flex-direction: column;
@@ -1874,26 +1874,28 @@ collectAllAncestors(dogId, maxGenerations) {
                 }
                 
                 .info-row {
-                    display: flex;
-                    flex-wrap: nowrap;
-                    gap: 8px;
-                    margin-bottom: 0;
+                    display: grid !important;
+                    grid-template-columns: 1fr 1fr !important;
+                    gap: 8px !important;
+                    margin-bottom: 0 !important;
+                    width: 100% !important;
                 }
                 
                 .info-item {
                     display: flex;
                     flex-direction: column;
-                    flex: 1;
-                    min-width: 0;
+                    width: 100% !important;
+                    min-width: 0 !important;
                 }
                 
                 .info-item-half {
-                    flex: 1;
-                    min-width: 0;
+                    grid-column: span 1 !important;
+                    width: 100% !important;
                 }
                 
                 .info-item-full {
-                    flex: 1 0 100%;
+                    grid-column: 1 / -1 !important;
+                    width: 100% !important;
                     margin-bottom: 4px;
                 }
                 
