@@ -1996,18 +1996,41 @@ testSpecificDog(dogId, expectedCOI) {
                     flex: 1;
                 }
                 
+                /* Eigen kruisje styling */
                 .popup-header .btn-close {
-                    opacity: 1 !important;
-                    filter: invert(1) grayscale(100%) brightness(200%);
-                    margin-left: 10px;
-                    padding: 8px;
+                    display: inline-block;
+                    width: 24px;
+                    height: 24px;
                     background: transparent;
                     border: none;
+                    position: relative;
+                    cursor: pointer;
+                    opacity: 0.8;
                     z-index: 2;
                 }
                 
+                .popup-header .btn-close::before,
+                .popup-header .btn-close::after {
+                    content: '';
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    width: 18px;
+                    height: 2px;
+                    background: white;
+                    transform-origin: center;
+                }
+                
+                .popup-header .btn-close::before {
+                    transform: translate(-50%, -50%) rotate(45deg);
+                }
+                
+                .popup-header .btn-close::after {
+                    transform: translate(-50%, -50%) rotate(-45deg);
+                }
+                
                 .popup-header .btn-close:hover {
-                    opacity: 0.75 !important;
+                    opacity: 1;
                 }
                 
                 .popup-body {
