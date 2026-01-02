@@ -327,7 +327,7 @@ class DogDataManager extends BaseModule {
                 loggedInAs: "Sie sind eingeloggt als:",
                 user: "Benutzer",
                 availableFeatures: "Verfügbare Funktionen für Benutzer",
-                searchDogs: "Hunde suchen und anzeigen",
+                searchDogs: "Hunde suchen en anzeigen",
                 viewGallery: "Fotogalerie anzeigen",
                 managePrivateInfo: "Private Informationen verwalten",
                 importExport: "Daten importieren/exportieren",
@@ -1302,17 +1302,20 @@ class DogDataManager extends BaseModule {
     
     /**
      * NIEUW: Zoekfunctionaliteit zoals in SearchManager voor hoofdzoekveld
+     * AANGEPAST: Zoek zowel op naam kennelnaam als op stamboomnummer
      */
     filterDogsForSearchField(searchTerm = '') {
         this.filteredSearchResults = this.allDogs.filter(dog => {
             const naam = dog.naam ? dog.naam.toLowerCase() : '';
             const kennelnaam = dog.kennelnaam ? dog.kennelnaam.toLowerCase() : '';
+            const stamboomnr = dog.stamboomnr ? dog.stamboomnr.toLowerCase() : '';
             
             // Creëer een gecombineerde string: "naam kennelnaam"
             const combined = `${naam} ${kennelnaam}`;
             
             // Controleer of de gecombineerde string begint met de zoekterm
-            return combined.startsWith(searchTerm);
+            // OF controleer of het stamboomnummer begint met de zoekterm
+            return combined.startsWith(searchTerm) || stamboomnr.startsWith(searchTerm);
         });
         
         this.displaySearchResults();
