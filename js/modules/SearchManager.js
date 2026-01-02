@@ -291,7 +291,7 @@ class SearchManager extends BaseModule {
                 // Stamboom buttons
                 pedigreeButton: "Ahnentafel",
                 pedigreeTitle: "Ahnentafel von {name}",
-                generatingPedigree: "Ahnentafel wird generiert...",
+                generatingPedigree: "Ahnentafel wordt generiert...",
                 openPedigree: "Ahnentafel öffnen",
                 pedigree4Gen: "4-Generationen Ahnentafel",
                 
@@ -309,7 +309,7 @@ class SearchManager extends BaseModule {
             }
         };
         
-        // Event delegation setup voor foto clicks - NET ALS IN STAMBOOMMANAGER
+        // Event delegation setup voor foto clicks - NET ALS STAMBOOMMANAGER
         this.setupGlobalEventListeners();
     }
     
@@ -1521,18 +1521,19 @@ class SearchManager extends BaseModule {
                 backButtonDiv.remove();
             }
             
-            // Herstel de zoekfunctie en toon opnieuw de zoekresultaten
+            // HERSTEL DE ZOEKRESULTATEN VOOR MOBIEL - DEZE OPLOSSING FIXT HET PROBLEEM
             const searchInput = this.searchType === 'name' ? 
                 document.getElementById('searchNameInput') : 
                 document.getElementById('searchKennelInput');
             if (searchInput) {
                 const searchTerm = searchInput.value.toLowerCase().trim();
                 if (searchTerm.length >= 1) {
-                    if (this.searchType === 'name') {
-                        this.filterDogsForNameField(searchTerm);
-                    } else {
-                        this.filterDogsByKennel(searchTerm);
-                    }
+                    // Simuleer een input event om de zoekresultaten te vernieuwen
+                    const inputEvent = new Event('input', {
+                        bubbles: true,
+                        cancelable: true
+                    });
+                    searchInput.dispatchEvent(inputEvent);
                 } else {
                     this.showInitialView();
                     this.clearDetails();
