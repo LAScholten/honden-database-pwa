@@ -267,7 +267,7 @@ class SearchManager extends BaseModule {
                 viewingParent: "Elternteil ansehen",
                 clickToView: "Klicken für Details",
                 parents: "Eltern",
-                noHealthInfo: "Keine Gesundheidsinformationen verfügbar",
+                noHealthInfo: "Keine Gesundheitsinformationen verfügbar",
                 noAdditionalInfo: "Keine zusätzlichen Informationen verfügbar",
                 selectDogToView: "Wählen Sie einen Hund, um Details zu sehen",
                 
@@ -291,7 +291,7 @@ class SearchManager extends BaseModule {
                 // Stamboom buttons
                 pedigreeButton: "Ahnentafel",
                 pedigreeTitle: "Ahnentafel von {name}",
-                generatingPedigree: "Ahnentafel wordt generiert...",
+                generatingPedigree: "Ahnentafel wird generiert...",
                 openPedigree: "Ahnentafel öffnen",
                 pedigree4Gen: "4-Generationen Ahnentafel",
                 
@@ -503,7 +503,7 @@ class SearchManager extends BaseModule {
                             <h5 class="modal-title" id="searchModalLabel">
                                 <i class="bi bi-search me-2"></i> ${t('searchDog')}
                             </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${t('close')}"></button>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${t('close')}" id="searchModalCloseBtn"></button>
                         </div>
                         <div class="modal-body p-0">
                             <div class="container-fluid">
@@ -573,7 +573,7 @@ class SearchManager extends BaseModule {
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="searchModalCloseBtnFooter">
                                 <i class="bi bi-x-circle me-1"></i> ${t('close')}
                             </button>
                         </div>
@@ -1218,6 +1218,73 @@ class SearchManager extends BaseModule {
         
         this.setupNameSearch();
         this.setupKennelSearch();
+        
+        // NIEUW: Event listener voor het sluiten van de modal
+        this.setupModalCloseEvents();
+    }
+    
+    // NIEUWE METHODE: Setup event listeners voor modal sluiten
+    setupModalCloseEvents() {
+        // Event listener voor wanneer de modal gesloten wordt
+        const searchModal = document.getElementById('searchModal');
+        if (searchModal) {
+            searchModal.addEventListener('hidden.bs.modal', () => {
+                this.resetSearchState();
+            });
+        }
+        
+        // Event listeners voor sluitknoppen
+        const closeBtn = document.getElementById('searchModalCloseBtn');
+        const closeBtnFooter = document.getElementById('searchModalCloseBtnFooter');
+        
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                this.resetSearchState();
+            });
+        }
+        
+        if (closeBtnFooter) {
+            closeBtnFooter.addEventListener('click', () => {
+                this.resetSearchState();
+            });
+        }
+    }
+    
+    // NIEUWE METHODE: Reset de zoekstatus wanneer modal gesloten wordt
+    resetSearchState() {
+        // Reset mobiele collapsed state
+        this.isMobileCollapsed = false;
+        
+        // Herstel de oorspronkelijke layout
+        const searchColumn = document.getElementById('searchColumn');
+        const detailsColumn = document.getElementById('detailsColumn');
+        
+        if (searchColumn && detailsColumn) {
+            searchColumn.classList.remove('d-none');
+            detailsColumn.classList.remove('col-12');
+            detailsColumn.classList.add('col-md-7');
+            
+            // Verwijder mobiele terugknop als die er is
+            const backButtonDiv = document.querySelector('.mobile-back-button');
+            if (backButtonDiv) {
+                backButtonDiv.remove();
+            }
+        }
+        
+        // Clear zoekvelden en toon initieel scherm
+        const nameInput = document.getElementById('searchNameInput');
+        const kennelInput = document.getElementById('searchKennelInput');
+        
+        if (nameInput) nameInput.value = '';
+        if (kennelInput) kennelInput.value = '';
+        
+        this.showInitialView();
+        this.clearDetails();
+        
+        // Reset filteredDogs
+        this.filteredDogs = [];
+        
+        console.log('Search state reset na sluiten modal');
     }
     
     switchSearchType(type) {
