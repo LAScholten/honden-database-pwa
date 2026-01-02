@@ -1,7 +1,6 @@
 /**
  * Search Manager Module
  * Beheert het zoeken naar honden met real-time filtering op naam en kennelnaam
- * Inclusief foto functionaliteit die hetzelfde werkt als in StamboomManager
  */
 
 class SearchManager extends BaseModule {
@@ -13,9 +12,8 @@ class SearchManager extends BaseModule {
         this.searchType = 'name'; // 'name' of 'kennel'
         this.stamboomManager = null; // Wordt later geïnitialiseerd
         this.isMobileCollapsed = false; // Track of mobiele weergave collapsed is
-        this.dogPhotosCache = new Map(); // Cache voor hondenfoto's
         
-        // Vertalingen uitgebreid met pedigree knop en foto's
+        // Vertalingen uitgebreid met pedigree knop
         this.translations = {
             nl: {
                 searchDog: "Hond Zoeken",
@@ -120,13 +118,7 @@ class SearchManager extends BaseModule {
                 greatGrandfather: "Overgrootvader",
                 greatGrandmother: "Overgrootmoeder",
                 grandfather: "Grootvader",
-                grandmother: "Grootmoeder",
-                
-                // Foto vertalingen (zelfde als in StamboomManager)
-                photos: "Foto's",
-                noPhotos: "Geen foto's beschikbaar",
-                clickToEnlarge: "Klik om te vergroten",
-                closePhoto: "Sluiten"
+                grandmother: "Grootmoeder"
             },
             en: {
                 searchDog: "Search Dog",
@@ -231,13 +223,7 @@ class SearchManager extends BaseModule {
                 greatGrandfather: "Great Grandfather",
                 greatGrandmother: "Great Grandmother",
                 grandfather: "Grandfather",
-                grandmother: "Grandmother",
-                
-                // Photo translations (same as in StamboomManager)
-                photos: "Photos",
-                noPhotos: "No photos available",
-                clickToEnlarge: "Click to enlarge",
-                closePhoto: "Close"
+                grandmother: "Grandmother"
             },
             de: {
                 searchDog: "Hund suchen",
@@ -299,18 +285,9 @@ class SearchManager extends BaseModule {
                 greatGrandfather: "Urgroßvater",
                 greatGrandmother: "Urgroßmutter",
                 grandfather: "Großvater",
-                grandmother: "Großmutter",
-                
-                // Foto Übersetzungen (gleich wie in StamboomManager)
-                photos: "Fotos",
-                noPhotos: "Keine Fotos verfügbar",
-                clickToEnlarge: "Klicken zum Vergrößern",
-                closePhoto: "Schließen"
+                grandmother: "Großmutter"
             }
         };
-        
-        // Event delegation setup voor foto clicks (zelfde als in StamboomManager)
-        this.setupGlobalEventListeners();
     }
     
     // NIEUW: Inject dependencies method voor UIHandler compatibiliteit
@@ -333,656 +310,6 @@ class SearchManager extends BaseModule {
             return this.translations[this.currentLang][key][subKey] || subKey;
         }
         return this.translations[this.currentLang][key] || key;
-    }
-    
-    // NIEUW: Foto's ophalen voor een hond (zelfde methode als in StamboomManager)
-    async getDogPhotos(dogId) {
-        if (!dogId || dogId === 0) return [];
-        
-        const dog = this.allDogs.find(d => d.id === dogId);
-        if (!dog || !dog.stamboomnr) return [];
-        
-        // Check cache
-        const cacheKey = `${dogId}_${dog.stamboomnr}`;
-        if (this.dogPhotosCache.has(cacheKey)) {
-            return this.dogPhotosCache.get(cacheKey);
-        }
-        
-        try {
-            const photos = await this.db.getFotosVoorStamboomnr(dog.stamboomnr);
-            this.dogPhotosCache.set(cacheKey, photos || []);
-            return photos || [];
-        } catch (error) {
-            console.error('Fout bij ophalen foto\'s voor hond:', dogId, error);
-            return [];
-        }
-    }
-    
-    // NIEUW: Setup globale event listeners voor foto's (zelfde als in StamboomManager)
-    setupGlobalEventListeners() {
-        // Event delegation voor foto thumbnail clicks
-        document.addEventListener('click', (e) => {
-            const thumbnail = e.target.closest('.photo-thumbnail');
-            if (thumbnail) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const photoSrc = thumbnail.getAttribute('data-photo-src');
-                console.log('Foto geklikt, src:', photoSrc);
-                
-                if (photoSrc && photoSrc.trim() !== '') {
-                    // Haal hondnaam op uit de details
-                    const dogNameHeader = document.querySelector('.dog-name-header');
-                    let dogName = '';
-                    if (dogNameHeader) {
-                        dogName = dogNameHeader.textContent.trim();
-                    }
-                    
-                    this.showLargePhoto(photoSrc, dogName);
-                } else {
-                    console.error('Geen geldige foto src gevonden:', photoSrc);
-                    // Probeer de img src als fallback
-                    const imgElement = thumbnail.querySelector('img');
-                    if (imgElement && imgElement.src) {
-                        console.log('Gebruik img src als fallback:', imgElement.src);
-                        this.showLargePhoto(imgElement.src, dogName);
-                    }
-                }
-            }
-        });
-        
-        // Event delegation voor grote foto sluitknoppen
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('photo-large-close') || 
-                e.target.classList.contains('photo-large-close-btn') ||
-                e.target.closest('.photo-large-close') ||
-                e.target.closest('.photo-large-close-btn')) {
-                const overlay = document.getElementById('photoLargeOverlay');
-                if (overlay) {
-                    overlay.style.display = 'none';
-                    setTimeout(() => {
-                        if (overlay.parentNode) {
-                            overlay.parentNode.removeChild(overlay);
-                        }
-                    }, 300);
-                }
-            }
-            
-            // Klik buiten de grote foto om te sluiten
-            if (e.target.id === 'photoLargeOverlay') {
-                const overlay = e.target;
-                overlay.style.display = 'none';
-                setTimeout(() => {
-                    if (overlay.parentNode) {
-                        overlay.parentNode.removeChild(overlay);
-                    }
-                }, 300);
-            }
-        });
-    }
-    
-    // NIEUW: Toon grote foto (zelfde als in StamboomManager)
-    showLargePhoto(photoData, dogName = '') {
-        console.log('Toon grote foto:', photoData);
-        
-        // Verwijder bestaande overlay
-        const existingOverlay = document.getElementById('photoLargeOverlay');
-        if (existingOverlay) {
-            existingOverlay.remove();
-        }
-        
-        // Maak nieuwe overlay
-        const overlayHTML = `
-            <div class="photo-large-overlay" id="photoLargeOverlay" style="display: flex;">
-                <div class="photo-large-container" id="photoLargeContainer">
-                    <div class="photo-large-header">
-                        <button type="button" class="btn-close btn-close-white photo-large-close" aria-label="${this.t('closePhoto')}"></button>
-                    </div>
-                    <div class="photo-large-content">
-                        <img src="${photoData}" 
-                             alt="${dogName || 'Foto'}" 
-                             class="photo-large-img"
-                             id="photoLargeImg"
-                             style="max-width: 90vw; max-height: 80vh; object-fit: contain;">
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.body.insertAdjacentHTML('beforeend', overlayHTML);
-        
-        // Sluit met Escape key
-        const closeOnEscape = (e) => {
-            if (e.key === 'Escape') {
-                const overlay = document.getElementById('photoLargeOverlay');
-                if (overlay) {
-                    overlay.style.display = 'none';
-                    setTimeout(() => {
-                        if (overlay.parentNode) {
-                            overlay.parentNode.removeChild(overlay);
-                        }
-                    }, 300);
-                    document.removeEventListener('keydown', closeOnEscape);
-                }
-            }
-        };
-        document.addEventListener('keydown', closeOnEscape);
-        
-        // Clean up
-        const overlay = document.getElementById('photoLargeOverlay');
-        overlay.addEventListener('animationend', function handler() {
-            if (overlay.style.display === 'none') {
-                document.removeEventListener('keydown', closeOnEscape);
-                overlay.removeEventListener('animationend', handler);
-            }
-        });
-    }
-    
-    // NIEUW: Check of een hond foto's heeft (voor indicator)
-    async checkDogHasPhotos(dogId) {
-        const photos = await this.getDogPhotos(dogId);
-        return photos.length > 0;
-    }
-    
-    // NIEUW: Laad en toon foto icoon voor hond (aangepaste versie)
-    async loadAndDisplayPhotoIcon(dog) {
-        try {
-            const photoIconContainer = document.querySelector(`.photo-icon-container[data-dog-id="${dog.id}"]`);
-            if (!photoIconContainer) return;
-            
-            // Controleer of er foto's zijn voor deze hond
-            const hasPhotos = await this.checkDogHasPhotos(dog.id);
-            
-            if (hasPhotos) {
-                photoIconContainer.innerHTML = `
-                    <i class="bi bi-camera text-primary ms-2" 
-                       style="cursor: pointer; font-size: 1.1rem;" 
-                       title="${this.t('photos')}"
-                       data-dog-id="${dog.id}"
-                       data-stamboomnr="${dog.stamboomnr || ''}"></i>
-                `;
-                
-                // Voeg event listener toe
-                const cameraIcon = photoIconContainer.querySelector('.bi-camera');
-                cameraIcon.addEventListener('click', async (e) => {
-                    e.stopPropagation();
-                    await this.showDogPhotosInPopup(dog);
-                });
-            } else {
-                // Geen foto's beschikbaar, toon niets
-                photoIconContainer.innerHTML = '';
-            }
-        } catch (error) {
-            console.error('Fout bij laden foto icoon:', error);
-            const photoIconContainer = document.querySelector(`.photo-icon-container[data-dog-id="${dog.id}"]`);
-            if (photoIconContainer) {
-                photoIconContainer.innerHTML = '';
-            }
-        }
-    }
-    
-    // NIEUW: Toon foto's in een popup (vergelijkbaar met StamboomManager)
-    async showDogPhotosInPopup(dog) {
-        try {
-            const photos = await this.getDogPhotos(dog.id);
-            
-            if (!photos || photos.length === 0) {
-                this.showError(this.t('noPhotos'));
-                return;
-            }
-            
-            // Maak popup HTML (vergelijkbaar met StamboomManager)
-            const popupHTML = `
-                <div class="pedigree-popup-overlay" id="searchPhotoPopup" style="display: flex;">
-                    <div class="pedigree-popup-container" style="max-width: 450px;">
-                        <div class="dog-detail-popup">
-                            <div class="popup-header">
-                                <h5 class="popup-title">
-                                    <i class="bi bi-camera me-2"></i>
-                                    ${this.t('photos')} - ${dog.naam || ''}
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white popup-close" aria-label="${this.t('close')}"></button>
-                            </div>
-                            <div class="popup-body">
-                                <!-- FOTO'S SECTIE BOVENAAN -->
-                                <div class="info-section mb-3">
-                                    <div class="photos-grid" id="photosGrid${dog.id}">
-                                        ${photos.map((photo, index) => {
-                                            // Bereken foto URL
-                                            let photoUrl = '';
-                                            if (photo.data && typeof photo.data === 'string') {
-                                                const mimeType = photo.type || 'image/jpeg';
-                                                let cleanData = photo.data;
-                                                if (cleanData.startsWith('data:')) {
-                                                    cleanData = cleanData.split(',')[1];
-                                                }
-                                                photoUrl = `data:${mimeType};base64,${cleanData}`;
-                                            } else if (photo.url) {
-                                                photoUrl = photo.url;
-                                            } else if (photo.filePath) {
-                                                photoUrl = photo.filePath;
-                                            }
-                                            
-                                            if (photoUrl) {
-                                                return `
-                                                    <div class="photo-thumbnail" 
-                                                         data-photo-id="${photo.id}" 
-                                                         data-dog-id="${dog.id}" 
-                                                         data-photo-index="${index}"
-                                                         data-photo-src="${photoUrl}">
-                                                        <img src="${photoUrl}" 
-                                                             alt="${dog.naam || ''} - ${photo.filename || ''}" 
-                                                             class="thumbnail-img"
-                                                             loading="lazy">
-                                                        <div class="photo-hover">
-                                                            <i class="bi bi-zoom-in"></i>
-                                                        </div>
-                                                    </div>
-                                                `;
-                                            } else {
-                                                return `
-                                                    <div class="photo-thumbnail">
-                                                        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
-                                                            <i class="bi bi-image text-muted"></i>
-                                                        </div>
-                                                    </div>
-                                                `;
-                                            }
-                                        }).join('')}
-                                    </div>
-                                    <div class="photo-hint">
-                                        <small class="text-muted"><i class="bi bi-info-circle me-1"></i> ${this.t('clickToEnlarge')}</small>
-                                    </div>
-                                </div>
-                                
-                                <!-- INFO OVER HOND -->
-                                <div class="info-section mb-2">
-                                    <h6><i class="bi bi-info-circle me-1"></i> Foto informatie</h6>
-                                    <div class="info-grid">
-                                        <div class="info-row">
-                                            <div class="info-item info-item-full">
-                                                <span class="info-label">Hond:</span>
-                                                <span class="info-value">${dog.naam || ''} ${dog.kennelnaam ? `(${dog.kennelnaam})` : ''}</span>
-                                            </div>
-                                        </div>
-                                        <div class="info-row">
-                                            <div class="info-item info-item-full">
-                                                <span class="info-label">Aantal foto's:</span>
-                                                <span class="info-value">${photos.length}</span>
-                                            </div>
-                                        </div>
-                                        ${dog.stamboomnr ? `
-                                        <div class="info-row">
-                                            <div class="info-item info-item-full">
-                                                <span class="info-label">Stamboomnummer:</span>
-                                                <span class="info-value">${dog.stamboomnr}</span>
-                                            </div>
-                                        </div>
-                                        ` : ''}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            // Verwijder bestaande popup
-            const existingPopup = document.getElementById('searchPhotoPopup');
-            if (existingPopup) {
-                existingPopup.remove();
-            }
-            
-            // Voeg popup toe aan DOM
-            document.body.insertAdjacentHTML('beforeend', popupHTML);
-            
-            // Voeg CSS toe als die nog niet bestaat
-            if (!document.querySelector('#searchPhotoStyles')) {
-                const styles = `
-                    <style id="searchPhotoStyles">
-                        /* FOTO POPUP STYLES - ZELFDE ALS STAMBOOMMANAGER */
-                        .pedigree-popup-overlay {
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            right: 0;
-                            bottom: 0;
-                            background: rgba(0, 0, 0, 0.7);
-                            z-index: 1060;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            animation: fadeIn 0.3s;
-                            overflow-y: auto;
-                        }
-                        
-                        @keyframes fadeIn {
-                            from { opacity: 0; }
-                            to { opacity: 1; }
-                        }
-                        
-                        .pedigree-popup-container {
-                            background: white;
-                            border-radius: 12px;
-                            max-width: 450px;
-                            max-height: 80vh;
-                            overflow-y: auto;
-                            animation: slideUp 0.3s;
-                            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-                            width: calc(100% - 20px);
-                            margin: 10px;
-                        }
-                        
-                        @keyframes slideUp {
-                            from { 
-                                opacity: 0;
-                                transform: translateY(30px);
-                            }
-                            to { 
-                                opacity: 1;
-                                transform: translateY(0);
-                            }
-                        }
-                        
-                        .dog-detail-popup {
-                            display: flex;
-                            flex-direction: column;
-                            height: 100%;
-                        }
-                        
-                        .popup-header {
-                            background: #0d6efd;
-                            color: white;
-                            padding: 16px 20px;
-                            border-radius: 12px 12px 0 0;
-                            display: flex;
-                            justify-content: space-between;
-                            align-items: center;
-                            position: sticky;
-                            top: 0;
-                            z-index: 10;
-                        }
-                        
-                        .popup-title {
-                            margin: 0;
-                            font-size: 1.1rem;
-                            display: flex;
-                            align-items: center;
-                            flex: 1;
-                        }
-                        
-                        .popup-close {
-                            background: none;
-                            border: none;
-                            font-size: 1.3rem;
-                            cursor: pointer;
-                            opacity: 0.8;
-                            color: white;
-                            flex-shrink: 0;
-                            margin-left: 15px;
-                            padding: 0;
-                            width: 30px;
-                            height: 30px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                        }
-                        
-                        .popup-close:hover {
-                            opacity: 1;
-                            background: rgba(255, 255, 255, 0.1);
-                            border-radius: 50%;
-                        }
-                        
-                        .popup-body {
-                            padding: 15px;
-                            flex: 1;
-                            overflow-y: auto;
-                            -webkit-overflow-scrolling: touch;
-                        }
-                        
-                        /* FOTO'S SECTIE IN POPUP */
-                        .photos-grid {
-                            display: grid;
-                            grid-template-columns: repeat(3, 1fr);
-                            gap: 8px;
-                            margin-bottom: 10px;
-                        }
-                        
-                        .photo-thumbnail {
-                            position: relative;
-                            aspect-ratio: 1 / 1;
-                            border-radius: 6px;
-                            overflow: hidden;
-                            cursor: pointer;
-                            border: 2px solid transparent;
-                            transition: all 0.2s;
-                        }
-                        
-                        .photo-thumbnail:hover {
-                            border-color: #0d6efd;
-                            transform: scale(1.05);
-                        }
-                        
-                        .thumbnail-img {
-                            width: 100%;
-                            height: 100%;
-                            object-fit: cover;
-                        }
-                        
-                        .photo-hover {
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            right: 0;
-                            bottom: 0;
-                            background: rgba(0, 0, 0, 0.3);
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            opacity: 0;
-                            transition: opacity 0.2s;
-                        }
-                        
-                        .photo-thumbnail:hover .photo-hover {
-                            opacity: 1;
-                        }
-                        
-                        .photo-hover i {
-                            color: white;
-                            font-size: 1.5rem;
-                        }
-                        
-                        .photo-hint {
-                            text-align: center;
-                            margin-bottom: 15px;
-                            font-size: 0.9rem;
-                        }
-                        
-                        /* INFO SECTIES */
-                        .info-section {
-                            margin-bottom: 20px;
-                        }
-                        
-                        .info-section h6 {
-                            color: #495057;
-                            margin-bottom: 10px;
-                            padding-bottom: 6px;
-                            border-bottom: 2px solid #e9ecef;
-                            display: flex;
-                            align-items: center;
-                            font-size: 1rem;
-                        }
-                        
-                        .info-grid {
-                            display: flex;
-                            flex-direction: column;
-                            gap: 8px;
-                        }
-                        
-                        .info-row {
-                            display: grid !important;
-                            grid-template-columns: 1fr !important;
-                            gap: 8px !important;
-                            margin-bottom: 0 !important;
-                            width: 100% !important;
-                        }
-                        
-                        .info-item {
-                            display: flex;
-                            flex-direction: column;
-                            width: 100% !important;
-                            min-width: 0 !important;
-                        }
-                        
-                        .info-item-full {
-                            grid-column: 1 / -1 !important;
-                            width: 100% !important;
-                            margin-bottom: 4px;
-                        }
-                        
-                        .info-label {
-                            font-weight: 600;
-                            color: #495057;
-                            font-size: 0.9rem;
-                            margin-bottom: 2px;
-                            line-height: 1.2;
-                        }
-                        
-                        .info-value {
-                            color: #212529;
-                            font-size: 0.95rem;
-                            line-height: 1.3;
-                            word-break: break-word;
-                        }
-                        
-                        /* GROTE FOTO OVERLAY STYLES - ZELFDE ALS STAMBOOMMANAGER */
-                        .photo-large-overlay {
-                            position: fixed;
-                            top: 0;
-                            left: 0;
-                            right: 0;
-                            bottom: 0;
-                            background: rgba(0, 0, 0, 0.85);
-                            z-index: 1070;
-                            display: none;
-                            align-items: center;
-                            justify-content: center;
-                            animation: fadeIn 0.3s;
-                        }
-                        
-                        .photo-large-container {
-                            background: white;
-                            border-radius: 12px;
-                            overflow: hidden;
-                            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-                            display: flex;
-                            flex-direction: column;
-                            max-height: 95vh;
-                            animation: slideUp 0.3s;
-                        }
-                        
-                        .photo-large-header {
-                            padding: 12px 16px;
-                            background: #0d6efd;
-                            color: white;
-                            display: flex;
-                            justify-content: flex-end;
-                        }
-                        
-                        .photo-large-close {
-                            background: none;
-                            border: none;
-                            color: white;
-                            opacity: 0.8;
-                            font-size: 1.3rem;
-                            cursor: pointer;
-                            width: 32px;
-                            height: 32px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            border-radius: 50%;
-                            transition: all 0.2s;
-                        }
-                        
-                        .photo-large-close:hover {
-                            opacity: 1;
-                            background: rgba(255, 255, 255, 0.2);
-                        }
-                        
-                        .photo-large-content {
-                            padding: 20px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            overflow: hidden;
-                            flex: 1;
-                            min-height: 300px;
-                        }
-                        
-                        .photo-large-img {
-                            max-width: 100%;
-                            max-height: 100%;
-                            object-fit: contain;
-                            border-radius: 4px;
-                        }
-                    </style>
-                `;
-                document.head.insertAdjacentHTML('beforeend', styles);
-            }
-            
-            // Voeg event listeners toe voor sluiten
-            const popup = document.getElementById('searchPhotoPopup');
-            const closeButton = popup.querySelector('.popup-close');
-            
-            closeButton.addEventListener('click', () => {
-                popup.style.display = 'none';
-                setTimeout(() => {
-                    if (popup.parentNode) {
-                        popup.parentNode.removeChild(popup);
-                    }
-                }, 300);
-            });
-            
-            // Sluit wanneer buiten de popup wordt geklikt
-            popup.addEventListener('click', (e) => {
-                if (e.target === popup) {
-                    popup.style.display = 'none';
-                    setTimeout(() => {
-                        if (popup.parentNode) {
-                            popup.parentNode.removeChild(popup);
-                        }
-                    }, 300);
-                }
-            });
-            
-            // Sluit met Escape key
-            const closeOnEscape = (e) => {
-                if (e.key === 'Escape' && popup.style.display === 'flex') {
-                    popup.style.display = 'none';
-                    setTimeout(() => {
-                        if (popup.parentNode) {
-                            popup.parentNode.removeChild(popup);
-                        }
-                    }, 300);
-                    document.removeEventListener('keydown', closeOnEscape);
-                }
-            };
-            document.addEventListener('keydown', closeOnEscape);
-            
-            // Clean up event listener
-            popup.addEventListener('animationend', function handler() {
-                if (popup.style.display === 'none') {
-                    document.removeEventListener('keydown', closeOnEscape);
-                    popup.removeEventListener('animationend', handler);
-                }
-            });
-            
-        } catch (error) {
-            console.error('Fout bij tonen foto popup:', error);
-            this.showError(`Fout bij tonen foto's: ${error.message}`);
-        }
     }
     
     getModalHTML() {
@@ -1074,6 +401,7 @@ class SearchManager extends BaseModule {
                 </div>
             </div>
             
+            <!-- RESET CSS VOOR STAMBOOMMODAL DIE VANUIT DEZE MODAL WORDT GESTART -->
             <style>
                 /* RESET VOOR STAMBOOM MODAL */
                 .modal-dialog.modal-fullscreen .modal-content {
@@ -1083,6 +411,24 @@ class SearchManager extends BaseModule {
                 }
                 
                 .modal-dialog.modal-fullscreen .modal-body {
+                    padding: 0 !important;
+                    margin: 0 !important;
+                }
+                
+                .pedigree-container-compact {
+                    padding: 0 !important;
+                    margin: 0 !important;
+                    width: 100vw !important;
+                    max-width: 100vw !important;
+                }
+                
+                .pedigree-grid-compact {
+                    padding: 0 !important;
+                    margin: 0 !important;
+                    width: 100vw !important;
+                }
+                
+                .pedigree-generation-row {
                     padding: 0 !important;
                     margin: 0 !important;
                 }
@@ -1363,23 +709,6 @@ class SearchManager extends BaseModule {
                     font-weight: 500;
                 }
                 
-                /* FOTO ICON STYLES - SIMPELE VERSIE */
-                .photo-icon-container .bi-camera {
-                    cursor: pointer;
-                    transition: all 0.2s;
-                }
-                
-                .photo-icon-container .bi-camera:hover {
-                    color: #0a58ca !important;
-                    transform: scale(1.1);
-                }
-                
-                /* Foto icon in header line */
-                .dog-detail-header-line .photo-icon-container {
-                    display: inline-flex;
-                    align-items: center;
-                }
-                
                 @media (max-width: 768px) {
                     .modal-body {
                         max-height: calc(100vh - 200px);
@@ -1410,7 +739,7 @@ class SearchManager extends BaseModule {
                     .dog-detail-header-line {
                         flex-direction: column;
                         align-items: flex-start;
-                        gap: 8px;
+                        gap: 4px;
                     }
                     
                     .mobile-back-button {
@@ -1486,8 +815,17 @@ class SearchManager extends BaseModule {
             const searchTerm = e.target.value.toLowerCase().trim();
             
             if (searchTerm.length >= 1) {
-                // Gebruik dezelfde logica als de kennelnaam zoekfunctie
-                this.filterDogsForNameField(searchTerm);
+                // Controleer of de gebruiker een spatie heeft ingetypt (naam + kennelnaam)
+                if (searchTerm.includes(' ')) {
+                    // Splits de zoekterm in naam en kennelnaam
+                    const [dogNamePart, ...kennelParts] = searchTerm.split(' ');
+                    const kennelNamePart = kennelParts.join(' ');
+                    
+                    this.filterDogsByNameAndKennel(dogNamePart, kennelNamePart);
+                } else {
+                    // Alleen op naam zoeken
+                    this.filterDogsByName(searchTerm);
+                }
             } else {
                 this.showInitialView();
                 this.clearDetails();
@@ -1579,25 +917,31 @@ class SearchManager extends BaseModule {
         }
     }
     
-    filterDogsForNameField(searchTerm = '') {
+    filterDogsByName(searchTerm = '') {
         this.filteredDogs = this.allDogs.filter(dog => {
             const naam = dog.naam ? dog.naam.toLowerCase() : '';
-            const kennelnaam = dog.kennelnaam ? dog.kennelnaam.toLowerCase() : '';
-            
-            // Creëer een gecombineerde string: "naam kennelnaam"
-            const combined = `${naam} ${kennelnaam}`;
-            
-            // Controleer of de gecombineerde string begint met de zoekterm
-            return combined.startsWith(searchTerm);
+            return naam.startsWith(searchTerm);
         });
         
         this.displaySearchResults();
     }
     
-    filterDogsByName(searchTerm = '') {
+    filterDogsByNameAndKennel(dogNamePart = '', kennelNamePart = '') {
         this.filteredDogs = this.allDogs.filter(dog => {
             const naam = dog.naam ? dog.naam.toLowerCase() : '';
-            return naam.startsWith(searchTerm);
+            const kennelnaam = dog.kennelnaam ? dog.kennelnaam.toLowerCase() : '';
+            
+            // Eerst controleren of de naam begint met het opgegeven naamdeel
+            if (!naam.startsWith(dogNamePart)) {
+                return false;
+            }
+            
+            // Als er ook een kennelnaamdeel is opgegeven, controleren of de kennelnaam begint hiermee
+            if (kennelNamePart && !kennelnaam.startsWith(kennelNamePart)) {
+                return false;
+            }
+            
+            return true;
         });
         
         this.displaySearchResults();
@@ -1893,7 +1237,7 @@ class SearchManager extends BaseModule {
                             <div class="dog-name-header">${displayValue(dog.naam)}</div>
                             ${dog.kennelnaam ? `<div class="text-muted mb-2">${displayValue(dog.kennelnaam)}</div>` : ''}
                             
-                            <!-- VOLGORDE: Stamboomnummer + Ras + Geslacht + Vachtkleur + Foto icoon -->
+                            <!-- VOLGORDE: Stamboomnummer + Ras + Geslacht + Vachtkleur (zoals in 2e image) -->
                             <div class="dog-detail-header-line mt-2">
                                 ${dog.stamboomnr ? `<span class="stamboom">${dog.stamboomnr}</span>` : ''}
                                 ${dog.ras ? `<span class="ras">${dog.ras}</span>` : ''}
@@ -1901,12 +1245,10 @@ class SearchManager extends BaseModule {
                                 ${dog.vachtkleur && dog.vachtkleur.trim() !== '' ? 
                                   `<span class="vachtkleur">${dog.vachtkleur}</span>` : 
                                   `<span class="text-muted fst-italic">geen vachtkleur</span>`}
-                                <!-- Foto icoon wordt hier ingevoegd via loadAndDisplayPhotoIcon -->
-                                <span class="photo-icon-container" data-dog-id="${dog.id}" data-stamboomnr="${dog.stamboomnr || ''}"></span>
                             </div>
                         </div>
                         <div class="text-end">
-                            <!-- Geboortedatum -->
+                            <!-- Geboortedatum - behouden -->
                             ${dog.geboortedatum ? `
                             <div class="text-muted">
                                 <i class="bi bi-calendar me-1"></i>
@@ -1914,7 +1256,7 @@ class SearchManager extends BaseModule {
                             </div>
                             ` : ''}
                             
-                            <!-- Overlijdensdatum -->
+                            <!-- Overlijdensdatum - behouden -->
                             ${dog.overlijdensdatum ? `
                             <div class="text-muted ${dog.geboortedatum ? 'mt-1' : ''}">
                                 <i class="bi bi-calendar-x me-1"></i>
@@ -2067,11 +1409,6 @@ class SearchManager extends BaseModule {
         `;
         
         container.innerHTML = html;
-        
-        // Laad en toon foto icoon
-        setTimeout(() => {
-            this.loadAndDisplayPhotoIcon(dog);
-        }, 100);
         
         // Voeg terugknop toe voor mobiele weergave (als we in collapsed modus zijn)
         if (this.isMobileCollapsed && window.innerWidth <= 768) {
