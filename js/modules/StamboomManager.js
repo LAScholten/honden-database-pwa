@@ -751,7 +751,7 @@ testSpecificDog(dogId, expectedCOI) {
                         <i class="bi ${dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 'bi-gender-female text-danger'} me-2"></i>
                         ${headerText}
                     </h5>
-                    <button type="button" class="btn-close btn-close-white popup-close" aria-label="${this.t('closePopup')}"></button>
+                    <button type="button" class="btn-close btn-close-white popup-close"></button>
                 </div>
                 <div class="popup-body">
                     <!-- FOTO'S SECTIE BOVENAAN (indien beschikbaar) -->
@@ -1055,7 +1055,7 @@ testSpecificDog(dogId, expectedCOI) {
             <div class="photo-large-overlay" id="photoLargeOverlay" style="display: flex;">
                 <div class="photo-large-container" id="photoLargeContainer">
                     <div class="photo-large-header">
-                        <button type="button" class="btn-close btn-close-white photo-large-close" aria-label="${this.t('closePhoto')}"></button>
+                        <button type="button" class="btn-close btn-close-white photo-large-close"></button>
                     </div>
                     <div class="photo-large-content">
                         <img src="${photoData}" 
@@ -1151,6 +1151,7 @@ testSpecificDog(dogId, expectedCOI) {
                                 </div>
                             </div>
                         </div>
+                        <!-- FOOTER VERWIJDERD -->
                     </div>
                 </div>
             </div>
@@ -1794,7 +1795,10 @@ testSpecificDog(dogId, expectedCOI) {
                         height: calc(100vh - 60px) !important;
                         overflow-x: auto !important;
                         overflow-y: hidden !important;
+                        align-items: center;
                         padding: 0 !important;
+                        display: flex;
+                        border-radius: 0;
                     }
                     
                     .pedigree-grid-compact {
@@ -1803,7 +1807,7 @@ testSpecificDog(dogId, expectedCOI) {
                         min-width: fit-content;
                         padding: 0 20px !important;
                         gap: 25px;
-                        align-items: flex-start;
+                        align-items: center;
                         box-sizing: border-box !important;
                         margin: 0 auto;
                     }
@@ -1812,7 +1816,7 @@ testSpecificDog(dogId, expectedCOI) {
                         display: flex;
                         flex-direction: column;
                         height: 100%;
-                        justify-content: flex-start;
+                        justify-content: center;
                         min-width: 0;
                     }
                     
@@ -1830,6 +1834,7 @@ testSpecificDog(dogId, expectedCOI) {
                     
                     .pedigree-generation-col.gen3 {
                         gap: 4px !important;
+                        justify-content: center;
                     }
                     
                     .pedigree-card-compact.horizontal.gen0,
