@@ -267,7 +267,7 @@ class SearchManager extends BaseModule {
                 viewingParent: "Elternteil ansehen",
                 clickToView: "Klicken für Details",
                 parents: "Eltern",
-                noHealthInfo: "Keine Gesundheidsinformationen verfügbar",
+                noHealthInfo: "Keine Gesundheitsinformationen verfügbar",
                 noAdditionalInfo: "Keine zusätzlichen Informationen verfügbar",
                 selectDogToView: "Wählen Sie einen Hund, um Details zu sehen",
                 
@@ -291,7 +291,7 @@ class SearchManager extends BaseModule {
                 // Stamboom buttons
                 pedigreeButton: "Ahnentafel",
                 pedigreeTitle: "Ahnentafel von {name}",
-                generatingPedigree: "Ahnentafel wird generiert...",
+                generatingPedigree: "Ahnentafel wordt generiert...",
                 openPedigree: "Ahnentafel öffnen",
                 pedigree4Gen: "4-Generationen Ahnentafel",
                 
@@ -440,7 +440,7 @@ class SearchManager extends BaseModule {
             existingOverlay.remove();
         }
         
-        // Maak nieuwe overlay - IDENTIEK AAN STAMBOOMMANAGER
+        // Maak nieuwe overlay - MET SLUITENKNOOND ONDERAAN NET ALS STAMBOOMMANAGER
         const overlayHTML = `
             <div class="photo-large-overlay" id="photoLargeOverlay" style="display: flex;">
                 <div class="photo-large-container" id="photoLargeContainer">
@@ -452,7 +452,12 @@ class SearchManager extends BaseModule {
                              alt="${dogName || 'Foto'}" 
                              class="photo-large-img"
                              id="photoLargeImg"
-                             style="max-width: 90vw; max-height: 80vh; object-fit: contain;">
+                             style="max-width: 90vw; max-height: 70vh; object-fit: contain;">
+                    </div>
+                    <div class="photo-large-footer text-center py-3">
+                        <button type="button" class="btn btn-secondary photo-large-close-btn">
+                            <i class="bi bi-x-lg me-1"></i> ${this.t('closePhoto')}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -885,15 +890,15 @@ class SearchManager extends BaseModule {
                 }
                 
                 /* ============================================= */
-                /* FOTO STYLES - IDENTIEK AAN STAMBOOMMANAGER */
+                /* FOTO STYLES - IDENTIEK AAN STAMBOOMMANAGER MAAR KLEINER */
                 /* ============================================= */
-                /* FOTO'S SECTIE IN DETAILS - NET ALS STAMBOOM */
+                /* FOTO'S SECTIE IN DETAILS - 50% KLEINER */
                 .photos-grid {
                     display: grid;
                     grid-template-columns: repeat(3, 1fr);
-                    gap: 6px;
-                    margin-bottom: 10px;
-                    max-width: 240px;
+                    gap: 4px;
+                    margin-bottom: 8px;
+                    max-width: 120px; /* 50% van 240px */
                     margin-left: auto;
                     margin-right: auto;
                 }
@@ -901,10 +906,10 @@ class SearchManager extends BaseModule {
                 .photo-thumbnail {
                     position: relative;
                     aspect-ratio: 1 / 1;
-                    border-radius: 4px;
+                    border-radius: 3px;
                     overflow: hidden;
                     cursor: pointer;
-                    border: 2px solid transparent;
+                    border: 1px solid transparent;
                     transition: all 0.2s;
                 }
                 
@@ -939,17 +944,17 @@ class SearchManager extends BaseModule {
                 
                 .photo-hover i {
                     color: white;
-                    font-size: 1.2rem;
+                    font-size: 0.9rem;
                 }
                 
                 .photo-hint {
                     text-align: center;
-                    margin-bottom: 15px;
-                    font-size: 0.85rem;
+                    margin-bottom: 10px;
+                    font-size: 0.75rem;
                 }
                 
                 /* ============================================= */
-                /* GROTE FOTO OVERLAY STYLES - IDENTIEK AAN STAMBOOM */
+                /* GROTE FOTO OVERLAY STYLES - IDENTIEK AAN STAMBOOM MET SLUITENKNOOND ONDERAAN */
                 /* ============================================= */
                 .photo-large-overlay {
                     position: fixed;
@@ -1006,13 +1011,13 @@ class SearchManager extends BaseModule {
                 }
                 
                 .photo-large-content {
-                    padding: 20px;
+                    padding: 15px;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     overflow: hidden;
                     flex: 1;
-                    min-height: 300px;
+                    min-height: 200px;
                 }
                 
                 .photo-large-img {
@@ -1022,22 +1027,10 @@ class SearchManager extends BaseModule {
                     border-radius: 4px;
                 }
                 
-                /* Foto icoon styling - GEWIJZIGD: CAMERA ICOON NET ALS STAMBOOM */
-                .photo-icon-btn {
-                    background: none;
-                    border: none;
-                    color: #dc3545;
-                    padding: 0;
-                    cursor: pointer;
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 2px;
-                    font-size: 14px;
-                    margin-left: 4px;
-                }
-                
-                .photo-icon-btn i {
-                    font-size: 16px;
+                .photo-large-footer {
+                    padding: 10px;
+                    background: #f8f9fa;
+                    border-top: 1px solid #dee2e6;
                 }
                 
                 /* Animations */
@@ -1103,17 +1096,17 @@ class SearchManager extends BaseModule {
                     /* Responsive photo adjustments */
                     .photos-grid {
                         grid-template-columns: repeat(3, 1fr);
-                        gap: 6px;
-                        max-width: 200px;
+                        gap: 4px;
+                        max-width: 100px;
                     }
                     
                     .photo-large-content {
-                        padding: 15px;
+                        padding: 10px;
                     }
                     
                     .photo-large-img {
                         max-width: 95vw;
-                        max-height: 75vh;
+                        max-height: 65vh;
                     }
                 }
                 
@@ -1614,7 +1607,6 @@ class SearchManager extends BaseModule {
         
         // Check of deze hond foto's heeft
         const hasPhotos = await this.checkDogHasPhotos(dog.id);
-        const cameraIcon = hasPhotos ? '<i class="bi bi-camera text-danger ms-1"></i>' : '';
         
         const html = `
             <div class="details-card">
@@ -1637,7 +1629,7 @@ class SearchManager extends BaseModule {
                             <div class="dog-name-header">${displayValue(dog.naam)}</div>
                             ${dog.kennelnaam ? `<div class="text-muted mb-2">${displayValue(dog.kennelnaam)}</div>` : ''}
                             
-                            <!-- VOLGORDE: Stamboomnummer + Ras + Geslacht + Vachtkleur + Foto icoon -->
+                            <!-- VOLGORDE: Stamboomnummer + Ras + Geslacht + Vachtkleur -->
                             <div class="dog-detail-header-line mt-2">
                                 ${dog.stamboomnr ? `<span class="stamboom">${dog.stamboomnr}</span>` : ''}
                                 ${dog.ras ? `<span class="ras">${dog.ras}</span>` : ''}
@@ -1645,8 +1637,6 @@ class SearchManager extends BaseModule {
                                 ${dog.vachtkleur && dog.vachtkleur.trim() !== '' ? 
                                   `<span class="vachtkleur">${dog.vachtkleur}</span>` : 
                                   `<span class="text-muted fst-italic">geen vachtkleur</span>`}
-                                <!-- Foto icoon -->
-                                ${hasPhotos ? `<button class="photo-icon-btn" title="${t('photos')}" data-dog-id="${dog.id}"><i class="bi bi-camera"></i></button>` : ''}
                             </div>
                         </div>
                         <div class="text-end">
@@ -1675,7 +1665,7 @@ class SearchManager extends BaseModule {
                 </div>
                 
                 <div class="details-body">
-                    <!-- FOTO'S SECTIE BOVENAAN (indien beschikbaar) - NET ALS STAMBOOMMANAGER -->
+                    <!-- FOTO'S SECTIE BOVENAAN (indien beschikbaar) - 50% KLEINER -->
                     ${hasPhotos ? `
                     <div class="info-section mb-3">
                         <h6><i class="bi bi-camera me-1"></i> ${t('photos')}</h6>
@@ -1825,22 +1815,9 @@ class SearchManager extends BaseModule {
         
         container.innerHTML = html;
         
-        // Laad foto's asynchroon en voeg ze toe - NET ALS STAMBOOMMANAGER
+        // Laad foto's asynchroon en voeg ze toe - 50% KLEINER
         if (hasPhotos) {
             this.loadAndDisplayPhotos(dog);
-        }
-        
-        // Event listener voor foto icoon
-        const photoIconBtn = container.querySelector('.photo-icon-btn');
-        if (photoIconBtn) {
-            photoIconBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                // Scroll naar foto sectie
-                const photoSection = container.querySelector('.info-section.mb-3');
-                if (photoSection) {
-                    photoSection.scrollIntoView({ behavior: 'smooth' });
-                }
-            });
         }
         
         // Voeg terugknop toe voor mobiele weergave (als we in collapsed modus zijn)
@@ -1893,7 +1870,7 @@ class SearchManager extends BaseModule {
         }
     }
     
-    // METHODE: Foto's laden en tonen - NET ALS STAMBOOMMANAGER
+    // METHODE: Foto's laden en tonen - 50% KLEINER
     async loadAndDisplayPhotos(dog) {
         try {
             const photos = await this.getDogPhotos(dog.id);
