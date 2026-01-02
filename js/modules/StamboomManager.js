@@ -751,7 +751,7 @@ testSpecificDog(dogId, expectedCOI) {
                         <i class="bi ${dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 'bi-gender-female text-danger'} me-2"></i>
                         ${headerText}
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" aria-label="Sluiten" style="position: relative; z-index: 1000;"></button>
+                    <button type="button" class="btn-close btn-close-white" aria-label="Sluiten"></button>
                 </div>
                 <div class="popup-body">
                     <!-- FOTO'S SECTIE BOVENAAN (indien beschikbaar) -->
@@ -1985,7 +1985,7 @@ testSpecificDog(dogId, expectedCOI) {
                     align-items: center;
                     position: sticky;
                     top: 0;
-                    z-index: 10;
+                    z-index: 1;
                 }
                 
                 .popup-title {
@@ -2003,8 +2003,7 @@ testSpecificDog(dogId, expectedCOI) {
                     padding: 8px;
                     background: transparent;
                     border: none;
-                    position: relative;
-                    z-index: 1000 !important;
+                    z-index: 2;
                 }
                 
                 .popup-header .btn-close:hover {
