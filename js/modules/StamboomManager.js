@@ -438,8 +438,8 @@ class StamboomManager extends BaseModule {
                     const remainingDepth = Math.max(0, maxGenerations - Math.max(n1, n2) - 1);
                     const ancestorCOI = this.calculateWrightCOI(ancestorId, remainingDepth, memo, newPath);
                     
-                    // WRIGHT'S FORMULE: (0.5)^(n1 + n2 + 1) * (1 + F_a)
-                    const contribution = Math.pow(0.5, n1 + n2 + 1) * (1 + ancestorCOI);
+                    // WRIGHT'S FORMULE: (0.5)^(n1 + n2) * (1 + F_a)
+                    const contribution = Math.pow(0.5, n1 + n2) * (1 + ancestorCOI);
                     totalCOI += contribution;
                 }
             }
