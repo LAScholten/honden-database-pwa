@@ -1696,10 +1696,7 @@ class SearchManager extends BaseModule {
                             </div>
                             ` : ''}
                             
-                            <!-- Stamboom knop -->
-                            <button class="btn btn-sm btn-outline-primary mt-2 btn-pedigree" data-dog-id="${dog.id}">
-                                <i class="bi bi-diagram-3 me-1"></i> ${t('pedigreeButton')}
-                            </button>
+                            <!-- STAMBOOM KNOOP VERWIJDERD - Nu alleen bij de ouders sectie -->
                         </div>
                     </div>
                 </div>
@@ -1726,6 +1723,7 @@ class SearchManager extends BaseModule {
                             <div>
                                 <i class="bi bi-people me-1"></i> ${t('parents')}
                             </div>
+                            <!-- ENIGE STAMBOOM KNOOP - alleen hier behouden -->
                             <button class="btn btn-sm btn-outline-primary btn-pedigree" data-dog-id="${dog.id}">
                                 <i class="bi bi-diagram-3 me-1"></i> ${t('pedigreeButton')}
                             </button>
@@ -1890,7 +1888,7 @@ class SearchManager extends BaseModule {
             }
         }
         
-        // Event listeners voor stamboom knoppen
+        // Event listeners voor stamboom knop (nu alleen nog bij de ouders sectie)
         document.querySelectorAll('.btn-pedigree').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.stopPropagation();
