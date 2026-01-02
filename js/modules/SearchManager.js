@@ -749,26 +749,36 @@ class SearchManager extends BaseModule {
                     font-weight: 500;
                 }
                 
-                /* FOTO STYLES */
+                /* FOTO STYLES - FIXED */
                 .photo-icon-btn {
                     background: none;
-                    border: none;
+                    border: 2px solid #0d6efd;
                     color: #0d6efd;
                     padding: 4px 8px;
+                    border-radius: 6px;
                     cursor: pointer;
                     transition: all 0.2s;
                     display: inline-flex;
                     align-items: center;
                     gap: 4px;
+                    font-size: 12px;
+                    font-weight: 600;
                 }
                 
                 .photo-icon-btn:hover {
-                    color: #084298;
-                    transform: scale(1.1);
+                    background-color: #0d6efd;
+                    color: white;
+                    transform: scale(1.05);
+                    box-shadow: 0 2px 5px rgba(13, 110, 253, 0.3);
+                }
+                
+                .photo-icon-btn i {
+                    font-size: 16px;
                 }
                 
                 .photo-icon-btn:disabled {
                     color: #adb5bd;
+                    border-color: #adb5bd;
                     cursor: not-allowed;
                 }
                 
@@ -806,6 +816,7 @@ class SearchManager extends BaseModule {
                     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
                     transition: all 0.3s ease;
                     aspect-ratio: 1;
+                    background-color: #fff;
                 }
                 
                 .photo-thumbnail-item:hover {
@@ -818,6 +829,7 @@ class SearchManager extends BaseModule {
                     height: 100%;
                     object-fit: cover;
                     transition: transform 0.3s ease;
+                    display: block;
                 }
                 
                 .photo-thumbnail-item:hover .photo-thumbnail {
@@ -848,42 +860,53 @@ class SearchManager extends BaseModule {
                     text-overflow: ellipsis;
                 }
                 
-                /* Fullscreen photo viewer */
+                /* Fullscreen photo viewer - FIXED */
                 .photo-viewer-modal .modal-dialog {
                     max-width: 95vw;
                     max-height: 95vh;
+                    margin: 0;
+                    width: 100%;
+                    height: 100%;
                 }
                 
                 .photo-viewer-modal .modal-content {
-                    background-color: rgba(0, 0, 0, 0.9);
+                    background-color: rgba(0, 0, 0, 0.95);
                     border: none;
+                    height: 100vh;
+                    width: 100vw;
                 }
                 
                 .photo-viewer-modal .modal-header {
                     background: transparent;
                     border-bottom: none;
                     position: absolute;
-                    top: 10px;
-                    right: 10px;
+                    top: 20px;
+                    right: 20px;
                     z-index: 1000;
+                    padding: 0;
                 }
                 
                 .photo-viewer-modal .modal-header .btn-close {
                     filter: invert(1);
                     opacity: 0.8;
+                    background-color: rgba(0, 0, 0, 0.5);
+                    border-radius: 50%;
+                    padding: 10px;
                 }
                 
                 .photo-viewer-modal .modal-body {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    padding: 20px;
+                    padding: 0;
+                    height: 100%;
+                    width: 100%;
                 }
                 
                 .photo-viewer-container {
                     position: relative;
                     width: 100%;
-                    height: calc(90vh - 100px);
+                    height: 100%;
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -895,6 +918,7 @@ class SearchManager extends BaseModule {
                     object-fit: contain;
                     transition: transform 0.3s ease;
                     cursor: grab;
+                    display: block;
                 }
                 
                 .photo-viewer-image.dragging {
@@ -903,7 +927,7 @@ class SearchManager extends BaseModule {
                 
                 .photo-viewer-controls {
                     position: absolute;
-                    bottom: 20px;
+                    bottom: 40px;
                     left: 0;
                     right: 0;
                     display: flex;
@@ -928,6 +952,7 @@ class SearchManager extends BaseModule {
                     cursor: pointer;
                     transition: all 0.3s ease;
                     z-index: 100;
+                    font-size: 20px;
                 }
                 
                 .photo-viewer-nav:hover {
@@ -967,35 +992,39 @@ class SearchManager extends BaseModule {
                     bottom: 20px;
                     left: 20px;
                     color: white;
-                    background: rgba(0, 0, 0, 0.5);
+                    background: rgba(0, 0, 0, 0.7);
                     padding: 10px 15px;
                     border-radius: 8px;
                     max-width: 300px;
+                    font-size: 14px;
                 }
                 
                 .photo-viewer-counter {
                     color: white;
-                    background: rgba(0, 0, 0, 0.5);
+                    background: rgba(0, 0, 0, 0.7);
                     padding: 8px 15px;
                     border-radius: 20px;
                     font-size: 14px;
+                    font-weight: 600;
                 }
                 
                 .photo-viewer-btn {
                     background: rgba(255, 255, 255, 0.2);
                     border: none;
                     color: white;
-                    padding: 8px 15px;
+                    padding: 10px 15px;
                     border-radius: 8px;
                     cursor: pointer;
                     transition: all 0.3s ease;
                     display: flex;
                     align-items: center;
                     gap: 5px;
+                    font-size: 14px;
                 }
                 
                 .photo-viewer-btn:hover {
                     background: rgba(255, 255, 255, 0.3);
+                    transform: translateY(-2px);
                 }
                 
                 /* Loading indicator */
@@ -1004,6 +1033,8 @@ class SearchManager extends BaseModule {
                     justify-content: center;
                     align-items: center;
                     height: 200px;
+                    flex-direction: column;
+                    gap: 15px;
                 }
                 
                 .photo-spinner {
@@ -1023,7 +1054,7 @@ class SearchManager extends BaseModule {
                 /* Empty state */
                 .photo-empty-state {
                     text-align: center;
-                    padding: 40px 20px;
+                    padding: 60px 20px;
                     color: #6c757d;
                 }
                 
@@ -1084,13 +1115,14 @@ class SearchManager extends BaseModule {
                     }
                     
                     .photo-viewer-controls {
-                        bottom: 10px;
+                        bottom: 20px;
+                        flex-wrap: wrap;
                     }
                     
                     .photo-viewer-nav {
                         width: 40px;
                         height: 40px;
-                        font-size: 14px;
+                        font-size: 16px;
                     }
                     
                     .photo-viewer-nav.prev {
@@ -1106,11 +1138,12 @@ class SearchManager extends BaseModule {
                         left: 10px;
                         max-width: 200px;
                         padding: 8px 12px;
+                        font-size: 12px;
                     }
                     
-                    .photo-viewer-zoom-controls {
-                        top: 10px;
-                        left: 10px;
+                    .photo-viewer-btn {
+                        padding: 8px 12px;
+                        font-size: 12px;
                     }
                 }
             </style>
@@ -1840,7 +1873,7 @@ class SearchManager extends BaseModule {
                 const t = this.t.bind(this);
                 photoIconContainer.innerHTML = `
                     <button class="photo-icon-btn" title="${t('viewPhotos')}" data-dog-id="${dog.id}" data-stamboomnr="${dog.stamboomnr || ''}">
-                        <i class="bi bi-images"></i>
+                        <i class="bi bi-camera"></i> ${t('photos')}
                     </button>
                 `;
                 
@@ -1874,6 +1907,7 @@ class SearchManager extends BaseModule {
             // Gebruik de juiste methode van je database: getFotosVoorStamboomnr
             if (typeof this.db.getFotosVoorStamboomnr === 'function') {
                 const photos = await this.db.getFotosVoorStamboomnr(dog.stamboomnr);
+                console.log(`Foto's gevonden voor hond ${dog.naam}:`, photos?.length || 0);
                 return photos || [];
             } else {
                 console.warn('getFotosVoorStamboomnr methode niet beschikbaar in database');
@@ -1906,7 +1940,7 @@ class SearchManager extends BaseModule {
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title">
-                                <i class="bi bi-images me-2"></i>
+                                <i class="bi bi-camera me-2"></i>
                                 ${t('photoModalTitle').replace('{name}', dog.naam || t('unknown'))}
                             </h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${t('closePhotos')}"></button>
@@ -1951,8 +1985,9 @@ class SearchManager extends BaseModule {
         
         try {
             const photos = await this.getDogPhotos(dog);
+            console.log('Foto\'s geladen voor modal:', photos);
             
-            if (photos.length === 0) {
+            if (!photos || photos.length === 0) {
                 modalBody.innerHTML = `
                     <div class="photo-empty-state">
                         <div class="photo-empty-icon">
@@ -1973,9 +2008,15 @@ class SearchManager extends BaseModule {
                 let photoTitle = photo.filename || `Foto ${index + 1}`;
                 
                 // Controleer verschillende mogelijke foto data formaten
-                if (photo.data) {
+                if (photo.data && typeof photo.data === 'string') {
                     // Base64 encoded data
-                    photoUrl = `data:${photo.type || 'image/jpeg'};base64,${photo.data}`;
+                    const mimeType = photo.type || 'image/jpeg';
+                    // Zorg ervoor dat de base64 string schoon is (geen data: prefix)
+                    let cleanData = photo.data;
+                    if (cleanData.startsWith('data:')) {
+                        cleanData = cleanData.split(',')[1];
+                    }
+                    photoUrl = `data:${mimeType};base64,${cleanData}`;
                 } else if (photo.url) {
                     // URL
                     photoUrl = photo.url;
@@ -1987,9 +2028,20 @@ class SearchManager extends BaseModule {
                 if (photoUrl) {
                     thumbnailHTML += `
                         <div class="photo-thumbnail-item" data-photo-index="${index}" data-modal-id="${modalId}">
-                            <img src="${photoUrl}" alt="${photoTitle}" class="photo-thumbnail" loading="lazy">
+                            <img src="${photoUrl}" alt="${photoTitle}" class="photo-thumbnail" loading="lazy" 
+                                 onerror="this.onerror=null; this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM2Yzc1N2QiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIwLjNlbSI+Rm90byBub3QgYXZhaWxhYmxlPC90ZXh0Pjwvc3ZnPg=='">
                             <div class="photo-thumbnail-overlay">
                                 <p class="photo-thumbnail-title mb-0">${photoTitle}</p>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Geen geldige foto URL, toon placeholder
+                    thumbnailHTML += `
+                        <div class="photo-thumbnail-item" style="background-color: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                            <div style="text-align: center; padding: 20px;">
+                                <i class="bi bi-image" style="font-size: 32px; color: #6c757d;"></i>
+                                <p class="mt-2 small" style="color: #6c757d;">Geen preview</p>
                             </div>
                         </div>
                     `;
@@ -2004,7 +2056,15 @@ class SearchManager extends BaseModule {
                 thumbnail.addEventListener('click', (e) => {
                     const photoIndex = parseInt(thumbnail.getAttribute('data-photo-index'));
                     const currentModalId = thumbnail.getAttribute('data-modal-id');
-                    this.showFullscreenPhotoViewer(photos, photoIndex, dog);
+                    
+                    // Verzamel alle geldige foto's
+                    const validPhotos = photos.filter(photo => {
+                        return photo.data || photo.url || photo.filePath;
+                    });
+                    
+                    if (validPhotos.length > 0) {
+                        this.showFullscreenPhotoViewer(validPhotos, photoIndex, dog);
+                    }
                 });
             });
             
@@ -2015,7 +2075,7 @@ class SearchManager extends BaseModule {
                     <div class="text-danger">
                         <i class="bi bi-exclamation-triangle"></i>
                     </div>
-                    <p class="mb-0">Fout bij laden foto's</p>
+                    <p class="mb-0">Fout bij laden foto's: ${error.message}</p>
                 </div>
             `;
         }
@@ -2114,56 +2174,81 @@ class SearchManager extends BaseModule {
         let isDragging = false;
         let startX, startY, translateX = 0, translateY = 0;
         
+        // Helper functie om foto URL te maken
+        const createPhotoUrl = (photo) => {
+            if (photo.data && typeof photo.data === 'string') {
+                // Base64 encoded data
+                const mimeType = photo.type || 'image/jpeg';
+                let cleanData = photo.data;
+                if (cleanData.startsWith('data:')) {
+                    cleanData = cleanData.split(',')[1];
+                }
+                return `data:${mimeType};base64,${cleanData}`;
+            } else if (photo.url) {
+                return photo.url;
+            } else if (photo.filePath) {
+                return photo.filePath;
+            }
+            return '';
+        };
+        
         // Laad initiële foto
         const loadPhoto = (index) => {
             if (index < 0 || index >= photos.length) return;
             
             currentIndex = index;
             const photo = photos[index];
+            const photoUrl = createPhotoUrl(photo);
             
-            // Bepaal de foto URL op basis van het beschikbare formaat
-            let photoUrl = '';
-            let photoFileName = photo.filename || `foto-${index + 1}`;
-            
-            if (photo.data) {
-                photoUrl = `data:${photo.type || 'image/jpeg'};base64,${photo.data}`;
-            } else if (photo.url) {
-                photoUrl = photo.url;
-            } else if (photo.filePath) {
-                photoUrl = photo.filePath;
+            if (!photoUrl) {
+                console.error('Geen geldige foto URL gevonden');
+                return;
             }
             
-            if (!photoUrl) return;
+            console.log('Laden foto:', photo.filename, 'URL lengte:', photoUrl.length);
             
-            imageElement.src = photoUrl;
-            imageElement.alt = photo.filename || `Foto ${index + 1}`;
+            // Preload de afbeelding om te controleren of deze geldig is
+            const img = new Image();
+            img.onload = () => {
+                imageElement.src = photoUrl;
+                imageElement.alt = photo.filename || `Foto ${index + 1}`;
+                
+                // Reset zoom en positie
+                currentZoom = 1;
+                translateX = 0;
+                translateY = 0;
+                imageElement.style.transform = 'scale(1) translate(0, 0)';
+                
+                // Update knoppen
+                prevButton.disabled = index === 0;
+                nextButton.disabled = index === photos.length - 1;
+                
+                // Update counter
+                if (counterElement) {
+                    counterElement.textContent = `${index + 1} / ${photos.length}`;
+                }
+                
+                // Update download link
+                if (downloadButton) {
+                    downloadButton.onclick = () => {
+                        const link = document.createElement('a');
+                        link.href = photoUrl;
+                        link.download = photo.filename || `foto-${dog?.naam || 'hond'}-${index + 1}.jpg`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    };
+                }
+            };
             
-            // Reset zoom en positie
-            currentZoom = 1;
-            translateX = 0;
-            translateY = 0;
-            imageElement.style.transform = 'scale(1) translate(0, 0)';
+            img.onerror = () => {
+                console.error('Foto kan niet geladen worden:', photo.filename);
+                // Toon een placeholder als de foto niet geladen kan worden
+                imageElement.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM2Yzc1N2QiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIwLjNlbSI+Rm90byBub3QgYXZhaWxhYmxlPC90ZXh0Pjwvc3ZnPg==';
+                imageElement.alt = 'Foto niet beschikbaar';
+            };
             
-            // Update knoppen
-            prevButton.disabled = index === 0;
-            nextButton.disabled = index === photos.length - 1;
-            
-            // Update counter
-            if (counterElement) {
-                counterElement.textContent = `${index + 1} / ${photos.length}`;
-            }
-            
-            // Update download link
-            if (downloadButton) {
-                downloadButton.onclick = () => {
-                    const link = document.createElement('a');
-                    link.href = photoUrl;
-                    link.download = photoFileName;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                };
-            }
+            img.src = photoUrl;
         };
         
         // Navigatie
