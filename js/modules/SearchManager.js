@@ -13,6 +13,7 @@ class SearchManager extends BaseModule {
         this.searchType = 'name'; // 'name' of 'kennel'
         this.stamboomManager = null; // Wordt later geïnitialiseerd
         this.isMobileCollapsed = false; // Track of mobiele weergave collapsed is
+        this.dogPhotosCache = new Map(); // Cache voor hondenfoto's - NET ALS STAMBOOMMANAGER
         
         // Vertalingen uitgebreid met pedigree knop en foto's
         this.translations = {
@@ -121,9 +122,9 @@ class SearchManager extends BaseModule {
                 grandfather: "Grootvader",
                 grandmother: "Grootmoeder",
                 
-                // Foto vertalingen (NU IDENTIEK AAN STAMBOOMMANAGER)
+                // Foto vertalingen - IDENTIEK AAN STAMBOOMMANAGER
                 photos: "Foto's",
-                noPhotosAvailable: "Geen foto's beschikbaar",
+                noPhotos: "Geen foto's beschikbaar",
                 clickToEnlarge: "Klik om te vergroten",
                 closePhoto: "Sluiten"
             },
@@ -232,9 +233,9 @@ class SearchManager extends BaseModule {
                 grandfather: "Grandfather",
                 grandmother: "Grandmother",
                 
-                // Photo translations (IDENTICAL TO STAMBOOMMANAGER)
+                // Photo translations - IDENTICAL TO STAMBOOMMANAGER
                 photos: "Photos",
-                noPhotosAvailable: "No photos available",
+                noPhotos: "No photos available",
                 clickToEnlarge: "Click to enlarge",
                 closePhoto: "Close"
             },
@@ -266,7 +267,7 @@ class SearchManager extends BaseModule {
                 viewingParent: "Elternteil ansehen",
                 clickToView: "Klicken für Details",
                 parents: "Eltern",
-                noHealthInfo: "Keine Gesundheitsinformationen verfügbar",
+                noHealthInfo: "Keine Gesundheidsinformationen verfügbar",
                 noAdditionalInfo: "Keine zusätzlichen Informationen verfügbar",
                 selectDogToView: "Wählen Sie einen Hund, um Details zu sehen",
                 
@@ -300,9 +301,9 @@ class SearchManager extends BaseModule {
                 grandfather: "Großvater",
                 grandmother: "Großmutter",
                 
-                // Foto Übersetzungen (IDENTISCH ZU STAMBOOMMANAGER)
+                // Foto Übersetzungen - IDENTISCH ZU STAMBOOMMANAGER
                 photos: "Fotos",
-                noPhotosAvailable: "Keine Fotos verfügbar",
+                noPhotos: "Keine Fotos verfügbar",
                 clickToEnlarge: "Klicken zum Vergrößern",
                 closePhoto: "Schließen"
             }
@@ -334,7 +335,7 @@ class SearchManager extends BaseModule {
         return this.translations[this.currentLang][key] || key;
     }
     
-    // NIEUWE METHODE: Setup globale event listeners eenmalig - IDENTIEK AAN STAMBOOMMANAGER
+    // METHODE: Setup globale event listeners eenmalig - IDENTIEK AAN STAMBOOMMANAGER
     setupGlobalEventListeners() {
         // Event delegation voor foto thumbnail clicks - IDENTIEK AAN STAMBOOMMANAGER
         document.addEventListener('click', (e) => {
@@ -400,7 +401,36 @@ class SearchManager extends BaseModule {
         });
     }
     
-    // SIMPELERE showLargePhoto methode - IDENTIEK AAN STAMBOOMMANAGER
+    // METHODE: Foto's ophalen voor een hond - NET ALS STAMBOOMMANAGER
+    async getDogPhotos(dogId) {
+        if (!dogId || dogId === 0) return [];
+        
+        const dog = this.allDogs.find(d => d.id === dogId);
+        if (!dog || !dog.stamboomnr) return [];
+        
+        // Check cache
+        const cacheKey = `${dogId}_${dog.stamboomnr}`;
+        if (this.dogPhotosCache.has(cacheKey)) {
+            return this.dogPhotosCache.get(cacheKey);
+        }
+        
+        try {
+            const photos = await this.db.getFotosVoorStamboomnr(dog.stamboomnr);
+            this.dogPhotosCache.set(cacheKey, photos || []);
+            return photos || [];
+        } catch (error) {
+            console.error('Fout bij ophalen foto\'s voor hond:', dogId, error);
+            return [];
+        }
+    }
+    
+    // METHODE: Check of een hond foto's heeft - NET ALS STAMBOOMMANAGER
+    async checkDogHasPhotos(dogId) {
+        const photos = await this.getDogPhotos(dogId);
+        return photos.length > 0;
+    }
+    
+    // METHODE: Toon grote foto - IDENTIEK AAN STAMBOOMMANAGER
     showLargePhoto(photoData, dogName = '') {
         console.log('Toon grote foto:', photoData);
         
@@ -410,7 +440,7 @@ class SearchManager extends BaseModule {
             existingOverlay.remove();
         }
         
-        // Maak nieuwe overlay
+        // Maak nieuwe overlay - IDENTIEK AAN STAMBOOMMANAGER
         const overlayHTML = `
             <div class="photo-large-overlay" id="photoLargeOverlay" style="display: flex;">
                 <div class="photo-large-container" id="photoLargeContainer">
@@ -546,7 +576,7 @@ class SearchManager extends BaseModule {
                 </div>
             </div>
             
-            <!-- RESET CSS VOOR STAMBOOMMODAL DIE VANUIT DEZE MODAL WORDT GESTART -->
+            <!-- Foto overlay - IDENTIEK AAN STAMBOOMMANAGER -->
             <style>
                 /* RESET VOOR STAMBOOM MODAL */
                 .modal-dialog.modal-fullscreen .modal-content {
@@ -992,28 +1022,22 @@ class SearchManager extends BaseModule {
                     border-radius: 4px;
                 }
                 
-                /* Foto icoon styling - GEWIJZIGD: CAMERA ICOON */
+                /* Foto icoon styling - GEWIJZIGD: CAMERA ICOON NET ALS STAMBOOM */
                 .photo-icon-btn {
                     background: none;
                     border: none;
-                    color: #1a15f4;
-                    padding: 2px 4px;
+                    color: #dc3545;
+                    padding: 0;
                     cursor: pointer;
-                    transition: all 0.2s;
                     display: inline-flex;
                     align-items: center;
                     gap: 2px;
-                    font-size: 12px;
-                    font-weight: 500;
-                }
-                
-                .photo-icon-btn:hover {
-                    color: #0d6efd;
-                    transform: scale(1.1);
+                    font-size: 14px;
+                    margin-left: 4px;
                 }
                 
                 .photo-icon-btn i {
-                    font-size: 14px;
+                    font-size: 16px;
                 }
                 
                 /* Animations */
@@ -1493,7 +1517,7 @@ class SearchManager extends BaseModule {
         }
     }
     
-    showDogDetails(dog, isParentView = false, originalDogId = null) {
+    async showDogDetails(dog, isParentView = false, originalDogId = null) {
         const t = this.t.bind(this);
         const container = document.getElementById('detailsContainer');
         
@@ -1588,6 +1612,10 @@ class SearchManager extends BaseModule {
         const genderText = dog.geslacht === 'reuen' ? t('male') : 
                           dog.geslacht === 'teven' ? t('female') : t('unknown');
         
+        // Check of deze hond foto's heeft
+        const hasPhotos = await this.checkDogHasPhotos(dog.id);
+        const cameraIcon = hasPhotos ? '<i class="bi bi-camera text-danger ms-1"></i>' : '';
+        
         const html = `
             <div class="details-card">
                 ${isParentView ? `
@@ -1617,8 +1645,8 @@ class SearchManager extends BaseModule {
                                 ${dog.vachtkleur && dog.vachtkleur.trim() !== '' ? 
                                   `<span class="vachtkleur">${dog.vachtkleur}</span>` : 
                                   `<span class="text-muted fst-italic">geen vachtkleur</span>`}
-                                <!-- Foto icoon wordt hier ingevoegd via loadAndDisplayPhotoIcon -->
-                                <span class="photo-icon-container" data-dog-id="${dog.id}" data-stamboomnr="${dog.stamboomnr || ''}"></span>
+                                <!-- Foto icoon -->
+                                ${hasPhotos ? `<button class="photo-icon-btn" title="${t('photos')}" data-dog-id="${dog.id}"><i class="bi bi-camera"></i></button>` : ''}
                             </div>
                         </div>
                         <div class="text-end">
@@ -1647,6 +1675,19 @@ class SearchManager extends BaseModule {
                 </div>
                 
                 <div class="details-body">
+                    <!-- FOTO'S SECTIE BOVENAAN (indien beschikbaar) - NET ALS STAMBOOMMANAGER -->
+                    ${hasPhotos ? `
+                    <div class="info-section mb-3">
+                        <h6><i class="bi bi-camera me-1"></i> ${t('photos')}</h6>
+                        <div class="photos-grid" id="photosGrid${dog.id}">
+                            <!-- Foto's worden hier ingeladen -->
+                        </div>
+                        <div class="photo-hint">
+                            <small class="text-muted"><i class="bi bi-info-circle me-1"></i> ${t('clickToEnlarge')}</small>
+                        </div>
+                    </div>
+                    ` : ''}
+                    
                     <div class="info-group">
                         <div class="info-group-title d-flex justify-content-between align-items-center">
                             <div>
@@ -1784,10 +1825,23 @@ class SearchManager extends BaseModule {
         
         container.innerHTML = html;
         
-        // Laad en toon foto icoon
-        setTimeout(() => {
-            this.loadAndDisplayPhotoIcon(dog);
-        }, 100);
+        // Laad foto's asynchroon en voeg ze toe - NET ALS STAMBOOMMANAGER
+        if (hasPhotos) {
+            this.loadAndDisplayPhotos(dog);
+        }
+        
+        // Event listener voor foto icoon
+        const photoIconBtn = container.querySelector('.photo-icon-btn');
+        if (photoIconBtn) {
+            photoIconBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Scroll naar foto sectie
+                const photoSection = container.querySelector('.info-section.mb-3');
+                if (photoSection) {
+                    photoSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        }
         
         // Voeg terugknop toe voor mobiele weergave (als we in collapsed modus zijn)
         if (this.isMobileCollapsed && window.innerWidth <= 768) {
@@ -1839,6 +1893,60 @@ class SearchManager extends BaseModule {
         }
     }
     
+    // METHODE: Foto's laden en tonen - NET ALS STAMBOOMMANAGER
+    async loadAndDisplayPhotos(dog) {
+        try {
+            const photos = await this.getDogPhotos(dog.id);
+            const photosGrid = document.getElementById(`photosGrid${dog.id}`);
+            
+            if (!photosGrid || photos.length === 0) {
+                return;
+            }
+            
+            let photosHTML = '';
+            photos.forEach((photo, index) => {
+                // Maak een geldige foto URL
+                let photoUrl = '';
+                if (photo.data && typeof photo.data === 'string') {
+                    // Base64 encoded data
+                    const mimeType = photo.type || 'image/jpeg';
+                    let cleanData = photo.data;
+                    if (cleanData.startsWith('data:')) {
+                        cleanData = cleanData.split(',')[1];
+                    }
+                    photoUrl = `data:${mimeType};base64,${cleanData}`;
+                } else if (photo.url) {
+                    photoUrl = photo.url;
+                } else if (photo.filePath) {
+                    photoUrl = photo.filePath;
+                }
+                
+                if (photoUrl) {
+                    photosHTML += `
+                        <div class="photo-thumbnail" 
+                             data-photo-id="${photo.id}" 
+                             data-dog-id="${dog.id}" 
+                             data-photo-index="${index}"
+                             data-photo-src="${photoUrl}">
+                            <img src="${photoUrl}" 
+                                 alt="${dog.naam || ''} - ${photo.filename || ''}" 
+                                 class="thumbnail-img"
+                                 loading="lazy">
+                            <div class="photo-hover">
+                                <i class="bi bi-zoom-in"></i>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            photosGrid.innerHTML = photosHTML;
+            
+        } catch (error) {
+            console.error('Fout bij laden foto\'s:', error);
+        }
+    }
+    
     showParentDetails(parentId, originalDogId) {
         const parent = this.allDogs.find(d => d.id === parentId);
         if (parent) {
@@ -1850,143 +1958,6 @@ class SearchManager extends BaseModule {
                     item.classList.add('selected');
                 }
             });
-        }
-    }
-    
-    // NIEUWE METHODE: Foto icoon laden en tonen
-    async loadAndDisplayPhotoIcon(dog) {
-        try {
-            const photoIconContainer = document.querySelector(`.photo-icon-container[data-dog-id="${dog.id}"]`);
-            if (!photoIconContainer) return;
-            
-            // Controleer of er foto's zijn voor deze hond
-            const photos = await this.getDogPhotos(dog);
-            
-            if (photos && photos.length > 0) {
-                const t = this.t.bind(this);
-                photoIconContainer.innerHTML = `
-                    <button class="photo-icon-btn" title="${t('photos')} (${photos.length})" data-dog-id="${dog.id}" data-stamboomnr="${dog.stamboomnr || ''}">
-                        <i class="bi bi-camera"></i>
-                    </button>
-                `;
-                
-                // Voeg event listener toe
-                const photoBtn = photoIconContainer.querySelector('.photo-icon-btn');
-                photoBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.showPhotosInDetails(dog);
-                });
-            } else {
-                // Geen foto's beschikbaar, toon niets
-                photoIconContainer.innerHTML = '';
-            }
-        } catch (error) {
-            console.error('Fout bij laden foto icoon:', error);
-            const photoIconContainer = document.querySelector(`.photo-icon-container[data-dog-id="${dog.id}"]`);
-            if (photoIconContainer) {
-                photoIconContainer.innerHTML = '';
-            }
-        }
-    }
-    
-    // NIEUWE METHODE: Toon foto's in de details sectie - IDENTIEK AAN STAMBOOMMANAGER
-    async showPhotosInDetails(dog) {
-        const t = this.t.bind(this);
-        const container = document.getElementById('detailsContainer');
-        
-        if (!container) return;
-        
-        // Haal foto's op
-        const photos = await this.getDogPhotos(dog);
-        
-        if (photos.length === 0) {
-            this.showError(t('noPhotosAvailable'));
-            return;
-        }
-        
-        // Maak foto sectie HTML - IDENTIEK AAN STAMBOOMMANAGER
-        const photosHTML = `
-            <div class="info-section mb-3">
-                <h6><i class="bi bi-camera me-1"></i> ${t('photos')} (${photos.length})</h6>
-                <div class="photos-grid" id="photosGrid${dog.id}">
-                    ${photos.map((photo, index) => `
-                        <div class="photo-thumbnail" 
-                             data-photo-id="${photo.id}" 
-                             data-dog-id="${dog.id}" 
-                             data-photo-index="${index}"
-                             data-photo-src="${this.getPhotoDataURL(photo)}">
-                            <img src="${this.getPhotoDataURL(photo)}" 
-                                 alt="${dog.naam || ''} - ${photo.filename || ''}" 
-                                 class="thumbnail-img"
-                                 loading="lazy">
-                            <div class="photo-hover">
-                                <i class="bi bi-zoom-in"></i>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-                <div class="photo-hint">
-                    <small class="text-muted"><i class="bi bi-info-circle me-1"></i> ${t('clickToEnlarge')}</small>
-                </div>
-            </div>
-        `;
-        
-        // Voeg foto sectie toe bovenaan de details
-        const detailsBody = container.querySelector('.details-body');
-        if (detailsBody) {
-            const firstChild = detailsBody.firstChild;
-            if (firstChild) {
-                detailsBody.insertAdjacentHTML('afterbegin', photosHTML);
-            } else {
-                detailsBody.innerHTML = photosHTML;
-            }
-        }
-    }
-    
-    // Helper methode om foto data URL te krijgen
-    getPhotoDataURL(photo) {
-        if (!photo) return '';
-        
-        if (photo.data && typeof photo.data === 'string') {
-            // Base64 encoded data
-            const mimeType = photo.type || 'image/jpeg';
-            let cleanData = photo.data;
-            if (cleanData.startsWith('data:')) {
-                cleanData = cleanData.split(',')[1];
-            }
-            return `data:${mimeType};base64,${cleanData}`;
-        } else if (photo.url) {
-            // URL
-            return photo.url;
-        } else if (photo.filePath) {
-            // File path
-            return photo.filePath;
-        }
-        
-        return '';
-    }
-    
-    // NIEUWE METHODE: Foto's ophalen uit database
-    async getDogPhotos(dog) {
-        try {
-            if (!this.db) {
-                console.error('Database niet beschikbaar');
-                return [];
-            }
-            
-            // Gebruik de juiste methode van je database: getFotosVoorStamboomnr
-            if (typeof this.db.getFotosVoorStamboomnr === 'function') {
-                const photos = await this.db.getFotosVoorStamboomnr(dog.stamboomnr);
-                console.log(`Foto's gevonden voor hond ${dog.naam}:`, photos?.length || 0);
-                return photos || [];
-            } else {
-                console.warn('getFotosVoorStamboomnr methode niet beschikbaar in database');
-                return [];
-            }
-            
-        } catch (error) {
-            console.error('Fout bij ophalen foto\'s:', error);
-            return [];
         }
     }
     
