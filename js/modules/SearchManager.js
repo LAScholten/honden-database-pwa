@@ -1,5 +1,4 @@
 /**
-/**
  * Search Manager Module
  * Beheert het zoeken naar honden met real-time filtering op naam en kennelnaam
  * Inclusief foto functionaliteit met thumbnail viewer en fullscreen viewer
@@ -35,7 +34,7 @@ class SearchManager extends BaseModule {
                 gender: "Geslacht",
                 close: "Sluiten",
                 dogDetails: "Hond Details",
-                father: "Vater",
+                father: "Vader",
                 mother: "Moeder",
                 parentsUnknown: "Onbekend",
                 male: "Reu",
@@ -120,7 +119,7 @@ class SearchManager extends BaseModule {
                 // Familierelaties voor stamboom
                 greatGrandfather: "Overgrootvader",
                 greatGrandmother: "Overgrootmoeder",
-                grandfather: "Grootvater",
+                grandfather: "Grootvader",
                 grandmother: "Grootmoeder",
                 
                 // Foto vertalingen - IDENTIEK AAN STAMBOOMMANAGER
@@ -1100,16 +1099,19 @@ class SearchManager extends BaseModule {
                         gap: 4px;
                     }
                     
+                    /* AANPASSING: Op mobiel zorgen we dat stamboomnummer, ras en geslacht achter elkaar blijven */
                     .dog-details-line {
-                        flex-direction: column;
-                        align-items: flex-start;
-                        gap: 4px;
+                        flex-direction: row !important; /* Achter elkaar blijven */
+                        flex-wrap: wrap !important; /* Maar kunnen wel naar volgende regel als nodig */
+                        align-items: center !important;
+                        gap: 8px !important;
                     }
                     
                     .dog-detail-header-line {
-                        flex-direction: column;
-                        align-items: flex-start;
-                        gap: 4px;
+                        flex-direction: row !important; /* Achter elkaar blijven */
+                        flex-wrap: wrap !important;
+                        align-items: center !important;
+                        gap: 8px !important;
                     }
                     
                     .mobile-back-button {
@@ -1137,11 +1139,14 @@ class SearchManager extends BaseModule {
                         max-height: 65vh;
                     }
                     
-                    /* AANPASSING: Stamboomnummer, ras en geslacht op 75% grootte voor mobiel */
+                    /* AANPASSING: Stamboomnummer, ras en geslacht iets kleiner op mobiel */
                     .dog-details-line .stamboom,
                     .dog-details-line .ras,
-                    .dog-details-line .geslacht {
-                        font-size: 0.7125rem !important; /* 0.95rem * 0.75 = 0.7125rem */
+                    .dog-details-line .geslacht,
+                    .dog-detail-header-line .stamboom,
+                    .dog-detail-header-line .ras,
+                    .dog-detail-header-line .geslacht {
+                        font-size: 0.85rem !important; /* Iets kleiner dan 0.95rem */
                     }
                 }
                 
@@ -1420,7 +1425,7 @@ class SearchManager extends BaseModule {
                         ${dog.kennelnaam ? `<span class="text-muted ms-2">${dog.kennelnaam}</span>` : ''}
                     </div>
                     
-                    <!-- REGEL 2: Stamboomnummer + Ras + Geslacht -->
+                    <!-- REGEL 2: Stamboomnummer + Ras + Geslacht - ACHTER ELKAAR -->
                     <div class="dog-details-line">
                         ${dog.stamboomnr ? `<span class="stamboom">${dog.stamboomnr}</span>` : ''}
                         ${dog.ras ? `<span class="ras">${dog.ras}</span>` : ''}
@@ -1664,7 +1669,7 @@ class SearchManager extends BaseModule {
                             <div class="dog-name-header">${displayValue(dog.naam)}</div>
                             ${dog.kennelnaam ? `<div class="text-muted mb-2">${displayValue(dog.kennelnaam)}</div>` : ''}
                             
-                            <!-- VOLGORDE: Stamboomnummer + Ras + Geslacht + Vachtkleur -->
+                            <!-- VOLGORDE: Stamboomnummer + Ras + Geslacht + Vachtkleur - ACHTER ELKAAR -->
                             <div class="dog-detail-header-line mt-2">
                                 ${dog.stamboomnr ? `<span class="stamboom">${dog.stamboomnr}</span>` : ''}
                                 ${dog.ras ? `<span class="ras">${dog.ras}</span>` : ''}
