@@ -751,7 +751,7 @@ testSpecificDog(dogId, expectedCOI) {
                         <i class="bi ${dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 'bi-gender-female text-danger'} me-2"></i>
                         ${headerText}
                     </h5>
-                    <button type="button" class="btn-close popup-close" style="z-index: 1000;"></button>
+                    <button type="button" class="btn-close btn-close-white" aria-label="Sluiten"></button>
                 </div>
                 <div class="popup-body">
                     <!-- FOTO'S SECTIE BOVENAAN (indien beschikbaar) -->
@@ -1978,14 +1978,14 @@ testSpecificDog(dogId, expectedCOI) {
                 .popup-header {
                     background: #0d6efd;
                     color: white;
-                    padding: 16px 20px;
+                    padding: 12px 16px;
                     border-radius: 12px 12px 0 0;
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
                     position: sticky;
                     top: 0;
-                    z-index: 1000;
+                    z-index: 10;
                 }
                 
                 .popup-title {
@@ -1994,32 +1994,19 @@ testSpecificDog(dogId, expectedCOI) {
                     display: flex;
                     align-items: center;
                     flex: 1;
-                    z-index: 1001;
                 }
                 
-                .popup-close {
-                    background: none;
+                .popup-header .btn-close {
+                    opacity: 1 !important;
+                    filter: invert(1) grayscale(100%) brightness(200%);
+                    margin-left: 10px;
+                    padding: 8px;
+                    background: transparent;
                     border: none;
-                    font-size: 1.3rem;
-                    cursor: pointer;
-                    opacity: 1 !important;
-                    color: white !important;
-                    flex-shrink: 0;
-                    margin-left: 15px;
-                    padding: 0;
-                    width: 30px;
-                    height: 30px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 1002 !important;
-                    position: relative;
                 }
                 
-                .popup-close:hover {
-                    opacity: 1 !important;
-                    background: rgba(255, 255, 255, 0.1);
-                    border-radius: 50%;
+                .popup-header .btn-close:hover {
+                    opacity: 0.75 !important;
                 }
                 
                 .popup-body {
@@ -2466,7 +2453,7 @@ testSpecificDog(dogId, expectedCOI) {
         overlay.style.display = 'flex';
         
         // Add close event listeners
-        const closeButtons = container.querySelectorAll('.popup-close, .popup-close-btn');
+        const closeButtons = container.querySelectorAll('.btn-close, .popup-close-btn');
         closeButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 overlay.style.display = 'none';
