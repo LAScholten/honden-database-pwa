@@ -267,7 +267,7 @@ class SearchManager extends BaseModule {
                 viewingParent: "Elternteil ansehen",
                 clickToView: "Klicken für Details",
                 parents: "Eltern",
-                noHealthInfo: "Keine Gesundheitsinformationen verfügbar",
+                noHealthInfo: "Keine Gesundheidsinformationen verfügbar",
                 noAdditionalInfo: "Keine zusätzlichen Informationen verfügbar",
                 selectDogToView: "Wählen Sie einen Hund, um Details zu sehen",
                 
@@ -884,9 +884,11 @@ class SearchManager extends BaseModule {
                     color: #212529;
                 }
                 
+                /* AANPASSING: vachtkleur nu in dezelfde grootte als de rest */
                 .dog-detail-header-line .vachtkleur {
                     color: #d63384;
                     font-weight: 500;
+                    font-size: 0.95rem; /* Zelfde grootte als de andere elementen */
                 }
                 
                 /* ============================================= */
@@ -1139,13 +1141,15 @@ class SearchManager extends BaseModule {
                         max-height: 65vh;
                     }
                     
-                    /* AANPASSING: Stamboomnummer, ras en geslacht iets kleiner op mobiel */
+                    /* AANPASSING: Stamboomnummer, ras, geslacht EN vachtkleur iets kleiner op mobiel */
                     .dog-details-line .stamboom,
                     .dog-details-line .ras,
                     .dog-details-line .geslacht,
+                    .dog-details-line .vachtkleur,
                     .dog-detail-header-line .stamboom,
                     .dog-detail-header-line .ras,
-                    .dog-detail-header-line .geslacht {
+                    .dog-detail-header-line .geslacht,
+                    .dog-detail-header-line .vachtkleur {
                         font-size: 0.85rem !important; /* Iets kleiner dan 0.95rem */
                     }
                 }
@@ -1517,11 +1521,22 @@ class SearchManager extends BaseModule {
                 backButtonDiv.remove();
             }
             
-            // Herstel de zoekfunctie
+            // Herstel de zoekfunctie en toon opnieuw de zoekresultaten
             const searchInput = this.searchType === 'name' ? 
                 document.getElementById('searchNameInput') : 
                 document.getElementById('searchKennelInput');
             if (searchInput) {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                if (searchTerm.length >= 1) {
+                    if (this.searchType === 'name') {
+                        this.filterDogsForNameField(searchTerm);
+                    } else {
+                        this.filterDogsByKennel(searchTerm);
+                    }
+                } else {
+                    this.showInitialView();
+                    this.clearDetails();
+                }
                 searchInput.focus();
             }
         }
@@ -1556,10 +1571,12 @@ class SearchManager extends BaseModule {
         
         if (!container) return;
         
-        // Verwijder bestaande mobiele terugknop als die er is
-        const mobileBackButton = container.querySelector('.mobile-back-button');
-        if (mobileBackButton) {
-            mobileBackButton.remove();
+        // AANPASSING: Eerst de container volledig leegmaken voordat we nieuwe inhoud toevoegen
+        container.innerHTML = '';
+        
+        // Voeg mobiele terugknop toe indien nodig
+        if (this.isMobileCollapsed && window.innerWidth <= 768) {
+            this.addMobileBackButton();
         }
         
         let fatherInfo = { id: null, naam: t('parentsUnknown'), stamboomnr: '', ras: '', kennelnaam: '' };
@@ -1854,20 +1871,15 @@ class SearchManager extends BaseModule {
             </div>
         `;
         
-        container.innerHTML = html;
+        container.insertAdjacentHTML('beforeend', html);
         
         // Laad foto's asynchroon en voeg ze toe - NIEUWE LAYOUT
         if (hasPhotos) {
             this.loadAndDisplayPhotos(dog);
         }
         
-        // Voeg terugknop toe voor mobiele weergave (als we in collapsed modus zijn)
-        if (this.isMobileCollapsed && window.innerWidth <= 768) {
-            this.addMobileBackButton();
-        }
-        
         if (fatherInfo.id) {
-            const fatherCard = document.querySelector('.father-card');
+            const fatherCard = container.querySelector('.father-card');
             if (fatherCard) {
                 fatherCard.addEventListener('click', (e) => {
                     const parentId = parseInt(fatherCard.getAttribute('data-parent-id'));
@@ -1878,7 +1890,7 @@ class SearchManager extends BaseModule {
         }
         
         if (motherInfo.id) {
-            const motherCard = document.querySelector('.mother-card');
+            const motherCard = container.querySelector('.mother-card');
             if (motherCard) {
                 motherCard.addEventListener('click', (e) => {
                     const parentId = parseInt(motherCard.getAttribute('data-parent-id'));
@@ -1889,7 +1901,7 @@ class SearchManager extends BaseModule {
         }
         
         // Event listeners voor stamboom knop (nu alleen nog bij de ouders sectie)
-        document.querySelectorAll('.btn-pedigree').forEach(btn => {
+        container.querySelectorAll('.btn-pedigree').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.stopPropagation();
                 const dogId = parseInt(btn.getAttribute('data-dog-id'));
@@ -1898,7 +1910,7 @@ class SearchManager extends BaseModule {
         });
         
         if (isParentView) {
-            const backButton = document.querySelector('.back-button');
+            const backButton = container.querySelector('.back-button');
             if (backButton) {
                 backButton.addEventListener('click', (e) => {
                     const originalDogId = parseInt(backButton.getAttribute('data-original-dog'));
@@ -1915,7 +1927,8 @@ class SearchManager extends BaseModule {
     async loadAndDisplayPhotos(dog) {
         try {
             const photos = await this.getDogPhotos(dog.id);
-            const photosGrid = document.getElementById(`photosGrid${dog.id}`);
+            const container = document.getElementById('detailsContainer');
+            const photosGrid = container.querySelector(`#photosGrid${dog.id}`);
             
             if (!photosGrid || photos.length === 0) {
                 return;
