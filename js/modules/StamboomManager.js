@@ -1996,7 +1996,7 @@ testSpecificDog(dogId, expectedCOI) {
                     flex: 1;
                 }
                 
-                /* Eigen kruisje styling */
+                /* Eigen kruisje styling - WIT KRUISJE */
                 .popup-header .btn-close {
                     display: inline-block;
                     width: 24px;
@@ -2007,6 +2007,7 @@ testSpecificDog(dogId, expectedCOI) {
                     cursor: pointer;
                     opacity: 0.8;
                     z-index: 2;
+                    filter: invert(1) grayscale(100%) brightness(200%) !important;
                 }
                 
                 .popup-header .btn-close::before,
@@ -2017,7 +2018,7 @@ testSpecificDog(dogId, expectedCOI) {
                     left: 50%;
                     width: 18px;
                     height: 2px;
-                    background: white;
+                    background: #000 !important;
                     transform-origin: center;
                 }
                 
