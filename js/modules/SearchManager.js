@@ -291,7 +291,7 @@ class SearchManager extends BaseModule {
                 // Stamboom buttons
                 pedigreeButton: "Ahnentafel",
                 pedigreeTitle: "Ahnentafel von {name}",
-                generatingPedigree: "Ahnentafel wordt generiert...",
+                generatingPedigree: "Ahnentafel wird generiert...",
                 openPedigree: "Ahnentafel öffnen",
                 pedigree4Gen: "4-Generationen Ahnentafel",
                 
@@ -890,32 +890,66 @@ class SearchManager extends BaseModule {
                 }
                 
                 /* ============================================= */
-                /* FOTO STYLES - IDENTIEK AAN STAMBOOMMANAGER MAAR KLEINER */
+                /* FOTO STYLES - OPTIMIZED */
                 /* ============================================= */
-                /* FOTO'S SECTIE IN DETAILS - 50% KLEINER */
-                .photos-grid {
-                    display: grid;
-                    grid-template-columns: repeat(3, 1fr);
-                    gap: 4px;
+                /* FOTO'S SECTIE IN DETAILS - OPTIMIZED LAYOUT */
+                .photos-section {
+                    margin-bottom: 15px;
+                }
+                
+                .photos-title {
+                    font-size: 0.9rem;
+                    text-transform: uppercase;
+                    color: #6c757d;
+                    letter-spacing: 1px;
                     margin-bottom: 8px;
-                    max-width: 120px; /* 50% van 240px */
-                    margin-left: auto;
-                    margin-right: auto;
+                    padding-bottom: 5px;
+                    border-bottom: 1px solid #f0f0f0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                }
+                
+                .photos-title-text {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+                
+                .click-hint-text {
+                    font-size: 0.75rem;
+                    color: #6c757d;
+                    font-style: italic;
+                    font-weight: normal;
+                    text-transform: none;
+                    letter-spacing: normal;
+                }
+                
+                .photos-grid-container {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 4px;
+                    margin-top: 5px;
+                    justify-content: flex-start; /* LINKS UITLIJNEN */
+                    min-height: auto; /* HOOGTE PAST ZICH AAN */
                 }
                 
                 .photo-thumbnail {
                     position: relative;
-                    aspect-ratio: 1 / 1;
+                    width: 36px; /* 50% KLEINER - 36px ipv 72px */
+                    height: 36px; /* 50% KLEINER - 36px ipv 72px */
                     border-radius: 3px;
                     overflow: hidden;
                     cursor: pointer;
-                    border: 1px solid transparent;
+                    border: 1px solid #dee2e6;
                     transition: all 0.2s;
+                    flex-shrink: 0; /* VOORKOM COMPRESSIE */
                 }
                 
                 .photo-thumbnail:hover {
                     border-color: #0d6efd;
-                    transform: scale(1.05);
+                    transform: scale(1.1);
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
                 }
                 
                 .thumbnail-img {
@@ -930,7 +964,7 @@ class SearchManager extends BaseModule {
                     left: 0;
                     right: 0;
                     bottom: 0;
-                    background: rgba(0, 0, 0, 0.3);
+                    background: rgba(0, 0, 0, 0.4);
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -944,13 +978,7 @@ class SearchManager extends BaseModule {
                 
                 .photo-hover i {
                     color: white;
-                    font-size: 0.9rem;
-                }
-                
-                .photo-hint {
-                    text-align: center;
-                    margin-bottom: 10px;
-                    font-size: 0.75rem;
+                    font-size: 0.8rem;
                 }
                 
                 /* ============================================= */
@@ -1094,10 +1122,9 @@ class SearchManager extends BaseModule {
                     }
                     
                     /* Responsive photo adjustments */
-                    .photos-grid {
-                        grid-template-columns: repeat(3, 1fr);
-                        gap: 4px;
-                        max-width: 100px;
+                    .photo-thumbnail {
+                        width: 32px;
+                        height: 32px;
                     }
                     
                     .photo-large-content {
@@ -1665,15 +1692,18 @@ class SearchManager extends BaseModule {
                 </div>
                 
                 <div class="details-body">
-                    <!-- FOTO'S SECTIE BOVENAAN (indien beschikbaar) - 50% KLEINER -->
+                    <!-- FOTO'S SECTIE BOVENAAN (indien beschikbaar) - NIEUWE LAYOUT -->
                     ${hasPhotos ? `
-                    <div class="info-section mb-3">
-                        <h6><i class="bi bi-camera me-1"></i> ${t('photos')}</h6>
-                        <div class="photos-grid" id="photosGrid${dog.id}">
-                            <!-- Foto's worden hier ingeladen -->
+                    <div class="photos-section">
+                        <div class="photos-title">
+                            <div class="photos-title-text">
+                                <i class="bi bi-camera"></i>
+                                <span>${t('photos')}</span>
+                            </div>
+                            <div class="click-hint-text">${t('clickToEnlarge')}</div>
                         </div>
-                        <div class="photo-hint">
-                            <small class="text-muted"><i class="bi bi-info-circle me-1"></i> ${t('clickToEnlarge')}</small>
+                        <div class="photos-grid-container" id="photosGrid${dog.id}">
+                            <!-- Foto's worden hier ingeladen -->
                         </div>
                     </div>
                     ` : ''}
@@ -1815,7 +1845,7 @@ class SearchManager extends BaseModule {
         
         container.innerHTML = html;
         
-        // Laad foto's asynchroon en voeg ze toe - 50% KLEINER
+        // Laad foto's asynchroon en voeg ze toe - NIEUWE LAYOUT
         if (hasPhotos) {
             this.loadAndDisplayPhotos(dog);
         }
@@ -1870,7 +1900,7 @@ class SearchManager extends BaseModule {
         }
     }
     
-    // METHODE: Foto's laden en tonen - 50% KLEINER
+    // METHODE: Foto's laden en tonen - NIEUWE LAYOUT
     async loadAndDisplayPhotos(dog) {
         try {
             const photos = await this.getDogPhotos(dog.id);
