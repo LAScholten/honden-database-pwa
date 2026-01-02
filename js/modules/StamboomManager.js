@@ -751,7 +751,7 @@ testSpecificDog(dogId, expectedCOI) {
                         <i class="bi ${dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 'bi-gender-female text-danger'} me-2"></i>
                         ${headerText}
                     </h5>
-                    <button type="button" class="btn-close btn-close-white popup-close" aria-label="${this.t('closePopup')}"></button>
+                    <button type="button" class="btn-close btn-close-white popup-close"></button>
                 </div>
                 <div class="popup-body">
                     <!-- FOTO'S SECTIE BOVENAAN (indien beschikbaar) -->
@@ -965,7 +965,11 @@ testSpecificDog(dogId, expectedCOI) {
                     </div>
                     `}
                 </div>
-                <!-- GEEN FOOTER - SLUITKNOP IS VERWIJDERD -->
+                <div class="popup-footer">
+                    <button type="button" class="btn btn-secondary popup-close-btn">
+                        <i class="bi bi-x-circle me-1"></i> ${this.t('closePopup')}
+                    </button>
+                </div>
             </div>
         `;
     }
@@ -1051,7 +1055,7 @@ testSpecificDog(dogId, expectedCOI) {
             <div class="photo-large-overlay" id="photoLargeOverlay" style="display: flex;">
                 <div class="photo-large-container" id="photoLargeContainer">
                     <div class="photo-large-header">
-                        <button type="button" class="btn-close btn-close-white photo-large-close" aria-label="${this.t('closePhoto')}"></button>
+                        <button type="button" class="btn-close btn-close-white photo-large-close"></button>
                     </div>
                     <div class="photo-large-content">
                         <img src="${photoData}" 
@@ -1059,6 +1063,11 @@ testSpecificDog(dogId, expectedCOI) {
                              class="photo-large-img"
                              id="photoLargeImg"
                              style="max-width: 90vw; max-height: 80vh; object-fit: contain;">
+                    </div>
+                    <div class="photo-large-footer">
+                        <button type="button" class="btn btn-secondary photo-large-close-btn">
+                            <i class="bi bi-x-circle me-1"></i> ${this.t('closePhoto')}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1142,6 +1151,7 @@ testSpecificDog(dogId, expectedCOI) {
                                 </div>
                             </div>
                         </div>
+                        <!-- FOOTER VERWIJDERD -->
                     </div>
                 </div>
             </div>
@@ -1785,7 +1795,10 @@ testSpecificDog(dogId, expectedCOI) {
                         height: calc(100vh - 60px) !important;
                         overflow-x: auto !important;
                         overflow-y: hidden !important;
+                        align-items: center;
                         padding: 0 !important;
+                        display: flex;
+                        border-radius: 0;
                     }
                     
                     .pedigree-grid-compact {
@@ -1794,7 +1807,7 @@ testSpecificDog(dogId, expectedCOI) {
                         min-width: fit-content;
                         padding: 0 20px !important;
                         gap: 25px;
-                        align-items: flex-start;
+                        align-items: center;
                         box-sizing: border-box !important;
                         margin: 0 auto;
                     }
@@ -1803,7 +1816,7 @@ testSpecificDog(dogId, expectedCOI) {
                         display: flex;
                         flex-direction: column;
                         height: 100%;
-                        justify-content: flex-start;
+                        justify-content: center;
                         min-width: 0;
                     }
                     
@@ -1821,6 +1834,7 @@ testSpecificDog(dogId, expectedCOI) {
                     
                     .pedigree-generation-col.gen3 {
                         gap: 4px !important;
+                        justify-content: center;
                     }
                     
                     .pedigree-card-compact.horizontal.gen0,
@@ -2151,6 +2165,21 @@ testSpecificDog(dogId, expectedCOI) {
                     font-size: 0.85rem;
                 }
                 
+                .popup-footer {
+                    padding: 16px 20px;
+                    border-top: 1px solid #dee2e6;
+                    display: flex;
+                    justify-content: center;
+                    background: #f8f9fa;
+                    border-radius: 0 0 12px 12px;
+                }
+                
+                .popup-close-btn {
+                    min-width: 130px;
+                    padding: 10px 25px;
+                    font-size: 1rem;
+                }
+                
                 /* ============================================= */
                 /* GROTE FOTO OVERLAY STYLES */
                 /* ============================================= */
@@ -2223,6 +2252,19 @@ testSpecificDog(dogId, expectedCOI) {
                     max-height: 100%;
                     object-fit: contain;
                     border-radius: 4px;
+                }
+                
+                .photo-large-footer {
+                    padding: 16px;
+                    border-top: 1px solid #dee2e6;
+                    display: flex;
+                    justify-content: center;
+                    background: #f8f9fa;
+                }
+                
+                .photo-large-close-btn {
+                    min-width: 120px;
+                    padding: 8px 20px;
                 }
                 
                 /* Print styles */
@@ -2421,7 +2463,7 @@ testSpecificDog(dogId, expectedCOI) {
         overlay.style.display = 'flex';
         
         // Add close event listeners
-        const closeButtons = container.querySelectorAll('.popup-close');
+        const closeButtons = container.querySelectorAll('.popup-close, .popup-close-btn');
         closeButtons.forEach(btn => {
             btn.addEventListener('click', () => {
                 overlay.style.display = 'none';
