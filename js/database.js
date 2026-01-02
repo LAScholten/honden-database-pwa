@@ -5,8 +5,8 @@
 
 class HondenDatabase {
     constructor() {
-        this.dbName = 'HondenDatabase_v6'; // Versie verhoogd naar v6 voor vachtkleur
-        this.version = 6; // Nieuwe versie voor vachtkleur
+        this.dbName = 'HondenDatabase_v7'; // Versie verhoogd naar v7 voor foto optimalisaties
+        this.version = 7; // Nieuwe versie voor foto optimalisaties
         this.db = null;
         this.isInitialized = false;
     }
@@ -53,7 +53,7 @@ class HondenDatabase {
             hondenStore.createIndex('kennelnaam', 'kennelnaam', { unique: false });
             hondenStore.createIndex('stamboomnr', 'stamboomnr', { unique: true });
             hondenStore.createIndex('ras', 'ras', { unique: false });
-            hondenStore.createIndex('vachtkleur', 'vachtkleur', { unique: false }); // Nieuw: vachtkleur
+            hondenStore.createIndex('vachtkleur', 'vachtkleur', { unique: false });
             hondenStore.createIndex('geslacht', 'geslacht', { unique: false });
             
             // Ouders
@@ -83,26 +83,29 @@ class HondenDatabase {
             hondenStore.createIndex('updatedAt', 'updatedAt', { unique: false });
         } else {
             // Upgrade van oude versies
-            const transaction = event.target.transaction;
+            const transaction = db.transaction(['honden'], 'readwrite');
             const hondenStore = transaction.objectStore('honden');
+            
+            // Upgrade naar versie 7 voor foto optimalisaties
+            if (oldVersion < 7) {
+                console.log('Upgrade naar versie 7 - foto optimalisaties');
+                // Geen wijzigingen nodig aan de honden store
+            }
             
             // Upgrade naar versie 6 voor vachtkleur
             if (oldVersion < 6) {
                 console.log('Upgrade honden store naar versie 6 - vachtkleur toevoegen');
                 
-                // Voeg vachtkleur index toe als deze nog niet bestaat
                 if (!hondenStore.indexNames.contains('vachtkleur')) {
                     try {
                         hondenStore.createIndex('vachtkleur', 'vachtkleur', { unique: false });
                         console.log('vachtkleur index toegevoegd');
                         
-                        // Voeg vachtkleur veld toe aan bestaande records
                         const request = hondenStore.openCursor();
                         request.onsuccess = (e) => {
                             const cursor = e.target.result;
                             if (cursor) {
                                 const hond = cursor.value;
-                                // Voeg vachtkleur veld toe als het niet bestaat
                                 if (hond.vachtkleur === undefined) {
                                     hond.vachtkleur = '';
                                     cursor.update(hond);
@@ -125,7 +128,6 @@ class HondenDatabase {
                         hondenStore.createIndex('kennelnaam', 'kennelnaam', { unique: false });
                         console.log('kennelnaam index toegevoegd');
                         
-                        // Voeg kennelnaam veld toe aan bestaande records
                         const request = hondenStore.openCursor();
                         request.onsuccess = (e) => {
                             const cursor = e.target.result;
@@ -143,29 +145,6 @@ class HondenDatabase {
                     }
                 }
             }
-            
-            // Voor versie 4: voeg vaderId/moederId indexen toe
-            if (oldVersion < 4) {
-                console.log('Upgrade honden store naar versie 4');
-                
-                if (!hondenStore.indexNames.contains('vaderId')) {
-                    try {
-                        hondenStore.createIndex('vaderId', 'vaderId', { unique: false });
-                        console.log('vaderId index toegevoegd');
-                    } catch (error) {
-                        console.warn('Kon vaderId index niet toevoegen:', error);
-                    }
-                }
-                
-                if (!hondenStore.indexNames.contains('moederId')) {
-                    try {
-                        hondenStore.createIndex('moederId', 'moederId', { unique: false });
-                        console.log('moederId index toegevoegd');
-                    } catch (error) {
-                        console.warn('Kon moederId index niet toevoegen:', error);
-                    }
-                }
-            }
         }
         
         // Store 2: Foto's
@@ -179,6 +158,32 @@ class HondenDatabase {
             fotoStore.createIndex('stamboomnr', 'stamboomnr', { unique: false });
             fotoStore.createIndex('uploadedAt', 'uploadedAt', { unique: false });
             fotoStore.createIndex('filename', 'filename', { unique: false });
+            fotoStore.createIndex('thumbnail', 'thumbnail', { unique: false }); // NIEUW: thumbnail veld
+            fotoStore.createIndex('size', 'size', { unique: false });
+        } else {
+            // Upgrade fotos store voor versie 7
+            const transaction = db.transaction(['fotos'], 'readwrite');
+            const fotoStore = transaction.objectStore('fotos');
+            
+            if (oldVersion < 7) {
+                console.log('Upgrade fotos store naar versie 7 - thumbnail support');
+                
+                // Voeg thumbnail veld toe aan bestaande foto's
+                const request = fotoStore.openCursor();
+                request.onsuccess = (e) => {
+                    const cursor = e.target.result;
+                    if (cursor) {
+                        const foto = cursor.value;
+                        // Als er nog geen thumbnail is, gebruik dan de originele data voor nu
+                        if (foto.thumbnail === undefined) {
+                            foto.thumbnail = foto.data; // Tijdelijk dezelfde
+                            foto.size = foto.size || 0;
+                            cursor.update(foto);
+                        }
+                        cursor.continue();
+                    }
+                };
+            }
         }
         
         // Store 3: Privé informatie
@@ -196,7 +201,192 @@ class HondenDatabase {
         console.log('Alle database stores zijn klaar');
     }
 
-    // ========== CRUD OPERATIES VOOR HONDEN ==========
+    // ========== NIEUWE FOTO FUNCTIES ==========
+
+    // Check alleen of er foto's bestaan (COUNT query)
+    async checkFotosExist(stamboomnr) {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['fotos'], 'readonly');
+            const store = transaction.objectStore('fotos');
+            const index = store.index('stamboomnr');
+            
+            const countRequest = index.count(stamboomnr);
+            
+            countRequest.onsuccess = () => {
+                resolve(countRequest.result > 0);
+            };
+            
+            countRequest.onerror = () => {
+                console.error('Fout bij checkFotosExist:', countRequest.error);
+                reject(countRequest.error);
+            };
+        });
+    }
+
+    // Haal alleen thumbnails op (kleine previews)
+    async getFotoThumbnails(stamboomnr, limit = 9) {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['fotos'], 'readonly');
+            const store = transaction.objectStore('fotos');
+            const index = store.index('stamboomnr');
+            
+            // Haal alle foto's voor deze stamboomnr op
+            const getAllRequest = index.getAll(stamboomnr);
+            
+            getAllRequest.onsuccess = () => {
+                const allFotos = getAllRequest.result || [];
+                
+                // Sorteer op upload datum (nieuwste eerst)
+                const sortedFotos = allFotos.sort((a, b) => {
+                    return new Date(b.uploadedAt) - new Date(a.uploadedAt);
+                });
+                
+                // Neem alleen de eerste [limit] foto's
+                const limitedFotos = sortedFotos.slice(0, limit);
+                
+                // Maak thumbnail objecten
+                const thumbnails = limitedFotos.map(foto => ({
+                    id: foto.id,
+                    thumbnail: foto.thumbnail || foto.data, // Gebruik thumbnail als beschikbaar
+                    filename: foto.filename,
+                    uploadedAt: foto.uploadedAt
+                }));
+                
+                resolve(thumbnails);
+            };
+            
+            getAllRequest.onerror = () => {
+                console.error('Fout bij getFotoThumbnails:', getAllRequest.error);
+                reject(getAllRequest.error);
+            };
+        });
+    }
+
+    // Haal originele foto op (alleen als nodig)
+    async getFotoById(fotoId) {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['fotos'], 'readonly');
+            const store = transaction.objectStore('fotos');
+            const getRequest = store.get(Number(fotoId));
+            
+            getRequest.onsuccess = () => {
+                if (getRequest.result) {
+                    resolve({
+                        id: getRequest.result.id,
+                        stamboomnr: getRequest.result.stamboomnr,
+                        data: getRequest.result.data, // Originele foto
+                        thumbnail: getRequest.result.thumbnail,
+                        filename: getRequest.result.filename,
+                        size: getRequest.result.size,
+                        type: getRequest.result.type,
+                        uploadedAt: getRequest.result.uploadedAt
+                    });
+                } else {
+                    resolve(null);
+                }
+            };
+            
+            getRequest.onerror = () => {
+                console.error('Fout bij getFotoById:', getRequest.error);
+                reject(getRequest.error);
+            };
+        });
+    }
+
+    // Bestaande functie: haal alle foto's op (origineel)
+    async getFotosVoorStamboomnr(stamboomnr) {
+        await this.init();
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['fotos'], 'readonly');
+            const store = transaction.objectStore('fotos');
+            const index = store.index('stamboomnr');
+            const request = index.getAll(stamboomnr);
+            
+            request.onsuccess = () => resolve(request.result || []);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    // Update bestaande functie voor voegFotoToe: maak thumbnail
+    async voegFotoToe(foto) {
+        await this.init();
+        
+        const fotoMetData = {
+            stamboomnr: foto.stamboomnr || '',
+            data: foto.data || '',
+            thumbnail: await this.maakThumbnail(foto.data), // Maak thumbnail
+            filename: foto.filename || 'onbekend.jpg',
+            size: foto.size || 0,
+            type: foto.type || 'image/jpeg',
+            uploadedAt: new Date().toISOString(),
+            geuploadDoor: window.auth?.getCurrentUser()?.username || 'unknown'
+        };
+        
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction(['fotos'], 'readwrite');
+            const store = transaction.objectStore('fotos');
+            const request = store.add(fotoMetData);
+            
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    // Helper: Maak thumbnail van base64 afbeelding
+    async maakThumbnail(base64Data, maxSize = 200) {
+        return new Promise((resolve) => {
+            if (!base64Data || !base64Data.startsWith('data:image')) {
+                resolve(base64Data); // Retourneer origineel als geen geldige afbeelding
+                return;
+            }
+            
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                
+                // Bereken nieuwe afmetingen
+                if (width > height) {
+                    if (width > maxSize) {
+                        height = Math.round(height * maxSize / width);
+                        width = maxSize;
+                    }
+                } else {
+                    if (height > maxSize) {
+                        width = Math.round(width * maxSize / height);
+                        height = maxSize;
+                    }
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Converteer naar base64 met lagere kwaliteit voor thumbnail
+                const thumbnail = canvas.toDataURL('image/jpeg', 0.7);
+                resolve(thumbnail);
+            };
+            
+            img.onerror = () => {
+                console.warn('Kon thumbnail niet maken, gebruik origineel');
+                resolve(base64Data);
+            };
+            
+            img.src = base64Data;
+        });
+    }
+
+    // ========== HONDEN FUNCTIES ==========
 
     async voegHondToe(hond) {
         await this.init();
@@ -207,7 +397,7 @@ class HondenDatabase {
             kennelnaam: hond.kennelnaam || '',
             stamboomnr: hond.stamboomnr || '',
             ras: hond.ras || '',
-            vachtkleur: hond.vachtkleur || '', // Nieuw: vachtkleur
+            vachtkleur: hond.vachtkleur || '',
             geslacht: hond.geslacht || '',
             
             // Ouders
@@ -314,7 +504,6 @@ class HondenDatabase {
         });
     }
 
-    // FIXED: Deze methode accepteert nu één object met ID erin
     async updateHond(hondData) {
         await this.init();
         
@@ -443,7 +632,6 @@ class HondenDatabase {
         });
     }
 
-    // Nieuwe zoekmethodes voor vachtkleur
     async zoekOpVachtkleur(vachtkleur) {
         await this.init();
         
@@ -452,7 +640,6 @@ class HondenDatabase {
             const store = transaction.objectStore('honden');
             const index = store.index('vachtkleur');
             
-            // Zoek naar exacte match of gedeeltelijke matches
             const request = index.getAll(vachtkleur);
             
             request.onsuccess = () => {
@@ -461,7 +648,6 @@ class HondenDatabase {
                 if (exactMatches.length > 0) {
                     resolve(exactMatches);
                 } else {
-                    // Zoek naar gedeeltelijke matches
                     const results = [];
                     const cursorRequest = store.openCursor();
                     
@@ -486,7 +672,6 @@ class HondenDatabase {
         });
     }
 
-    // Nieuwe zoekmethodes voor kennelnaam
     async zoekOpKennelnaam(kennelnaam) {
         await this.init();
         
@@ -495,7 +680,6 @@ class HondenDatabase {
             const store = transaction.objectStore('honden');
             const index = store.index('kennelnaam');
             
-            // Zoek naar exacte match of gedeeltelijke matches
             const request = index.getAll(kennelnaam);
             
             request.onsuccess = () => {
@@ -504,7 +688,6 @@ class HondenDatabase {
                 if (exactMatches.length > 0) {
                     resolve(exactMatches);
                 } else {
-                    // Zoek naar gedeeltelijke matches
                     const results = [];
                     const cursorRequest = store.openCursor();
                     
@@ -565,7 +748,6 @@ class HondenDatabase {
                     
                     cursor.continue();
                 } else {
-                    // Converteer naar array en sorteer op aantal
                     const result = Object.values(kennelOverzicht)
                         .sort((a, b) => b.aantal - a.aantal);
                     resolve(result);
@@ -611,7 +793,6 @@ class HondenDatabase {
                     
                     cursor.continue();
                 } else {
-                    // Converteer naar array en sorteer op aantal
                     const result = Object.values(vachtkleurOverzicht)
                         .sort((a, b) => b.aantal - a.aantal);
                     resolve(result);
@@ -622,44 +803,7 @@ class HondenDatabase {
         });
     }
 
-    // ========== FOTO OPERATIES ==========
-
-    async voegFotoToe(foto) {
-        await this.init();
-        
-        const fotoMetData = {
-            stamboomnr: foto.stamboomnr || '',
-            data: foto.data || '',
-            filename: foto.filename || 'onbekend.jpg',
-            size: foto.size || 0,
-            type: foto.type || 'image/jpeg',
-            uploadedAt: new Date().toISOString(),
-            geuploadDoor: window.auth?.getCurrentUser()?.username || 'unknown'
-        };
-        
-        return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction(['fotos'], 'readwrite');
-            const store = transaction.objectStore('fotos');
-            const request = store.add(fotoMetData);
-            
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
-        });
-    }
-
-    async getFotosVoorStamboomnr(stamboomnr) {
-        await this.init();
-        
-        return new Promise((resolve, reject) => {
-            const transaction = this.db.transaction(['fotos'], 'readonly');
-            const store = transaction.objectStore('fotos');
-            const index = store.index('stamboomnr');
-            const request = index.getAll(stamboomnr);
-            
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
-        });
-    }
+    // ========== FOTO OPERATIES (bestaande) ==========
 
     async verwijderFoto(fotoId) {
         await this.init();
@@ -813,12 +957,10 @@ class HondenDatabase {
         if (importData.honden && Array.isArray(importData.honden)) {
             for (const hond of importData.honden) {
                 try {
-                    // Zorg dat oudere imports ook kennelnaam hebben
                     if (hond.kennelnaam === undefined) {
                         hond.kennelnaam = '';
                     }
                     
-                    // Zorg dat oudere imports ook vachtkleur hebben
                     if (hond.vachtkleur === undefined) {
                         hond.vachtkleur = '';
                     }
@@ -958,7 +1100,6 @@ class HondenDatabase {
             console.log('Geen toegang tot privé info statistieken');
         }
         
-        // Tel honden per kennel
         const kennelStats = {};
         const vachtkleurStats = {};
         
@@ -1006,7 +1147,7 @@ class HondenDatabase {
             // Geen toegang, gebruik standaard
         }
         
-        const avgHondSize = 1600; // Iets groter door vachtkleur veld
+        const avgHondSize = 1600;
         const avgFotoSize = 50000;
         const avgPriveSize = 1000;
         
