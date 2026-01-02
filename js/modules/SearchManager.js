@@ -1,4 +1,5 @@
 /**
+/**
  * Search Manager Module
  * Beheert het zoeken naar honden met real-time filtering op naam en kennelnaam
  * Inclusief foto functionaliteit met thumbnail viewer en fullscreen viewer
@@ -34,7 +35,7 @@ class SearchManager extends BaseModule {
                 gender: "Geslacht",
                 close: "Sluiten",
                 dogDetails: "Hond Details",
-                father: "Vader",
+                father: "Vater",
                 mother: "Moeder",
                 parentsUnknown: "Onbekend",
                 male: "Reu",
@@ -119,7 +120,7 @@ class SearchManager extends BaseModule {
                 // Familierelaties voor stamboom
                 greatGrandfather: "Overgrootvader",
                 greatGrandmother: "Overgrootmoeder",
-                grandfather: "Grootvader",
+                grandfather: "Grootvater",
                 grandmother: "Grootmoeder",
                 
                 // Foto vertalingen - IDENTIEK AAN STAMBOOMMANAGER
@@ -1134,6 +1135,13 @@ class SearchManager extends BaseModule {
                     .photo-large-img {
                         max-width: 95vw;
                         max-height: 65vh;
+                    }
+                    
+                    /* AANPASSING: Stamboomnummer, ras en geslacht op 75% grootte voor mobiel */
+                    .dog-details-line .stamboom,
+                    .dog-details-line .ras,
+                    .dog-details-line .geslacht {
+                        font-size: 0.7125rem !important; /* 0.95rem * 0.75 = 0.7125rem */
                     }
                 }
                 
