@@ -176,7 +176,7 @@ class SearchManager extends BaseModule {
                 additionalInfo: "Zusätzliche Informationen",
                 grade: "Grad",
                 status: "Status",
-                notApplicable: "Nicht von toepassing",
+                notApplicable: "Niet van toepassing",
                 viewMore: "Mehr Details",
                 pedigreeButton: "Ahnentafel",
                 photos: "Fotos",
@@ -876,7 +876,6 @@ class SearchManager extends BaseModule {
         }
     }
     
-    // BELANGRIJK: EXACT DEzelfde logica als DogDataManager
     async showDogDetails(dog, isParentView = false, originalDogId = null) {
         const t = this.t.bind(this);
         const container = document.getElementById('detailsContainer');
@@ -885,7 +884,17 @@ class SearchManager extends BaseModule {
         
         container.innerHTML = '';
         
-        // EXACT ZELFDE LOGICA ALS DOGDATAMANAGER - alleen tekst gebruiken
+        // DEBUG: Check wat er in de database staat
+        console.log('=== DEBUG SearchManager ===');
+        console.log('Hond gevonden:', {
+            id: dog.id,
+            naam: dog.naam,
+            vader: dog.vader,
+            vaderId: dog.vaderId,
+            moeder: dog.moeder,
+            moederId: dog.moederId
+        });
+        
         let fatherInfo = { 
             naam: dog.vader || t('parentsUnknown'), 
             stamboomnr: '', 
@@ -900,8 +909,9 @@ class SearchManager extends BaseModule {
             kennelnaam: '' 
         };
         
-        // Zoek alleen op ID als DogDataManager dat ook doet
+        // BELANGRIJK: Eerst zoeken op ID zoals DogDataManager doet
         if (dog.vaderId) {
+            console.log(`Zoeken vader met ID: ${dog.vaderId}`);
             const father = this.allDogs.find(d => d.id === dog.vaderId);
             if (father) {
                 fatherInfo = { 
@@ -911,10 +921,19 @@ class SearchManager extends BaseModule {
                     ras: father.ras || '',
                     kennelnaam: father.kennelnaam || ''
                 };
+                console.log('Vader gevonden via ID:', fatherInfo);
+            } else {
+                console.log(`ERROR: Vader met ID ${dog.vaderId} niet gevonden in allDogs!`);
+                // Toon tekstuele naam als fallback
+                fatherInfo.naam = dog.vader || t('parentsUnknown');
             }
+        } else {
+            console.log('Geen vaderId beschikbaar voor deze hond');
+            fatherInfo.naam = dog.vader || t('parentsUnknown');
         }
         
         if (dog.moederId) {
+            console.log(`Zoeken moeder met ID: ${dog.moederId}`);
             const mother = this.allDogs.find(d => d.id === dog.moederId);
             if (mother) {
                 motherInfo = { 
@@ -924,8 +943,19 @@ class SearchManager extends BaseModule {
                     ras: mother.ras || '',
                     kennelnaam: mother.kennelnaam || ''
                 };
+                console.log('Moeder gevonden via ID:', motherInfo);
+            } else {
+                console.log(`ERROR: Moeder met ID ${dog.moederId} niet gevonden in allDogs!`);
+                motherInfo.naam = dog.moeder || t('parentsUnknown');
             }
+        } else {
+            console.log('Geen moederId beschikbaar voor deze hond');
+            motherInfo.naam = dog.moeder || t('parentsUnknown');
         }
+        
+        // Debug: Laat zien welke ID's in allDogs zitten
+        console.log('Totaal honden in allDogs:', this.allDogs.length);
+        console.log('Eerste 5 honden:', this.allDogs.slice(0, 5).map(d => ({ id: d.id, naam: d.naam })));
         
         const formatDate = (dateString) => {
             if (!dateString) return '';
@@ -939,8 +969,6 @@ class SearchManager extends BaseModule {
         
         const genderText = dog.geslacht === 'reuen' ? t('male') : 
                           dog.geslacht === 'teven' ? t('female') : t('unknown');
-        
-        const hasPhotos = await this.checkDogHasPhotos(dog.id);
         
         const html = `
             <div class="details-card">
@@ -983,9 +1011,6 @@ class SearchManager extends BaseModule {
                             <div>
                                 <i class="bi bi-people me-1"></i> ${t('parents')}
                             </div>
-                            <button class="btn btn-sm btn-outline-primary btn-pedigree" data-dog-id="${dog.id}">
-                                <i class="bi bi-diagram-3 me-1"></i> ${t('pedigreeButton')}
-                            </button>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -1129,6 +1154,8 @@ class SearchManager extends BaseModule {
                 });
             }
         }
+        
+        console.log('=== EINDE DEBUG ===');
     }
     
     showParentDetails(parentId, originalDogId) {
