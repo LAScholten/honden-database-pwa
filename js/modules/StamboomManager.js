@@ -12,10 +12,6 @@ class StamboomManager extends BaseModule {
         this.currentLang = currentLang;
         this.allDogs = [];
         this.dogPhotosCache = new Map(); // Cache voor hondenfoto's
-        this.dogHasPhotosCache = new Map(); // NIEUW: Cache voor foto aanwezigheid
-        this.dogThumbnailsCache = new Map(); // NIEUW: Cache voor thumbnails
-        this.fullPhotoCache = new Map(); // NIEUW: Cache voor volledige foto's
-        
         this.translations = {
             nl: {
                 pedigreeTitle: "Stamboom van {name}",
@@ -154,7 +150,7 @@ class StamboomManager extends BaseModule {
             de: {
                 pedigreeTitle: "Ahnentafel von {name}",
                 pedigree4Gen: "4-Generationen Ahnentafel",
-                generatingPedigree: "Ahnentafel wird generiert...",
+                generatingPedigree: "Ahnentafel wordt generiert...",
                 close: "Schließen",
                 print: "Drucken",
                 noData: "Keine Daten",
@@ -214,7 +210,7 @@ class StamboomManager extends BaseModule {
                 
                 // Fotos
                 photos: "Fotos",
-                noPhotos: "Keine Fotos verfügbaar",
+                noPhotos: "Keine Fotos verfügbar",
                 clickToEnlarge: "Klicken zum Vergrößern",
                 closePhoto: "Schließen"
             }
@@ -237,101 +233,58 @@ class StamboomManager extends BaseModule {
         return this.allDogs.find(dog => dog.id === id);
     }
     
-    // NIEUW: Check alleen of er foto's zijn (geen data laden)
-    async checkDogHasPhotos(dogId) {
-        if (!dogId || dogId === 0) return false;
-        
-        const dog = this.getDogById(dogId);
-        if (!dog || !dog.stamboomnr) return false;
-        
-        // Check cache voor foto aanwezigheid
-        const cacheKey = `has_${dogId}_${dog.stamboomnr}`;
-        if (this.dogHasPhotosCache.has(cacheKey)) {
-            return this.dogHasPhotosCache.get(cacheKey);
-        }
-        
-        try {
-            // Gebruik de snelle check functie
-            const hasPhotos = await this.db.checkFotosExist(dog.stamboomnr);
-            this.dogHasPhotosCache.set(cacheKey, hasPhotos);
-            return hasPhotos;
-        } catch (error) {
-            console.error('Fout bij checken foto\'s voor hond:', dogId, error);
-            return false;
-        }
-    }
-    
-    // NIEUW: Laad alleen thumbnails
-    async getDogThumbnails(dogId, limit = 9) {
+    // Nieuwe methode: laad foto's voor een hond
+    async getDogPhotos(dogId) {
         if (!dogId || dogId === 0) return [];
         
         const dog = this.getDogById(dogId);
         if (!dog || !dog.stamboomnr) return [];
         
-        // Check cache voor thumbnails
-        const cacheKey = `thumbs_${dogId}_${dog.stamboomnr}_${limit}`;
-        if (this.dogThumbnailsCache.has(cacheKey)) {
-            return this.dogThumbnailsCache.get(cacheKey);
+        // Check cache
+        const cacheKey = `${dogId}_${dog.stamboomnr}`;
+        if (this.dogPhotosCache.has(cacheKey)) {
+            return this.dogPhotosCache.get(cacheKey);
         }
         
         try {
-            const thumbnails = await this.db.getFotoThumbnails(dog.stamboomnr, limit);
-            this.dogThumbnailsCache.set(cacheKey, thumbnails || []);
-            return thumbnails || [];
+            const photos = await this.db.getFotosVoorStamboomnr(dog.stamboomnr);
+            this.dogPhotosCache.set(cacheKey, photos || []);
+            return photos || [];
         } catch (error) {
-            console.error('Fout bij ophalen thumbnails voor hond:', dogId, error);
+            console.error('Fout bij ophalen foto\'s voor hond:', dogId, error);
             return [];
         }
     }
     
-    // NIEUW: Laad originele foto alleen wanneer nodig
-    async getFullSizeFoto(fotoId) {
-        if (!fotoId) return null;
-        
-        // Check cache voor volledige foto
-        const cacheKey = `full_${fotoId}`;
-        if (this.fullPhotoCache.has(cacheKey)) {
-            return this.fullPhotoCache.get(cacheKey);
-        }
-        
-        try {
-            const foto = await this.db.getFotoById(fotoId);
-            if (foto) {
-                this.fullPhotoCache.set(cacheKey, foto);
-            }
-            return foto;
-        } catch (error) {
-            console.error('Fout bij ophalen volledige foto:', fotoId, error);
-            return null;
-        }
+    // Nieuwe methode: check of een hond foto's heeft (voor card indicator)
+    async checkDogHasPhotos(dogId) {
+        const photos = await this.getDogPhotos(dogId);
+        return photos.length > 0;
     }
 
 /* ============================================= */
-/* COI BEREKENING OP DATABASE ID BASIS */
-/* BEGINT HIER */
+/* COI BEREKENING - DEFINITIEF CORRECT */
 /* ============================================= */
 
 calculateCOI(dogId) {
-    console.log('COI berekening voor database ID:', dogId);
+    console.log('COI berekening voor hond ID:', dogId);
     
-    if (!dogId || dogId === 0) return { coi6Gen: '0.0', coiAllGen: '0.0' };
-    
-    const dog = this.getDogById(dogId);
-    if (!dog) return { coi6Gen: '0.0', coiAllGen: '0.0' };
-    
-    // DEBUG
-    console.log('Hond ID:', dogId, 'Naam:', dog.naam, 'Stamboomnr:', dog.stamboomnr);
-    console.log('vaderId:', dog.vaderId, 'moederId:', dog.moederId);
-    
-    // Als er geen ouders zijn = 0%
-    if (!dog.vaderId || !dog.moederId) {
-        console.log('Geen ouders bekend -> 0%');
+    if (!dogId || dogId === 0) {
         return { coi6Gen: '0.0', coiAllGen: '0.0' };
     }
     
-    // 1. Zelfde ouders (incest) = 25%
+    const dog = this.getDogById(dogId);
+    if (!dog) {
+        return { coi6Gen: '0.0', coiAllGen: '0.0' };
+    }
+    
+    // Check ouders
+    if (!dog.vaderId || !dog.moederId) {
+        return { coi6Gen: '0.0', coiAllGen: '0.0' };
+    }
+    
+    // DIRECTE GEVALLEN
     if (dog.vaderId === dog.moederId) {
-        console.log('Zelfde ouders -> 25%');
         return { coi6Gen: '25.0', coiAllGen: '25.0' };
     }
     
@@ -339,40 +292,31 @@ calculateCOI(dogId) {
     const moeder = this.getDogById(dog.moederId);
     
     if (!vader || !moeder) {
-        console.log('Ouders niet gevonden in database');
         return { coi6Gen: '0.0', coiAllGen: '0.0' };
     }
     
-    // 2. Ouder-kind relatie = 25%
-    // Voorbeeld: vader is ook grootvader van moeder
-    if ((vader.vaderId === dog.moederId) || 
-        (vader.moederId === dog.moederId) ||
-        (moeder.vaderId === dog.vaderId) || 
-        (moeder.moederId === dog.vaderId)) {
-        console.log('Ouder-kind relatie -> 25%');
+    // Ouder-kind = 25%
+    if (vader.vaderId === dog.moederId || vader.moederId === dog.moederId ||
+        moeder.vaderId === dog.vaderId || moeder.moederId === dog.vaderId) {
         return { coi6Gen: '25.0', coiAllGen: '25.0' };
     }
     
-    // 3. Broer/zus (volle broer/zus) = 25%
+    // Broer/zus = 25%
     if (vader.vaderId && moeder.vaderId && vader.vaderId === moeder.vaderId &&
         vader.moederId && moeder.moederId && vader.moederId === moeder.moederId) {
-        console.log('Volle broer/zus -> 25%');
         return { coi6Gen: '25.0', coiAllGen: '25.0' };
     }
     
-    // 4. HALF broer/zus (1 gemeenschappelijke ouder) = 12.5%
-    if ((vader.vaderId && moeder.vaderId && vader.vaderId === moeder.vaderId) ||
-        (vader.moederId && moeder.moederId && vader.moederId === moeder.moederId)) {
-        console.log('Half broer/zus -> 12.5%');
-        return { coi6Gen: '12.5', coiAllGen: '12.5' };
-    }
+    // VOOR ALLE ANDERE GEVALLEN: gebruik de CORRECTE formule
+    console.log('Complex geval - gebruik volledige berekening');
     
-    // 5. COMPLEXE GEVALLEN - Bereken volledige COI
-    console.log('Complex geval - bereken volledige COI');
-    const coi6Gen = this.calculateFullCOI(dogId, 6);
-    const coiAllGen = this.calculateFullCOI(dogId, 15);
+    // Bereken voor 6 generaties
+    const coi6Gen = this.calculateWrightCOI(dogId, 6);
     
-    console.log('Resultaat:', { coi6Gen, coiAllGen });
+    // Bereken voor alle generaties
+    const coiAllGen = this.calculateWrightCOI(dogId, 15);
+    
+    console.log('Resultaat 6 gen:', coi6Gen, 'All gen:', coiAllGen);
     
     return {
         coi6Gen: (coi6Gen * 100).toFixed(1),
@@ -380,33 +324,94 @@ calculateCOI(dogId) {
     };
 }
 
-// Helper om alle voorouders te vinden
-getAllAncestors(dogId, maxGenerations, ancestors = new Set(), currentGen = 0) {
-    if (!dogId || currentGen >= maxGenerations) return ancestors;
+// CORRECTE Wright's formule implementatie
+calculateWrightCOI(dogId, maxGenerations, memo = new Map(), path = new Set()) {
+    if (!dogId || maxGenerations <= 0) return 0;
+    
+    const memoKey = `${dogId}-${maxGenerations}`;
+    if (memo.has(memoKey)) return memo.get(memoKey);
+    
+    // Voorkom oneindige recursie bij circulaire stambomen
+    if (path.has(dogId)) return 0;
     
     const dog = this.getDogById(dogId);
-    if (!dog) return ancestors;
-    
-    // Voeg deze hond toe als voorouder (behalve de start-hond)
-    if (currentGen > 0) {
-        ancestors.add(dogId);
+    if (!dog || !dog.vaderId || !dog.moederId) {
+        memo.set(memoKey, 0);
+        return 0;
     }
     
-    // Recursief ouders toevoegen
-    if (dog.vaderId) {
-        this.getAllAncestors(dog.vaderId, maxGenerations, ancestors, currentGen + 1);
-    }
-    if (dog.moederId) {
-        this.getAllAncestors(dog.moederId, maxGenerations, ancestors, currentGen + 1);
+    // Basisgevallen
+    if (dog.vaderId === dog.moederId) {
+        memo.set(memoKey, 0.25);
+        return 0.25;
     }
     
-    return ancestors;
+    const vader = this.getDogById(dog.vaderId);
+    const moeder = this.getDogById(dog.moederId);
+    
+    if (!vader || !moeder) {
+        memo.set(memoKey, 0);
+        return 0;
+    }
+    
+    // Ouder-kind = 25%
+    if (vader.vaderId === dog.moederId || vader.moederId === dog.moederId ||
+        moeder.vaderId === dog.vaderId || moeder.moederId === dog.vaderId) {
+        memo.set(memoKey, 0.25);
+        return 0.25;
+    }
+    
+    // Broer/zus = 25%
+    if (vader.vaderId && moeder.vaderId && vader.vaderId === moeder.vaderId &&
+        vader.moederId && moeder.moederId && vader.moederId === moeder.moederId) {
+        memo.set(memoKey, 0.25);
+        return 0.25;
+    }
+    
+    // Voor complexe gevallen: vind alle gemeenschappelijke voorouders
+    const newPath = new Set(path);
+    newPath.add(dogId);
+    
+    const commonAncestors = this.findCommonAncestors(dog.vaderId, dog.moederId, maxGenerations - 1, newPath);
+    
+    let totalCOI = 0;
+    
+    // Voor elke gemeenschappelijke voorouder
+    for (const ancestorId of commonAncestors) {
+        // Vind alle paden van vader naar voorouder
+        const fatherPaths = this.findAllPaths(dog.vaderId, ancestorId, maxGenerations - 1, new Set());
+        
+        // Vind alle paden van moeder naar voorouder
+        const motherPaths = this.findAllPaths(dog.moederId, ancestorId, maxGenerations - 1, new Set());
+        
+        // Voor elke combinatie van paden
+        for (const fPath of fatherPaths) {
+            for (const mPath of motherPaths) {
+                const n1 = fPath.length; // aantal stappen via vader
+                const n2 = mPath.length; // aantal stappen via moeder
+                
+                // Bereken COI van de voorouder ZELF (met resterende diepte)
+                const remainingDepth = Math.max(0, maxGenerations - Math.max(n1, n2) - 1);
+                const ancestorCOI = this.calculateWrightCOI(ancestorId, remainingDepth, memo, newPath);
+                
+                // WRIGHT'S FORMULE: (0.5)^(n1 + n2 + 1) * (1 + F_a)
+                const contribution = Math.pow(0.5, n1 + n2 + 1) * (1 + ancestorCOI);
+                totalCOI += contribution;
+            }
+        }
+    }
+    
+    memo.set(memoKey, totalCOI);
+    return totalCOI;
 }
 
-// Vind gemeenschappelijke voorouders
-findCommonAncestors(dogId1, dogId2, maxGenerations) {
-    const ancestors1 = this.getAllAncestors(dogId1, maxGenerations);
-    const ancestors2 = this.getAllAncestors(dogId2, maxGenerations);
+// Helper: Vind gemeenschappelijke voorouders
+findCommonAncestors(dogId1, dogId2, maxDepth, path) {
+    const ancestors1 = new Set();
+    const ancestors2 = new Set();
+    
+    this.collectAncestors(dogId1, maxDepth, ancestors1, path);
+    this.collectAncestors(dogId2, maxDepth, ancestors2, path);
     
     const common = new Set();
     for (const ancestor of ancestors1) {
@@ -414,75 +419,105 @@ findCommonAncestors(dogId1, dogId2, maxGenerations) {
             common.add(ancestor);
         }
     }
+    
     return common;
 }
 
-// Bereken afstand naar voorouder
-getDistanceToAncestor(startDogId, targetAncestorId, maxDepth = 10) {
-    const queue = [{ id: startDogId, distance: 0 }];
-    const visited = new Set();
-    
-    while (queue.length > 0) {
-        const { id, distance } = queue.shift();
-        
-        if (id === targetAncestorId) {
-            return distance;
-        }
-        
-        if (distance >= maxDepth || visited.has(id)) continue;
-        visited.add(id);
-        
-        const dog = this.getDogById(id);
-        if (!dog) continue;
-        
-        if (dog.vaderId) {
-            queue.push({ id: dog.vaderId, distance: distance + 1 });
-        }
-        if (dog.moederId) {
-            queue.push({ id: dog.moederId, distance: distance + 1 });
-        }
-    }
-    
-    return -1; // Niet gevonden
-}
-
-// VOLLEDIGE COI BEREKENING
-calculateFullCOI(dogId, maxGenerations) {
-    if (!dogId || maxGenerations <= 0) return 0;
+// Helper: Verzamel voorouders
+collectAncestors(dogId, maxDepth, ancestors, path) {
+    if (!dogId || maxDepth <= 0 || path.has(dogId)) return;
     
     const dog = this.getDogById(dogId);
-    if (!dog || !dog.vaderId || !dog.moederId) return 0;
+    if (!dog) return;
     
-    const commonAncestors = this.findCommonAncestors(dog.vaderId, dog.moederId, maxGenerations - 1);
-    
-    let totalCOI = 0;
-    
-    for (const ancestorId of commonAncestors) {
-        // Bereken afstand via vader
-        const distViaVader = this.getDistanceToAncestor(dog.vaderId, ancestorId, maxGenerations - 1);
-        // Bereken afstand via moeder
-        const distViaMoeder = this.getDistanceToAncestor(dog.moederId, ancestorId, maxGenerations - 1);
-        
-        if (distViaVader > 0 && distViaMoeder > 0) {
-            // COI formule: (0.5)^(n1 + n2 + 1)
-            const contribution = Math.pow(0.5, distViaVader + distViaMoeder + 1);
-            totalCOI += contribution;
-            
-            // Recursief COI van voorouder zelf
-            const ancestorCOI = this.calculateFullCOI(ancestorId, maxGenerations - Math.max(distViaVader, distViaMoeder) - 1);
-            if (ancestorCOI > 0) {
-                totalCOI += contribution * ancestorCOI;
-            }
-        }
+    // Voeg toe als voorouder (niet de start-hond)
+    if (maxDepth > 0) {
+        ancestors.add(dogId);
     }
     
-    return totalCOI;
+    // Recursief ouders
+    const newPath = new Set(path);
+    newPath.add(dogId);
+    
+    if (dog.vaderId) {
+        this.collectAncestors(dog.vaderId, maxDepth - 1, ancestors, newPath);
+    }
+    if (dog.moederId) {
+        this.collectAncestors(dog.moederId, maxDepth - 1, ancestors, newPath);
+    }
+}
+
+// Helper: Vind alle paden tussen twee honden
+findAllPaths(startId, targetId, maxDepth, visited) {
+    const results = [];
+    
+    const dfs = (currentId, currentPath, depth) => {
+        if (!currentId || depth > maxDepth) return;
+        
+        // Voorkom loops
+        if (visited.has(currentId) || currentPath.includes(currentId)) return;
+        
+        const dog = this.getDogById(currentId);
+        if (!dog) return;
+        
+        const newPath = [...currentPath, currentId];
+        
+        if (currentId === targetId) {
+            results.push(newPath.slice(1)); // Verwijder startpunt
+            return;
+        }
+        
+        const newVisited = new Set(visited);
+        newVisited.add(currentId);
+        
+        if (dog.vaderId) {
+            dfs(dog.vaderId, newPath, depth + 1);
+        }
+        if (dog.moederId) {
+            dfs(dog.moederId, newPath, depth + 1);
+        }
+    };
+    
+    dfs(startId, [], 0);
+    return results;
 }
 
 /* ============================================= */
-/* COI BEREKENING EINDIGT HIER */
+/* TEST FUNCTIE voor specifieke gevallen */
 /* ============================================= */
 
+testCOICases() {
+    console.log('=== COI TEST CASES ===');
+    
+    // Test 1: Broer × Zus = 25%
+    console.log('\n1. Broer × Zus verwacht: 25%');
+    
+    // Test 2: Ouder × Kind = 25%
+    console.log('\n2. Ouder × Kind verwacht: 25%');
+    
+    // Test 3: Half-broer × Half-zus = 12.5%
+    console.log('\n3. Half-broer × Half-zus verwacht: 12.5%');
+    
+    // Test 4: Broer×Zus → Zoon×Moeder = 37.5%
+    console.log('\n4. Broer×Zus → Zoon×Moeder verwacht: 37.5%');
+    
+    // Test 5: Neef × Nicht = 6.25%
+    console.log('\n5. Neef × Nicht verwacht: 6.25%');
+    
+    console.log('\n=== EINDE TEST CASES ===');
+}
+
+// Helper om een specifieke hond te testen
+testSpecificDog(dogId, expectedCOI) {
+    const result = this.calculateCOI(dogId);
+    console.log(`\nTest hond ${dogId}:`);
+    console.log(`Verwacht: ${expectedCOI}%`);
+    console.log(`Gevonden: ${result.coi6Gen}% (6 gen), ${result.coiAllGen}% (all gen)`);
+    console.log(`Correct: ${Math.abs(parseFloat(result.coi6Gen) - expectedCOI) < 0.1 ? '✓' : '✗'}`);
+}
+/* ============================================= */
+/* EINDE COI BEREKENING                         */
+/* ============================================= */
 
     buildPedigreeTree(dogId) {
         const pedigreeTree = {
@@ -629,7 +664,7 @@ calculateFullCOI(dogId, maxGenerations) {
         const mainDogClass = isMainDog ? 'main-dog-compact' : '';
         const headerColor = isMainDog ? 'bg-primary' : 'bg-secondary';
         
-        // Check of deze hond foto's heeft (SNELLE CHECK)
+        // Check of deze hond foto's heeft
         const hasPhotos = await this.checkDogHasPhotos(dog.id);
         const cameraIcon = hasPhotos ? '<i class="bi bi-camera text-danger ms-1"></i>' : '';
 
@@ -688,7 +723,7 @@ calculateFullCOI(dogId, maxGenerations) {
         `;
     }
     
-    // UPDATE: DETAIL POPUP met thumbnails
+    // DETAIL POPUP voor wanneer op card geklikt wordt - MET FOTO'S BOVENAAN (nieuwe volgorde)
     async getDogDetailPopupHTML(dog, relation = '') {
         if (!dog) return '';
         
@@ -700,8 +735,8 @@ calculateFullCOI(dogId, maxGenerations) {
         const coi6Color = this.getCOIColor(coiValues.coi6Gen);
         const coiAllColor = this.getCOIColor(coiValues.coiAllGen);
         
-        // NIEUW: Laad alleen thumbnails
-        const thumbnails = await this.getDogThumbnails(dog.id, 9);
+        // Haal foto's op voor deze hond
+        const photos = await this.getDogPhotos(dog.id);
         
         // Maak een gecombineerde naam+kennel string voor de header
         const combinedName = dog.naam || this.t('unknown');
@@ -719,19 +754,19 @@ calculateFullCOI(dogId, maxGenerations) {
                     <button type="button" class="btn-close btn-close-white" aria-label="Sluiten"></button>
                 </div>
                 <div class="popup-body">
-                    <!-- THUMBNAILS SECTIE BOVENAAN (indien beschikbaar) -->
-                    ${thumbnails.length > 0 ? `
+                    <!-- FOTO'S SECTIE BOVENAAN (indien beschikbaar) -->
+                    ${photos.length > 0 ? `
                     <div class="info-section mb-3">
-                        <h6><i class="bi bi-camera me-1"></i> ${this.t('photos')} (${thumbnails.length})</h6>
+                        <h6><i class="bi bi-camera me-1"></i> ${this.t('photos')} (${photos.length})</h6>
                         <div class="photos-grid" id="photosGrid${dog.id}">
-                            ${thumbnails.map((thumb, index) => `
+                            ${photos.map((photo, index) => `
                                 <div class="photo-thumbnail" 
-                                     data-photo-id="${thumb.id}" 
+                                     data-photo-id="${photo.id}" 
                                      data-dog-id="${dog.id}" 
                                      data-photo-index="${index}"
-                                     data-is-thumbnail="true">
-                                    <img src="${thumb.thumbnail}" 
-                                         alt="${dog.naam || ''} - ${thumb.filename || ''}" 
+                                     data-photo-src="${photo.data}">
+                                    <img src="${photo.data}" 
+                                         alt="${dog.naam || ''} - ${photo.filename || ''}" 
                                          class="thumbnail-img"
                                          loading="lazy">
                                     <div class="photo-hover">
@@ -939,44 +974,38 @@ calculateFullCOI(dogId, maxGenerations) {
         `;
     }
     
-    // UPDATE: Setup globale event listeners voor gefaseerd foto laden
+    // NIEUWE METHODE: Setup globale event listeners eenmalig
     setupGlobalEventListeners() {
         // Event delegation voor foto thumbnail clicks
-        document.addEventListener('click', async (e) => {
+        document.addEventListener('click', (e) => {
             const thumbnail = e.target.closest('.photo-thumbnail');
             if (thumbnail) {
                 e.preventDefault();
                 e.stopPropagation();
                 
-                const photoId = thumbnail.getAttribute('data-photo-id');
-                const isThumbnail = thumbnail.getAttribute('data-is-thumbnail') === 'true';
+                const photoSrc = thumbnail.getAttribute('data-photo-src');
+                console.log('Foto geklikt, src:', photoSrc);
                 
-                if (!photoId) return;
-                
-                try {
-                    // NIEUW: Laad pas de volledige foto als er op geklikt wordt
-                    const fullPhoto = await this.getFullSizeFoto(photoId);
-                    
-                    if (fullPhoto && fullPhoto.data) {
-                        // Haal hondnaam op uit de popup
-                        const popupTitle = document.querySelector('.popup-title');
-                        let dogName = '';
-                        if (popupTitle) {
-                            dogName = popupTitle.textContent.trim();
-                            dogName = dogName.replace(/^[^a-zA-Z]*/, '').trim();
-                        }
-                        
-                        this.showLargePhoto(fullPhoto.data, dogName);
-                    } else {
-                        console.error('Kon volledige foto niet laden:', photoId);
-                        // Probeer de thumbnail als fallback
-                        const imgElement = thumbnail.querySelector('img');
-                        if (imgElement && imgElement.src) {
-                            this.showLargePhoto(imgElement.src, dogName);
-                        }
+                if (photoSrc && photoSrc.trim() !== '') {
+                    // Haal hondnaam op uit de popup
+                    const popupTitle = document.querySelector('.popup-title');
+                    let dogName = '';
+                    if (popupTitle) {
+                        // Verwijder het geslachtsicoon uit de titel
+                        dogName = popupTitle.textContent.trim();
+                        // Verwijder het icoon als het er is
+                        dogName = dogName.replace(/^[^a-zA-Z]*/, '').trim();
                     }
-                } catch (error) {
-                    console.error('Fout bij laden volledige foto:', error);
+                    
+                    this.showLargePhoto(photoSrc, dogName);
+                } else {
+                    console.error('Geen geldige foto src gevonden:', photoSrc);
+                    // Probeer de img src als fallback
+                    const imgElement = thumbnail.querySelector('img');
+                    if (imgElement && imgElement.src) {
+                        console.log('Gebruik img src als fallback:', imgElement.src);
+                        this.showLargePhoto(imgElement.src, dogName);
+                    }
                 }
             }
         });
@@ -1011,8 +1040,9 @@ calculateFullCOI(dogId, maxGenerations) {
         });
     }
     
+    // SIMPELERE showLargePhoto methode
     showLargePhoto(photoData, dogName = '') {
-        console.log('Toon grote foto:', photoData.substring(0, 100) + '...');
+        console.log('Toon grote foto:', photoData);
         
         // Verwijder bestaande overlay
         const existingOverlay = document.getElementById('photoLargeOverlay');
@@ -1894,7 +1924,7 @@ calculateFullCOI(dogId, maxGenerations) {
                 }
                 
                 /* ============================================= */
-                /* DETAIL POPUP STYLES MET THUMBNAILS BOVENAAN */
+                /* DETAIL POPUP STYLES MET FOTO'S BOVENAAN */
                 /* ============================================= */
                 .pedigree-popup-overlay {
                     position: fixed;
@@ -2089,13 +2119,13 @@ calculateFullCOI(dogId, maxGenerations) {
                     line-height: 1.5;
                 }
                 
-                /* THUMBNAILS SECTIE IN POPUP */
+                /* FOTO'S SECTIE IN POPUP - BOVENAAN EN KLEINER (60% van huidige grootte) */
                 .photos-grid {
                     display: grid;
                     grid-template-columns: repeat(3, 1fr);
                     gap: 6px;
                     margin-bottom: 10px;
-                    max-width: 240px;
+                    max-width: 240px; /* 60% van 400px */
                     margin-left: auto;
                     margin-right: auto;
                 }
@@ -2355,7 +2385,7 @@ calculateFullCOI(dogId, maxGenerations) {
         const container = document.getElementById('pedigreeContainer');
         if (!container) return;
         
-        // Maak alle cards asynchroon om foto checks te doen (SNELLE CHECK)
+        // Maak alle cards asynchroon om foto checks te doen
         const mainDogCard = await this.getDogCompactCardHTML(pedigreeTree.mainDog, this.t('mainDog'), true, 0);
         const fatherCard = await this.getDogCompactCardHTML(pedigreeTree.father, this.t('father'), false, 1);
         const motherCard = await this.getDogCompactCardHTML(pedigreeTree.mother, this.t('mother'), false, 1);
