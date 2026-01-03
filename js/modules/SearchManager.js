@@ -884,7 +884,7 @@ class SearchManager extends BaseModule {
         
         container.innerHTML = '';
         
-        // DEBUG: Check wat er in de database staat
+        // BELANGRIJK: Debug log om te zien wat er in de database staat
         console.log('=== DEBUG SearchManager ===');
         console.log('Hond gevonden:', {
             id: dog.id,
@@ -909,9 +909,8 @@ class SearchManager extends BaseModule {
             kennelnaam: '' 
         };
         
-        // BELANGRIJK: Eerst zoeken op ID zoals DogDataManager doet
+        // EERST: Zoek op ID zoals DogDataManager doet
         if (dog.vaderId) {
-            console.log(`Zoeken vader met ID: ${dog.vaderId}`);
             const father = this.allDogs.find(d => d.id === dog.vaderId);
             if (father) {
                 fatherInfo = { 
@@ -923,17 +922,12 @@ class SearchManager extends BaseModule {
                 };
                 console.log('Vader gevonden via ID:', fatherInfo);
             } else {
-                console.log(`ERROR: Vader met ID ${dog.vaderId} niet gevonden in allDogs!`);
-                // Toon tekstuele naam als fallback
+                console.log(`Vader ID ${dog.vaderId} niet gevonden in allDogs`);
                 fatherInfo.naam = dog.vader || t('parentsUnknown');
             }
-        } else {
-            console.log('Geen vaderId beschikbaar voor deze hond');
-            fatherInfo.naam = dog.vader || t('parentsUnknown');
         }
         
         if (dog.moederId) {
-            console.log(`Zoeken moeder met ID: ${dog.moederId}`);
             const mother = this.allDogs.find(d => d.id === dog.moederId);
             if (mother) {
                 motherInfo = { 
@@ -945,17 +939,10 @@ class SearchManager extends BaseModule {
                 };
                 console.log('Moeder gevonden via ID:', motherInfo);
             } else {
-                console.log(`ERROR: Moeder met ID ${dog.moederId} niet gevonden in allDogs!`);
+                console.log(`Moeder ID ${dog.moederId} niet gevonden in allDogs`);
                 motherInfo.naam = dog.moeder || t('parentsUnknown');
             }
-        } else {
-            console.log('Geen moederId beschikbaar voor deze hond');
-            motherInfo.naam = dog.moeder || t('parentsUnknown');
         }
-        
-        // Debug: Laat zien welke ID's in allDogs zitten
-        console.log('Totaal honden in allDogs:', this.allDogs.length);
-        console.log('Eerste 5 honden:', this.allDogs.slice(0, 5).map(d => ({ id: d.id, naam: d.naam })));
         
         const formatDate = (dateString) => {
             if (!dateString) return '';
@@ -970,9 +957,24 @@ class SearchManager extends BaseModule {
         const genderText = dog.geslacht === 'reuen' ? t('male') : 
                           dog.geslacht === 'teven' ? t('female') : t('unknown');
         
+        const hasPhotos = await this.checkDogHasPhotos(dog.id);
+        
         const html = `
             <div class="details-card">
+                ${isParentView ? `
                 <div class="details-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button class="btn btn-sm btn-outline-secondary back-button" data-original-dog="${originalDogId}">
+                            <i class="bi bi-arrow-left me-1"></i> ${t('backToSearch')}
+                        </button>
+                        <div class="text-muted small">
+                            <i class="bi bi-info-circle me-1"></i> ${t('viewingParent')}
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+                
+                <div class="details-header ${isParentView ? 'pt-0' : ''}">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="dog-name-header">${dog.naam || t('unknown')}</div>
@@ -1006,11 +1008,30 @@ class SearchManager extends BaseModule {
                 </div>
                 
                 <div class="details-body">
+                    ${hasPhotos ? `
+                    <div class="photos-section">
+                        <div class="photos-title">
+                            <div class="photos-title-text">
+                                <i class="bi bi-camera"></i>
+                                <span>${t('photos')}</span>
+                            </div>
+                            <div class="click-hint-text">${t('clickToEnlarge')}</div>
+                        </div>
+                        <div class="photos-grid-container" id="photosGrid${dog.id}">
+                            <!-- Foto's worden hier ingeladen -->
+                        </div>
+                    </div>
+                    ` : ''}
+                    
                     <div class="info-group">
                         <div class="info-group-title d-flex justify-content-between align-items-center">
                             <div>
                                 <i class="bi bi-people me-1"></i> ${t('parents')}
                             </div>
+                            <!-- STAMBOOM KNOOP TERUG -->
+                            <button class="btn btn-sm btn-outline-primary btn-pedigree" data-dog-id="${dog.id}">
+                                <i class="bi bi-diagram-3 me-1"></i> ${t('pedigreeButton')}
+                            </button>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -1120,6 +1141,12 @@ class SearchManager extends BaseModule {
         
         container.insertAdjacentHTML('beforeend', html);
         
+        // Laad foto's
+        if (hasPhotos) {
+            this.loadAndDisplayPhotos(dog);
+        }
+        
+        // Event listeners voor ouders
         if (fatherInfo.id) {
             const fatherCard = container.querySelector('.father-card');
             if (fatherCard) {
@@ -1142,6 +1169,16 @@ class SearchManager extends BaseModule {
             }
         }
         
+        // Event listener voor stamboom knop TERUG
+        const pedigreeBtn = container.querySelector('.btn-pedigree');
+        if (pedigreeBtn) {
+            pedigreeBtn.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                const dogId = parseInt(pedigreeBtn.getAttribute('data-dog-id'));
+                await this.openPedigree(dogId);
+            });
+        }
+        
         if (isParentView) {
             const backButton = container.querySelector('.back-button');
             if (backButton) {
@@ -1158,6 +1195,58 @@ class SearchManager extends BaseModule {
         console.log('=== EINDE DEBUG ===');
     }
     
+    async loadAndDisplayPhotos(dog) {
+        try {
+            const photos = await this.getDogPhotos(dog.id);
+            const container = document.getElementById('detailsContainer');
+            const photosGrid = container.querySelector(`#photosGrid${dog.id}`);
+            
+            if (!photosGrid || photos.length === 0) {
+                return;
+            }
+            
+            let photosHTML = '';
+            photos.forEach((photo, index) => {
+                let photoUrl = '';
+                if (photo.data && typeof photo.data === 'string') {
+                    const mimeType = photo.type || 'image/jpeg';
+                    let cleanData = photo.data;
+                    if (cleanData.startsWith('data:')) {
+                        cleanData = cleanData.split(',')[1];
+                    }
+                    photoUrl = `data:${mimeType};base64,${cleanData}`;
+                } else if (photo.url) {
+                    photoUrl = photo.url;
+                } else if (photo.filePath) {
+                    photoUrl = photo.filePath;
+                }
+                
+                if (photoUrl) {
+                    photosHTML += `
+                        <div class="photo-thumbnail" 
+                             data-photo-id="${photo.id}" 
+                             data-dog-id="${dog.id}" 
+                             data-photo-index="${index}"
+                             data-photo-src="${photoUrl}">
+                            <img src="${photoUrl}" 
+                                 alt="${dog.naam || ''} - ${photo.filename || ''}" 
+                                 class="thumbnail-img"
+                                 loading="lazy">
+                            <div class="photo-hover">
+                                <i class="bi bi-zoom-in"></i>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            photosGrid.innerHTML = photosHTML;
+            
+        } catch (error) {
+            console.error('Fout bij laden foto\'s:', error);
+        }
+    }
+    
     showParentDetails(parentId, originalDogId) {
         const parent = this.allDogs.find(d => d.id === parentId);
         if (parent) {
@@ -1169,6 +1258,28 @@ class SearchManager extends BaseModule {
                     item.classList.add('selected');
                 }
             });
+        }
+    }
+    
+    async openPedigree(dogId) {
+        try {
+            if (!this.stamboomManager) {
+                console.log('Initializing StamboomManager...');
+                this.stamboomManager = new StamboomManager(this.db, this.currentLang);
+                await this.stamboomManager.initialize();
+            }
+            
+            const dog = this.allDogs.find(d => d.id === dogId);
+            if (!dog) {
+                this.showError("Hond niet gevonden");
+                return;
+            }
+            
+            this.stamboomManager.showPedigree(dog);
+            
+        } catch (error) {
+            console.error('Fout bij openen stamboom:', error);
+            this.showError(`Fout bij openen stamboom: ${error.message}`);
         }
     }
     
