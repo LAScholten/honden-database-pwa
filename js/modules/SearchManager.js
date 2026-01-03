@@ -291,7 +291,7 @@ class SearchManager extends BaseModule {
                 // Stamboom buttons
                 pedigreeButton: "Ahnentafel",
                 pedigreeTitle: "Ahnentafel von {name}",
-                generatingPedigree: "Ahnentafel wird generiert...",
+                generatingPedigree: "Ahnentafel wordt generiert...",
                 openPedigree: "Ahnentafel öffnen",
                 pedigree4Gen: "4-Generationen Ahnentafel",
                 
@@ -1229,10 +1229,7 @@ class SearchManager extends BaseModule {
         const searchModal = document.getElementById('searchModal');
         if (searchModal) {
             searchModal.addEventListener('hidden.bs.modal', () => {
-                // Wacht 100ms om zeker te zijn dat de modal volledig gesloten is
-                setTimeout(() => {
-                    this.resetSearchState();
-                }, 100);
+                this.resetSearchState();
             });
         }
         
@@ -1242,19 +1239,13 @@ class SearchManager extends BaseModule {
         
         if (closeBtn) {
             closeBtn.addEventListener('click', () => {
-                // Wacht even voordat we resetten
-                setTimeout(() => {
-                    this.resetSearchState();
-                }, 50);
+                this.resetSearchState();
             });
         }
         
         if (closeBtnFooter) {
             closeBtnFooter.addEventListener('click', () => {
-                // Wacht even voordat we resetten
-                setTimeout(() => {
-                    this.resetSearchState();
-                }, 50);
+                this.resetSearchState();
             });
         }
     }
@@ -1263,6 +1254,17 @@ class SearchManager extends BaseModule {
     resetSearchState() {
         // Reset mobiele collapsed state
         this.isMobileCollapsed = false;
+        
+        // Reset filteredDogs
+        this.filteredDogs = [];
+        
+        // Controleer of de modal nog open is voordat we DOM manipulatie doen
+        const searchModal = document.getElementById('searchModal');
+        if (searchModal && !searchModal.classList.contains('show')) {
+            // Modal is gesloten, alleen interne state resetten
+            console.log('Modal is gesloten, alleen interne state gereset');
+            return; // Stop hier, doe geen DOM manipulatie
+        }
         
         // Herstel de oorspronkelijke layout
         const searchColumn = document.getElementById('searchColumn');
@@ -1287,18 +1289,9 @@ class SearchManager extends BaseModule {
         if (nameInput) nameInput.value = '';
         if (kennelInput) kennelInput.value = '';
         
-        // Controleer of de modal nog open is voordat we DOM manipulatie doen
-        const searchModal = document.getElementById('searchModal');
-        if (searchModal && !searchModal.classList.contains('show')) {
-            // Modal is gesloten, geen DOM manipulatie proberen
-            console.log('Modal is gesloten, skip showInitialView en clearDetails');
-        } else {
-            this.showInitialView();
-            this.clearDetails();
-        }
-        
-        // Reset filteredDogs
-        this.filteredDogs = [];
+        // Toon initieel scherm
+        this.showInitialView();
+        this.clearDetails();
         
         console.log('Search state reset na sluiten modal');
     }
