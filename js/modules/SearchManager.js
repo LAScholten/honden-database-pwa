@@ -1199,20 +1199,12 @@ class SearchManager extends BaseModule {
         this.setupNameSearch();
         this.setupKennelSearch();
         
-        // NIEUW: Event listener voor het sluiten van de modal
         this.setupModalCloseEvents();
     }
     
-    // NIEUWE METHODE: Setup event listeners voor modal sluiten
     setupModalCloseEvents() {
-        // Event listener voor wanneer de modal gesloten wordt
         const searchModal = document.getElementById('searchModal');
         if (searchModal) {
-            // Verwijder eerst bestaande event listeners
-            searchModal.removeEventListener('hide.bs.modal', this.modalHideHandler);
-            searchModal.removeEventListener('hidden.bs.modal', this.modalHiddenHandler);
-            
-            // Definieer handlers
             this.modalHideHandler = () => {
                 this.modalClosing = true;
             };
@@ -1222,12 +1214,10 @@ class SearchManager extends BaseModule {
                 this.modalClosing = false;
             };
             
-            // Voeg nieuwe event listeners toe
             searchModal.addEventListener('hide.bs.modal', this.modalHideHandler.bind(this));
             searchModal.addEventListener('hidden.bs.modal', this.modalHiddenHandler.bind(this));
         }
         
-        // Event listeners voor sluitknoppen
         const closeBtn = document.getElementById('searchModalCloseBtn');
         const closeBtnFooter = document.getElementById('searchModalCloseBtnFooter');
         
@@ -1252,29 +1242,21 @@ class SearchManager extends BaseModule {
         }
     }
     
-    // NIEUWE METHODE: Reset de zoekstatus wanneer modal gesloten wordt
     resetSearchState() {
-        // Reset mobiele collapsed state
         this.isMobileCollapsed = false;
-        
-        // Reset filteredDogs
         this.filteredDogs = [];
         
-        // Controleer of we in een modal closing state zijn
         if (this.modalClosing) {
             console.log('Modal is aan het sluiten, alleen interne state gereset');
             return;
         }
         
-        // Controleer of de modal nog open is voordat we DOM manipulatie doen
         const searchModal = document.getElementById('searchModal');
         if (!searchModal || !searchModal.classList.contains('show')) {
-            // Modal is gesloten, alleen interne state resetten
             console.log('Modal is gesloten, alleen interne state gereset');
             return;
         }
         
-        // Herstel de oorspronkelijke layout
         const searchColumn = document.getElementById('searchColumn');
         const detailsColumn = document.getElementById('detailsColumn');
         
@@ -1283,21 +1265,18 @@ class SearchManager extends BaseModule {
             detailsColumn.classList.remove('col-12');
             detailsColumn.classList.add('col-md-7');
             
-            // Verwijder mobiele terugknop als die er is
             const backButtonDiv = document.querySelector('.mobile-back-button');
             if (backButtonDiv) {
                 backButtonDiv.remove();
             }
         }
         
-        // Clear zoekvelden
         const nameInput = document.getElementById('searchNameInput');
         const kennelInput = document.getElementById('searchKennelInput');
         
         if (nameInput) nameInput.value = '';
         if (kennelInput) kennelInput.value = '';
         
-        // Toon initieel scherm
         this.showInitialView();
         this.clearDetails();
         
@@ -1454,10 +1433,8 @@ class SearchManager extends BaseModule {
             const naam = dog.naam ? dog.naam.toLowerCase() : '';
             const kennelnaam = dog.kennelnaam ? dog.kennelnaam.toLowerCase() : '';
             
-            // Creëer een gecombineerde string: "naam kennelnaam"
             const combined = `${naam} ${kennelnaam}`;
             
-            // Controleer of de gecombineerde string begint met de zoekterm
             return combined.startsWith(searchTerm);
         });
         
@@ -1530,7 +1507,6 @@ class SearchManager extends BaseModule {
                 const hondId = parseInt(item.getAttribute('data-id'));
                 this.selectDogById(hondId);
                 
-                // Verberg de dropdown op mobiele apparaten
                 if (window.innerWidth <= 768) {
                     this.collapseSearchResultsOnMobile();
                 }
@@ -1539,7 +1515,6 @@ class SearchManager extends BaseModule {
     }
     
     collapseSearchResultsOnMobile() {
-        // Op mobiel schermen, toon alleen de details en verberg de zoekresultaten
         if (window.innerWidth <= 768 && !this.isMobileCollapsed) {
             const searchColumn = document.getElementById('searchColumn');
             const detailsColumn = document.getElementById('detailsColumn');
@@ -1550,7 +1525,6 @@ class SearchManager extends BaseModule {
                 detailsColumn.classList.add('col-12');
                 this.isMobileCollapsed = true;
                 
-                // Voeg een terugknop toe voor mobiele weergave
                 this.addMobileBackButton();
             }
         }
@@ -1560,13 +1534,11 @@ class SearchManager extends BaseModule {
         const detailsContainer = document.getElementById('detailsContainer');
         if (!detailsContainer) return;
         
-        // Verwijder bestaande terugknop als die er al is
         const existingButton = detailsContainer.querySelector('.mobile-back-button');
         if (existingButton) {
-            return; // Knop bestaat al, niet opnieuw toevoegen
+            return;
         }
         
-        // Maak terugknop
         const backButtonDiv = document.createElement('div');
         backButtonDiv.className = 'mobile-back-button';
         backButtonDiv.innerHTML = `
@@ -1575,12 +1547,10 @@ class SearchManager extends BaseModule {
             </button>
         `;
         
-        // Voeg event listener toe
         backButtonDiv.querySelector('button').addEventListener('click', () => {
             this.restoreSearchViewOnMobile();
         });
         
-        // Voeg de knop toe aan het begin van de details
         const firstChild = detailsContainer.firstChild;
         if (firstChild) {
             detailsContainer.insertBefore(backButtonDiv, firstChild);
@@ -1599,13 +1569,11 @@ class SearchManager extends BaseModule {
             detailsColumn.classList.add('col-md-7');
             this.isMobileCollapsed = false;
             
-            // Verwijder de terugknop
             const backButtonDiv = document.querySelector('.mobile-back-button');
             if (backButtonDiv) {
                 backButtonDiv.remove();
             }
             
-            // HERSTEL DE ZOEKRESULTATEN VOOR MOBIEL
             const searchInput = this.searchType === 'name' ? 
                 document.getElementById('searchNameInput') : 
                 document.getElementById('searchKennelInput');
@@ -1636,7 +1604,6 @@ class SearchManager extends BaseModule {
         
         this.showDogDetails(dog);
         
-        // Verberg de dropdown op mobiele apparaten
         if (window.innerWidth <= 768) {
             this.collapseSearchResultsOnMobile();
         }
@@ -1649,23 +1616,20 @@ class SearchManager extends BaseModule {
         }
     }
     
-    // BELANGRIJK AANPASSING: showDogDetails herschreven om dezelfde logica als DogDataManager te gebruiken
+    // BELANGRIJK: showDogDetails herschreven met correcte ouderzoeklogica
     async showDogDetails(dog, isParentView = false, originalDogId = null) {
         const t = this.t.bind(this);
         const container = document.getElementById('detailsContainer');
         
         if (!container) return;
         
-        // Container leegmaken
         container.innerHTML = '';
         
-        // Mobiele terugknop toevoegen indien nodig
         if (this.isMobileCollapsed && window.innerWidth <= 768) {
             this.addMobileBackButton();
         }
         
-        // BELANGRIJK: Gebruik de tekstuele vader/moeder velden net zoals DogDataManager
-        // NIET de vaderId/moederId velden proberen op te zoeken
+        // BELANGRIJK: Ouderzoeklogica op basis van ID's (zoals DogDataManager opslaat)
         let fatherInfo = { 
             naam: dog.vader || t('parentsUnknown'), 
             stamboomnr: '', 
@@ -1680,38 +1644,74 @@ class SearchManager extends BaseModule {
             kennelnaam: '' 
         };
         
-        // Optioneel: Probeer aanvullende info op te halen voor ouders als hun namen bekend zijn
-        if (dog.vader && dog.vader.trim() !== '') {
-            // Zoek vader in allDogs op naam (net zoals DogDataManager doet in de autocomplete)
-            const father = this.allDogs.find(d => 
-                d.naam === dog.vader || 
-                `${d.naam} ${d.kennelnaam}` === dog.vader
-            );
-            if (father) {
+        // BELANGRIJK: Eerst zoeken op ID zoals DogDataManager gebruikt
+        // Controleer of vaderId bestaat EN of de tekstuele vader naam overeenkomt met de ID
+        if (dog.vaderId) {
+            // Zoek vader in allDogs op ID
+            const fatherById = this.allDogs.find(d => d.id === dog.vaderId);
+            if (fatherById) {
                 fatherInfo = { 
-                    id: father.id,
-                    naam: father.naam || dog.vader,
-                    stamboomnr: father.stamboomnr || '',
-                    ras: father.ras || '',
-                    kennelnaam: father.kennelnaam || ''
+                    id: fatherById.id,
+                    naam: fatherById.naam || dog.vader,
+                    stamboomnr: fatherById.stamboomnr || '',
+                    ras: fatherById.ras || '',
+                    kennelnaam: fatherById.kennelnaam || ''
                 };
+                console.log(`Vader gevonden via ID ${dog.vaderId}: ${fatherInfo.naam}`);
             }
         }
         
-        if (dog.moeder && dog.moeder.trim() !== '') {
-            // Zoek moeder in allDogs op naam
-            const mother = this.allDogs.find(d => 
-                d.naam === dog.moeder || 
-                `${d.naam} ${d.kennelnaam}` === dog.moeder
-            );
-            if (mother) {
-                motherInfo = { 
-                    id: mother.id,
-                    naam: mother.naam || dog.moeder,
-                    stamboomnr: mother.stamboomnr || '',
-                    ras: mother.ras || '',
-                    kennelnaam: mother.kennelnaam || ''
+        // ALTERNATIEF: Zoek vader op naam als ID niet werkt
+        if (!fatherInfo.id && dog.vader && dog.vader.trim() !== '') {
+            // Zoek op exacte combinatie van "naam kennelnaam" zoals DogDataManager opslaat
+            const fatherByName = this.allDogs.find(d => {
+                const fullName = `${d.naam || ''} ${d.kennelnaam || ''}`.trim();
+                return fullName === dog.vader.trim();
+            });
+            
+            if (fatherByName) {
+                fatherInfo = { 
+                    id: fatherByName.id,
+                    naam: fatherByName.naam || dog.vader,
+                    stamboomnr: fatherByName.stamboomnr || '',
+                    ras: fatherByName.ras || '',
+                    kennelnaam: fatherByName.kennelnaam || ''
                 };
+                console.log(`Vader gevonden via naam "${dog.vader}": ${fatherInfo.naam}`);
+            }
+        }
+        
+        // Moeder: eerst zoeken op ID
+        if (dog.moederId) {
+            const motherById = this.allDogs.find(d => d.id === dog.moederId);
+            if (motherById) {
+                motherInfo = { 
+                    id: motherById.id,
+                    naam: motherById.naam || dog.moeder,
+                    stamboomnr: motherById.stamboomnr || '',
+                    ras: motherById.ras || '',
+                    kennelnaam: motherById.kennelnaam || ''
+                };
+                console.log(`Moeder gevonden via ID ${dog.moederId}: ${motherInfo.naam}`);
+            }
+        }
+        
+        // ALTERNATIEF: Zoek moeder op naam als ID niet werkt
+        if (!motherInfo.id && dog.moeder && dog.moeder.trim() !== '') {
+            const motherByName = this.allDogs.find(d => {
+                const fullName = `${d.naam || ''} ${d.kennelnaam || ''}`.trim();
+                return fullName === dog.moeder.trim();
+            });
+            
+            if (motherByName) {
+                motherInfo = { 
+                    id: motherByName.id,
+                    naam: motherByName.naam || dog.moeder,
+                    stamboomnr: motherByName.stamboomnr || '',
+                    ras: motherByName.ras || '',
+                    kennelnaam: motherByName.kennelnaam || ''
+                };
+                console.log(`Moeder gevonden via naam "${dog.moeder}": ${motherInfo.naam}`);
             }
         }
         
@@ -1722,7 +1722,7 @@ class SearchManager extends BaseModule {
                 return date.toLocaleDateString(this.currentLang === 'nl' ? 'nl-NL' : 
                                               this.currentLang === 'de' ? 'de-DE' : 'en-US');
             } catch (e) {
-                return dateString; // Als datum niet geparsed kan worden, toon de originele string
+                return dateString;
             }
         };
         
@@ -1773,7 +1773,6 @@ class SearchManager extends BaseModule {
         const genderText = dog.geslacht === 'reuen' ? t('male') : 
                           dog.geslacht === 'teven' ? t('female') : t('unknown');
         
-        // Check of deze hond foto's heeft
         const hasPhotos = await this.checkDogHasPhotos(dog.id);
         
         const html = `
@@ -1797,7 +1796,6 @@ class SearchManager extends BaseModule {
                             <div class="dog-name-header">${displayValue(dog.naam)}</div>
                             ${dog.kennelnaam ? `<div class="text-muted mb-2">${displayValue(dog.kennelnaam)}</div>` : ''}
                             
-                            <!-- VOLGORDE: Stamboomnummer + Ras + Geslacht + Vachtkleur - ACHTER ELKAAR -->
                             <div class="dog-detail-header-line mt-2">
                                 ${dog.stamboomnr ? `<span class="stamboom">${dog.stamboomnr}</span>` : ''}
                                 ${dog.ras ? `<span class="ras">${dog.ras}</span>` : ''}
@@ -1808,7 +1806,6 @@ class SearchManager extends BaseModule {
                             </div>
                         </div>
                         <div class="text-end">
-                            <!-- Geboortedatum -->
                             ${dog.geboortedatum ? `
                             <div class="text-muted">
                                 <i class="bi bi-calendar me-1"></i>
@@ -1816,7 +1813,6 @@ class SearchManager extends BaseModule {
                             </div>
                             ` : ''}
                             
-                            <!-- Overlijdensdatum -->
                             ${dog.overlijdensdatum ? `
                             <div class="text-muted ${dog.geboortedatum ? 'mt-1' : ''}">
                                 <i class="bi bi-calendar-x me-1"></i>
@@ -1828,7 +1824,6 @@ class SearchManager extends BaseModule {
                 </div>
                 
                 <div class="details-body">
-                    <!-- FOTO'S SECTIE BOVENAAN -->
                     ${hasPhotos ? `
                     <div class="photos-section">
                         <div class="photos-title">
@@ -1849,7 +1844,6 @@ class SearchManager extends BaseModule {
                             <div>
                                 <i class="bi bi-people me-1"></i> ${t('parents')}
                             </div>
-                            <!-- STAMBOOM KNOOP -->
                             <button class="btn btn-sm btn-outline-primary btn-pedigree" data-dog-id="${dog.id}">
                                 <i class="bi bi-diagram-3 me-1"></i> ${t('pedigreeButton')}
                             </button>
@@ -1984,12 +1978,10 @@ class SearchManager extends BaseModule {
         
         container.insertAdjacentHTML('beforeend', html);
         
-        // Laad foto's asynchroon
         if (hasPhotos) {
             this.loadAndDisplayPhotos(dog);
         }
         
-        // Event listeners voor ouders als we een ID hebben gevonden
         if (fatherInfo.id) {
             const fatherCard = container.querySelector('.father-card');
             if (fatherCard) {
@@ -2012,7 +2004,6 @@ class SearchManager extends BaseModule {
             }
         }
         
-        // Event listeners voor stamboom knop
         container.querySelectorAll('.btn-pedigree').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.stopPropagation();
@@ -2035,7 +2026,6 @@ class SearchManager extends BaseModule {
         }
     }
     
-    // METHODE: Foto's laden en tonen
     async loadAndDisplayPhotos(dog) {
         try {
             const photos = await this.getDogPhotos(dog.id);
@@ -2102,7 +2092,6 @@ class SearchManager extends BaseModule {
         }
     }
     
-    // NIEUWE METHODE: Stamboom openen
     async openPedigree(dogId) {
         try {
             if (!this.stamboomManager) {
