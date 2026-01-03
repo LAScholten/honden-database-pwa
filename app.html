@@ -119,52 +119,6 @@
             margin-right: 10px;
             font-weight: bold;
         }
-        
-        /* Mobiele weergave aanpassingen */
-        @media (max-width: 768px) {
-            .mobile-nav-buttons {
-                display: flex;
-                flex-direction: column;
-                gap: 4px;
-                margin-left: 10px;
-            }
-            
-            .mobile-nav-buttons .btn {
-                font-size: 0.75rem;
-                padding: 4px 8px;
-                white-space: nowrap;
-                min-width: 120px;
-            }
-            
-            .nav-buttons-desktop {
-                display: none;
-            }
-            
-            .navbar-brand span {
-                font-size: 0.9rem;
-            }
-            
-            #currentUser {
-                font-size: 0.8rem;
-            }
-            
-            .text-white.me-3 {
-                margin-right: 5px !important;
-            }
-        }
-        
-        /* Desktop weergave */
-        @media (min-width: 769px) {
-            .mobile-nav-buttons {
-                display: none;
-            }
-            
-            .nav-buttons-desktop {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            }
-        }
     </style>
 </head>
 <body>
@@ -197,29 +151,14 @@
                     <span id="currentUser">Gebruiker</span>
                 </span>
                 
-                <!-- Desktop: knoppen naast elkaar -->
-                <div class="nav-buttons-desktop">
-                    <!-- PWA Installatie Knop - ALTIJD ZICHTBAAR -->
-                    <button class="btn btn-success btn-sm me-2" id="pwaInstallBtn">
-                        <i class="bi bi-download"></i> Installeer App
-                    </button>
-                    
-                    <button class="btn btn-outline-light btn-sm" id="logoutBtn">
-                        <i class="bi bi-box-arrow-right"></i> <span class="app-text" data-key="logout">Uitloggen</span>
-                    </button>
-                </div>
+                <!-- PWA Installatie Knop - ALTIJD ZICHTBAAR -->
+                <button class="btn btn-success btn-sm me-2" id="pwaInstallBtn">
+                    <i class="bi bi-download"></i> Installeer App
+                </button>
                 
-                <!-- Mobile: knoppen onder elkaar op dezelfde plek -->
-                <div class="mobile-nav-buttons">
-                    <!-- PWA Installatie Knop -->
-                    <button class="btn btn-success btn-sm" id="pwaInstallBtnMobile">
-                        <i class="bi bi-download"></i> Installeer
-                    </button>
-                    
-                    <button class="btn btn-outline-light btn-sm" id="logoutBtnMobile">
-                        <i class="bi bi-box-arrow-right"></i> <span class="app-text" data-key="logout">Uitloggen</span>
-                    </button>
-                </div>
+                <button class="btn btn-outline-light btn-sm" id="logoutBtn">
+                    <i class="bi bi-box-arrow-right"></i> <span class="app-text" data-key="logout">Uitloggen</span>
+                </button>
             </div>
         </div>
     </nav>
@@ -487,6 +426,9 @@
     <!-- Base Module -->
     <script src="js/modules/BaseModule.js"></script>
     
+    <!-- COICalculator apart bestand - HIEROP VOLGENS MOET STAMBOOMMANAGER LADEN -->
+    <script src="js/modules/COICalculator.js"></script>
+    
     <!-- Feature Modules -->
     <script src="js/modules/DataManager.js"></script>
     <script src="js/modules/DogManager.js"></script>
@@ -496,7 +438,8 @@
     <script src="js/modules/PhotoManager.js"></script>
     <script src="js/modules/BreedingManager.js"></script>
     <script src="js/modules/PrivateInfoManager.js"></script>
-    <!-- NIEUW: StamboomManager -->
+    
+    <!-- StamboomManager (nu vindt hij COICalculator omdat die EERDER wordt geladen) -->
     <script src="js/modules/StamboomManager.js"></script>
     
     <!-- Main UI Handler -->
@@ -645,7 +588,7 @@
                 refresh: "Aktualisieren",
                 dashboard: "Dashboard",
                 welcomeTitle: "Willkommen bei der Hundendatenbank PWA",
-                welcomeText: "Wählen Sie eine option aus dem Menü, um zu beginnen. Die Anwendung funktioniert vollständig offline.",
+                welcomeText: "Wählen Sie eine option aus dem menü, um zu beginnen. Die anwendung funktioniert vollständig offline.",
                 aboutApp: "Über diese App",
                 appDescription: "Diese PWA (Progressive Web App) speichert alle Daten lokal in Ihrem Browser. Sie können:",
                 feature1: "Hunde hinzufügen en verwalten",
@@ -659,14 +602,14 @@
                 adminRole: "Administrator",
                 adminRights: "Volle Rechte, einschließlich neuer Hunde hinzufügen.",
                 userRole: "Benutzer",
-                userRights: "Kann Daten importieren/exportieren und ansehen, aber keine neuen Hunde hinzufügen of bearbeiten.",
+                userRights: "Kann Daten importieren/exportieren und ansehen, aber keine neuen Hunde hinzufügen oder bearbeiten.",
                 
                 // Backup Texte
                 backupNow: "Backup",
                 learnMore: "Info",
                 backupWarningTitle: "Backup empfohlen",
                 backupNowDashboard: "Jetzt Backup erstellen",
-                dismissBackup: "Nicht mehr anzeigen",
+                dismissBackup: "Nicht meer anzeigen",
                 backupModalTitle: "Data Backup - Warum is das wichtig?",
                 backupRisksTitle: "Risiken zonder Backup",
                 backupRisksText1: "Diese App speichert alle Daten <strong>nur lokal in Ihrem Browser</strong>.",
@@ -682,13 +625,13 @@
                 backupStatusWarning: "⚠ Letztes Backup: vor {days} Tagen",
                 backupStatusDanger: "🚨 NOCH NIE gebackupt!",
                 dashboardWarningNever: "Sie haben noch nie ein Backup erstellt! Wenn Sie Browser-Daten löschen, verlieren Sie alle Ihre Hundeaufzeichnungen.",
-                dashboardWarningOld: "Ihr letztes Backup was vor {days} Tagen. Erwägen Sie, ein neues Backup zu erstellen, um Datenverlust zu vermeiden.",
+                dashboardWarningOld: "Ihr letztes Backup war vor {days} Tagen. Erwägen Sie, ein neues Backup te maken, um Datenverlust te vermeiden.",
                 
                 installPWA: "App installieren"
             }
         };
 
-        // Backup status management - GEÜPDATE VERSIE
+        // Backup status management
         const backupManager = {
             storageKey: 'honden_backup_history',
             warningDays: 7,
@@ -832,7 +775,6 @@
                 }
             },
             
-            // CORRECTIE: WERKENDE recordBackup functie toegevoegd
             recordBackup: function() {
                 const backupEntry = {
                     date: new Date().toISOString(),
@@ -964,6 +906,13 @@
                 
                 console.log('UIHandler succesvol geïnitialiseerd:', ui);
                 
+                // Controleer of COICalculator beschikbaar is
+                if (typeof COICalculator === 'undefined') {
+                    console.error('COICalculator is niet beschikbaar! Controleer de laadvolgorde.');
+                } else {
+                    console.log('COICalculator is beschikbaar:', COICalculator);
+                }
+                
                 // Initialiseer taal
                 translateAppPage(appLanguage);
                 
@@ -1033,19 +982,16 @@
         function setupOtherEventListeners() {
             console.log('Setting up other event listeners');
             
-            // Uitloggen - beide knoppen
-            const logoutButtons = ['logoutBtn', 'logoutBtnMobile'];
-            logoutButtons.forEach(btnId => {
-                const logoutBtn = document.getElementById(btnId);
-                if (logoutBtn) {
-                    logoutBtn.addEventListener('click', function() {
-                        console.log('Logout button clicked:', btnId);
-                        auth.logout();
-                    });
-                } else {
-                    console.error('Logout button not found:', btnId);
-                }
-            });
+            // Uitloggen
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function() {
+                    console.log('Logout button clicked');
+                    auth.logout();
+                });
+            } else {
+                console.error('Logout button not found');
+            }
             
             // Vernieuw statistieken
             const refreshStatsBtn = document.getElementById('refreshStatsBtn');
@@ -1073,16 +1019,12 @@
         
         // PWA INSTALLATIE - SIMPELE WERKENDE VERSIE
         function setupPWAInstallation() {
-            const pwaInstallButtons = ['pwaInstallBtn', 'pwaInstallBtnMobile'];
+            const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+            if (!pwaInstallBtn) return;
             
-            pwaInstallButtons.forEach(btnId => {
-                const pwaInstallBtn = document.getElementById(btnId);
-                if (pwaInstallBtn) {
-                    // ALTIJD klikbaar maken
-                    pwaInstallBtn.addEventListener('click', function() {
-                        showInstallInstructions();
-                    });
-                }
+            // ALTIJD klikbaar maken
+            pwaInstallBtn.addEventListener('click', function() {
+                showInstallInstructions();
             });
         }
         
@@ -1207,14 +1149,11 @@
             window.deferredPrompt = e;
             
             // Update knop tekst als installatie beschikbaar is
-            const pwaInstallButtons = ['pwaInstallBtn', 'pwaInstallBtnMobile'];
-            pwaInstallButtons.forEach(btnId => {
-                const pwaInstallBtn = document.getElementById(btnId);
-                if (pwaInstallBtn) {
-                    pwaInstallBtn.innerHTML = '<i class="bi bi-download"></i> Klik om te Installeren';
-                    pwaInstallBtn.classList.add('btn-warning');
-                }
-            });
+            const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+            if (pwaInstallBtn) {
+                pwaInstallBtn.innerHTML = '<i class="bi bi-download"></i> Klik om te Installeren';
+                pwaInstallBtn.classList.add('btn-warning');
+            }
         });
         
         // Wanneer app is geïnstalleerd
@@ -1222,16 +1161,13 @@
             console.log('PWA succesvol geïnstalleerd!');
             deferredPrompt = null;
             
-            const pwaInstallButtons = ['pwaInstallBtn', 'pwaInstallBtnMobile'];
-            pwaInstallButtons.forEach(btnId => {
-                const pwaInstallBtn = document.getElementById(btnId);
-                if (pwaInstallBtn) {
-                    pwaInstallBtn.innerHTML = '<i class="bi bi-check-circle"></i> Geïnstalleerd!';
-                    pwaInstallBtn.classList.remove('btn-warning', 'btn-success');
-                    pwaInstallBtn.classList.add('btn-secondary');
-                    pwaInstallBtn.disabled = true;
-                }
-            });
+            const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+            if (pwaInstallBtn) {
+                pwaInstallBtn.innerHTML = '<i class="bi bi-check-circle"></i> Geïnstalleerd!';
+                pwaInstallBtn.classList.remove('btn-warning', 'btn-success');
+                pwaInstallBtn.classList.add('btn-secondary');
+                pwaInstallBtn.disabled = true;
+            }
             
             if (ui && ui.showSuccess) {
                 ui.showSuccess('App succesvol geïnstalleerd!');

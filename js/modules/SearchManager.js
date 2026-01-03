@@ -14,6 +14,7 @@ class SearchManager extends BaseModule {
         this.stamboomManager = null; // Wordt later geïnitialiseerd
         this.isMobileCollapsed = false; // Track of mobiele weergave collapsed is
         this.dogPhotosCache = new Map(); // Cache voor hondenfoto's - NET ALS STAMBOOMMANAGER
+        this.modalClosing = false; // Track of modal aan het sluiten is
         
         // Vertalingen uitgebreid met pedigree knop en foto's
         this.translations = {
@@ -267,12 +268,12 @@ class SearchManager extends BaseModule {
                 viewingParent: "Elternteil ansehen",
                 clickToView: "Klicken für Details",
                 parents: "Eltern",
-                noHealthInfo: "Keine Gesundheitsinformationen verfügbar",
+                noHealthInfo: "Keine Gesundheidsinformationen verfügbar",
                 noAdditionalInfo: "Keine zusätzlichen Informationen verfügbar",
                 selectDogToView: "Wählen Sie einen Hund, um Details zu sehen",
                 
                 // Hund Details
-                birthDate: "Geburtsdatum",
+                birthDate: "Geboortedatum",
                 deathDate: "Sterbedatum",
                 hipDysplasia: "Hüftdysplasie",
                 elbowDysplasia: "Ellbogendysplasie",
@@ -291,7 +292,7 @@ class SearchManager extends BaseModule {
                 // Stamboom buttons
                 pedigreeButton: "Ahnentafel",
                 pedigreeTitle: "Ahnentafel von {name}",
-                generatingPedigree: "Ahnentafel wird generiert...",
+                generatingPedigree: "Ahnentafel wordt generiert...",
                 openPedigree: "Ahnentafel öffnen",
                 pedigree4Gen: "4-Generationen Ahnentafel",
                 
@@ -309,7 +310,7 @@ class SearchManager extends BaseModule {
             }
         };
         
-        // Event delegation setup voor foto clicks - NET ALS IN STAMBOOMMANAGER
+        // Event delegation setup voor foto clicks - NET ALS STAMBOOMMANAGER
         this.setupGlobalEventListeners();
     }
     
@@ -503,7 +504,7 @@ class SearchManager extends BaseModule {
                             <h5 class="modal-title" id="searchModalLabel">
                                 <i class="bi bi-search me-2"></i> ${t('searchDog')}
                             </h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${t('close')}"></button>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${t('close')}" id="searchModalCloseBtn"></button>
                         </div>
                         <div class="modal-body p-0">
                             <div class="container-fluid">
@@ -573,7 +574,7 @@ class SearchManager extends BaseModule {
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="searchModalCloseBtnFooter">
                                 <i class="bi bi-x-circle me-1"></i> ${t('close')}
                             </button>
                         </div>
@@ -884,9 +885,11 @@ class SearchManager extends BaseModule {
                     color: #212529;
                 }
                 
+                /* AANPASSING: vachtkleur nu in dezelfde grootte als de rest */
                 .dog-detail-header-line .vachtkleur {
                     color: #d63384;
                     font-weight: 500;
+                    font-size: 0.95rem; /* Zelfde grootte als de andere elementen */
                 }
                 
                 /* ============================================= */
@@ -1139,13 +1142,15 @@ class SearchManager extends BaseModule {
                         max-height: 65vh;
                     }
                     
-                    /* AANPASSING: Stamboomnummer, ras en geslacht iets kleiner op mobiel */
+                    /* AANPASSING: Stamboomnummer, ras, geslacht EN vachtkleur iets kleiner op mobiel */
                     .dog-details-line .stamboom,
                     .dog-details-line .ras,
                     .dog-details-line .geslacht,
+                    .dog-details-line .vachtkleur,
                     .dog-detail-header-line .stamboom,
                     .dog-detail-header-line .ras,
-                    .dog-detail-header-line .geslacht {
+                    .dog-detail-header-line .geslacht,
+                    .dog-detail-header-line .vachtkleur {
                         font-size: 0.85rem !important; /* Iets kleiner dan 0.95rem */
                     }
                 }
@@ -1214,6 +1219,110 @@ class SearchManager extends BaseModule {
         
         this.setupNameSearch();
         this.setupKennelSearch();
+        
+        // NIEUW: Event listener voor het sluiten van de modal
+        this.setupModalCloseEvents();
+    }
+    
+    // NIEUWE METHODE: Setup event listeners voor modal sluiten
+    setupModalCloseEvents() {
+        // Event listener voor wanneer de modal gesloten wordt
+        const searchModal = document.getElementById('searchModal');
+        if (searchModal) {
+            // Verwijder eerst bestaande event listeners
+            searchModal.removeEventListener('hide.bs.modal', this.modalHideHandler);
+            searchModal.removeEventListener('hidden.bs.modal', this.modalHiddenHandler);
+            
+            // Definieer handlers
+            this.modalHideHandler = () => {
+                this.modalClosing = true;
+            };
+            
+            this.modalHiddenHandler = () => {
+                this.resetSearchState();
+                this.modalClosing = false;
+            };
+            
+            // Voeg nieuwe event listeners toe
+            searchModal.addEventListener('hide.bs.modal', this.modalHideHandler.bind(this));
+            searchModal.addEventListener('hidden.bs.modal', this.modalHiddenHandler.bind(this));
+        }
+        
+        // Event listeners voor sluitknoppen
+        const closeBtn = document.getElementById('searchModalCloseBtn');
+        const closeBtnFooter = document.getElementById('searchModalCloseBtnFooter');
+        
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                this.modalClosing = true;
+                setTimeout(() => {
+                    this.resetSearchState();
+                    this.modalClosing = false;
+                }, 100);
+            });
+        }
+        
+        if (closeBtnFooter) {
+            closeBtnFooter.addEventListener('click', () => {
+                this.modalClosing = true;
+                setTimeout(() => {
+                    this.resetSearchState();
+                    this.modalClosing = false;
+                }, 100);
+            });
+        }
+    }
+    
+    // NIEUWE METHODE: Reset de zoekstatus wanneer modal gesloten wordt
+    resetSearchState() {
+        // Reset mobiele collapsed state
+        this.isMobileCollapsed = false;
+        
+        // Reset filteredDogs
+        this.filteredDogs = [];
+        
+        // Controleer of we in een modal closing state zijn
+        if (this.modalClosing) {
+            console.log('Modal is aan het sluiten, alleen interne state gereset');
+            return;
+        }
+        
+        // Controleer of de modal nog open is voordat we DOM manipulatie doen
+        const searchModal = document.getElementById('searchModal');
+        if (!searchModal || !searchModal.classList.contains('show')) {
+            // Modal is gesloten, alleen interne state resetten
+            console.log('Modal is gesloten, alleen interne state gereset');
+            return;
+        }
+        
+        // Herstel de oorspronkelijke layout
+        const searchColumn = document.getElementById('searchColumn');
+        const detailsColumn = document.getElementById('detailsColumn');
+        
+        if (searchColumn && detailsColumn) {
+            searchColumn.classList.remove('d-none');
+            detailsColumn.classList.remove('col-12');
+            detailsColumn.classList.add('col-md-7');
+            
+            // Verwijder mobiele terugknop als die er is
+            const backButtonDiv = document.querySelector('.mobile-back-button');
+            if (backButtonDiv) {
+                backButtonDiv.remove();
+            }
+        }
+        
+        // Clear zoekvelden
+        const nameInput = document.getElementById('searchNameInput');
+        const kennelInput = document.getElementById('searchKennelInput');
+        
+        if (nameInput) nameInput.value = '';
+        if (kennelInput) kennelInput.value = '';
+        
+        // Toon initieel scherm
+        this.showInitialView();
+        this.clearDetails();
+        
+        console.log('Search state reset na sluiten modal');
     }
     
     switchSearchType(type) {
@@ -1306,6 +1415,12 @@ class SearchManager extends BaseModule {
     
     showInitialView() {
         const container = document.getElementById('searchResultsContainer');
+        // CONTROLEER EERST OF HET ELEMENT BESTAAT
+        if (!container) {
+            console.warn('searchResultsContainer niet gevonden bij showInitialView');
+            return;
+        }
+        
         const t = this.t.bind(this);
         
         const message = this.searchType === 'name' ? t('typeToSearch') : t('typeToSearchKennel');
@@ -1320,6 +1435,12 @@ class SearchManager extends BaseModule {
     
     clearDetails() {
         const container = document.getElementById('detailsContainer');
+        // CONTROLEER EERST OF HET ELEMENT BESTAAT
+        if (!container) {
+            console.warn('detailsContainer niet gevonden bij clearDetails');
+            return;
+        }
+        
         const t = this.t.bind(this);
         
         container.innerHTML = `
@@ -1517,11 +1638,23 @@ class SearchManager extends BaseModule {
                 backButtonDiv.remove();
             }
             
-            // Herstel de zoekfunctie
+            // HERSTEL DE ZOEKRESULTATEN VOOR MOBIEL - DEZE OPLOSSING FIXT HET PROBLEEM
             const searchInput = this.searchType === 'name' ? 
                 document.getElementById('searchNameInput') : 
                 document.getElementById('searchKennelInput');
             if (searchInput) {
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                if (searchTerm.length >= 1) {
+                    // Simuleer een input event om de zoekresultaten te vernieuwen
+                    const inputEvent = new Event('input', {
+                        bubbles: true,
+                        cancelable: true
+                    });
+                    searchInput.dispatchEvent(inputEvent);
+                } else {
+                    this.showInitialView();
+                    this.clearDetails();
+                }
                 searchInput.focus();
             }
         }
@@ -1556,10 +1689,12 @@ class SearchManager extends BaseModule {
         
         if (!container) return;
         
-        // Verwijder bestaande mobiele terugknop als die er is
-        const mobileBackButton = container.querySelector('.mobile-back-button');
-        if (mobileBackButton) {
-            mobileBackButton.remove();
+        // AANPASSING: Eerst de container volledig leegmaken voordat we nieuwe inhoud toevoegen
+        container.innerHTML = '';
+        
+        // Voeg mobiele terugknop toe indien nodig
+        if (this.isMobileCollapsed && window.innerWidth <= 768) {
+            this.addMobileBackButton();
         }
         
         let fatherInfo = { id: null, naam: t('parentsUnknown'), stamboomnr: '', ras: '', kennelnaam: '' };
@@ -1854,20 +1989,15 @@ class SearchManager extends BaseModule {
             </div>
         `;
         
-        container.innerHTML = html;
+        container.insertAdjacentHTML('beforeend', html);
         
         // Laad foto's asynchroon en voeg ze toe - NIEUWE LAYOUT
         if (hasPhotos) {
             this.loadAndDisplayPhotos(dog);
         }
         
-        // Voeg terugknop toe voor mobiele weergave (als we in collapsed modus zijn)
-        if (this.isMobileCollapsed && window.innerWidth <= 768) {
-            this.addMobileBackButton();
-        }
-        
         if (fatherInfo.id) {
-            const fatherCard = document.querySelector('.father-card');
+            const fatherCard = container.querySelector('.father-card');
             if (fatherCard) {
                 fatherCard.addEventListener('click', (e) => {
                     const parentId = parseInt(fatherCard.getAttribute('data-parent-id'));
@@ -1878,7 +2008,7 @@ class SearchManager extends BaseModule {
         }
         
         if (motherInfo.id) {
-            const motherCard = document.querySelector('.mother-card');
+            const motherCard = container.querySelector('.mother-card');
             if (motherCard) {
                 motherCard.addEventListener('click', (e) => {
                     const parentId = parseInt(motherCard.getAttribute('data-parent-id'));
@@ -1889,7 +2019,7 @@ class SearchManager extends BaseModule {
         }
         
         // Event listeners voor stamboom knop (nu alleen nog bij de ouders sectie)
-        document.querySelectorAll('.btn-pedigree').forEach(btn => {
+        container.querySelectorAll('.btn-pedigree').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 e.stopPropagation();
                 const dogId = parseInt(btn.getAttribute('data-dog-id'));
@@ -1898,7 +2028,7 @@ class SearchManager extends BaseModule {
         });
         
         if (isParentView) {
-            const backButton = document.querySelector('.back-button');
+            const backButton = container.querySelector('.back-button');
             if (backButton) {
                 backButton.addEventListener('click', (e) => {
                     const originalDogId = parseInt(backButton.getAttribute('data-original-dog'));
@@ -1915,7 +2045,8 @@ class SearchManager extends BaseModule {
     async loadAndDisplayPhotos(dog) {
         try {
             const photos = await this.getDogPhotos(dog.id);
-            const photosGrid = document.getElementById(`photosGrid${dog.id}`);
+            const container = document.getElementById('detailsContainer');
+            const photosGrid = container.querySelector(`#photosGrid${dog.id}`);
             
             if (!photosGrid || photos.length === 0) {
                 return;

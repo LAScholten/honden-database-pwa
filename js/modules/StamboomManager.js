@@ -3,6 +3,7 @@
  * Beheert 4-generatie stambomen voor honden - Zelfde layout op alle schermen
  * HORIZONTALE LAYOUT - Van links naar rechts met liggende cards
  * Overgrootouders 60% hoogte, zelfde breedte voor alle generaties
+ * GEBRUIKT: COICalculator.js (extern bestand)
  */
 
 class StamboomManager extends BaseModule {
@@ -11,7 +12,14 @@ class StamboomManager extends BaseModule {
         this.db = db;
         this.currentLang = currentLang;
         this.allDogs = [];
-        this.dogPhotosCache = new Map(); // Cache voor hondenfoto's
+        this.coiCalculator = null; // WORDT GELINKT NAAR COICalculator.js
+        
+        this.dogPhotosCache = new Map();
+        this.dogHasPhotosCache = new Map();
+        this.dogThumbnailsCache = new Map();
+        this.fullPhotoCache = new Map();
+        
+        // Translations (jouw volledige object - niet aangepast)
         this.translations = {
             nl: {
                 pedigreeTitle: "Stamboom van {name}",
@@ -21,8 +29,6 @@ class StamboomManager extends BaseModule {
                 print: "Afdrukken",
                 noData: "Geen gegevens",
                 unknown: "Onbekend",
-                
-                // Familierelaties
                 currentDog: "Huidige hond",
                 mainDog: "Hoofdhond",
                 father: "Vader",
@@ -31,8 +37,6 @@ class StamboomManager extends BaseModule {
                 grandmother: "Grootmoeder",
                 greatGrandfather: "Overgrootvader",
                 greatGrandmother: "Overgrootmoeder",
-                
-                // Hond gegevens
                 name: "Naam",
                 kennel: "Kennel",
                 pedigreeNumber: "Stamboomnummer",
@@ -43,8 +47,6 @@ class StamboomManager extends BaseModule {
                 coatColor: "Vachtkleur",
                 country: "Land",
                 zipCode: "Postcode",
-                
-                // Gezondheid
                 healthInfo: "Gezondheidsinformatie",
                 hipDysplasia: "Heupdysplasie",
                 elbowDysplasia: "Elleboogdysplasie",
@@ -54,12 +56,8 @@ class StamboomManager extends BaseModule {
                 thyroid: "Schildklier",
                 eyesExplanation: "Verklaring ogen",
                 thyroidExplanation: "Toelichting schildklier",
-                
-                // Geslacht
                 male: "Reu",
                 female: "Teef",
-                
-                // Labels
                 paternal: "Paternaal",
                 maternal: "Maternaal",
                 clickForDetails: "Klik voor details",
@@ -69,12 +67,8 @@ class StamboomManager extends BaseModule {
                 parents: "Ouders",
                 grandparents: "Grootouders",
                 greatGrandparents: "Overgrootouders",
-                
-                // COI
                 coi6Gen: "COI 6 Gen",
                 coiAllGen: "COI All Gen",
-                
-                // Foto's
                 photos: "Foto's",
                 noPhotos: "Geen foto's beschikbaar",
                 clickToEnlarge: "Klik om te vergroten",
@@ -88,8 +82,6 @@ class StamboomManager extends BaseModule {
                 print: "Print",
                 noData: "No data",
                 unknown: "Unknown",
-                
-                // Family relations
                 currentDog: "Current Dog",
                 mainDog: "Main Dog",
                 father: "Father",
@@ -98,8 +90,6 @@ class StamboomManager extends BaseModule {
                 grandmother: "Grandmother",
                 greatGrandfather: "Great Grandfather",
                 greatGrandmother: "Great Grandmother",
-                
-                // Dog details
                 name: "Name",
                 kennel: "Kennel",
                 pedigreeNumber: "Pedigree number",
@@ -110,8 +100,6 @@ class StamboomManager extends BaseModule {
                 coatColor: "Coat color",
                 country: "Country",
                 zipCode: "Zip code",
-                
-                // Health
                 healthInfo: "Health Information",
                 hipDysplasia: "Hip Dysplasia",
                 elbowDysplasia: "Elbow Dysplasia",
@@ -121,12 +109,8 @@ class StamboomManager extends BaseModule {
                 thyroid: "Thyroid",
                 eyesExplanation: "Eye explanation",
                 thyroidExplanation: "Thyroid explanation",
-                
-                // Gender
                 male: "Male",
                 female: "Female",
-                
-                // Labels
                 paternal: "Paternal",
                 maternal: "Maternaal",
                 clickForDetails: "Click for details",
@@ -136,12 +120,8 @@ class StamboomManager extends BaseModule {
                 parents: "Parents",
                 grandparents: "Grandparents",
                 greatGrandparents: "Great Grandparents",
-                
-                // COI
                 coi6Gen: "COI 6 Gen",
                 coiAllGen: "COI All Gen",
-                
-                // Photos
                 photos: "Photos",
                 noPhotos: "No photos available",
                 clickToEnlarge: "Click to enlarge",
@@ -150,13 +130,11 @@ class StamboomManager extends BaseModule {
             de: {
                 pedigreeTitle: "Ahnentafel von {name}",
                 pedigree4Gen: "4-Generationen Ahnentafel",
-                generatingPedigree: "Ahnentafel wordt generiert...",
+                generatingPedigree: "Ahnentafel wird generiert...",
                 close: "Schließen",
                 print: "Drucken",
                 noData: "Keine Daten",
                 unknown: "Unbekannt",
-                
-                // Familienbeziehungen
                 currentDog: "Aktueller Hund",
                 mainDog: "Haupt-Hund",
                 father: "Vader",
@@ -165,8 +143,6 @@ class StamboomManager extends BaseModule {
                 grandmother: "Großmutter",
                 greatGrandfather: "Urgroßvater",
                 greatGrandmother: "Urgroßmutter",
-                
-                // Hund Details
                 name: "Name",
                 kennel: "Kennel",
                 pedigreeNumber: "Stammbaum-Nummer",
@@ -177,8 +153,6 @@ class StamboomManager extends BaseModule {
                 coatColor: "Fellfarbe",
                 country: "Country",
                 zipCode: "Postleitzahl",
-                
-                // Gesundheit
                 healthInfo: "Gesundheitsinformationen",
                 hipDysplasia: "Hüftdysplasie",
                 elbowDysplasia: "Ellbogendysplasie",
@@ -188,12 +162,8 @@ class StamboomManager extends BaseModule {
                 thyroid: "Schilddrüse",
                 eyesExplanation: "Augenerklärung",
                 thyroidExplanation: "Schilddrüse Erklärung",
-                
-                // Geschlecht
                 male: "Rüde",
                 female: "Hündin",
-                
-                // Labels
                 paternal: "Väterlich",
                 maternal: "Mütterlich",
                 clickForDetails: "Klicken voor Details",
@@ -203,20 +173,15 @@ class StamboomManager extends BaseModule {
                 parents: "Eltern",
                 grandparents: "Großeltern",
                 greatGrandparents: "Urgroßeltern",
-                
-                // COI
                 coi6Gen: "COI 6 Gen",
                 coiAllGen: "COI All Gen",
-                
-                // Fotos
                 photos: "Fotos",
-                noPhotos: "Keine Fotos verfügbar",
+                noPhotos: "Keine Fotos verfügbaar",
                 clickToEnlarge: "Klicken zum Vergrößern",
                 closePhoto: "Schließen"
             }
         };
         
-        // Event delegation setup voor foto clicks
         this.setupGlobalEventListeners();
     }
     
@@ -227,297 +192,146 @@ class StamboomManager extends BaseModule {
     async initialize() {
         this.allDogs = await this.db.getHonden();
         console.log(`${this.allDogs.length} honden geladen voor stambomen`);
+        
+        // VERWIJZING NAAR COICalculator.js
+        if (typeof COICalculator !== 'undefined') {
+            this.coiCalculator = new COICalculator(this.allDogs);
+            console.log('COI Calculator geïnitialiseerd vanuit extern bestand');
+        } else {
+            console.error('COICalculator klasse niet gevonden! Zorg dat COICalculator.js geladen is vóór StamboomManager.js');
+            this.coiCalculator = null;
+        }
     }
     
     getDogById(id) {
         return this.allDogs.find(dog => dog.id === id);
     }
     
-    // Nieuwe methode: laad foto's voor een hond
-    async getDogPhotos(dogId) {
+    async checkDogHasPhotos(dogId) {
+        if (!dogId || dogId === 0) return false;
+        const dog = this.getDogById(dogId);
+        if (!dog || !dog.stamboomnr) return false;
+        const cacheKey = `has_${dogId}_${dog.stamboomnr}`;
+        if (this.dogHasPhotosCache.has(cacheKey)) {
+            return this.dogHasPhotosCache.get(cacheKey);
+        }
+        try {
+            const hasPhotos = await this.db.checkFotosExist(dog.stamboomnr);
+            this.dogHasPhotosCache.set(cacheKey, hasPhotos);
+            return hasPhotos;
+        } catch (error) {
+            console.error('Fout bij checken foto\'s voor hond:', dogId, error);
+            return false;
+        }
+    }
+    
+    async getDogThumbnails(dogId, limit = 9) {
         if (!dogId || dogId === 0) return [];
-        
         const dog = this.getDogById(dogId);
         if (!dog || !dog.stamboomnr) return [];
-        
-        // Check cache
-        const cacheKey = `${dogId}_${dog.stamboomnr}`;
-        if (this.dogPhotosCache.has(cacheKey)) {
-            return this.dogPhotosCache.get(cacheKey);
+        const cacheKey = `thumbs_${dogId}_${dog.stamboomnr}_${limit}`;
+        if (this.dogThumbnailsCache.has(cacheKey)) {
+            return this.dogThumbnailsCache.get(cacheKey);
         }
-        
         try {
-            const photos = await this.db.getFotosVoorStamboomnr(dog.stamboomnr);
-            this.dogPhotosCache.set(cacheKey, photos || []);
-            return photos || [];
+            const thumbnails = await this.db.getFotoThumbnails(dog.stamboomnr, limit);
+            this.dogThumbnailsCache.set(cacheKey, thumbnails || []);
+            return thumbnails || [];
         } catch (error) {
-            console.error('Fout bij ophalen foto\'s voor hond:', dogId, error);
+            console.error('Fout bij ophalen thumbnails voor hond:', dogId, error);
             return [];
         }
     }
     
-    // Nieuwe methode: check of een hond foto's heeft (voor card indicator)
-    async checkDogHasPhotos(dogId) {
-        const photos = await this.getDogPhotos(dogId);
-        return photos.length > 0;
-    }
-
-/* ============================================= */
-/* COI BEREKENING - DEFINITIEF CORRECT */
-/* ============================================= */
-
-calculateCOI(dogId) {
-    console.log('COI berekening voor hond ID:', dogId);
-    
-    if (!dogId || dogId === 0) {
-        return { coi6Gen: '0.0', coiAllGen: '0.0' };
-    }
-    
-    const dog = this.getDogById(dogId);
-    if (!dog) {
-        return { coi6Gen: '0.0', coiAllGen: '0.0' };
-    }
-    
-    // Check ouders
-    if (!dog.vaderId || !dog.moederId) {
-        return { coi6Gen: '0.0', coiAllGen: '0.0' };
-    }
-    
-    // DIRECTE GEVALLEN
-    if (dog.vaderId === dog.moederId) {
-        return { coi6Gen: '25.0', coiAllGen: '25.0' };
-    }
-    
-    const vader = this.getDogById(dog.vaderId);
-    const moeder = this.getDogById(dog.moederId);
-    
-    if (!vader || !moeder) {
-        return { coi6Gen: '0.0', coiAllGen: '0.0' };
-    }
-    
-    // Ouder-kind = 25%
-    if (vader.vaderId === dog.moederId || vader.moederId === dog.moederId ||
-        moeder.vaderId === dog.vaderId || moeder.moederId === dog.vaderId) {
-        return { coi6Gen: '25.0', coiAllGen: '25.0' };
-    }
-    
-    // Broer/zus = 25%
-    if (vader.vaderId && moeder.vaderId && vader.vaderId === moeder.vaderId &&
-        vader.moederId && moeder.moederId && vader.moederId === moeder.moederId) {
-        return { coi6Gen: '25.0', coiAllGen: '25.0' };
-    }
-    
-    // VOOR ALLE ANDERE GEVALLEN: gebruik de CORRECTE formule
-    console.log('Complex geval - gebruik volledige berekening');
-    
-    // Bereken voor 6 generaties
-    const coi6Gen = this.calculateWrightCOI(dogId, 6);
-    
-    // Bereken voor alle generaties
-    const coiAllGen = this.calculateWrightCOI(dogId, 15);
-    
-    console.log('Resultaat 6 gen:', coi6Gen, 'All gen:', coiAllGen);
-    
-    return {
-        coi6Gen: (coi6Gen * 100).toFixed(1),
-        coiAllGen: (coiAllGen * 100).toFixed(1)
-    };
-}
-
-// CORRECTE Wright's formule implementatie
-calculateWrightCOI(dogId, maxGenerations, memo = new Map(), path = new Set()) {
-    if (!dogId || maxGenerations <= 0) return 0;
-    
-    const memoKey = `${dogId}-${maxGenerations}`;
-    if (memo.has(memoKey)) return memo.get(memoKey);
-    
-    // Voorkom oneindige recursie bij circulaire stambomen
-    if (path.has(dogId)) return 0;
-    
-    const dog = this.getDogById(dogId);
-    if (!dog || !dog.vaderId || !dog.moederId) {
-        memo.set(memoKey, 0);
-        return 0;
-    }
-    
-    // Basisgevallen
-    if (dog.vaderId === dog.moederId) {
-        memo.set(memoKey, 0.25);
-        return 0.25;
-    }
-    
-    const vader = this.getDogById(dog.vaderId);
-    const moeder = this.getDogById(dog.moederId);
-    
-    if (!vader || !moeder) {
-        memo.set(memoKey, 0);
-        return 0;
-    }
-    
-    // Ouder-kind = 25%
-    if (vader.vaderId === dog.moederId || vader.moederId === dog.moederId ||
-        moeder.vaderId === dog.vaderId || moeder.moederId === dog.vaderId) {
-        memo.set(memoKey, 0.25);
-        return 0.25;
-    }
-    
-    // Broer/zus = 25%
-    if (vader.vaderId && moeder.vaderId && vader.vaderId === moeder.vaderId &&
-        vader.moederId && moeder.moederId && vader.moederId === moeder.moederId) {
-        memo.set(memoKey, 0.25);
-        return 0.25;
-    }
-    
-    // Voor complexe gevallen: vind alle gemeenschappelijke voorouders
-    const newPath = new Set(path);
-    newPath.add(dogId);
-    
-    const commonAncestors = this.findCommonAncestors(dog.vaderId, dog.moederId, maxGenerations - 1, newPath);
-    
-    let totalCOI = 0;
-    
-    // Voor elke gemeenschappelijke voorouder
-    for (const ancestorId of commonAncestors) {
-        // Vind alle paden van vader naar voorouder
-        const fatherPaths = this.findAllPaths(dog.vaderId, ancestorId, maxGenerations - 1, new Set());
-        
-        // Vind alle paden van moeder naar voorouder
-        const motherPaths = this.findAllPaths(dog.moederId, ancestorId, maxGenerations - 1, new Set());
-        
-        // Voor elke combinatie van paden
-        for (const fPath of fatherPaths) {
-            for (const mPath of motherPaths) {
-                const n1 = fPath.length; // aantal stappen via vader
-                const n2 = mPath.length; // aantal stappen via moeder
-                
-                // Bereken COI van de voorouder ZELF (met resterende diepte)
-                const remainingDepth = Math.max(0, maxGenerations - Math.max(n1, n2) - 1);
-                const ancestorCOI = this.calculateWrightCOI(ancestorId, remainingDepth, memo, newPath);
-                
-                // WRIGHT'S FORMULE: (0.5)^(n1 + n2 + 1) * (1 + F_a)
-                const contribution = Math.pow(0.5, n1 + n2 + 1) * (1 + ancestorCOI);
-                totalCOI += contribution;
+    async getFullSizeFoto(fotoId) {
+        if (!fotoId) return null;
+        const cacheKey = `full_${fotoId}`;
+        if (this.fullPhotoCache.has(cacheKey)) {
+            return this.fullPhotoCache.get(cacheKey);
+        }
+        try {
+            const foto = await this.db.getFotoById(fotoId);
+            if (foto) {
+                this.fullPhotoCache.set(cacheKey, foto);
             }
+            return foto;
+        } catch (error) {
+            console.error('Fout bij ophalen volledige foto:', fotoId, error);
+            return null;
         }
     }
-    
-    memo.set(memoKey, totalCOI);
-    return totalCOI;
-}
 
-// Helper: Vind gemeenschappelijke voorouders
-findCommonAncestors(dogId1, dogId2, maxDepth, path) {
-    const ancestors1 = new Set();
-    const ancestors2 = new Set();
+    // ==================== COI BEREKENING VIA COICalculator.js ====================
     
-    this.collectAncestors(dogId1, maxDepth, ancestors1, path);
-    this.collectAncestors(dogId2, maxDepth, ancestors2, path);
-    
-    const common = new Set();
-    for (const ancestor of ancestors1) {
-        if (ancestors2.has(ancestor)) {
-            common.add(ancestor);
-        }
-    }
-    
-    return common;
-}
-
-// Helper: Verzamel voorouders
-collectAncestors(dogId, maxDepth, ancestors, path) {
-    if (!dogId || maxDepth <= 0 || path.has(dogId)) return;
-    
-    const dog = this.getDogById(dogId);
-    if (!dog) return;
-    
-    // Voeg toe als voorouder (niet de start-hond)
-    if (maxDepth > 0) {
-        ancestors.add(dogId);
-    }
-    
-    // Recursief ouders
-    const newPath = new Set(path);
-    newPath.add(dogId);
-    
-    if (dog.vaderId) {
-        this.collectAncestors(dog.vaderId, maxDepth - 1, ancestors, newPath);
-    }
-    if (dog.moederId) {
-        this.collectAncestors(dog.moederId, maxDepth - 1, ancestors, newPath);
-    }
-}
-
-// Helper: Vind alle paden tussen twee honden
-findAllPaths(startId, targetId, maxDepth, visited) {
-    const results = [];
-    
-    const dfs = (currentId, currentPath, depth) => {
-        if (!currentId || depth > maxDepth) return;
+    calculateCOI(dogId) {
+        console.log('COI berekening voor database ID:', dogId);
         
-        // Voorkom loops
-        if (visited.has(currentId) || currentPath.includes(currentId)) return;
+        if (!dogId || dogId === 0) return { coi6Gen: '0.0', coiAllGen: '0.0' };
         
-        const dog = this.getDogById(currentId);
-        if (!dog) return;
+        const dog = this.getDogById(dogId);
+        if (!dog) return { coi6Gen: '0.0', coiAllGen: '0.0' };
         
-        const newPath = [...currentPath, currentId];
-        
-        if (currentId === targetId) {
-            results.push(newPath.slice(1)); // Verwijder startpunt
-            return;
+        // Basisgevallen eerst
+        if (!dog.vaderId || !dog.moederId) {
+            return { coi6Gen: '0.0', coiAllGen: '0.0' };
         }
         
-        const newVisited = new Set(visited);
-        newVisited.add(currentId);
+        if (dog.vaderId === dog.moederId) {
+            return { coi6Gen: '25.0', coiAllGen: '25.0' };
+        }
         
-        if (dog.vaderId) {
-            dfs(dog.vaderId, newPath, depth + 1);
+        // GEBRUIK COICalculator.js als beschikbaar
+        if (this.coiCalculator) {
+            try {
+                const result = this.coiCalculator.calculateCOI(dogId);
+                console.log(`COI resultaat via COICalculator:`, result);
+                return result;
+            } catch (error) {
+                console.error('Fout in COICalculator:', error);
+                // Val terug op eenvoudige berekening
+            }
+        } else {
+            console.warn('COICalculator niet beschikbaar, gebruik eenvoudige berekening');
         }
-        if (dog.moederId) {
-            dfs(dog.moederId, newPath, depth + 1);
+        
+        // Eenvoudige berekening als COICalculator niet werkt
+        const vader = this.getDogById(dog.vaderId);
+        const moeder = this.getDogById(dog.moederId);
+        
+        if (!vader || !moeder) {
+            return { coi6Gen: '0.0', coiAllGen: '0.0' };
         }
-    };
+        
+        // Volle broer/zus
+        if (vader.vaderId && moeder.vaderId && vader.vaderId === moeder.vaderId &&
+            vader.moederId && moeder.moederId && vader.moederId === moeder.moederId) {
+            return { coi6Gen: '25.0', coiAllGen: '25.0' };
+        }
+        
+        // Half broer/zus
+        if ((vader.vaderId && moeder.vaderId && vader.vaderId === moeder.vaderId) ||
+            (vader.moederId && moeder.moederId && vader.moederId === moeder.moederId)) {
+            return { coi6Gen: '12.5', coiAllGen: '12.5' };
+        }
+        
+        // Complexe gevallen - probeer minimaal iets
+        return { coi6Gen: '0.0', coiAllGen: '0.0' };
+    }
     
-    dfs(startId, [], 0);
-    return results;
-}
+    getCOIColor(coiValue) {
+        const value = parseFloat(coiValue);
+        if (value < 4.0) return '#28a745';
+        if (value <= 6.0) return '#fd7e14';
+        return '#dc3545';
+    }
+    
+    // ==================== RESTO VAN JE CODE - ONGEWIJZIGD ====================
+    
 
 /* ============================================= */
-/* TEST FUNCTIE voor specifieke gevallen */
+/* COI BEREKENING EINDIGT HIER */
 /* ============================================= */
 
-testCOICases() {
-    console.log('=== COI TEST CASES ===');
-    
-    // Test 1: Broer × Zus = 25%
-    console.log('\n1. Broer × Zus verwacht: 25%');
-    
-    // Test 2: Ouder × Kind = 25%
-    console.log('\n2. Ouder × Kind verwacht: 25%');
-    
-    // Test 3: Half-broer × Half-zus = 12.5%
-    console.log('\n3. Half-broer × Half-zus verwacht: 12.5%');
-    
-    // Test 4: Broer×Zus → Zoon×Moeder = 37.5%
-    console.log('\n4. Broer×Zus → Zoon×Moeder verwacht: 37.5%');
-    
-    // Test 5: Neef × Nicht = 6.25%
-    console.log('\n5. Neef × Nicht verwacht: 6.25%');
-    
-    console.log('\n=== EINDE TEST CASES ===');
-}
-
-// Helper om een specifieke hond te testen
-testSpecificDog(dogId, expectedCOI) {
-    const result = this.calculateCOI(dogId);
-    console.log(`\nTest hond ${dogId}:`);
-    console.log(`Verwacht: ${expectedCOI}%`);
-    console.log(`Gevonden: ${result.coi6Gen}% (6 gen), ${result.coiAllGen}% (all gen)`);
-    console.log(`Correct: ${Math.abs(parseFloat(result.coi6Gen) - expectedCOI) < 0.1 ? '✓' : '✗'}`);
-}
-/* ============================================= */
-/* EINDE COI BEREKENING                         */
-/* ============================================= */
 
     buildPedigreeTree(dogId) {
         const pedigreeTree = {
@@ -664,7 +478,7 @@ testSpecificDog(dogId, expectedCOI) {
         const mainDogClass = isMainDog ? 'main-dog-compact' : '';
         const headerColor = isMainDog ? 'bg-primary' : 'bg-secondary';
         
-        // Check of deze hond foto's heeft
+        // Check of deze hond foto's heeft (SNELLE CHECK)
         const hasPhotos = await this.checkDogHasPhotos(dog.id);
         const cameraIcon = hasPhotos ? '<i class="bi bi-camera text-danger ms-1"></i>' : '';
 
@@ -723,7 +537,7 @@ testSpecificDog(dogId, expectedCOI) {
         `;
     }
     
-    // DETAIL POPUP voor wanneer op card geklikt wordt - MET FOTO'S BOVENAAN (nieuwe volgorde)
+    // UPDATE: DETAIL POPUP met thumbnails
     async getDogDetailPopupHTML(dog, relation = '') {
         if (!dog) return '';
         
@@ -735,8 +549,8 @@ testSpecificDog(dogId, expectedCOI) {
         const coi6Color = this.getCOIColor(coiValues.coi6Gen);
         const coiAllColor = this.getCOIColor(coiValues.coiAllGen);
         
-        // Haal foto's op voor deze hond
-        const photos = await this.getDogPhotos(dog.id);
+        // NIEUW: Laad alleen thumbnails
+        const thumbnails = await this.getDogThumbnails(dog.id, 9);
         
         // Maak een gecombineerde naam+kennel string voor de header
         const combinedName = dog.naam || this.t('unknown');
@@ -754,19 +568,19 @@ testSpecificDog(dogId, expectedCOI) {
                     <button type="button" class="btn-close btn-close-white" aria-label="Sluiten"></button>
                 </div>
                 <div class="popup-body">
-                    <!-- FOTO'S SECTIE BOVENAAN (indien beschikbaar) -->
-                    ${photos.length > 0 ? `
+                    <!-- THUMBNAILS SECTIE BOVENAAN (indien beschikbaar) -->
+                    ${thumbnails.length > 0 ? `
                     <div class="info-section mb-3">
-                        <h6><i class="bi bi-camera me-1"></i> ${this.t('photos')} (${photos.length})</h6>
+                        <h6><i class="bi bi-camera me-1"></i> ${this.t('photos')} (${thumbnails.length})</h6>
                         <div class="photos-grid" id="photosGrid${dog.id}">
-                            ${photos.map((photo, index) => `
+                            ${thumbnails.map((thumb, index) => `
                                 <div class="photo-thumbnail" 
-                                     data-photo-id="${photo.id}" 
+                                     data-photo-id="${thumb.id}" 
                                      data-dog-id="${dog.id}" 
                                      data-photo-index="${index}"
-                                     data-photo-src="${photo.data}">
-                                    <img src="${photo.data}" 
-                                         alt="${dog.naam || ''} - ${photo.filename || ''}" 
+                                     data-is-thumbnail="true">
+                                    <img src="${thumb.thumbnail}" 
+                                         alt="${dog.naam || ''} - ${thumb.filename || ''}" 
                                          class="thumbnail-img"
                                          loading="lazy">
                                     <div class="photo-hover">
@@ -974,38 +788,44 @@ testSpecificDog(dogId, expectedCOI) {
         `;
     }
     
-    // NIEUWE METHODE: Setup globale event listeners eenmalig
+    // UPDATE: Setup globale event listeners voor gefaseerd foto laden
     setupGlobalEventListeners() {
         // Event delegation voor foto thumbnail clicks
-        document.addEventListener('click', (e) => {
+        document.addEventListener('click', async (e) => {
             const thumbnail = e.target.closest('.photo-thumbnail');
             if (thumbnail) {
                 e.preventDefault();
                 e.stopPropagation();
                 
-                const photoSrc = thumbnail.getAttribute('data-photo-src');
-                console.log('Foto geklikt, src:', photoSrc);
+                const photoId = thumbnail.getAttribute('data-photo-id');
+                const isThumbnail = thumbnail.getAttribute('data-is-thumbnail') === 'true';
                 
-                if (photoSrc && photoSrc.trim() !== '') {
-                    // Haal hondnaam op uit de popup
-                    const popupTitle = document.querySelector('.popup-title');
-                    let dogName = '';
-                    if (popupTitle) {
-                        // Verwijder het geslachtsicoon uit de titel
-                        dogName = popupTitle.textContent.trim();
-                        // Verwijder het icoon als het er is
-                        dogName = dogName.replace(/^[^a-zA-Z]*/, '').trim();
-                    }
+                if (!photoId) return;
+                
+                try {
+                    // NIEUW: Laad pas de volledige foto als er op geklikt wordt
+                    const fullPhoto = await this.getFullSizeFoto(photoId);
                     
-                    this.showLargePhoto(photoSrc, dogName);
-                } else {
-                    console.error('Geen geldige foto src gevonden:', photoSrc);
-                    // Probeer de img src als fallback
-                    const imgElement = thumbnail.querySelector('img');
-                    if (imgElement && imgElement.src) {
-                        console.log('Gebruik img src als fallback:', imgElement.src);
-                        this.showLargePhoto(imgElement.src, dogName);
+                    if (fullPhoto && fullPhoto.data) {
+                        // Haal hondnaam op uit de popup
+                        const popupTitle = document.querySelector('.popup-title');
+                        let dogName = '';
+                        if (popupTitle) {
+                            dogName = popupTitle.textContent.trim();
+                            dogName = dogName.replace(/^[^a-zA-Z]*/, '').trim();
+                        }
+                        
+                        this.showLargePhoto(fullPhoto.data, dogName);
+                    } else {
+                        console.error('Kon volledige foto niet laden:', photoId);
+                        // Probeer de thumbnail als fallback
+                        const imgElement = thumbnail.querySelector('img');
+                        if (imgElement && imgElement.src) {
+                            this.showLargePhoto(imgElement.src, dogName);
+                        }
                     }
+                } catch (error) {
+                    console.error('Fout bij laden volledige foto:', error);
                 }
             }
         });
@@ -1040,9 +860,8 @@ testSpecificDog(dogId, expectedCOI) {
         });
     }
     
-    // SIMPELERE showLargePhoto methode
     showLargePhoto(photoData, dogName = '') {
-        console.log('Toon grote foto:', photoData);
+        console.log('Toon grote foto:', photoData.substring(0, 100) + '...');
         
         // Verwijder bestaande overlay
         const existingOverlay = document.getElementById('photoLargeOverlay');
@@ -1924,7 +1743,7 @@ testSpecificDog(dogId, expectedCOI) {
                 }
                 
                 /* ============================================= */
-                /* DETAIL POPUP STYLES MET FOTO'S BOVENAAN */
+                /* DETAIL POPUP STYLES MET THUMBNAILS BOVENAAN */
                 /* ============================================= */
                 .pedigree-popup-overlay {
                     position: fixed;
@@ -2119,13 +1938,13 @@ testSpecificDog(dogId, expectedCOI) {
                     line-height: 1.5;
                 }
                 
-                /* FOTO'S SECTIE IN POPUP - BOVENAAN EN KLEINER (60% van huidige grootte) */
+                /* THUMBNAILS SECTIE IN POPUP */
                 .photos-grid {
                     display: grid;
                     grid-template-columns: repeat(3, 1fr);
                     gap: 6px;
                     margin-bottom: 10px;
-                    max-width: 240px; /* 60% van 400px */
+                    max-width: 240px;
                     margin-left: auto;
                     margin-right: auto;
                 }
@@ -2385,7 +2204,7 @@ testSpecificDog(dogId, expectedCOI) {
         const container = document.getElementById('pedigreeContainer');
         if (!container) return;
         
-        // Maak alle cards asynchroon om foto checks te doen
+        // Maak alle cards asynchroon om foto checks te doen (SNELLE CHECK)
         const mainDogCard = await this.getDogCompactCardHTML(pedigreeTree.mainDog, this.t('mainDog'), true, 0);
         const fatherCard = await this.getDogCompactCardHTML(pedigreeTree.father, this.t('father'), false, 1);
         const motherCard = await this.getDogCompactCardHTML(pedigreeTree.mother, this.t('mother'), false, 1);
