@@ -65,15 +65,6 @@ class COICalculator {
                 return { coi6Gen: '25.0', coiAllGen: '25.0' };
             }
 
-            // HALF BROER/ZUS
-            const isHalfSibling = (vader.vaderId && moeder.vaderId && vader.vaderId === moeder.vaderId) ||
-                                 (vader.moederId && moeder.moederId && vader.moederId === moeder.moederId);
-            
-            if (isHalfSibling) {
-                console.log(`   ➡ Ouders zijn half broer/zus -> 12.5%`);
-                return { coi6Gen: '12.5', coiAllGen: '12.5' };
-            }
-
             // COMPLEXE BEREKENING
             console.log(`   ➡ Complex geval - zoek gemeenschappelijke voorouders`);
             
