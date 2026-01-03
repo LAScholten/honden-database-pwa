@@ -1,7 +1,6 @@
 /**
  * Search Manager Module
  * Beheert het zoeken naar honden met real-time filtering op naam en kennelnaam
- * Inclusief foto functionaliteit met thumbnail viewer en fullscreen viewer
  */
 
 class SearchManager extends BaseModule {
@@ -10,13 +9,12 @@ class SearchManager extends BaseModule {
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';
         this.allDogs = [];
         this.filteredDogs = [];
-        this.searchType = 'name'; // 'name' of 'kennel'
-        this.stamboomManager = null; // Wordt later geïnitialiseerd
-        this.isMobileCollapsed = false; // Track of mobiele weergave collapsed is
-        this.dogPhotosCache = new Map(); // Cache voor hondenfoto's
-        this.modalClosing = false; // Track of modal aan het sluiten is
+        this.searchType = 'name';
+        this.stamboomManager = null;
+        this.isMobileCollapsed = false;
+        this.dogPhotosCache = new Map();
+        this.modalClosing = false;
         
-        // Vertalingen
         this.translations = {
             nl: {
                 searchDog: "Hond Zoeken",
@@ -49,8 +47,6 @@ class SearchManager extends BaseModule {
                 noHealthInfo: "Geen gezondheidsinformatie beschikbaar",
                 noAdditionalInfo: "Geen extra informatie beschikbaar",
                 selectDogToView: "Selecteer een hond om details te zien",
-                
-                // Hond gegevens
                 birthDate: "Geboortedatum",
                 deathDate: "Overlijdensdatum",
                 hipDysplasia: "Heupdysplasie",
@@ -66,64 +62,11 @@ class SearchManager extends BaseModule {
                 remarks: "Opmerkingen",
                 healthInfo: "Gezondheidsinformatie",
                 additionalInfo: "Extra informatie",
-                
-                // Gezondheidsstatussen
-                hipGrades: {
-                    A: "A - Geen tekenen van HD",
-                    B: "B - Overgangsvorm",
-                    C: "C - Lichte HD",
-                    D: "D - Matige HD", 
-                    E: "E - Ernstige HD"
-                },
-                elbowGrades: {
-                    "0": "0 - Geen ED",
-                    "1": "1 - Milde ED",
-                    "2": "2 - Matige ED",
-                    "3": "3 - Ernstige ED",
-                    "NB": "NB - Niet bekend"
-                },
-                patellaGrades: {
-                    "0": "0 - Geen PL",
-                    "1": "1 - Af en toe luxatie",
-                    "2": "2 - Regelmatig luxatie",
-                    "3": "3 - Constante luxation"
-                },
-                eyeStatus: {
-                    "Vrij": "Vrij",
-                    "Distichiasis": "Distichiasis",
-                    "Overig": "Overig"
-                },
-                dandyStatus: {
-                    "Vrij op DNA": "Vrij op DNA",
-                    "Vrij op ouders": "Vrij op ouders", 
-                    "Drager": "Drager",
-                    "Lijder": "Lijder"
-                },
-                thyroidStatus: {
-                    "Negatief": "Tgaa Negatief",
-                    "Positief": "Tgaa Positief"
-                },
-                
-                // Labels
                 grade: "Graad",
                 status: "Status",
                 notApplicable: "Niet van toepassing",
                 viewMore: "Meer details",
-                
-                // Stamboom knoppen
                 pedigreeButton: "Stamboom",
-                pedigreeTitle: "Stamboom van {name}",
-                generatingPedigree: "Stamboom genereren...",
-                openPedigree: "Stamboom openen",
-                pedigree4Gen: "4-generatie stamboom",
-                
-                // Familierelaties voor stamboom
-                greatGrandfather: "Overgrootvader",
-                greatGrandmother: "Overgrootmoeder",
-                grandfather: "Grootvader",
-                grandmother: "Grootmoeder",
-                
-                // Foto vertalingen
                 photos: "Foto's",
                 noPhotos: "Geen foto's beschikbaar",
                 clickToEnlarge: "Klik om te vergroten",
@@ -160,8 +103,6 @@ class SearchManager extends BaseModule {
                 noHealthInfo: "No health information available",
                 noAdditionalInfo: "No additional information available",
                 selectDogToView: "Select a dog to view details",
-                
-                // Dog details
                 birthDate: "Birth date",
                 deathDate: "Death date",
                 hipDysplasia: "Hip Dysplasia",
@@ -177,64 +118,11 @@ class SearchManager extends BaseModule {
                 remarks: "Remarks",
                 healthInfo: "Health Information",
                 additionalInfo: "Additional Information",
-                
-                // Health statuses
-                hipGrades: {
-                    A: "A - No signs of HD",
-                    B: "B - Borderline",
-                    C: "C - Mild HD",
-                    D: "D - Moderate HD",
-                    E: "E - Severe HD"
-                },
-                elbowGrades: {
-                    "0": "0 - No ED",
-                    "1": "1 - Mild ED",
-                    "2": "2 - Moderate ED",
-                    "3": "3 - Severe ED",
-                    "NB": "NB - Not known"
-                },
-                patellaGrades: {
-                    "0": "0 - No PL",
-                    "1": "1 - Occasional luxation",
-                    "2": "2 - Frequent luxation",
-                    "3": "3 - Constant luxation"
-                },
-                eyeStatus: {
-                    "Vrij": "Free",
-                    "Distichiasis": "Distichiasis",
-                    "Overig": "Other"
-                },
-                dandyStatus: {
-                    "Vrij op DNA": "Free on DNA",
-                    "Vrij op ouders": "Free on parents",
-                    "Drager": "Carrier",
-                    "Lijder": "Affected"
-                },
-                thyroidStatus: {
-                    "Negatief": "Tgaa Negative",
-                    "Positief": "Tgaa Positive"
-                },
-                
-                // Labels
                 grade: "Grade",
                 status: "Status",
                 notApplicable: "Not applicable",
                 viewMore: "View details",
-                
-                // Stamboom buttons
                 pedigreeButton: "Pedigree",
-                pedigreeTitle: "Pedigree of {name}",
-                generatingPedigree: "Generating pedigree...",
-                openPedigree: "Open pedigree",
-                pedigree4Gen: "4-generation pedigree",
-                
-                // Family relations for pedigree
-                greatGrandfather: "Great Grandfather",
-                greatGrandmother: "Great Grandmother",
-                grandfather: "Grandfather",
-                grandmother: "Grandmother",
-                
-                // Photo translations
                 photos: "Photos",
                 noPhotos: "No photos available",
                 clickToEnlarge: "Click to enlarge",
@@ -271,8 +159,6 @@ class SearchManager extends BaseModule {
                 noHealthInfo: "Keine Gesundheitsinformationen verfügbar",
                 noAdditionalInfo: "Keine zusätzlichen Informationen verfügbar",
                 selectDogToView: "Wählen Sie einen Hund, um Details zu sehen",
-                
-                // Hund Details
                 birthDate: "Geburtsdatum",
                 deathDate: "Sterbedatum",
                 hipDysplasia: "Hüftdysplasie",
@@ -288,21 +174,11 @@ class SearchManager extends BaseModule {
                 remarks: "Bemerkungen",
                 healthInfo: "Gesundheitsinformationen",
                 additionalInfo: "Zusätzliche Informationen",
-                
-                // Stamboom buttons
+                grade: "Grad",
+                status: "Status",
+                notApplicable: "Nicht von toepassing",
+                viewMore: "Mehr Details",
                 pedigreeButton: "Ahnentafel",
-                pedigreeTitle: "Ahnentafel von {name}",
-                generatingPedigree: "Ahnentafel wird generiert...",
-                openPedigree: "Ahnentafel öffnen",
-                pedigree4Gen: "4-Generationen Ahnentafel",
-                
-                // Familienbeziehungen für Ahnentafel
-                greatGrandfather: "Urgroßvater",
-                greatGrandmother: "Urgroßmutter",
-                grandfather: "Großvater",
-                grandmother: "Großmutter",
-                
-                // Foto Übersetzungen
                 photos: "Fotos",
                 noPhotos: "Keine Fotos verfügbar",
                 clickToEnlarge: "Klicken zum Vergrößern",
@@ -332,7 +208,6 @@ class SearchManager extends BaseModule {
     }
     
     setupGlobalEventListeners() {
-        // Event delegation voor foto thumbnail clicks
         document.addEventListener('click', (e) => {
             const thumbnail = e.target.closest('.photo-thumbnail');
             if (thumbnail) {
@@ -340,8 +215,6 @@ class SearchManager extends BaseModule {
                 e.stopPropagation();
                 
                 const photoSrc = thumbnail.getAttribute('data-photo-src');
-                console.log('Foto geklikt, src:', photoSrc);
-                
                 if (photoSrc && photoSrc.trim() !== '') {
                     const popupTitle = document.querySelector('.popup-title');
                     let dogName = '';
@@ -349,20 +222,11 @@ class SearchManager extends BaseModule {
                         dogName = popupTitle.textContent.trim();
                         dogName = dogName.replace(/^[^a-zA-Z]*/, '').trim();
                     }
-                    
                     this.showLargePhoto(photoSrc, dogName);
-                } else {
-                    console.error('Geen geldige foto src gevonden:', photoSrc);
-                    const imgElement = thumbnail.querySelector('img');
-                    if (imgElement && imgElement.src) {
-                        console.log('Gebruik img src als fallback:', imgElement.src);
-                        this.showLargePhoto(imgElement.src, dogName);
-                    }
                 }
             }
         });
         
-        // Event delegation voor grote foto sluitknoppen
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('photo-large-close') || 
                 e.target.classList.contains('photo-large-close-btn') ||
@@ -379,7 +243,6 @@ class SearchManager extends BaseModule {
                 }
             }
             
-            // Klik buiten de grote foto om te sluiten
             if (e.target.id === 'photoLargeOverlay') {
                 const overlay = e.target;
                 overlay.style.display = 'none';
@@ -419,12 +282,8 @@ class SearchManager extends BaseModule {
     }
     
     showLargePhoto(photoData, dogName = '') {
-        console.log('Toon grote foto:', photoData);
-        
         const existingOverlay = document.getElementById('photoLargeOverlay');
-        if (existingOverlay) {
-            existingOverlay.remove();
-        }
+        if (existingOverlay) existingOverlay.remove();
         
         const overlayHTML = `
             <div class="photo-large-overlay" id="photoLargeOverlay" style="display: flex;">
@@ -465,14 +324,6 @@ class SearchManager extends BaseModule {
             }
         };
         document.addEventListener('keydown', closeOnEscape);
-        
-        const overlay = document.getElementById('photoLargeOverlay');
-        overlay.addEventListener('animationend', function handler() {
-            if (overlay.style.display === 'none') {
-                document.removeEventListener('keydown', closeOnEscape);
-                overlay.removeEventListener('animationend', handler);
-            }
-        });
     }
     
     getModalHTML() {
@@ -491,10 +342,8 @@ class SearchManager extends BaseModule {
                         <div class="modal-body p-0">
                             <div class="container-fluid">
                                 <div class="row">
-                                    <!-- Zoekkolom -->
                                     <div class="col-md-5 border-end p-3" id="searchColumn">
                                         <div class="sticky-top" style="top: 15px;">
-                                            <!-- Tab knoppen voor zoektype -->
                                             <div class="d-flex mb-3 border-bottom">
                                                 <button type="button" class="btn btn-search-type btn-outline-info active me-2" data-search-type="name">
                                                     ${t('searchName')}
@@ -504,7 +353,6 @@ class SearchManager extends BaseModule {
                                                 </button>
                                             </div>
                                             
-                                            <!-- Zoekveld voor naam -->
                                             <div class="mb-4" id="nameSearchField">
                                                 <label for="searchNameInput" class="form-label fw-bold">${t('searchName')}</label>
                                                 <div class="input-group">
@@ -519,7 +367,6 @@ class SearchManager extends BaseModule {
                                                 <div class="form-text mt-1">${t('typeToSearch')}</div>
                                             </div>
                                             
-                                            <!-- Zoekveld voor kennelnaam -->
                                             <div class="mb-4 d-none" id="kennelSearchField">
                                                 <label for="searchKennelInput" class="form-label fw-bold">${t('searchKennel')}</label>
                                                 <div class="input-group">
@@ -543,7 +390,6 @@ class SearchManager extends BaseModule {
                                         </div>
                                     </div>
                                     
-                                    <!-- Details kolom -->
                                     <div class="col-md-7 p-3" id="detailsColumn">
                                         <div id="detailsContainer">
                                             <div class="text-center py-5">
@@ -565,36 +411,6 @@ class SearchManager extends BaseModule {
             </div>
             
             <style>
-                .modal-dialog.modal-fullscreen .modal-content {
-                    padding: 0 !important;
-                    margin: 0 !important;
-                    border: none !important;
-                }
-                
-                .modal-dialog.modal-fullscreen .modal-body {
-                    padding: 0 !important;
-                    margin: 0 !important;
-                }
-                
-                .pedigree-container-compact {
-                    padding: 0 !important;
-                    margin: 0 !important;
-                    width: 100vw !important;
-                    max-width: 100vw !important;
-                }
-                
-                .pedigree-grid-compact {
-                    padding: 0 !important;
-                    margin: 0 !important;
-                    width: 100vw !important;
-                }
-                
-                .pedigree-generation-row {
-                    padding: 0 !important;
-                    margin: 0 !important;
-                }
-                
-                /* SEARCH MANAGER STYLES */
                 .search-input {
                     font-size: 1.1rem;
                     padding: 10px 15px;
@@ -650,13 +466,6 @@ class SearchManager extends BaseModule {
                     margin-bottom: 8px;
                 }
                 
-                .dog-kennel-line {
-                    font-size: 0.95rem;
-                    color: #6c757d;
-                    margin-bottom: 8px;
-                    font-style: italic;
-                }
-                
                 .dog-details-line {
                     color: #495057;
                     font-size: 0.95rem;
@@ -706,55 +515,6 @@ class SearchManager extends BaseModule {
                     margin-bottom: 10px;
                     padding-bottom: 5px;
                     border-bottom: 1px solid #f0f0f0;
-                }
-                
-                .info-row {
-                    display: flex;
-                    margin-bottom: 8px;
-                    padding: 8px 0;
-                    border-bottom: 1px solid #f8f9fa;
-                }
-                
-                .info-label {
-                    font-weight: 600;
-                    color: #495057;
-                    width: 180px;
-                    min-width: 180px;
-                }
-                
-                .info-value {
-                    color: #212529;
-                    flex: 1;
-                }
-                
-                .badge-hd {
-                    background-color: #20c997;
-                    color: white;
-                }
-                
-                .badge-ed {
-                    background-color: #6f42c1;
-                    color: white;
-                }
-                
-                .badge-pl {
-                    background-color: #fd7e14;
-                    color: white;
-                }
-                
-                .badge-eyes {
-                    background-color: #17a2b8;
-                    color: white;
-                }
-                
-                .badge-dandy {
-                    background-color: #e83e8c;
-                    color: white;
-                }
-                
-                .badge-thyroid {
-                    background-color: #28a745;
-                    color: white;
                 }
                 
                 .father-card {
@@ -817,24 +577,6 @@ class SearchManager extends BaseModule {
                     gap: 4px;
                 }
                 
-                .back-button {
-                    margin-bottom: 15px;
-                }
-                
-                .remarks-box {
-                    background: #f8f9fa;
-                    border: 1px solid #dee2e6;
-                    padding: 15px;
-                    border-radius: 6px;
-                    font-style: italic;
-                    color: #495057;
-                }
-                
-                .empty-state {
-                    color: #adb5bd;
-                    font-style: italic;
-                }
-                
                 .dog-name-header {
                     color: #0d6efd;
                     font-size: 1.5rem;
@@ -851,249 +593,16 @@ class SearchManager extends BaseModule {
                     color: #495057;
                 }
                 
-                .dog-detail-header-line .geslacht {
-                    font-weight: 600;
-                    color: #0d6efd;
-                }
-                
-                .dog-detail-header-line .ras {
-                    font-weight: 500;
-                }
-                
-                .dog-detail-header-line .stamboom {
-                    font-weight: 700;
-                    color: #212529;
-                }
-                
-                /* AANPASSING: vachtkleur nu in dezelfde grootte als de rest */
                 .dog-detail-header-line .vachtkleur {
                     color: #d63384;
                     font-weight: 500;
-                    font-size: 0.95rem; /* Zelfde grootte als de andere elementen */
-                }
-                
-                /* ============================================= */
-                /* FOTO STYLES */
-                /* ============================================= */
-                .photos-section {
-                    margin-bottom: 15px;
-                }
-                
-                .photos-title {
-                    font-size: 0.9rem;
-                    text-transform: uppercase;
-                    color: #6c757d;
-                    letter-spacing: 1px;
-                    margin-bottom: 8px;
-                    padding-bottom: 5px;
-                    border-bottom: 1px solid #f0f0f0;
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                }
-                
-                .photos-title-text {
-                    display: flex;
-                    align-items: center;
-                    gap: 6px;
-                }
-                
-                .click-hint-text {
-                    font-size: 0.75rem;
-                    color: #6c757d;
-                    font-style: italic;
-                    font-weight: normal;
-                    text-transform: none;
-                    letter-spacing: normal;
-                }
-                
-                .photos-grid-container {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 4px;
-                    margin-top: 5px;
-                    justify-content: flex-start; /* LINKS UITLIJNEN */
-                    min-height: auto; /* HOOGTE PAST ZICH AAN */
-                }
-                
-                .photo-thumbnail {
-                    position: relative;
-                    width: 36px; /* 50% KLEINER - 36px ipv 72px */
-                    height: 36px; /* 50% KLEINER - 36px ipv 72px */
-                    border-radius: 3px;
-                    overflow: hidden;
-                    cursor: pointer;
-                    border: 1px solid #dee2e6;
-                    transition: all 0.2s;
-                    flex-shrink: 0; /* VOORKOM COMPRESSIE */
-                }
-                
-                .photo-thumbnail:hover {
-                    border-color: #0d6efd;
-                    transform: scale(1.1);
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-                }
-                
-                .thumbnail-img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                }
-                
-                .photo-hover {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0, 0, 0, 0.4);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    opacity: 0;
-                    transition: opacity 0.2s;
-                }
-                
-                .photo-thumbnail:hover .photo-hover {
-                    opacity: 1;
-                }
-                
-                .photo-hover i {
-                    color: white;
-                    font-size: 0.8rem;
-                }
-                
-                /* ============================================= */
-                /* GROTE FOTO OVERLAY STYLES */
-                /* ============================================= */
-                .photo-large-overlay {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0, 0, 0, 0.85);
-                    z-index: 1070;
-                    display: none;
-                    align-items: center;
-                    justify-content: center;
-                    animation: fadeIn 0.3s;
-                }
-                
-                .photo-large-container {
-                    background: white;
-                    border-radius: 12px;
-                    overflow: hidden;
-                    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-                    display: flex;
-                    flex-direction: column;
-                    max-height: 95vh;
-                    animation: slideUp 0.3s;
-                }
-                
-                .photo-large-header {
-                    padding: 12px 16px;
-                    background: #0d6efd;
-                    color: white;
-                    display: flex;
-                    justify-content: flex-end;
-                }
-                
-                .photo-large-close {
-                    background: none;
-                    border: none;
-                    color: white;
-                    opacity: 0.8;
-                    font-size: 1.3rem;
-                    cursor: pointer;
-                    width: 32px;
-                    height: 32px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    border-radius: 50%;
-                    transition: all 0.2s;
-                }
-                
-                .photo-large-close:hover {
-                    opacity: 1;
-                    background: rgba(255, 255, 255, 0.2);
-                }
-                
-                .photo-large-content {
-                    padding: 15px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    overflow: hidden;
-                    flex: 1;
-                    min-height: 200px;
-                }
-                
-                .photo-large-img {
-                    max-width: 100%;
-                    max-height: 100%;
-                    object-fit: contain;
-                    border-radius: 4px;
-                }
-                
-                .photo-large-footer {
-                    padding: 10px;
-                    background: #f8f9fa;
-                    border-top: 1px solid #dee2e6;
-                }
-                
-                /* Animations */
-                @keyframes fadeIn {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
-                }
-                
-                @keyframes slideUp {
-                    from { 
-                        opacity: 0;
-                        transform: translateY(30px);
-                    }
-                    to { 
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
+                    font-size: 0.95rem;
                 }
                 
                 @media (max-width: 768px) {
                     .modal-body {
                         max-height: calc(100vh - 200px);
                         overflow-y: auto;
-                    }
-                    
-                    .info-row {
-                        flex-direction: column;
-                    }
-                    
-                    .info-label {
-                        width: 100%;
-                        margin-bottom: 4px;
-                    }
-                    
-                    .dog-name-line {
-                        flex-direction: column;
-                        align-items: flex-start;
-                        gap: 4px;
-                    }
-                    
-                    /* AANPASSING: Op mobiel zorgen we dat stamboomnummer, ras en geslacht achter elkaar blijven */
-                    .dog-details-line {
-                        flex-direction: row !important; /* Achter elkaar blijven */
-                        flex-wrap: wrap !important; /* Maar kunnen wel naar volgende regel als nodig */
-                        align-items: center !important;
-                        gap: 8px !important;
-                    }
-                    
-                    .dog-detail-header-line {
-                        flex-direction: row !important; /* Achter elkaar blijven */
-                        flex-wrap: wrap !important;
-                        align-items: center !important;
-                        gap: 8px !important;
                     }
                     
                     .mobile-back-button {
@@ -1106,22 +615,20 @@ class SearchManager extends BaseModule {
                         border-bottom: 1px solid #dee2e6;
                     }
                     
-                    /* Responsive photo adjustments */
-                    .photo-thumbnail {
-                        width: 32px;
-                        height: 32px;
+                    .dog-details-line {
+                        flex-direction: row !important;
+                        flex-wrap: wrap !important;
+                        align-items: center !important;
+                        gap: 8px !important;
                     }
                     
-                    .photo-large-content {
-                        padding: 10px;
+                    .dog-detail-header-line {
+                        flex-direction: row !important;
+                        flex-wrap: wrap !important;
+                        align-items: center !important;
+                        gap: 8px !important;
                     }
                     
-                    .photo-large-img {
-                        max-width: 95vw;
-                        max-height: 65vh;
-                    }
-                    
-                    /* AANPASSING: Stamboomnummer, ras, geslacht EN vachtkleur iets kleiner op mobiel */
                     .dog-details-line .stamboom,
                     .dog-details-line .ras,
                     .dog-details-line .geslacht,
@@ -1130,54 +637,7 @@ class SearchManager extends BaseModule {
                     .dog-detail-header-line .ras,
                     .dog-detail-header-line .geslacht,
                     .dog-detail-header-line .vachtkleur {
-                        font-size: 0.85rem !important; /* Iets kleiner dan 0.95rem */
-                    }
-                }
-                
-                /* Print styles */
-                @media print {
-                    .modal-dialog {
-                        max-width: none;
-                        margin: 0;
-                    }
-                    
-                    .modal-header {
-                        display: none !important;
-                    }
-                    
-                    .pedigree-container-compact {
-                        padding: 0;
-                        background: white;
-                        height: auto !important;
-                        overflow-x: visible !important;
-                        height: 100vh !important;
-                    }
-                    
-                    .pedigree-grid-compact {
-                        flex-direction: row !important;
-                        height: auto;
-                        padding: 20px !important;
-                        gap: 15px;
-                    }
-                    
-                    .pedigree-generation-col {
-                        flex-direction: column;
-                        gap: 10px;
-                    }
-                    
-                    .pedigree-card-compact.horizontal {
-                        break-inside: avoid;
-                        box-shadow: none;
-                        border: 1px solid #ccc !important;
-                        margin-bottom: 10px;
-                    }
-                    
-                    .main-dog-compact {
-                        border: 2px solid #000 !important;
-                    }
-                    
-                    .photo-large-overlay {
-                        display: none !important;
+                        font-size: 0.85rem !important;
                     }
                 }
             </style>
@@ -1198,89 +658,6 @@ class SearchManager extends BaseModule {
         
         this.setupNameSearch();
         this.setupKennelSearch();
-        
-        this.setupModalCloseEvents();
-    }
-    
-    setupModalCloseEvents() {
-        const searchModal = document.getElementById('searchModal');
-        if (searchModal) {
-            this.modalHideHandler = () => {
-                this.modalClosing = true;
-            };
-            
-            this.modalHiddenHandler = () => {
-                this.resetSearchState();
-                this.modalClosing = false;
-            };
-            
-            searchModal.addEventListener('hide.bs.modal', this.modalHideHandler.bind(this));
-            searchModal.addEventListener('hidden.bs.modal', this.modalHiddenHandler.bind(this));
-        }
-        
-        const closeBtn = document.getElementById('searchModalCloseBtn');
-        const closeBtnFooter = document.getElementById('searchModalCloseBtnFooter');
-        
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
-                this.modalClosing = true;
-                setTimeout(() => {
-                    this.resetSearchState();
-                    this.modalClosing = false;
-                }, 100);
-            });
-        }
-        
-        if (closeBtnFooter) {
-            closeBtnFooter.addEventListener('click', () => {
-                this.modalClosing = true;
-                setTimeout(() => {
-                    this.resetSearchState();
-                    this.modalClosing = false;
-                }, 100);
-            });
-        }
-    }
-    
-    resetSearchState() {
-        this.isMobileCollapsed = false;
-        this.filteredDogs = [];
-        
-        if (this.modalClosing) {
-            console.log('Modal is aan het sluiten, alleen interne state gereset');
-            return;
-        }
-        
-        const searchModal = document.getElementById('searchModal');
-        if (!searchModal || !searchModal.classList.contains('show')) {
-            console.log('Modal is gesloten, alleen interne state gereset');
-            return;
-        }
-        
-        const searchColumn = document.getElementById('searchColumn');
-        const detailsColumn = document.getElementById('detailsColumn');
-        
-        if (searchColumn && detailsColumn) {
-            searchColumn.classList.remove('d-none');
-            detailsColumn.classList.remove('col-12');
-            detailsColumn.classList.add('col-md-7');
-            
-            const backButtonDiv = document.querySelector('.mobile-back-button');
-            if (backButtonDiv) {
-                backButtonDiv.remove();
-            }
-        }
-        
-        const nameInput = document.getElementById('searchNameInput');
-        const kennelInput = document.getElementById('searchKennelInput');
-        
-        if (nameInput) nameInput.value = '';
-        if (kennelInput) kennelInput.value = '';
-        
-        this.showInitialView();
-        this.clearDetails();
-        
-        console.log('Search state reset na sluiten modal');
     }
     
     switchSearchType(type) {
@@ -1332,13 +709,6 @@ class SearchManager extends BaseModule {
                 this.clearDetails();
             }
         });
-        
-        searchInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && this.filteredDogs.length > 0) {
-                e.preventDefault();
-                this.selectDog(this.filteredDogs[0]);
-            }
-        });
     }
     
     setupKennelSearch() {
@@ -1361,24 +731,13 @@ class SearchManager extends BaseModule {
                 this.clearDetails();
             }
         });
-        
-        searchInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && this.filteredDogs.length > 0) {
-                e.preventDefault();
-                this.selectDog(this.filteredDogs[0]);
-            }
-        });
     }
     
     showInitialView() {
         const container = document.getElementById('searchResultsContainer');
-        if (!container) {
-            console.warn('searchResultsContainer niet gevonden bij showInitialView');
-            return;
-        }
+        if (!container) return;
         
         const t = this.t.bind(this);
-        
         const message = this.searchType === 'name' ? t('typeToSearch') : t('typeToSearchKennel');
         
         container.innerHTML = `
@@ -1391,10 +750,7 @@ class SearchManager extends BaseModule {
     
     clearDetails() {
         const container = document.getElementById('detailsContainer');
-        if (!container) {
-            console.warn('detailsContainer niet gevonden bij clearDetails');
-            return;
-        }
+        if (!container) return;
         
         const t = this.t.bind(this);
         
@@ -1432,9 +788,7 @@ class SearchManager extends BaseModule {
         this.filteredDogs = this.allDogs.filter(dog => {
             const naam = dog.naam ? dog.naam.toLowerCase() : '';
             const kennelnaam = dog.kennelnaam ? dog.kennelnaam.toLowerCase() : '';
-            
             const combined = `${naam} ${kennelnaam}`;
-            
             return combined.startsWith(searchTerm);
         });
         
@@ -1447,11 +801,7 @@ class SearchManager extends BaseModule {
             return kennelnaam.startsWith(searchTerm);
         });
         
-        this.filteredDogs.sort((a, b) => {
-            const naamA = a.naam ? a.naam.toLowerCase() : '';
-            const naamB = b.naam ? b.naam.toLowerCase() : '';
-            return naamA.localeCompare(naamB);
-        });
+        this.filteredDogs.sort((a, b) => a.naam.localeCompare(b.naam));
         
         this.displaySearchResults();
     }
@@ -1484,13 +834,11 @@ class SearchManager extends BaseModule {
             
             html += `
                 <div class="dog-result-item" data-id="${dog.id}">
-                    <!-- REGEL 1: Naam + Kennelnaam -->
                     <div class="dog-name-line">
                         <span class="dog-name">${dog.naam || t('unknown')}</span>
                         ${dog.kennelnaam ? `<span class="text-muted ms-2">${dog.kennelnaam}</span>` : ''}
                     </div>
                     
-                    <!-- REGEL 2: Stamboomnummer + Ras + Geslacht - ACHTER ELKAAR -->
                     <div class="dog-details-line">
                         ${dog.stamboomnr ? `<span class="stamboom">${dog.stamboomnr}</span>` : ''}
                         ${dog.ras ? `<span class="ras">${dog.ras}</span>` : ''}
@@ -1506,92 +854,8 @@ class SearchManager extends BaseModule {
             item.addEventListener('click', (e) => {
                 const hondId = parseInt(item.getAttribute('data-id'));
                 this.selectDogById(hondId);
-                
-                if (window.innerWidth <= 768) {
-                    this.collapseSearchResultsOnMobile();
-                }
             });
         });
-    }
-    
-    collapseSearchResultsOnMobile() {
-        if (window.innerWidth <= 768 && !this.isMobileCollapsed) {
-            const searchColumn = document.getElementById('searchColumn');
-            const detailsColumn = document.getElementById('detailsColumn');
-            
-            if (searchColumn && detailsColumn) {
-                searchColumn.classList.add('d-none');
-                detailsColumn.classList.remove('col-md-7');
-                detailsColumn.classList.add('col-12');
-                this.isMobileCollapsed = true;
-                
-                this.addMobileBackButton();
-            }
-        }
-    }
-    
-    addMobileBackButton() {
-        const detailsContainer = document.getElementById('detailsContainer');
-        if (!detailsContainer) return;
-        
-        const existingButton = detailsContainer.querySelector('.mobile-back-button');
-        if (existingButton) {
-            return;
-        }
-        
-        const backButtonDiv = document.createElement('div');
-        backButtonDiv.className = 'mobile-back-button';
-        backButtonDiv.innerHTML = `
-            <button class="btn btn-sm btn-outline-secondary">
-                <i class="bi bi-arrow-left me-1"></i> ${this.t('backToSearch')}
-            </button>
-        `;
-        
-        backButtonDiv.querySelector('button').addEventListener('click', () => {
-            this.restoreSearchViewOnMobile();
-        });
-        
-        const firstChild = detailsContainer.firstChild;
-        if (firstChild) {
-            detailsContainer.insertBefore(backButtonDiv, firstChild);
-        } else {
-            detailsContainer.appendChild(backButtonDiv);
-        }
-    }
-    
-    restoreSearchViewOnMobile() {
-        const searchColumn = document.getElementById('searchColumn');
-        const detailsColumn = document.getElementById('detailsColumn');
-        
-        if (searchColumn && detailsColumn) {
-            searchColumn.classList.remove('d-none');
-            detailsColumn.classList.remove('col-12');
-            detailsColumn.classList.add('col-md-7');
-            this.isMobileCollapsed = false;
-            
-            const backButtonDiv = document.querySelector('.mobile-back-button');
-            if (backButtonDiv) {
-                backButtonDiv.remove();
-            }
-            
-            const searchInput = this.searchType === 'name' ? 
-                document.getElementById('searchNameInput') : 
-                document.getElementById('searchKennelInput');
-            if (searchInput) {
-                const searchTerm = searchInput.value.toLowerCase().trim();
-                if (searchTerm.length >= 1) {
-                    const inputEvent = new Event('input', {
-                        bubbles: true,
-                        cancelable: true
-                    });
-                    searchInput.dispatchEvent(inputEvent);
-                } else {
-                    this.showInitialView();
-                    this.clearDetails();
-                }
-                searchInput.focus();
-            }
-        }
     }
     
     selectDog(dog) {
@@ -1603,10 +867,6 @@ class SearchManager extends BaseModule {
         });
         
         this.showDogDetails(dog);
-        
-        if (window.innerWidth <= 768) {
-            this.collapseSearchResultsOnMobile();
-        }
     }
     
     selectDogById(hondId) {
@@ -1616,7 +876,7 @@ class SearchManager extends BaseModule {
         }
     }
     
-    // BELANGRIJK: showDogDetails herschreven met correcte ouderzoeklogica
+    // BELANGRIJK: EXACT DEzelfde logica als DogDataManager
     async showDogDetails(dog, isParentView = false, originalDogId = null) {
         const t = this.t.bind(this);
         const container = document.getElementById('detailsContainer');
@@ -1625,11 +885,7 @@ class SearchManager extends BaseModule {
         
         container.innerHTML = '';
         
-        if (this.isMobileCollapsed && window.innerWidth <= 768) {
-            this.addMobileBackButton();
-        }
-        
-        // BELANGRIJK: Ouderzoeklogica op basis van ID's (zoals DogDataManager opslaat)
+        // EXACT ZELFDE LOGICA ALS DOGDATAMANAGER - alleen tekst gebruiken
         let fatherInfo = { 
             naam: dog.vader || t('parentsUnknown'), 
             stamboomnr: '', 
@@ -1644,74 +900,30 @@ class SearchManager extends BaseModule {
             kennelnaam: '' 
         };
         
-        // BELANGRIJK: Eerst zoeken op ID zoals DogDataManager gebruikt
-        // Controleer of vaderId bestaat EN of de tekstuele vader naam overeenkomt met de ID
+        // Zoek alleen op ID als DogDataManager dat ook doet
         if (dog.vaderId) {
-            // Zoek vader in allDogs op ID
-            const fatherById = this.allDogs.find(d => d.id === dog.vaderId);
-            if (fatherById) {
+            const father = this.allDogs.find(d => d.id === dog.vaderId);
+            if (father) {
                 fatherInfo = { 
-                    id: fatherById.id,
-                    naam: fatherById.naam || dog.vader,
-                    stamboomnr: fatherById.stamboomnr || '',
-                    ras: fatherById.ras || '',
-                    kennelnaam: fatherById.kennelnaam || ''
+                    id: father.id,
+                    naam: father.naam || dog.vader,
+                    stamboomnr: father.stamboomnr || '',
+                    ras: father.ras || '',
+                    kennelnaam: father.kennelnaam || ''
                 };
-                console.log(`Vader gevonden via ID ${dog.vaderId}: ${fatherInfo.naam}`);
             }
         }
         
-        // ALTERNATIEF: Zoek vader op naam als ID niet werkt
-        if (!fatherInfo.id && dog.vader && dog.vader.trim() !== '') {
-            // Zoek op exacte combinatie van "naam kennelnaam" zoals DogDataManager opslaat
-            const fatherByName = this.allDogs.find(d => {
-                const fullName = `${d.naam || ''} ${d.kennelnaam || ''}`.trim();
-                return fullName === dog.vader.trim();
-            });
-            
-            if (fatherByName) {
-                fatherInfo = { 
-                    id: fatherByName.id,
-                    naam: fatherByName.naam || dog.vader,
-                    stamboomnr: fatherByName.stamboomnr || '',
-                    ras: fatherByName.ras || '',
-                    kennelnaam: fatherByName.kennelnaam || ''
-                };
-                console.log(`Vader gevonden via naam "${dog.vader}": ${fatherInfo.naam}`);
-            }
-        }
-        
-        // Moeder: eerst zoeken op ID
         if (dog.moederId) {
-            const motherById = this.allDogs.find(d => d.id === dog.moederId);
-            if (motherById) {
+            const mother = this.allDogs.find(d => d.id === dog.moederId);
+            if (mother) {
                 motherInfo = { 
-                    id: motherById.id,
-                    naam: motherById.naam || dog.moeder,
-                    stamboomnr: motherById.stamboomnr || '',
-                    ras: motherById.ras || '',
-                    kennelnaam: motherById.kennelnaam || ''
+                    id: mother.id,
+                    naam: mother.naam || dog.moeder,
+                    stamboomnr: mother.stamboomnr || '',
+                    ras: mother.ras || '',
+                    kennelnaam: mother.kennelnaam || ''
                 };
-                console.log(`Moeder gevonden via ID ${dog.moederId}: ${motherInfo.naam}`);
-            }
-        }
-        
-        // ALTERNATIEF: Zoek moeder op naam als ID niet werkt
-        if (!motherInfo.id && dog.moeder && dog.moeder.trim() !== '') {
-            const motherByName = this.allDogs.find(d => {
-                const fullName = `${d.naam || ''} ${d.kennelnaam || ''}`.trim();
-                return fullName === dog.moeder.trim();
-            });
-            
-            if (motherByName) {
-                motherInfo = { 
-                    id: motherByName.id,
-                    naam: motherByName.naam || dog.moeder,
-                    stamboomnr: motherByName.stamboomnr || '',
-                    ras: motherByName.ras || '',
-                    kennelnaam: motherByName.kennelnaam || ''
-                };
-                console.log(`Moeder gevonden via naam "${dog.moeder}": ${motherInfo.naam}`);
             }
         }
         
@@ -1719,55 +931,10 @@ class SearchManager extends BaseModule {
             if (!dateString) return '';
             try {
                 const date = new Date(dateString);
-                return date.toLocaleDateString(this.currentLang === 'nl' ? 'nl-NL' : 
-                                              this.currentLang === 'de' ? 'de-DE' : 'en-US');
+                return date.toLocaleDateString(this.currentLang === 'nl' ? 'nl-NL' : 'en-US');
             } catch (e) {
                 return dateString;
             }
-        };
-        
-        const getHealthBadge = (value, type) => {
-            if (!value || value === '') {
-                return `<span class="badge bg-secondary">${t('unknown')}</span>`;
-            }
-            
-            let badgeClass = '';
-            let badgeText = value;
-            
-            switch(type) {
-                case 'hip':
-                    badgeClass = 'badge-hd';
-                    badgeText = t('hipGrades', value) || value;
-                    break;
-                case 'elbow':
-                    badgeClass = 'badge-ed';
-                    badgeText = t('elbowGrades', value) || value;
-                    break;
-                case 'patella':
-                    badgeClass = 'badge-pl';
-                    badgeText = t('patellaGrades', value) || value;
-                    break;
-                case 'eyes':
-                    badgeClass = 'badge-eyes';
-                    badgeText = t('eyeStatus', value) || value;
-                    break;
-                case 'dandy':
-                    badgeClass = 'badge-dandy';
-                    badgeText = t('dandyStatus', value) || value;
-                    break;
-                case 'thyroid':
-                    badgeClass = 'badge-thyroid';
-                    badgeText = t('thyroidStatus', value) || value;
-                    break;
-                default:
-                    badgeClass = 'badge bg-secondary';
-            }
-            
-            return `<span class="badge ${badgeClass}">${badgeText}</span>`;
-        };
-        
-        const displayValue = (value) => {
-            return value && value !== '' ? value : t('unknown');
         };
         
         const genderText = dog.geslacht === 'reuen' ? t('male') : 
@@ -1777,24 +944,11 @@ class SearchManager extends BaseModule {
         
         const html = `
             <div class="details-card">
-                ${isParentView ? `
                 <div class="details-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <button class="btn btn-sm btn-outline-secondary back-button" data-original-dog="${originalDogId}">
-                            <i class="bi bi-arrow-left me-1"></i> ${t('backToSearch')}
-                        </button>
-                        <div class="text-muted small">
-                            <i class="bi bi-info-circle me-1"></i> ${t('viewingParent')}
-                        </div>
-                    </div>
-                </div>
-                ` : ''}
-                
-                <div class="details-header ${isParentView ? 'pt-0' : ''}">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="dog-name-header">${displayValue(dog.naam)}</div>
-                            ${dog.kennelnaam ? `<div class="text-muted mb-2">${displayValue(dog.kennelnaam)}</div>` : ''}
+                            <div class="dog-name-header">${dog.naam || t('unknown')}</div>
+                            ${dog.kennelnaam ? `<div class="text-muted mb-2">${dog.kennelnaam}</div>` : ''}
                             
                             <div class="dog-detail-header-line mt-2">
                                 ${dog.stamboomnr ? `<span class="stamboom">${dog.stamboomnr}</span>` : ''}
@@ -1824,21 +978,6 @@ class SearchManager extends BaseModule {
                 </div>
                 
                 <div class="details-body">
-                    ${hasPhotos ? `
-                    <div class="photos-section">
-                        <div class="photos-title">
-                            <div class="photos-title-text">
-                                <i class="bi bi-camera"></i>
-                                <span>${t('photos')}</span>
-                            </div>
-                            <div class="click-hint-text">${t('clickToEnlarge')}</div>
-                        </div>
-                        <div class="photos-grid-container" id="photosGrid${dog.id}">
-                            <!-- Foto's worden hier ingeladen -->
-                        </div>
-                    </div>
-                    ` : ''}
-                    
                     <div class="info-group">
                         <div class="info-group-title d-flex justify-content-between align-items-center">
                             <div>
@@ -1894,33 +1033,33 @@ class SearchManager extends BaseModule {
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <div class="fw-bold mb-1">${t('hipDysplasia')}</div>
-                                <div>${getHealthBadge(dog.heupdysplasie, 'hip')}</div>
+                                <div>${dog.heupdysplasie || t('unknown')}</div>
                             </div>
                             
                             <div class="col-md-6 mb-3">
                                 <div class="fw-bold mb-1">${t('elbowDysplasia')}</div>
-                                <div>${getHealthBadge(dog.elleboogdysplasie, 'elbow')}</div>
+                                <div>${dog.elleboogdysplasie || t('unknown')}</div>
                             </div>
                             
                             <div class="col-md-6 mb-3">
                                 <div class="fw-bold mb-1">${t('patellaLuxation')}</div>
-                                <div>${getHealthBadge(dog.patella, 'patella')}</div>
+                                <div>${dog.patella || t('unknown')}</div>
                             </div>
                             
                             <div class="col-md-6 mb-3">
                                 <div class="fw-bold mb-1">${t('eyes')}</div>
-                                <div>${getHealthBadge(dog.ogen, 'eyes')}</div>
+                                <div>${dog.ogen || t('unknown')}</div>
                                 ${dog.ogenVerklaring ? `<div class="text-muted small mt-1">${dog.ogenVerklaring}</div>` : ''}
                             </div>
                             
                             <div class="col-md-6 mb-3">
                                 <div class="fw-bold mb-1">${t('dandyWalker')}</div>
-                                <div>${getHealthBadge(dog.dandyWalker, 'dandy')}</div>
+                                <div>${dog.dandyWalker || t('unknown')}</div>
                             </div>
                             
                             <div class="col-md-6 mb-3">
                                 <div class="fw-bold mb-1">${t('thyroid')}</div>
-                                <div>${getHealthBadge(dog.schildklier, 'thyroid')}</div>
+                                <div>${dog.schildklier || t('unknown')}</div>
                                 ${dog.schildklierVerklaring ? `<div class="text-muted small mt-1">${dog.schildklierVerklaring}</div>` : ''}
                             </div>
                         </div>
@@ -1934,12 +1073,12 @@ class SearchManager extends BaseModule {
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <div class="fw-bold mb-1">${t('country')}</div>
-                                <div>${displayValue(dog.land)}</div>
+                                <div>${dog.land || t('unknown')}</div>
                             </div>
                             
                             <div class="col-md-6">
                                 <div class="fw-bold mb-1">${t('zipCode')}</div>
-                                <div>${displayValue(dog.postcode)}</div>
+                                <div>${dog.postcode || t('unknown')}</div>
                             </div>
                         </div>
                         
@@ -1950,37 +1089,11 @@ class SearchManager extends BaseModule {
                             </div>
                         </div>
                     </div>
-                    
-                    ${dog.createdAt || dog.updatedAt ? `
-                    <div class="info-group">
-                        <div class="info-group-title">
-                            <i class="bi bi-clock-history me-1"></i> Systeem informatie
-                        </div>
-                        <div class="row">
-                            ${dog.createdAt ? `
-                            <div class="col-md-6">
-                                <div class="text-muted small">Aangemaakt</div>
-                                <div class="small">${formatDate(dog.createdAt)}</div>
-                            </div>
-                            ` : ''}
-                            ${dog.updatedAt ? `
-                            <div class="col-md-6">
-                                <div class="text-muted small">Laatst bijgewerkt</div>
-                                <div class="small">${formatDate(dog.updatedAt)}</div>
-                            </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                    ` : ''}
                 </div>
             </div>
         `;
         
         container.insertAdjacentHTML('beforeend', html);
-        
-        if (hasPhotos) {
-            this.loadAndDisplayPhotos(dog);
-        }
         
         if (fatherInfo.id) {
             const fatherCard = container.querySelector('.father-card');
@@ -2004,14 +1117,6 @@ class SearchManager extends BaseModule {
             }
         }
         
-        container.querySelectorAll('.btn-pedigree').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                e.stopPropagation();
-                const dogId = parseInt(btn.getAttribute('data-dog-id'));
-                await this.openPedigree(dogId);
-            });
-        });
-        
         if (isParentView) {
             const backButton = container.querySelector('.back-button');
             if (backButton) {
@@ -2023,58 +1128,6 @@ class SearchManager extends BaseModule {
                     }
                 });
             }
-        }
-    }
-    
-    async loadAndDisplayPhotos(dog) {
-        try {
-            const photos = await this.getDogPhotos(dog.id);
-            const container = document.getElementById('detailsContainer');
-            const photosGrid = container.querySelector(`#photosGrid${dog.id}`);
-            
-            if (!photosGrid || photos.length === 0) {
-                return;
-            }
-            
-            let photosHTML = '';
-            photos.forEach((photo, index) => {
-                let photoUrl = '';
-                if (photo.data && typeof photo.data === 'string') {
-                    const mimeType = photo.type || 'image/jpeg';
-                    let cleanData = photo.data;
-                    if (cleanData.startsWith('data:')) {
-                        cleanData = cleanData.split(',')[1];
-                    }
-                    photoUrl = `data:${mimeType};base64,${cleanData}`;
-                } else if (photo.url) {
-                    photoUrl = photo.url;
-                } else if (photo.filePath) {
-                    photoUrl = photo.filePath;
-                }
-                
-                if (photoUrl) {
-                    photosHTML += `
-                        <div class="photo-thumbnail" 
-                             data-photo-id="${photo.id}" 
-                             data-dog-id="${dog.id}" 
-                             data-photo-index="${index}"
-                             data-photo-src="${photoUrl}">
-                            <img src="${photoUrl}" 
-                                 alt="${dog.naam || ''} - ${photo.filename || ''}" 
-                                 class="thumbnail-img"
-                                 loading="lazy">
-                            <div class="photo-hover">
-                                <i class="bi bi-zoom-in"></i>
-                            </div>
-                        </div>
-                    `;
-                }
-            });
-            
-            photosGrid.innerHTML = photosHTML;
-            
-        } catch (error) {
-            console.error('Fout bij laden foto\'s:', error);
         }
     }
     
@@ -2092,33 +1145,9 @@ class SearchManager extends BaseModule {
         }
     }
     
-    async openPedigree(dogId) {
-        try {
-            if (!this.stamboomManager) {
-                console.log('Initializing StamboomManager...');
-                this.stamboomManager = new StamboomManager(this.db, this.currentLang);
-                await this.stamboomManager.initialize();
-            }
-            
-            const dog = this.allDogs.find(d => d.id === dogId);
-            if (!dog) {
-                this.showError("Hond niet gevonden");
-                return;
-            }
-            
-            this.stamboomManager.showPedigree(dog);
-            
-        } catch (error) {
-            console.error('Fout bij openen stamboom:', error);
-            this.showError(`Fout bij openen stamboom: ${error.message}`);
-        }
-    }
-    
     showProgress(message) {
         if (typeof super.showProgress === 'function') {
             super.showProgress(message);
-        } else {
-            console.log('Progress:', message);
         }
     }
     
@@ -2140,8 +1169,6 @@ class SearchManager extends BaseModule {
     showSuccess(message) {
         if (typeof super.showSuccess === 'function') {
             super.showSuccess(message);
-        } else {
-            console.log('Success:', message);
         }
     }
 }
