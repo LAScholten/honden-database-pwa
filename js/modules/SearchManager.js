@@ -272,7 +272,7 @@ class SearchManager extends BaseModule {
                 selectDogToView: "Wählen Sie einen Hund, um Details zu sehen",
                 
                 // Hund Details
-                birthDate: "Geburtsdatum",
+                birthDate: "Geboortedatum",
                 deathDate: "Sterbedatum",
                 hipDysplasia: "Hüftdysplasie",
                 elbowDysplasia: "Ellbogendysplasie",
@@ -1278,7 +1278,15 @@ class SearchManager extends BaseModule {
         if (nameInput) nameInput.value = '';
         if (kennelInput) kennelInput.value = '';
         
-        this.showInitialView();
+        // Controleer of de modal nog open is voordat we showInitialView aanroepen
+        const searchModal = document.getElementById('searchModal');
+        if (searchModal && !searchModal.classList.contains('show')) {
+            // Modal is gesloten, geen DOM manipulatie proberen
+            console.log('Modal is gesloten, skip showInitialView');
+        } else {
+            this.showInitialView();
+        }
+        
         this.clearDetails();
         
         // Reset filteredDogs
@@ -1377,6 +1385,12 @@ class SearchManager extends BaseModule {
     
     showInitialView() {
         const container = document.getElementById('searchResultsContainer');
+        // CONTROLEER EERST OF HET ELEMENT BESTAAT
+        if (!container) {
+            console.warn('searchResultsContainer niet gevonden bij showInitialView');
+            return;
+        }
+        
         const t = this.t.bind(this);
         
         const message = this.searchType === 'name' ? t('typeToSearch') : t('typeToSearchKennel');
