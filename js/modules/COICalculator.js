@@ -1,4 +1,4 @@
-// COICalculator V4 - DUBBELE BEREKENING (6 generaties + alle generaties)
+// COICalculator V3 - DUBBELE BEREKENING (6 generaties + alle generaties)
 class COICalculator {
     constructor(allDogs = []) {
         this.allDogs = allDogs;
