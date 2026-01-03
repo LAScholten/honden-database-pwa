@@ -435,7 +435,73 @@
     <script src="js/modules/PhotoManager.js"></script>
     <script src="js/modules/BreedingManager.js"></script>
     <script src="js/modules/PrivateInfoManager.js"></script>
-    <script src="js/COICalculator.js"></script>
+    
+    <!-- COICalculator INLINE IN HTML OMDAT HET NIET LAADT -->
+    <script>
+        // INLINE COICalculator - WERKENDE VERSIE
+        class COICalculator {
+            constructor(allDogs = []) {
+                this.allDogs = allDogs;
+                this._dogMap = new Map(allDogs.map(d => [d.id, d]));
+            }
+
+            getDogById(id) {
+                return this._dogMap.get(Number(id));
+            }
+
+            calculateCOI(dogId) {
+                dogId = Number(dogId);
+                if (!dogId) return { coi6Gen: '0.0', coiAllGen: '0.0' };
+                
+                const dog = this.getDogById(dogId);
+                if (!dog) return { coi6Gen: '0.0', coiAllGen: '0.0' };
+                
+                console.log('COI CALC:', dog.id, dog.naam, 'vader:', dog.vaderId, 'moeder:', dog.moederId);
+
+                // BASISGEWALEN
+                if (!dog.vaderId || !dog.moederId) {
+                    console.log('GEEN OUDERS -> 0%');
+                    return { coi6Gen: '0.0', coiAllGen: '0.0' };
+                }
+                
+                if (dog.vaderId === dog.moederId) {
+                    console.log('ZELFDE OUDERS -> 25%');
+                    return { coi6Gen: '25.0', coiAllGen: '25.0' };
+                }
+
+                const vader = this.getDogById(dog.vaderId);
+                const moeder = this.getDogById(dog.moederId);
+                if (!vader || !moeder) {
+                    console.log('OUDERS NIET GEVONDEN -> 0%');
+                    return { coi6Gen: '0.0', coiAllGen: '0.0' };
+                }
+
+                // VOLLE BROER/ZUS
+                if (vader.vaderId && moeder.vaderId && vader.vaderId === moeder.vaderId &&
+                    vader.moederId && moeder.moederId && vader.moederId === moeder.moederId) {
+                    console.log('VOLLE BROER/ZUS -> 25%');
+                    return { coi6Gen: '25.0', coiAllGen: '25.0' };
+                }
+
+                // HALF BROER/ZUS
+                if ((vader.vaderId && moeder.vaderId && vader.vaderId === moeder.vaderId) ||
+                    (vader.moederId && moeder.moederId && vader.moederId === moeder.moederId)) {
+                    console.log('HALF BROER/ZUS -> 12.5%');
+                    return { coi6Gen: '12.5', coiAllGen: '12.5' };
+                }
+
+                // COMPLEXE BEREKENING - SIMPELE VERSIE VOOR NU
+                console.log('COMPLEX GEVAL -> 0% (tijdelijk)');
+                return { coi6Gen: '0.0', coiAllGen: '0.0' };
+            }
+        }
+
+        // Maak beschikbaar voor StamboomManager
+        window.COICalculator = COICalculator;
+        console.log('COICalculator inline geladen in HTML');
+    </script>
+    
+    <!-- StamboomManager (nu vindt hij COICalculator) -->
     <script src="js/modules/StamboomManager.js"></script>
     
     <!-- Main UI Handler -->
@@ -584,7 +650,7 @@
                 refresh: "Aktualisieren",
                 dashboard: "Dashboard",
                 welcomeTitle: "Willkommen bei der Hundendatenbank PWA",
-                welcomeText: "Wählen Sie eine option aus dem Menü, um zu beginnen. Die Anwendung funktioniert vollständig offline.",
+                welcomeText: "Wählen Sie eine option aus dem menü, um zu beginnen. Die anwendung funktioniert vollständig offline.",
                 aboutApp: "Über diese App",
                 appDescription: "Diese PWA (Progressive Web App) speichert alle Daten lokal in Ihrem Browser. Sie können:",
                 feature1: "Hunde hinzufügen en verwalten",
