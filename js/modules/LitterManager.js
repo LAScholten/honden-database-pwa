@@ -1899,6 +1899,17 @@ class LitterManager {
             }
         };
         
+        // Haal de vader en moeder ID's op uit de hidden inputs
+        const fatherIdInput = document.getElementById('fatherId');
+        const motherIdInput = document.getElementById('motherId');
+        const fatherIdValue = fatherIdInput?.value;
+        const motherIdValue = motherIdInput?.value;
+        
+        console.log('LitterManager: vaderId uit hidden input:', fatherIdValue);
+        console.log('LitterManager: moederId uit hidden input:', motherIdValue);
+        console.log('LitterManager: vaderId type:', typeof fatherIdValue);
+        console.log('LitterManager: moederId type:', typeof motherIdValue);
+        
         // Verzamel formulier data
         const dogData = {
             naam: document.getElementById('name')?.value.trim() || '',
@@ -1908,9 +1919,9 @@ class LitterManager {
             vachtkleur: document.getElementById('coatColor')?.value.trim() || '', // NIEUW: vachtkleur
             geslacht: document.getElementById('gender')?.value || '',
             vader: document.getElementById('father')?.value.trim() || '',
-            vaderId: document.getElementById('fatherId')?.value ? parseInt(document.getElementById('fatherId').value) : null,
+            vaderId: fatherIdValue ? parseInt(fatherIdValue) : null,
             moeder: document.getElementById('mother')?.value.trim() || '',
-            moederId: document.getElementById('motherId')?.value ? parseInt(document.getElementById('motherId').value) : null,
+            moederId: motherIdValue ? parseInt(motherIdValue) : null,
             geboortedatum: formatDateForStorage(birthDateValue),
             overlijdensdatum: formatDateForStorage(deathDateValue),
             heupdysplasie: document.getElementById('hipDysplasia')?.value || '',
@@ -1929,6 +1940,8 @@ class LitterManager {
         };
         
         console.log('LitterManager: Dog data verzameld:', dogData);
+        console.log('LitterManager: vaderId in dogData:', dogData.vaderId, 'type:', typeof dogData.vaderId);
+        console.log('LitterManager: moederId in dogData:', dogData.moederId, 'type:', typeof dogData.moederId);
         
         // Validatie - OUDERS NU OOK VERPLICHT
         if (!dogData.naam) {
@@ -1968,6 +1981,11 @@ class LitterManager {
         
         try {
             console.log('LitterManager: Probeer hond op te slaan via db...');
+            console.log('LitterManager: Data die naar db.voegHondToe wordt gestuurd:');
+            console.log('  - naam:', dogData.naam);
+            console.log('  - vader:', dogData.vader, 'vaderId:', dogData.vaderId);
+            console.log('  - moeder:', dogData.moeder, 'moederId:', dogData.moederId);
+            
             const result = await this.db.voegHondToe(dogData);
             console.log('LitterManager: Hond opgeslagen met ID:', result);
             
@@ -1983,7 +2001,9 @@ class LitterManager {
                 naam: dogData.naam,
                 stamboomnr: dogData.stamboomnr,
                 geslacht: dogData.geslacht,
-                vachtkleur: dogData.vachtkleur // NIEUW: vachtkleur toevoegen
+                vachtkleur: dogData.vachtkleur, // NIEUW: vachtkleur toevoegen
+                vaderId: dogData.vaderId,
+                moederId: dogData.moederId
             });
             
             // Update de UI lijst
