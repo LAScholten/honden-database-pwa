@@ -119,6 +119,83 @@
             margin-right: 10px;
             font-weight: bold;
         }
+        
+        /* Responsieve layout voor actieknoppen */
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Standaard layout (desktop): knoppen naast elkaar */
+        .action-buttons-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Mobiele layout: knoppen onder elkaar */
+        .action-buttons-column {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            width: 100%;
+        }
+        
+        /* Mobile-specifieke aanpassingen */
+        @media (max-width: 768px) {
+            .mobile-actions {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                margin-top: 5px;
+                width: 100%;
+            }
+            
+            .mobile-actions .btn {
+                width: 100%;
+                justify-content: center;
+                padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+            
+            /* Verberg de normale layout op mobiel */
+            .action-buttons-row {
+                display: none !important;
+            }
+            
+            /* Toon mobiele layout */
+            .action-buttons-column {
+                display: flex !important;
+            }
+            
+            /* Pas navigatie aan voor mobiel */
+            .navbar .container-fluid {
+                flex-wrap: wrap;
+            }
+            
+            .navbar-actions {
+                width: 100%;
+                order: 3;
+                margin-top: 10px;
+            }
+            
+            /* Maak taal selector compacter op mobiel */
+            .btn-group.btn-group-sm {
+                margin-right: 0 !important;
+            }
+        }
+        
+        /* Desktop: verberg mobiele layout */
+        @media (min-width: 769px) {
+            .action-buttons-column {
+                display: none !important;
+            }
+            
+            .action-buttons-row {
+                display: flex !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -130,7 +207,7 @@
                 <span class="app-text" data-key="appTitle">Hondendatabase PWA</span>
             </a>
             
-            <div class="d-flex align-items-center">
+            <div class="navbar-actions">
                 <!-- Taal selector in navigatie -->
                 <div class="me-3">
                     <div class="btn-group btn-group-sm">
@@ -146,19 +223,35 @@
                     </div>
                 </div>
                 
-                <span class="text-white me-3">
+                <span class="text-white me-3 d-none d-md-inline">
                     <i class="bi bi-person-circle"></i> 
                     <span id="currentUser">Gebruiker</span>
                 </span>
                 
-                <!-- PWA Installatie Knop - ALTIJD ZICHTBAAR -->
-                <button class="btn btn-success btn-sm me-2" id="pwaInstallBtn">
-                    <i class="bi bi-download"></i> Installeer App
-                </button>
+                <!-- Desktop layout: knoppen naast elkaar -->
+                <div class="action-buttons-row">
+                    <!-- PWA Installatie Knop - ALTIJD ZICHTBAAR -->
+                    <button class="btn btn-success btn-sm me-2" id="pwaInstallBtn">
+                        <i class="bi bi-download"></i> Installeer App
+                    </button>
+                    
+                    <button class="btn btn-outline-light btn-sm" id="logoutBtn">
+                        <i class="bi bi-box-arrow-right"></i> <span class="app-text" data-key="logout">Uitloggen</span>
+                    </button>
+                </div>
                 
-                <button class="btn btn-outline-light btn-sm" id="logoutBtn">
-                    <i class="bi bi-box-arrow-right"></i> <span class="app-text" data-key="logout">Uitloggen</span>
-                </button>
+                <!-- Mobile layout: knoppen onder elkaar -->
+                <div class="action-buttons-column d-none">
+                    <!-- PWA Installatie Knop voor mobiel -->
+                    <button class="btn btn-success btn-sm" id="pwaInstallBtnMobile">
+                        <i class="bi bi-download"></i> Installeer App
+                    </button>
+                    
+                    <!-- Uitlogknop voor mobiel -->
+                    <button class="btn btn-outline-light btn-sm" id="logoutBtnMobile">
+                        <i class="bi bi-box-arrow-right"></i> <span class="app-text" data-key="logout">Uitloggen</span>
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
@@ -602,7 +695,7 @@
                 adminRole: "Administrator",
                 adminRights: "Volle Rechte, einschließlich neuer Hunde hinzufügen.",
                 userRole: "Benutzer",
-                userRights: "Kann Daten importieren/exportieren und ansehen, aber keine neuen Hunde hinzufügen oder bearbeiten.",
+                userRights: "Kann Daten importieren/exportieren und ansehen, maar keine neuen Hunde hinzufügen oder bearbeiten.",
                 
                 // Backup Texte
                 backupNow: "Backup",
@@ -939,6 +1032,9 @@
                 // Laad initiële statistieken
                 loadInitialStats();
                 
+                // Setup responsieve layout
+                setupResponsiveLayout();
+                
             } catch (error) {
                 console.error('Fout bij initialiseren UI:', error);
                 alert('Fout bij initialiseren applicatie: ' + error.message);
@@ -982,7 +1078,7 @@
         function setupOtherEventListeners() {
             console.log('Setting up other event listeners');
             
-            // Uitloggen
+            // Uitloggen - desktop knop
             const logoutBtn = document.getElementById('logoutBtn');
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', function() {
@@ -991,6 +1087,15 @@
                 });
             } else {
                 console.error('Logout button not found');
+            }
+            
+            // Uitloggen - mobiele knop
+            const logoutBtnMobile = document.getElementById('logoutBtnMobile');
+            if (logoutBtnMobile) {
+                logoutBtnMobile.addEventListener('click', function() {
+                    console.log('Mobile logout button clicked');
+                    auth.logout();
+                });
             }
             
             // Vernieuw statistieken
@@ -1019,13 +1124,21 @@
         
         // PWA INSTALLATIE - SIMPELE WERKENDE VERSIE
         function setupPWAInstallation() {
+            // Desktop installatie knop
             const pwaInstallBtn = document.getElementById('pwaInstallBtn');
-            if (!pwaInstallBtn) return;
+            if (pwaInstallBtn) {
+                pwaInstallBtn.addEventListener('click', function() {
+                    showInstallInstructions();
+                });
+            }
             
-            // ALTIJD klikbaar maken
-            pwaInstallBtn.addEventListener('click', function() {
-                showInstallInstructions();
-            });
+            // Mobiele installatie knop
+            const pwaInstallBtnMobile = document.getElementById('pwaInstallBtnMobile');
+            if (pwaInstallBtnMobile) {
+                pwaInstallBtnMobile.addEventListener('click', function() {
+                    showInstallInstructions();
+                });
+            }
         }
         
         function showInstallInstructions() {
@@ -1140,6 +1253,45 @@
             }
         }
         
+        // Responsieve layout management
+        function setupResponsiveLayout() {
+            // Controleer initieel of mobiel
+            checkScreenSize();
+            
+            // Luister naar window resize
+            window.addEventListener('resize', checkScreenSize);
+        }
+        
+        function checkScreenSize() {
+            const isMobile = window.innerWidth <= 768;
+            
+            // Zoek de knoppen containers
+            const columnLayout = document.querySelector('.action-buttons-column');
+            const rowLayout = document.querySelector('.action-buttons-row');
+            
+            if (isMobile) {
+                // Mobiel: toon kolom layout
+                if (columnLayout) columnLayout.classList.remove('d-none');
+                if (rowLayout) rowLayout.classList.add('d-none');
+                
+                // Verberg uitlegknop op mobiel
+                const learnMoreBtn = document.getElementById('learnMoreHeaderBtn');
+                if (learnMoreBtn) {
+                    learnMoreBtn.style.display = 'none';
+                }
+            } else {
+                // Desktop: toon rij layout
+                if (columnLayout) columnLayout.classList.add('d-none');
+                if (rowLayout) rowLayout.classList.remove('d-none');
+                
+                // Toon uitlegknop op desktop
+                const learnMoreBtn = document.getElementById('learnMoreHeaderBtn');
+                if (learnMoreBtn) {
+                    learnMoreBtn.style.display = '';
+                }
+            }
+        }
+        
         // Automatische PWA detectie voor browsers die het ondersteunen
         let deferredPrompt;
         
@@ -1148,12 +1300,16 @@
             deferredPrompt = e;
             window.deferredPrompt = e;
             
-            // Update knop tekst als installatie beschikbaar is
-            const pwaInstallBtn = document.getElementById('pwaInstallBtn');
-            if (pwaInstallBtn) {
-                pwaInstallBtn.innerHTML = '<i class="bi bi-download"></i> Klik om te Installeren';
-                pwaInstallBtn.classList.add('btn-warning');
-            }
+            // Update knoppen tekst als installatie beschikbaar is
+            const updateInstallButton = (btn) => {
+                if (btn) {
+                    btn.innerHTML = '<i class="bi bi-download"></i> Klik om te Installeren';
+                    btn.classList.add('btn-warning');
+                }
+            };
+            
+            updateInstallButton(document.getElementById('pwaInstallBtn'));
+            updateInstallButton(document.getElementById('pwaInstallBtnMobile'));
         });
         
         // Wanneer app is geïnstalleerd
@@ -1161,13 +1317,17 @@
             console.log('PWA succesvol geïnstalleerd!');
             deferredPrompt = null;
             
-            const pwaInstallBtn = document.getElementById('pwaInstallBtn');
-            if (pwaInstallBtn) {
-                pwaInstallBtn.innerHTML = '<i class="bi bi-check-circle"></i> Geïnstalleerd!';
-                pwaInstallBtn.classList.remove('btn-warning', 'btn-success');
-                pwaInstallBtn.classList.add('btn-secondary');
-                pwaInstallBtn.disabled = true;
-            }
+            const updateInstalledButton = (btn) => {
+                if (btn) {
+                    btn.innerHTML = '<i class="bi bi-check-circle"></i> Geïnstalleerd!';
+                    btn.classList.remove('btn-warning', 'btn-success');
+                    btn.classList.add('btn-secondary');
+                    btn.disabled = true;
+                }
+            };
+            
+            updateInstalledButton(document.getElementById('pwaInstallBtn'));
+            updateInstalledButton(document.getElementById('pwaInstallBtnMobile'));
             
             if (ui && ui.showSuccess) {
                 ui.showSuccess('App succesvol geïnstalleerd!');
