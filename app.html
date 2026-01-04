@@ -530,7 +530,7 @@
     <script src="js/modules/SearchManager.js"></script>
     <script src="js/modules/PhotoManager.js"></script>
     
-    <!-- NIEUWE BREEDING MODULES -->
+    <!-- BREEDING MODULES - ALLE DRIE ALTIJD LADEN -->
     <script src="js/modules/BreedingManager.js"></script>
     <script src="js/modules/ReuTeefCombinatie.js"></script>
     <script src="js/modules/ZoekReu.js"></script>
@@ -683,7 +683,7 @@
                 quickOverview: "Schnellübersicht",
                 dogs: "Hunde",
                 photos: "Fotos",
-                refresh: "Aktualisieren",
+                refresh: "Aktualiseren",
                 dashboard: "Dashboard",
                 welcomeTitle: "Willkommen bei der Hundendatenbank PWA",
                 welcomeText: "Wählen Sie eine option aus dem menü, um zu beginnen. Die anwendung funktioniert vollständig offline.",
@@ -700,7 +700,7 @@
                 adminRole: "Administrator",
                 adminRights: "Volle Rechte, einschließlich neuer Hunde hinzufügen.",
                 userRole: "Benutzer",
-                userRights: "Kann Daten importieren/exportieren und ansehen, maar keine neuen Hunde hinzufügen oder bearbeiten.",
+                userRights: "Kann Daten importieren/exportieren und ansehen, maar keine neuen Hunde hinzufügen of bearbeiten.",
                 
                 // Backup Texte
                 backupNow: "Backup",
@@ -711,7 +711,7 @@
                 backupModalTitle: "Data Backup - Warum is das wichtig?",
                 backupRisksTitle: "Risiken zonder Backup",
                 backupRisksText1: "Diese App speichert alle Daten <strong>nur lokal in Ihrem Browser</strong>.",
-                backupRisksText2: "Ihre Daten kunnen verloren gehen, wenn Sie: ",
+                backupRisksText2: "Ihre Daten kunnen verloren gehen, wanneer Sie: ",
                 backupHowToTitle: "Wie man ein Backup erstellt",
                 backupHowToText1: "<strong>Empfohlen:</strong> Erstellen Sie wöchentliche Backups",
                 backupIOSHeading: "Auf iPhone/iPad:",
@@ -723,7 +723,7 @@
                 backupStatusWarning: "⚠ Letztes Backup: vor {days} Tagen",
                 backupStatusDanger: "🚨 NOCH NIE gebackupt!",
                 dashboardWarningNever: "Sie haben noch nie ein Backup erstellt! Wenn Sie Browser-Daten löschen, verlieren Sie alle Ihre Hundeaufzeichnungen.",
-                dashboardWarningOld: "Ihr letztes Backup war vor {days} Tagen. Erwägen Sie, ein neues Backup te maken, um Datenverlust te vermeiden.",
+                dashboardWarningOld: "Ihr letztes Backup war vor {days} Tagen. Erwägen Sie, ein neues Backup te machen, um Datenverlust zu vermeiden.",
                 
                 installPWA: "App installieren"
             }
@@ -1039,6 +1039,10 @@
                 
                 // Setup responsieve layout
                 setupResponsiveLayout();
+                
+                // Maak de nieuwe modules beschikbaar in window object
+                window.reuTeefCombinatie = ReuTeefCombinatie;
+                window.zoekReu = ZoekReu;
                 
             } catch (error) {
                 console.error('Fout bij initialiseren UI:', error);
@@ -1357,6 +1361,7 @@
             }, 100);
         });
         
+        // VERWIJDER de override van showModal in UIHandler.prototype
         // UI Handler aanpassing voor LitterManager
         const originalShowModal = UIHandler.prototype.showModal;
         UIHandler.prototype.showModal = function(modalType) {
@@ -1368,7 +1373,7 @@
                 const litterManager = new LitterManager();
                 
                 if (litterManager.injectDependencies) {
-                    litterManager.injectDependencies(db, auth);
+                    litterManager.injectDependencies(this.db, this.auth);
                     console.log('Dependencies injected into LitterManager');
                 }
                 
@@ -1380,7 +1385,7 @@
                 setTimeout(() => {
                     try {
                         if (litterManager.setupEvents) {
-                            const isAdmin = auth.isAdmin();
+                            const isAdmin = this.auth.isAdmin();
                             if (!isAdmin) {
                                 console.log('User is not admin, showing access denied popup');
                                 return;
@@ -1390,42 +1395,6 @@
                         }
                     } catch (error) {
                         console.error('Error setting up LitterManager events:', error);
-                    }
-                }, 500);
-                
-                return;
-            }
-            
-            // NIEUW: Aanpassing voor BreedingManager
-            if (modalType === 'breeding') {
-                console.log('Creating breeding plan modal');
-                
-                const breedingManager = new BreedingManager();
-                
-                if (breedingManager.injectDependencies) {
-                    breedingManager.injectDependencies(db, auth);
-                    console.log('Dependencies injected into BreedingManager');
-                }
-                
-                const modalHTML = breedingManager.getModalHTML();
-                console.log('Got modal HTML from BreedingManager');
-                
-                this.showCustomModal(modalHTML, 'breedingPlanModal', 'breedingPlanModalLabel');
-                
-                setTimeout(() => {
-                    try {
-                        if (breedingManager.setupEvents) {
-                            breedingManager.setupEvents();
-                            console.log('BreedingManager events setup complete');
-                        }
-                        
-                        // Laad de initiële content
-                        if (breedingManager.loadMainScreen) {
-                            breedingManager.loadMainScreen();
-                            console.log('BreedingManager main screen loaded');
-                        }
-                    } catch (error) {
-                        console.error('Error setting up BreedingManager events:', error);
                     }
                 }, 500);
                 
