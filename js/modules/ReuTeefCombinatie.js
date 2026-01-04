@@ -11,7 +11,8 @@ class ReuTeefCombinatie {
         this.selectedTeef = null;
         this.selectedReu = null;
         this.allHonden = [];
-        this.familieData = new Map(); // Cache voor familie data
+        this.familieDataCache = new Map(); // Cache voor familie data
+        this.hondenCache = new Map(); // Cache voor individuele honden
         this.translations = {
             nl: {
                 title: "Reu en Teef Combinatie",
@@ -54,7 +55,15 @@ class ReuTeefCombinatie {
                 color: "Vachtkleur:",
                 searchByName: "Zoek op naam of kennel",
                 dogDetails: "Hond details",
-                selectDogFirst: "Selecteer eerst een hond"
+                selectDogFirst: "Selecteer eerst een hond",
+                loadingPedigree: "Stamboom wordt geladen...",
+                unknownAncestor: "Onbekend",
+                fatherLabel: "Vader",
+                motherLabel: "Moeder",
+                grandfatherLabel: "Grootvader",
+                grandmotherLabel: "Grootmoeder",
+                greatGrandfatherLabel: "Overgrootvader",
+                greatGrandmotherLabel: "Overgrootmoeder"
             },
             en: {
                 title: "Male and Female Combination",
@@ -97,7 +106,15 @@ class ReuTeefCombinatie {
                 color: "Color:",
                 searchByName: "Search by name or kennel",
                 dogDetails: "Dog details",
-                selectDogFirst: "Select a dog first"
+                selectDogFirst: "Select a dog first",
+                loadingPedigree: "Loading pedigree...",
+                unknownAncestor: "Unknown",
+                fatherLabel: "Father",
+                motherLabel: "Mother",
+                grandfatherLabel: "Grandfather",
+                grandmotherLabel: "Grandmother",
+                greatGrandfatherLabel: "Great-grandfather",
+                greatGrandmotherLabel: "Great-grandmother"
             },
             de: {
                 title: "Rüde und Hündin Kombination",
@@ -140,7 +157,15 @@ class ReuTeefCombinatie {
                 color: "Fellfarbe:",
                 searchByName: "Suche nach Name oder Zwingername",
                 dogDetails: "Hund Details",
-                selectDogFirst: "Wählen Sie zuerst einen Hund"
+                selectDogFirst: "Wählen Sie zuerst einen Hund",
+                loadingPedigree: "Stammbaum wird geladen...",
+                unknownAncestor: "Unbekannt",
+                fatherLabel: "Vater",
+                motherLabel: "Mutter",
+                grandfatherLabel: "Großvater",
+                grandmotherLabel: "Großmutter",
+                greatGrandfatherLabel: "Urgroßvater",
+                greatGrandmotherLabel: "Urgroßmutter"
             }
         };
     }
@@ -164,7 +189,8 @@ class ReuTeefCombinatie {
         // Reset geselecteerde honden
         this.selectedTeef = null;
         this.selectedReu = null;
-        this.familieData.clear();
+        this.familieDataCache.clear();
+        this.hondenCache.clear();
         
         // Laad honden data
         await this.loadAllHonden();
@@ -665,6 +691,14 @@ class ReuTeefCombinatie {
             if (this.db && typeof this.db.getHonden === 'function') {
                 this.allHonden = await this.db.getHonden();
                 console.log(`Geladen: ${this.allHonden.length} honden uit database`);
+                
+                // Voeg alle honden toe aan cache
+                this.allHonden.forEach(hond => {
+                    this.hondenCache.set(hond.id, hond);
+                    if (hond.stamboomnr) {
+                        this.hondenCache.set(hond.stamboomnr, hond);
+                    }
+                });
             } else {
                 console.error('Database niet beschikbaar of getHonden functie ontbreekt');
                 this.allHonden = [];
@@ -673,6 +707,61 @@ class ReuTeefCombinatie {
             console.error('Fout bij laden honden:', error);
             this.allHonden = [];
         }
+    }
+    
+    async getHondById(id) {
+        // Controleer eerst cache
+        if (this.hondenCache.has(id)) {
+            return this.hondenCache.get(id);
+        }
+        
+        try {
+            const hond = await this.db.getHondById(id);
+            if (hond) {
+                // Voeg toe aan cache
+                this.hondenCache.set(id, hond);
+                if (hond.stamboomnr) {
+                    this.hondenCache.set(hond.stamboomnr, hond);
+                }
+            }
+            return hond;
+        } catch (error) {
+            console.error(`Fout bij ophalen hond ${id}:`, error);
+            return null;
+        }
+    }
+    
+    async findHondByNameOrPedigree(name) {
+        if (!name || !name.trim()) return null;
+        
+        // Controleer eerst in cache
+        const searchName = name.toLowerCase().trim();
+        for (const hond of this.allHonden) {
+            const hondNaam = hond.naam?.toLowerCase() || '';
+            const stamboomnr = hond.stamboomnr?.toLowerCase() || '';
+            if (hondNaam === searchName || stamboomnr === searchName) {
+                return hond;
+            }
+        }
+        
+        // Zoek in database als niet gevonden in cache
+        try {
+            const result = await this.db.zoekHonden({ naam: name });
+            if (result && result.length > 0) {
+                // Voeg gevonden hond toe aan cache
+                result.forEach(hond => {
+                    this.hondenCache.set(hond.id, hond);
+                    if (hond.stamboomnr) {
+                        this.hondenCache.set(hond.stamboomnr, hond);
+                    }
+                });
+                return result[0];
+            }
+        } catch (error) {
+            console.error(`Fout bij zoeken hond op naam ${name}:`, error);
+        }
+        
+        return null;
     }
     
     setupAutocomplete(inputId, geslacht, onSelect) {
@@ -895,7 +984,7 @@ class ReuTeefCombinatie {
         const t = this.t.bind(this);
         const details = document.getElementById(elementId);
         
-        // Haal extra informatie op
+        // Haal ouders informatie op
         const oudersInfo = await this.getOudersInfo(hond);
         
         details.innerHTML = `
@@ -949,14 +1038,14 @@ class ReuTeefCombinatie {
                                 <div class="row">
                                     ${oudersInfo.vader ? `
                                         <div class="col-md-6 mb-2">
-                                            <strong>Vader:</strong><br>
+                                            <strong>${t('fatherLabel')}:</strong><br>
                                             ${oudersInfo.vader.naam || 'Onbekend'}
                                             ${oudersInfo.vader.stamboomnr ? `(${oudersInfo.vader.stamboomnr})` : ''}
                                         </div>
                                     ` : ''}
                                     ${oudersInfo.moeder ? `
                                         <div class="col-md-6 mb-2">
-                                            <strong>Moeder:</strong><br>
+                                            <strong>${t('motherLabel')}:</strong><br>
                                             ${oudersInfo.moeder.naam || 'Onbekend'}
                                             ${oudersInfo.moeder.stamboomnr ? `(${oudersInfo.moeder.stamboomnr})` : ''}
                                         </div>
@@ -1020,35 +1109,74 @@ class ReuTeefCombinatie {
     async getOudersInfo(hond) {
         const result = { vader: null, moeder: null };
         
+        // Zoek vader
         if (hond.vaderId) {
-            try {
-                result.vader = await this.db.getHondById(hond.vaderId);
-            } catch (error) {
-                console.log('Kon vader niet vinden:', error);
-            }
+            result.vader = await this.getHondById(hond.vaderId);
         } else if (hond.vader) {
-            // Zoek vader op naam
-            const vader = this.allHonden.find(h => 
-                h.naam === hond.vader || h.stamboomnr === hond.vader
-            );
-            if (vader) result.vader = vader;
+            // Zoek vader op naam of stamboomnummer
+            result.vader = await this.findHondByNameOrPedigree(hond.vader);
         }
         
+        // Zoek moeder
         if (hond.moederId) {
-            try {
-                result.moeder = await this.db.getHondById(hond.moederId);
-            } catch (error) {
-                console.log('Kon moeder niet vinden:', error);
-            }
+            result.moeder = await this.getHondById(hond.moederId);
         } else if (hond.moeder) {
-            // Zoek moeder op naam
-            const moeder = this.allHonden.find(h => 
-                h.naam === hond.moeder || h.stamboomnr === hond.moeder
-            );
-            if (moeder) result.moeder = moeder;
+            // Zoek moeder op naam of stamboomnummer
+            result.moeder = await this.findHondByNameOrPedigree(hond.moeder);
         }
         
         return result;
+    }
+    
+    async getFamilielid(hond, generatie, relatie) {
+        if (!hond) return null;
+        
+        // Als we bij de gewenste generatie zijn, geef de hond terug
+        if (generatie === 0) return hond;
+        
+        // Haal ouders op
+        const ouders = await this.getOudersInfo(hond);
+        
+        // Ga recursief dieper
+        if (relatie === 'vader' || relatie === 'both') {
+            const vaderFamilielid = await this.getFamilielid(ouders.vader, generatie - 1, relatie);
+            if (vaderFamilielid) return vaderFamilielid;
+        }
+        
+        if (relatie === 'moeder' || relatie === 'both') {
+            const moederFamilielid = await this.getFamilielid(ouders.moeder, generatie - 1, relatie);
+            if (moederFamilielid) return moederFamilielid;
+        }
+        
+        return null;
+    }
+    
+    async getFamilieTree(hond, diepte) {
+        if (diepte <= 0 || !hond) return { hond: hond };
+        
+        const cacheKey = `${hond.id}_${diepte}`;
+        if (this.familieDataCache.has(cacheKey)) {
+            return this.familieDataCache.get(cacheKey);
+        }
+        
+        const ouders = await this.getOudersInfo(hond);
+        
+        const tree = {
+            hond: hond,
+            vader: null,
+            moeder: null
+        };
+        
+        if (ouders.vader) {
+            tree.vader = await this.getFamilieTree(ouders.vader, diepte - 1);
+        }
+        
+        if (ouders.moeder) {
+            tree.moeder = await this.getFamilieTree(ouders.moeder, diepte - 1);
+        }
+        
+        this.familieDataCache.set(cacheKey, tree);
+        return tree;
     }
     
     updateSaveButtonState() {
@@ -1095,44 +1223,51 @@ class ReuTeefCombinatie {
         content.innerHTML = `
             <div class="text-center py-5">
                 <div class="spinner-border text-purple mb-3" role="status">
-                    <span class="visually-hidden">${t('loading')}</span>
+                    <span class="visually-hidden">${t('loadingPedigree')}</span>
                 </div>
-                <p class="text-muted">${t('loading')}...</p>
+                <p class="text-muted">${t('loadingPedigree')}...</p>
             </div>
         `;
         
         try {
-            // Haal familie data op voor beide honden
-            const [teefFamilie, reuFamilie] = await Promise.all([
-                this.haalFamilieData(this.selectedTeef, 3),
-                this.haalFamilieData(this.selectedReu, 3)
+            // Haal familie bomen op voor beide honden (tot 3 generaties diep)
+            const [teefTree, reuTree] = await Promise.all([
+                this.getFamilieTree(this.selectedTeef, 3),
+                this.getFamilieTree(this.selectedReu, 3)
             ]);
             
-            const predictedPuppy = {
-                naam: `Toekomstige pup van ${this.selectedTeef.naam} & ${this.selectedReu.naam}`,
-                ras: this.selectedTeef.ras || this.selectedReu.ras || 'Mix',
-                ouders: {
-                    moeder: this.selectedTeef,
-                    vader: this.selectedReu
-                },
-                grootouders: {
-                    moederMoeder: teefFamilie.moeder?.moeder || this.maakOnbekendeAncestor('teef', 'Grootmoeder (Moeders kant)'),
-                    moederVader: teefFamilie.moeder?.vader || this.maakOnbekendeAncestor('reu', 'Grootvader (Moeders kant)'),
-                    vaderMoeder: reuFamilie.moeder?.moeder || this.maakOnbekendeAncestor('teef', 'Grootmoeder (Vaders kant)'),
-                    vaderVader: reuFamilie.moeder?.vader || this.maakOnbekendeAncestor('reu', 'Grootvader (Vaders kant)')
-                }
+            // Haal specifieke generaties op
+            const grootoudersTeef = {
+                moederMoeder: teefTree.moeder?.hond || null,
+                moederVader: teefTree.vader?.hond || null,
+                vaderMoeder: teefTree.moeder?.moeder?.hond || null,
+                vaderVader: teefTree.moeder?.vader?.hond || null
             };
             
-            // Haal overgrootouders op indien beschikbaar
+            const grootoudersReu = {
+                moederMoeder: reuTree.moeder?.hond || null,
+                moederVader: reuTree.vader?.hond || null,
+                vaderMoeder: reuTree.moeder?.moeder?.hond || null,
+                vaderVader: reuTree.moeder?.vader?.hond || null
+            };
+            
+            // Haal overgrootouders op
             const overgrootouders = {
-                mmMoeder: teefFamilie.moeder?.moeder?.moeder || this.maakOnbekendeAncestor('teef', 'Overgrootmoeder'),
-                mmVader: teefFamilie.moeder?.moeder?.vader || this.maakOnbekendeAncestor('reu', 'Overgrootvader'),
-                mvMoeder: teefFamilie.moeder?.vader?.moeder || this.maakOnbekendeAncestor('teef', 'Overgrootmoeder'),
-                mvVader: teefFamilie.moeder?.vader?.vader || this.maakOnbekendeAncestor('reu', 'Overgrootvader'),
-                vmMoeder: reuFamilie.moeder?.moeder?.moeder || this.maakOnbekendeAncestor('teef', 'Overgrootmoeder'),
-                vmVader: reuFamilie.moeder?.moeder?.vader || this.maakOnbekendeAncestor('reu', 'Overgrootvader'),
-                vvMoeder: reuFamilie.vader?.moeder?.moeder || this.maakOnbekendeAncestor('teef', 'Overgrootmoeder'),
-                vvVader: reuFamilie.vader?.vader?.vader || this.maakOnbekendeAncestor('reu', 'Overgrootvader')
+                // Teef's moeder's moeder's ouders
+                mmMoeder: teefTree.moeder?.moeder?.hond || null,
+                mmVader: teefTree.moeder?.moeder?.vader?.hond || null,
+                
+                // Teef's moeder's vader's ouders
+                mvMoeder: teefTree.moeder?.vader?.hond || null,
+                mvVader: teefTree.moeder?.vader?.vader?.hond || null,
+                
+                // Teef's vader's moeder's ouders
+                vmMoeder: teefTree.vader?.moeder?.hond || null,
+                vmVader: teefTree.vader?.moeder?.vader?.hond || null,
+                
+                // Teef's vader's vader's ouders
+                vvMoeder: teefTree.vader?.vader?.hond || null,
+                vvVader: teefTree.vader?.vader?.vader?.hond || null
             };
             
             content.innerHTML = `
@@ -1143,10 +1278,10 @@ class ReuTeefCombinatie {
                         <div class="pedigree-row">
                             <div class="pedigree-box puppy">
                                 <div class="pedigree-label">Voorspelde Pup</div>
-                                <div class="pedigree-name">${predictedPuppy.naam}</div>
-                                <div class="pedigree-breed">${predictedPuppy.ras}</div>
+                                <div class="pedigree-name">${this.selectedTeef.naam} & ${this.selectedReu.naam}</div>
+                                <div class="pedigree-breed">${this.selectedTeef.ras || this.selectedReu.ras || 'Mix'}</div>
                                 <div class="pedigree-details">
-                                    Combinatie van ${this.selectedTeef.naam} en ${this.selectedReu.naam}
+                                    Combinatie van geselecteerde reu en teef
                                 </div>
                                 <div class="pedigree-pedigree">Theoretische voorspelling</div>
                             </div>
@@ -1157,8 +1292,8 @@ class ReuTeefCombinatie {
                     <div class="pedigree-generation">
                         <div class="pedigree-generation-title mb-4">${t('parents')}</div>
                         <div class="pedigree-row">
-                            ${this.maakPedigreeBox(this.selectedReu, 'Vader', 'parent')}
-                            ${this.maakPedigreeBox(this.selectedTeef, 'Moeder', 'parent')}
+                            ${this.maakPedigreeBox(this.selectedReu, t('fatherLabel'), 'parent')}
+                            ${this.maakPedigreeBox(this.selectedTeef, t('motherLabel'), 'parent')}
                         </div>
                     </div>
                     
@@ -1171,8 +1306,8 @@ class ReuTeefCombinatie {
                             <div class="col-lg-6">
                                 <div class="pedigree-side-title">${t('fatherSide')}</div>
                                 <div class="pedigree-row">
-                                    ${this.maakPedigreeBox(predictedPuppy.grootouders.vaderVader, 'Grootvader', 'grandparent')}
-                                    ${this.maakPedigreeBox(predictedPuppy.grootouders.vaderMoeder, 'Grootmoeder', 'grandparent')}
+                                    ${this.maakPedigreeBox(grootoudersReu.vaderVader, t('grandfatherLabel'), 'grandparent')}
+                                    ${this.maakPedigreeBox(grootoudersReu.vaderMoeder, t('grandmotherLabel'), 'grandparent')}
                                 </div>
                             </div>
                             
@@ -1180,8 +1315,8 @@ class ReuTeefCombinatie {
                             <div class="col-lg-6">
                                 <div class="pedigree-side-title">${t('motherSide')}</div>
                                 <div class="pedigree-row">
-                                    ${this.maakPedigreeBox(predictedPuppy.grootouders.moederVader, 'Grootvader', 'grandparent')}
-                                    ${this.maakPedigreeBox(predictedPuppy.grootouders.moederMoeder, 'Grootmoeder', 'grandparent')}
+                                    ${this.maakPedigreeBox(grootoudersTeef.vaderVader, t('grandfatherLabel'), 'grandparent')}
+                                    ${this.maakPedigreeBox(grootoudersTeef.vaderMoeder, t('grandmotherLabel'), 'grandparent')}
                                 </div>
                             </div>
                         </div>
@@ -1194,37 +1329,37 @@ class ReuTeefCombinatie {
                         <div class="row">
                             <!-- Vaders vaders kant -->
                             <div class="col-lg-3 col-md-6">
-                                <div class="pedigree-side-title small">Vader's Vader</div>
+                                <div class="pedigree-side-title small">${t('fatherSide')} - ${t('fatherLabel')}</div>
                                 <div class="pedigree-row">
-                                    ${this.maakPedigreeBox(overgrootouders.vvVader, 'Overgrootvader', 'great-grandparent')}
-                                    ${this.maakPedigreeBox(overgrootouders.vvMoeder, 'Overgrootmoeder', 'great-grandparent')}
+                                    ${this.maakPedigreeBox(overgrootouders.vvVader, t('greatGrandfatherLabel'), 'great-grandparent')}
+                                    ${this.maakPedigreeBox(overgrootouders.vvMoeder, t('greatGrandmotherLabel'), 'great-grandparent')}
                                 </div>
                             </div>
                             
                             <!-- Vaders moeders kant -->
                             <div class="col-lg-3 col-md-6">
-                                <div class="pedigree-side-title small">Vader's Moeder</div>
+                                <div class="pedigree-side-title small">${t('fatherSide')} - ${t('motherLabel')}</div>
                                 <div class="pedigree-row">
-                                    ${this.maakPedigreeBox(overgrootouders.vmVader, 'Overgrootvader', 'great-grandparent')}
-                                    ${this.maakPedigreeBox(overgrootouders.vmMoeder, 'Overgrootmoeder', 'great-grandparent')}
+                                    ${this.maakPedigreeBox(overgrootouders.vmVader, t('greatGrandfatherLabel'), 'great-grandparent')}
+                                    ${this.maakPedigreeBox(overgrootouders.vmMoeder, t('greatGrandmotherLabel'), 'great-grandparent')}
                                 </div>
                             </div>
                             
                             <!-- Moeders vaders kant -->
                             <div class="col-lg-3 col-md-6">
-                                <div class="pedigree-side-title small">Moeder's Vader</div>
+                                <div class="pedigree-side-title small">${t('motherSide')} - ${t('fatherLabel')}</div>
                                 <div class="pedigree-row">
-                                    ${this.maakPedigreeBox(overgrootouders.mvVader, 'Overgrootvader', 'great-grandparent')}
-                                    ${this.maakPedigreeBox(overgrootouders.mvMoeder, 'Overgrootmoeder', 'great-grandparent')}
+                                    ${this.maakPedigreeBox(overgrootouders.mvVader, t('greatGrandfatherLabel'), 'great-grandparent')}
+                                    ${this.maakPedigreeBox(overgrootouders.mvMoeder, t('greatGrandmotherLabel'), 'great-grandparent')}
                                 </div>
                             </div>
                             
                             <!-- Moeders moeders kant -->
                             <div class="col-lg-3 col-md-6">
-                                <div class="pedigree-side-title small">Moeder's Moeder</div>
+                                <div class="pedigree-side-title small">${t('motherSide')} - ${t('motherLabel')}</div>
                                 <div class="pedigree-row">
-                                    ${this.maakPedigreeBox(overgrootouders.mmVader, 'Overgrootvader', 'great-grandparent')}
-                                    ${this.maakPedigreeBox(overgrootouders.mmMoeder, 'Overgrootmoeder', 'great-grandparent')}
+                                    ${this.maakPedigreeBox(overgrootouders.mmVader, t('greatGrandfatherLabel'), 'great-grandparent')}
+                                    ${this.maakPedigreeBox(overgrootouders.mmMoeder, t('greatGrandmotherLabel'), 'great-grandparent')}
                                 </div>
                             </div>
                         </div>
@@ -1249,6 +1384,19 @@ class ReuTeefCombinatie {
                             <span class="small">${t('greatGrandparents')}</span>
                         </div>
                     </div>
+                    
+                    <!-- Debug info (optioneel) -->
+                    <div class="mt-4 text-muted small">
+                        <details>
+                            <summary>Debug informatie</summary>
+                            <div class="mt-2">
+                                <strong>Teef ID:</strong> ${this.selectedTeef.id}<br>
+                                <strong>Reu ID:</strong> ${this.selectedReu.id}<br>
+                                <strong>Cache grootte:</strong> ${this.hondenCache.size} honden<br>
+                                <strong>Familie cache:</strong> ${this.familieDataCache.size} bomen
+                            </div>
+                        </details>
+                    </div>
                 </div>
             `;
         } catch (error) {
@@ -1258,46 +1406,20 @@ class ReuTeefCombinatie {
                     <i class="bi bi-exclamation-triangle me-2"></i>
                     Er is een fout opgetreden bij het laden van de stamboom.
                     <div class="small mt-2">${error.message}</div>
+                    <div class="small mt-2">Stack trace: ${error.stack}</div>
                 </div>
             `;
         }
     }
     
-    async haalFamilieData(hond, diepte) {
-        if (diepte <= 0) return {};
-        
-        const cacheKey = `${hond.id}_${diepte}`;
-        if (this.familieData.has(cacheKey)) {
-            return this.familieData.get(cacheKey);
-        }
-        
-        const result = {
-            hond: hond,
-            vader: null,
-            moeder: null
-        };
-        
-        // Haal ouders op
-        const ouders = await this.getOudersInfo(hond);
-        
-        if (ouders.vader) {
-            result.vader = await this.haalFamilieData(ouders.vader, diepte - 1);
-        }
-        
-        if (ouders.moeder) {
-            result.moeder = await this.haalFamilieData(ouders.moeder, diepte - 1);
-        }
-        
-        this.familieData.set(cacheKey, result);
-        return result;
-    }
-    
     maakPedigreeBox(hond, relatie, type = 'unknown') {
+        const t = this.t.bind(this);
+        
         if (!hond || !hond.naam) {
             return `
                 <div class="pedigree-box ${type} unknown">
                     <div class="pedigree-label">${relatie}</div>
-                    <div class="pedigree-name">Onbekend</div>
+                    <div class="pedigree-name">${t('unknownAncestor')}</div>
                     <div class="pedigree-details">Geen informatie beschikbaar</div>
                 </div>
             `;
@@ -1306,6 +1428,8 @@ class ReuTeefCombinatie {
         const geboortejaar = hond.geboortedatum ? 
             new Date(hond.geboortedatum).getFullYear() : '?';
         const kennelInfo = hond.kennelnaam ? `Kennel: ${hond.kennelnaam}` : '';
+        const geboorteDatum = hond.geboortedatum ? 
+            new Date(hond.geboortedatum).toLocaleDateString(this.currentLang) : '?';
         
         // Gezondheid indicator
         let healthIndicator = '';
@@ -1319,26 +1443,16 @@ class ReuTeefCombinatie {
             <div class="pedigree-box ${type}">
                 <div class="pedigree-label">${relatie}</div>
                 <div class="pedigree-name">${hond.naam}</div>
-                <div class="pedigree-breed">${hond.ras || 'Onbekend ras'}</div>
+                <div class="pedigree-breed">${hond.ras || t('unknownBreed')}</div>
                 ${hond.stamboomnr ? `<div class="pedigree-pedigree">${hond.stamboomnr}</div>` : ''}
                 <div class="pedigree-details">
-                    ${geboortejaar}<br>
+                    ${geboorteDatum}<br>
                     ${kennelInfo}
                     ${hond.vachtkleur ? `<br>Kleur: ${hond.vachtkleur}` : ''}
                 </div>
                 ${healthIndicator}
             </div>
         `;
-    }
-    
-    maakOnbekendeAncestor(geslacht, relatie) {
-        const geslachtTekst = geslacht === 'teef' ? 'Teef' : 'Reu';
-        return {
-            naam: `Onbekende ${geslachtTekst}`,
-            relatie: relatie,
-            geslacht: geslacht,
-            onbekend: true
-        };
     }
     
     showAlert(message, type = 'info') {
