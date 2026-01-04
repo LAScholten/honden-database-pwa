@@ -651,7 +651,7 @@ class SearchManager extends BaseModule {
             existingOverlay.remove();
         }
         
-        // Maak nieuwe overlay voor nakomelingen
+        // Maak nieuwe overlay voor nakomelingen - AANPASSING VOOR MOBIEL
         const overlayHTML = `
             <div class="offspring-modal-overlay" id="offspringModalOverlay" style="display: flex;">
                 <div class="offspring-modal-container">
@@ -1442,7 +1442,7 @@ class SearchManager extends BaseModule {
                 }
                 
                 /* ============================================= */
-                /* NAKOMELINGEN MODAL STYLES */
+                /* NAKOMELINGEN MODAL STYLES - AANGEPAST VOOR MOBIEL */
                 /* ============================================= */
                 .offspring-modal-overlay {
                     position: fixed;
@@ -1610,28 +1610,106 @@ class SearchManager extends BaseModule {
                         font-size: 0.85rem !important; /* Iets kleiner dan 0.95rem */
                     }
                     
-                    /* Nakomelingen modal aanpassingen voor mobiel */
+                    /* NAKOMELINGEN MODAL AANPASSINGEN VOOR MOBIEL - AANGEPAST VOOR SMALLERE BREEDTE */
                     .offspring-modal-container {
-                        width: 95%;
-                        max-height: 95vh;
+                        width: 95% !important; /* NARROWER - 95% van schermbreedte ipv 90% */
+                        max-width: 95% !important; /* Maximale breedte ook 95% */
+                        margin: 0 10px !important; /* Kleine marges aan de zijkanten */
+                        border-radius: 8px !important; /* Kleinere border radius */
+                    }
+                    
+                    .offspring-modal-header {
+                        padding: 12px 15px !important; /* Kleinere padding */
+                    }
+                    
+                    .offspring-modal-title {
+                        font-size: 1.1rem !important; /* Kleinere titel */
                     }
                     
                     .offspring-modal-body {
-                        max-height: 70vh;
-                        padding: 15px;
+                        max-height: 70vh !important;
+                        padding: 15px !important; /* Kleinere padding */
+                    }
+                    
+                    .offspring-modal-footer {
+                        padding: 12px 15px !important; /* Kleinere padding */
                     }
                     
                     .offspring-row {
-                        font-size: 0.85rem;
+                        font-size: 0.8rem !important; /* Kleinere tekst voor rijen */
                     }
                     
                     .offspring-row td {
-                        padding: 8px 6px;
+                        padding: 6px 4px !important; /* Kleinere cel padding */
                     }
                     
                     .offspring-badge {
-                        padding: 3px 8px;
-                        font-size: 0.8rem;
+                        padding: 3px 8px !important;
+                        font-size: 0.8rem !important;
+                    }
+                    
+                    /* Scrollbaar maken voor kleine schermen */
+                    .table-responsive {
+                        max-width: 100%;
+                        overflow-x: auto;
+                        -webkit-overflow-scrolling: touch;
+                    }
+                    
+                    /* Verklein specifieke kolommen op zeer kleine schermen */
+                    @media (max-width: 480px) {
+                        .offspring-modal-container {
+                            width: 98% !important;
+                            max-width: 98% !important;
+                        }
+                        
+                        .offspring-modal-title {
+                            font-size: 1rem !important;
+                            max-width: 70%;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                        }
+                        
+                        .offspring-row {
+                            font-size: 0.75rem !important;
+                        }
+                        
+                        .offspring-row td:nth-child(3), /* Vader kolom */
+                        .offspring-row td:nth-child(4) { /* Moeder kolom */
+                            max-width: 80px;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            white-space: nowrap;
+                        }
+                    }
+                    
+                    /* Extra aanpassingen voor extreem kleine schermen */
+                    @media (max-width: 360px) {
+                        .offspring-modal-container {
+                            width: 100% !important;
+                            max-width: 100% !important;
+                            margin: 0 5px !important;
+                            border-radius: 6px !important;
+                        }
+                        
+                        .offspring-modal-header,
+                        .offspring-modal-body,
+                        .offspring-modal-footer {
+                            padding: 10px !important;
+                        }
+                        
+                        .offspring-modal-title {
+                            font-size: 0.95rem !important;
+                        }
+                        
+                        .offspring-row {
+                            font-size: 0.7rem !important;
+                        }
+                        
+                        /* Verberg enkele kolommen op zeer kleine schermen */
+                        .offspring-row td:nth-child(6) { /* Ras kolom */
+                            display: none;
+                        }
                     }
                 }
                 
