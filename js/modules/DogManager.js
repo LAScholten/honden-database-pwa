@@ -316,8 +316,8 @@ class DogManager extends BaseModule {
                 importExport: "Daten importieren/exportieren",
                 
                 // Meldungen
-                adminOnly: "Nur Administratoren kunnen Hunde hinzufügen/bearbeiten",
-                fieldsRequired: "Name, Stammbaum-Nummer en Rasse zijn Pflichtfelder",
+                adminOnly: "Nur Administratoren können Hunde hinzufügen/bearbeiten",
+                fieldsRequired: "Name, Stammbaum-Nummer en Rasse sind Pflichtfelder",
                 savingDog: "Hund wird gespeichert...",
                 dogAdded: "Hund erfolgreich hinzugefügt!",
                 dogUpdated: "Hund erfolgreich aktualisiert!",
@@ -671,6 +671,10 @@ class DogManager extends BaseModule {
     getDogFormHTML(dogData = null) {
         const t = this.t.bind(this);
         const data = dogData || {};
+        
+        console.log('DogManager getDogFormHTML - ontvangen dogData:', data);
+        console.log('DogManager getDogFormHTML - vaderId:', data.vaderId);
+        console.log('DogManager getDogFormHTML - moederId:', data.moederId);
         
         // Formatteer datums voor weergave (YYYY-MM-DD naar DD-MM-YYYY)
         const formatDateForDisplay = (dateString) => {
@@ -1246,6 +1250,8 @@ class DogManager extends BaseModule {
      * Setup autocomplete voor ouders - MET DE ZOEKFUNCTIE VAN SEARCHMANAGER
      */
     setupParentAutocomplete() {
+        console.log('DogManager: setupParentAutocomplete aangeroepen');
+        
         // Verwijder bestaande dropdowns
         document.querySelectorAll('.autocomplete-dropdown').forEach(dropdown => {
             dropdown.remove();
@@ -1299,6 +1305,7 @@ class DogManager extends BaseModule {
                     // Reset hidden ID als het veld leeg is
                     const idInput = document.getElementById(`${parentType}Id`);
                     if (idInput) {
+                        console.log(`${parentType}Id gereset omdat input veld leeg is`);
                         idInput.value = '';
                     }
                 }
@@ -1325,8 +1332,13 @@ class DogManager extends BaseModule {
      * NIEUW: Toon parent autocomplete - MET DE ZOEKFUNCTIE VAN SEARCHMANAGER
      */
     showParentAutocomplete(searchTerm, parentType) {
+        console.log(`DogManager: showParentAutocomplete voor ${parentType} met zoekterm: "${searchTerm}"`);
+        
         const dropdown = document.getElementById(`${parentType}Dropdown`);
-        if (!dropdown) return;
+        if (!dropdown) {
+            console.log(`Dropdown voor ${parentType} niet gevonden`);
+            return;
+        }
         
         // Filter honden voor autocomplete - GEBRUIK DE ZOEKFUNCTIE VAN SEARCHMANAGER
         const suggestions = this.allDogs.filter(dog => {
@@ -1347,6 +1359,8 @@ class DogManager extends BaseModule {
             }
             return matchesSearch;
         }).slice(0, 8); // Beperk tot 8 suggesties
+        
+        console.log(`DogManager: ${suggestions.length} suggesties gevonden voor ${parentType}`);
         
         if (suggestions.length === 0) {
             dropdown.style.display = 'none';
@@ -1388,6 +1402,10 @@ class DogManager extends BaseModule {
                 const dogId = item.getAttribute('data-id');
                 const dogName = item.getAttribute('data-name');
                 
+                console.log(`DogManager: Autocomplete item geklikt voor ${parentType}`);
+                console.log(`- Geselecteerde hond ID: ${dogId}`);
+                console.log(`- Geselecteerde hond naam: ${dogName}`);
+                
                 // Vul het input veld met de volledige naam
                 input.value = dogName;
                 
@@ -1395,6 +1413,9 @@ class DogManager extends BaseModule {
                 const idInput = document.getElementById(`${parentType}Id`);
                 if (idInput) {
                     idInput.value = dogId;
+                    console.log(`${parentType}Id ingesteld op: ${dogId}`);
+                } else {
+                    console.error(`${parentType}Id input niet gevonden!`);
                 }
                 
                 // Verberg de dropdown
@@ -1417,6 +1438,8 @@ class DogManager extends BaseModule {
     }
     
     async saveDog() {
+        console.log('=== DogManager: saveDog aangeroepen ===');
+        
         if (!this.auth.isAdmin()) {
             this.showError(this.t('adminOnly'));
             return;
@@ -1448,6 +1471,45 @@ class DogManager extends BaseModule {
             }
         };
         
+        // Haal ouder ID's op
+        const fatherIdInput = document.getElementById('fatherId');
+        const motherIdInput = document.getElementById('motherId');
+        
+        // Log de ouder ID's voor debugging
+        console.log('=== OUDER ID DEBUGGING ===');
+        console.log('Vader ID input element:', fatherIdInput);
+        console.log('Vader ID waarde:', fatherIdInput ? fatherIdInput.value : 'Niet gevonden');
+        console.log('Moeder ID input element:', motherIdInput);
+        console.log('Moeder ID waarde:', motherIdInput ? motherIdInput.value : 'Niet gevonden');
+        
+        // Parse ouder ID's
+        const vaderId = fatherIdInput && fatherIdInput.value ? parseInt(fatherIdInput.value) : null;
+        const moederId = motherIdInput && motherIdInput.value ? parseInt(motherIdInput.value) : null;
+        
+        console.log('Vader ID geparsed:', vaderId, '(type:', typeof vaderId, ')');
+        console.log('Moeder ID geparsed:', moederId, '(type:', typeof moederId, ')');
+        
+        // Haal ouder namen op
+        let vaderNaam = document.getElementById('father').value.trim();
+        let moederNaam = document.getElementById('mother').value.trim();
+        
+        // Als er ID's zijn, zoek dan de bijbehorende hond op voor de naam
+        if (vaderId && this.allDogs.length > 0) {
+            const vaderHond = this.allDogs.find(dog => dog.id === vaderId);
+            if (vaderHond) {
+                vaderNaam = vaderHond.naam || '';
+                console.log(`Vader naam gevonden via ID ${vaderId}: ${vaderNaam}`);
+            }
+        }
+        
+        if (moederId && this.allDogs.length > 0) {
+            const moederHond = this.allDogs.find(dog => dog.id === moederId);
+            if (moederHond) {
+                moederNaam = moederHond.naam || '';
+                console.log(`Moeder naam gevonden via ID ${moederId}: ${moederNaam}`);
+            }
+        }
+        
         const dogData = {
             naam: document.getElementById('dogName').value.trim(),
             kennelnaam: document.getElementById('kennelName').value.trim(),
@@ -1455,10 +1517,10 @@ class DogManager extends BaseModule {
             ras: document.getElementById('breed').value.trim(),
             vachtkleur: document.getElementById('coatColor').value.trim(), // Nieuw veld
             geslacht: document.getElementById('gender').value,
-            vader: document.getElementById('father').value.trim(),
-            vaderId: document.getElementById('fatherId').value ? parseInt(document.getElementById('fatherId').value) : null,
-            moeder: document.getElementById('mother').value.trim(),
-            moederId: document.getElementById('motherId').value ? parseInt(document.getElementById('motherId').value) : null,
+            vader: vaderNaam,
+            vaderId: vaderId,
+            moeder: moederNaam,
+            moederId: moederId,
             geboortedatum: formatDateForStorage(birthDateValue),
             overlijdensdatum: formatDateForStorage(deathDateValue),
             heupdysplasie: document.getElementById('hipDysplasia').value,
@@ -1476,6 +1538,15 @@ class DogManager extends BaseModule {
             updatedAt: new Date().toISOString()
         };
         
+        // Log de volledige data die wordt opgeslagen
+        console.log('=== DOG DATA VOOR OPSLAG ===');
+        console.log('Volledige dogData:', dogData);
+        console.log('vader:', dogData.vader, '(vaderId:', dogData.vaderId, ')');
+        console.log('moeder:', dogData.moeder, '(moederId:', dogData.moederId, ')');
+        console.log('vaderId type:', typeof dogData.vaderId, 'waarde:', dogData.vaderId);
+        console.log('moederId type:', typeof dogData.moederId, 'waarde:', dogData.moederId);
+        console.log('=== EINDE DOG DATA LOG ===');
+        
         if (!dogData.naam || !dogData.stamboomnr || !dogData.ras) {
             this.showError(this.t('fieldsRequired'));
             return;
@@ -1487,23 +1558,34 @@ class DogManager extends BaseModule {
         this.showProgress(this.t('savingDog'));
         
         try {
-            await this.db.voegHondToe(dogData);
+            console.log('DogManager: Roep db.voegHondToe aan met dogData');
+            const result = await this.db.voegHondToe(dogData);
+            console.log('DogManager: Hond toegevoegd met resultaat:', result);
+            
             this.hideProgress();
             this.showSuccess(this.t('dogAdded'));
             
             // Foto uploaden als er een is geselecteerd
             const photoInput = document.getElementById('dogPhoto');
             if (photoInput && photoInput.files.length > 0) {
+                console.log('DogManager: Upload foto');
                 await this.uploadPhoto(dogData.stamboomnr, photoInput.files[0]);
             }
             
             // Modal sluiten
             setTimeout(() => {
                 const modal = bootstrap.Modal.getInstance(document.getElementById('addDogModal'));
-                if (modal) modal.hide();
+                if (modal) {
+                    console.log('DogManager: Sluit modal');
+                    modal.hide();
+                }
+                
+                // Update de lokale cache van honden
+                this.loadAllDogs();
             }, 1500);
             
         } catch (error) {
+            console.error('DogManager: Fout bij opslaan hond:', error);
             this.hideProgress();
             this.showError(`${this.t('addFailed')}${error.message}`);
         }

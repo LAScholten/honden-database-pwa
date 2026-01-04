@@ -2,8 +2,7 @@
 
 /**
  * DogDataManager - Module voor het bewerken en verwijderen van honden
- * NU MET VACHTKLEUR veld toegevoegd, identiek aan DogManager
- * UPDATE: Ouders velden tonen nu naam + kennelnaam, zoekt ALTIJD eerst op ID
+ * MET CORRECTE OPSLAG VAN OUDER ID's volgens database structuur
  */
 class DogDataManager extends BaseModule {
     constructor() {
@@ -32,7 +31,7 @@ class DogDataManager extends BaseModule {
                 pedigreeNumber: "Stamboomnummer *",
                 breed: "Ras",
                 breedRequired: "Ras *",
-                coatColor: "Vachtkleur", // NIEUW VELD
+                coatColor: "Vachtkleur",
                 recent: "Recent:",
                 father: "Vader",
                 mother: "Moeder",
@@ -148,7 +147,7 @@ class DogDataManager extends BaseModule {
                 pedigreeNumber: "Pedigree number *",
                 breed: "Breed",
                 breedRequired: "Breed *",
-                coatColor: "Coat Color", // NEW FIELD
+                coatColor: "Coat Color",
                 recent: "Recent:",
                 father: "Father",
                 mother: "Mother",
@@ -264,7 +263,7 @@ class DogDataManager extends BaseModule {
                 pedigreeNumber: "Stammbaum-Nummer *",
                 breed: "Rasse",
                 breedRequired: "Rasse *",
-                coatColor: "Fellfarbe", // NEUES FELD
+                coatColor: "Fellfarbe",
                 recent: "Kürzlich:",
                 father: "Vater",
                 mother: "Mutter",
@@ -315,7 +314,7 @@ class DogDataManager extends BaseModule {
                 chooseFile: "Datei wählen",
                 noFileChosen: "Keine Datei gewählt",
                 remarks: "Bemerkungen",
-                requiredFields: "Felder mit * sind Pflichtfelder",
+                requiredFields: "Felder met * sind Pflichtfelder",
                 saveChanges: "Änderungen speichern",
                 cancel: "Abbrechen",
                 deleteDog: "Hund löschen",
@@ -323,7 +322,7 @@ class DogDataManager extends BaseModule {
                 searchPlaceholder: "Name oder Stammbaum-Nummer eingeben...",
                 
                 // Zugangskontrolle Popup Texte
-                insufficientPermissions: "Unzureichende Berechtigungen",
+                insufficientPermissions: "Unzureichende Berechtigingen",
                 insufficientPermissionsText: "Sie haben keine Berechtigung, Hunde zu bearbeiten. Nur Administratoren können diese Funktion nutzen.",
                 loggedInAs: "Sie sind eingeloggt als:",
                 user: "Benutzer",
@@ -337,19 +336,19 @@ class DogDataManager extends BaseModule {
                 loadingDogs: "Hunde laden...",
                 noResults: "Keine Hunde gefunden",
                 selectDogToEdit: "Wählen Sie einen Hund zum Bearbeiten",
-                typeToSearch: "Beginnen Sie mit der Eingabe, um zu suchen",
+                typeToSearch: "Beginnen Sie mit der Eingabe, um te suchen",
                 
                 // Status Meldungen
                 searchResults: "Suchergebnisse",
-                dogSelected: "Hund ausgewählt",
-                editingDog: "Hund bearbeiten",
+                dogSelected: "Hond uitgewählt",
+                editingDog: "Hond bearbeiten",
                 savingChanges: "Änderungen speichern...",
                 changesSaved: "Änderungen gespeichert!",
-                dogDeleted: "Hund erfolgreich gelöscht!",
+                dogDeleted: "Hond erfolgreich gelöscht!",
                 confirmDelete: "Sind Sie sicher, dat Sie diesen Hund löschen möchten?",
                 photoAdded: "Foto hinzugefügt",
-                updatingDog: "Hund aktualisieren...",
-                dogUpdated: "Hund aktualisiert!",
+                updatingDog: "Hond aktualisieren...",
+                dogUpdated: "Hond aktualisiert!",
                 deleting: "Löschen...",
                 
                 // Fehlermeldungen
@@ -377,7 +376,7 @@ class DogDataManager extends BaseModule {
     }
     
     /**
-     * Render de module interface - MET VACHTKLEUR
+     * Render de module interface
      */
     getModalHTML() {
         // Controleer of gebruiker admin is
@@ -430,7 +429,7 @@ class DogDataManager extends BaseModule {
         
         const t = this.t.bind(this);
         
-        // Genereer recente rassen knoppen (op 1 regel naast het ras veld)
+        // Genereer recente rassen knoppen
         let recentBreedsHTML = '';
         if (this.lastBreeds && this.lastBreeds.length > 0) {
             recentBreedsHTML = `
@@ -486,8 +485,9 @@ class DogDataManager extends BaseModule {
                             <div id="editSection" style="display: none;">
                                 <form id="editDogForm">
                                     <input type="hidden" id="dogId">
-                                    <input type="hidden" id="fatherId" value="">
-                                    <input type="hidden" id="motherId" value="">
+                                    <!-- BELANGRIJK: Gebruik Nederlandse veldnamen zoals in database -->
+                                    <input type="hidden" id="vaderId" value="">
+                                    <input type="hidden" id="moederId" value="">
                                     
                                     <div class="alert alert-info mb-3">
                                         <i class="bi bi-pencil"></i> 
@@ -531,7 +531,7 @@ class DogDataManager extends BaseModule {
                                         </div>
                                     </div>
                                     
-                                    <!-- Rij 3: Ras, Recente rassen en Vachtkleur - EXACT zoals scherm2.png EN DogManager -->
+                                    <!-- Rij 3: Ras, Recente rassen en Vachtkleur -->
                                     <div class="row">
                                         <div class="col-12">
                                             <div class="ras-vachtkleur-row">
@@ -560,7 +560,7 @@ class DogDataManager extends BaseModule {
                                                 <label for="father" class="form-label fw-semibold">${t('father')}</label>
                                                 <input type="text" class="form-control parent-search-input" id="father" 
                                                        placeholder="Typ naam of 'naam kennelnaam'..."
-                                                       data-parent-type="father"
+                                                       data-parent-type="vader"
                                                        autocomplete="off">
                                                 <div class="form-text mt-1">${t('typeToSearch')}</div>
                                             </div>
@@ -570,7 +570,7 @@ class DogDataManager extends BaseModule {
                                                 <label for="mother" class="form-label fw-semibold">${t('mother')}</label>
                                                 <input type="text" class="form-control parent-search-input" id="mother" 
                                                        placeholder="Typ naam of 'naam kennelnaam'..."
-                                                       data-parent-type="mother"
+                                                       data-parent-type="moeder"
                                                        autocomplete="off">
                                                 <div class="form-text mt-1">${t('typeToSearch')}</div>
                                             </div>
@@ -751,7 +751,7 @@ class DogDataManager extends BaseModule {
             </div>
             
             <style>
-                /* Desktop layout: EXACT zoals scherm2.png EN DogManager */
+                /* Desktop layout */
                 .ras-vachtkleur-row {
                     display: flex;
                     flex-wrap: nowrap;
@@ -797,7 +797,6 @@ class DogDataManager extends BaseModule {
                     margin: 2px 0;
                 }
                 
-                /* Zorg dat de labels op dezelfde hoogte staan */
                 .ras-col .form-label,
                 .vachtkleur-col .form-label {
                     margin-bottom: 8px;
@@ -950,7 +949,7 @@ class DogDataManager extends BaseModule {
                     box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
                 }
                 
-                /* Datum input styling - gebruik text input voor alle apparaten */
+                /* Datum input styling */
                 .date-input-wrapper {
                     position: relative;
                 }
@@ -991,7 +990,7 @@ class DogDataManager extends BaseModule {
                     margin-top: 0.25rem;
                 }
                 
-                /* Parent dropdown styling - GECORRIGEERDE POSITIONERING */
+                /* Parent dropdown styling */
                 .parent-autocomplete-dropdown {
                     position: absolute;
                     background: white;
@@ -1002,7 +1001,7 @@ class DogDataManager extends BaseModule {
                     z-index: 1060;
                     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
                     width: 100%;
-                    top: calc(100% + 2px); /* BELANGRIJK: Plaats onder het input veld */
+                    top: calc(100% + 2px);
                     left: 0;
                     display: none;
                 }
@@ -1043,7 +1042,6 @@ class DogDataManager extends BaseModule {
         const isAdmin = auth.isAdmin();
         
         if (!isAdmin) {
-            // Voeg event listeners toe voor de knoppen in de modal
             const modal = document.getElementById('dogDataModal');
             if (modal) {
                 modal.addEventListener('shown.bs.modal', () => {
@@ -1053,12 +1051,10 @@ class DogDataManager extends BaseModule {
             return;
         }
         
-        // Alleen verder gaan als gebruiker admin is
-        
         // Laad alle honden voor autocomplete
         this.loadAllDogs();
         
-        // Zoekveld event listener - GEBRUIK DE ZOEKFUNCTIE VAN SEARCHMANAGER
+        // Zoekveld event listener
         const searchInput = document.getElementById('dogSearch');
         if (searchInput) {
             searchInput.addEventListener('focus', async () => {
@@ -1071,7 +1067,6 @@ class DogDataManager extends BaseModule {
                 const searchTerm = e.target.value.toLowerCase().trim();
                 
                 if (searchTerm.length >= 1) {
-                    // Gebruik dezelfde logica als SearchManager
                     this.filterDogsForSearchField(searchTerm);
                 } else {
                     this.showInitialView();
@@ -1132,7 +1127,7 @@ class DogDataManager extends BaseModule {
             });
         }
         
-        // Recente rassen knoppen - Delegatie gebruiken
+        // Recente rassen knoppen
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('recent-breed-btn')) {
                 const breed = e.target.dataset.breed;
@@ -1143,7 +1138,7 @@ class DogDataManager extends BaseModule {
             }
         });
         
-        // Setup autocomplete voor ouders - MET DE ZOEKFUNCTIE VAN SEARCHMANAGER
+        // Setup autocomplete voor ouders
         this.setupParentAutocomplete();
         
         // Setup datum velden voor correcte verwerking
@@ -1165,12 +1160,8 @@ class DogDataManager extends BaseModule {
         const birthDateInput = document.getElementById('birthDate');
         const deathDateInput = document.getElementById('deathDate');
         
-        // Verwijder alle complexe formatteer logica - gebruik gewoon date input
         if (birthDateInput) {
-            // Reset type naar date voor correcte browser support
             birthDateInput.type = 'date';
-            
-            // Voor weergave: show placeholder when empty
             birthDateInput.addEventListener('focus', function() {
                 if (!this.value) {
                     this.placeholder = 'dd-mm-jjjj';
@@ -1183,9 +1174,7 @@ class DogDataManager extends BaseModule {
         }
         
         if (deathDateInput) {
-            // Reset type naar date voor correcte browser support
             deathDateInput.type = 'date';
-            
             deathDateInput.addEventListener('focus', function() {
                 if (!this.value) {
                     this.placeholder = 'dd-mm-jjjj';
@@ -1291,7 +1280,7 @@ class DogDataManager extends BaseModule {
     async loadAllDogs() {
         if (this.allDogs.length === 0) {
             try {
-                this.allDogs = await this.db.getHonden();
+                this.allDogs = await db.getHonden();
                 this.allDogs.sort((a, b) => a.naam.localeCompare(b.naam));
                 console.log(`DogDataManager: ${this.allDogs.length} honden geladen voor zoeken`);
             } catch (error) {
@@ -1302,8 +1291,7 @@ class DogDataManager extends BaseModule {
     }
     
     /**
-     * NIEUW: Zoekfunctionaliteit zoals in SearchManager voor hoofdzoekveld
-     * AANGEPAST: Zoek zowel op naam kennelnaam als op stamboomnummer
+     * Zoekfunctionaliteit voor hoofdzoekveld
      */
     filterDogsForSearchField(searchTerm = '') {
         this.filteredSearchResults = this.allDogs.filter(dog => {
@@ -1311,11 +1299,8 @@ class DogDataManager extends BaseModule {
             const kennelnaam = dog.kennelnaam ? dog.kennelnaam.toLowerCase() : '';
             const stamboomnr = dog.stamboomnr ? dog.stamboomnr.toLowerCase() : '';
             
-            // Creëer een gecombineerde string: "naam kennelnaam"
             const combined = `${naam} ${kennelnaam}`;
             
-            // Controleer of de gecombineerde string begint met de zoekterm
-            // OF controleer of het stamboomnummer begint met de zoekterm
             return combined.startsWith(searchTerm) || stamboomnr.startsWith(searchTerm);
         });
         
@@ -1323,7 +1308,7 @@ class DogDataManager extends BaseModule {
     }
     
     /**
-     * NIEUW: Toon initiële view voor zoeken
+     * Toon initiële view voor zoeken
      */
     showInitialView() {
         const container = document.getElementById('searchResults');
@@ -1338,7 +1323,7 @@ class DogDataManager extends BaseModule {
     }
     
     /**
-     * NIEUW: Display search results
+     * Display search results
      */
     displaySearchResults() {
         const t = this.t.bind(this);
@@ -1366,7 +1351,6 @@ class DogDataManager extends BaseModule {
             const genderText = dog.geslacht === 'reuen' ? t('male') : 
                              dog.geslacht === 'teven' ? t('female') : t('unknown');
             
-            // Toon ook vachtkleur in zoekresultaten indien beschikbaar
             const coatColorText = dog.vachtkleur ? `<span><i class="bi bi-palette me-1"></i>${dog.vachtkleur}</span>` : '';
             
             html += `
@@ -1407,7 +1391,6 @@ class DogDataManager extends BaseModule {
         try {
             console.log(`Selecting dog with ID: ${dogId}`);
             
-            // Controleer of ID geldig is
             if (!dogId || isNaN(dogId)) {
                 this.showError(this.t('invalidId'));
                 return;
@@ -1421,7 +1404,7 @@ class DogDataManager extends BaseModule {
                 }
             });
             
-            // Zoek in lokale cache eerst - ALTIJD OP ID
+            // Zoek in lokale cache eerst
             let dog = this.allDogs.find(d => d.id === dogId);
             
             if (!dog) {
@@ -1470,8 +1453,7 @@ class DogDataManager extends BaseModule {
     }
     
     /**
-     * Vul formulier met hond data - MET VACHTKLEUR EN MET KENNELNAAM BIJ OUDERS
-     * VERBETERD: Zoekt ALTIJD op ID voor ouders, geen terugval op tekst
+     * Vul formulier met hond data - MET CORRECTE OUDER ID'S IN HET NEDERLANDS
      */
     fillFormWithDogData(dog) {
         console.log('Filling form with dog data:', dog);
@@ -1484,51 +1466,52 @@ class DogDataManager extends BaseModule {
         document.getElementById('breed').value = dog.ras || '';
         document.getElementById('gender').value = dog.geslacht || '';
         
-        // NIEUW VELD: Vachtkleur
+        // Vachtkleur
         document.getElementById('coatColor').value = dog.vachtkleur || '';
         
-        // Ouders - ALLEEN OP ID ZOEKEN
+        // Ouders - CORRECT ID'S OPSLAAN IN HET NEDERLANDS
+        const vaderId = dog.vaderId || null;
         let vaderDisplayNaam = '';
-        let moederDisplayNaam = '';
         
-        // Vader: ALTIJD op ID zoeken als die bestaat
-        if (dog.vaderId) {
-            const vaderHond = this.allDogs.find(d => d.id === dog.vaderId);
+        if (vaderId) {
+            const vaderHond = this.allDogs.find(d => d.id === vaderId);
             if (vaderHond) {
                 vaderDisplayNaam = this.makeDisplayName(vaderHond);
             } else {
-                // Als hond niet gevonden wordt, toon alleen ID en naam uit database
                 vaderDisplayNaam = dog.vader || '';
-                console.warn(`Vader hond met ID ${dog.vaderId} niet gevonden in cache`);
             }
-            document.getElementById('fatherId').value = dog.vaderId;
+            // Sla ID op in het verborgen veld
+            document.getElementById('vaderId').value = vaderId;
+            console.log(`Vader ID gevuld: ${vaderId} (display: ${vaderDisplayNaam})`);
         } else {
-            // Geen vaderId, gebruik tekst uit database
             vaderDisplayNaam = dog.vader || '';
-            document.getElementById('fatherId').value = '';
+            document.getElementById('vaderId').value = '';
+            console.log('Geen vader ID gevonden in database');
         }
         
-        // Moeder: ALTIJD op ID zoeken als die bestaat
-        if (dog.moederId) {
-            const moederHond = this.allDogs.find(d => d.id === dog.moederId);
+        const moederId = dog.moederId || null;
+        let moederDisplayNaam = '';
+        
+        if (moederId) {
+            const moederHond = this.allDogs.find(d => d.id === moederId);
             if (moederHond) {
                 moederDisplayNaam = this.makeDisplayName(moederHond);
             } else {
-                // Als hond niet gevonden wordt, toon alleen ID en naam uit database
                 moederDisplayNaam = dog.moeder || '';
-                console.warn(`Moeder hond met ID ${dog.moederId} niet gevonden in cache`);
             }
-            document.getElementById('motherId').value = dog.moederId;
+            // Sla ID op in het verborgen veld
+            document.getElementById('moederId').value = moederId;
+            console.log(`Moeder ID gevuld: ${moederId} (display: ${moederDisplayNaam})`);
         } else {
-            // Geen moederId, gebruik tekst uit database
             moederDisplayNaam = dog.moeder || '';
-            document.getElementById('motherId').value = '';
+            document.getElementById('moederId').value = '';
+            console.log('Geen moeder ID gevonden in database');
         }
         
         document.getElementById('father').value = vaderDisplayNaam;
         document.getElementById('mother').value = moederDisplayNaam;
         
-        // Datums - formatteer voor display
+        // Datums
         const formatDateForDisplay = (dateString) => {
             if (!dateString) return '';
             try {
@@ -1622,8 +1605,8 @@ class DogDataManager extends BaseModule {
         
         // Wis hidden inputs
         document.getElementById('dogId').value = '';
-        document.getElementById('fatherId').value = '';
-        document.getElementById('motherId').value = '';
+        document.getElementById('vaderId').value = '';
+        document.getElementById('moederId').value = '';
         
         // Reset datum velden naar date type
         const birthDateInput = document.getElementById('birthDate');
@@ -1648,7 +1631,7 @@ class DogDataManager extends BaseModule {
     }
     
     /**
-     * Opslaan wijzigingen - MET VACHTKLEUR VELD EN OUDERS MET ID'S
+     * Opslaan wijzigingen - MET CORRECTE NEDERLANDSE OUDER ID OPSLAG EN CONSOLE LOGGING
      */
     async saveDogChanges() {
         if (!auth.isAdmin()) {
@@ -1668,7 +1651,6 @@ class DogDataManager extends BaseModule {
             return;
         }
         
-        // Parse ID als getal
         const parsedId = parseInt(dogId);
         if (isNaN(parsedId)) {
             this.showError(this.t('invalidId'));
@@ -1695,22 +1677,41 @@ class DogDataManager extends BaseModule {
             }
         };
         
-        // Haal ouder IDs op
-        const fatherId = document.getElementById('fatherId').value ? parseInt(document.getElementById('fatherId').value) : null;
-        const motherId = document.getElementById('motherId').value ? parseInt(document.getElementById('motherId').value) : null;
+        // Haal ouder IDs op - CORRECT VAN HET NEDERLANDSE HIDDEN INPUT VELD
+        const vaderIdValue = document.getElementById('vaderId').value;
+        const moederIdValue = document.getElementById('moederId').value;
+        
+        const vaderId = vaderIdValue ? parseInt(vaderIdValue) : null;
+        const moederId = moederIdValue ? parseInt(moederIdValue) : null;
+        
+        // CONSOLE LOGGING VOOR DEBUGGING
+        console.log('=== OUDER ID LOGGING ===');
+        console.log('Vader ID uit hidden veld:', vaderIdValue, '(geparsed:', vaderId, ')');
+        console.log('Moeder ID uit hidden veld:', moederIdValue, '(geparsed:', moederId, ')');
+        console.log('Vader input veld waarde:', document.getElementById('father').value);
+        console.log('Moeder input veld waarde:', document.getElementById('mother').value);
+        console.log('=== EINDE LOGGING ===');
         
         // Zoek ouder namen op basis van IDs
-        let fatherName = '';
-        let motherName = '';
+        let vaderNaam = '';
+        let moederNaam = '';
         
-        if (fatherId) {
-            const fatherDog = this.allDogs.find(d => d.id === fatherId);
-            fatherName = fatherDog ? fatherDog.naam || '' : '';
+        if (vaderId) {
+            const vaderHond = this.allDogs.find(d => d.id === vaderId);
+            vaderNaam = vaderHond ? vaderHond.naam || '' : '';
+            console.log(`Vader gevonden: ID=${vaderId}, Naam=${vaderNaam}`);
+        } else {
+            console.log('Geen vader ID opgegeven, gebruik tekst uit input veld');
+            vaderNaam = document.getElementById('father').value.split(' ')[0] || ''; // Neem eerste woord als naam
         }
         
-        if (motherId) {
-            const motherDog = this.allDogs.find(d => d.id === motherId);
-            motherName = motherDog ? motherDog.naam || '' : '';
+        if (moederId) {
+            const moederHond = this.allDogs.find(d => d.id === moederId);
+            moederNaam = moederHond ? moederHond.naam || '' : '';
+            console.log(`Moeder gevonden: ID=${moederId}, Naam=${moederNaam}`);
+        } else {
+            console.log('Geen moeder ID opgegeven, gebruik tekst uit input veld');
+            moederNaam = document.getElementById('mother').value.split(' ')[0] || ''; // Neem eerste woord als naam
         }
         
         const dogData = {
@@ -1719,12 +1720,12 @@ class DogDataManager extends BaseModule {
             kennelnaam: document.getElementById('kennelName').value.trim(),
             stamboomnr: document.getElementById('pedigreeNumber').value.trim(),
             ras: document.getElementById('breed').value.trim(),
-            vachtkleur: document.getElementById('coatColor').value.trim(), // NIEUW VELD
+            vachtkleur: document.getElementById('coatColor').value.trim(),
             geslacht: document.getElementById('gender').value,
-            vader: fatherName, // Alleen naam, zonder kennelnaam
-            vaderId: fatherId, // ID is het belangrijkste
-            moeder: motherName, // Alleen naam, zonder kennelnaam
-            moederId: motherId, // ID is het belangrijkste
+            vader: vaderNaam, // Alleen naam
+            vaderId: vaderId, // ID in het Nederlands
+            moeder: moederNaam, // Alleen naam
+            moederId: moederId, // ID in het Nederlands
             geboortedatum: formatDateForStorage(birthDateValue),
             overlijdensdatum: formatDateForStorage(deathDateValue),
             heupdysplasie: document.getElementById('hipDysplasia').value,
@@ -1741,6 +1742,13 @@ class DogDataManager extends BaseModule {
             updatedAt: new Date().toISOString()
         };
         
+        // CONSOLE LOG DE DATA DIE NAAR DE DATABASE GAAT
+        console.log('=== DATA NAAR DATABASE ===');
+        console.log('Volledige dogData:', dogData);
+        console.log('vaderId waarde:', dogData.vaderId, '(type:', typeof dogData.vaderId, ')');
+        console.log('moederId waarde:', dogData.moederId, '(type:', typeof dogData.moederId, ')');
+        console.log('=== EINDE DATA LOG ===');
+        
         // Valideer verplichte velden
         if (!dogData.naam || !dogData.stamboomnr || !dogData.ras) {
             this.showError(this.t('fieldsRequired'));
@@ -1750,23 +1758,16 @@ class DogDataManager extends BaseModule {
         // Voeg ras toe aan recente rassen
         this.addToLastBreeds(dogData.ras);
         
-        console.log('Saving dog data (with coat color and parent IDs):', dogData);
+        console.log('Saving dog data (with correct Dutch parent IDs):', dogData);
         this.showProgress(this.t('savingChanges'));
         
         try {
-            // Controleer of updateHond methode bestaat
-            if (this.db && typeof this.db.updateHond === 'function') {
+            // Gebruik de updateHond methode van de database
+            if (db && typeof db.updateHond === 'function') {
                 console.log('Calling updateHond with ID:', dogData.id);
-                await this.db.updateHond(dogData);
+                const result = await db.updateHond(dogData);
+                console.log('Update result:', result);
             } 
-            else if (this.db && typeof this.db.updateDog === 'function') {
-                console.log('Calling updateDog with ID:', dogData.id);
-                await this.db.updateDog(dogData);
-            }
-            else if (this.db && typeof this.db.put === 'function') {
-                console.log('Calling put with ID:', dogData.id);
-                await this.db.put('honden', dogData);
-            }
             else {
                 throw new Error('Geen geschikte update methode gevonden in database');
             }
@@ -1836,26 +1837,11 @@ class DogDataManager extends BaseModule {
         this.showProgress(this.t('deleting'));
         
         try {
-            // Probeer verschillende delete methodes
-            let deleted = false;
-            
-            if (this.db && typeof this.db.verwijderHond === 'function') {
+            // Gebruik de verwijderHond methode van de database
+            if (db && typeof db.verwijderHond === 'function') {
                 console.log('Calling verwijderHond with ID:', parsedId);
-                await this.db.verwijderHond(parsedId);
-                deleted = true;
-            }
-            else if (this.db && typeof this.db.deleteDog === 'function') {
-                console.log('Calling deleteDog with ID:', parsedId);
-                await this.db.deleteDog(parsedId);
-                deleted = true;
-            }
-            else if (this.db && typeof this.db.delete === 'function') {
-                console.log('Calling delete with ID:', parsedId);
-                await this.db.delete('honden', parsedId);
-                deleted = true;
-            }
-            
-            if (!deleted) {
+                await db.verwijderHond(parsedId);
+            } else {
                 throw new Error('Geen geschikte delete methode gevonden in database');
             }
             
@@ -1896,8 +1882,8 @@ class DogDataManager extends BaseModule {
                             uploadedAt: new Date().toISOString()
                         };
                         
-                        if (this.db && typeof this.db.voegFotoToe === 'function') {
-                            await this.db.voegFotoToe(photoData);
+                        if (db && typeof db.voegFotoToe === 'function') {
+                            await db.voegFotoToe(photoData);
                             this.showSuccess(this.t('photoAdded'));
                             resolve();
                         } else {
@@ -1921,7 +1907,7 @@ class DogDataManager extends BaseModule {
     }
     
     /**
-     * Setup autocomplete voor ouders - MET DE ZOEKFUNCTIE VAN SEARCHMANAGER EN MET ID'S
+     * Setup autocomplete voor ouders - MET CORRECTE NEDERLANDSE ID OPSLAG EN CONSOLE LOGGING
      */
     setupParentAutocomplete() {
         // Verwijder bestaande dropdowns
@@ -1929,7 +1915,7 @@ class DogDataManager extends BaseModule {
             dropdown.remove();
         });
         
-        // Event listeners voor vader en moeder velden - gebruik de SearchManager logica
+        // Event listeners voor vader en moeder velden
         document.querySelectorAll('#father, #mother').forEach(input => {
             if (!input) return;
             
@@ -1947,34 +1933,31 @@ class DogDataManager extends BaseModule {
                     await this.loadAllDogs();
                 }
                 
-                const parentType = input.id === 'father' ? 'father' : 'mother';
                 const searchTerm = input.value.toLowerCase().trim();
                 
                 if (searchTerm.length >= 1) {
-                    this.showParentAutocomplete(searchTerm, parentType);
+                    this.showParentAutocomplete(searchTerm, input.id);
                 }
             });
             
             input.addEventListener('input', (e) => {
                 const searchTerm = e.target.value.toLowerCase().trim();
-                const parentType = input.id === 'father' ? 'father' : 'mother';
+                const parentField = input.id;
                 
                 if (searchTerm.length >= 1) {
-                    this.showParentAutocomplete(searchTerm, parentType);
+                    this.showParentAutocomplete(searchTerm, parentField);
                 } else {
-                    this.hideParentAutocomplete(parentType);
+                    this.hideParentAutocomplete(parentField);
                     // Reset hidden ID als het veld leeg is
-                    const idInput = document.getElementById(`${parentType}Id`);
-                    if (idInput) {
-                        idInput.value = '';
-                    }
+                    const idField = parentField === 'father' ? 'vaderId' : 'moederId';
+                    document.getElementById(idField).value = '';
+                    console.log(`${idField} gereset omdat input veld leeg is`);
                 }
             });
             
             input.addEventListener('blur', (e) => {
                 setTimeout(() => {
-                    const parentType = input.id === 'father' ? 'father' : 'mother';
-                    this.hideParentAutocomplete(parentType);
+                    this.hideParentAutocomplete(input.id);
                 }, 200);
             });
         });
@@ -1989,48 +1972,45 @@ class DogDataManager extends BaseModule {
     }
     
     /**
-     * NIEUW: Toon parent autocomplete - MET DE ZOEKFUNCTIE VAN SEARCHMANAGER EN MET ID'S
+     * Toon parent autocomplete - MET NEDERLANDSE ID OPSLAG EN CONSOLE LOGGING
      */
-    showParentAutocomplete(searchTerm, parentType) {
-        const input = document.getElementById(parentType);
+    showParentAutocomplete(searchTerm, parentField) {
+        const input = document.getElementById(parentField);
         if (!input) return;
         
         // Zoek de dropdown
-        let dropdown = document.getElementById(`${parentType}Autocomplete`);
+        let dropdown = document.getElementById(`${parentField}Autocomplete`);
         if (!dropdown) {
             const wrapper = input.closest('.parent-input-wrapper');
             if (wrapper) {
                 dropdown = document.createElement('div');
                 dropdown.className = 'parent-autocomplete-dropdown';
-                dropdown.id = `${parentType}Autocomplete`;
+                dropdown.id = `${parentField}Autocomplete`;
                 wrapper.appendChild(dropdown);
             } else {
                 return;
             }
         }
         
-        // Filter honden voor autocomplete - GEBRUIK DE ZOEKFUNCTIE VAN SEARCHMANAGER
+        // Filter honden voor autocomplete
         const suggestions = this.allDogs.filter(dog => {
             const naam = dog.naam ? dog.naam.toLowerCase() : '';
             const kennelnaam = dog.kennelnaam ? dog.kennelnaam.toLowerCase() : '';
             
-            // Creëer een gecombineerde string: "naam kennelnaam"
             const combined = `${naam} ${kennelnaam}`;
-            
-            // Controleer of de gecombineerde string begint met de zoekterm
             const matchesSearch = combined.startsWith(searchTerm);
             
             // Filter op geslacht
-            if (parentType === 'father') {
+            if (parentField === 'father') {
                 return matchesSearch && dog.geslacht === 'reuen';
-            } else if (parentType === 'mother') {
+            } else if (parentField === 'mother') {
                 return matchesSearch && dog.geslacht === 'teven';
             }
             return matchesSearch;
-        }).slice(0, 8); // Beperk tot 8 suggesties
+        }).slice(0, 8);
         
         if (suggestions.length === 0) {
-            this.hideParentAutocomplete(parentType);
+            this.hideParentAutocomplete(parentField);
             return;
         }
         
@@ -2039,11 +2019,13 @@ class DogDataManager extends BaseModule {
             const genderText = dog.geslacht === 'reuen' ? this.t('male') : 
                              dog.geslacht === 'teven' ? this.t('female') : this.t('unknown');
             
-            // Toon naam + kennelnaam in de dropdown
             const displayName = dog.naam ? `${dog.naam} ${dog.kennelnaam ? dog.kennelnaam : ''}` : 'Onbekend';
             
             html += `
-                <div class="parent-autocomplete-item" data-id="${dog.id}" data-name="${dog.naam || ''}" data-kennelnaam="${dog.kennelnaam || ''}">
+                <div class="parent-autocomplete-item" 
+                     data-id="${dog.id}" 
+                     data-name="${dog.naam || ''}" 
+                     data-kennelnaam="${dog.kennelnaam || ''}">
                     <div class="dog-name">${displayName}</div>
                     <div class="dog-info">
                         ${dog.ras || 'Onbekend ras'} | ${dog.stamboomnr || 'Geen stamboom'} | ${genderText}
@@ -2066,14 +2048,19 @@ class DogDataManager extends BaseModule {
                 const displayName = dogName ? `${dogName} ${dogKennelnaam ? dogKennelnaam : ''}` : '';
                 input.value = displayName.trim();
                 
-                // Vul het hidden ID veld - DIT IS BELANGRIJK
-                const idInput = document.getElementById(`${parentType}Id`);
-                if (idInput) {
-                    idInput.value = dogId;
-                }
+                // Vul het hidden ID veld - BELANGRIJK: Sla op in het Nederlandse veld
+                const idField = parentField === 'father' ? 'vaderId' : 'moederId';
+                document.getElementById(idField).value = dogId;
+                
+                // CONSOLE LOGGING
+                console.log(`Parent autocomplete geselecteerd: ${parentField}`);
+                console.log(`- Hond ID: ${dogId}`);
+                console.log(`- Naam: ${dogName}`);
+                console.log(`- Kennelnaam: ${dogKennelnaam}`);
+                console.log(`- Hidden ID veld: ${idField} = ${dogId}`);
                 
                 // Verberg de dropdown
-                this.hideParentAutocomplete(parentType);
+                this.hideParentAutocomplete(parentField);
                 
                 // Focus terug op het input veld
                 input.focus();
@@ -2090,10 +2077,10 @@ class DogDataManager extends BaseModule {
     }
     
     /**
-     * NIEUW: Verberg parent autocomplete
+     * Verberg parent autocomplete
      */
-    hideParentAutocomplete(parentType) {
-        const dropdown = document.getElementById(`${parentType}Autocomplete`);
+    hideParentAutocomplete(parentField) {
+        const dropdown = document.getElementById(`${parentField}Autocomplete`);
         if (dropdown) {
             dropdown.style.display = 'none';
         }
