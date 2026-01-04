@@ -529,7 +529,12 @@
     <script src="js/modules/DogDataManager.js"></script>
     <script src="js/modules/SearchManager.js"></script>
     <script src="js/modules/PhotoManager.js"></script>
+    
+    <!-- NIEUWE BREEDING MODULES -->
     <script src="js/modules/BreedingManager.js"></script>
+    <script src="js/modules/ReuTeefCombinatie.js"></script>
+    <script src="js/modules/ZoekReu.js"></script>
+    
     <script src="js/modules/PrivateInfoManager.js"></script>
     
     <!-- StamboomManager (nu vindt hij COICalculator omdat die EERDER wordt geladen) -->
@@ -1385,6 +1390,42 @@
                         }
                     } catch (error) {
                         console.error('Error setting up LitterManager events:', error);
+                    }
+                }, 500);
+                
+                return;
+            }
+            
+            // NIEUW: Aanpassing voor BreedingManager
+            if (modalType === 'breeding') {
+                console.log('Creating breeding plan modal');
+                
+                const breedingManager = new BreedingManager();
+                
+                if (breedingManager.injectDependencies) {
+                    breedingManager.injectDependencies(db, auth);
+                    console.log('Dependencies injected into BreedingManager');
+                }
+                
+                const modalHTML = breedingManager.getModalHTML();
+                console.log('Got modal HTML from BreedingManager');
+                
+                this.showCustomModal(modalHTML, 'breedingPlanModal', 'breedingPlanModalLabel');
+                
+                setTimeout(() => {
+                    try {
+                        if (breedingManager.setupEvents) {
+                            breedingManager.setupEvents();
+                            console.log('BreedingManager events setup complete');
+                        }
+                        
+                        // Laad de initiële content
+                        if (breedingManager.loadMainScreen) {
+                            breedingManager.loadMainScreen();
+                            console.log('BreedingManager main screen loaded');
+                        }
+                    } catch (error) {
+                        console.error('Error setting up BreedingManager events:', error);
                     }
                 }, 500);
                 
