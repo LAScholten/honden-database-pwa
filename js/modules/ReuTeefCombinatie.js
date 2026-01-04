@@ -24,14 +24,6 @@ class ReuTeefCombinatie {
                 searchPlaceholder: "Typ om te zoeken...",
                 inDevelopment: "Deze functie is momenteel in ontwikkeling",
                 devMessage: "De volledige functionaliteit voor reu en teef combinatie zal binnenkort beschikbaar zijn.",
-                features: [
-                    "Selectie van specifieke reu en teef",
-                    "Genetische compatibiliteitsanalyse",
-                    "Stamboom verificatie",
-                    "Gezondheidsscore berekening",
-                    "Voorspelde nestgrootte",
-                    "Planning en kalenderintegratie"
-                ],
                 back: "Terug",
                 save: "Toekomstige Stamboom Tonen",
                 showPedigree: "Toon Stamboom",
@@ -75,14 +67,6 @@ class ReuTeefCombinatie {
                 searchPlaceholder: "Type to search...",
                 inDevelopment: "This feature is currently in development",
                 devMessage: "The full functionality for male and female combination will be available soon.",
-                features: [
-                    "Selection of specific male and female",
-                    "Genetic compatibility analysis",
-                    "Pedigree verification",
-                    "Health score calculation",
-                    "Predicted litter size",
-                    "Planning and calendar integration"
-                ],
                 back: "Back",
                 save: "Show Future Pedigree",
                 showPedigree: "Show Pedigree",
@@ -266,26 +250,6 @@ class ReuTeefCombinatie {
                                 <!-- Reu details komen hier -->
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card mt-4">
-                <div class="card-header bg-light">
-                    <h6 class="mb-0">
-                        <i class="bi bi-lightbulb text-warning me-2"></i>Toekomstige functionaliteiten
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        ${t('features').map((feature, index) => `
-                            <div class="col-md-6 mb-2">
-                                <div class="d-flex align-items-start">
-                                    <i class="bi bi-check-circle text-success me-2 mt-1"></i>
-                                    <span>${feature}</span>
-                                </div>
-                            </div>
-                        `).join('')}
                     </div>
                 </div>
             </div>
