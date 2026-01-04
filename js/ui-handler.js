@@ -20,20 +20,17 @@ class UIHandler {
                 editDogData: new DogDataManager(),
                 search: new SearchManager(),
                 photo: new PhotoManager(),
-                breeding: new BreedingManager(),
+                breeding: new BreedingManager(), // De nieuwe hoofdmodule
                 private: new PrivateInfoManager(),
-                // Voeg LitterManager toe
                 litter: new LitterManager()
             };
             
-            // Injecteer dependencies in LitterManager
-            if (this.modules.litter && this.modules.litter.injectDependencies) {
-                this.modules.litter.injectDependencies(this.db, this.auth);
-                console.log('Dependencies geïnjecteerd in LitterManager');
-            }
-            
-            // Maak dogManager beschikbaar voor SearchManager
-            window.dogManager = this.modules.dog;
+            // Injecteer dependencies in modules
+            Object.values(this.modules).forEach(module => {
+                if (module && module.injectDependencies) {
+                    module.injectDependencies(this.db, this.auth);
+                }
+            });
             
             console.log('Modules geïnitialiseerd:', Object.keys(this.modules).map(key => ({
                 name: key,
@@ -324,7 +321,10 @@ class UIHandler {
                     case 'breeding':
                         if (this.modules.breeding && this.modules.breeding.setupEvents) {
                             this.modules.breeding.setupEvents();
-                            if (this.modules.breeding.loadBreedingData) {
+                            // Voor BreedingManager moet loadMainScreen worden aangeroepen
+                            if (this.modules.breeding.loadMainScreen) {
+                                this.modules.breeding.loadMainScreen();
+                            } else if (this.modules.breeding.loadBreedingData) {
                                 this.modules.breeding.loadBreedingData();
                             }
                         }
@@ -341,7 +341,6 @@ class UIHandler {
                         
                     case 'litter':
                         if (this.modules.litter && this.modules.litter.setupEvents) {
-                            // Initialize LitterManager als dat nodig is
                             if (this.modules.litter.initialize) {
                                 this.modules.litter.initialize();
                             }
