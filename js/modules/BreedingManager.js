@@ -3,11 +3,11 @@
  * Beheert fokplannen en nest planning
  */
 
-class BreedingManager extends BaseModule {
+class BreedingManager {
     constructor() {
-        super();
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';
-        this.breedingPlans = [];
+        this.db = null;
+        this.auth = null;
         this.translations = {
             nl: {
                 breedingPlan: "Fok Planning",
@@ -43,6 +43,11 @@ class BreedingManager extends BaseModule {
                 back: "Zurück"
             }
         };
+    }
+    
+    injectDependencies(db, auth) {
+        this.db = db;
+        this.auth = auth;
     }
     
     t(key) {
@@ -182,14 +187,10 @@ class BreedingManager extends BaseModule {
         
         // Laad de ReuTeefCombinatie module
         try {
-            if (!window.reuTeefCombinatie) {
-                await this.loadModule('ReuTeefCombinatie.js');
-            }
+            const module = new ReuTeefCombinatie();
+            module.injectDependencies(this.db, this.auth);
+            await module.loadContent();
             
-            if (window.reuTeefCombinatie) {
-                const module = new window.reuTeefCombinatie();
-                await module.loadContent();
-            }
         } catch (error) {
             console.error('Fout bij laden ReuTeefCombinatie:', error);
             content.innerHTML = `
@@ -231,14 +232,10 @@ class BreedingManager extends BaseModule {
         
         // Laad de ZoekReu module
         try {
-            if (!window.zoekReu) {
-                await this.loadModule('ZoekReu.js');
-            }
+            const module = new ZoekReu();
+            module.injectDependencies(this.db, this.auth);
+            await module.loadContent();
             
-            if (window.zoekReu) {
-                const module = new window.zoekReu();
-                await module.loadContent();
-            }
         } catch (error) {
             console.error('Fout bij laden ZoekReu:', error);
             content.innerHTML = `
@@ -249,16 +246,6 @@ class BreedingManager extends BaseModule {
                 </div>
             `;
         }
-    }
-    
-    async loadModule(moduleName) {
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = `js/modules/${moduleName}`;
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
     }
     
     async loadBreedingData() {

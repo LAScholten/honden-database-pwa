@@ -6,6 +6,8 @@
 class ZoekReu {
     constructor() {
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';
+        this.db = null;
+        this.auth = null;
         this.translations = {
             nl: {
                 title: "Zoek een Reu",
@@ -90,7 +92,7 @@ class ZoekReu {
                 searchButton: "Rüden suchen",
                 results: "Suchergebnisse",
                 inDevelopment: "Diese Suchfunktion ist derzeit in Entwicklung",
-                devMessage: "Die vollständige Suchfunktionalität für Rüden wird demnächst verfügbar sein.",
+                devMessage: "Die vollständige Suchfunktionalität für Rüden wird demnächst verfügbaar sein.",
                 features: [
                     "Erweiterte Suchfilter",
                     "Genetische Kompatibilitätsprüfung",
@@ -104,6 +106,11 @@ class ZoekReu {
                 tryAgain: "Versuchen Sie andere Suchkriterien"
             }
         };
+    }
+    
+    injectDependencies(db, auth) {
+        this.db = db;
+        this.auth = auth;
     }
     
     t(key) {
@@ -278,7 +285,7 @@ class ZoekReu {
         
         // Event handlers
         document.getElementById('backBtn').addEventListener('click', () => {
-            window.breedingManager.loadMainScreen();
+            this.goBack();
         });
         
         document.getElementById('teefSelect').addEventListener('change', (e) => {
@@ -292,8 +299,8 @@ class ZoekReu {
     
     async getHonden() {
         try {
-            if (window.db && typeof window.db.getHonden === 'function') {
-                return await window.db.getHonden();
+            if (this.db && typeof this.db.getHonden === 'function') {
+                return await this.db.getHonden();
             }
             return [];
         } catch (error) {
@@ -373,6 +380,25 @@ class ZoekReu {
         }, 1500);
     }
     
+    goBack() {
+        // Zoek de breeding modal
+        const breedingModal = document.getElementById('breedingPlanModal');
+        if (breedingModal) {
+            // Roep loadMainScreen aan via het juiste pad
+            if (window.uiHandler && window.uiHandler.modules && window.uiHandler.modules.breeding) {
+                window.uiHandler.modules.breeding.loadMainScreen();
+            } else if (window.appUI && window.appUI.modules && window.appUI.modules.breeding) {
+                window.appUI.modules.breeding.loadMainScreen();
+            } else {
+                console.warn('Kon breeding manager niet vinden, sluit modal');
+                const modal = bootstrap.Modal.getInstance(breedingModal);
+                if (modal) {
+                    modal.hide();
+                }
+            }
+        }
+    }
+    
     showAlert(message, type = 'info') {
         const alertDiv = document.createElement('div');
         alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
@@ -382,7 +408,9 @@ class ZoekReu {
         `;
         
         const content = document.getElementById('breedingContent');
-        content.insertBefore(alertDiv, content.firstChild);
+        if (content) {
+            content.insertBefore(alertDiv, content.firstChild);
+        }
         
         setTimeout(() => {
             if (alertDiv.parentNode) {

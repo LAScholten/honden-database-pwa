@@ -6,6 +6,8 @@
 class ReuTeefCombinatie {
     constructor() {
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';
+        this.db = null;
+        this.auth = null;
         this.translations = {
             nl: {
                 title: "Reu en Teef Combinatie",
@@ -54,7 +56,7 @@ class ReuTeefCombinatie {
                 selectMother: "Wählen Sie eine Hündin...",
                 father: "Rüde (Vater)",
                 selectFather: "Wählen Sie einen Rüden...",
-                inDevelopment: "Diese Funktion ist derzeit in Entwicklung",
+                inDevelopment: "Diese functie ist derzeit in Entwicklung",
                 devMessage: "Die vollständige Funktionalität für Rüde und Hündin Kombination wird demnächst verfügbar sein.",
                 features: [
                     "Auswahl spezifischer Rüde und Hündin",
@@ -68,6 +70,11 @@ class ReuTeefCombinatie {
                 save: "Speichern"
             }
         };
+    }
+    
+    injectDependencies(db, auth) {
+        this.db = db;
+        this.auth = auth;
     }
     
     t(key) {
@@ -175,7 +182,7 @@ class ReuTeefCombinatie {
         
         // Event handlers
         document.getElementById('backBtn').addEventListener('click', () => {
-            window.breedingManager.loadMainScreen();
+            this.goBack();
         });
         
         document.getElementById('saveBtn').addEventListener('click', () => {
@@ -207,8 +214,8 @@ class ReuTeefCombinatie {
     
     async getHonden() {
         try {
-            if (window.db && typeof window.db.getHonden === 'function') {
-                return await window.db.getHonden();
+            if (this.db && typeof this.db.getHonden === 'function') {
+                return await this.db.getHonden();
             }
             return [];
         } catch (error) {
@@ -291,6 +298,25 @@ class ReuTeefCombinatie {
         details.classList.remove('d-none');
     }
     
+    goBack() {
+        // Zoek de breeding modal
+        const breedingModal = document.getElementById('breedingPlanModal');
+        if (breedingModal) {
+            // Roep loadMainScreen aan via het juiste pad
+            if (window.uiHandler && window.uiHandler.modules && window.uiHandler.modules.breeding) {
+                window.uiHandler.modules.breeding.loadMainScreen();
+            } else if (window.appUI && window.appUI.modules && window.appUI.modules.breeding) {
+                window.appUI.modules.breeding.loadMainScreen();
+            } else {
+                console.warn('Kon breeding manager niet vinden, sluit modal');
+                const modal = bootstrap.Modal.getInstance(breedingModal);
+                if (modal) {
+                    modal.hide();
+                }
+            }
+        }
+    }
+    
     saveCombinatie() {
         const teefId = document.getElementById('teefSelect').value;
         const reuId = document.getElementById('reuSelect').value;
@@ -312,7 +338,9 @@ class ReuTeefCombinatie {
         `;
         
         const content = document.getElementById('breedingContent');
-        content.insertBefore(alertDiv, content.firstChild);
+        if (content) {
+            content.insertBefore(alertDiv, content.firstChild);
+        }
         
         setTimeout(() => {
             if (alertDiv.parentNode) {
