@@ -110,14 +110,6 @@ class ReuTeefCombinatie {
                 searchPlaceholder: "Tippen Sie zum Suchen...",
                 inDevelopment: "Diese Funktion ist derzeit in Entwicklung",
                 devMessage: "Die vollständige Funktionalität für Rüde und Hündin Kombination wird demnächst verfügbar sein.",
-                features: [
-                    "Auswahl spezifischer Rüde und Hündin",
-                    "Genetische Kompatibilitätsanalyse",
-                    "Stammbaumverifizierung",
-                    "Gesundheitswertberechnung",
-                    "Vorhergesagte Wurfgröße",
-                    "Planung und Kalenderintegration"
-                ],
                 back: "Zurück",
                 save: "Zukünftigen Stammbaum Zeigen",
                 showPedigree: "Stammbaum Zeigen",
@@ -349,6 +341,8 @@ class ReuTeefCombinatie {
                     cursor: pointer;
                     border-bottom: 1px solid #f8f9fa;
                     transition: all 0.2s;
+                    overflow: visible !important;
+                    position: relative;
                 }
                 
                 .autocomplete-item:hover {
@@ -365,6 +359,9 @@ class ReuTeefCombinatie {
                     font-weight: 600;
                     font-size: 1rem;
                     color: #495057;
+                    overflow: visible;
+                    white-space: normal;
+                    word-wrap: break-word;
                 }
                 
                 .autocomplete-item.active .dog-name {
@@ -374,6 +371,10 @@ class ReuTeefCombinatie {
                 .autocomplete-item .dog-details {
                     font-size: 0.85rem;
                     opacity: 0.8;
+                    overflow: visible;
+                    white-space: normal;
+                    word-wrap: break-word;
+                    line-height: 1.4;
                 }
                 
                 .autocomplete-item.active .dog-details {
@@ -383,10 +384,24 @@ class ReuTeefCombinatie {
                 .autocomplete-item .kennel-name {
                     color: #6f42c1;
                     font-weight: 500;
+                    display: inline;
                 }
                 
                 .autocomplete-item.active .kennel-name {
                     color: #e0d6f5;
+                }
+                
+                /* Zorg ervoor dat dropdown altijd volledig zichtbaar is */
+                .autocomplete-dropdown {
+                    overflow-y: auto !important;
+                    overflow-x: visible !important;
+                    z-index: 1060 !important;
+                    max-width: 100% !important;
+                }
+                
+                /* Zorg dat de dropdown boven andere elementen staat */
+                .modal .autocomplete-dropdown {
+                    z-index: 1070 !important;
                 }
             `;
             document.head.appendChild(style);
@@ -843,6 +858,11 @@ class ReuTeefCombinatie {
             }).join('');
             
             dropdown.style.display = 'block';
+            
+            // Forceer zichtbaarheid en hoogte
+            dropdown.style.overflowY = 'auto';
+            dropdown.style.maxHeight = '300px';
+            dropdown.style.zIndex = '1060';
             
             // Event listeners voor dropdown items
             dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
