@@ -20,7 +20,7 @@ class ReuTeefCombinatie {
         // COI Calculator instance
         this.coiCalculator = null;
         
-        // Vertalingen
+        // Vertalingen - UITGEBREID MET GEZONDHEIDSUITSLAGEN
         this.translations = {
             nl: {
                 title: "Reu en Teef Combinatie",
@@ -101,7 +101,7 @@ class ReuTeefCombinatie {
                 thyroidTested: "Schildklier getest",
                 thyroidUnknown: "Schildklier niet bekend",
                 occurrences: "Aantal keer",
-                // HEALTH INFO TRANSLATIONS - TOEVOEGING
+                // HEALTH INFO TRANSLATIONS - COMPLEET OVERGENOMEN VAN SEARCHMANAGER
                 hipDysplasia: "Heupdysplasie",
                 elbowDysplasia: "Elleboogdysplasie",
                 patellaLuxation: "Patella Luxatie",
@@ -113,11 +113,50 @@ class ReuTeefCombinatie {
                 country: "Land",
                 zipCode: "Postcode",
                 remarks: "Opmerkingen",
-                healthGrades: "Gegevens",
+                healthInfo: "Gezondheidsinformatie",
+                additionalInfo: "Extra informatie",
                 noAdditionalInfo: "Geen extra informatie beschikbaar",
+                noHealthInfo: "Geen gezondheidsinformatie beschikbaar",
                 grade: "Graad",
                 status: "Status",
-                notApplicable: "Niet van toepassing"
+                notApplicable: "Niet van toepassing",
+                
+                // GEZONDHEIDSUITSLAGEN - COMPLEET VAN SEARCHMANAGER
+                hipGrades: {
+                    A: "A - Geen tekenen van HD",
+                    B: "B - Overgangsvorm",
+                    C: "C - Lichte HD",
+                    D: "D - Matige HD", 
+                    E: "E - Ernstige HD"
+                },
+                elbowGrades: {
+                    "0": "0 - Geen ED",
+                    "1": "1 - Milde ED",
+                    "2": "2 - Matige ED",
+                    "3": "3 - Ernstige ED",
+                    "NB": "NB - Niet bekend"
+                },
+                patellaGrades: {
+                    "0": "0 - Geen PL",
+                    "1": "1 - Af en toe luxatie",
+                    "2": "2 - Regelmatig luxatie",
+                    "3": "3 - Constante luxatie"
+                },
+                eyeStatus: {
+                    "Vrij": "Vrij",
+                    "Distichiasis": "Distichiasis",
+                    "Overig": "Overig"
+                },
+                dandyStatus: {
+                    "Vrij op DNA": "Vrij op DNA",
+                    "Vrij op ouders": "Vrij op ouders", 
+                    "Drager": "Drager",
+                    "Lijder": "Lijder"
+                },
+                thyroidStatus: {
+                    "Negatief": "Tgaa Negatief",
+                    "Positief": "Tgaa Positief"
+                }
             },
             en: {
                 title: "Male and Female Combination",
@@ -210,11 +249,48 @@ class ReuTeefCombinatie {
                 country: "Country",
                 zipCode: "Zip code",
                 remarks: "Remarks",
-                healthGrades: "Data",
                 noAdditionalInfo: "No additional information available",
+                noHealthInfo: "No health information available",
                 grade: "Grade",
                 status: "Status",
-                notApplicable: "Not applicable"
+                notApplicable: "Not applicable",
+                
+                // HEALTH STATUS TRANSLATIONS - COMPLETE FROM SEARCHMANAGER
+                hipGrades: {
+                    A: "A - No signs of HD",
+                    B: "B - Borderline",
+                    C: "C - Mild HD",
+                    D: "D - Moderate HD",
+                    E: "E - Severe HD"
+                },
+                elbowGrades: {
+                    "0": "0 - No ED",
+                    "1": "1 - Mild ED",
+                    "2": "2 - Moderate ED",
+                    "3": "3 - Severe ED",
+                    "NB": "NB - Not known"
+                },
+                patellaGrades: {
+                    "0": "0 - No PL",
+                    "1": "1 - Occasional luxation",
+                    "2": "2 - Frequent luxation",
+                    "3": "3 - Constant luxation"
+                },
+                eyeStatus: {
+                    "Vrij": "Free",
+                    "Distichiasis": "Distichiasis",
+                    "Overig": "Other"
+                },
+                dandyStatus: {
+                    "Vrij op DNA": "Free on DNA",
+                    "Vrij op ouders": "Free on parents",
+                    "Drager": "Carrier",
+                    "Lijder": "Affected"
+                },
+                thyroidStatus: {
+                    "Negatief": "Tgaa Negative",
+                    "Positief": "Tgaa Positive"
+                }
             },
             de: {
                 title: "Rüde und Hündin Kombination",
@@ -237,7 +313,7 @@ class ReuTeefCombinatie {
                 kennel: "Zwingername:",
                 pedigreeNumber: "Stammbuchnr:",
                 birthDate: "Geburtsdatum:",
-                healthInfo: "Health information",
+                healthInfo: "Gesundheitsinformationen",
                 color: "Fellfarbe:",
                 searchByName: "Suche nach Name oder Zwingername",
                 dogDetails: "Hund Details",
@@ -307,11 +383,48 @@ class ReuTeefCombinatie {
                 country: "Land",
                 zipCode: "Postleitzahl",
                 remarks: "Bemerkungen",
-                healthGrades: "Daten",
                 noAdditionalInfo: "Keine zusätzlichen Informationen verfügbar",
+                noHealthInfo: "Keine Gesundheitsinformationen verfügbar",
                 grade: "Grade",
                 status: "Status",
-                notApplicable: "Nicht zutreffend"
+                notApplicable: "Nicht zutreffend",
+                
+                // GESUNDHEITSAUSWERTUNGEN - VOLLSTÄNDIG ÜBERNOMMEN VON SEARCHMANAGER
+                hipGrades: {
+                    A: "A - Keine Anzeichen von HD",
+                    B: "B - Grenzfall",
+                    C: "C - Leichte HD",
+                    D: "D - Mäßige HD",
+                    E: "E - Schwere HD"
+                },
+                elbowGrades: {
+                    "0": "0 - Keine ED",
+                    "1": "1 - Leichte ED",
+                    "2": "2 - Mäßige ED",
+                    "3": "3 - Schwere ED",
+                    "NB": "NB - Nicht bekannt"
+                },
+                patellaGrades: {
+                    "0": "0 - Keine PL",
+                    "1": "1 - Gelegentliche Luxation",
+                    "2": "2 - Häufige Luxation",
+                    "3": "3 - Ständige Luxation"
+                },
+                eyeStatus: {
+                    "Vrij": "Frei",
+                    "Distichiasis": "Distichiasis",
+                    "Overig": "Andere"
+                },
+                dandyStatus: {
+                    "Vrij op DNA": "DNA-Frei",
+                    "Vrij op ouders": "Eltern-Frei",
+                    "Drager": "Träger",
+                    "Lijder": "Betroffen"
+                },
+                thyroidStatus: {
+                    "Negatief": "Tgaa Negativ",
+                    "Positief": "Tgaa Positiv"
+                }
             }
         };
     }
@@ -322,15 +435,11 @@ class ReuTeefCombinatie {
         this.stamboomManager = stamboomManager;
     }
     
-    t(key, params = {}) {
-        let text = this.translations[this.currentLang][key] || key;
-        
-        // Vervang parameters in tekst
-        Object.keys(params).forEach(param => {
-            text = text.replace(`{${param}}`, params[param]);
-        });
-        
-        return text;
+    t(key, subKey = null) {
+        if (subKey && this.translations[this.currentLang][key] && typeof this.translations[this.currentLang][key] === 'object') {
+            return this.translations[this.currentLang][key][subKey] || subKey;
+        }
+        return this.translations[this.currentLang][key] || key;
     }
     
     async loadContent() {
@@ -1199,14 +1308,14 @@ class ReuTeefCombinatie {
         // Haal ouders informatie op
         const oudersInfo = await this.getOudersInfo(hond);
         
-        // Helper functie voor gezondheidsbadges - NET ALS IN SEARCHMANAGER
+        // Helper functie voor gezondheidsbadges - IDENTIEK AAN SEARCHMANAGER
         const getHealthBadge = (value, type) => {
             if (!value || value === '') {
                 return `<span class="badge bg-secondary">${t('unknown')}</span>`;
             }
             
             let badgeClass = '';
-            let badgeText = value;
+            let badgeText = t(`${type}Grades`, value) || value;  // Gebruik vertaalde uitslag
             
             switch(type) {
                 case 'hip':
@@ -1220,12 +1329,15 @@ class ReuTeefCombinatie {
                     break;
                 case 'eyes':
                     badgeClass = 'badge-eyes';
+                    badgeText = t('eyeStatus', value) || value;
                     break;
                 case 'dandy':
                     badgeClass = 'badge-dandy';
+                    badgeText = t('dandyStatus', value) || value;
                     break;
                 case 'thyroid':
                     badgeClass = 'badge-thyroid';
+                    badgeText = t('thyroidStatus', value) || value;
                     break;
                 default:
                     badgeClass = 'badge bg-secondary';
@@ -1893,7 +2005,7 @@ class ReuTeefCombinatie {
             }
             
             let badgeClass = '';
-            let badgeText = value;
+            let badgeText = t(`${type}Grades`, value) || value;  // Gebruik vertaalde uitslag
             
             switch(type) {
                 case 'hip':
@@ -1907,12 +2019,15 @@ class ReuTeefCombinatie {
                     break;
                 case 'eyes':
                     badgeClass = 'badge-eyes';
+                    badgeText = t('eyeStatus', value) || value;
                     break;
                 case 'dandy':
                     badgeClass = 'badge-dandy';
+                    badgeText = t('dandyStatus', value) || value;
                     break;
                 case 'thyroid':
                     badgeClass = 'badge-thyroid';
+                    badgeText = t('thyroidStatus', value) || value;
                     break;
                 default:
                     badgeClass = 'badge bg-secondary';
@@ -1944,7 +2059,7 @@ class ReuTeefCombinatie {
                         <i class="${dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 'bi-gender-female text-danger'} me-2"></i>
                         ${dog.naam || this.t('unknown')}
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" aria-label="Sluiten"></button>
+                    <button type="button" class="btn-close btn-close-white" aria-label="${t('close')}"></button>
                 </div>
                 <div class="popup-body">
                     <div class="info-section mb-2">
@@ -2364,7 +2479,7 @@ class ReuTeefCombinatie {
                         </h5>
                         <div class="d-flex gap-2">
                             <button class="btn btn-sm btn-light btn-print">
-                                <i class="bi bi-printer me-1"></i> ${this.t('print')}
+                                <i class="bi bi-printer me-1"></i> ${this.t('close')}
                             </button>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${this.t('close')}"></button>
                         </div>
@@ -2588,7 +2703,7 @@ class ReuTeefCombinatie {
                         <div class="relation-compact">${relation}</div>
                     </div>
                     <div class="pedigree-card-body-compact horizontal text-center py-3">
-                        <div class="no-data-text">${this.t('noData')}</div>
+                        <div class="no-data-text">${this.t('noDogFound')}</div>
                     </div>
                 </div>
             `;
