@@ -60,7 +60,36 @@ class ReuTeefCombinatie {
                 futurePuppyDescription: "Voorspelling van combinatie {reu} × {teef}",
                 futurePuppyTitle: "Stamboom voor toekomstige pup uit combinatie {reu} × {teef}",
                 predictedPedigree: "Voorspelde stamboom",
-                combinedParents: "Combinatie ouders"
+                combinedParents: "Combinatie ouders",
+                print: "Afdrukken",
+                parents: "Ouders",
+                grandparents: "Grootouders",
+                greatGrandparents: "Overgrootouders",
+                mainDog: "Hoofdhond",
+                currentDog: "Huidige hond",
+                noData: "Geen gegevens",
+                clickForDetails: "Klik voor details",
+                coi6Gen: "COI 6 Gen",
+                coiAllGen: "COI All Gen",
+                breed: "Ras",
+                gender: "Geslacht",
+                coatColor: "Vachtkleur",
+                hipDysplasia: "Heupdysplasie",
+                elbowDysplasia: "Elleboogdysplasie",
+                patellaLuxation: "Patella Luxatie",
+                eyes: "Ogen",
+                dandyWalker: "Dandy Walker Malformation",
+                thyroid: "Schildklier",
+                eyesExplanation: "Verklaring ogen",
+                thyroidExplanation: "Toelichting schildklier",
+                male: "Reu",
+                female: "Teef",
+                remarks: "Opmerkingen",
+                noRemarks: "Geen opmerkingen",
+                closePopup: "Sluiten",
+                photos: "Foto's",
+                clickToEnlarge: "Klik om te vergroten",
+                closePhoto: "Sluiten"
             },
             en: {
                 title: "Male and Female Combination",
@@ -103,7 +132,36 @@ class ReuTeefCombinatie {
                 futurePuppyDescription: "Prediction of combination {father} × {mother}",
                 futurePuppyTitle: "Pedigree for future puppy from combination {father} × {mother}",
                 predictedPedigree: "Predicted pedigree",
-                combinedParents: "Combination parents"
+                combinedParents: "Combination parents",
+                print: "Print",
+                parents: "Parents",
+                grandparents: "Grandparents",
+                greatGrandparents: "Great Grandparents",
+                mainDog: "Main Dog",
+                currentDog: "Current Dog",
+                noData: "No data",
+                clickForDetails: "Click for details",
+                coi6Gen: "COI 6 Gen",
+                coiAllGen: "COI All Gen",
+                breed: "Breed",
+                gender: "Gender",
+                coatColor: "Coat color",
+                hipDysplasia: "Hip Dysplasia",
+                elbowDysplasia: "Elbow Dysplasia",
+                patellaLuxation: "Patella Luxation",
+                eyes: "Eyes",
+                dandyWalker: "Dandy Walker Malformation",
+                thyroid: "Thyroid",
+                eyesExplanation: "Eye explanation",
+                thyroidExplanation: "Thyroid explanation",
+                male: "Male",
+                female: "Female",
+                remarks: "Remarks",
+                noRemarks: "No remarks",
+                closePopup: "Close",
+                photos: "Photos",
+                clickToEnlarge: "Click to enlarge",
+                closePhoto: "Close"
             },
             de: {
                 title: "Rüde und Hündin Kombination",
@@ -146,7 +204,36 @@ class ReuTeefCombinatie {
                 futurePuppyDescription: "Vorhersage der Kombination {father} × {mother}",
                 futurePuppyTitle: "Stamboom für zukünftigen Welpen aus Kombination {father} × {mother}",
                 predictedPedigree: "Vorhergesagter Stammbaum",
-                combinedParents: "Kombination Eltern"
+                combinedParents: "Kombination Eltern",
+                print: "Drucken",
+                parents: "Eltern",
+                grandparents: "Großeltern",
+                greatGrandparents: "Urgroßeltern",
+                mainDog: "Haupt-Hund",
+                currentDog: "Aktueller Hund",
+                noData: "Keine Daten",
+                clickForDetails: "Klicken für Details",
+                coi6Gen: "COI 6 Gen",
+                coiAllGen: "COI All Gen",
+                breed: "Rasse",
+                gender: "Geslacht",
+                coatColor: "Fellfarbe",
+                hipDysplasia: "Hüftdysplasie",
+                elbowDysplasia: "Ellbogendysplasie",
+                patellaLuxation: "Patella Luxation",
+                eyes: "Augen",
+                dandyWalker: "Dandy Walker Malformation",
+                thyroid: "Schilddrüse",
+                eyesExplanation: "Augenerklärung",
+                thyroidExplanation: "Schilddrüse Erklärung",
+                male: "Rüde",
+                female: "Hündin",
+                remarks: "Bemerkungen",
+                noRemarks: "Keine Bemerkungen",
+                closePopup: "Schließen",
+                photos: "Fotos",
+                clickToEnlarge: "Klicken zum Vergrößern",
+                closePhoto: "Schließen"
             }
         };
     }
@@ -317,12 +404,10 @@ class ReuTeefCombinatie {
             </div>
         `;
         
+        // ALLEEN de groene knop tonen, paarse knop verwijderd
         buttons.innerHTML = `
             <button type="button" class="btn btn-secondary" id="backBtn">
                 <i class="bi bi-arrow-left me-1"></i> ${t('back')}
-            </button>
-            <button type="button" class="btn btn-purple" id="showPedigreeBtn" disabled>
-                <i class="bi bi-diagram-3 me-1"></i> ${t('showPedigree')}
             </button>
         `;
         
@@ -332,10 +417,6 @@ class ReuTeefCombinatie {
         // Event handlers
         document.getElementById('backBtn').addEventListener('click', () => {
             this.goBack();
-        });
-        
-        document.getElementById('showPedigreeBtn').addEventListener('click', () => {
-            this.showCombinedPedigree();
         });
         
         // Setup autocomplete voor teef
@@ -525,6 +606,29 @@ class ReuTeefCombinatie {
                 #showFuturePedigreeBtn:hover {
                     transform: translateY(-2px);
                     box-shadow: 0 4px 15px rgba(25, 135, 84, 0.3);
+                }
+                
+                /* TOEKOMSTIGE PUP STAMBOOM STYLES */
+                .future-puppy-modal .modal-header {
+                    background: linear-gradient(135deg, #198754 0%, #2ecc71 100%);
+                }
+                
+                .future-puppy-card {
+                    background: linear-gradient(135deg, #f8fff9 0%, #e8f5e9 100%);
+                    border: 2px solid #198754;
+                }
+                
+                .future-puppy-card .pedigree-card-header-compact.horizontal {
+                    background: #198754 !important;
+                }
+                
+                .pedigree-card-compact.horizontal.future-puppy {
+                    background: #f0fff4;
+                    border: 2px solid #28a745;
+                }
+                
+                .pedigree-card-compact.horizontal.future-puppy .pedigree-card-header-compact.horizontal {
+                    background: #28a745 !important;
                 }
                 
                 /* RESPONSIVE STYLES */
@@ -1165,16 +1269,10 @@ class ReuTeefCombinatie {
     }
     
     updateButtonStates() {
-        const showPedigreeBtn = document.getElementById('showPedigreeBtn');
         const showFuturePedigreeBtn = document.getElementById('showFuturePedigreeBtn');
         
         // Alleen beschikbaar als beide honden geselecteerd zijn
         const bothSelected = this.selectedTeef && this.selectedReu;
-        
-        if (showPedigreeBtn) {
-            showPedigreeBtn.disabled = !bothSelected;
-            showPedigreeBtn.title = bothSelected ? '' : this.t('selectDogFirst');
-        }
         
         if (showFuturePedigreeBtn) {
             showFuturePedigreeBtn.disabled = !bothSelected;
@@ -1224,20 +1322,6 @@ class ReuTeefCombinatie {
         }
     }
     
-    async showCombinedPedigree() {
-        if (!this.selectedTeef || !this.selectedReu) {
-            this.showAlert(this.t('selectDogFirst'), 'warning');
-            return;
-        }
-        
-        // Toon stamboom van de geselecteerde reu
-        if (this.stamboomManager) {
-            await this.stamboomManager.showPedigree(this.selectedReu);
-        } else {
-            this.showAlert('StamboomManager niet geïnitialiseerd', 'danger');
-        }
-    }
-    
     async showFuturePuppyPedigree() {
         if (!this.selectedTeef || !this.selectedReu) {
             this.showAlert(this.t('selectDogFirst'), 'warning');
@@ -1251,7 +1335,7 @@ class ReuTeefCombinatie {
         
         // Maak een virtuele toekomstige pup
         const futurePuppy = {
-            id: -1, // Speciaal ID voor toekomstige pup
+            id: -999, // Speciaal ID voor toekomstige pup
             naam: this.t('futurePuppyName'),
             geslacht: 'onbekend',
             vaderId: this.selectedReu.id,
@@ -1368,7 +1452,7 @@ class ReuTeefCombinatie {
         if (!modal) {
             modal = document.createElement('div');
             modal.id = modalId;
-            modal.className = 'modal fade';
+            modal.className = 'modal fade future-puppy-modal';
             modal.tabIndex = -1;
             modal.setAttribute('aria-hidden', 'true');
             
@@ -1434,22 +1518,22 @@ class ReuTeefCombinatie {
         const container = document.getElementById('futurePuppyPedigreeContainer');
         if (!container || !this.stamboomManager) return;
         
-        // Gebruik de StamboomManager om de compacte cards te genereren
-        const mainDogCard = await this.stamboomManager.getDogCompactCardHTML(
+        // Gebruik aangepaste methode om cards te genereren voor toekomstige pup
+        const mainDogCard = this.getFuturePuppyCompactCardHTML(
             pedigreeTree.mainDog, 
             this.t('futurePuppyName'), 
             true, 
             0
         );
         
-        const fatherCard = await this.stamboomManager.getDogCompactCardHTML(
+        const fatherCard = await this.getDogCompactCardFromStamboomManager(
             pedigreeTree.father, 
             this.t('fatherLabel'), 
             false, 
             1
         );
         
-        const motherCard = await this.stamboomManager.getDogCompactCardHTML(
+        const motherCard = await this.getDogCompactCardFromStamboomManager(
             pedigreeTree.mother, 
             this.t('motherLabel'), 
             false, 
@@ -1457,28 +1541,28 @@ class ReuTeefCombinatie {
         );
         
         // Grootouders
-        const paternalGrandfatherCard = await this.stamboomManager.getDogCompactCardHTML(
+        const paternalGrandfatherCard = await this.getDogCompactCardFromStamboomManager(
             pedigreeTree.paternalGrandfather, 
             this.t('grandfatherLabel'), 
             false, 
             2
         );
         
-        const paternalGrandmotherCard = await this.stamboomManager.getDogCompactCardHTML(
+        const paternalGrandmotherCard = await this.getDogCompactCardFromStamboomManager(
             pedigreeTree.paternalGrandmother, 
             this.t('grandmotherLabel'), 
             false, 
             2
         );
         
-        const maternalGrandfatherCard = await this.stamboomManager.getDogCompactCardHTML(
+        const maternalGrandfatherCard = await this.getDogCompactCardFromStamboomManager(
             pedigreeTree.maternalGrandfather, 
             this.t('grandfatherLabel'), 
             false, 
             2
         );
         
-        const maternalGrandmotherCard = await this.stamboomManager.getDogCompactCardHTML(
+        const maternalGrandmotherCard = await this.getDogCompactCardFromStamboomManager(
             pedigreeTree.maternalGrandmother, 
             this.t('grandmotherLabel'), 
             false, 
@@ -1486,56 +1570,56 @@ class ReuTeefCombinatie {
         );
         
         // Overgrootouders
-        const paternalGreatGrandfather1Card = await this.stamboomManager.getDogCompactCardHTML(
+        const paternalGreatGrandfather1Card = await this.getDogCompactCardFromStamboomManager(
             pedigreeTree.paternalGreatGrandfather1, 
             this.t('greatGrandfatherLabel'), 
             false, 
             3
         );
         
-        const paternalGreatGrandmother1Card = await this.stamboomManager.getDogCompactCardHTML(
+        const paternalGreatGrandmother1Card = await this.getDogCompactCardFromStamboomManager(
             pedigreeTree.paternalGreatGrandmother1, 
             this.t('greatGrandmotherLabel'), 
             false, 
             3
         );
         
-        const paternalGreatGrandfather2Card = await this.stamboomManager.getDogCompactCardHTML(
+        const paternalGreatGrandfather2Card = await this.getDogCompactCardFromStamboomManager(
             pedigreeTree.paternalGreatGrandfather2, 
             this.t('greatGrandfatherLabel'), 
             false, 
             3
         );
         
-        const paternalGreatGrandmother2Card = await this.stamboomManager.getDogCompactCardHTML(
+        const paternalGreatGrandmother2Card = await this.getDogCompactCardFromStamboomManager(
             pedigreeTree.paternalGreatGrandmother2, 
             this.t('greatGrandmotherLabel'), 
             false, 
             3
         );
         
-        const maternalGreatGrandfather1Card = await this.stamboomManager.getDogCompactCardHTML(
+        const maternalGreatGrandfather1Card = await this.getDogCompactCardFromStamboomManager(
             pedigreeTree.maternalGreatGrandfather1, 
             this.t('greatGrandfatherLabel'), 
             false, 
             3
         );
         
-        const maternalGreatGrandmother1Card = await this.stamboomManager.getDogCompactCardHTML(
+        const maternalGreatGrandmother1Card = await this.getDogCompactCardFromStamboomManager(
             pedigreeTree.maternalGreatGrandmother1, 
             this.t('greatGrandmotherLabel'), 
             false, 
             3
         );
         
-        const maternalGreatGrandfather2Card = await this.stamboomManager.getDogCompactCardHTML(
+        const maternalGreatGrandfather2Card = await this.getDogCompactCardFromStamboomManager(
             pedigreeTree.maternalGreatGrandfather2, 
             this.t('greatGrandfatherLabel'), 
             false, 
             3
         );
         
-        const maternalGreatGrandmother2Card = await this.stamboomManager.getDogCompactCardHTML(
+        const maternalGreatGrandmother2Card = await this.getDogCompactCardFromStamboomManager(
             pedigreeTree.maternalGreatGrandmother2, 
             this.t('greatGrandmotherLabel'), 
             false, 
@@ -1589,15 +1673,87 @@ class ReuTeefCombinatie {
         this.setupFuturePuppyCardClickEvents();
     }
     
+    // Aangepaste card voor toekomstige pup (zonder click functionaliteit)
+    getFuturePuppyCompactCardHTML(dog, relation = '', isMainDog = true, generation = 0) {
+        const genderIcon = 'bi-stars text-success';
+        
+        return `
+            <div class="pedigree-card-compact horizontal future-puppy ${isMainDog ? 'main-dog-compact' : ''} gen${generation}" 
+                 data-dog-id="${dog.id}" 
+                 data-dog-name="${dog.naam || ''}"
+                 data-relation="${relation}"
+                 data-generation="${generation}"
+                 data-has-photos="false">
+                <div class="pedigree-card-header-compact horizontal bg-success">
+                    <div class="relation-compact">
+                        <span class="relation-text">${relation}</span>
+                        <span class="main-dot">★</span>
+                    </div>
+                    <div class="gender-icon-compact">
+                        <i class="bi ${genderIcon}"></i>
+                    </div>
+                </div>
+                <div class="pedigree-card-body-compact horizontal">
+                    <!-- Regel 1: Naam en kennelnaam in één regel -->
+                    <div class="card-row card-row-1">
+                        <div class="dog-name-kennel-compact" title="${dog.naam || this.t('futurePuppyName')}">
+                            ${dog.naam || this.t('futurePuppyName')}
+                        </div>
+                    </div>
+                    
+                    <!-- Regel 2: Stamboomnummer en ras -->
+                    <div class="card-row card-row-2">
+                        ${dog.stamboomnr ? `
+                        <div class="dog-pedigree-compact" title="${dog.stamboomnr}">
+                            ${dog.stamboomnr}
+                        </div>
+                        ` : ''}
+                        
+                        ${dog.ras ? `
+                        <div class="dog-breed-compact" title="${dog.ras}">
+                            ${dog.ras}
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <!-- Regel 3: Info tekst -->
+                    <div class="card-row card-row-3">
+                        <div class="click-hint-compact text-success">
+                            <i class="bi bi-info-circle"></i> ${this.t('predictedPedigree')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    async getDogCompactCardFromStamboomManager(dog, relation = '', isMainDog = false, generation = 0) {
+        if (!dog) {
+            return `
+                <div class="pedigree-card-compact horizontal empty gen${generation}" data-dog-id="0">
+                    <div class="pedigree-card-header-compact horizontal">
+                        <div class="relation-compact">${relation}</div>
+                    </div>
+                    <div class="pedigree-card-body-compact horizontal text-center py-3">
+                        <div class="no-data-text">${this.t('noData')}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Gebruik de methode uit StamboomManager
+        return await this.stamboomManager.getDogCompactCardHTML(dog, relation, isMainDog, generation);
+    }
+    
     setupFuturePuppyCardClickEvents() {
         const container = document.getElementById('futurePuppyPedigreeContainer');
         if (!container) return;
         
-        const cards = container.querySelectorAll('.pedigree-card-compact.horizontal:not(.empty)');
+        const cards = container.querySelectorAll('.pedigree-card-compact.horizontal:not(.empty):not(.future-puppy)');
         cards.forEach(card => {
             card.addEventListener('click', async (e) => {
                 const dogId = parseInt(card.getAttribute('data-dog-id'));
-                if (dogId === 0 || dogId === -1) return; // Skip toekomstige pup en lege cards
+                if (dogId === -999 || dogId === 0) return; // Skip toekomstige pup en lege cards
                 
                 // Voor echte honden, gebruik de StamboomManager om details te tonen
                 if (this.stamboomManager) {
@@ -1609,6 +1765,26 @@ class ReuTeefCombinatie {
                 }
             });
         });
+    }
+    
+    // Helper methode om health badge te maken
+    getHealthBadge(value, type) {
+        if (!value || value === '') {
+            return `<span class="badge bg-secondary">${this.t('unknown')}</span>`;
+        }
+        
+        let badgeClass = 'badge ';
+        switch(type) {
+            case 'hip': badgeClass += 'badge-hd'; break;
+            case 'elbow': badgeClass += 'badge-ed'; break;
+            case 'patella': badgeClass += 'badge-pl'; break;
+            case 'eyes': badgeClass += 'badge-eyes'; break;
+            case 'dandy': badgeClass += 'badge-dandy'; break;
+            case 'thyroid': badgeClass += 'badge-thyroid'; break;
+            default: badgeClass += 'bg-secondary';
+        }
+        
+        return `<span class="${badgeClass}">${value}</span>`;
     }
     
     showAlert(message, type = 'info') {
