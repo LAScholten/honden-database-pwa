@@ -20,10 +20,7 @@ class ReuTeefCombinatie {
         // COI Calculator instance
         this.coiCalculator = null;
         
-        // Importeer de translation helper van SearchManager
-        this.translationHelper = null;
-        
-        // VERTALINGEN - Vereenvoudigd, gebruikt dezelfde logica als SearchManager
+        // Vertalingen
         this.translations = {
             nl: {
                 title: "Reu en Teef Combinatie",
@@ -103,26 +100,7 @@ class ReuTeefCombinatie {
                 dwlmUnknown: "Dandy Walker niet bekend",
                 thyroidTested: "Schildklier getest",
                 thyroidUnknown: "Schildklier niet bekend",
-                occurrences: "Aantal keer",
-                // HEALTH INFO TRANSLATIONS
-                hipDysplasia: "Heupdysplasie",
-                elbowDysplasia: "Elleboogdysplasie",
-                patellaLuxation: "Patella Luxatie",
-                eyes: "Ogen",
-                eyesExplanation: "Verklaring ogen",
-                dandyWalker: "Dandy Walker Malformation",
-                thyroid: "Schildklier",
-                thyroidExplanation: "Toelichting schildklier",
-                country: "Land",
-                zipCode: "Postcode",
-                remarks: "Opmerkingen",
-                additionalInfo: "Extra informatie",
-                noAdditionalInfo: "Geen extra informatie beschikbaar",
-                noHealthInfo: "Geen gezondheidsinformatie beschikbaar",
-                grade: "Graad",
-                status: "Status",
-                notApplicable: "Niet van toepassing",
-                unknown: "Onbekend"
+                occurrences: "Aantal keer"
             },
             en: {
                 title: "Male and Female Combination",
@@ -202,25 +180,7 @@ class ReuTeefCombinatie {
                 dwlmUnknown: "Dandy Walker unknown",
                 thyroidTested: "Thyroid tested",
                 thyroidUnknown: "Thyroid unknown",
-                occurrences: "Occurrences",
-                // HEALTH INFO TRANSLATIONS - ADDITION
-                hipDysplasia: "Hip Dysplasia",
-                elbowDysplasia: "Elbow Dysplasia",
-                patellaLuxation: "Patella Luxation",
-                eyes: "Eyes",
-                eyesExplanation: "Eye explanation",
-                dandyWalker: "Dandy Walker Malformation",
-                thyroid: "Thyroid",
-                thyroidExplanation: "Thyroid explanation",
-                country: "Country",
-                zipCode: "Zip code",
-                remarks: "Remarks",
-                noAdditionalInfo: "No additional information available",
-                noHealthInfo: "No health information available",
-                grade: "Grade",
-                status: "Status",
-                notApplicable: "Not applicable",
-                unknown: "Unknown"
+                occurrences: "Occurrences"
             },
             de: {
                 title: "Rüde und Hündin Kombination",
@@ -243,7 +203,7 @@ class ReuTeefCombinatie {
                 kennel: "Zwingername:",
                 pedigreeNumber: "Stammbuchnr:",
                 birthDate: "Geburtsdatum:",
-                healthInfo: "Gesundheitsinformationen",
+                healthInfo: "Health information",
                 color: "Fellfarbe:",
                 searchByName: "Suche nach Name oder Zwingername",
                 dogDetails: "Hund Details",
@@ -300,25 +260,7 @@ class ReuTeefCombinatie {
                 dwlmUnknown: "Dandy Walker unbekannt",
                 thyroidTested: "Schilddrüse getestet",
                 thyroidUnknown: "Schilddrüse unbekannt",
-                occurrences: "Anzahl Mal",
-                // HEALTH INFO TRANSLATIONS - ERGÄNZUNG
-                hipDysplasia: "Hüftdysplasie",
-                elbowDysplasia: "Ellbogendysplasie",
-                patellaLuxation: "Patella Luxation",
-                eyes: "Augen",
-                eyesExplanation: "Augenerklärung",
-                dandyWalker: "Dandy Walker Malformation",
-                thyroid: "Schilddrüse",
-                thyroidExplanation: "Schilddrüse Erklärung",
-                country: "Land",
-                zipCode: "Postleitzahl",
-                remarks: "Bemerkungen",
-                noAdditionalInfo: "Keine zusätzlichen Informationen verfügbar",
-                noHealthInfo: "Keine Gesundheitsinformationen verfügbar",
-                grade: "Grade",
-                status: "Status",
-                notApplicable: "Nicht zutreffend",
-                unknown: "Unbekannt"
+                occurrences: "Anzahl Mal"
             }
         };
     }
@@ -327,15 +269,6 @@ class ReuTeefCombinatie {
         this.db = db;
         this.auth = auth;
         this.stamboomManager = stamboomManager;
-        
-        // Probeer translation helper van SearchManager te krijgen
-        if (window.searchManager && window.searchManager.getHealthTranslation) {
-            console.log('✅ Gevonden: SearchManager met getHealthTranslation');
-            this.translationHelper = window.searchManager;
-        } else if (window.appUI && window.appUI.modules && window.appUI.modules.search) {
-            console.log('✅ Gevonden: appUI search module');
-            this.translationHelper = window.appUI.modules.search;
-        }
     }
     
     t(key, params = {}) {
@@ -347,149 +280,6 @@ class ReuTeefCombinatie {
         });
         
         return text;
-    }
-    
-    // NIEUW: Gebruik dezelfde logica als SearchManager voor gezondheidsvertalingen
-    getHealthTranslation(type, value) {
-        // Als we een translation helper hebben, gebruik die
-        if (this.translationHelper && this.translationHelper.getHealthTranslation) {
-            return this.translationHelper.getHealthTranslation(type, value);
-        }
-        
-        // Fallback naar lokale implementatie (zelfde als SearchManager)
-        if (!value || value.trim() === '') {
-            return this.t('unknown');
-        }
-        
-        const val = value.trim().toUpperCase();
-        let translation = value; // default
-        
-        switch(type) {
-            case 'hip':
-                switch(val) {
-                    case 'A': translation = `${value} - ${this.currentLang === 'nl' ? 'Geen tekenen van HD' : 
-                                               this.currentLang === 'de' ? 'Keine Anzeichen von HD' : 'No signs of HD'}`; break;
-                    case 'B': translation = `${value} - ${this.currentLang === 'nl' ? 'Overgangsvorm' : 
-                                               this.currentLang === 'de' ? 'Grenzfall' : 'Borderline'}`; break;
-                    case 'C': translation = `${value} - ${this.currentLang === 'nl' ? 'Lichte HD' : 
-                                               this.currentLang === 'de' ? 'Leichte HD' : 'Mild HD'}`; break;
-                    case 'D': translation = `${value} - ${this.currentLang === 'nl' ? 'Matige HD' : 
-                                               this.currentLang === 'de' ? 'Mäßige HD' : 'Moderate HD'}`; break;
-                    case 'E': translation = `${value} - ${this.currentLang === 'nl' ? 'Ernstige HD' : 
-                                               this.currentLang === 'de' ? 'Schwere HD' : 'Severe HD'}`; break;
-                }
-                break;
-                
-            case 'elbow':
-                switch(val) {
-                    case '0': translation = `${value} - ${this.currentLang === 'nl' ? 'Geen ED' : 
-                                                this.currentLang === 'de' ? 'Keine ED' : 'No ED'}`; break;
-                    case '1': translation = `${value} - ${this.currentLang === 'nl' ? 'Milde ED' : 
-                                                this.currentLang === 'de' ? 'Leichte ED' : 'Mild ED'}`; break;
-                    case '2': translation = `${value} - ${this.currentLang === 'nl' ? 'Matige ED' : 
-                                                this.currentLang === 'de' ? 'Mäßige ED' : 'Moderate ED'}`; break;
-                    case '3': translation = `${value} - ${this.currentLang === 'nl' ? 'Ernstige ED' : 
-                                                this.currentLang === 'de' ? 'Schwere ED' : 'Severe ED'}`; break;
-                    case 'NB': translation = `${value} - ${this.currentLang === 'nl' ? 'Niet bekend' : 
-                                                 this.currentLang === 'de' ? 'Nicht bekannt' : 'Not known'}`; break;
-                }
-                break;
-                
-            case 'patella':
-                switch(val) {
-                    case '0': translation = `${value} - ${this.currentLang === 'nl' ? 'Geen PL' : 
-                                                this.currentLang === 'de' ? 'Keine PL' : 'No PL'}`; break;
-                    case '1': translation = `${value} - ${this.currentLang === 'nl' ? 'Af en toe luxatie' : 
-                                                this.currentLang === 'de' ? 'Gelegentliche Luxation' : 'Occasional luxation'}`; break;
-                    case '2': translation = `${value} - ${this.currentLang === 'nl' ? 'Regelmatig luxatie' : 
-                                                this.currentLang === 'de' ? 'Häufige Luxation' : 'Frequent luxation'}`; break;
-                    case '3': translation = `${value} - ${this.currentLang === 'nl' ? 'Constante luxatie' : 
-                                                this.currentLang === 'de' ? 'Ständige Luxation' : 'Constant luxation'}`; break;
-                }
-                break;
-                
-            case 'eyes':
-                const eyesLower = value.toLowerCase();
-                if (eyesLower.includes('vrij') || eyesLower.includes('free')) {
-                    translation = `${this.currentLang === 'nl' ? 'Vrij' : 
-                                   this.currentLang === 'de' ? 'Frei' : 'Free'}`;
-                } else if (eyesLower.includes('dist')) {
-                    translation = `${this.currentLang === 'nl' ? 'Distichiasis' : 
-                                   this.currentLang === 'de' ? 'Distichiasis' : 'Distichiasis'}`;
-                } else {
-                    translation = `${this.currentLang === 'nl' ? 'Overig' : 
-                                   this.currentLang === 'de' ? 'Andere' : 'Other'}`;
-                }
-                break;
-                
-            case 'dandy':
-                if (value.includes('DNA')) {
-                    translation = `${this.currentLang === 'nl' ? 'Vrij op DNA' : 
-                                   this.currentLang === 'de' ? 'DNA-Frei' : 'Free on DNA'}`;
-                } else if (value.includes('ouders') || value.includes('parents')) {
-                    translation = `${this.currentLang === 'nl' ? 'Vrij op ouders' : 
-                                   this.currentLang === 'de' ? 'Eltern-Frei' : 'Free on parents'}`;
-                }
-                break;
-                
-            case 'thyroid':
-                if (value.includes('Negatief') || value.includes('Negative')) {
-                    translation = `${this.currentLang === 'nl' ? 'Tgaa Negatief' : 
-                                   this.currentLang === 'de' ? 'Tgaa Negativ' : 'Tgaa Negative'}`;
-                } else if (value.includes('Positief') || value.includes('Positive')) {
-                    translation = `${this.currentLang === 'nl' ? 'Tgaa Positief' : 
-                                   this.currentLang === 'de' ? 'Tgaa Positiv' : 'Tgaa Positive'}`;
-                }
-                break;
-        }
-        
-        return translation;
-    }
-    
-    // Helper functie voor gezondheidsbadges - IDENTIEK AAN SEARCHMANAGER
-    getHealthBadge(value, type) {
-        if (!value || value.trim() === '') {
-            return `<span class="badge bg-secondary">${this.t('unknown')}</span>`;
-        }
-        
-        const translation = this.getHealthTranslation(type, value);
-        
-        // Bepaal badge class op basis van type
-        let badgeClass = '';
-        switch(type) {
-            case 'hip':
-                badgeClass = value.toUpperCase() === 'A' ? 'badge-success' : 
-                            value.toUpperCase() === 'B' ? 'badge-warning' : 
-                            value.toUpperCase() === 'C' ? 'badge-warning' : 
-                            value.toUpperCase() === 'D' ? 'badge-danger' : 
-                            value.toUpperCase() === 'E' ? 'badge-danger' : 'badge-secondary';
-                break;
-            case 'elbow':
-                badgeClass = value === '0' ? 'badge-success' : 
-                            value === '1' ? 'badge-warning' : 
-                            value === '2' ? 'badge-warning' : 
-                            value === '3' ? 'badge-danger' : 'badge-secondary';
-                break;
-            case 'patella':
-                badgeClass = value === '0' ? 'badge-success' : 
-                            value === '1' ? 'badge-warning' : 
-                            value === '2' ? 'badge-warning' : 
-                            value === '3' ? 'badge-danger' : 'badge-secondary';
-                break;
-            case 'eyes':
-                badgeClass = 'badge-info';
-                break;
-            case 'dandy':
-                badgeClass = 'badge-primary';
-                break;
-            case 'thyroid':
-                badgeClass = value.includes('Negatief') || value.includes('Negative') ? 'badge-success' : 'badge-danger';
-                break;
-            default:
-                badgeClass = 'badge-secondary';
-        }
-        
-        return `<span class="badge ${badgeClass}">${translation}</span>`;
     }
     
     async loadContent() {
@@ -510,7 +300,7 @@ class ReuTeefCombinatie {
         // Initialiseer COI Calculator DIRECT met alle honden
         if (typeof COICalculator !== 'undefined') {
             this.coiCalculator = new COICalculator(this.allHonden);
-            console.log('✅ COICalculator direct geïninitialiseerd in ReuTeefCombinatie');
+            console.log('✅ COICalculator direct geïnitialiseerd in ReuTeefCombinatie');
         } else {
             console.error('❌ COICalculator klasse niet gevonden!');
         }
@@ -871,27 +661,6 @@ class ReuTeefCombinatie {
                     color: #155724 !important;
                 }
                 
-                /* BADGE STYLES - IDENTIEK AAN SEARCHMANAGER */
-                .badge-success {
-                    background-color: #198754 !important;
-                }
-                .badge-warning {
-                    background-color: #ffc107 !important;
-                    color: #000 !important;
-                }
-                .badge-danger {
-                    background-color: #dc3545 !important;
-                }
-                .badge-info {
-                    background-color: #0dcaf0 !important;
-                }
-                .badge-primary {
-                    background-color: #0d6efd !important;
-                }
-                .badge-secondary {
-                    background-color: #6c757d !important;
-                }
-                
                 /* RESPONSIVE STYLES */
                 @media (max-width: 768px) {
                     .search-input {
@@ -1015,7 +784,6 @@ class ReuTeefCombinatie {
             const cached = this.hondenCache.get(id);
             // Controleer of cache compleet is (heeft gezondheidsinformatie)
             if (cached.heupdysplasie !== undefined || cached.elleboogdysplasie !== undefined) {
-                console.log(`✅ Hond ${id} uit cache: HD=${cached.heupdysplasie}`);
                 return cached;
             }
         }
@@ -1377,32 +1145,34 @@ class ReuTeefCombinatie {
         // Toon details container
         detailsContainer.classList.remove('d-none');
         
-        // Haal ouders informatie op
-        const oudersInfo = await this.getOudersInfo(hond);
+        // 🔴 CRITIEK: HAAL DE VOLLEDIGE HOND GEGEVENS OP UIT DE DATABASE
+        // Dit zorgt ervoor dat we altijd de complete gezondheidsinformatie hebben
+        const fullHond = await this.getHondByIdFromDb(hond.id);
         
-        // Gebruik getHealthBadge functie die nu WEL de juiste vertaling geeft
-        const getHealthBadge = (value, healthType) => {
-            return this.getHealthBadge(value, healthType);
-        };
+        // Gebruik de volledige hond informatie voor de details
+        const displayHond = fullHond || hond;
+        
+        // Haal ouders informatie op
+        const oudersInfo = await this.getOudersInfo(displayHond);
         
         detailsContainer.innerHTML = `
             <div class="dog-details-card">
                 <div class="dog-details-header">
-                    <div class="dog-details-name">${hond.naam || 'Onbekend'}</div>
-                    ${hond.kennelnaam ? `<div class="dog-details-subtitle">${hond.kennelnaam}</div>` : ''}
+                    <div class="dog-details-name">${displayHond.naam || 'Onbekend'}</div>
+                    ${displayHond.kennelnaam ? `<div class="dog-details-subtitle">${displayHond.kennelnaam}</div>` : ''}
                     
                     <div class="dog-details-info mt-3">
-                        ${hond.stamboomnr ? `
+                        ${displayHond.stamboomnr ? `
                             <div class="info-item">
                                 <i class="bi bi-card-checklist"></i>
-                                <span>${hond.stamboomnr}</span>
+                                <span>${displayHond.stamboomnr}</span>
                             </div>
                         ` : ''}
                         
-                        ${hond.ras ? `
+                        ${displayHond.ras ? `
                             <div class="info-item">
                                 <i class="bi bi-tag"></i>
-                                <span>${hond.ras}</span>
+                                <span>${displayHond.ras}</span>
                             </div>
                         ` : ''}
                         
@@ -1411,24 +1181,24 @@ class ReuTeefCombinatie {
                             <span>${type === 'teef' ? t('genderTeef') : t('genderReu')}</span>
                         </div>
                         
-                        ${hond.geboortedatum ? `
+                        ${displayHond.geboortedatum ? `
                             <div class="info-item">
                                 <i class="bi bi-calendar"></i>
-                                <span>${new Date(hond.geboortedatum).toLocaleDateString(this.currentLang)}</span>
+                                <span>${new Date(displayHond.geboortedatum).toLocaleDateString(this.currentLang)}</span>
                             </div>
                         ` : ''}
                         
-                        ${hond.vachtkleur ? `
+                        ${displayHond.vachtkleur ? `
                             <div class="info-item">
                                 <i class="bi bi-palette"></i>
-                                <span>${hond.vachtkleur}</span>
+                                <span>${displayHond.vachtkleur}</span>
                             </div>
                         ` : ''}
                     </div>
                 </div>
                 
                 <div class="dog-details-row">
-                    <div class="dog-details-label">Ouders:</div>
+                    <div class="dog-details-label">${t('parents')}:</div>
                     <div class="dog-details-value">
                         <div class="row">
                             ${oudersInfo.vader ? `
@@ -1460,52 +1230,46 @@ class ReuTeefCombinatie {
                     </div>
                 </div>
                 
-                ${hond.heupdysplasie || hond.elleboogdysplasie || hond.patella || hond.ogen || hond.dandyWalker || hond.schildklier ? `
+                ${displayHond.heupdysplasie || displayHond.elleboogdysplasie || displayHond.patella || displayHond.ogen || displayHond.dandyWalker || displayHond.schildklier ? `
                     <div class="dog-details-row">
                         <div class="dog-details-label">${t('healthInfo')}:</div>
                         <div class="dog-details-value">
                             <div class="row">
-                                ${hond.heupdysplasie ? `
+                                ${displayHond.heupdysplasie ? `
                                     <div class="col-md-6 mb-2">
-                                        <strong>${t('hipDysplasia')}:</strong><br>
-                                        ${getHealthBadge(hond.heupdysplasie, 'hip')}
+                                        <strong>HD:</strong> ${displayHond.heupdysplasie}
                                     </div>
                                 ` : ''}
                                 
-                                ${hond.elleboogdysplasie ? `
+                                ${displayHond.elleboogdysplasie ? `
                                     <div class="col-md-6 mb-2">
-                                        <strong>${t('elbowDysplasia')}:</strong><br>
-                                        ${getHealthBadge(hond.elleboogdysplasie, 'elbow')}
+                                        <strong>ED:</strong> ${displayHond.elleboogdysplasie}
                                     </div>
                                 ` : ''}
                                 
-                                ${hond.patella ? `
+                                ${displayHond.patella ? `
                                     <div class="col-md-6 mb-2">
-                                        <strong>${t('patellaLuxation')}:</strong><br>
-                                        ${getHealthBadge(hond.patella, 'patella')}
+                                        <strong>Patella:</strong> ${displayHond.patella}
                                     </div>
                                 ` : ''}
                                 
-                                ${hond.ogen ? `
+                                ${displayHond.ogen ? `
                                     <div class="col-md-6 mb-2">
-                                        <strong>${t('eyes')}:</strong><br>
-                                        ${getHealthBadge(hond.ogen, 'eyes')}
-                                        ${hond.ogenVerklaring ? `<br><small>${hond.ogenVerklaring}</small>` : ''}
+                                        <strong>Ogen:</strong> ${displayHond.ogen}
+                                        ${displayHond.ogenVerklaring ? `<br><small>${displayHond.ogenVerklaring}</small>` : ''}
                                     </div>
                                 ` : ''}
                                 
-                                ${hond.dandyWalker ? `
+                                ${displayHond.dandyWalker ? `
                                     <div class="col-md-6 mb-2">
-                                        <strong>${t('dandyWalker')}:</strong><br>
-                                        ${getHealthBadge(hond.dandyWalker, 'dandy')}
+                                        <strong>Dandy Walker:</strong> ${displayHond.dandyWalker}
                                     </div>
                                 ` : ''}
                                 
-                                ${hond.schildklier ? `
+                                ${displayHond.schildklier ? `
                                     <div class="col-md-6 mb-2">
-                                        <strong>${t('thyroid')}:</strong><br>
-                                        ${getHealthBadge(hond.schildklier, 'thyroid')}
-                                        ${hond.schildklierVerklaring ? `<br><small>${hond.schildklierVerklaring}</small>` : ''}
+                                        <strong>Schildklier:</strong> ${displayHond.schildklier}
+                                        ${displayHond.schildklierVerklaring ? `<br><small>${displayHond.schildklierVerklaring}</small>` : ''}
                                     </div>
                                 ` : ''}
                             </div>
@@ -1864,27 +1628,26 @@ class ReuTeefCombinatie {
     }
     
     getHDKey(hdValue) {
-        const hd = (hdValue || '').toUpperCase().trim();
-        if (hd.includes('A')) return 'hd_a';
-        if (hd.includes('B')) return 'hd_b';
-        if (hd.includes('C')) return 'hd_c';
-        if (hd.includes('D')) return 'hd_d';
-        if (hd.includes('E')) return 'hd_e';
+        const hd = (hdValue || '').toLowerCase().trim();
+        if (hd.includes('a')) return 'hd_a';
+        if (hd.includes('b')) return 'hd_b';
+        if (hd.includes('c')) return 'hd_c';
+        if (hd.includes('d')) return 'hd_d';
+        if (hd.includes('e')) return 'hd_e';
         return null;
     }
     
     getEDKey(edValue) {
-        const ed = (edValue || '').toUpperCase().trim();
+        const ed = (edValue || '').toLowerCase().trim();
         if (ed.includes('0')) return 'ed_0';
         if (ed.includes('1')) return 'ed_1';
         if (ed.includes('2')) return 'ed_2';
         if (ed.includes('3')) return 'ed_3';
-        if (ed.includes('NB')) return 'ed_unknown';
         return null;
     }
     
     getPLKey(plValue) {
-        const pl = (plValue || '').toUpperCase().trim();
+        const pl = (plValue || '').toLowerCase().trim();
         if (pl.includes('0')) return 'pl_0';
         if (pl.includes('1')) return 'pl_1';
         if (pl.includes('2')) return 'pl_2';
@@ -1915,22 +1678,10 @@ class ReuTeefCombinatie {
             
             // Zorg dat ouders in de StamboomManager cache zitten
             if (this.selectedReu) {
-                // Gebruik getHondByIdFromDb om volledige informatie te krijgen
-                const fullReu = await this.getHondByIdFromDb(this.selectedReu.id);
-                if (fullReu) {
-                    this.stamboomManager.allDogs.push(fullReu);
-                } else {
-                    this.stamboomManager.allDogs.push(this.selectedReu);
-                }
+                this.stamboomManager.allDogs.push(this.selectedReu);
             }
             if (this.selectedTeef) {
-                // Gebruik getHondByIdFromDb om volledige informatie te krijgen
-                const fullTeef = await this.getHondByIdFromDb(this.selectedTeef.id);
-                if (fullTeef) {
-                    this.stamboomManager.allDogs.push(fullTeef);
-                } else {
-                    this.stamboomManager.allDogs.push(this.selectedTeef);
-                }
+                this.stamboomManager.allDogs.push(this.selectedTeef);
             }
             
             this.stamboomManager.allDogs.push(futurePuppy);
@@ -1938,7 +1689,7 @@ class ReuTeefCombinatie {
             try {
                 await this.stamboomManager.showPedigree(futurePuppy);
                 
-                // VOEG CLICK EVENT TOE - PAS DEZE METHODE AAN
+                // VOEG CLICK EVENT TOE
                 setTimeout(() => {
                     this.addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis);
                 }, 100);
@@ -1954,7 +1705,7 @@ class ReuTeefCombinatie {
         }
     }
     
-    async addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis) {
+    addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis) {
         const futurePuppyCard = document.querySelector('.pedigree-card-compact.horizontal.main-dog-compact.gen0');
         if (futurePuppyCard) {
             futurePuppyCard.addEventListener('click', (e) => {
@@ -1968,267 +1719,6 @@ class ReuTeefCombinatie {
             if (clickHint) {
                 clickHint.innerHTML = '<i class="bi bi-info-circle"></i> ' + this.t('clickForDetails');
             }
-        }
-        
-        // IMPORTANT: Vervang de click handlers voor de ouders om volledige informatie te tonen
-        const parentCards = document.querySelectorAll('.pedigree-card-compact.horizontal.gen1');
-        parentCards.forEach(async (card) => {
-            const dogId = parseInt(card.getAttribute('data-dog-id'));
-            if (dogId === 0 || dogId === futurePuppy.id) return;
-            
-            // Vervang de bestaande click handler
-            card.removeEventListener('click', card._originalClickHandler);
-            
-            const newHandler = async (e) => {
-                e.stopPropagation();
-                
-                // Haal volledige informatie op uit de database
-                const fullDog = await this.getHondByIdFromDb(dogId);
-                if (!fullDog) return;
-                
-                const relation = card.getAttribute('data-relation') || '';
-                
-                // Gebruik StamboomManager om de popup te tonen met volledige informatie
-                if (this.stamboomManager) {
-                    await this.stamboomManager.showDogDetailPopup(fullDog, relation);
-                } else {
-                    // Fallback - gebruik nu de verbeterde showDogPopup met juiste gezondheidsinfo
-                    await this.showDogPopup(fullDog, relation);
-                }
-            };
-            
-            card._originalClickHandler = newHandler;
-            card.addEventListener('click', newHandler);
-            card.style.cursor = 'pointer';
-        });
-        
-        // Ook voor grootouders en overgrootouders
-        const ancestorCards = document.querySelectorAll('.pedigree-card-compact.horizontal.gen2, .pedigree-card-compact.horizontal.gen3');
-        ancestorCards.forEach(async (card) => {
-            const dogId = parseInt(card.getAttribute('data-dog-id'));
-            if (dogId === 0) return;
-            
-            // Vervang de bestaande click handler
-            card.removeEventListener('click', card._originalClickHandler);
-            
-            const newHandler = async (e) => {
-                e.stopPropagation();
-                
-                // Haal volledige informatie op uit de database
-                const fullDog = await this.getHondByIdFromDb(dogId);
-                if (!fullDog) return;
-                
-                const relation = card.getAttribute('data-relation') || '';
-                
-                // Gebruik StamboomManager om de popup te tonen met volledige informatie
-                if (this.stamboomManager) {
-                    await this.stamboomManager.showDogDetailPopup(fullDog, relation);
-                } else {
-                    // Fallback - gebruik nu de verbeterde showDogPopup met juiste gezondheidsinfo
-                    await this.showDogPopup(fullDog, relation);
-                }
-            };
-            
-            card._originalClickHandler = newHandler;
-            card.addEventListener('click', newHandler);
-            card.style.cursor = 'pointer';
-        });
-    }
-    
-    async showDogPopup(dog, relation) {
-        const t = this.t.bind(this);
-        
-        // Helper functie voor gezondheidsbadges - GEBRUIK NIEUWE FUNCTIE
-        const getHealthBadge = (value, healthType) => {
-            return this.getHealthBadge(value, healthType);
-        };
-        
-        // Formateer datum
-        const formatDate = (dateString) => {
-            if (!dateString) return '';
-            try {
-                const date = new Date(dateString);
-                return date.toLocaleDateString(this.currentLang === 'nl' ? 'nl-NL' : 
-                                              this.currentLang === 'de' ? 'de-DE' : 'en-US');
-            } catch {
-                return dateString;
-            }
-        };
-        
-        const genderText = dog.geslacht === 'reuen' ? t('genderReu') : 
-                          dog.geslacht === 'teven' ? t('genderTeef') : t('unknown');
-        
-        // Maak een eenvoudige popup die WEL de juiste gezondheidsinformatie toont
-        const popupHTML = `
-            <div class="dog-detail-popup">
-                <div class="popup-header">
-                    <h5 class="popup-title">
-                        <i class="${dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 'bi-gender-female text-danger'} me-2"></i>
-                        ${dog.naam || this.t('unknown')}
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" aria-label="${t('close')}"></button>
-                </div>
-                <div class="popup-body">
-                    <div class="info-section mb-2">
-                        <h6><i class="bi bi-card-text me-1"></i> Basisgegevens</h6>
-                        <div class="info-grid">
-                            ${dog.stamboomnr ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('pedigreeNumber')}:</span>
-                                    <span class="info-value">${dog.stamboomnr}</span>
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.ras ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">Ras:</span>
-                                    <span class="info-value">${dog.ras}</span>
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">Geslacht:</span>
-                                    <span class="info-value">${genderText}</span>
-                                </div>
-                            </div>
-                            
-                            ${dog.vachtkleur ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('color')}:</span>
-                                    <span class="info-value">${dog.vachtkleur}</span>
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.geboortedatum ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('birthDate')}:</span>
-                                    <span class="info-value">${formatDate(dog.geboortedatum)}</span>
-                                </div>
-                            </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                    
-                    <div class="info-section mb-2">
-                        <h6><i class="bi bi-heart-pulse me-1"></i> ${t('healthInfo')}</h6>
-                        <div class="info-grid">
-                            ${dog.heupdysplasie ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('hipDysplasia')}:</span>
-                                    <div class="info-value">${getHealthBadge(dog.heupdysplasie, 'hip')}</div>
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.elleboogdysplasie ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('elbowDysplasia')}:</span>
-                                    <div class="info-value">${getHealthBadge(dog.elleboogdysplasie, 'elbow')}</div>
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.patella ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('patellaLuxation')}:</span>
-                                    <div class="info-value">${getHealthBadge(dog.patella, 'patella')}</div>
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.ogen ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('eyes')}:</span>
-                                    <div class="info-value">${getHealthBadge(dog.ogen, 'eyes')}</div>
-                                    ${dog.ogenVerklaring ? `<div class="info-value"><small>${dog.ogenVerklaring}</small></div>` : ''}
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.dandyWalker ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('dandyWalker')}:</span>
-                                    <div class="info-value">${getHealthBadge(dog.dandyWalker, 'dandy')}</div>
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.schildklier ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('thyroid')}:</span>
-                                    <div class="info-value">${getHealthBadge(dog.schildklier, 'thyroid')}</div>
-                                    ${dog.schildklierVerklaring ? `<div class="info-value"><small>${dog.schildklierVerklaring}</small></div>` : ''}
-                                </div>
-                            </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                    
-                    ${dog.opmerkingen || dog.land || dog.postcode ? `
-                    <div class="info-section mb-2">
-                        <h6><i class="bi bi-info-circle me-1"></i> ${t('additionalInfo')}</h6>
-                        <div class="info-grid">
-                            ${dog.land ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('country')}:</span>
-                                    <span class="info-value">${dog.land}</span>
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.postcode ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('zipCode')}:</span>
-                                    <span class="info-value">${dog.postcode}</span>
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.opmerkingen ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('remarks')}:</span>
-                                    <div class="info-value">${dog.opmerkingen}</div>
-                                </div>
-                            </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                    ` : ''}
-                </div>
-                <div class="popup-footer">
-                    <button type="button" class="btn btn-secondary popup-close-btn">
-                        <i class="bi bi-x-circle me-1"></i> ${t('closePopup')}
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        this.ensurePopupContainer();
-        
-        const overlay = document.getElementById('pedigreePopupOverlay');
-        const container = document.getElementById('pedigreePopupContainer');
-        
-        if (container) {
-            container.innerHTML = popupHTML;
-            overlay.style.display = 'flex';
-            this.setupPopupEventListeners();
         }
     }
     
@@ -2477,7 +1967,7 @@ class ReuTeefCombinatie {
                         </h5>
                         <div class="d-flex gap-2">
                             <button class="btn btn-sm btn-light btn-print">
-                                <i class="bi bi-printer me-1"></i> ${this.t('close')}
+                                <i class="bi bi-printer me-1"></i> ${this.t('print')}
                             </button>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${this.t('close')}"></button>
                         </div>
@@ -2549,13 +2039,13 @@ class ReuTeefCombinatie {
                 </div>
                 
                 <div class="pedigree-generation-col gen1">
-                    <div class="generation-label">Ouders</div>
+                    <div class="generation-label">${this.t('parents')}</div>
                     ${fatherCard}
                     ${motherCard}
                 </div>
                 
                 <div class="pedigree-generation-col gen2">
-                    <div class="generation-label">Grootouders</div>
+                    <div class="generation-label">${this.t('grandparents')}</div>
                     ${paternalGrandfatherCard}
                     ${paternalGrandmotherCard}
                     ${maternalGrandfatherCard}
@@ -2563,7 +2053,7 @@ class ReuTeefCombinatie {
                 </div>
                 
                 <div class="pedigree-generation-col gen3">
-                    <div class="generation-label">Overgrootouders</div>
+                    <div class="generation-label">${this.t('greatGrandparents')}</div>
                     ${paternalGreatGrandfather1Card}
                     ${paternalGreatGrandmother1Card}
                     ${paternalGreatGrandfather2Card}
@@ -2701,7 +2191,7 @@ class ReuTeefCombinatie {
                         <div class="relation-compact">${relation}</div>
                     </div>
                     <div class="pedigree-card-body-compact horizontal text-center py-3">
-                        <div class="no-data-text">${this.t('noDogFound')}</div>
+                        <div class="no-data-text">${this.t('noData')}</div>
                     </div>
                 </div>
             `;
