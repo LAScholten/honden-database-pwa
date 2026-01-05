@@ -2,6 +2,7 @@
  * Reu en Teef Combinatie Module
  * Voor het maken van fokplannen met specifieke reu en teef
  * HERGEBRUIKT StamboomManager voor stamboom visualisatie
+ * MET GEZONDHEID ANALYSE 6 GENERATIES
  */
 
 class ReuTeefCombinatie {
@@ -69,7 +70,47 @@ class ReuTeefCombinatie {
                 closePopup: "Sluiten",
                 predictedCoi: "Voorspelde Inteeltcoëfficiënt",
                 futurePuppyInfo: "Toekomstige Pup Informatie",
-                clickForDetails: "Klik voor details"
+                clickForDetails: "Klik voor details",
+                healthInLine: "Gezondheid in de lijn 6 generaties",
+                healthCategory: "Gezondheidscategorie",
+                motherLine: "Moederlijn",
+                fatherLine: "Vaderlijn",
+                hdA: "HD A",
+                hdB: "HD B",
+                hdC: "HD C",
+                hdD: "HD D",
+                hdE: "HD E",
+                hdUnknown: "HD niet bekend",
+                ed0: "ED 0",
+                ed1: "ED 1",
+                ed2: "ED 2",
+                ed3: "ED 3",
+                edUnknown: "ED niet bekend",
+                pl0: "PL 0",
+                pl1: "PL 1",
+                pl2: "PL 2",
+                pl3: "PL 3",
+                plUnknown: "PL niet bekend",
+                eyesFree: "Ogen vrij",
+                eyesDist: "Ogen Dist",
+                eyesOther: "Ogen overig",
+                eyesUnknown: "Ogen niet bekend",
+                dwlmDnaFree: "DWLM vrij op DNA",
+                dwlmParentsFree: "DWLM vrij op ouders",
+                dwlmUnknown: "DWLM niet bekend",
+                thyroidTested: "Schildklier getest",
+                thyroidUnknown: "Schildklier niet bekend",
+                occurrences: "Aantal keer",
+                totalAncestors: "Totaal voorouders geanalyseerd",
+                // Nieuwe vertalingen voor gezondheidsanalyse
+                healthAnalysis: "Gezondheidsanalyse 6 generaties",
+                directAncestors: "Directe voorouders",
+                healthSummary: "Gezondheidsoverzicht",
+                good: "Goed",
+                moderate: "Matig",
+                poor: "Slecht",
+                unknown: "Onbekend",
+                healthScore: "Gezondheidsscore"
             },
             en: {
                 title: "Male and Female Combination",
@@ -119,7 +160,47 @@ class ReuTeefCombinatie {
                 closePopup: "Close",
                 predictedCoi: "Predicted Inbreeding Coefficient",
                 futurePuppyInfo: "Future Puppy Information",
-                clickForDetails: "Click for details"
+                clickForDetails: "Click for details",
+                healthInLine: "Health in the line 6 generations",
+                healthCategory: "Health category",
+                motherLine: "Mother line",
+                fatherLine: "Father line",
+                hdA: "HD A",
+                hdB: "HD B",
+                hdC: "HD C",
+                hdD: "HD D",
+                hdE: "HD E",
+                hdUnknown: "HD unknown",
+                ed0: "ED 0",
+                ed1: "ED 1",
+                ed2: "ED 2",
+                ed3: "ED 3",
+                edUnknown: "ED unknown",
+                pl0: "PL 0",
+                pl1: "PL 1",
+                pl2: "PL 2",
+                pl3: "PL 3",
+                plUnknown: "PL unknown",
+                eyesFree: "Eyes free",
+                eyesDist: "Eyes Dist",
+                eyesOther: "Eyes other",
+                eyesUnknown: "Eyes unknown",
+                dwlmDnaFree: "DWLM free on DNA",
+                dwlmParentsFree: "DWLM free on parents",
+                dwlmUnknown: "DWLM unknown",
+                thyroidTested: "Thyroid tested",
+                thyroidUnknown: "Thyroid unknown",
+                occurrences: "Occurrences",
+                totalAncestors: "Total ancestors analyzed",
+                // New translations for health analysis
+                healthAnalysis: "Health analysis 6 generations",
+                directAncestors: "Direct ancestors",
+                healthSummary: "Health summary",
+                good: "Good",
+                moderate: "Moderate",
+                poor: "Poor",
+                unknown: "Unknown",
+                healthScore: "Health score"
             },
             de: {
                 title: "Rüde und Hündin Kombination",
@@ -169,7 +250,47 @@ class ReuTeefCombinatie {
                 closePopup: "Schließen",
                 predictedCoi: "Vorhergesagter Inzuchtkoeffizient",
                 futurePuppyInfo: "Zukünftiger Welpen-Informationen",
-                clickForDetails: "Klicken für Details"
+                clickForDetails: "Klicken für Details",
+                healthInLine: "Gesundheit in der Linie 6 Generationen",
+                healthCategory: "Gesundheitskategorie",
+                motherLine: "Mutterlinie",
+                fatherLine: "Vaterlinie",
+                hdA: "HD A",
+                hdB: "HD B",
+                hdC: "HD C",
+                hdD: "HD D",
+                hdE: "HD E",
+                hdUnknown: "HD unbekannt",
+                ed0: "ED 0",
+                ed1: "ED 1",
+                ed2: "ED 2",
+                ed3: "ED 3",
+                edUnknown: "ED unbekannt",
+                pl0: "PL 0",
+                pl1: "PL 1",
+                pl2: "PL 2",
+                pl3: "PL 3",
+                plUnknown: "PL unbekannt",
+                eyesFree: "Augen frei",
+                eyesDist: "Augen Dist",
+                eyesOther: "Augen sonstige",
+                eyesUnknown: "Augen unbekannt",
+                dwlmDnaFree: "DWLM frei auf DNA",
+                dwlmParentsFree: "DWLM frei auf Eltern",
+                dwlmUnknown: "DWLM unbekannt",
+                thyroidTested: "Schilddrüse getestet",
+                thyroidUnknown: "Schilddrüse unbekannt",
+                occurrences: "Anzahl Mal",
+                totalAncestors: "Gesamte Vorfahren analysiert",
+                // Neue Übersetzungen für Gesundheitsanalyse
+                healthAnalysis: "Gesundheitsanalyse 6 Generationen",
+                directAncestors: "Direkte Vorfahren",
+                healthSummary: "Gesundheitsübersicht",
+                good: "Gut",
+                moderate: "Mäßig",
+                poor: "Schlecht",
+                unknown: "Unbekannt",
+                healthScore: "Gesundheitswert"
             }
         };
     }
@@ -517,6 +638,86 @@ class ReuTeefCombinatie {
                     color: #212529;
                 }
                 
+                /* HEALTH ANALYSIS TABLE STYLES */
+                .health-analysis-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 15px;
+                    font-size: 0.85rem;
+                }
+                
+                .health-analysis-table th {
+                    background-color: #f8f9fa;
+                    padding: 10px 8px;
+                    text-align: center;
+                    border: 1px solid #dee2e6;
+                    font-weight: 600;
+                    color: #495057;
+                }
+                
+                .health-analysis-table td {
+                    padding: 8px;
+                    border: 1px solid #dee2e6;
+                    text-align: center;
+                    vertical-align: middle;
+                }
+                
+                .health-category {
+                    text-align: left !important;
+                    font-weight: 500;
+                    padding-left: 12px;
+                    background-color: #f8f9fa;
+                }
+                
+                .mother-count {
+                    background-color: #fff3cd;
+                    color: #856404;
+                }
+                
+                .father-count {
+                    background-color: #d1ecf1;
+                    color: #0c5460;
+                }
+                
+                .count-high {
+                    font-weight: bold;
+                    background-color: #f8d7da !important;
+                    color: #721c24 !important;
+                }
+                
+                .count-good {
+                    font-weight: bold;
+                    background-color: #d4edda !important;
+                    color: #155724 !important;
+                }
+                
+                /* HEALTH SUMMARY STYLES */
+                .health-summary {
+                    display: flex;
+                    justify-content: space-between;
+                    margin-top: 20px;
+                    padding: 15px;
+                    background-color: #f8f9fa;
+                    border-radius: 8px;
+                    border: 1px solid #dee2e6;
+                }
+                
+                .summary-item {
+                    text-align: center;
+                    flex: 1;
+                }
+                
+                .summary-value {
+                    font-size: 1.5rem;
+                    font-weight: bold;
+                    margin-bottom: 5px;
+                }
+                
+                .summary-label {
+                    font-size: 0.85rem;
+                    color: #6c757d;
+                }
+                
                 /* RESPONSIVE STYLES */
                 @media (max-width: 768px) {
                     .search-input {
@@ -561,6 +762,28 @@ class ReuTeefCombinatie {
                     .dog-details-name {
                         font-size: 1.3rem;
                     }
+                    
+                    .health-analysis-table {
+                        font-size: 0.75rem;
+                    }
+                    
+                    .health-analysis-table th,
+                    .health-analysis-table td {
+                        padding: 6px 4px;
+                    }
+                    
+                    .health-category {
+                        padding-left: 8px;
+                    }
+                    
+                    .health-summary {
+                        flex-direction: column;
+                        gap: 15px;
+                    }
+                    
+                    .summary-item {
+                        flex: none;
+                    }
                 }
                 
                 @media (max-width: 480px) {
@@ -572,6 +795,11 @@ class ReuTeefCombinatie {
                     .dog-details-info {
                         flex-direction: column;
                         gap: 8px;
+                    }
+                    
+                    .health-analysis-table {
+                        display: block;
+                        overflow-x: auto;
                     }
                 }
             `;
@@ -1196,7 +1424,7 @@ class ReuTeefCombinatie {
             vader: this.selectedReu.naam,
             moeder: this.selectedTeef.naam,
             kennelnaam: this.t('combinedParents'),
-            ras: this.selectedReu.ras || this.selectedTeef.ras || 'Mix',
+            // Ras wordt nu leeg gelaten
             stamboomnr: 'VOORSPELD',
             geboortedatum: new Date().toISOString().split('T')[0],
             vachtkleur: `${this.selectedReu.vachtkleur || ''}/${this.selectedTeef.vachtkleur || ''}`.trim(),
@@ -1228,12 +1456,16 @@ class ReuTeefCombinatie {
             const coiResult = this.coiCalculator.calculateCOI(futurePuppy.id);
             console.log('✅ COI resultaat via COICalculator:', coiResult);
             
+            // BEREKEN GEZONDHEIDSANALYSE
+            const healthAnalysis = await this.analyzeHealthInLine(futurePuppy);
+            console.log('✅ Gezondheidsanalyse resultaat:', healthAnalysis);
+            
             // Herstel originele lijst
             this.allHonden = originalHonden;
             this.coiCalculator = new COICalculator(this.allHonden);
             
             // Toon stamboom via StamboomManager
-            await this.showStamboomWithFuturePuppy(futurePuppy, coiResult);
+            await this.showStamboomWithFuturePuppy(futurePuppy, coiResult, healthAnalysis);
             
         } catch (error) {
             console.error('❌ Fout bij tonen toekomstige pup stamboom:', error);
@@ -1241,7 +1473,374 @@ class ReuTeefCombinatie {
         }
     }
     
-    async showStamboomWithFuturePuppy(futurePuppy, coiResult) {
+    async analyzeHealthInLine(futurePuppy) {
+        const t = this.t.bind(this);
+        
+        // Initialiseer resultaat object
+        const analysis = {
+            categories: {
+                hd: { name: t('hdA'), items: {} },
+                ed: { name: t('ed0'), items: {} },
+                pl: { name: t('pl0'), items: {} },
+                eyes: { name: t('eyesFree'), items: {} },
+                dwlm: { name: t('dwlmDnaFree'), items: {} },
+                thyroid: { name: t('thyroidTested'), items: {} }
+            },
+            motherLine: { total: 0, counts: {} },
+            fatherLine: { total: 0, counts: {} },
+            summary: {
+                totalAncestors: 0,
+                goodHealth: 0,
+                moderateHealth: 0,
+                poorHealth: 0,
+                unknownHealth: 0
+            }
+        };
+        
+        // Initialiseer alle items
+        const healthItems = [
+            // HD items
+            { category: 'hd', key: 'hd_a', label: t('hdA') },
+            { category: 'hd', key: 'hd_b', label: t('hdB') },
+            { category: 'hd', key: 'hd_c', label: t('hdC') },
+            { category: 'hd', key: 'hd_d', label: t('hdD') },
+            { category: 'hd', key: 'hd_e', label: t('hdE') },
+            { category: 'hd', key: 'hd_unknown', label: t('hdUnknown') },
+            
+            // ED items
+            { category: 'ed', key: 'ed_0', label: t('ed0') },
+            { category: 'ed', key: 'ed_1', label: t('ed1') },
+            { category: 'ed', key: 'ed_2', label: t('ed2') },
+            { category: 'ed', key: 'ed_3', label: t('ed3') },
+            { category: 'ed', key: 'ed_unknown', label: t('edUnknown') },
+            
+            // PL items
+            { category: 'pl', key: 'pl_0', label: t('pl0') },
+            { category: 'pl', key: 'pl_1', label: t('pl1') },
+            { category: 'pl', key: 'pl_2', label: t('pl2') },
+            { category: 'pl', key: 'pl_3', label: t('pl3') },
+            { category: 'pl', key: 'pl_unknown', label: t('plUnknown') },
+            
+            // Ogen items
+            { category: 'eyes', key: 'eyes_free', label: t('eyesFree') },
+            { category: 'eyes', key: 'eyes_dist', label: t('eyesDist') },
+            { category: 'eyes', key: 'eyes_other', label: t('eyesOther') },
+            { category: 'eyes', key: 'eyes_unknown', label: t('eyesUnknown') },
+            
+            // DWLM items
+            { category: 'dwlm', key: 'dwlm_dna_free', label: t('dwlmDnaFree') },
+            { category: 'dwlm', key: 'dwlm_parents_free', label: t('dwlmParentsFree') },
+            { category: 'dwlm', key: 'dwlm_unknown', label: t('dwlmUnknown') },
+            
+            // Schildklier items
+            { category: 'thyroid', key: 'thyroid_tested', label: t('thyroidTested') },
+            { category: 'thyroid', key: 'thyroid_unknown', label: t('thyroidUnknown') }
+        ];
+        
+        // Initialiseer counts voor alle items
+        healthItems.forEach(item => {
+            analysis.motherLine.counts[item.key] = 0;
+            analysis.fatherLine.counts[item.key] = 0;
+        });
+        
+        // Verzamel alle voorouders (6 generaties)
+        const ancestors = await this.collectAncestors(futurePuppy, 6);
+        analysis.summary.totalAncestors = ancestors.length;
+        
+        // Analyseer elk voorouder
+        for (const ancestor of ancestors) {
+            // Bepaal of voorouder in moeder- of vaderlijn zit
+            const isMotherLine = await this.isInMotherLine(futurePuppy, ancestor.id);
+            const line = isMotherLine ? 'motherLine' : 'fatherLine';
+            
+            // Update totaal voor de lijn
+            analysis[line].total++;
+            
+            // Analyseer gezondheid
+            const healthStatus = this.analyzeHealthStatus(ancestor);
+            
+            // Update summary
+            switch(healthStatus.overall) {
+                case 'good':
+                    analysis.summary.goodHealth++;
+                    break;
+                case 'moderate':
+                    analysis.summary.moderateHealth++;
+                    break;
+                case 'poor':
+                    analysis.summary.poorHealth++;
+                    break;
+                default:
+                    analysis.summary.unknownHealth++;
+            }
+            
+            // Update specifieke gezondheidsitems
+            if (ancestor.heupdysplasie) {
+                const hdKey = this.getHDKey(ancestor.heupdysplasie);
+                if (hdKey) {
+                    analysis[line].counts[hdKey]++;
+                }
+            } else {
+                analysis[line].counts['hd_unknown']++;
+            }
+            
+            if (ancestor.elleboogdysplasie) {
+                const edKey = this.getEDKey(ancestor.elleboogdysplasie);
+                if (edKey) {
+                    analysis[line].counts[edKey]++;
+                }
+            } else {
+                analysis[line].counts['ed_unknown']++;
+            }
+            
+            if (ancestor.patella) {
+                const plKey = this.getPLKey(ancestor.patella);
+                if (plKey) {
+                    analysis[line].counts[plKey]++;
+                }
+            } else {
+                analysis[line].counts['pl_unknown']++;
+            }
+            
+            if (ancestor.ogen) {
+                const eyesKey = this.getEyesKey(ancestor.ogen);
+                if (eyesKey) {
+                    analysis[line].counts[eyesKey]++;
+                }
+            } else {
+                analysis[line].counts['eyes_unknown']++;
+            }
+            
+            if (ancestor.dandyWalker) {
+                const dwlmKey = this.getDWLMDKey(ancestor.dandyWalker);
+                if (dwlmKey) {
+                    analysis[line].counts[dwlmKey]++;
+                }
+            } else {
+                analysis[line].counts['dwlm_unknown']++;
+            }
+            
+            if (ancestor.schildklier) {
+                analysis[line].counts['thyroid_tested']++;
+            } else {
+                analysis[line].counts['thyroid_unknown']++;
+            }
+        }
+        
+        return analysis;
+    }
+    
+    async collectAncestors(dog, generations) {
+        const ancestors = [];
+        const queue = [{ dog: dog, generation: 0 }];
+        const visited = new Set();
+        
+        while (queue.length > 0) {
+            const { dog: currentDog, generation } = queue.shift();
+            
+            if (!currentDog || visited.has(currentDog.id) || generation >= generations) {
+                continue;
+            }
+            
+            visited.add(currentDog.id);
+            
+            // Voeg toe aan ancestors (exclusief de huidige hond zelf)
+            if (generation > 0) {
+                ancestors.push(currentDog);
+            }
+            
+            // Voeg ouders toe aan queue
+            if (currentDog.vaderId) {
+                const father = await this.getHondById(currentDog.vaderId);
+                if (father) {
+                    queue.push({ dog: father, generation: generation + 1 });
+                }
+            }
+            
+            if (currentDog.moederId) {
+                const mother = await this.getHondById(currentDog.moederId);
+                if (mother) {
+                    queue.push({ dog: mother, generation: generation + 1 });
+                }
+            }
+        }
+        
+        return ancestors;
+    }
+    
+    async isInMotherLine(puppy, ancestorId) {
+        // Recursieve functie om te bepalen of voorouder in moederlijn zit
+        const checkLine = async (currentDogId, isMotherSide) => {
+            if (currentDogId === ancestorId) {
+                return isMotherSide;
+            }
+            
+            const dog = await this.getHondById(currentDogId);
+            if (!dog) return false;
+            
+            let found = false;
+            
+            // Check vader
+            if (dog.vaderId) {
+                found = await checkLine(dog.vaderId, isMotherSide);
+                if (found) return true;
+            }
+            
+            // Check moeder
+            if (dog.moederId) {
+                found = await checkLine(dog.moederId, isMotherSide);
+                if (found) return true;
+            }
+            
+            return false;
+        };
+        
+        // Start bij de moeder van de puppy
+        if (puppy.moederId) {
+            return await checkLine(puppy.moederId, true);
+        }
+        
+        return false;
+    }
+    
+    analyzeHealthStatus(dog) {
+        const status = { overall: 'unknown', details: {} };
+        
+        // HD score
+        if (dog.heupdysplasie) {
+            const hdScore = this.getHDScore(dog.heupdysplasie);
+            status.details.hd = { score: hdScore, value: dog.heupdysplasie };
+        }
+        
+        // ED score
+        if (dog.elleboogdysplasie) {
+            const edScore = this.getEDScore(dog.elleboogdysplasie);
+            status.details.ed = { score: edScore, value: dog.elleboogdysplasie };
+        }
+        
+        // PL score
+        if (dog.patella) {
+            const plScore = this.getPLScore(dog.patella);
+            status.details.pl = { score: plScore, value: dog.patella };
+        }
+        
+        // Ogen score
+        if (dog.ogen) {
+            const eyesScore = this.getEyesScore(dog.ogen);
+            status.details.eyes = { score: eyesScore, value: dog.ogen };
+        }
+        
+        // DWLM score
+        if (dog.dandyWalker) {
+            const dwlmScore = this.getDWLMDScore(dog.dandyWalker);
+            status.details.dwlm = { score: dwlmScore, value: dog.dandyWalker };
+        }
+        
+        // Schildklier
+        status.details.thyroid = { 
+            score: dog.schildklier ? 1 : 0, 
+            value: dog.schildklier || 'unknown' 
+        };
+        
+        // Bereken overall score
+        const scores = Object.values(status.details).map(d => d.score);
+        if (scores.length === 0) {
+            status.overall = 'unknown';
+        } else {
+            const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
+            if (avgScore >= 0.7) status.overall = 'good';
+            else if (avgScore >= 0.4) status.overall = 'moderate';
+            else status.overall = 'poor';
+        }
+        
+        return status;
+    }
+    
+    getHDKey(hdValue) {
+        const hd = (hdValue || '').toLowerCase().trim();
+        if (hd.includes('a')) return 'hd_a';
+        if (hd.includes('b')) return 'hd_b';
+        if (hd.includes('c')) return 'hd_c';
+        if (hd.includes('d')) return 'hd_d';
+        if (hd.includes('e')) return 'hd_e';
+        return null;
+    }
+    
+    getEDKey(edValue) {
+        const ed = (edValue || '').toLowerCase().trim();
+        if (ed.includes('0')) return 'ed_0';
+        if (ed.includes('1')) return 'ed_1';
+        if (ed.includes('2')) return 'ed_2';
+        if (ed.includes('3')) return 'ed_3';
+        return null;
+    }
+    
+    getPLKey(plValue) {
+        const pl = (plValue || '').toLowerCase().trim();
+        if (pl.includes('0')) return 'pl_0';
+        if (pl.includes('1')) return 'pl_1';
+        if (pl.includes('2')) return 'pl_2';
+        if (pl.includes('3')) return 'pl_3';
+        return null;
+    }
+    
+    getEyesKey(eyesValue) {
+        const eyes = (eyesValue || '').toLowerCase().trim();
+        if (eyes.includes('vrij') || eyes.includes('free')) return 'eyes_free';
+        if (eyes.includes('dist')) return 'eyes_dist';
+        return 'eyes_other';
+    }
+    
+    getDWLMDKey(dwlmValue) {
+        const dwlm = (dwlmValue || '').toLowerCase().trim();
+        if (dwlm.includes('dna')) return 'dwlm_dna_free';
+        if (dwlm.includes('ouders') || dwlm.includes('parents')) return 'dwlm_parents_free';
+        return null;
+    }
+    
+    getHDScore(hdValue) {
+        const hd = (hdValue || '').toLowerCase().trim();
+        if (hd.includes('a')) return 1.0;
+        if (hd.includes('b')) return 0.8;
+        if (hd.includes('c')) return 0.5;
+        if (hd.includes('d')) return 0.2;
+        if (hd.includes('e')) return 0.0;
+        return 0.5; // unknown
+    }
+    
+    getEDScore(edValue) {
+        const ed = (edValue || '').toLowerCase().trim();
+        if (ed.includes('0')) return 1.0;
+        if (ed.includes('1')) return 0.6;
+        if (ed.includes('2')) return 0.3;
+        if (ed.includes('3')) return 0.0;
+        return 0.5; // unknown
+    }
+    
+    getPLScore(plValue) {
+        const pl = (plValue || '').toLowerCase().trim();
+        if (pl.includes('0')) return 1.0;
+        if (pl.includes('1')) return 0.6;
+        if (pl.includes('2')) return 0.3;
+        if (pl.includes('3')) return 0.0;
+        return 0.5; // unknown
+    }
+    
+    getEyesScore(eyesValue) {
+        const eyes = (eyesValue || '').toLowerCase().trim();
+        if (eyes.includes('vrij') || eyes.includes('free')) return 1.0;
+        if (eyes.includes('dist')) return 0.4;
+        return 0.3; // other
+    }
+    
+    getDWLMDScore(dwlmValue) {
+        const dwlm = (dwlmValue || '').toLowerCase().trim();
+        if (dwlm.includes('dna')) return 1.0;
+        if (dwlm.includes('ouders') || dwlm.includes('parents')) return 0.7;
+        return 0.5; // unknown
+    }
+    
+    async showStamboomWithFuturePuppy(futurePuppy, coiResult, healthAnalysis) {
         // Probeer eerst via StamboomManager
         if (this.stamboomManager && this.stamboomManager.allDogs) {
             const originalDogs = [...this.stamboomManager.allDogs];
@@ -1252,7 +1851,7 @@ class ReuTeefCombinatie {
                 
                 // VOEG CLICK EVENT TOE
                 setTimeout(() => {
-                    this.addFuturePuppyClickHandler(futurePuppy, coiResult);
+                    this.addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis);
                 }, 100);
                 
             } finally {
@@ -1261,16 +1860,16 @@ class ReuTeefCombinatie {
             }
         } else {
             // Fallback
-            await this.showCustomFuturePuppyPedigree(futurePuppy, coiResult);
+            await this.showCustomFuturePuppyPedigree(futurePuppy, coiResult, healthAnalysis);
         }
     }
     
-    addFuturePuppyClickHandler(futurePuppy, coiResult) {
+    addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis) {
         const futurePuppyCard = document.querySelector('.pedigree-card-compact.horizontal.main-dog-compact.gen0');
         if (futurePuppyCard) {
             futurePuppyCard.addEventListener('click', (e) => {
                 e.stopPropagation();
-                this.showFuturePuppyPopup(futurePuppy, coiResult);
+                this.showFuturePuppyPopup(futurePuppy, coiResult, healthAnalysis);
             });
             
             futurePuppyCard.style.cursor = 'pointer';
@@ -1282,10 +1881,13 @@ class ReuTeefCombinatie {
         }
     }
     
-    showFuturePuppyPopup(futurePuppy, coiResult) {
+    showFuturePuppyPopup(futurePuppy, coiResult, healthAnalysis) {
         // Gebruik COI resultaat dat al berekend is
         const coi6Color = this.getCOIColor(coiResult.coi6Gen);
         const coiAllColor = this.getCOIColor(coiResult.coiAllGen);
+        
+        // Genereer gezondheidsanalyse HTML
+        const healthAnalysisHTML = this.generateHealthAnalysisHTML(healthAnalysis);
         
         const popupHTML = `
             <div class="dog-detail-popup">
@@ -1297,7 +1899,7 @@ class ReuTeefCombinatie {
                     <button type="button" class="btn-close btn-close-white" aria-label="${this.t('close')}"></button>
                 </div>
                 <div class="popup-body">
-                    <!-- ALLEEN COI SECTIE -->
+                    <!-- COI SECTIE -->
                     <div class="info-section mb-4">
                         <h6><i class="bi bi-calculator me-1"></i> ${this.t('predictedCoi')}</h6>
                         <div class="info-grid">
@@ -1317,6 +1919,12 @@ class ReuTeefCombinatie {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                    
+                    <!-- GEZONDHEIDSANALYSE SECTIE -->
+                    <div class="info-section mb-4">
+                        <h6><i class="bi bi-heart-pulse me-1"></i> ${this.t('healthInLine')}</h6>
+                        ${healthAnalysisHTML}
                     </div>
                     
                     <div class="info-section mb-2">
@@ -1348,6 +1956,113 @@ class ReuTeefCombinatie {
             overlay.style.display = 'flex';
             this.setupPopupEventListeners();
         }
+    }
+    
+    generateHealthAnalysisHTML(analysis) {
+        const t = this.t.bind(this);
+        
+        // Definitie van alle gezondheidsitems
+        const healthItems = [
+            // HD items
+            { key: 'hd_a', label: t('hdA') },
+            { key: 'hd_b', label: t('hdB') },
+            { key: 'hd_c', label: t('hdC') },
+            { key: 'hd_d', label: t('hdD') },
+            { key: 'hd_e', label: t('hdE') },
+            { key: 'hd_unknown', label: t('hdUnknown') },
+            
+            // ED items
+            { key: 'ed_0', label: t('ed0') },
+            { key: 'ed_1', label: t('ed1') },
+            { key: 'ed_2', label: t('ed2') },
+            { key: 'ed_3', label: t('ed3') },
+            { key: 'ed_unknown', label: t('edUnknown') },
+            
+            // PL items
+            { key: 'pl_0', label: t('pl0') },
+            { key: 'pl_1', label: t('pl1') },
+            { key: 'pl_2', label: t('pl2') },
+            { key: 'pl_3', label: t('pl3') },
+            { key: 'pl_unknown', label: t('plUnknown') },
+            
+            // Ogen items
+            { key: 'eyes_free', label: t('eyesFree') },
+            { key: 'eyes_dist', label: t('eyesDist') },
+            { key: 'eyes_other', label: t('eyesOther') },
+            { key: 'eyes_unknown', label: t('eyesUnknown') },
+            
+            // DWLM items
+            { key: 'dwlm_dna_free', label: t('dwlmDnaFree') },
+            { key: 'dwlm_parents_free', label: t('dwlmParentsFree') },
+            { key: 'dwlm_unknown', label: t('dwlmUnknown') },
+            
+            // Schildklier items
+            { key: 'thyroid_tested', label: t('thyroidTested') },
+            { key: 'thyroid_unknown', label: t('thyroidUnknown') }
+        ];
+        
+        // Genereer tabelrijen
+        let tableRows = '';
+        healthItems.forEach(item => {
+            const motherCount = analysis.motherLine.counts[item.key] || 0;
+            const fatherCount = analysis.fatherLine.counts[item.key] || 0;
+            
+            // Bepaal CSS classes voor tellingen
+            const motherClass = motherCount > 0 ? (motherCount > 2 ? 'count-high' : 'count-good') : '';
+            const fatherClass = fatherCount > 0 ? (fatherCount > 2 ? 'count-high' : 'count-good') : '';
+            
+            tableRows += `
+                <tr>
+                    <td class="health-category">${item.label}</td>
+                    <td class="mother-count ${motherClass}">${motherCount}</td>
+                    <td class="father-count ${fatherClass}">${fatherCount}</td>
+                </tr>
+            `;
+        });
+        
+        // Genereer samenvatting
+        const summaryHTML = `
+            <div class="health-summary">
+                <div class="summary-item">
+                    <div class="summary-value">${analysis.summary.totalAncestors}</div>
+                    <div class="summary-label">${t('totalAncestors')}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value" style="color: #28a745;">${analysis.summary.goodHealth}</div>
+                    <div class="summary-label">${t('good')}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value" style="color: #fd7e14;">${analysis.summary.moderateHealth}</div>
+                    <div class="summary-label">${t('moderate')}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value" style="color: #dc3545;">${analysis.summary.poorHealth}</div>
+                    <div class="summary-label">${t('poor')}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value" style="color: #6c757d;">${analysis.summary.unknownHealth}</div>
+                    <div class="summary-label">${t('unknown')}</div>
+                </div>
+            </div>
+        `;
+        
+        return `
+            <div class="mb-3">
+                <table class="health-analysis-table">
+                    <thead>
+                        <tr>
+                            <th>${t('healthCategory')}</th>
+                            <th>${t('motherLine')}</th>
+                            <th>${t('fatherLine')}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
+            </div>
+            ${summaryHTML}
+        `;
     }
     
     ensurePopupContainer() {
@@ -1403,7 +2118,7 @@ class ReuTeefCombinatie {
         return '#dc3545';
     }
     
-    async showCustomFuturePuppyPedigree(futurePuppy, coiResult) {
+    async showCustomFuturePuppyPedigree(futurePuppy, coiResult, healthAnalysis) {
         const modalId = 'futurePuppyModal';
         let modal = document.getElementById(modalId);
         
@@ -1462,7 +2177,7 @@ class ReuTeefCombinatie {
         });
         
         setTimeout(() => {
-            this.addFuturePuppyClickHandler(futurePuppy, coiResult);
+            this.addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis);
         }, 100);
     }
     
@@ -1644,6 +2359,10 @@ class ReuTeefCombinatie {
         const showKennel = dog.kennelnaam && dog.kennelnaam.trim() !== '';
         const fullDisplayText = combinedName + (showKennel ? ` ${dog.kennelnaam}` : '');
         
+        // RAS WEGLATEN voor toekomstige pup
+        const breedText = dog.ras && !dog.ras.includes('VOORSPELD') && dog.ras !== this.t('combinedParents') ? 
+                         `<div class="dog-breed-compact" title="${dog.ras}">${dog.ras}</div>` : '';
+        
         return `
             <div class="pedigree-card-compact horizontal ${dog.geslacht === 'reuen' ? 'male' : 'female'} ${mainDogClass} gen${generation}" 
                  data-dog-id="${dog.id}" 
@@ -1673,11 +2392,7 @@ class ReuTeefCombinatie {
                         </div>
                         ` : ''}
                         
-                        ${dog.ras ? `
-                        <div class="dog-breed-compact" title="${dog.ras}">
-                            ${dog.ras}
-                        </div>
-                        ` : ''}
+                        ${breedText}
                     </div>
                     
                     <div class="card-row card-row-3">
