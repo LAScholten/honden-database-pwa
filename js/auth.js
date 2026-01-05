@@ -29,7 +29,7 @@ class AuthSystem {
     login(username, password) {
         // Hardcoded gebruikers (in productie vervangen door server-side auth)
         const users = {
-            'admin': { username: 'admin', password: 'admin123', role: 'admin' },
+            'admin': { username: 'admin', password: 'admin1903', role: 'admin' },
             'user': { username: 'user', password: 'user123', role: 'user' }
         };
         
