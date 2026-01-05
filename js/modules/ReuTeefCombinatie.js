@@ -113,7 +113,6 @@ class ReuTeefCombinatie {
                 country: "Land",
                 zipCode: "Postcode",
                 remarks: "Opmerkingen",
-                healthInfo: "Gezondheidsinformatie",
                 additionalInfo: "Extra informatie",
                 noAdditionalInfo: "Geen extra informatie beschikbaar",
                 noHealthInfo: "Geen gezondheidsinformatie beschikbaar",
@@ -122,42 +121,35 @@ class ReuTeefCombinatie {
                 notApplicable: "Niet van toepassing",
                 unknown: "Onbekend",
                 
-                // GEZONDHEIDSUITSLAGEN - COMPLEET VAN SEARCHMANAGER
-                hipGrades: {
-                    "A": "A - Geen tekenen van HD",
-                    "B": "B - Overgangsvorm",
-                    "C": "C - Lichte HD",
-                    "D": "D - Matige HD", 
-                    "E": "E - Ernstige HD"
-                },
-                elbowGrades: {
-                    "0": "0 - Geen ED",
-                    "1": "1 - Milde ED",
-                    "2": "2 - Matige ED",
-                    "3": "3 - Ernstige ED",
-                    "NB": "NB - Niet bekend"
-                },
-                patellaGrades: {
-                    "0": "0 - Geen PL",
-                    "1": "1 - Af en toe luxatie",
-                    "2": "2 - Regelmatig luxatie",
-                    "3": "3 - Constante luxatie"
-                },
-                eyeStatus: {
-                    "Vrij": "Vrij",
-                    "Distichiasis": "Distichiasis",
-                    "Overig": "Overig"
-                },
-                dandyStatus: {
-                    "Vrij op DNA": "Vrij op DNA",
-                    "Vrij op ouders": "Vrij op ouders", 
-                    "Drager": "Drager",
-                    "Lijder": "Lijder"
-                },
-                thyroidStatus: {
-                    "Negatief": "Tgaa Negatief",
-                    "Positief": "Tgaa Positief"
-                }
+                // GEWIJZIGD: VERWIJDERD hipGrades OBJECT EN VERVANGEN DOOR SPECIFIEKE VERTALINGEN
+                hipGradeA: "A - Geen tekenen van HD",
+                hipGradeB: "B - Overgangsvorm",
+                hipGradeC: "C - Lichte HD",
+                hipGradeD: "D - Matige HD",
+                hipGradeE: "E - Ernstige HD",
+                
+                elbowGrade0: "0 - Geen ED",
+                elbowGrade1: "1 - Milde ED",
+                elbowGrade2: "2 - Matige ED",
+                elbowGrade3: "3 - Ernstige ED",
+                elbowGradeNB: "NB - Niet bekend",
+                
+                patellaGrade0: "0 - Geen PL",
+                patellaGrade1: "1 - Af en toe luxatie",
+                patellaGrade2: "2 - Regelmatig luxatie",
+                patellaGrade3: "3 - Constante luxatie",
+                
+                eyeStatusVrij: "Vrij",
+                eyeStatusDistichiasis: "Distichiasis",
+                eyeStatusOverig: "Overig",
+                
+                dandyStatusVrijDNA: "Vrij op DNA",
+                dandyStatusVrijOuders: "Vrij op ouders",
+                dandyStatusDrager: "Drager",
+                dandyStatusLijder: "Lijder",
+                
+                thyroidStatusNegatief: "Tgaa Negatief",
+                thyroidStatusPositief: "Tgaa Positief"
             },
             en: {
                 title: "Male and Female Combination",
@@ -257,42 +249,35 @@ class ReuTeefCombinatie {
                 notApplicable: "Not applicable",
                 unknown: "Unknown",
                 
-                // HEALTH STATUS TRANSLATIONS - COMPLETE FROM SEARCHMANAGER
-                hipGrades: {
-                    "A": "A - No signs of HD",
-                    "B": "B - Borderline",
-                    "C": "C - Mild HD",
-                    "D": "D - Moderate HD",
-                    "E": "E - Severe HD"
-                },
-                elbowGrades: {
-                    "0": "0 - No ED",
-                    "1": "1 - Mild ED",
-                    "2": "2 - Moderate ED",
-                    "3": "3 - Severe ED",
-                    "NB": "NB - Not known"
-                },
-                patellaGrades: {
-                    "0": "0 - No PL",
-                    "1": "1 - Occasional luxation",
-                    "2": "2 - Frequent luxation",
-                    "3": "3 - Constant luxation"
-                },
-                eyeStatus: {
-                    "Vrij": "Free",
-                    "Distichiasis": "Distichiasis",
-                    "Overig": "Other"
-                },
-                dandyStatus: {
-                    "Vrij op DNA": "Free on DNA",
-                    "Vrij op ouders": "Free on parents",
-                    "Drager": "Carrier",
-                    "Lijder": "Affected"
-                },
-                thyroidStatus: {
-                    "Negatief": "Tgaa Negative",
-                    "Positief": "Tgaa Positive"
-                }
+                // HEALTH STATUS TRANSLATIONS - GEWIJZIGD: EENVOUDIGE VERTALINGEN
+                hipGradeA: "A - No signs of HD",
+                hipGradeB: "B - Borderline",
+                hipGradeC: "C - Mild HD",
+                hipGradeD: "D - Moderate HD",
+                hipGradeE: "E - Severe HD",
+                
+                elbowGrade0: "0 - No ED",
+                elbowGrade1: "1 - Mild ED",
+                elbowGrade2: "2 - Moderate ED",
+                elbowGrade3: "3 - Severe ED",
+                elbowGradeNB: "NB - Not known",
+                
+                patellaGrade0: "0 - No PL",
+                patellaGrade1: "1 - Occasional luxation",
+                patellaGrade2: "2 - Frequent luxation",
+                patellaGrade3: "3 - Constant luxation",
+                
+                eyeStatusVrij: "Free",
+                eyeStatusDistichiasis: "Distichiasis",
+                eyeStatusOverig: "Other",
+                
+                dandyStatusVrijDNA: "Free on DNA",
+                dandyStatusVrijOuders: "Free on parents",
+                dandyStatusDrager: "Carrier",
+                dandyStatusLijder: "Affected",
+                
+                thyroidStatusNegatief: "Tgaa Negative",
+                thyroidStatusPositief: "Tgaa Positive"
             },
             de: {
                 title: "Rüde und Hündin Kombination",
@@ -392,42 +377,35 @@ class ReuTeefCombinatie {
                 notApplicable: "Nicht zutreffend",
                 unknown: "Unbekannt",
                 
-                // GESUNDHEITSAUSWERTUNGEN - VOLLSTÄNDIG ÜBERNOMMEN VON SEARCHMANAGER
-                hipGrades: {
-                    "A": "A - Keine Anzeichen von HD",
-                    "B": "B - Grenzfall",
-                    "C": "C - Leichte HD",
-                    "D": "D - Mäßige HD",
-                    "E": "E - Schwere HD"
-                },
-                elbowGrades: {
-                    "0": "0 - Keine ED",
-                    "1": "1 - Leichte ED",
-                    "2": "2 - Mäßige ED",
-                    "3": "3 - Schwere ED",
-                    "NB": "NB - Nicht bekannt"
-                },
-                patellaGrades: {
-                    "0": "0 - Keine PL",
-                    "1": "1 - Gelegentliche Luxation",
-                    "2": "2 - Häufige Luxation",
-                    "3": "3 - Ständige Luxation"
-                },
-                eyeStatus: {
-                    "Vrij": "Frei",
-                    "Distichiasis": "Distichiasis",
-                    "Overig": "Andere"
-                },
-                dandyStatus: {
-                    "Vrij op DNA": "DNA-Frei",
-                    "Vrij op ouders": "Eltern-Frei",
-                    "Drager": "Träger",
-                    "Lijder": "Betroffen"
-                },
-                thyroidStatus: {
-                    "Negatief": "Tgaa Negativ",
-                    "Positief": "Tgaa Positiv"
-                }
+                // GESUNDHEITSAUSWERTUNGEN - GEWIJZIGD: EENVOUDIGE VERTALINGEN
+                hipGradeA: "A - Keine Anzeichen von HD",
+                hipGradeB: "B - Grenzfall",
+                hipGradeC: "C - Leichte HD",
+                hipGradeD: "D - Mäßige HD",
+                hipGradeE: "E - Schwere HD",
+                
+                elbowGrade0: "0 - Keine ED",
+                elbowGrade1: "1 - Leichte ED",
+                elbowGrade2: "2 - Mäßige ED",
+                elbowGrade3: "3 - Schwere ED",
+                elbowGradeNB: "NB - Nicht bekannt",
+                
+                patellaGrade0: "0 - Keine PL",
+                patellaGrade1: "1 - Gelegentliche Luxation",
+                patellaGrade2: "2 - Häufige Luxation",
+                patellaGrade3: "3 - Ständige Luxation",
+                
+                eyeStatusVrij: "Frei",
+                eyeStatusDistichiasis: "Distichiasis",
+                eyeStatusOverig: "Andere",
+                
+                dandyStatusVrijDNA: "DNA-Frei",
+                dandyStatusVrijOuders: "Eltern-Frei",
+                dandyStatusDrager: "Träger",
+                dandyStatusLijder: "Betroffen",
+                
+                thyroidStatusNegatief: "Tgaa Negativ",
+                thyroidStatusPositief: "Tgaa Positiv"
             }
         };
     }
@@ -449,11 +427,87 @@ class ReuTeefCombinatie {
         return text;
     }
     
-    t2(key, subKey = null) {
-        if (subKey && this.translations[this.currentLang][key] && typeof this.translations[this.currentLang][key] === 'object') {
-            return this.translations[this.currentLang][key][subKey] || subKey;
+    // SPECIFIEKE FUNCTIE VOOR GEZONDHEIDSVERTALINGEN
+    getHealthTranslation(type, value) {
+        const lang = this.currentLang;
+        const translations = this.translations[lang];
+        
+        if (!value || value === '') {
+            return translations['unknown'] || 'Onbekend';
         }
-        return this.translations[this.currentLang][key] || key;
+        
+        const val = value.trim().toUpperCase();
+        
+        switch(type) {
+            case 'hip':
+                switch(val) {
+                    case 'A': return translations['hipGradeA'] || value;
+                    case 'B': return translations['hipGradeB'] || value;
+                    case 'C': return translations['hipGradeC'] || value;
+                    case 'D': return translations['hipGradeD'] || value;
+                    case 'E': return translations['hipGradeE'] || value;
+                    default: return value;
+                }
+                
+            case 'elbow':
+                switch(val) {
+                    case '0': return translations['elbowGrade0'] || value;
+                    case '1': return translations['elbowGrade1'] || value;
+                    case '2': return translations['elbowGrade2'] || value;
+                    case '3': return translations['elbowGrade3'] || value;
+                    case 'NB': return translations['elbowGradeNB'] || value;
+                    default: return value;
+                }
+                
+            case 'patella':
+                switch(val) {
+                    case '0': return translations['patellaGrade0'] || value;
+                    case '1': return translations['patellaGrade1'] || value;
+                    case '2': return translations['patellaGrade2'] || value;
+                    case '3': return translations['patellaGrade3'] || value;
+                    default: return value;
+                }
+                
+            case 'eyes':
+                const eyesLower = value.toLowerCase();
+                if (eyesLower.includes('vrij') || eyesLower.includes('free')) {
+                    return translations['eyeStatusVrij'] || value;
+                }
+                if (eyesLower.includes('dist')) {
+                    return translations['eyeStatusDistichiasis'] || value;
+                }
+                if (eyesLower.includes('overig') || eyesLower.includes('other')) {
+                    return translations['eyeStatusOverig'] || value;
+                }
+                return value;
+                
+            case 'dandy':
+                if (value.includes('DNA')) {
+                    return translations['dandyStatusVrijDNA'] || value;
+                }
+                if (value.includes('ouders') || value.includes('parents')) {
+                    return translations['dandyStatusVrijOuders'] || value;
+                }
+                if (value.includes('Drager') || value.includes('Carrier')) {
+                    return translations['dandyStatusDrager'] || value;
+                }
+                if (value.includes('Lijder') || value.includes('Affected')) {
+                    return translations['dandyStatusLijder'] || value;
+                }
+                return value;
+                
+            case 'thyroid':
+                if (value.includes('Negatief') || value.includes('Negative')) {
+                    return translations['thyroidStatusNegatief'] || value;
+                }
+                if (value.includes('Positief') || value.includes('Positive')) {
+                    return translations['thyroidStatusPositief'] || value;
+                }
+                return value;
+                
+            default:
+                return value;
+        }
     }
     
     async loadContent() {
@@ -1322,8 +1376,8 @@ class ReuTeefCombinatie {
         // Haal ouders informatie op
         const oudersInfo = await this.getOudersInfo(hond);
         
-        // Helper functie voor gezondheidsbadges - IDENTIEK AAN SEARCHMANAGER
-        const getHealthBadge = (value, type) => {
+        // Helper functie voor gezondheidsbadges - GEWIJZIGD: GEBRUIK NIEUWE FUNCTIE
+        const getHealthBadge = (value, healthType) => {
             if (!value || value === '') {
                 return `<span class="badge bg-secondary">${t('unknown')}</span>`;
             }
@@ -1331,31 +1385,27 @@ class ReuTeefCombinatie {
             let badgeClass = '';
             let badgeText = value;
             
-            // Zoek de vertaalde uitslag
-            switch(type) {
+            // Gebruik de nieuwe getHealthTranslation functie
+            badgeText = this.getHealthTranslation(healthType, value);
+            
+            switch(healthType) {
                 case 'hip':
                     badgeClass = 'badge-hd';
-                    badgeText = this.t2('hipGrades', value) || value;
                     break;
                 case 'elbow':
                     badgeClass = 'badge-ed';
-                    badgeText = this.t2('elbowGrades', value) || value;
                     break;
                 case 'patella':
                     badgeClass = 'badge-pl';
-                    badgeText = this.t2('patellaGrades', value) || value;
                     break;
                 case 'eyes':
                     badgeClass = 'badge-eyes';
-                    badgeText = this.t2('eyeStatus', value) || value;
                     break;
                 case 'dandy':
                     badgeClass = 'badge-dandy';
-                    badgeText = this.t2('dandyStatus', value) || value;
                     break;
                 case 'thyroid':
                     badgeClass = 'badge-thyroid';
-                    badgeText = this.t2('thyroidStatus', value) || value;
                     break;
                 default:
                     badgeClass = 'badge bg-secondary';
@@ -1407,7 +1457,7 @@ class ReuTeefCombinatie {
                 </div>
                 
                 <div class="dog-details-row">
-                    <div class="dog-details-label">${t('parents')}:</div>
+                    <div class="dog-details-label">Ouders:</div>
                     <div class="dog-details-value">
                         <div class="row">
                             ${oudersInfo.vader ? `
@@ -1843,26 +1893,27 @@ class ReuTeefCombinatie {
     }
     
     getHDKey(hdValue) {
-        const hd = (hdValue || '').toLowerCase().trim();
-        if (hd.includes('a')) return 'hd_a';
-        if (hd.includes('b')) return 'hd_b';
-        if (hd.includes('c')) return 'hd_c';
-        if (hd.includes('d')) return 'hd_d';
-        if (hd.includes('e')) return 'hd_e';
+        const hd = (hdValue || '').toUpperCase().trim();
+        if (hd.includes('A')) return 'hd_a';
+        if (hd.includes('B')) return 'hd_b';
+        if (hd.includes('C')) return 'hd_c';
+        if (hd.includes('D')) return 'hd_d';
+        if (hd.includes('E')) return 'hd_e';
         return null;
     }
     
     getEDKey(edValue) {
-        const ed = (edValue || '').toLowerCase().trim();
+        const ed = (edValue || '').toUpperCase().trim();
         if (ed.includes('0')) return 'ed_0';
         if (ed.includes('1')) return 'ed_1';
         if (ed.includes('2')) return 'ed_2';
         if (ed.includes('3')) return 'ed_3';
+        if (ed.includes('NB')) return 'ed_unknown';
         return null;
     }
     
     getPLKey(plValue) {
-        const pl = (plValue || '').toLowerCase().trim();
+        const pl = (plValue || '').toUpperCase().trim();
         if (pl.includes('0')) return 'pl_0';
         if (pl.includes('1')) return 'pl_1';
         if (pl.includes('2')) return 'pl_2';
@@ -2016,8 +2067,8 @@ class ReuTeefCombinatie {
     async showDogPopup(dog, relation) {
         const t = this.t.bind(this);
         
-        // Helper functie voor gezondheidsbadges - ZELFDE ALS IN showHondDetails
-        const getHealthBadge = (value, type) => {
+        // Helper functie voor gezondheidsbadges - GEBRUIK NIEUWE FUNCTIE
+        const getHealthBadge = (value, healthType) => {
             if (!value || value === '') {
                 return `<span class="badge bg-secondary">${t('unknown')}</span>`;
             }
@@ -2025,31 +2076,27 @@ class ReuTeefCombinatie {
             let badgeClass = '';
             let badgeText = value;
             
-            // Zoek de vertaalde uitslag
-            switch(type) {
+            // Gebruik de nieuwe getHealthTranslation functie
+            badgeText = this.getHealthTranslation(healthType, value);
+            
+            switch(healthType) {
                 case 'hip':
                     badgeClass = 'badge-hd';
-                    badgeText = this.t2('hipGrades', value) || value;
                     break;
                 case 'elbow':
                     badgeClass = 'badge-ed';
-                    badgeText = this.t2('elbowGrades', value) || value;
                     break;
                 case 'patella':
                     badgeClass = 'badge-pl';
-                    badgeText = this.t2('patellaGrades', value) || value;
                     break;
                 case 'eyes':
                     badgeClass = 'badge-eyes';
-                    badgeText = this.t2('eyeStatus', value) || value;
                     break;
                 case 'dandy':
                     badgeClass = 'badge-dandy';
-                    badgeText = this.t2('dandyStatus', value) || value;
                     break;
                 case 'thyroid':
                     badgeClass = 'badge-thyroid';
-                    badgeText = this.t2('thyroidStatus', value) || value;
                     break;
                 default:
                     badgeClass = 'badge bg-secondary';
@@ -2099,7 +2146,7 @@ class ReuTeefCombinatie {
                             ${dog.ras ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
-                                    <span class="info-label">${t('breed')}:</span>
+                                    <span class="info-label">Ras:</span>
                                     <span class="info-value">${dog.ras}</span>
                                 </div>
                             </div>
@@ -2126,15 +2173,6 @@ class ReuTeefCombinatie {
                                 <div class="info-item info-item-full">
                                     <span class="info-label">${t('birthDate')}:</span>
                                     <span class="info-value">${formatDate(dog.geboortedatum)}</span>
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.overlijdensdatum ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('deathDate')}:</span>
-                                    <span class="info-value">${formatDate(dog.overlijdensdatum)}</span>
                                 </div>
                             </div>
                             ` : ''}
@@ -2573,13 +2611,13 @@ class ReuTeefCombinatie {
                 </div>
                 
                 <div class="pedigree-generation-col gen1">
-                    <div class="generation-label">${this.t('parents')}</div>
+                    <div class="generation-label">Ouders</div>
                     ${fatherCard}
                     ${motherCard}
                 </div>
                 
                 <div class="pedigree-generation-col gen2">
-                    <div class="generation-label">${this.t('grandparents')}</div>
+                    <div class="generation-label">Grootouders</div>
                     ${paternalGrandfatherCard}
                     ${paternalGrandmotherCard}
                     ${maternalGrandfatherCard}
@@ -2587,7 +2625,7 @@ class ReuTeefCombinatie {
                 </div>
                 
                 <div class="pedigree-generation-col gen3">
-                    <div class="generation-label">${this.t('greatGrandparents')}</div>
+                    <div class="generation-label">Overgrootouders</div>
                     ${paternalGreatGrandfather1Card}
                     ${paternalGreatGrandmother1Card}
                     ${paternalGreatGrandfather2Card}
