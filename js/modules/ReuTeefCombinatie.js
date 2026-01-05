@@ -60,13 +60,7 @@ class ReuTeefCombinatie {
                 futurePuppyDescription: "Voorspelling van combinatie {reu} × {teef}",
                 futurePuppyTitle: "Stamboom voor toekomstige pup uit combinatie {reu} × {teef}",
                 predictedPedigree: "Voorspelde stamboom",
-                combinedParents: "Combinatie ouders",
-                // COI labels toegevoegd voor popup
-                coi6Gen: "COI 6 Gen",
-                coiAllGen: "COI All Gen",
-                closePopup: "Sluiten",
-                predictedCoi: "Voorspelde Inteeltcoëfficiënt",
-                futurePuppyInfo: "Toekomstige Pup Informatie"
+                combinedParents: "Combinatie ouders"
             },
             en: {
                 title: "Male and Female Combination",
@@ -109,13 +103,7 @@ class ReuTeefCombinatie {
                 futurePuppyDescription: "Prediction of combination {father} × {mother}",
                 futurePuppyTitle: "Pedigree for future puppy from combination {father} × {mother}",
                 predictedPedigree: "Predicted pedigree",
-                combinedParents: "Combination parents",
-                // COI labels added for popup
-                coi6Gen: "COI 6 Gen",
-                coiAllGen: "COI All Gen",
-                closePopup: "Close",
-                predictedCoi: "Predicted Inbreeding Coefficient",
-                futurePuppyInfo: "Future Puppy Information"
+                combinedParents: "Combination parents"
             },
             de: {
                 title: "Rüde und Hündin Kombination",
@@ -158,13 +146,7 @@ class ReuTeefCombinatie {
                 futurePuppyDescription: "Vorhersage der Kombination {father} × {mother}",
                 futurePuppyTitle: "Stamboom für zukünftigen Welpen aus Kombination {father} × {mother}",
                 predictedPedigree: "Vorhergesagter Stammbaum",
-                combinedParents: "Kombination Eltern",
-                // COI labels hinzugefügt für Popup
-                coi6Gen: "COI 6 Gen",
-                coiAllGen: "COI All Gen",
-                closePopup: "Schließen",
-                predictedCoi: "Vorhergesagter Inzuchtkoeffizient",
-                futurePuppyInfo: "Zukünftiger Welpen-Informationen"
+                combinedParents: "Kombination Eltern"
             }
         };
     }
@@ -1214,11 +1196,6 @@ class ReuTeefCombinatie {
                 // Probeer de stamboom te tonen
                 await this.stamboomManager.showPedigree(futurePuppy);
                 
-                // VOEG CLICK EVENT TOE VOOR TOEKOMSTIGE PUP CARD
-                setTimeout(() => {
-                    this.addFuturePuppyClickHandler(futurePuppy);
-                }, 100);
-                
                 // Herstel de originele lijst
                 this.stamboomManager.allDogs = originalDogs;
             } else {
@@ -1229,289 +1206,6 @@ class ReuTeefCombinatie {
             console.error('Fout bij tonen toekomstige pup stamboom:', error);
             this.showAlert('Kon stamboom niet genereren. Probeer opnieuw.', 'danger');
         }
-    }
-    
-    // NIEUWE FUNCTIE: Voeg click handler toe voor toekomstige pup card
-    addFuturePuppyClickHandler(futurePuppy) {
-        const futurePuppyCard = document.querySelector('.pedigree-card-compact.horizontal.main-dog-compact.gen0');
-        if (futurePuppyCard) {
-            futurePuppyCard.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.showFuturePuppyPopup(futurePuppy);
-            });
-            
-            // Voeg cursor styling toe
-            futurePuppyCard.style.cursor = 'pointer';
-            
-            // Update click hint
-            const clickHint = futurePuppyCard.querySelector('.click-hint-compact');
-            if (clickHint) {
-                clickHint.innerHTML = '<i class="bi bi-info-circle"></i> ' + this.t('clickForDetails');
-            }
-        }
-    }
-    
-    // NIEUWE FUNCTIE: Toon popup voor toekomstige pup - ENKEL COI
-    async showFuturePuppyPopup(futurePuppy) {
-        // Bereken COI waarden voor de toekomstige pup - DIRECTE BEREKENING
-        const coiValues = this.calculateDirectCOIForParents(this.selectedReu, this.selectedTeef);
-        const coi6Color = this.getCOIColor(coiValues.coi6Gen);
-        const coiAllColor = this.getCOIColor(coiValues.coiAllGen);
-        
-        // Maak popup HTML - ALLEEN COI
-        const popupHTML = `
-            <div class="dog-detail-popup">
-                <div class="popup-header">
-                    <h5 class="popup-title">
-                        <i class="bi bi-stars me-2" style="color: #ffc107;"></i>
-                        ${this.t('futurePuppyName')}
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" aria-label="${this.t('close')}"></button>
-                </div>
-                <div class="popup-body">
-                    <!-- ALLEEN COI SECTIE -->
-                    <div class="info-section mb-4">
-                        <h6><i class="bi bi-calculator me-1"></i> ${this.t('predictedCoi')}</h6>
-                        <div class="info-grid">
-                            <div class="info-row">
-                                <div class="info-item info-item-half">
-                                    <span class="info-label">${this.t('coi6Gen')}:</span>
-                                    <span class="info-value coi-value" style="color: ${coi6Color}; font-weight: bold;">
-                                        ${coiValues.coi6Gen}%
-                                    </span>
-                                </div>
-                                
-                                <div class="info-item info-item-half">
-                                    <span class="info-label">${this.t('coiAllGen')}:</span>
-                                    <span class="info-value coi-value" style="color: ${coiAllColor}; font-weight: bold;">
-                                        ${coiValues.coiAllGen}%
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Status info -->
-                    <div class="info-section mb-2">
-                        <div class="alert alert-info mb-0">
-                            <i class="bi bi-info-circle me-2"></i>
-                            <strong>${this.t('predictedPedigree')}</strong><br>
-                            ${this.t('futurePuppyDescription', { 
-                                reu: this.selectedReu.naam || '?', 
-                                teef: this.selectedTeef.naam || '?' 
-                            })}
-                        </div>
-                    </div>
-                </div>
-                <div class="popup-footer">
-                    <button type="button" class="btn btn-secondary popup-close-btn">
-                        <i class="bi bi-x-circle me-1"></i> ${this.t('closePopup')}
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        // Gebruik dezelfde popup container als StamboomManager
-        this.ensurePopupContainer();
-        
-        const overlay = document.getElementById('pedigreePopupOverlay');
-        const container = document.getElementById('pedigreePopupContainer');
-        
-        if (container) {
-            container.innerHTML = popupHTML;
-            overlay.style.display = 'flex';
-            
-            // Voeg event listeners toe
-            this.setupPopupEventListeners();
-        }
-    }
-    
-    // NIEUWE FUNCTIE: Directe COI berekening voor ouders combinatie
-    calculateDirectCOIForParents(reu, teef) {
-        console.log('🔍 COI berekening voor ouders combinatie:');
-        console.log('   Reu:', reu.naam, 'ID:', reu.id);
-        console.log('   Teef:', teef.naam, 'ID:', teef.id);
-        
-        // Controleer basisgevallen eerst
-        if (!reu || !teef) {
-            console.log('   ➡ Ontbrekende ouders -> 0%');
-            return { coi6Gen: '0.0', coiAllGen: '0.0' };
-        }
-        
-        if (reu.id === teef.id) {
-            console.log('   ➡ Zelfde ouders -> 25%');
-            return { coi6Gen: '25.0', coiAllGen: '25.0' };
-        }
-        
-        // VOLLE BROER/ZUS
-        const isFullSibling = reu.vaderId && teef.vaderId && reu.vaderId === teef.vaderId &&
-                             reu.moederId && teef.moederId && reu.moederId === teef.moederId;
-        
-        if (isFullSibling) {
-            console.log('   ➡ Ouders zijn volle broer/zus -> 25%');
-            return { coi6Gen: '25.0', coiAllGen: '25.0' };
-        }
-        
-        // HALF BROER/ZUS (gemeenschappelijke vader OF moeder)
-        const isHalfSibling = (reu.vaderId && teef.vaderId && reu.vaderId === teef.vaderId) ||
-                             (reu.moederId && teef.moederId && reu.moederId === teef.moederId);
-        
-        if (isHalfSibling) {
-            console.log('   ➡ Ouders zijn half broer/zus -> 12.5%');
-            return { coi6Gen: '12.5', coiAllGen: '12.5' };
-        }
-        
-        // COMPLEXE BEREKENING - gebruik StamboomManager's COI calculator als beschikbaar
-        if (this.stamboomManager && this.stamboomManager.coiCalculator) {
-            try {
-                // Maak een virtuele pup voor berekening
-                const tempVirtualPup = {
-                    id: -9999,
-                    vaderId: reu.id,
-                    moederId: teef.id
-                };
-                
-                // Voeg tijdelijk toe aan allDogs voor COI berekening
-                const originalDogs = [...this.stamboomManager.allDogs];
-                this.stamboomManager.allDogs.push(tempVirtualPup);
-                
-                // Bereken COI via COICalculator
-                const coiResult = this.stamboomManager.coiCalculator.calculateCOI(-9999);
-                console.log('   ➡ Complexe COI via calculator:', coiResult);
-                
-                // Herstel originele lijst
-                this.stamboomManager.allDogs = originalDogs;
-                
-                return {
-                    coi6Gen: coiResult.coi6Gen || '0.0',
-                    coiAllGen: coiResult.coiAllGen || '0.0'
-                };
-                
-            } catch (error) {
-                console.error('Fout in COI calculator:', error);
-            }
-        }
-        
-        // Eenvoudige berekening voor neef/nicht etc.
-        // Controleer op gemeenschappelijke grootouders
-        let commonAncestors = 0;
-        
-        // Vind alle voorouders van reu (2 generaties)
-        const reuAncestors = this.getAllAncestors(reu.id, 2);
-        // Vind alle voorouders van teef (2 generaties)
-        const teefAncestors = this.getAllAncestors(teef.id, 2);
-        
-        // Tel gemeenschappelijke voorouders
-        for (const ancestor of reuAncestors) {
-            if (teefAncestors.has(ancestor)) {
-                commonAncestors++;
-            }
-        }
-        
-        console.log('   ➡ Gemeenschappelijke voorouders:', commonAncestors);
-        
-        // Bepaal COI op basis van gemeenschappelijke voorouders
-        if (commonAncestors >= 2) {
-            // Waarschijnlijk neef/nicht of dichter
-            return { coi6Gen: '6.25', coiAllGen: '6.25' };
-        } else if (commonAncestors === 1) {
-            // Verre verwantschap
-            return { coi6Gen: '3.125', coiAllGen: '3.125' };
-        }
-        
-        console.log('   ➡ Geen verwantschap -> 0%');
-        return { coi6Gen: '0.0', coiAllGen: '0.0' };
-    }
-    
-    // Helper functie: vind alle voorouders tot bepaalde diepte
-    getAllAncestors(dogId, maxDepth) {
-        const ancestors = new Set();
-        
-        const traverse = (id, depth) => {
-            if (depth > maxDepth) return;
-            
-            const dog = this.getDogById(id);
-            if (!dog) return;
-            
-            if (dog.vaderId) {
-                ancestors.add(dog.vaderId);
-                traverse(dog.vaderId, depth + 1);
-            }
-            
-            if (dog.moederId) {
-                ancestors.add(dog.moederId);
-                traverse(dog.moederId, depth + 1);
-            }
-        };
-        
-        traverse(dogId, 1);
-        return ancestors;
-    }
-    
-    // NIEUWE FUNCTIE: Maak popup container aan als deze niet bestaat
-    ensurePopupContainer() {
-        // Controleer of container al bestaat
-        if (document.getElementById('pedigreePopupOverlay')) {
-            return;
-        }
-        
-        const overlayHTML = `
-            <div class="pedigree-popup-overlay" id="pedigreePopupOverlay" style="display: none;">
-                <div class="pedigree-popup-container" id="pedigreePopupContainer">
-                    <!-- Hier komt de popup content -->
-                </div>
-            </div>
-        `;
-        
-        document.body.insertAdjacentHTML('beforeend', overlayHTML);
-    }
-    
-    // NIEUWE FUNCTIE: Setup popup event listeners
-    setupPopupEventListeners() {
-        const overlay = document.getElementById('pedigreePopupOverlay');
-        const container = document.getElementById('pedigreePopupContainer');
-        
-        if (!overlay || !container) return;
-        
-        // Add close event listeners
-        const closeButtons = container.querySelectorAll('.btn-close, .popup-close-btn');
-        closeButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                overlay.style.display = 'none';
-            });
-        });
-        
-        // Close when clicking outside popup
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) {
-                overlay.style.display = 'none';
-            }
-        });
-        
-        // Close with Escape key
-        const closeOnEscape = (e) => {
-            if (e.key === 'Escape') {
-                overlay.style.display = 'none';
-                document.removeEventListener('keydown', closeOnEscape);
-            }
-        };
-        document.addEventListener('keydown', closeOnEscape);
-        
-        // Clean up event listener when popup closes
-        overlay.addEventListener('animationend', function handler() {
-            if (overlay.style.display === 'none') {
-                document.removeEventListener('keydown', closeOnEscape);
-                overlay.removeEventListener('animationend', handler);
-            }
-        });
-    }
-    
-    // NIEUWE FUNCTIE: Helper voor COI kleuren (zelfde als StamboomManager)
-    getCOIColor(coiValue) {
-        const value = parseFloat(coiValue);
-        if (value < 4.0) return '#28a745'; // groen
-        if (value <= 6.0) return '#fd7e14'; // oranje
-        return '#dc3545'; // rood
     }
     
     async showCustomFuturePuppyPedigree(futurePuppy) {
@@ -1577,11 +1271,6 @@ class ReuTeefCombinatie {
         modal.querySelector('.btn-print').addEventListener('click', () => {
             window.print();
         });
-        
-        // VOEG CLICK EVENT TOE VOOR TOEKOMSTIGE PUP CARD
-        setTimeout(() => {
-            this.addFuturePuppyClickHandler(futurePuppy);
-        }, 100);
     }
     
     async renderFuturePuppyPedigree(futurePuppy) {
@@ -1655,11 +1344,6 @@ class ReuTeefCombinatie {
         `;
         
         container.innerHTML = gridHTML;
-        
-        // Add click events to other cards via StamboomManager
-        if (this.stamboomManager && typeof this.stamboomManager.setupCardClickEvents === 'function') {
-            this.stamboomManager.setupCardClickEvents();
-        }
     }
     
     buildFuturePuppyPedigreeTree(futurePuppy) {
@@ -1772,7 +1456,7 @@ class ReuTeefCombinatie {
                           dog.geslacht === 'teven' ? 'bi-gender-female text-danger' : 'bi-question-circle text-secondary';
         
         const mainDogClass = isMainDog ? 'main-dog-compact' : '';
-        const headerColor = isMainDog ? 'bg-success' : 'bg-secondary';
+        const headerColor = isMainDog ? 'bg-primary' : 'bg-secondary';
         
         // Maak een gecombineerde naam+kennel string voor automatische aanpassing
         const combinedName = dog.naam || this.t('unknown');
