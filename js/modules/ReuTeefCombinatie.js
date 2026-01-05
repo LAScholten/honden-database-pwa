@@ -1671,10 +1671,22 @@ class ReuTeefCombinatie {
             
             // Zorg dat ouders in de StamboomManager cache zitten
             if (this.selectedReu) {
-                this.stamboomManager.allDogs.push(this.selectedReu);
+                // Gebruik getHondByIdFromDb om volledige informatie te krijgen
+                const fullReu = await this.getHondByIdFromDb(this.selectedReu.id);
+                if (fullReu) {
+                    this.stamboomManager.allDogs.push(fullReu);
+                } else {
+                    this.stamboomManager.allDogs.push(this.selectedReu);
+                }
             }
             if (this.selectedTeef) {
-                this.stamboomManager.allDogs.push(this.selectedTeef);
+                // Gebruik getHondByIdFromDb om volledige informatie te krijgen
+                const fullTeef = await this.getHondByIdFromDb(this.selectedTeef.id);
+                if (fullTeef) {
+                    this.stamboomManager.allDogs.push(fullTeef);
+                } else {
+                    this.stamboomManager.allDogs.push(this.selectedTeef);
+                }
             }
             
             this.stamboomManager.allDogs.push(futurePuppy);
@@ -1682,7 +1694,7 @@ class ReuTeefCombinatie {
             try {
                 await this.stamboomManager.showPedigree(futurePuppy);
                 
-                // VOEG CLICK EVENT TOE
+                // VOEG CLICK EVENT TOE - PAS DEZE METHODE AAN
                 setTimeout(() => {
                     this.addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis);
                 }, 100);
@@ -1698,7 +1710,7 @@ class ReuTeefCombinatie {
         }
     }
     
-    addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis) {
+    async addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis) {
         const futurePuppyCard = document.querySelector('.pedigree-card-compact.horizontal.main-dog-compact.gen0');
         if (futurePuppyCard) {
             futurePuppyCard.addEventListener('click', (e) => {
@@ -1712,6 +1724,205 @@ class ReuTeefCombinatie {
             if (clickHint) {
                 clickHint.innerHTML = '<i class="bi bi-info-circle"></i> ' + this.t('clickForDetails');
             }
+        }
+        
+        // IMPORTANT: Vervang de click handlers voor de ouders om volledige informatie te tonen
+        const parentCards = document.querySelectorAll('.pedigree-card-compact.horizontal.gen1');
+        parentCards.forEach(async (card) => {
+            const dogId = parseInt(card.getAttribute('data-dog-id'));
+            if (dogId === 0 || dogId === futurePuppy.id) return;
+            
+            // Vervang de bestaande click handler
+            card.removeEventListener('click', card._originalClickHandler);
+            
+            const newHandler = async (e) => {
+                e.stopPropagation();
+                
+                // Haal volledige informatie op uit de database
+                const fullDog = await this.getHondByIdFromDb(dogId);
+                if (!fullDog) return;
+                
+                const relation = card.getAttribute('data-relation') || '';
+                
+                // Gebruik StamboomManager om de popup te tonen met volledige informatie
+                if (this.stamboomManager) {
+                    await this.stamboomManager.showDogDetailPopup(fullDog, relation);
+                } else {
+                    // Fallback
+                    this.showDogPopup(fullDog, relation);
+                }
+            };
+            
+            card._originalClickHandler = newHandler;
+            card.addEventListener('click', newHandler);
+            card.style.cursor = 'pointer';
+        });
+        
+        // Ook voor grootouders en overgrootouders
+        const ancestorCards = document.querySelectorAll('.pedigree-card-compact.horizontal.gen2, .pedigree-card-compact.horizontal.gen3');
+        ancestorCards.forEach(async (card) => {
+            const dogId = parseInt(card.getAttribute('data-dog-id'));
+            if (dogId === 0) return;
+            
+            // Vervang de bestaande click handler
+            card.removeEventListener('click', card._originalClickHandler);
+            
+            const newHandler = async (e) => {
+                e.stopPropagation();
+                
+                // Haal volledige informatie op uit de database
+                const fullDog = await this.getHondByIdFromDb(dogId);
+                if (!fullDog) return;
+                
+                const relation = card.getAttribute('data-relation') || '';
+                
+                // Gebruik StamboomManager om de popup te tonen met volledige informatie
+                if (this.stamboomManager) {
+                    await this.stamboomManager.showDogDetailPopup(fullDog, relation);
+                } else {
+                    // Fallback
+                    this.showDogPopup(fullDog, relation);
+                }
+            };
+            
+            card._originalClickHandler = newHandler;
+            card.addEventListener('click', newHandler);
+            card.style.cursor = 'pointer';
+        });
+    }
+    
+    async showDogPopup(dog, relation) {
+        // Maak een eenvoudige popup als StamboomManager niet beschikbaar is
+        const popupHTML = `
+            <div class="dog-detail-popup">
+                <div class="popup-header">
+                    <h5 class="popup-title">
+                        <i class="${dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 'bi-gender-female text-danger'} me-2"></i>
+                        ${dog.naam || this.t('unknown')}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" aria-label="Sluiten"></button>
+                </div>
+                <div class="popup-body">
+                    <div class="info-section mb-2">
+                        <h6><i class="bi bi-card-text me-1"></i> Basisgegevens</h6>
+                        <div class="info-grid">
+                            ${dog.stamboomnr ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('pedigreeNumber')}:</span>
+                                    <span class="info-value">${dog.stamboomnr}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.ras ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('breed')}:</span>
+                                    <span class="info-value">${dog.ras}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">Geslacht:</span>
+                                    <span class="info-value">
+                                        ${dog.geslacht === 'reuen' ? this.t('genderReu') : 
+                                          dog.geslacht === 'teven' ? this.t('genderTeef') : this.t('unknown')}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            ${dog.vachtkleur ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('color')}:</span>
+                                    <span class="info-value">${dog.vachtkleur}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    ${dog.heupdysplasie || dog.elleboogdysplasie || dog.patella || dog.ogen || dog.dandyWalker || dog.schildklier ? `
+                    <div class="info-section mb-2">
+                        <h6><i class="bi bi-heart-pulse me-1"></i> ${this.t('healthInfo')}</h6>
+                        <div class="info-grid">
+                            ${dog.heupdysplasie ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('hdA')}:</span>
+                                    <span class="info-value">${dog.heupdysplasie}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.elleboogdysplasie ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('ed0')}:</span>
+                                    <span class="info-value">${dog.elleboogdysplasie}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.patella ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('pl0')}:</span>
+                                    <span class="info-value">${dog.patella}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.ogen ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">Ogen:</span>
+                                    <span class="info-value">${dog.ogen}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.dandyWalker ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">Dandy Walker:</span>
+                                    <span class="info-value">${dog.dandyWalker}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.schildklier ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">Schildklier:</span>
+                                    <span class="info-value">${dog.schildklier}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    ` : ''}
+                </div>
+                <div class="popup-footer">
+                    <button type="button" class="btn btn-secondary popup-close-btn">
+                        <i class="bi bi-x-circle me-1"></i> ${this.t('closePopup')}
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        this.ensurePopupContainer();
+        
+        const overlay = document.getElementById('pedigreePopupOverlay');
+        const container = document.getElementById('pedigreePopupContainer');
+        
+        if (container) {
+            container.innerHTML = popupHTML;
+            overlay.style.display = 'flex';
+            this.setupPopupEventListeners();
         }
     }
     
