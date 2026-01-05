@@ -106,7 +106,7 @@ class ReuTeefCombinatie {
                 mother: "Hündin (Mutter)",
                 selectMother: "Wählen Sie eine Hündin...",
                 father: "Rüde (Vater)",
-                selectFather: "Wählen Sie een Rüden...",
+                selectFather: "Wählen Sie einen Rüden...",
                 searchPlaceholder: "Tippen Sie zum Suchen...",
                 inDevelopment: "Diese Funktion ist derzeit in Entwicklung",
                 devMessage: "Die vollständige Funktionalität für Rüde und Hündin Kombination wird demnächst verfügbar sein.",
@@ -327,60 +327,33 @@ class ReuTeefCombinatie {
                 }
                 
                 .autocomplete-dropdown {
-                    position: fixed; /* Changed from absolute to fixed */
-                    top: unset;
-                    bottom: unset;
+                    position: absolute;
+                    top: 100%;
                     left: 0;
                     right: 0;
-                    max-height: 70vh; /* Use viewport height for better visibility */
-                    height: auto;
+                    max-height: 300px;
                     overflow-y: auto;
                     background: white;
-                    border: 2px solid #6f42c1;
-                    border-radius: 0.75rem;
-                    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-                    z-index: 1090;
+                    border: 1px solid #dee2e6;
+                    border-radius: 0.375rem;
+                    border-top: none;
+                    border-top-left-radius: 0;
+                    border-top-right-radius: 0;
+                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                    z-index: 1050;
                     display: none;
-                    margin: 5px auto;
-                    width: 95%;
-                    max-width: 600px;
-                    backdrop-filter: blur(10px);
-                }
-                
-                .autocomplete-dropdown.showing-results {
-                    display: block !important;
-                    animation: slideInUp 0.3s ease-out;
-                }
-                
-                @keyframes slideInUp {
-                    from {
-                        opacity: 0;
-                        transform: translateY(10px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
                 }
                 
                 .autocomplete-item {
-                    padding: 1rem 1.25rem;
+                    padding: 0.75rem 1rem;
                     cursor: pointer;
-                    border-bottom: 1px solid #f1f3f5;
+                    border-bottom: 1px solid #f8f9fa;
                     transition: all 0.2s;
-                    display: flex;
-                    align-items: center;
-                    gap: 1rem;
-                }
-                
-                .autocomplete-item:last-child {
-                    border-bottom: none;
                 }
                 
                 .autocomplete-item:hover {
                     background-color: #f8f9fa;
-                    transform: translateX(5px);
-                    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    transform: translateX(2px);
                 }
                 
                 .autocomplete-item.active {
@@ -388,38 +361,10 @@ class ReuTeefCombinatie {
                     color: white;
                 }
                 
-                .autocomplete-item .dog-avatar {
-                    width: 50px;
-                    height: 50px;
-                    border-radius: 50%;
-                    background: linear-gradient(135deg, #6f42c1, #9d7ce6);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: white;
-                    font-weight: bold;
-                    font-size: 1.2rem;
-                    flex-shrink: 0;
-                }
-                
-                .autocomplete-item.active .dog-avatar {
-                    background: white;
-                    color: #6f42c1;
-                }
-                
-                .autocomplete-item .dog-info {
-                    flex: 1;
-                    min-width: 0; /* Voor tekst overflow */
-                }
-                
                 .autocomplete-item .dog-name {
-                    font-weight: 700;
-                    font-size: 1.1rem;
-                    color: #343a40;
-                    margin-bottom: 0.25rem;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
+                    font-weight: 600;
+                    font-size: 1rem;
+                    color: #495057;
                 }
                 
                 .autocomplete-item.active .dog-name {
@@ -427,140 +372,21 @@ class ReuTeefCombinatie {
                 }
                 
                 .autocomplete-item .dog-details {
-                    font-size: 0.9rem;
-                    opacity: 0.9;
-                    line-height: 1.4;
+                    font-size: 0.85rem;
+                    opacity: 0.8;
                 }
                 
                 .autocomplete-item.active .dog-details {
-                    opacity: 0.95;
+                    opacity: 0.9;
                 }
                 
                 .autocomplete-item .kennel-name {
                     color: #6f42c1;
-                    font-weight: 600;
-                    display: inline-block;
-                    background: rgba(111, 66, 193, 0.1);
-                    padding: 0.15rem 0.5rem;
-                    border-radius: 4px;
-                    margin-right: 0.5rem;
+                    font-weight: 500;
                 }
                 
                 .autocomplete-item.active .kennel-name {
                     color: #e0d6f5;
-                    background: rgba(255, 255, 255, 0.2);
-                }
-                
-                .autocomplete-item .dog-breed {
-                    color: #495057;
-                    font-weight: 500;
-                }
-                
-                .autocomplete-item.active .dog-breed {
-                    color: #e0d6f5;
-                }
-                
-                .autocomplete-item .dog-pedigree {
-                    font-size: 0.85rem;
-                    color: #6c757d;
-                    font-family: monospace;
-                }
-                
-                .autocomplete-item.active .dog-pedigree {
-                    color: #d1c4e9;
-                }
-                
-                .autocomplete-item .dog-year {
-                    font-size: 0.9rem;
-                    color: #6c757d;
-                    font-weight: 600;
-                    background: #f8f9fa;
-                    padding: 0.25rem 0.75rem;
-                    border-radius: 20px;
-                    white-space: nowrap;
-                }
-                
-                .autocomplete-item.active .dog-year {
-                    color: #6f42c1;
-                    background: white;
-                }
-                
-                .autocomplete-results-count {
-                    padding: 0.75rem 1.25rem;
-                    background: #f8f9fa;
-                    border-bottom: 1px solid #e9ecef;
-                    font-size: 0.9rem;
-                    color: #6c757d;
-                    font-weight: 600;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                }
-                
-                .autocomplete-results-count .total-count {
-                    color: #6f42c1;
-                    font-weight: 700;
-                }
-                
-                .autocomplete-no-results {
-                    padding: 2rem 1.25rem;
-                    text-align: center;
-                    color: #6c757d;
-                }
-                
-                .autocomplete-no-results i {
-                    font-size: 2rem;
-                    color: #adb5bd;
-                    margin-bottom: 0.5rem;
-                }
-                
-                /* Media queries voor responsive design */
-                @media (max-width: 768px) {
-                    .autocomplete-dropdown {
-                        width: 98%;
-                        max-height: 60vh;
-                        left: 1%;
-                        right: 1%;
-                    }
-                    
-                    .autocomplete-item {
-                        padding: 0.85rem 1rem;
-                    }
-                    
-                    .autocomplete-item .dog-avatar {
-                        width: 45px;
-                        height: 45px;
-                        font-size: 1rem;
-                    }
-                    
-                    .autocomplete-item .dog-name {
-                        font-size: 1rem;
-                    }
-                    
-                    .autocomplete-item .dog-details {
-                        font-size: 0.85rem;
-                    }
-                }
-                
-                @media (max-width: 576px) {
-                    .autocomplete-item {
-                        flex-direction: column;
-                        align-items: flex-start;
-                        gap: 0.5rem;
-                    }
-                    
-                    .autocomplete-item .dog-avatar {
-                        align-self: center;
-                    }
-                    
-                    .autocomplete-item .dog-info {
-                        width: 100%;
-                    }
-                    
-                    .autocomplete-item .dog-year {
-                        align-self: flex-end;
-                        margin-top: 0.5rem;
-                    }
                 }
             `;
             document.head.appendChild(style);
@@ -913,7 +739,6 @@ class ReuTeefCombinatie {
             activeIndex = -1;
             
             if (searchTerm.length === 0) {
-                dropdown.classList.remove('showing-results');
                 dropdown.style.display = 'none';
                 return;
             }
@@ -977,83 +802,46 @@ class ReuTeefCombinatie {
             
             currentResults = filteredHonden;
             
-            // Bereken positie voor dropdown
-            this.positionDropdown(dropdown, input);
-            
             if (filteredHonden.length === 0) {
                 dropdown.innerHTML = `
-                    <div class="autocomplete-results-count">
-                        <span>${this.t('noDogFound')}</span>
-                    </div>
-                    <div class="autocomplete-no-results">
-                        <i class="bi bi-search"></i>
-                        <p class="mb-0">${this.t('noDogFound')}</p>
-                        <small class="text-muted">Probeer een andere zoekterm</small>
+                    <div class="autocomplete-item text-muted text-center py-3">
+                        <i class="bi bi-search me-2"></i>${this.t('noDogFound')}
                     </div>
                 `;
-                dropdown.classList.add('showing-results');
                 dropdown.style.display = 'block';
                 return;
             }
             
-            // Bereken welke honden we tonen (eerste 3 prominent)
-            const visibleResults = filteredHonden.slice(0, 50); // Toon max 50 resultaten
-            const totalResults = filteredHonden.length;
-            
-            dropdown.innerHTML = `
-                <div class="autocomplete-results-count">
-                    <span>${totalResults} honden gevonden</span>
-                    <span class="total-count">Eerste ${Math.min(3, totalResults)} direct zichtbaar</span>
-                </div>
-                ${visibleResults.map((hond, index) => {
-                    const geboortejaar = hond.geboortedatum ? 
-                        new Date(hond.geboortedatum).getFullYear() : '?';
-                    const eersteLetter = hond.naam ? hond.naam.charAt(0).toUpperCase() : '?';
-                    const isFirstThree = index < 3;
-                    
-                    return `
-                        <div class="autocomplete-item ${index === activeIndex ? 'active' : ''} 
-                            ${isFirstThree ? 'first-three' : ''}"
-                            data-index="${index}"
-                            data-id="${hond.id}"
-                            data-value='${JSON.stringify(hond)}'>
-                            <div class="dog-avatar">
-                                ${eersteLetter}
-                            </div>
-                            <div class="dog-info">
+            dropdown.innerHTML = filteredHonden.map((hond, index) => {
+                const geboortejaar = hond.geboortedatum ? 
+                    new Date(hond.geboortedatum).getFullYear() : '?';
+                
+                return `
+                    <div class="autocomplete-item ${index === activeIndex ? 'active' : ''}" 
+                         data-index="${index}"
+                         data-id="${hond.id}"
+                         data-value='${JSON.stringify(hond)}'>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div style="flex: 1;">
                                 <div class="dog-name">${hond.naam || 'Onbekend'}</div>
                                 <div class="dog-details">
                                     ${hond.kennelnaam ? `
                                         <span class="kennel-name">
                                             <i class="bi bi-house-door me-1"></i>${hond.kennelnaam}
-                                        </span>
+                                        </span> • 
                                     ` : ''}
-                                    <span class="dog-breed">
-                                        <i class="bi bi-tag me-1"></i>${hond.ras || this.t('unknownBreed')}
-                                    </span>
-                                    ${hond.stamboomnr ? `
-                                        <br>
-                                        <span class="dog-pedigree">
-                                            <i class="bi bi-card-checklist me-1"></i>${hond.stamboomnr}
-                                        </span>
-                                    ` : ''}
+                                    ${hond.ras || this.t('unknownBreed')}
+                                    ${hond.stamboomnr ? ` • ${hond.stamboomnr}` : ''}
                                 </div>
                             </div>
-                            <div class="dog-year">
-                                <i class="bi bi-calendar3 me-1"></i>${geboortejaar}
+                            <div class="text-muted small ms-2" style="white-space: nowrap;">
+                                ${geboortejaar}
                             </div>
                         </div>
-                    `;
-                }).join('')}
-                ${totalResults > visibleResults.length ? `
-                    <div class="autocomplete-results-count" style="border-top: 1px solid #e9ecef;">
-                        <span>${totalResults - visibleResults.length} meer resultaten beschikbaar</span>
-                        <small class="text-muted">Scroll om meer te zien</small>
                     </div>
-                ` : ''}
-            `;
+                `;
+            }).join('');
             
-            dropdown.classList.add('showing-results');
             dropdown.style.display = 'block';
             
             // Event listeners voor dropdown items
@@ -1067,22 +855,11 @@ class ReuTeefCombinatie {
                             `${hond.naam} (${hond.kennelnaam})` : 
                             hond.naam;
                         input.value = displayName;
-                        dropdown.classList.remove('showing-results');
                         dropdown.style.display = 'none';
                         onSelect(hond);
                     }
                 });
             });
-            
-            // Zorg ervoor dat eerste 3 items direct zichtbaar zijn
-            if (dropdown.querySelector('.autocomplete-item')) {
-                setTimeout(() => {
-                    const firstItem = dropdown.querySelector('.autocomplete-item');
-                    if (firstItem) {
-                        firstItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    }
-                }, 10);
-            }
         });
         
         input.addEventListener('keydown', (e) => {
@@ -1113,7 +890,6 @@ class ReuTeefCombinatie {
                                 `${hond.naam} (${hond.kennelnaam})` : 
                                 hond.naam;
                             input.value = displayName;
-                            dropdown.classList.remove('showing-results');
                             dropdown.style.display = 'none';
                             onSelect(hond);
                         }
@@ -1121,13 +897,11 @@ class ReuTeefCombinatie {
                     break;
                     
                 case 'Escape':
-                    dropdown.classList.remove('showing-results');
                     dropdown.style.display = 'none';
                     activeIndex = -1;
                     break;
                     
                 case 'Tab':
-                    dropdown.classList.remove('showing-results');
                     dropdown.style.display = 'none';
                     activeIndex = -1;
                     break;
@@ -1137,7 +911,6 @@ class ReuTeefCombinatie {
         // Sluit dropdown bij klik buiten
         document.addEventListener('click', (e) => {
             if (!input.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.classList.remove('showing-results');
                 dropdown.style.display = 'none';
                 activeIndex = -1;
             }
@@ -1148,42 +921,6 @@ class ReuTeefCombinatie {
             e.preventDefault();
             input.focus();
         });
-        
-        // Positioneer dropdown opnieuw bij scroll
-        window.addEventListener('scroll', () => {
-            if (dropdown.classList.contains('showing-results')) {
-                this.positionDropdown(dropdown, input);
-            }
-        });
-        
-        // Positioneer dropdown opnieuw bij resize
-        window.addEventListener('resize', () => {
-            if (dropdown.classList.contains('showing-results')) {
-                this.positionDropdown(dropdown, input);
-            }
-        });
-    }
-    
-    positionDropdown(dropdown, input) {
-        const inputRect = input.getBoundingClientRect();
-        const viewportHeight = window.innerHeight;
-        
-        // Bereken of er genoeg ruimte is onder de input
-        const spaceBelow = viewportHeight - inputRect.bottom;
-        const spaceAbove = inputRect.top;
-        
-        if (spaceBelow >= 300 || spaceBelow >= spaceAbove) {
-            // Toon dropdown onder de input
-            dropdown.style.top = `${inputRect.bottom + window.scrollY + 5}px`;
-            dropdown.style.bottom = 'unset';
-        } else {
-            // Toon dropdown boven de input
-            dropdown.style.top = 'unset';
-            dropdown.style.bottom = `${viewportHeight - inputRect.top + window.scrollY + 5}px`;
-        }
-        
-        dropdown.style.left = `${inputRect.left + window.scrollX}px`;
-        dropdown.style.width = `${inputRect.width}px`;
     }
     
     updateActiveItem(items, activeIndex) {
@@ -1191,12 +928,6 @@ class ReuTeefCombinatie {
             item.classList.toggle('active', index === activeIndex);
             if (index === activeIndex) {
                 item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-                
-                // Voeg visuele feedback toe
-                item.style.transform = 'translateX(8px)';
-                setTimeout(() => {
-                    item.style.transform = '';
-                }, 200);
             }
         });
     }
