@@ -20,7 +20,10 @@ class ReuTeefCombinatie {
         // COI Calculator instance
         this.coiCalculator = null;
         
-        // Vertalingen - UITGEBREID MET GEZONDHEIDSUITSLAGEN
+        // Importeer de translation helper van SearchManager
+        this.translationHelper = null;
+        
+        // VERTALINGEN - Vereenvoudigd, gebruikt dezelfde logica als SearchManager
         this.translations = {
             nl: {
                 title: "Reu en Teef Combinatie",
@@ -101,7 +104,7 @@ class ReuTeefCombinatie {
                 thyroidTested: "Schildklier getest",
                 thyroidUnknown: "Schildklier niet bekend",
                 occurrences: "Aantal keer",
-                // HEALTH INFO TRANSLATIONS - COMPLEET OVERGENOMEN VAN SEARCHMANAGER
+                // HEALTH INFO TRANSLATIONS
                 hipDysplasia: "Heupdysplasie",
                 elbowDysplasia: "Elleboogdysplasie",
                 patellaLuxation: "Patella Luxatie",
@@ -119,37 +122,7 @@ class ReuTeefCombinatie {
                 grade: "Graad",
                 status: "Status",
                 notApplicable: "Niet van toepassing",
-                unknown: "Onbekend",
-                
-                // GEWIJZIGD: VERWIJDERD hipGrades OBJECT EN VERVANGEN DOOR SPECIFIEKE VERTALINGEN
-                hipGradeA: "A - Geen tekenen van HD",
-                hipGradeB: "B - Overgangsvorm",
-                hipGradeC: "C - Lichte HD",
-                hipGradeD: "D - Matige HD",
-                hipGradeE: "E - Ernstige HD",
-                
-                elbowGrade0: "0 - Geen ED",
-                elbowGrade1: "1 - Milde ED",
-                elbowGrade2: "2 - Matige ED",
-                elbowGrade3: "3 - Ernstige ED",
-                elbowGradeNB: "NB - Niet bekend",
-                
-                patellaGrade0: "0 - Geen PL",
-                patellaGrade1: "1 - Af en toe luxatie",
-                patellaGrade2: "2 - Regelmatig luxatie",
-                patellaGrade3: "3 - Constante luxatie",
-                
-                eyeStatusVrij: "Vrij",
-                eyeStatusDistichiasis: "Distichiasis",
-                eyeStatusOverig: "Overig",
-                
-                dandyStatusVrijDNA: "Vrij op DNA",
-                dandyStatusVrijOuders: "Vrij op ouders",
-                dandyStatusDrager: "Drager",
-                dandyStatusLijder: "Lijder",
-                
-                thyroidStatusNegatief: "Tgaa Negatief",
-                thyroidStatusPositief: "Tgaa Positief"
+                unknown: "Onbekend"
             },
             en: {
                 title: "Male and Female Combination",
@@ -247,37 +220,7 @@ class ReuTeefCombinatie {
                 grade: "Grade",
                 status: "Status",
                 notApplicable: "Not applicable",
-                unknown: "Unknown",
-                
-                // HEALTH STATUS TRANSLATIONS - GEWIJZIGD: EENVOUDIGE VERTALINGEN
-                hipGradeA: "A - No signs of HD",
-                hipGradeB: "B - Borderline",
-                hipGradeC: "C - Mild HD",
-                hipGradeD: "D - Moderate HD",
-                hipGradeE: "E - Severe HD",
-                
-                elbowGrade0: "0 - No ED",
-                elbowGrade1: "1 - Mild ED",
-                elbowGrade2: "2 - Moderate ED",
-                elbowGrade3: "3 - Severe ED",
-                elbowGradeNB: "NB - Not known",
-                
-                patellaGrade0: "0 - No PL",
-                patellaGrade1: "1 - Occasional luxation",
-                patellaGrade2: "2 - Frequent luxation",
-                patellaGrade3: "3 - Constant luxation",
-                
-                eyeStatusVrij: "Free",
-                eyeStatusDistichiasis: "Distichiasis",
-                eyeStatusOverig: "Other",
-                
-                dandyStatusVrijDNA: "Free on DNA",
-                dandyStatusVrijOuders: "Free on parents",
-                dandyStatusDrager: "Carrier",
-                dandyStatusLijder: "Affected",
-                
-                thyroidStatusNegatief: "Tgaa Negative",
-                thyroidStatusPositief: "Tgaa Positive"
+                unknown: "Unknown"
             },
             de: {
                 title: "Rüde und Hündin Kombination",
@@ -375,37 +318,7 @@ class ReuTeefCombinatie {
                 grade: "Grade",
                 status: "Status",
                 notApplicable: "Nicht zutreffend",
-                unknown: "Unbekannt",
-                
-                // GESUNDHEITSAUSWERTUNGEN - GEWIJZIGD: EENVOUDIGE VERTALINGEN
-                hipGradeA: "A - Keine Anzeichen von HD",
-                hipGradeB: "B - Grenzfall",
-                hipGradeC: "C - Leichte HD",
-                hipGradeD: "D - Mäßige HD",
-                hipGradeE: "E - Schwere HD",
-                
-                elbowGrade0: "0 - Keine ED",
-                elbowGrade1: "1 - Leichte ED",
-                elbowGrade2: "2 - Mäßige ED",
-                elbowGrade3: "3 - Schwere ED",
-                elbowGradeNB: "NB - Nicht bekannt",
-                
-                patellaGrade0: "0 - Keine PL",
-                patellaGrade1: "1 - Gelegentliche Luxation",
-                patellaGrade2: "2 - Häufige Luxation",
-                patellaGrade3: "3 - Ständige Luxation",
-                
-                eyeStatusVrij: "Frei",
-                eyeStatusDistichiasis: "Distichiasis",
-                eyeStatusOverig: "Andere",
-                
-                dandyStatusVrijDNA: "DNA-Frei",
-                dandyStatusVrijOuders: "Eltern-Frei",
-                dandyStatusDrager: "Träger",
-                dandyStatusLijder: "Betroffen",
-                
-                thyroidStatusNegatief: "Tgaa Negativ",
-                thyroidStatusPositief: "Tgaa Positiv"
+                unknown: "Unbekannt"
             }
         };
     }
@@ -414,6 +327,15 @@ class ReuTeefCombinatie {
         this.db = db;
         this.auth = auth;
         this.stamboomManager = stamboomManager;
+        
+        // Probeer translation helper van SearchManager te krijgen
+        if (window.searchManager && window.searchManager.getHealthTranslation) {
+            console.log('✅ Gevonden: SearchManager met getHealthTranslation');
+            this.translationHelper = window.searchManager;
+        } else if (window.appUI && window.appUI.modules && window.appUI.modules.search) {
+            console.log('✅ Gevonden: appUI search module');
+            this.translationHelper = window.appUI.modules.search;
+        }
     }
     
     t(key, params = {}) {
@@ -427,87 +349,147 @@ class ReuTeefCombinatie {
         return text;
     }
     
-    // SPECIFIEKE FUNCTIE VOOR GEZONDHEIDSVERTALINGEN
+    // NIEUW: Gebruik dezelfde logica als SearchManager voor gezondheidsvertalingen
     getHealthTranslation(type, value) {
-        const lang = this.currentLang;
-        const translations = this.translations[lang];
+        // Als we een translation helper hebben, gebruik die
+        if (this.translationHelper && this.translationHelper.getHealthTranslation) {
+            return this.translationHelper.getHealthTranslation(type, value);
+        }
         
-        if (!value || value === '') {
-            return translations['unknown'] || 'Onbekend';
+        // Fallback naar lokale implementatie (zelfde als SearchManager)
+        if (!value || value.trim() === '') {
+            return this.t('unknown');
         }
         
         const val = value.trim().toUpperCase();
+        let translation = value; // default
         
         switch(type) {
             case 'hip':
                 switch(val) {
-                    case 'A': return translations['hipGradeA'] || value;
-                    case 'B': return translations['hipGradeB'] || value;
-                    case 'C': return translations['hipGradeC'] || value;
-                    case 'D': return translations['hipGradeD'] || value;
-                    case 'E': return translations['hipGradeE'] || value;
-                    default: return value;
+                    case 'A': translation = `${value} - ${this.currentLang === 'nl' ? 'Geen tekenen van HD' : 
+                                               this.currentLang === 'de' ? 'Keine Anzeichen von HD' : 'No signs of HD'}`; break;
+                    case 'B': translation = `${value} - ${this.currentLang === 'nl' ? 'Overgangsvorm' : 
+                                               this.currentLang === 'de' ? 'Grenzfall' : 'Borderline'}`; break;
+                    case 'C': translation = `${value} - ${this.currentLang === 'nl' ? 'Lichte HD' : 
+                                               this.currentLang === 'de' ? 'Leichte HD' : 'Mild HD'}`; break;
+                    case 'D': translation = `${value} - ${this.currentLang === 'nl' ? 'Matige HD' : 
+                                               this.currentLang === 'de' ? 'Mäßige HD' : 'Moderate HD'}`; break;
+                    case 'E': translation = `${value} - ${this.currentLang === 'nl' ? 'Ernstige HD' : 
+                                               this.currentLang === 'de' ? 'Schwere HD' : 'Severe HD'}`; break;
                 }
+                break;
                 
             case 'elbow':
                 switch(val) {
-                    case '0': return translations['elbowGrade0'] || value;
-                    case '1': return translations['elbowGrade1'] || value;
-                    case '2': return translations['elbowGrade2'] || value;
-                    case '3': return translations['elbowGrade3'] || value;
-                    case 'NB': return translations['elbowGradeNB'] || value;
-                    default: return value;
+                    case '0': translation = `${value} - ${this.currentLang === 'nl' ? 'Geen ED' : 
+                                                this.currentLang === 'de' ? 'Keine ED' : 'No ED'}`; break;
+                    case '1': translation = `${value} - ${this.currentLang === 'nl' ? 'Milde ED' : 
+                                                this.currentLang === 'de' ? 'Leichte ED' : 'Mild ED'}`; break;
+                    case '2': translation = `${value} - ${this.currentLang === 'nl' ? 'Matige ED' : 
+                                                this.currentLang === 'de' ? 'Mäßige ED' : 'Moderate ED'}`; break;
+                    case '3': translation = `${value} - ${this.currentLang === 'nl' ? 'Ernstige ED' : 
+                                                this.currentLang === 'de' ? 'Schwere ED' : 'Severe ED'}`; break;
+                    case 'NB': translation = `${value} - ${this.currentLang === 'nl' ? 'Niet bekend' : 
+                                                 this.currentLang === 'de' ? 'Nicht bekannt' : 'Not known'}`; break;
                 }
+                break;
                 
             case 'patella':
                 switch(val) {
-                    case '0': return translations['patellaGrade0'] || value;
-                    case '1': return translations['patellaGrade1'] || value;
-                    case '2': return translations['patellaGrade2'] || value;
-                    case '3': return translations['patellaGrade3'] || value;
-                    default: return value;
+                    case '0': translation = `${value} - ${this.currentLang === 'nl' ? 'Geen PL' : 
+                                                this.currentLang === 'de' ? 'Keine PL' : 'No PL'}`; break;
+                    case '1': translation = `${value} - ${this.currentLang === 'nl' ? 'Af en toe luxatie' : 
+                                                this.currentLang === 'de' ? 'Gelegentliche Luxation' : 'Occasional luxation'}`; break;
+                    case '2': translation = `${value} - ${this.currentLang === 'nl' ? 'Regelmatig luxatie' : 
+                                                this.currentLang === 'de' ? 'Häufige Luxation' : 'Frequent luxation'}`; break;
+                    case '3': translation = `${value} - ${this.currentLang === 'nl' ? 'Constante luxatie' : 
+                                                this.currentLang === 'de' ? 'Ständige Luxation' : 'Constant luxation'}`; break;
                 }
+                break;
                 
             case 'eyes':
                 const eyesLower = value.toLowerCase();
                 if (eyesLower.includes('vrij') || eyesLower.includes('free')) {
-                    return translations['eyeStatusVrij'] || value;
+                    translation = `${this.currentLang === 'nl' ? 'Vrij' : 
+                                   this.currentLang === 'de' ? 'Frei' : 'Free'}`;
+                } else if (eyesLower.includes('dist')) {
+                    translation = `${this.currentLang === 'nl' ? 'Distichiasis' : 
+                                   this.currentLang === 'de' ? 'Distichiasis' : 'Distichiasis'}`;
+                } else {
+                    translation = `${this.currentLang === 'nl' ? 'Overig' : 
+                                   this.currentLang === 'de' ? 'Andere' : 'Other'}`;
                 }
-                if (eyesLower.includes('dist')) {
-                    return translations['eyeStatusDistichiasis'] || value;
-                }
-                if (eyesLower.includes('overig') || eyesLower.includes('other')) {
-                    return translations['eyeStatusOverig'] || value;
-                }
-                return value;
+                break;
                 
             case 'dandy':
                 if (value.includes('DNA')) {
-                    return translations['dandyStatusVrijDNA'] || value;
+                    translation = `${this.currentLang === 'nl' ? 'Vrij op DNA' : 
+                                   this.currentLang === 'de' ? 'DNA-Frei' : 'Free on DNA'}`;
+                } else if (value.includes('ouders') || value.includes('parents')) {
+                    translation = `${this.currentLang === 'nl' ? 'Vrij op ouders' : 
+                                   this.currentLang === 'de' ? 'Eltern-Frei' : 'Free on parents'}`;
                 }
-                if (value.includes('ouders') || value.includes('parents')) {
-                    return translations['dandyStatusVrijOuders'] || value;
-                }
-                if (value.includes('Drager') || value.includes('Carrier')) {
-                    return translations['dandyStatusDrager'] || value;
-                }
-                if (value.includes('Lijder') || value.includes('Affected')) {
-                    return translations['dandyStatusLijder'] || value;
-                }
-                return value;
+                break;
                 
             case 'thyroid':
                 if (value.includes('Negatief') || value.includes('Negative')) {
-                    return translations['thyroidStatusNegatief'] || value;
+                    translation = `${this.currentLang === 'nl' ? 'Tgaa Negatief' : 
+                                   this.currentLang === 'de' ? 'Tgaa Negativ' : 'Tgaa Negative'}`;
+                } else if (value.includes('Positief') || value.includes('Positive')) {
+                    translation = `${this.currentLang === 'nl' ? 'Tgaa Positief' : 
+                                   this.currentLang === 'de' ? 'Tgaa Positiv' : 'Tgaa Positive'}`;
                 }
-                if (value.includes('Positief') || value.includes('Positive')) {
-                    return translations['thyroidStatusPositief'] || value;
-                }
-                return value;
-                
-            default:
-                return value;
+                break;
         }
+        
+        return translation;
+    }
+    
+    // Helper functie voor gezondheidsbadges - IDENTIEK AAN SEARCHMANAGER
+    getHealthBadge(value, type) {
+        if (!value || value.trim() === '') {
+            return `<span class="badge bg-secondary">${this.t('unknown')}</span>`;
+        }
+        
+        const translation = this.getHealthTranslation(type, value);
+        
+        // Bepaal badge class op basis van type
+        let badgeClass = '';
+        switch(type) {
+            case 'hip':
+                badgeClass = value.toUpperCase() === 'A' ? 'badge-success' : 
+                            value.toUpperCase() === 'B' ? 'badge-warning' : 
+                            value.toUpperCase() === 'C' ? 'badge-warning' : 
+                            value.toUpperCase() === 'D' ? 'badge-danger' : 
+                            value.toUpperCase() === 'E' ? 'badge-danger' : 'badge-secondary';
+                break;
+            case 'elbow':
+                badgeClass = value === '0' ? 'badge-success' : 
+                            value === '1' ? 'badge-warning' : 
+                            value === '2' ? 'badge-warning' : 
+                            value === '3' ? 'badge-danger' : 'badge-secondary';
+                break;
+            case 'patella':
+                badgeClass = value === '0' ? 'badge-success' : 
+                            value === '1' ? 'badge-warning' : 
+                            value === '2' ? 'badge-warning' : 
+                            value === '3' ? 'badge-danger' : 'badge-secondary';
+                break;
+            case 'eyes':
+                badgeClass = 'badge-info';
+                break;
+            case 'dandy':
+                badgeClass = 'badge-primary';
+                break;
+            case 'thyroid':
+                badgeClass = value.includes('Negatief') || value.includes('Negative') ? 'badge-success' : 'badge-danger';
+                break;
+            default:
+                badgeClass = 'badge-secondary';
+        }
+        
+        return `<span class="badge ${badgeClass}">${translation}</span>`;
     }
     
     async loadContent() {
@@ -889,6 +871,27 @@ class ReuTeefCombinatie {
                     color: #155724 !important;
                 }
                 
+                /* BADGE STYLES - IDENTIEK AAN SEARCHMANAGER */
+                .badge-success {
+                    background-color: #198754 !important;
+                }
+                .badge-warning {
+                    background-color: #ffc107 !important;
+                    color: #000 !important;
+                }
+                .badge-danger {
+                    background-color: #dc3545 !important;
+                }
+                .badge-info {
+                    background-color: #0dcaf0 !important;
+                }
+                .badge-primary {
+                    background-color: #0d6efd !important;
+                }
+                .badge-secondary {
+                    background-color: #6c757d !important;
+                }
+                
                 /* RESPONSIVE STYLES */
                 @media (max-width: 768px) {
                     .search-input {
@@ -1012,6 +1015,7 @@ class ReuTeefCombinatie {
             const cached = this.hondenCache.get(id);
             // Controleer of cache compleet is (heeft gezondheidsinformatie)
             if (cached.heupdysplasie !== undefined || cached.elleboogdysplasie !== undefined) {
+                console.log(`✅ Hond ${id} uit cache: HD=${cached.heupdysplasie}`);
                 return cached;
             }
         }
@@ -1376,42 +1380,9 @@ class ReuTeefCombinatie {
         // Haal ouders informatie op
         const oudersInfo = await this.getOudersInfo(hond);
         
-        // Helper functie voor gezondheidsbadges - GEWIJZIGD: GEBRUIK NIEUWE FUNCTIE
+        // Gebruik getHealthBadge functie die nu WEL de juiste vertaling geeft
         const getHealthBadge = (value, healthType) => {
-            if (!value || value === '') {
-                return `<span class="badge bg-secondary">${t('unknown')}</span>`;
-            }
-            
-            let badgeClass = '';
-            let badgeText = value;
-            
-            // Gebruik de nieuwe getHealthTranslation functie
-            badgeText = this.getHealthTranslation(healthType, value);
-            
-            switch(healthType) {
-                case 'hip':
-                    badgeClass = 'badge-hd';
-                    break;
-                case 'elbow':
-                    badgeClass = 'badge-ed';
-                    break;
-                case 'patella':
-                    badgeClass = 'badge-pl';
-                    break;
-                case 'eyes':
-                    badgeClass = 'badge-eyes';
-                    break;
-                case 'dandy':
-                    badgeClass = 'badge-dandy';
-                    break;
-                case 'thyroid':
-                    badgeClass = 'badge-thyroid';
-                    break;
-                default:
-                    badgeClass = 'badge bg-secondary';
-            }
-            
-            return `<span class="badge ${badgeClass}">${badgeText}</span>`;
+            return this.getHealthBadge(value, healthType);
         };
         
         detailsContainer.innerHTML = `
@@ -2069,40 +2040,7 @@ class ReuTeefCombinatie {
         
         // Helper functie voor gezondheidsbadges - GEBRUIK NIEUWE FUNCTIE
         const getHealthBadge = (value, healthType) => {
-            if (!value || value === '') {
-                return `<span class="badge bg-secondary">${t('unknown')}</span>`;
-            }
-            
-            let badgeClass = '';
-            let badgeText = value;
-            
-            // Gebruik de nieuwe getHealthTranslation functie
-            badgeText = this.getHealthTranslation(healthType, value);
-            
-            switch(healthType) {
-                case 'hip':
-                    badgeClass = 'badge-hd';
-                    break;
-                case 'elbow':
-                    badgeClass = 'badge-ed';
-                    break;
-                case 'patella':
-                    badgeClass = 'badge-pl';
-                    break;
-                case 'eyes':
-                    badgeClass = 'badge-eyes';
-                    break;
-                case 'dandy':
-                    badgeClass = 'badge-dandy';
-                    break;
-                case 'thyroid':
-                    badgeClass = 'badge-thyroid';
-                    break;
-                default:
-                    badgeClass = 'badge bg-secondary';
-            }
-            
-            return `<span class="badge ${badgeClass}">${badgeText}</span>`;
+            return this.getHealthBadge(value, healthType);
         };
         
         // Formateer datum
