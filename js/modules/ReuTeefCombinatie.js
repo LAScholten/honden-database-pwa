@@ -126,10 +126,10 @@ class ReuTeefCombinatie {
                 kennel: "Zwingername:",
                 pedigreeNumber: "Stammbuchnr:",
                 birthDate: "Geburtsdatum:",
-                healthInfo: "Gesundheitsinformationen",
+                healthInfo: "Health information",
                 color: "Fellfarbe:",
                 searchByName: "Suche nach Name oder Zwingername",
-                dogDetails: "Hund Details",
+                dogDetails: "Dog details",
                 selectDogFirst: "Wählen Sie zuerst einen Rüden und eine Hündin",
                 loadingPedigree: "Stammbaum wird geladen...",
                 unknownAncestor: "Unbekannt",
@@ -183,11 +183,8 @@ class ReuTeefCombinatie {
         // Laad honden data
         await this.loadAllHonden();
         
-        // Initialiseer StamboomManager als deze nog niet bestaat
-        if (!this.stamboomManager && this.db) {
-            this.stamboomManager = new StamboomManager(this.db, this.currentLang);
-            await this.stamboomManager.initialize();
-        }
+        // Zorg dat StamboomManager geïnitialiseerd is
+        await this.ensureStamboomManager();
         
         content.innerHTML = `
             <div class="alert alert-info mb-4">
@@ -321,9 +318,7 @@ class ReuTeefCombinatie {
             <button type="button" class="btn btn-secondary" id="backBtn">
                 <i class="bi bi-arrow-left me-1"></i> ${t('back')}
             </button>
-            <button type="button" class="btn btn-purple" id="showPedigreeBtn" disabled>
-                <i class="bi bi-diagram-3 me-1"></i> ${t('showPedigree')}
-            </button>
+            <!-- Paarse knop verwijderd -->
         `;
         
         // Voeg CSS toe
@@ -332,10 +327,6 @@ class ReuTeefCombinatie {
         // Event handlers
         document.getElementById('backBtn').addEventListener('click', () => {
             this.goBack();
-        });
-        
-        document.getElementById('showPedigreeBtn').addEventListener('click', () => {
-            this.showCombinedPedigree();
         });
         
         // Setup autocomplete voor teef
@@ -350,6 +341,17 @@ class ReuTeefCombinatie {
         
         // Update button states
         this.updateButtonStates();
+    }
+    
+    async ensureStamboomManager() {
+        if (!this.stamboomManager && this.db) {
+            console.log('StamboomManager wordt geïnitialiseerd...');
+            this.stamboomManager = new StamboomManager(this.db, this.currentLang);
+            await this.stamboomManager.initialize();
+            console.log('StamboomManager geïnitialiseerd');
+        } else if (this.stamboomManager) {
+            console.log('StamboomManager bestaat al');
+        }
     }
     
     addStyles() {
@@ -525,6 +527,13 @@ class ReuTeefCombinatie {
                 #showFuturePedigreeBtn:hover {
                     transform: translateY(-2px);
                     box-shadow: 0 4px 15px rgba(25, 135, 84, 0.3);
+                }
+                
+                #showFuturePedigreeBtn:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                    transform: none;
+                    box-shadow: none;
                 }
                 
                 /* RESPONSIVE STYLES */
@@ -1165,19 +1174,14 @@ class ReuTeefCombinatie {
     }
     
     updateButtonStates() {
-        const showPedigreeBtn = document.getElementById('showPedigreeBtn');
         const showFuturePedigreeBtn = document.getElementById('showFuturePedigreeBtn');
         
         // Alleen beschikbaar als beide honden geselecteerd zijn
         const bothSelected = this.selectedTeef && this.selectedReu;
         
-        if (showPedigreeBtn) {
-            showPedigreeBtn.disabled = !bothSelected;
-            showPedigreeBtn.title = bothSelected ? '' : this.t('selectDogFirst');
-        }
-        
         if (showFuturePedigreeBtn) {
             showFuturePedigreeBtn.disabled = !bothSelected;
+            showFuturePedigreeBtn.title = bothSelected ? '' : this.t('selectDogFirst');
         }
     }
     
@@ -1198,9 +1202,14 @@ class ReuTeefCombinatie {
             // Voeg event listener toe aan knop
             const showFuturePedigreeBtn = document.getElementById('showFuturePedigreeBtn');
             if (showFuturePedigreeBtn) {
-                showFuturePedigreeBtn.onclick = () => {
-                    this.showFuturePuppyPedigree();
-                };
+                // Verwijder oude event listeners eerst
+                const newBtn = showFuturePedigreeBtn.cloneNode(true);
+                showFuturePedigreeBtn.parentNode.replaceChild(newBtn, showFuturePedigreeBtn);
+                
+                // Voeg nieuwe event listener toe
+                newBtn.addEventListener('click', async () => {
+                    await this.showFuturePuppyPedigree();
+                });
             }
         } else {
             // Verberg samenvatting
@@ -1224,25 +1233,14 @@ class ReuTeefCombinatie {
         }
     }
     
-    async showCombinedPedigree() {
-        if (!this.selectedTeef || !this.selectedReu) {
-            this.showAlert(this.t('selectDogFirst'), 'warning');
-            return;
-        }
-        
-        // Toon stamboom van de geselecteerde reu
-        if (this.stamboomManager) {
-            await this.stamboomManager.showPedigree(this.selectedReu);
-        } else {
-            this.showAlert('StamboomManager niet geïnitialiseerd', 'danger');
-        }
-    }
-    
     async showFuturePuppyPedigree() {
         if (!this.selectedTeef || !this.selectedReu) {
             this.showAlert(this.t('selectDogFirst'), 'warning');
             return;
         }
+        
+        // Zorg dat StamboomManager geïnitialiseerd is
+        await this.ensureStamboomManager();
         
         if (!this.stamboomManager) {
             this.showAlert('StamboomManager niet geïnitialiseerd', 'danger');
@@ -1265,18 +1263,11 @@ class ReuTeefCombinatie {
             vachtkleur: `${this.selectedReu.vachtkleur || ''}/${this.selectedTeef.vachtkleur || ''}`.trim()
         };
         
-        // Haal de complete stamboom op
-        try {
-            // Maak een aangepaste pedigree tree voor de toekomstige pup
-            const pedigreeTree = await this.createFuturePuppyPedigree(futurePuppy);
-            
-            // Toon de aangepaste modal voor toekomstige pup
-            await this.showFuturePuppyPedigreeModal(futurePuppy, pedigreeTree);
-            
-        } catch (error) {
-            console.error('Fout bij tonen toekomstige pup stamboom:', error);
-            this.showAlert('Kon toekomstige pup stamboom niet tonen', 'danger');
-        }
+        // Maak een aangepaste pedigree tree voor de toekomstige pup
+        const pedigreeTree = await this.createFuturePuppyPedigree(futurePuppy);
+        
+        // Toon de aangepaste modal voor toekomstige pup
+        await this.showFuturePuppyPedigreeModal(futurePuppy, pedigreeTree);
     }
     
     async createFuturePuppyPedigree(futurePuppy) {
