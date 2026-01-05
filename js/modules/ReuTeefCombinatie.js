@@ -95,22 +95,12 @@ class ReuTeefCombinatie {
                 eyesDist: "Ogen Dist",
                 eyesOther: "Ogen overig",
                 eyesUnknown: "Ogen niet bekend",
-                dwlmDnaFree: "DWLM vrij op DNA",
-                dwlmParentsFree: "DWLM vrij op ouders",
-                dwlmUnknown: "DWLM niet bekend",
+                dwlmDnaFree: "Dandy Walker (DNA) vrij",
+                dwlmParentsFree: "Dandy Walker (ouders) vrij",
+                dwlmUnknown: "Dandy Walker niet bekend",
                 thyroidTested: "Schildklier getest",
                 thyroidUnknown: "Schildklier niet bekend",
-                occurrences: "Aantal keer",
-                totalAncestors: "Totaal voorouders geanalyseerd",
-                // Nieuwe vertalingen voor gezondheidsanalyse
-                healthAnalysis: "Gezondheidsanalyse 6 generaties",
-                directAncestors: "Directe voorouders",
-                healthSummary: "Gezondheidsoverzicht",
-                good: "Goed",
-                moderate: "Matig",
-                poor: "Slecht",
-                unknown: "Onbekend",
-                healthScore: "Gezondheidsscore"
+                occurrences: "Aantal keer"
             },
             en: {
                 title: "Male and Female Combination",
@@ -185,22 +175,12 @@ class ReuTeefCombinatie {
                 eyesDist: "Eyes Dist",
                 eyesOther: "Eyes other",
                 eyesUnknown: "Eyes unknown",
-                dwlmDnaFree: "DWLM free on DNA",
-                dwlmParentsFree: "DWLM free on parents",
-                dwlmUnknown: "DWLM unknown",
+                dwlmDnaFree: "Dandy Walker (DNA) free",
+                dwlmParentsFree: "Dandy Walker (parents) free",
+                dwlmUnknown: "Dandy Walker unknown",
                 thyroidTested: "Thyroid tested",
                 thyroidUnknown: "Thyroid unknown",
-                occurrences: "Occurrences",
-                totalAncestors: "Total ancestors analyzed",
-                // New translations for health analysis
-                healthAnalysis: "Health analysis 6 generations",
-                directAncestors: "Direct ancestors",
-                healthSummary: "Health summary",
-                good: "Good",
-                moderate: "Moderate",
-                poor: "Poor",
-                unknown: "Unknown",
-                healthScore: "Health score"
+                occurrences: "Occurrences"
             },
             de: {
                 title: "Rüde und Hündin Kombination",
@@ -275,22 +255,12 @@ class ReuTeefCombinatie {
                 eyesDist: "Augen Dist",
                 eyesOther: "Augen sonstige",
                 eyesUnknown: "Augen unbekannt",
-                dwlmDnaFree: "DWLM frei auf DNA",
-                dwlmParentsFree: "DWLM frei auf Eltern",
-                dwlmUnknown: "DWLM unbekannt",
+                dwlmDnaFree: "Dandy Walker (DNA) frei",
+                dwlmParentsFree: "Dandy Walker (Eltern) frei",
+                dwlmUnknown: "Dandy Walker unbekannt",
                 thyroidTested: "Schilddrüse getestet",
                 thyroidUnknown: "Schilddrüse unbekannt",
-                occurrences: "Anzahl Mal",
-                totalAncestors: "Gesamte Vorfahren analysiert",
-                // Neue Übersetzungen für Gesundheitsanalyse
-                healthAnalysis: "Gesundheitsanalyse 6 Generationen",
-                directAncestors: "Direkte Vorfahren",
-                healthSummary: "Gesundheitsübersicht",
-                good: "Gut",
-                moderate: "Mäßig",
-                poor: "Schlecht",
-                unknown: "Unbekannt",
-                healthScore: "Gesundheitswert"
+                occurrences: "Anzahl Mal"
             }
         };
     }
@@ -691,33 +661,6 @@ class ReuTeefCombinatie {
                     color: #155724 !important;
                 }
                 
-                /* HEALTH SUMMARY STYLES */
-                .health-summary {
-                    display: flex;
-                    justify-content: space-between;
-                    margin-top: 20px;
-                    padding: 15px;
-                    background-color: #f8f9fa;
-                    border-radius: 8px;
-                    border: 1px solid #dee2e6;
-                }
-                
-                .summary-item {
-                    text-align: center;
-                    flex: 1;
-                }
-                
-                .summary-value {
-                    font-size: 1.5rem;
-                    font-weight: bold;
-                    margin-bottom: 5px;
-                }
-                
-                .summary-label {
-                    font-size: 0.85rem;
-                    color: #6c757d;
-                }
-                
                 /* RESPONSIVE STYLES */
                 @media (max-width: 768px) {
                     .search-input {
@@ -774,15 +717,6 @@ class ReuTeefCombinatie {
                     
                     .health-category {
                         padding-left: 8px;
-                    }
-                    
-                    .health-summary {
-                        flex-direction: column;
-                        gap: 15px;
-                    }
-                    
-                    .summary-item {
-                        flex: none;
                     }
                 }
                 
@@ -1478,63 +1412,48 @@ class ReuTeefCombinatie {
         
         // Initialiseer resultaat object
         const analysis = {
-            categories: {
-                hd: { name: t('hdA'), items: {} },
-                ed: { name: t('ed0'), items: {} },
-                pl: { name: t('pl0'), items: {} },
-                eyes: { name: t('eyesFree'), items: {} },
-                dwlm: { name: t('dwlmDnaFree'), items: {} },
-                thyroid: { name: t('thyroidTested'), items: {} }
-            },
             motherLine: { total: 0, counts: {} },
-            fatherLine: { total: 0, counts: {} },
-            summary: {
-                totalAncestors: 0,
-                goodHealth: 0,
-                moderateHealth: 0,
-                poorHealth: 0,
-                unknownHealth: 0
-            }
+            fatherLine: { total: 0, counts: {} }
         };
         
-        // Initialiseer alle items
+        // Definitie van alle gezondheidsitems
         const healthItems = [
             // HD items
-            { category: 'hd', key: 'hd_a', label: t('hdA') },
-            { category: 'hd', key: 'hd_b', label: t('hdB') },
-            { category: 'hd', key: 'hd_c', label: t('hdC') },
-            { category: 'hd', key: 'hd_d', label: t('hdD') },
-            { category: 'hd', key: 'hd_e', label: t('hdE') },
-            { category: 'hd', key: 'hd_unknown', label: t('hdUnknown') },
+            { key: 'hd_a', label: t('hdA') },
+            { key: 'hd_b', label: t('hdB') },
+            { key: 'hd_c', label: t('hdC') },
+            { key: 'hd_d', label: t('hdD') },
+            { key: 'hd_e', label: t('hdE') },
+            { key: 'hd_unknown', label: t('hdUnknown') },
             
             // ED items
-            { category: 'ed', key: 'ed_0', label: t('ed0') },
-            { category: 'ed', key: 'ed_1', label: t('ed1') },
-            { category: 'ed', key: 'ed_2', label: t('ed2') },
-            { category: 'ed', key: 'ed_3', label: t('ed3') },
-            { category: 'ed', key: 'ed_unknown', label: t('edUnknown') },
+            { key: 'ed_0', label: t('ed0') },
+            { key: 'ed_1', label: t('ed1') },
+            { key: 'ed_2', label: t('ed2') },
+            { key: 'ed_3', label: t('ed3') },
+            { key: 'ed_unknown', label: t('edUnknown') },
             
             // PL items
-            { category: 'pl', key: 'pl_0', label: t('pl0') },
-            { category: 'pl', key: 'pl_1', label: t('pl1') },
-            { category: 'pl', key: 'pl_2', label: t('pl2') },
-            { category: 'pl', key: 'pl_3', label: t('pl3') },
-            { category: 'pl', key: 'pl_unknown', label: t('plUnknown') },
+            { key: 'pl_0', label: t('pl0') },
+            { key: 'pl_1', label: t('pl1') },
+            { key: 'pl_2', label: t('pl2') },
+            { key: 'pl_3', label: t('pl3') },
+            { key: 'pl_unknown', label: t('plUnknown') },
             
             // Ogen items
-            { category: 'eyes', key: 'eyes_free', label: t('eyesFree') },
-            { category: 'eyes', key: 'eyes_dist', label: t('eyesDist') },
-            { category: 'eyes', key: 'eyes_other', label: t('eyesOther') },
-            { category: 'eyes', key: 'eyes_unknown', label: t('eyesUnknown') },
+            { key: 'eyes_free', label: t('eyesFree') },
+            { key: 'eyes_dist', label: t('eyesDist') },
+            { key: 'eyes_other', label: t('eyesOther') },
+            { key: 'eyes_unknown', label: t('eyesUnknown') },
             
-            // DWLM items
-            { category: 'dwlm', key: 'dwlm_dna_free', label: t('dwlmDnaFree') },
-            { category: 'dwlm', key: 'dwlm_parents_free', label: t('dwlmParentsFree') },
-            { category: 'dwlm', key: 'dwlm_unknown', label: t('dwlmUnknown') },
+            // Dandy Walker items (nu met correcte naam)
+            { key: 'dwlm_dna_free', label: t('dwlmDnaFree') },
+            { key: 'dwlm_parents_free', label: t('dwlmParentsFree') },
+            { key: 'dwlm_unknown', label: t('dwlmUnknown') },
             
             // Schildklier items
-            { category: 'thyroid', key: 'thyroid_tested', label: t('thyroidTested') },
-            { category: 'thyroid', key: 'thyroid_unknown', label: t('thyroidUnknown') }
+            { key: 'thyroid_tested', label: t('thyroidTested') },
+            { key: 'thyroid_unknown', label: t('thyroidUnknown') }
         ];
         
         // Initialiseer counts voor alle items
@@ -1545,7 +1464,6 @@ class ReuTeefCombinatie {
         
         // Verzamel alle voorouders (6 generaties)
         const ancestors = await this.collectAncestors(futurePuppy, 6);
-        analysis.summary.totalAncestors = ancestors.length;
         
         // Analyseer elk voorouder
         for (const ancestor of ancestors) {
@@ -1555,24 +1473,6 @@ class ReuTeefCombinatie {
             
             // Update totaal voor de lijn
             analysis[line].total++;
-            
-            // Analyseer gezondheid
-            const healthStatus = this.analyzeHealthStatus(ancestor);
-            
-            // Update summary
-            switch(healthStatus.overall) {
-                case 'good':
-                    analysis.summary.goodHealth++;
-                    break;
-                case 'moderate':
-                    analysis.summary.moderateHealth++;
-                    break;
-                case 'poor':
-                    analysis.summary.poorHealth++;
-                    break;
-                default:
-                    analysis.summary.unknownHealth++;
-            }
             
             // Update specifieke gezondheidsitems
             if (ancestor.heupdysplasie) {
@@ -1612,7 +1512,7 @@ class ReuTeefCombinatie {
             }
             
             if (ancestor.dandyWalker) {
-                const dwlmKey = this.getDWLMDKey(ancestor.dandyWalker);
+                const dwlmKey = this.getDWLMKey(ancestor.dandyWalker);
                 if (dwlmKey) {
                     analysis[line].counts[dwlmKey]++;
                 }
@@ -1703,59 +1603,6 @@ class ReuTeefCombinatie {
         return false;
     }
     
-    analyzeHealthStatus(dog) {
-        const status = { overall: 'unknown', details: {} };
-        
-        // HD score
-        if (dog.heupdysplasie) {
-            const hdScore = this.getHDScore(dog.heupdysplasie);
-            status.details.hd = { score: hdScore, value: dog.heupdysplasie };
-        }
-        
-        // ED score
-        if (dog.elleboogdysplasie) {
-            const edScore = this.getEDScore(dog.elleboogdysplasie);
-            status.details.ed = { score: edScore, value: dog.elleboogdysplasie };
-        }
-        
-        // PL score
-        if (dog.patella) {
-            const plScore = this.getPLScore(dog.patella);
-            status.details.pl = { score: plScore, value: dog.patella };
-        }
-        
-        // Ogen score
-        if (dog.ogen) {
-            const eyesScore = this.getEyesScore(dog.ogen);
-            status.details.eyes = { score: eyesScore, value: dog.ogen };
-        }
-        
-        // DWLM score
-        if (dog.dandyWalker) {
-            const dwlmScore = this.getDWLMDScore(dog.dandyWalker);
-            status.details.dwlm = { score: dwlmScore, value: dog.dandyWalker };
-        }
-        
-        // Schildklier
-        status.details.thyroid = { 
-            score: dog.schildklier ? 1 : 0, 
-            value: dog.schildklier || 'unknown' 
-        };
-        
-        // Bereken overall score
-        const scores = Object.values(status.details).map(d => d.score);
-        if (scores.length === 0) {
-            status.overall = 'unknown';
-        } else {
-            const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
-            if (avgScore >= 0.7) status.overall = 'good';
-            else if (avgScore >= 0.4) status.overall = 'moderate';
-            else status.overall = 'poor';
-        }
-        
-        return status;
-    }
-    
     getHDKey(hdValue) {
         const hd = (hdValue || '').toLowerCase().trim();
         if (hd.includes('a')) return 'hd_a';
@@ -1791,53 +1638,11 @@ class ReuTeefCombinatie {
         return 'eyes_other';
     }
     
-    getDWLMDKey(dwlmValue) {
+    getDWLMKey(dwlmValue) {
         const dwlm = (dwlmValue || '').toLowerCase().trim();
         if (dwlm.includes('dna')) return 'dwlm_dna_free';
         if (dwlm.includes('ouders') || dwlm.includes('parents')) return 'dwlm_parents_free';
         return null;
-    }
-    
-    getHDScore(hdValue) {
-        const hd = (hdValue || '').toLowerCase().trim();
-        if (hd.includes('a')) return 1.0;
-        if (hd.includes('b')) return 0.8;
-        if (hd.includes('c')) return 0.5;
-        if (hd.includes('d')) return 0.2;
-        if (hd.includes('e')) return 0.0;
-        return 0.5; // unknown
-    }
-    
-    getEDScore(edValue) {
-        const ed = (edValue || '').toLowerCase().trim();
-        if (ed.includes('0')) return 1.0;
-        if (ed.includes('1')) return 0.6;
-        if (ed.includes('2')) return 0.3;
-        if (ed.includes('3')) return 0.0;
-        return 0.5; // unknown
-    }
-    
-    getPLScore(plValue) {
-        const pl = (plValue || '').toLowerCase().trim();
-        if (pl.includes('0')) return 1.0;
-        if (pl.includes('1')) return 0.6;
-        if (pl.includes('2')) return 0.3;
-        if (pl.includes('3')) return 0.0;
-        return 0.5; // unknown
-    }
-    
-    getEyesScore(eyesValue) {
-        const eyes = (eyesValue || '').toLowerCase().trim();
-        if (eyes.includes('vrij') || eyes.includes('free')) return 1.0;
-        if (eyes.includes('dist')) return 0.4;
-        return 0.3; // other
-    }
-    
-    getDWLMDScore(dwlmValue) {
-        const dwlm = (dwlmValue || '').toLowerCase().trim();
-        if (dwlm.includes('dna')) return 1.0;
-        if (dwlm.includes('ouders') || dwlm.includes('parents')) return 0.7;
-        return 0.5; // unknown
     }
     
     async showStamboomWithFuturePuppy(futurePuppy, coiResult, healthAnalysis) {
@@ -1991,7 +1796,7 @@ class ReuTeefCombinatie {
             { key: 'eyes_other', label: t('eyesOther') },
             { key: 'eyes_unknown', label: t('eyesUnknown') },
             
-            // DWLM items
+            // Dandy Walker items
             { key: 'dwlm_dna_free', label: t('dwlmDnaFree') },
             { key: 'dwlm_parents_free', label: t('dwlmParentsFree') },
             { key: 'dwlm_unknown', label: t('dwlmUnknown') },
@@ -2020,32 +1825,6 @@ class ReuTeefCombinatie {
             `;
         });
         
-        // Genereer samenvatting
-        const summaryHTML = `
-            <div class="health-summary">
-                <div class="summary-item">
-                    <div class="summary-value">${analysis.summary.totalAncestors}</div>
-                    <div class="summary-label">${t('totalAncestors')}</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-value" style="color: #28a745;">${analysis.summary.goodHealth}</div>
-                    <div class="summary-label">${t('good')}</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-value" style="color: #fd7e14;">${analysis.summary.moderateHealth}</div>
-                    <div class="summary-label">${t('moderate')}</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-value" style="color: #dc3545;">${analysis.summary.poorHealth}</div>
-                    <div class="summary-label">${t('poor')}</div>
-                </div>
-                <div class="summary-item">
-                    <div class="summary-value" style="color: #6c757d;">${analysis.summary.unknownHealth}</div>
-                    <div class="summary-label">${t('unknown')}</div>
-                </div>
-            </div>
-        `;
-        
         return `
             <div class="mb-3">
                 <table class="health-analysis-table">
@@ -2061,7 +1840,6 @@ class ReuTeefCombinatie {
                     </tbody>
                 </table>
             </div>
-            ${summaryHTML}
         `;
     }
     
