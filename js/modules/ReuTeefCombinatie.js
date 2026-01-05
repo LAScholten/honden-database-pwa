@@ -1958,7 +1958,7 @@ class ReuTeefCombinatie {
                         </div>
                     </div>
                     
-                    <!-- GEZONDHEIDSINFORMATIE -->
+                    <!-- GEZONDHEIDSINFORMATIE - CORRECTE WEERGAVE -->
                     <div class="info-section mb-2">
                         <h6><i class="bi bi-heart-pulse me-1"></i> ${this.t('healthInfo')}</h6>
                         <div class="info-grid">
@@ -1996,7 +1996,7 @@ class ReuTeefCombinatie {
                                     <span class="info-value">${dog.ogen}</span>
                                     ${dog.ogenVerklaring ? `
                                     <div class="mt-1 small text-muted">
-                                        ${dog.ogenVerklaring}
+                                        ${this.t('eyesExplanation')}: ${dog.ogenVerklaring}
                                     </div>
                                     ` : ''}
                                 </div>
@@ -2019,7 +2019,7 @@ class ReuTeefCombinatie {
                                     <span class="info-value">${dog.schildklier}</span>
                                     ${dog.schildklierVerklaring ? `
                                     <div class="mt-1 small text-muted">
-                                        ${dog.schildklierVerklaring}
+                                        ${this.t('thyroidExplanation')}: ${dog.schildklierVerklaring}
                                     </div>
                                     ` : ''}
                                 </div>
