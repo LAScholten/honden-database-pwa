@@ -1390,7 +1390,7 @@ class ReuTeefCombinatie {
             const coiResult = this.coiCalculator.calculateCOI(futurePuppy.id);
             console.log('✅ COI resultaat via COICalculator:', coiResult);
             
-            // BEREKEN GEZONDHEIDSANALYSE
+            // BEREKEN GEZONDHEIDSANALYSE MET CORRECTE LOGICA
             const healthAnalysis = await this.analyzeHealthInLine(futurePuppy);
             console.log('✅ Gezondheidsanalyse resultaat:', healthAnalysis);
             
@@ -1446,7 +1446,7 @@ class ReuTeefCombinatie {
             { key: 'eyes_other', label: t('eyesOther') },
             { key: 'eyes_unknown', label: t('eyesUnknown') },
             
-            // Dandy Walker items (nu met correcte naam)
+            // Dandy Walker items
             { key: 'dwlm_dna_free', label: t('dwlmDnaFree') },
             { key: 'dwlm_parents_free', label: t('dwlmParentsFree') },
             { key: 'dwlm_unknown', label: t('dwlmUnknown') },
@@ -1462,92 +1462,43 @@ class ReuTeefCombinatie {
             analysis.fatherLine.counts[item.key] = 0;
         });
         
-        // Verzamel alle voorouders (6 generaties)
-        const ancestors = await this.collectAncestors(futurePuppy, 6);
+        // Verzamel alle voorouders SEPARATE voor moeder en vader
+        const motherAncestors = await this.collectAncestorsFromParent(this.selectedTeef, 6);
+        const fatherAncestors = await this.collectAncestorsFromParent(this.selectedReu, 6);
         
-        // Analyseer elk voorouder
-        for (const ancestor of ancestors) {
-            // Bepaal of voorouder in moeder- of vaderlijn zit
-            const isMotherLine = await this.isInMotherLine(futurePuppy, ancestor.id);
-            const line = isMotherLine ? 'motherLine' : 'fatherLine';
-            
-            // Update totaal voor de lijn
-            analysis[line].total++;
-            
-            // Update specifieke gezondheidsitems
-            if (ancestor.heupdysplasie) {
-                const hdKey = this.getHDKey(ancestor.heupdysplasie);
-                if (hdKey) {
-                    analysis[line].counts[hdKey]++;
-                }
-            } else {
-                analysis[line].counts['hd_unknown']++;
-            }
-            
-            if (ancestor.elleboogdysplasie) {
-                const edKey = this.getEDKey(ancestor.elleboogdysplasie);
-                if (edKey) {
-                    analysis[line].counts[edKey]++;
-                }
-            } else {
-                analysis[line].counts['ed_unknown']++;
-            }
-            
-            if (ancestor.patella) {
-                const plKey = this.getPLKey(ancestor.patella);
-                if (plKey) {
-                    analysis[line].counts[plKey]++;
-                }
-            } else {
-                analysis[line].counts['pl_unknown']++;
-            }
-            
-            if (ancestor.ogen) {
-                const eyesKey = this.getEyesKey(ancestor.ogen);
-                if (eyesKey) {
-                    analysis[line].counts[eyesKey]++;
-                }
-            } else {
-                analysis[line].counts['eyes_unknown']++;
-            }
-            
-            if (ancestor.dandyWalker) {
-                const dwlmKey = this.getDWLMKey(ancestor.dandyWalker);
-                if (dwlmKey) {
-                    analysis[line].counts[dwlmKey]++;
-                }
-            } else {
-                analysis[line].counts['dwlm_unknown']++;
-            }
-            
-            if (ancestor.schildklier) {
-                analysis[line].counts['thyroid_tested']++;
-            } else {
-                analysis[line].counts['thyroid_unknown']++;
-            }
+        console.log(`📊 Moederlijn voorouders: ${motherAncestors.length}, Vaderlijn voorouders: ${fatherAncestors.length}`);
+        
+        // Analyseer moederlijn
+        for (const ancestor of motherAncestors) {
+            analysis.motherLine.total++;
+            this.updateHealthCounts(analysis.motherLine.counts, ancestor);
+        }
+        
+        // Analyseer vaderlijn
+        for (const ancestor of fatherAncestors) {
+            analysis.fatherLine.total++;
+            this.updateHealthCounts(analysis.fatherLine.counts, ancestor);
         }
         
         return analysis;
     }
     
-    async collectAncestors(dog, generations) {
+    async collectAncestorsFromParent(parentDog, generations) {
         const ancestors = [];
-        const queue = [{ dog: dog, generation: 0 }];
+        const queue = [{ dog: parentDog, generation: 1 }]; // Start bij generatie 1 (ouder)
         const visited = new Set();
         
         while (queue.length > 0) {
             const { dog: currentDog, generation } = queue.shift();
             
-            if (!currentDog || visited.has(currentDog.id) || generation >= generations) {
+            if (!currentDog || visited.has(currentDog.id) || generation > generations) {
                 continue;
             }
             
             visited.add(currentDog.id);
             
-            // Voeg toe aan ancestors (exclusief de huidige hond zelf)
-            if (generation > 0) {
-                ancestors.push(currentDog);
-            }
+            // Voeg toe aan ancestors
+            ancestors.push(currentDog);
             
             // Voeg ouders toe aan queue
             if (currentDog.vaderId) {
@@ -1568,39 +1519,58 @@ class ReuTeefCombinatie {
         return ancestors;
     }
     
-    async isInMotherLine(puppy, ancestorId) {
-        // Recursieve functie om te bepalen of voorouder in moederlijn zit
-        const checkLine = async (currentDogId, isMotherSide) => {
-            if (currentDogId === ancestorId) {
-                return isMotherSide;
+    updateHealthCounts(counts, ancestor) {
+        // Update specifieke gezondheidsitems
+        if (ancestor.heupdysplasie) {
+            const hdKey = this.getHDKey(ancestor.heupdysplasie);
+            if (hdKey) {
+                counts[hdKey]++;
             }
-            
-            const dog = await this.getHondById(currentDogId);
-            if (!dog) return false;
-            
-            let found = false;
-            
-            // Check vader
-            if (dog.vaderId) {
-                found = await checkLine(dog.vaderId, isMotherSide);
-                if (found) return true;
-            }
-            
-            // Check moeder
-            if (dog.moederId) {
-                found = await checkLine(dog.moederId, isMotherSide);
-                if (found) return true;
-            }
-            
-            return false;
-        };
-        
-        // Start bij de moeder van de puppy
-        if (puppy.moederId) {
-            return await checkLine(puppy.moederId, true);
+        } else {
+            counts['hd_unknown']++;
         }
         
-        return false;
+        if (ancestor.elleboogdysplasie) {
+            const edKey = this.getEDKey(ancestor.elleboogdysplasie);
+            if (edKey) {
+                counts[edKey]++;
+            }
+        } else {
+            counts['ed_unknown']++;
+        }
+        
+        if (ancestor.patella) {
+            const plKey = this.getPLKey(ancestor.patella);
+            if (plKey) {
+                counts[plKey]++;
+            }
+        } else {
+            counts['pl_unknown']++;
+        }
+        
+        if (ancestor.ogen) {
+            const eyesKey = this.getEyesKey(ancestor.ogen);
+            if (eyesKey) {
+                counts[eyesKey]++;
+            }
+        } else {
+            counts['eyes_unknown']++;
+        }
+        
+        if (ancestor.dandyWalker) {
+            const dwlmKey = this.getDWLMKey(ancestor.dandyWalker);
+            if (dwlmKey) {
+                counts[dwlmKey]++;
+            }
+        } else {
+            counts['dwlm_unknown']++;
+        }
+        
+        if (ancestor.schildklier) {
+            counts['thyroid_tested']++;
+        } else {
+            counts['thyroid_unknown']++;
+        }
     }
     
     getHDKey(hdValue) {
@@ -1824,6 +1794,15 @@ class ReuTeefCombinatie {
                 </tr>
             `;
         });
+        
+        // Voeg totaalrij toe
+        tableRows += `
+            <tr style="border-top: 2px solid #dee2e6;">
+                <td class="health-category"><strong>Totaal voorouders:</strong></td>
+                <td class="mother-count"><strong>${analysis.motherLine.total}</strong></td>
+                <td class="father-count"><strong>${analysis.fatherLine.total}</strong></td>
+            </tr>
+        `;
         
         return `
             <div class="mb-3">
