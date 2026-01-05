@@ -100,7 +100,24 @@ class ReuTeefCombinatie {
                 dwlmUnknown: "Dandy Walker niet bekend",
                 thyroidTested: "Schildklier getest",
                 thyroidUnknown: "Schildklier niet bekend",
-                occurrences: "Aantal keer"
+                occurrences: "Aantal keer",
+                // HEALTH INFO TRANSLATIONS - TOEVOEGING
+                hipDysplasia: "Heupdysplasie",
+                elbowDysplasia: "Elleboogdysplasie",
+                patellaLuxation: "Patella Luxatie",
+                eyes: "Ogen",
+                eyesExplanation: "Verklaring ogen",
+                dandyWalker: "Dandy Walker Malformation",
+                thyroid: "Schildklier",
+                thyroidExplanation: "Toelichting schildklier",
+                country: "Land",
+                zipCode: "Postcode",
+                remarks: "Opmerkingen",
+                healthGrades: "Gegevens",
+                noAdditionalInfo: "Geen extra informatie beschikbaar",
+                grade: "Graad",
+                status: "Status",
+                notApplicable: "Niet van toepassing"
             },
             en: {
                 title: "Male and Female Combination",
@@ -180,7 +197,24 @@ class ReuTeefCombinatie {
                 dwlmUnknown: "Dandy Walker unknown",
                 thyroidTested: "Thyroid tested",
                 thyroidUnknown: "Thyroid unknown",
-                occurrences: "Occurrences"
+                occurrences: "Occurrences",
+                // HEALTH INFO TRANSLATIONS - ADDITION
+                hipDysplasia: "Hip Dysplasia",
+                elbowDysplasia: "Elbow Dysplasia",
+                patellaLuxation: "Patella Luxation",
+                eyes: "Eyes",
+                eyesExplanation: "Eye explanation",
+                dandyWalker: "Dandy Walker Malformation",
+                thyroid: "Thyroid",
+                thyroidExplanation: "Thyroid explanation",
+                country: "Country",
+                zipCode: "Zip code",
+                remarks: "Remarks",
+                healthGrades: "Data",
+                noAdditionalInfo: "No additional information available",
+                grade: "Grade",
+                status: "Status",
+                notApplicable: "Not applicable"
             },
             de: {
                 title: "Rüde und Hündin Kombination",
@@ -260,7 +294,24 @@ class ReuTeefCombinatie {
                 dwlmUnknown: "Dandy Walker unbekannt",
                 thyroidTested: "Schilddrüse getestet",
                 thyroidUnknown: "Schilddrüse unbekannt",
-                occurrences: "Anzahl Mal"
+                occurrences: "Anzahl Mal",
+                // HEALTH INFO TRANSLATIONS - ERGÄNZUNG
+                hipDysplasia: "Hüftdysplasie",
+                elbowDysplasia: "Ellbogendysplasie",
+                patellaLuxation: "Patella Luxation",
+                eyes: "Augen",
+                eyesExplanation: "Augenerklärung",
+                dandyWalker: "Dandy Walker Malformation",
+                thyroid: "Schilddrüse",
+                thyroidExplanation: "Schilddrüse Erklärung",
+                country: "Land",
+                zipCode: "Postleitzahl",
+                remarks: "Bemerkungen",
+                healthGrades: "Daten",
+                noAdditionalInfo: "Keine zusätzlichen Informationen verfügbar",
+                grade: "Grade",
+                status: "Status",
+                notApplicable: "Nicht zutreffend"
             }
         };
     }
@@ -1148,6 +1199,41 @@ class ReuTeefCombinatie {
         // Haal ouders informatie op
         const oudersInfo = await this.getOudersInfo(hond);
         
+        // Helper functie voor gezondheidsbadges - NET ALS IN SEARCHMANAGER
+        const getHealthBadge = (value, type) => {
+            if (!value || value === '') {
+                return `<span class="badge bg-secondary">${t('unknown')}</span>`;
+            }
+            
+            let badgeClass = '';
+            let badgeText = value;
+            
+            switch(type) {
+                case 'hip':
+                    badgeClass = 'badge-hd';
+                    break;
+                case 'elbow':
+                    badgeClass = 'badge-ed';
+                    break;
+                case 'patella':
+                    badgeClass = 'badge-pl';
+                    break;
+                case 'eyes':
+                    badgeClass = 'badge-eyes';
+                    break;
+                case 'dandy':
+                    badgeClass = 'badge-dandy';
+                    break;
+                case 'thyroid':
+                    badgeClass = 'badge-thyroid';
+                    break;
+                default:
+                    badgeClass = 'badge bg-secondary';
+            }
+            
+            return `<span class="badge ${badgeClass}">${badgeText}</span>`;
+        };
+        
         detailsContainer.innerHTML = `
             <div class="dog-details-card">
                 <div class="dog-details-header">
@@ -1230,38 +1316,44 @@ class ReuTeefCombinatie {
                             <div class="row">
                                 ${hond.heupdysplasie ? `
                                     <div class="col-md-6 mb-2">
-                                        <strong>HD:</strong> ${hond.heupdysplasie}
+                                        <strong>${t('hipDysplasia')}:</strong><br>
+                                        ${getHealthBadge(hond.heupdysplasie, 'hip')}
                                     </div>
                                 ` : ''}
                                 
                                 ${hond.elleboogdysplasie ? `
                                     <div class="col-md-6 mb-2">
-                                        <strong>ED:</strong> ${hond.elleboogdysplasie}
+                                        <strong>${t('elbowDysplasia')}:</strong><br>
+                                        ${getHealthBadge(hond.elleboogdysplasie, 'elbow')}
                                     </div>
                                 ` : ''}
                                 
                                 ${hond.patella ? `
                                     <div class="col-md-6 mb-2">
-                                        <strong>Patella:</strong> ${hond.patella}
+                                        <strong>${t('patellaLuxation')}:</strong><br>
+                                        ${getHealthBadge(hond.patella, 'patella')}
                                     </div>
                                 ` : ''}
                                 
                                 ${hond.ogen ? `
                                     <div class="col-md-6 mb-2">
-                                        <strong>Ogen:</strong> ${hond.ogen}
+                                        <strong>${t('eyes')}:</strong><br>
+                                        ${getHealthBadge(hond.ogen, 'eyes')}
                                         ${hond.ogenVerklaring ? `<br><small>${hond.ogenVerklaring}</small>` : ''}
                                     </div>
                                 ` : ''}
                                 
                                 ${hond.dandyWalker ? `
                                     <div class="col-md-6 mb-2">
-                                        <strong>Dandy Walker:</strong> ${hond.dandyWalker}
+                                        <strong>${t('dandyWalker')}:</strong><br>
+                                        ${getHealthBadge(hond.dandyWalker, 'dandy')}
                                     </div>
                                 ` : ''}
                                 
                                 ${hond.schildklier ? `
                                     <div class="col-md-6 mb-2">
-                                        <strong>Schildklier:</strong> ${hond.schildklier}
+                                        <strong>${t('thyroid')}:</strong><br>
+                                        ${getHealthBadge(hond.schildklier, 'thyroid')}
                                         ${hond.schildklierVerklaring ? `<br><small>${hond.schildklierVerklaring}</small>` : ''}
                                     </div>
                                 ` : ''}
@@ -1748,8 +1840,8 @@ class ReuTeefCombinatie {
                 if (this.stamboomManager) {
                     await this.stamboomManager.showDogDetailPopup(fullDog, relation);
                 } else {
-                    // Fallback
-                    this.showDogPopup(fullDog, relation);
+                    // Fallback - gebruik nu de verbeterde showDogPopup met juiste gezondheidsinfo
+                    await this.showDogPopup(fullDog, relation);
                 }
             };
             
@@ -1780,8 +1872,8 @@ class ReuTeefCombinatie {
                 if (this.stamboomManager) {
                     await this.stamboomManager.showDogDetailPopup(fullDog, relation);
                 } else {
-                    // Fallback
-                    this.showDogPopup(fullDog, relation);
+                    // Fallback - gebruik nu de verbeterde showDogPopup met juiste gezondheidsinfo
+                    await this.showDogPopup(fullDog, relation);
                 }
             };
             
@@ -1792,7 +1884,59 @@ class ReuTeefCombinatie {
     }
     
     async showDogPopup(dog, relation) {
-        // Maak een eenvoudige popup als StamboomManager niet beschikbaar is
+        const t = this.t.bind(this);
+        
+        // Helper functie voor gezondheidsbadges - ZELFDE ALS IN showHondDetails
+        const getHealthBadge = (value, type) => {
+            if (!value || value === '') {
+                return `<span class="badge bg-secondary">${t('unknown')}</span>`;
+            }
+            
+            let badgeClass = '';
+            let badgeText = value;
+            
+            switch(type) {
+                case 'hip':
+                    badgeClass = 'badge-hd';
+                    break;
+                case 'elbow':
+                    badgeClass = 'badge-ed';
+                    break;
+                case 'patella':
+                    badgeClass = 'badge-pl';
+                    break;
+                case 'eyes':
+                    badgeClass = 'badge-eyes';
+                    break;
+                case 'dandy':
+                    badgeClass = 'badge-dandy';
+                    break;
+                case 'thyroid':
+                    badgeClass = 'badge-thyroid';
+                    break;
+                default:
+                    badgeClass = 'badge bg-secondary';
+            }
+            
+            return `<span class="badge ${badgeClass}">${badgeText}</span>`;
+        };
+        
+        // Formateer datum
+        const formatDate = (dateString) => {
+            if (!dateString) return '';
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString(this.currentLang === 'nl' ? 'nl-NL' : 
+                                              this.currentLang === 'de' ? 'de-DE' : 'en-US');
+            } catch {
+                return dateString;
+            }
+        };
+        
+        const genderText = dog.geslacht === 'reuen' ? t('genderReu') : 
+                          dog.geslacht === 'teven' ? t('genderTeef') : t('unknown');
+        
+        // Maak een eenvoudige popup die WEL de juiste gezondheidsinformatie toont
         const popupHTML = `
             <div class="dog-detail-popup">
                 <div class="popup-header">
@@ -1809,7 +1953,7 @@ class ReuTeefCombinatie {
                             ${dog.stamboomnr ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
-                                    <span class="info-label">${this.t('pedigreeNumber')}:</span>
+                                    <span class="info-label">${t('pedigreeNumber')}:</span>
                                     <span class="info-value">${dog.stamboomnr}</span>
                                 </div>
                             </div>
@@ -1818,7 +1962,7 @@ class ReuTeefCombinatie {
                             ${dog.ras ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
-                                    <span class="info-label">${this.t('breed')}:</span>
+                                    <span class="info-label">${t('breed')}:</span>
                                     <span class="info-value">${dog.ras}</span>
                                 </div>
                             </div>
@@ -1827,33 +1971,47 @@ class ReuTeefCombinatie {
                             <div class="info-row">
                                 <div class="info-item info-item-full">
                                     <span class="info-label">Geslacht:</span>
-                                    <span class="info-value">
-                                        ${dog.geslacht === 'reuen' ? this.t('genderReu') : 
-                                          dog.geslacht === 'teven' ? this.t('genderTeef') : this.t('unknown')}
-                                    </span>
+                                    <span class="info-value">${genderText}</span>
                                 </div>
                             </div>
                             
                             ${dog.vachtkleur ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
-                                    <span class="info-label">${this.t('color')}:</span>
+                                    <span class="info-label">${t('color')}:</span>
                                     <span class="info-value">${dog.vachtkleur}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.geboortedatum ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${t('birthDate')}:</span>
+                                    <span class="info-value">${formatDate(dog.geboortedatum)}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.overlijdensdatum ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${t('deathDate')}:</span>
+                                    <span class="info-value">${formatDate(dog.overlijdensdatum)}</span>
                                 </div>
                             </div>
                             ` : ''}
                         </div>
                     </div>
                     
-                    ${dog.heupdysplasie || dog.elleboogdysplasie || dog.patella || dog.ogen || dog.dandyWalker || dog.schildklier ? `
                     <div class="info-section mb-2">
-                        <h6><i class="bi bi-heart-pulse me-1"></i> ${this.t('healthInfo')}</h6>
+                        <h6><i class="bi bi-heart-pulse me-1"></i> ${t('healthInfo')}</h6>
                         <div class="info-grid">
                             ${dog.heupdysplasie ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
-                                    <span class="info-label">${this.t('hdA')}:</span>
-                                    <span class="info-value">${dog.heupdysplasie}</span>
+                                    <span class="info-label">${t('hipDysplasia')}:</span>
+                                    <div class="info-value">${getHealthBadge(dog.heupdysplasie, 'hip')}</div>
                                 </div>
                             </div>
                             ` : ''}
@@ -1861,8 +2019,8 @@ class ReuTeefCombinatie {
                             ${dog.elleboogdysplasie ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
-                                    <span class="info-label">${this.t('ed0')}:</span>
-                                    <span class="info-value">${dog.elleboogdysplasie}</span>
+                                    <span class="info-label">${t('elbowDysplasia')}:</span>
+                                    <div class="info-value">${getHealthBadge(dog.elleboogdysplasie, 'elbow')}</div>
                                 </div>
                             </div>
                             ` : ''}
@@ -1870,8 +2028,8 @@ class ReuTeefCombinatie {
                             ${dog.patella ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
-                                    <span class="info-label">${this.t('pl0')}:</span>
-                                    <span class="info-value">${dog.patella}</span>
+                                    <span class="info-label">${t('patellaLuxation')}:</span>
+                                    <div class="info-value">${getHealthBadge(dog.patella, 'patella')}</div>
                                 </div>
                             </div>
                             ` : ''}
@@ -1879,8 +2037,9 @@ class ReuTeefCombinatie {
                             ${dog.ogen ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
-                                    <span class="info-label">Ogen:</span>
-                                    <span class="info-value">${dog.ogen}</span>
+                                    <span class="info-label">${t('eyes')}:</span>
+                                    <div class="info-value">${getHealthBadge(dog.ogen, 'eyes')}</div>
+                                    ${dog.ogenVerklaring ? `<div class="info-value"><small>${dog.ogenVerklaring}</small></div>` : ''}
                                 </div>
                             </div>
                             ` : ''}
@@ -1888,8 +2047,8 @@ class ReuTeefCombinatie {
                             ${dog.dandyWalker ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
-                                    <span class="info-label">Dandy Walker:</span>
-                                    <span class="info-value">${dog.dandyWalker}</span>
+                                    <span class="info-label">${t('dandyWalker')}:</span>
+                                    <div class="info-value">${getHealthBadge(dog.dandyWalker, 'dandy')}</div>
                                 </div>
                             </div>
                             ` : ''}
@@ -1897,8 +2056,42 @@ class ReuTeefCombinatie {
                             ${dog.schildklier ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
-                                    <span class="info-label">Schildklier:</span>
-                                    <span class="info-value">${dog.schildklier}</span>
+                                    <span class="info-label">${t('thyroid')}:</span>
+                                    <div class="info-value">${getHealthBadge(dog.schildklier, 'thyroid')}</div>
+                                    ${dog.schildklierVerklaring ? `<div class="info-value"><small>${dog.schildklierVerklaring}</small></div>` : ''}
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    ${dog.opmerkingen || dog.land || dog.postcode ? `
+                    <div class="info-section mb-2">
+                        <h6><i class="bi bi-info-circle me-1"></i> ${t('additionalInfo')}</h6>
+                        <div class="info-grid">
+                            ${dog.land ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${t('country')}:</span>
+                                    <span class="info-value">${dog.land}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.postcode ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${t('zipCode')}:</span>
+                                    <span class="info-value">${dog.postcode}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.opmerkingen ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${t('remarks')}:</span>
+                                    <div class="info-value">${dog.opmerkingen}</div>
                                 </div>
                             </div>
                             ` : ''}
@@ -1908,7 +2101,7 @@ class ReuTeefCombinatie {
                 </div>
                 <div class="popup-footer">
                     <button type="button" class="btn btn-secondary popup-close-btn">
-                        <i class="bi bi-x-circle me-1"></i> ${this.t('closePopup')}
+                        <i class="bi bi-x-circle me-1"></i> ${t('closePopup')}
                     </button>
                 </div>
             </div>
