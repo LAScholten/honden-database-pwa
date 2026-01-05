@@ -14,6 +14,7 @@ class ReuTeefCombinatie {
         this.selectedReu = null;
         this.allHonden = [];
         this.hondenCache = new Map();
+        this.fullHondenCache = new Map(); // NIEUW: Cache voor volledige hond gegevens
         
         // Stamboom Manager instance
         this.stamboomManager = null;
@@ -196,7 +197,7 @@ class ReuTeefCombinatie {
                 pedigreeTitle: "Zukünftiger Welpen-Stammbaum",
                 close: "Schließen",
                 loading: "Laden...",
-                noDogFound: "Kein Hund gefunden",
+                noDogFound: "Kein Hund gefonden",
                 unknownBreed: "Unbekannte Rasse",
                 genderTeef: "Hündin",
                 genderReu: "Rüde",
@@ -293,6 +294,7 @@ class ReuTeefCombinatie {
         this.selectedTeef = null;
         this.selectedReu = null;
         this.hondenCache.clear();
+        this.fullHondenCache.clear();
         
         // Laad honden data
         await this.loadAllHonden();
@@ -808,10 +810,23 @@ class ReuTeefCombinatie {
     async getHondByIdFromDb(id) {
         // Directe database call voor volledige informatie
         try {
+            // Controleer eerst volledige cache
+            if (this.fullHondenCache.has(id)) {
+                const cached = this.fullHondenCache.get(id);
+                console.log(`✅ getHondByIdFromDb(${id}) uit volledige cache: HD=${cached.heupdysplasie}, ED=${cached.elleboogdysplasie}`);
+                return cached;
+            }
+            
             const hond = await this.db.getHondById(id);
             if (hond) {
-                console.log(`✅ getHondByIdFromDb(${id}): HD=${hond.heupdysplasie}, ED=${hond.elleboogdysplasie}`);
+                console.log(`✅ getHondByIdFromDb(${id}) uit database: HD=${hond.heupdysplasie}, ED=${hond.elleboogdysplasie}`);
+                // Voeg toe aan beide caches
                 this.hondenCache.set(id, hond);
+                this.fullHondenCache.set(id, hond);
+                if (hond.stamboomnr) {
+                    this.hondenCache.set(hond.stamboomnr, hond);
+                    this.fullHondenCache.set(hond.stamboomnr, hond);
+                }
             }
             return hond;
         } catch (error) {
@@ -1320,7 +1335,7 @@ class ReuTeefCombinatie {
         
         // Zoek vader
         if (hond.vaderId) {
-            result.vader = await this.getHondById(hond.vaderId);
+            result.vader = await this.getHondByIdFromDb(hond.vaderId); // Gebruik volledige info
         } else if (hond.vader) {
             // Zoek vader op naam of stamboomnummer
             result.vader = await this.findHondByNameOrPedigree(hond.vader);
@@ -1328,7 +1343,7 @@ class ReuTeefCombinatie {
         
         // Zoek moeder
         if (hond.moederId) {
-            result.moeder = await this.getHondById(hond.moederId);
+            result.moeder = await this.getHondByIdFromDb(hond.moederId); // Gebruik volledige info
         } else if (hond.moeder) {
             // Zoek moeder op naam of stamboomnummer
             result.moeder = await this.findHondByNameOrPedigree(hond.moeder);
@@ -1670,11 +1685,18 @@ class ReuTeefCombinatie {
             const originalDogs = [...this.stamboomManager.allDogs];
             
             // Zorg dat ouders in de StamboomManager cache zitten
+            // MAAR gebruik de volledige gegevens uit getHondByIdFromDb
             if (this.selectedReu) {
-                this.stamboomManager.allDogs.push(this.selectedReu);
+                const fullReu = await this.getHondByIdFromDb(this.selectedReu.id);
+                if (fullReu) {
+                    this.stamboomManager.allDogs.push(fullReu);
+                }
             }
             if (this.selectedTeef) {
-                this.stamboomManager.allDogs.push(this.selectedTeef);
+                const fullTeef = await this.getHondByIdFromDb(this.selectedTeef.id);
+                if (fullTeef) {
+                    this.stamboomManager.allDogs.push(fullTeef);
+                }
             }
             
             this.stamboomManager.allDogs.push(futurePuppy);
@@ -1682,8 +1704,8 @@ class ReuTeefCombinatie {
             try {
                 await this.stamboomManager.showPedigree(futurePuppy);
                 
-                // VOEG CLICK EVENT TOE
-                setTimeout(() => {
+                // VOEG CLICK EVENT TOE - PASS DE VOLLEDIGE HOND DOOR
+                setTimeout(async () => {
                     this.addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis);
                 }, 100);
                 
@@ -1712,6 +1734,331 @@ class ReuTeefCombinatie {
             if (clickHint) {
                 clickHint.innerHTML = '<i class="bi bi-info-circle"></i> ' + this.t('clickForDetails');
             }
+        }
+        
+        // OOK: VERVANG DE BESTAANDE CLICK HANDLERS VOOR DE OUDERDIEREN
+        const setupExistingClickHandlers = () => {
+            const parentCards = document.querySelectorAll('.pedigree-card-compact.horizontal[data-dog-id]:not(.main-dog-compact)');
+            parentCards.forEach(async (card) => {
+                const dogId = parseInt(card.getAttribute('data-dog-id'));
+                if (dogId <= 0 || dogId === futurePuppy.id) return;
+                
+                // Haal de volledige hond op voor de details
+                const fullDog = await this.getHondByIdFromDb(dogId);
+                if (!fullDog) return;
+                
+                // Verwijder bestaande event listener
+                const newCard = card.cloneNode(true);
+                card.parentNode.replaceChild(newCard, card);
+                
+                // Voeg nieuwe event listener toe met volledige hond
+                newCard.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    
+                    const relation = newCard.getAttribute('data-relation') || '';
+                    const generation = parseInt(newCard.getAttribute('data-generation') || '0');
+                    
+                    // Toon de details popup met volledige hond informatie
+                    await this.showDogDetailPopupInPedigree(fullDog, relation, generation);
+                });
+                
+                newCard.style.cursor = 'pointer';
+            });
+        };
+        
+        setTimeout(setupExistingClickHandlers, 200);
+    }
+    
+    async showDogDetailPopupInPedigree(dog, relation, generation) {
+        // Gebruik de bestaande stamboomManager popup functionaliteit
+        if (this.stamboomManager && typeof this.stamboomManager.showDogDetailPopup === 'function') {
+            await this.stamboomManager.showDogDetailPopup(dog, relation);
+            return;
+        }
+        
+        // Fallback naar aangepaste popup
+        const popupHTML = await this.getDogDetailPopupHTML(dog, relation);
+        this.ensurePopupContainer();
+        
+        const overlay = document.getElementById('pedigreePopupOverlay');
+        const container = document.getElementById('pedigreePopupContainer');
+        
+        if (container) {
+            container.innerHTML = popupHTML;
+            overlay.style.display = 'flex';
+            this.setupPopupEventListeners();
+        }
+    }
+    
+    async getDogDetailPopupHTML(dog, relation = '') {
+        if (!dog) return '';
+        
+        const genderText = dog.geslacht === 'reuen' ? this.t('genderReu') : 
+                          dog.geslacht === 'teven' ? this.t('genderTeef') : this.t('unknown');
+        
+        // Bereken COI waarden
+        let coiValues = { coi6Gen: '0.0', coiAllGen: '0.0' };
+        if (this.coiCalculator) {
+            try {
+                coiValues = this.coiCalculator.calculateCOI(dog.id);
+            } catch (error) {
+                console.warn('Kon COI niet berekenen voor hond:', dog.id, error);
+            }
+        }
+        
+        const coi6Color = this.getCOIColor(coiValues.coi6Gen);
+        const coiAllColor = this.getCOIColor(coiValues.coiAllGen);
+        
+        // Haal thumbnails op als de stamboomManager beschikbaar is
+        let thumbnailsHTML = '';
+        if (this.stamboomManager && typeof this.stamboomManager.getDogThumbnails === 'function') {
+            try {
+                const thumbnails = await this.stamboomManager.getDogThumbnails(dog.id, 9);
+                if (thumbnails && thumbnails.length > 0) {
+                    thumbnailsHTML = `
+                        <div class="info-section mb-3">
+                            <h6><i class="bi bi-camera me-1"></i> ${this.t('photos')} (${thumbnails.length})</h6>
+                            <div class="photos-grid">
+                                ${thumbnails.map((thumb, index) => `
+                                    <div class="photo-thumbnail" 
+                                         data-photo-id="${thumb.id}" 
+                                         data-dog-id="${dog.id}" 
+                                         data-photo-index="${index}"
+                                         data-is-thumbnail="true">
+                                        <img src="${thumb.thumbnail}" 
+                                             alt="${dog.naam || ''} - ${thumb.filename || ''}" 
+                                             class="thumbnail-img"
+                                             loading="lazy">
+                                        <div class="photo-hover">
+                                            <i class="bi bi-zoom-in"></i>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="photo-hint">
+                                <small class="text-muted"><i class="bi bi-info-circle me-1"></i> ${this.t('clickToEnlarge')}</small>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.warn('Kon thumbnails niet ophalen:', error);
+            }
+        }
+        
+        // Maak een gecombineerde naam+kennel string voor de header
+        const combinedName = dog.naam || this.t('unknown');
+        const showKennel = dog.kennelnaam && dog.kennelnaam.trim() !== '';
+        const kennelSuffix = showKennel ? ` ${dog.kennelnaam}` : '';
+        const headerText = combinedName + kennelSuffix;
+        
+        return `
+            <div class="dog-detail-popup">
+                <div class="popup-header">
+                    <h5 class="popup-title">
+                        <i class="bi ${dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 'bi-gender-female text-danger'} me-2"></i>
+                        ${headerText}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" aria-label="${this.t('close')}"></button>
+                </div>
+                <div class="popup-body">
+                    <!-- THUMBNAILS SECTIE BOVENAAN (indien beschikbaar) -->
+                    ${thumbnailsHTML}
+                    
+                    <!-- BASISGEGEVENS -->
+                    <div class="info-section mb-2">
+                        <h6><i class="bi bi-card-text me-1"></i> Basisgegevens</h6>
+                        <div class="info-grid">
+                            <!-- Stamboomnummer en Ras naast elkaar -->
+                            <div class="info-row">
+                                ${dog.stamboomnr ? `
+                                <div class="info-item info-item-half">
+                                    <span class="info-label">${this.t('pedigreeNumber')}:</span>
+                                    <span class="info-value">${dog.stamboomnr}</span>
+                                </div>
+                                ` : ''}
+                                
+                                ${dog.ras ? `
+                                <div class="info-item info-item-half">
+                                    <span class="info-label">${this.t('breed')}:</span>
+                                    <span class="info-value">${dog.ras}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                            
+                            <!-- Geslacht en Vachtkleur naast elkaar -->
+                            <div class="info-row">
+                                <div class="info-item info-item-half">
+                                    <span class="info-label">${this.t('gender')}:</span>
+                                    <span class="info-value">${genderText}</span>
+                                </div>
+                                
+                                ${dog.vachtkleur ? `
+                                <div class="info-item info-item-half">
+                                    <span class="info-label">${this.t('coatColor')}:</span>
+                                    <span class="info-value">${dog.vachtkleur}</span>
+                                </div>
+                                ` : ''}
+                            </div>
+                            
+                            <!-- COI waarden naast elkaar -->
+                            <div class="info-row">
+                                <div class="info-item info-item-half">
+                                    <span class="info-label">${this.t('coi6Gen')}:</span>
+                                    <span class="info-value coi-value" style="color: ${coi6Color}; font-weight: bold;">
+                                        ${coiValues.coi6Gen}%
+                                    </span>
+                                </div>
+                                
+                                <div class="info-item info-item-half">
+                                    <span class="info-label">${this.t('coiAllGen')}:</span>
+                                    <span class="info-value coi-value" style="color: ${coiAllColor}; font-weight: bold;">
+                                        ${coiValues.coiAllGen}%
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <!-- Datums -->
+                            ${dog.geboortedatum ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('birthDate')}:</span>
+                                    <span class="info-value">${this.formatDate(dog.geboortedatum)}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.overlijdensdatum ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('deathDate')}:</span>
+                                    <span class="info-value">${this.formatDate(dog.overlijdensdatum)}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            <!-- Land en postcode -->
+                            ${dog.land ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('country')}:</span>
+                                    <span class="info-value">${dog.land}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.postcode ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('zipCode')}:</span>
+                                    <span class="info-value">${dog.postcode}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    <!-- GEZONDHEIDSINFORMATIE -->
+                    <div class="info-section mb-2">
+                        <h6><i class="bi bi-heart-pulse me-1"></i> ${this.t('healthInfo')}</h6>
+                        <div class="info-grid">
+                            ${dog.heupdysplasie ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('hipDysplasia')}:</span>
+                                    <span class="info-value">${dog.heupdysplasie}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.elleboogdysplasie ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('elbowDysplasia')}:</span>
+                                    <span class="info-value">${dog.elleboogdysplasie}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.patella ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('patellaLuxation')}:</span>
+                                    <span class="info-value">${dog.patella}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.ogen ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('eyes')}:</span>
+                                    <span class="info-value">${dog.ogen}</span>
+                                    ${dog.ogenVerklaring ? `
+                                    <div class="mt-1 small text-muted">
+                                        ${dog.ogenVerklaring}
+                                    </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.dandyWalker ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('dandyWalker')}:</span>
+                                    <span class="info-value">${dog.dandyWalker}</span>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            ${dog.schildklier ? `
+                            <div class="info-row">
+                                <div class="info-item info-item-full">
+                                    <span class="info-label">${this.t('thyroid')}:</span>
+                                    <span class="info-value">${dog.schildklier}</span>
+                                    ${dog.schildklierVerklaring ? `
+                                    <div class="mt-1 small text-muted">
+                                        ${dog.schildklierVerklaring}
+                                    </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    ${dog.opmerkingen ? `
+                    <div class="info-section mb-2">
+                        <h6><i class="bi bi-chat-text me-1"></i> ${this.t('remarks')}</h6>
+                        <div class="remarks-box">
+                            ${dog.opmerkingen}
+                        </div>
+                    </div>
+                    ` : `
+                    <div class="info-section mb-2">
+                        <h6><i class="bi bi-chat-text me-1"></i> ${this.t('remarks')}</h6>
+                        <div class="text-muted">${this.t('noRemarks')}</div>
+                    </div>
+                    `}
+                </div>
+                <div class="popup-footer">
+                    <button type="button" class="btn btn-secondary popup-close-btn">
+                        <i class="bi bi-x-circle me-1"></i> ${this.t('closePopup')}
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+    
+    formatDate(dateString) {
+        if (!dateString) return '';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString(this.currentLang === 'nl' ? 'nl-NL' : 
+                                          this.currentLang === 'de' ? 'de-DE' : 'en-US');
+        } catch {
+            return dateString;
         }
     }
     
