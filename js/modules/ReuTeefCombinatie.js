@@ -60,7 +60,8 @@ class ReuTeefCombinatie {
                 futurePuppyDescription: "Voorspelling van combinatie {reu} × {teef}",
                 futurePuppyTitle: "Stamboom voor toekomstige pup uit combinatie {reu} × {teef}",
                 predictedPedigree: "Voorspelde stamboom",
-                combinedParents: "Combinatie ouders"
+                combinedParents: "Combinatie ouders",
+                print: "Afdrukken"
             },
             en: {
                 title: "Male and Female Combination",
@@ -103,7 +104,8 @@ class ReuTeefCombinatie {
                 futurePuppyDescription: "Prediction of combination {father} × {mother}",
                 futurePuppyTitle: "Pedigree for future puppy from combination {father} × {mother}",
                 predictedPedigree: "Predicted pedigree",
-                combinedParents: "Combination parents"
+                combinedParents: "Combination parents",
+                print: "Print"
             },
             de: {
                 title: "Rüde und Hündin Kombination",
@@ -146,7 +148,8 @@ class ReuTeefCombinatie {
                 futurePuppyDescription: "Vorhersage der Kombination {father} × {mother}",
                 futurePuppyTitle: "Stamboom für zukünftigen Welpen aus Kombination {father} × {mother}",
                 predictedPedigree: "Vorhergesagter Stammbaum",
-                combinedParents: "Kombination Eltern"
+                combinedParents: "Kombination Eltern",
+                print: "Drucken"
             }
         };
     }
@@ -1356,50 +1359,61 @@ class ReuTeefCombinatie {
         const modalId = 'futurePuppyPedigreeModal';
         let modal = document.getElementById(modalId);
         
-        if (!modal) {
-            modal = document.createElement('div');
-            modal.id = modalId;
-            modal.className = 'modal fade';
-            modal.tabIndex = -1;
-            modal.setAttribute('aria-hidden', 'true');
-            
-            modal.innerHTML = `
-                <div class="modal-dialog modal-fullscreen">
-                    <div class="modal-content">
-                        <div class="modal-header bg-success text-white">
-                            <h5 class="modal-title" id="futurePuppyPedigreeModalLabel">
-                                <i class="bi bi-stars me-2"></i>
-                                ${this.t('futurePuppyTitle', { 
-                                    reu: this.selectedReu.naam || '?', 
-                                    teef: this.selectedTeef.naam || '?' 
-                                })}
-                            </h5>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-sm btn-light btn-print">
-                                    <i class="bi bi-printer me-1"></i> ${this.t('print')}
-                                </button>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${this.t('close')}"></button>
-                            </div>
+        // VERWIJDER EXISTING MODAL ALS DIE ER IS
+        if (modal) {
+            modal.remove();
+        }
+        
+        // NIEUWE MODAL MAKEN MET ZELFDE LAYOUT ALS STAMBOOMMANAGER
+        modal = document.createElement('div');
+        modal.id = modalId;
+        modal.className = 'modal fade';
+        modal.tabIndex = -1;
+        modal.setAttribute('aria-hidden', 'true');
+        
+        // Gebruik EXACT dezelfde HTML structuur als StamboomManager
+        modal.innerHTML = `
+            <div class="modal-dialog modal-fullscreen">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title" id="futurePuppyPedigreeModalLabel">
+                            <i class="bi bi-diagram-3 me-2"></i> ${this.t('futurePuppyTitle', { 
+                                reu: this.selectedReu.naam || '?', 
+                                teef: this.selectedTeef.naam || '?' 
+                            })}
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-light btn-print">
+                                <i class="bi bi-printer me-1"></i> ${this.t('print')}
+                            </button>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${this.t('close')}"></button>
                         </div>
-                        <div class="modal-body p-0" style="overflow: hidden;">
-                            <!-- STAMBOOM WORDT HIER INGELADEN -->
-                            <div class="pedigree-mobile-wrapper" id="futurePuppyPedigreeMobileWrapper">
-                                <div class="pedigree-container-compact" id="futurePuppyPedigreeContainer">
-                                    <div class="text-center py-5">
-                                        <div class="spinner-border text-success" role="status">
-                                            <span class="visually-hidden">${this.t('loadingPedigree')}</span>
-                                        </div>
-                                        <p class="mt-3">${this.t('loadingPedigree')}</p>
+                    </div>
+                    <div class="modal-body p-0" style="overflow: hidden;">
+                        <!-- MOBIELE CONTAINER - ZELFDE LAYOUT ALS STAMBOOMMANAGER -->
+                        <div class="pedigree-mobile-wrapper" id="futurePuppyPedigreeMobileWrapper">
+                            <div class="pedigree-container-compact" id="futurePuppyPedigreeContainer">
+                                <div class="text-center py-5">
+                                    <div class="spinner-border text-success" role="status">
+                                        <span class="visually-hidden">${this.t('loadingPedigree')}</span>
                                     </div>
+                                    <p class="mt-3">${this.t('loadingPedigree')}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            `;
+            </div>
             
-            document.body.appendChild(modal);
-        }
+            <!-- Popup overlay voor hond details -->
+            <div class="pedigree-popup-overlay" id="futurePuppyPopupOverlay" style="display: none;">
+                <div class="pedigree-popup-container" id="futurePuppyPopupContainer">
+                    <!-- Hier komt de popup content -->
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
         
         // Update titel
         const title = this.t('futurePuppyTitle', { 
@@ -1411,6 +1425,9 @@ class ReuTeefCombinatie {
         // Render de stamboom
         await this.renderFuturePuppyPedigree(pedigreeTree);
         
+        // Zorg dat de CSS voor de horizontale layout geladen wordt
+        this.ensurePedigreeStyles();
+        
         // Toon modal
         const bootstrapModal = new bootstrap.Modal(modal);
         bootstrapModal.show();
@@ -1419,6 +1436,399 @@ class ReuTeefCombinatie {
         modal.querySelector('.btn-print').addEventListener('click', () => {
             window.print();
         });
+    }
+    
+    ensurePedigreeStyles() {
+        // Controleer of de StamboomManager CSS al is geladen
+        const existingStyle = document.querySelector('#stamboomManagerStyles');
+        if (existingStyle) return;
+        
+        // Laad de CSS voor horizontale layout
+        const style = document.createElement('style');
+        style.id = 'stamboomManagerStyles';
+        style.textContent = `
+            /* HORIZONTALE PEDIGREE LAYOUT - ZELFDE ALS STAMBOOMMANAGER */
+            .pedigree-mobile-wrapper {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                background: #f8f9fa;
+                position: relative;
+                border-radius: 12px;
+            }
+            
+            .pedigree-container-compact {
+                padding: 15px !important;
+                margin: 0 !important;
+                width: 100% !important;
+                background: #f8f9fa;
+                overflow-x: auto !important;
+                overflow-y: auto !important;
+                position: relative;
+                min-height: 0 !important;
+                box-sizing: border-box !important;
+                border-radius: inherit;
+            }
+            
+            .pedigree-grid-compact {
+                display: flex;
+                flex-direction: row;
+                height: auto;
+                min-width: fit-content;
+                padding: 10px 15px !important;
+                gap: 20px;
+                align-items: flex-start;
+                box-sizing: border-box !important;
+                margin: 0 auto;
+            }
+            
+            .pedigree-generation-col {
+                display: flex;
+                flex-direction: column;
+                height: auto;
+                justify-content: flex-start;
+                min-width: 0;
+            }
+            
+            .pedigree-generation-col.gen0,
+            .pedigree-generation-col.gen1,
+            .pedigree-generation-col.gen2,
+            .pedigree-generation-col.gen3 {
+                gap: 4px !important;
+            }
+            
+            .pedigree-card-compact.horizontal {
+                background: white;
+                border-radius: 6px;
+                border: 1px solid #dee2e6;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+                cursor: pointer;
+                transition: all 0.2s;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                margin: 0 !important;
+                padding: 0 !important;
+                flex-shrink: 0;
+            }
+            
+            .pedigree-card-compact.horizontal.gen0,
+            .pedigree-card-compact.horizontal.gen1,
+            .pedigree-card-compact.horizontal.gen2 {
+                width: 160px !important;
+                height: 120px !important;
+            }
+            
+            .pedigree-card-compact.horizontal.gen3 {
+                width: 160px !important;
+                height: 60px !important;
+            }
+            
+            .pedigree-card-compact.horizontal.main-dog-compact {
+                border: 2px solid #198754 !important;
+                background: #f0fff4;
+                width: 170px !important;
+                height: 110px !important;
+            }
+            
+            .pedigree-card-compact.horizontal.male {
+                border-left: 4px solid #0d6efd !important;
+            }
+            
+            .pedigree-card-compact.horizontal.female {
+                border-left: 4px solid #dc3545 !important;
+            }
+            
+            .pedigree-card-compact.horizontal:hover {
+                box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+                transform: translateY(-1px);
+                z-index: 1;
+                position: relative;
+            }
+            
+            .pedigree-card-compact.horizontal.empty {
+                background: #f8f9fa;
+                cursor: default;
+                opacity: 0.6;
+            }
+            
+            .pedigree-card-header-compact.horizontal {
+                color: white;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                overflow: hidden;
+                flex-shrink: 0;
+            }
+            
+            .pedigree-card-compact.horizontal.gen0 .pedigree-card-header-compact.horizontal,
+            .pedigree-card-compact.horizontal.gen1 .pedigree-card-header-compact.horizontal,
+            .pedigree-card-compact.horizontal.gen2 .pedigree-card-header-compact.horizontal {
+                padding: 5px 8px;
+                font-size: 0.7rem;
+                min-height: 22px;
+            }
+            
+            .pedigree-card-compact.horizontal.gen3 .pedigree-card-header-compact.horizontal {
+                padding: 3px 6px;
+                font-size: 0.56rem;
+                min-height: 16px;
+            }
+            
+            .pedigree-card-header-compact.horizontal.bg-primary {
+                background: #198754 !important;
+            }
+            
+            .pedigree-card-header-compact.horizontal.bg-secondary {
+                background: #6c757d !important;
+            }
+            
+            .relation-compact {
+                display: flex;
+                align-items: center;
+                gap: 3px;
+                font-weight: 600;
+                overflow: hidden;
+                flex: 1;
+            }
+            
+            .relation-text {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            .main-dot {
+                color: #ffc107;
+                font-size: 0.7rem;
+                flex-shrink: 0;
+            }
+            
+            .gender-icon-compact {
+                flex-shrink: 0;
+                margin-left: 4px;
+            }
+            
+            .pedigree-card-body-compact.horizontal {
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                flex: 1;
+            }
+            
+            .pedigree-card-compact.horizontal.gen0 .pedigree-card-body-compact.horizontal,
+            .pedigree-card-compact.horizontal.gen1 .pedigree-card-body-compact.horizontal,
+            .pedigree-card-compact.horizontal.gen2 .pedigree-card-body-compact.horizontal {
+                padding: 6px 8px;
+            }
+            
+            .pedigree-card-compact.horizontal.gen3 .pedigree-card-body-compact.horizontal {
+                padding: 4px 6px;
+            }
+            
+            .card-row {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 4px;
+                overflow: hidden;
+            }
+            
+            .card-row-1 {
+                margin-bottom: 2px;
+            }
+            
+            .card-row-2 {
+                margin-bottom: 2px;
+            }
+            
+            .card-row-3 {
+                margin-top: auto;
+            }
+            
+            .dog-name-kennel-compact {
+                font-weight: 600;
+                color: #0d6efd;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                line-height: 1.1;
+                width: 100%;
+            }
+            
+            .pedigree-card-compact.horizontal.gen0 .dog-name-kennel-compact,
+            .pedigree-card-compact.horizontal.gen1 .dog-name-kennel-compact,
+            .pedigree-card-compact.horizontal.gen2 .dog-name-kennel-compact {
+                font-size: 0.75rem;
+            }
+            
+            .pedigree-card-compact.horizontal.gen0 .dog-pedigree-compact,
+            .pedigree-card-compact.horizontal.gen1 .dog-pedigree-compact,
+            .pedigree-card-compact.horizontal.gen2 .dog-pedigree-compact,
+            .pedigree-card-compact.horizontal.gen0 .dog-breed-compact,
+            .pedigree-card-compact.horizontal.gen1 .dog-breed-compact,
+            .pedigree-card-compact.horizontal.gen2 .dog-breed-compact {
+                font-size: 0.65rem;
+            }
+            
+            .pedigree-card-compact.horizontal.gen0 .click-hint-compact,
+            .pedigree-card-compact.horizontal.gen1 .click-hint-compact,
+            .pedigree-card-compact.horizontal.gen2 .click-hint-compact {
+                font-size: 0.55rem;
+            }
+            
+            .pedigree-card-compact.horizontal.gen3 .dog-name-kennel-compact {
+                font-size: 0.6rem;
+            }
+            
+            .pedigree-card-compact.horizontal.gen3 .dog-pedigree-compact,
+            .pedigree-card-compact.horizontal.gen3 .dog-breed-compact {
+                font-size: 0.52rem;
+            }
+            
+            .pedigree-card-compact.horizontal.gen3 .click-hint-compact {
+                font-size: 0.44rem;
+            }
+            
+            .dog-pedigree-compact {
+                font-weight: 600;
+                color: #495057;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                line-height: 1.1;
+                flex: 1;
+            }
+            
+            .dog-breed-compact {
+                color: #28a745;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                line-height: 1.1;
+                flex: 1;
+                text-align: right;
+            }
+            
+            .no-data-text {
+                color: #6c757d;
+                font-style: italic;
+                line-height: 1.3;
+                font-size: 0.7rem;
+            }
+            
+            .click-hint-compact {
+                color: #6c757d;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 3px;
+                line-height: 1;
+                width: 100%;
+                padding-top: 2px;
+                border-top: 1px dashed #dee2e6;
+                font-size: 0.55rem;
+            }
+            
+            .click-hint-compact .bi-camera {
+                color: #1a15f4;
+                font-size: 0.7rem;
+            }
+            
+            .generation-label {
+                font-weight: bold;
+                color: #495057;
+                text-align: center;
+                margin-bottom: 8px !important;
+                font-size: 0.75rem;
+                background: #e9ecef;
+                padding: 4px 8px;
+                border-radius: 4px;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+            
+            @media (max-width: 767px) {
+                .pedigree-mobile-wrapper {
+                    height: 640px;
+                }
+                
+                .pedigree-container-compact {
+                    height: 640px !important;
+                    overflow-x: auto !important;
+                    overflow-y: hidden !important;
+                }
+                
+                .pedigree-grid-compact {
+                    display: flex !important;
+                    flex-direction: row !important;
+                    height: 100% !important;
+                    min-width: max-content !important;
+                    padding: 10px 15px !important;
+                    gap: 15px !important;
+                }
+                
+                .pedigree-generation-col {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    height: 100% !important;
+                    flex-shrink: 0 !important;
+                }
+                
+                .pedigree-card-compact.horizontal.gen0,
+                .pedigree-card-compact.horizontal.gen1,
+                .pedigree-card-compact.horizontal.gen2 {
+                    width: 220px !important;
+                    height: 140px !important;
+                }
+                
+                .pedigree-card-compact.horizontal.gen3 {
+                    width: 220px !important;
+                    height: 70px !important;
+                }
+                
+                .pedigree-card-compact.horizontal.main-dog-compact {
+                    width: 220px !important;
+                    height: 140px !important;
+                }
+            }
+            
+            @media (min-width: 768px) {
+                .pedigree-container-compact {
+                    height: calc(100vh - 60px) !important;
+                    overflow-x: auto !important;
+                    overflow-y: hidden !important;
+                }
+                
+                .pedigree-grid-compact {
+                    flex-direction: row;
+                    height: 100%;
+                    min-width: fit-content;
+                    padding: 0 20px !important;
+                    gap: 25px;
+                    align-items: center;
+                }
+                
+                .pedigree-card-compact.horizontal.gen0,
+                .pedigree-card-compact.horizontal.gen1,
+                .pedigree-card-compact.horizontal.gen2 {
+                    width: 200px !important;
+                    height: 132px !important;
+                }
+                
+                .pedigree-card-compact.horizontal.gen3 {
+                    width: 200px !important;
+                    height: 66px !important;
+                }
+                
+                .pedigree-card-compact.horizontal.main-dog-compact {
+                    width: 200px !important;
+                    height: 132px !important;
+                }
+            }
+        `;
+        
+        document.head.appendChild(style);
     }
     
     async renderFuturePuppyPedigree(pedigreeTree) {
