@@ -31,12 +31,6 @@ class ReuTeefCombinatie {
                 showPedigree: "Toekomstige Stamboom Tonen",
                 showFuturePuppy: "Toon Toekomstige Pup Stamboom",
                 pedigreeTitle: "Toekomstige Pup Stamboom",
-                pedigreeInfo: "Dit is een voorspelde 4-generatie stamboom voor de toekomstige pup:",
-                parents: "Ouders",
-                grandparents: "Grootouders",
-                greatGrandparents: "Overgrootouders",
-                motherSide: "Moeders kant",
-                fatherSide: "Vaders kant",
                 close: "Sluiten",
                 loading: "Laden...",
                 noDogFound: "Geen hond gevonden",
@@ -80,12 +74,6 @@ class ReuTeefCombinatie {
                 showPedigree: "Show Future Pedigree",
                 showFuturePuppy: "Show Future Puppy Pedigree",
                 pedigreeTitle: "Future Puppy Pedigree",
-                pedigreeInfo: "This is a predicted 4-generation pedigree for the future puppy:",
-                parents: "Parents",
-                grandparents: "Grandparents",
-                greatGrandparents: "Great-grandparents",
-                motherSide: "Mother's side",
-                fatherSide: "Father's side",
                 close: "Close",
                 loading: "Loading...",
                 noDogFound: "No dog found",
@@ -129,12 +117,6 @@ class ReuTeefCombinatie {
                 showPedigree: "Zukünftigen Stammbaum Zeigen",
                 showFuturePuppy: "Zukünftigen Welpen-Stammbaum Zeigen",
                 pedigreeTitle: "Zukünftiger Welpen-Stammbaum",
-                pedigreeInfo: "Dies ist ein vorhergesagter 4-Generationen Stammbaum für den zukünftigen Welpen:",
-                parents: "Eltern",
-                grandparents: "Großeltern",
-                greatGrandparents: "Urgroßeltern",
-                motherSide: "Mutterseite",
-                fatherSide: "Vaterseite",
                 close: "Schließen",
                 loading: "Laden...",
                 noDogFound: "Kein Hund gefunden",
@@ -162,7 +144,7 @@ class ReuTeefCombinatie {
                 found: "gefunden",
                 futurePuppyName: "Zukünftiger Welpe",
                 futurePuppyDescription: "Vorhersage der Kombination {father} × {mother}",
-                futurePuppyTitle: "Stammbaum für zukünftigen Welpen aus Kombination {father} × {mother}",
+                futurePuppyTitle: "Stamboom für zukünftigen Welpen aus Kombination {father} × {mother}",
                 predictedPedigree: "Vorhergesagter Stammbaum",
                 combinedParents: "Kombination Eltern"
             }
@@ -208,7 +190,7 @@ class ReuTeefCombinatie {
         }
         
         content.innerHTML = `
-            <div class="alert alert-info">
+            <div class="alert alert-info mb-4">
                 <i class="bi bi-info-circle"></i>
                 <strong>${t('searchByName')}</strong><br>
                 ${t('description')}
@@ -324,10 +306,6 @@ class ReuTeefCombinatie {
                             <p class="mb-2" id="futurePuppyDescription">
                                 ${t('futurePuppyDescription', { reu: '?', teef: '?' })}
                             </p>
-                            <div class="small text-muted">
-                                <i class="bi bi-info-circle me-1"></i>
-                                ${t('pedigreeInfo')}
-                            </div>
                         </div>
                         <div class="col-md-4 text-end">
                             <button type="button" class="btn btn-success btn-lg" id="showFuturePedigreeBtn">
@@ -1287,12 +1265,12 @@ class ReuTeefCombinatie {
             vachtkleur: `${this.selectedReu.vachtkleur || ''}/${this.selectedTeef.vachtkleur || ''}`.trim()
         };
         
-        // Haal de complete stamboom op (dit gebruikt de bestaande StamboomManager functionaliteit)
+        // Haal de complete stamboom op
         try {
             // Maak een aangepaste pedigree tree voor de toekomstige pup
-            const pedigreeTree = this.createFuturePuppyPedigree(futurePuppy);
+            const pedigreeTree = await this.createFuturePuppyPedigree(futurePuppy);
             
-            // Maak een aangepaste StamboomManager voor de toekomstige pup
+            // Toon de aangepaste modal voor toekomstige pup
             await this.showFuturePuppyPedigreeModal(futurePuppy, pedigreeTree);
             
         } catch (error) {
@@ -1301,7 +1279,7 @@ class ReuTeefCombinatie {
         }
     }
     
-    createFuturePuppyPedigree(futurePuppy) {
+    async createFuturePuppyPedigree(futurePuppy) {
         // Bouw een virtuele pedigree tree op basis van de geselecteerde ouders
         const tree = {
             mainDog: futurePuppy,
@@ -1321,49 +1299,43 @@ class ReuTeefCombinatie {
             maternalGreatGrandmother2: null
         };
         
-        // Haal grootouders op voor reu
-        this.getParentsForDog(this.selectedReu).then(parents => {
-            tree.paternalGrandfather = parents.vader;
-            tree.paternalGrandmother = parents.moeder;
-            
-            // Haal overgrootouders op voor reu's vader
-            if (parents.vader) {
-                this.getParentsForDog(parents.vader).then(grandParents => {
-                    tree.paternalGreatGrandfather1 = grandParents.vader;
-                    tree.paternalGreatGrandmother1 = grandParents.moeder;
-                });
-            }
-            
-            // Haal overgrootouders op voor reu's moeder
-            if (parents.moeder) {
-                this.getParentsForDog(parents.moeder).then(grandParents => {
-                    tree.paternalGreatGrandfather2 = grandParents.vader;
-                    tree.paternalGreatGrandmother2 = grandParents.moeder;
-                });
-            }
-        });
+        // Haal ouders op voor reu
+        const reuParents = await this.getParentsForDog(this.selectedReu);
+        tree.paternalGrandfather = reuParents.vader;
+        tree.paternalGrandmother = reuParents.moeder;
         
-        // Haal grootouders op voor teef
-        this.getParentsForDog(this.selectedTeef).then(parents => {
-            tree.maternalGrandfather = parents.vader;
-            tree.maternalGrandmother = parents.moeder;
-            
-            // Haal overgrootouders op voor teef's vader
-            if (parents.vader) {
-                this.getParentsForDog(parents.vader).then(grandParents => {
-                    tree.maternalGreatGrandfather1 = grandParents.vader;
-                    tree.maternalGreatGrandmother1 = grandParents.moeder;
-                });
-            }
-            
-            // Haal overgrootouders op voor teef's moeder
-            if (parents.moeder) {
-                this.getParentsForDog(parents.moeder).then(grandParents => {
-                    tree.maternalGreatGrandfather2 = grandParents.vader;
-                    tree.maternalGreatGrandmother2 = grandParents.moeder;
-                });
-            }
-        });
+        // Haal ouders op voor teef
+        const teefParents = await this.getParentsForDog(this.selectedTeef);
+        tree.maternalGrandfather = teefParents.vader;
+        tree.maternalGrandmother = teefParents.moeder;
+        
+        // Haal grootouders op voor reu's vader
+        if (reuParents.vader) {
+            const reuVaderParents = await this.getParentsForDog(reuParents.vader);
+            tree.paternalGreatGrandfather1 = reuVaderParents.vader;
+            tree.paternalGreatGrandmother1 = reuVaderParents.moeder;
+        }
+        
+        // Haal grootouders op voor reu's moeder
+        if (reuParents.moeder) {
+            const reuMoederParents = await this.getParentsForDog(reuParents.moeder);
+            tree.paternalGreatGrandfather2 = reuMoederParents.vader;
+            tree.paternalGreatGrandmother2 = reuMoederParents.moeder;
+        }
+        
+        // Haal grootouders op voor teef's vader
+        if (teefParents.vader) {
+            const teefVaderParents = await this.getParentsForDog(teefParents.vader);
+            tree.maternalGreatGrandfather1 = teefVaderParents.vader;
+            tree.maternalGreatGrandmother1 = teefVaderParents.moeder;
+        }
+        
+        // Haal grootouders op voor teef's moeder
+        if (teefParents.moeder) {
+            const teefMoederParents = await this.getParentsForDog(teefParents.moeder);
+            tree.maternalGreatGrandfather2 = teefMoederParents.vader;
+            tree.maternalGreatGrandmother2 = teefMoederParents.moeder;
+        }
         
         return tree;
     }
@@ -1419,13 +1391,15 @@ class ReuTeefCombinatie {
                             </div>
                         </div>
                         <div class="modal-body p-0" style="overflow: hidden;">
-                            <div class="alert alert-info m-3">
-                                <i class="bi bi-info-circle me-2"></i>
-                                ${this.t('pedigreeInfo')}
-                            </div>
+                            <!-- STAMBOOM WORDT HIER INGELADEN -->
                             <div class="pedigree-mobile-wrapper" id="futurePuppyPedigreeMobileWrapper">
                                 <div class="pedigree-container-compact" id="futurePuppyPedigreeContainer">
-                                    <!-- Hier komt de stamboom -->
+                                    <div class="text-center py-5">
+                                        <div class="spinner-border text-success" role="status">
+                                            <span class="visually-hidden">${this.t('loadingPedigree')}</span>
+                                        </div>
+                                        <p class="mt-3">${this.t('loadingPedigree')}</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
