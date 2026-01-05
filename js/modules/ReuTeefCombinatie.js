@@ -120,14 +120,15 @@ class ReuTeefCombinatie {
                 grade: "Graad",
                 status: "Status",
                 notApplicable: "Niet van toepassing",
+                unknown: "Onbekend",
                 
                 // GEZONDHEIDSUITSLAGEN - COMPLEET VAN SEARCHMANAGER
                 hipGrades: {
-                    A: "A - Geen tekenen van HD",
-                    B: "B - Overgangsvorm",
-                    C: "C - Lichte HD",
-                    D: "D - Matige HD", 
-                    E: "E - Ernstige HD"
+                    "A": "A - Geen tekenen van HD",
+                    "B": "B - Overgangsvorm",
+                    "C": "C - Lichte HD",
+                    "D": "D - Matige HD", 
+                    "E": "E - Ernstige HD"
                 },
                 elbowGrades: {
                     "0": "0 - Geen ED",
@@ -254,14 +255,15 @@ class ReuTeefCombinatie {
                 grade: "Grade",
                 status: "Status",
                 notApplicable: "Not applicable",
+                unknown: "Unknown",
                 
                 // HEALTH STATUS TRANSLATIONS - COMPLETE FROM SEARCHMANAGER
                 hipGrades: {
-                    A: "A - No signs of HD",
-                    B: "B - Borderline",
-                    C: "C - Mild HD",
-                    D: "D - Moderate HD",
-                    E: "E - Severe HD"
+                    "A": "A - No signs of HD",
+                    "B": "B - Borderline",
+                    "C": "C - Mild HD",
+                    "D": "D - Moderate HD",
+                    "E": "E - Severe HD"
                 },
                 elbowGrades: {
                     "0": "0 - No ED",
@@ -388,14 +390,15 @@ class ReuTeefCombinatie {
                 grade: "Grade",
                 status: "Status",
                 notApplicable: "Nicht zutreffend",
+                unknown: "Unbekannt",
                 
                 // GESUNDHEITSAUSWERTUNGEN - VOLLSTÄNDIG ÜBERNOMMEN VON SEARCHMANAGER
                 hipGrades: {
-                    A: "A - Keine Anzeichen von HD",
-                    B: "B - Grenzfall",
-                    C: "C - Leichte HD",
-                    D: "D - Mäßige HD",
-                    E: "E - Schwere HD"
+                    "A": "A - Keine Anzeichen von HD",
+                    "B": "B - Grenzfall",
+                    "C": "C - Leichte HD",
+                    "D": "D - Mäßige HD",
+                    "E": "E - Schwere HD"
                 },
                 elbowGrades: {
                     "0": "0 - Keine ED",
@@ -435,7 +438,18 @@ class ReuTeefCombinatie {
         this.stamboomManager = stamboomManager;
     }
     
-    t(key, subKey = null) {
+    t(key, params = {}) {
+        let text = this.translations[this.currentLang][key] || key;
+        
+        // Vervang parameters in tekst
+        Object.keys(params).forEach(param => {
+            text = text.replace(`{${param}}`, params[param]);
+        });
+        
+        return text;
+    }
+    
+    t2(key, subKey = null) {
         if (subKey && this.translations[this.currentLang][key] && typeof this.translations[this.currentLang][key] === 'object') {
             return this.translations[this.currentLang][key][subKey] || subKey;
         }
@@ -460,7 +474,7 @@ class ReuTeefCombinatie {
         // Initialiseer COI Calculator DIRECT met alle honden
         if (typeof COICalculator !== 'undefined') {
             this.coiCalculator = new COICalculator(this.allHonden);
-            console.log('✅ COICalculator direct geïnitialiseerd in ReuTeefCombinatie');
+            console.log('✅ COICalculator direct geïninitialiseerd in ReuTeefCombinatie');
         } else {
             console.error('❌ COICalculator klasse niet gevonden!');
         }
@@ -1315,29 +1329,33 @@ class ReuTeefCombinatie {
             }
             
             let badgeClass = '';
-            let badgeText = t(`${type}Grades`, value) || value;  // Gebruik vertaalde uitslag
+            let badgeText = value;
             
+            // Zoek de vertaalde uitslag
             switch(type) {
                 case 'hip':
                     badgeClass = 'badge-hd';
+                    badgeText = this.t2('hipGrades', value) || value;
                     break;
                 case 'elbow':
                     badgeClass = 'badge-ed';
+                    badgeText = this.t2('elbowGrades', value) || value;
                     break;
                 case 'patella':
                     badgeClass = 'badge-pl';
+                    badgeText = this.t2('patellaGrades', value) || value;
                     break;
                 case 'eyes':
                     badgeClass = 'badge-eyes';
-                    badgeText = t('eyeStatus', value) || value;
+                    badgeText = this.t2('eyeStatus', value) || value;
                     break;
                 case 'dandy':
                     badgeClass = 'badge-dandy';
-                    badgeText = t('dandyStatus', value) || value;
+                    badgeText = this.t2('dandyStatus', value) || value;
                     break;
                 case 'thyroid':
                     badgeClass = 'badge-thyroid';
-                    badgeText = t('thyroidStatus', value) || value;
+                    badgeText = this.t2('thyroidStatus', value) || value;
                     break;
                 default:
                     badgeClass = 'badge bg-secondary';
@@ -2005,29 +2023,33 @@ class ReuTeefCombinatie {
             }
             
             let badgeClass = '';
-            let badgeText = t(`${type}Grades`, value) || value;  // Gebruik vertaalde uitslag
+            let badgeText = value;
             
+            // Zoek de vertaalde uitslag
             switch(type) {
                 case 'hip':
                     badgeClass = 'badge-hd';
+                    badgeText = this.t2('hipGrades', value) || value;
                     break;
                 case 'elbow':
                     badgeClass = 'badge-ed';
+                    badgeText = this.t2('elbowGrades', value) || value;
                     break;
                 case 'patella':
                     badgeClass = 'badge-pl';
+                    badgeText = this.t2('patellaGrades', value) || value;
                     break;
                 case 'eyes':
                     badgeClass = 'badge-eyes';
-                    badgeText = t('eyeStatus', value) || value;
+                    badgeText = this.t2('eyeStatus', value) || value;
                     break;
                 case 'dandy':
                     badgeClass = 'badge-dandy';
-                    badgeText = t('dandyStatus', value) || value;
+                    badgeText = this.t2('dandyStatus', value) || value;
                     break;
                 case 'thyroid':
                     badgeClass = 'badge-thyroid';
-                    badgeText = t('thyroidStatus', value) || value;
+                    badgeText = this.t2('thyroidStatus', value) || value;
                     break;
                 default:
                     badgeClass = 'badge bg-secondary';
