@@ -126,7 +126,7 @@ class ReuTeefCombinatie {
                 kennel: "Zwingername:",
                 pedigreeNumber: "Stammbuchnr:",
                 birthDate: "Geburtsdatum:",
-                healthInfo: "Health information",
+                healthInfo: "Gesundheitsinformationen",
                 color: "Fellfarbe:",
                 searchByName: "Suche nach Name oder Zwingername",
                 dogDetails: "Hund Details",
@@ -317,10 +317,12 @@ class ReuTeefCombinatie {
             </div>
         `;
         
-        // VERWIJDERD: Paarse knop
         buttons.innerHTML = `
             <button type="button" class="btn btn-secondary" id="backBtn">
                 <i class="bi bi-arrow-left me-1"></i> ${t('back')}
+            </button>
+            <button type="button" class="btn btn-purple" id="showPedigreeBtn" disabled>
+                <i class="bi bi-diagram-3 me-1"></i> ${t('showPedigree')}
             </button>
         `;
         
@@ -330,6 +332,10 @@ class ReuTeefCombinatie {
         // Event handlers
         document.getElementById('backBtn').addEventListener('click', () => {
             this.goBack();
+        });
+        
+        document.getElementById('showPedigreeBtn').addEventListener('click', () => {
+            this.showCombinedPedigree();
         });
         
         // Setup autocomplete voor teef
@@ -1159,14 +1165,19 @@ class ReuTeefCombinatie {
     }
     
     updateButtonStates() {
+        const showPedigreeBtn = document.getElementById('showPedigreeBtn');
         const showFuturePedigreeBtn = document.getElementById('showFuturePedigreeBtn');
         
         // Alleen beschikbaar als beide honden geselecteerd zijn
         const bothSelected = this.selectedTeef && this.selectedReu;
         
+        if (showPedigreeBtn) {
+            showPedigreeBtn.disabled = !bothSelected;
+            showPedigreeBtn.title = bothSelected ? '' : this.t('selectDogFirst');
+        }
+        
         if (showFuturePedigreeBtn) {
             showFuturePedigreeBtn.disabled = !bothSelected;
-            showFuturePedigreeBtn.title = bothSelected ? '' : this.t('selectDogFirst');
         }
     }
     
@@ -1210,6 +1221,20 @@ class ReuTeefCombinatie {
                     modal.hide();
                 }
             }
+        }
+    }
+    
+    async showCombinedPedigree() {
+        if (!this.selectedTeef || !this.selectedReu) {
+            this.showAlert(this.t('selectDogFirst'), 'warning');
+            return;
+        }
+        
+        // Toon stamboom van de geselecteerde reu
+        if (this.stamboomManager) {
+            await this.stamboomManager.showPedigree(this.selectedReu);
+        } else {
+            this.showAlert('StamboomManager niet geïnitialiseerd', 'danger');
         }
     }
     
@@ -1383,9 +1408,6 @@ class ReuTeefCombinatie {
             `;
             
             document.body.appendChild(modal);
-            
-            // Voeg noodzakelijke CSS toe voor de juiste layout
-            this.addFuturePuppyModalStyles();
         }
         
         // Update titel
@@ -1395,7 +1417,7 @@ class ReuTeefCombinatie {
         });
         document.getElementById('futurePuppyPedigreeModalLabel').textContent = title;
         
-        // Render de stamboom MET HORIZONTALE LAYOUT
+        // Render de stamboom
         await this.renderFuturePuppyPedigree(pedigreeTree);
         
         // Toon modal
@@ -1406,253 +1428,6 @@ class ReuTeefCombinatie {
         modal.querySelector('.btn-print').addEventListener('click', () => {
             window.print();
         });
-    }
-    
-    addFuturePuppyModalStyles() {
-        // Voeg noodzakelijke stamboom CSS toe
-        const styleId = 'future-puppy-modal-styles';
-        if (document.getElementById(styleId)) return;
-        
-        const style = document.createElement('style');
-        style.id = styleId;
-        style.textContent = `
-            /* ZORG DAT DE MODAL DE JUISTE LAYOUT HEEFT */
-            #futurePuppyPedigreeModal .pedigree-mobile-wrapper {
-                width: 100%;
-                display: flex;
-                flex-direction: column;
-                background: #f8f9fa;
-                position: relative;
-                border-radius: 12px;
-            }
-            
-            /* HORIZONTALE PEDIGREE CONTAINER */
-            #futurePuppyPedigreeModal .pedigree-container-compact {
-                padding: 15px !important;
-                margin: 0 !important;
-                width: 100% !important;
-                background: #f8f9fa;
-                overflow-x: auto !important;
-                overflow-y: auto !important;
-                position: relative;
-                min-height: 0 !important;
-                box-sizing: border-box !important;
-                border-radius: inherit;
-            }
-            
-            #futurePuppyPedigreeModal .pedigree-grid-compact {
-                display: flex;
-                flex-direction: row;
-                height: auto;
-                min-width: fit-content;
-                padding: 10px 15px !important;
-                gap: 20px;
-                align-items: flex-start;
-                box-sizing: border-box !important;
-                margin: 0 auto;
-            }
-            
-            /* GENERATIE KOLOM - VERTICALE STACK VAN LIGGENDE CARDS */
-            #futurePuppyPedigreeModal .pedigree-generation-col {
-                display: flex;
-                flex-direction: column;
-                height: auto;
-                justify-content: flex-start;
-                min-width: 0;
-            }
-            
-            /* ZELFDE SPACING PER GENERATIE - ALLES GELIJK ZETTEN */
-            #futurePuppyPedigreeModal .pedigree-generation-col.gen0 {
-                gap: 4px !important;
-            }
-            
-            #futurePuppyPedigreeModal .pedigree-generation-col.gen1 {
-                gap: 4px !important;
-            }
-            
-            #futurePuppyPedigreeModal .pedigree-generation-col.gen2 {
-                gap: 4px !important;
-            }
-            
-            #futurePuppyPedigreeModal .pedigree-generation-col.gen3 {
-                gap: 4px !important;
-            }
-            
-            /* BASIS LIGGENDE CARDS */
-            #futurePuppyPedigreeModal .pedigree-card-compact.horizontal {
-                background: white;
-                border-radius: 6px;
-                border: 1px solid #dee2e6;
-                box-shadow: 0 1px 2px rgba(0,0,0,0.08);
-                cursor: pointer;
-                transition: all 0.2s;
-                display: flex;
-                flex-direction: column;
-                overflow: hidden;
-                margin: 0 !important;
-                padding: 0 !important;
-                flex-shrink: 0;
-            }
-            
-            /* ZELFDE BREEDTE VOOR ALLE GENERATIES - ANDERE HOOGTE VOOR OVERGROOTOUDERS */
-            #futurePuppyPedigreeModal .pedigree-card-compact.horizontal.gen0,
-            #futurePuppyPedigreeModal .pedigree-card-compact.horizontal.gen1,
-            #futurePuppyPedigreeModal .pedigree-card-compact.horizontal.gen2 {
-                width: 160px !important;
-                height: 120px !important;
-            }
-            
-            /* OVERGROOTOUDERS: 60% HOOGTE VAN NORMALE CARDS */
-            #futurePuppyPedigreeModal .pedigree-card-compact.horizontal.gen3 {
-                width: 160px !important;
-                height: 60px !important;
-            }
-            
-            /* Hoofdhond extra styling */
-            #futurePuppyPedigreeModal .pedigree-card-compact.horizontal.main-dog-compact {
-                border: 2px solid #198754 !important;
-                background: #f0f9f0;
-                width: 170px !important;
-                height: 110px !important;
-            }
-            
-            /* Generation labels styling */
-            #futurePuppyPedigreeModal .generation-label {
-                font-weight: bold;
-                color: #495057;
-                text-align: center;
-                margin-bottom: 8px !important;
-                font-size: 0.75rem;
-                background: #e9ecef;
-                padding: 4px 8px;
-                border-radius: 4px;
-                white-space: nowrap;
-                flex-shrink: 0;
-            }
-            
-            /* MOBIELE AANPASSINGEN */
-            @media (max-width: 767px) {
-                #futurePuppyPedigreeModal .pedigree-container-compact {
-                    height: 640px !important;
-                    overflow-x: auto !important;
-                    overflow-y: hidden !important;
-                    padding: 10px !important;
-                    -webkit-overflow-scrolling: touch;
-                    display: flex;
-                    flex-direction: column;
-                }
-                
-                #futurePuppyPedigreeModal .pedigree-grid-compact {
-                    display: flex !important;
-                    flex-direction: row !important;
-                    flex-wrap: nowrap !important;
-                    height: 100% !important;
-                    min-width: max-content !important;
-                    padding: 10px 15px !important;
-                    gap: 15px !important;
-                    margin: 0 !important;
-                    align-items: stretch !important;
-                    box-sizing: border-box !important;
-                    width: auto !important;
-                }
-                
-                #futurePuppyPedigreeModal .pedigree-generation-col {
-                    display: flex !important;
-                    flex-direction: column !important;
-                    height: 100% !important;
-                    flex-shrink: 0 !important;
-                    padding: 0 !important;
-                    margin: 0 !important;
-                    position: relative;
-                    justify-content: center !important;
-                    align-items: flex-start !important;
-                }
-                
-                #futurePuppyPedigreeModal .pedigree-generation-col.gen0,
-                #futurePuppyPedigreeModal .pedigree-generation-col.gen1,
-                #futurePuppyPedigreeModal .pedigree-generation-col.gen2,
-                #futurePuppyPedigreeModal .pedigree-generation-col.gen3 {
-                    justify-content: center !important;
-                    align-items: flex-start !important;
-                    min-width: 220px !important;
-                    width: 220px !important;
-                    gap: 4px !important;
-                }
-                
-                #futurePuppyPedigreeModal .pedigree-card-compact.horizontal.gen0,
-                #futurePuppyPedigreeModal .pedigree-card-compact.horizontal.gen1,
-                #futurePuppyPedigreeModal .pedigree-card-compact.horizontal.gen2 {
-                    width: 220px !important;
-                    height: 140px !important;
-                    margin: 0 !important;
-                    flex-shrink: 0 !important;
-                }
-                
-                #futurePuppyPedigreeModal .pedigree-card-compact.horizontal.gen3 {
-                    width: 220px !important;
-                    height: 70px !important;
-                    margin: 0 !important;
-                    flex-shrink: 0 !important;
-                }
-                
-                #futurePuppyPedigreeModal .pedigree-card-compact.horizontal.main-dog-compact {
-                    width: 220px !important;
-                    height: 140px !important;
-                    margin: 0 !important;
-                    flex-shrink: 0 !important;
-                }
-            }
-            
-            /* DESKTOP STYLES */
-            @media (min-width: 768px) {
-                #futurePuppyPedigreeModal .pedigree-container-compact {
-                    height: calc(100vh - 60px) !important;
-                    overflow-x: auto !important;
-                    overflow-y: hidden !important;
-                    align-items: center;
-                    padding: 0 !important;
-                    display: flex;
-                }
-                
-                #futurePuppyPedigreeModal .pedigree-grid-compact {
-                    flex-direction: row;
-                    height: 100%;
-                    min-width: fit-content;
-                    padding: 0 20px !important;
-                    gap: 25px;
-                    align-items: center;
-                    box-sizing: border-box !important;
-                    margin: 0 auto;
-                }
-                
-                #futurePuppyPedigreeModal .pedigree-generation-col {
-                    display: flex;
-                    flex-direction: column;
-                    height: 100%;
-                    justify-content: center;
-                    min-width: 0;
-                }
-                
-                #futurePuppyPedigreeModal .pedigree-card-compact.horizontal.gen0,
-                #futurePuppyPedigreeModal .pedigree-card-compact.horizontal.gen1,
-                #futurePuppyPedigreeModal .pedigree-card-compact.horizontal.gen2 {
-                    width: 200px !important;
-                    height: 132px !important;
-                }
-                
-                #futurePuppyPedigreeModal .pedigree-card-compact.horizontal.gen3 {
-                    width: 200px !important;
-                    height: 66px !important;
-                }
-                
-                #futurePuppyPedigreeModal .pedigree-card-compact.horizontal.main-dog-compact {
-                    width: 200px !important;
-                    height: 132px !important;
-                }
-            }
-        `;
-        
-        document.head.appendChild(style);
     }
     
     async renderFuturePuppyPedigree(pedigreeTree) {
