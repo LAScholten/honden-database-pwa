@@ -1188,7 +1188,7 @@ class ReuTeefCombinatie {
         
         // Maak een virtuele toekomstige pup
         const futurePuppy = {
-            id: -9999, // Uniek ID voor virtuele pup
+            id: -999999, // Uniek ID voor virtuele pup
             naam: this.t('futurePuppyName'),
             geslacht: 'onbekend',
             vaderId: this.selectedReu.id,
