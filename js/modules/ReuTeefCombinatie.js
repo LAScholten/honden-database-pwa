@@ -1577,7 +1577,7 @@ class ReuTeefCombinatie {
                             </div>
                         </div>
                         <div class="modal-body p-0" style="overflow: hidden;">
-                            <!-- STAMBOOM WORDT HIER INGELADEN -->
+                            <!-- STAMBOOM WORDT HIER INGELADEN - gebruik EXACT dezelfde structuur als StamboomManager -->
                             <div class="pedigree-mobile-wrapper" id="futurePuppyPedigreeMobileWrapper">
                                 <div class="pedigree-container-compact" id="futurePuppyPedigreeContainer">
                                     <div class="text-center py-5">
@@ -1603,7 +1603,7 @@ class ReuTeefCombinatie {
         });
         document.getElementById('futurePuppyPedigreeModalLabel').textContent = title;
         
-        // Render de stamboom
+        // Render de stamboom MET DEZELFDE LAYOUT als StamboomManager
         await this.renderFuturePuppyPedigree(pedigreeTree);
         
         // Toon modal
@@ -1620,117 +1620,42 @@ class ReuTeefCombinatie {
         const container = document.getElementById('futurePuppyPedigreeContainer');
         if (!container || !this.stamboomManager) return;
         
-        // Gebruik aangepaste methode om cards te genereren voor toekomstige pup
-        const mainDogCard = this.getFuturePuppyCompactCardHTML(
+        // Zorg ervoor dat de container dezelfde CSS heeft als StamboomManager
+        container.className = 'pedigree-container-compact';
+        
+        // Gebruik EXACT dezelfde HTML structuur als StamboomManager
+        // Hoofdhond (toekomstige pup) met speciale styling
+        const mainDogCard = this.createFuturePuppyCard(
             pedigreeTree.mainDog, 
             this.t('futurePuppy'), 
             true, 
             0
         );
         
-        const fatherCard = await this.getDogCompactCardFromStamboomManager(
-            pedigreeTree.father, 
-            this.t('fatherLabel'), 
-            false, 
-            1
-        );
-        
-        const motherCard = await this.getDogCompactCardFromStamboomManager(
-            pedigreeTree.mother, 
-            this.t('motherLabel'), 
-            false, 
-            1
-        );
+        // Ouders - gebruik StamboomManager's methode voor consistente styling
+        const fatherCard = await this.createDogCard(pedigreeTree.father, this.t('fatherLabel'), false, 1);
+        const motherCard = await this.createDogCard(pedigreeTree.mother, this.t('motherLabel'), false, 1);
         
         // Grootouders
-        const paternalGrandfatherCard = await this.getDogCompactCardFromStamboomManager(
-            pedigreeTree.paternalGrandfather, 
-            this.t('grandfatherLabel'), 
-            false, 
-            2
-        );
-        
-        const paternalGrandmotherCard = await this.getDogCompactCardFromStamboomManager(
-            pedigreeTree.paternalGrandmother, 
-            this.t('grandmotherLabel'), 
-            false, 
-            2
-        );
-        
-        const maternalGrandfatherCard = await this.getDogCompactCardFromStamboomManager(
-            pedigreeTree.maternalGrandfather, 
-            this.t('grandfatherLabel'), 
-            false, 
-            2
-        );
-        
-        const maternalGrandmotherCard = await this.getDogCompactCardFromStamboomManager(
-            pedigreeTree.maternalGrandmother, 
-            this.t('grandmotherLabel'), 
-            false, 
-            2
-        );
+        const paternalGrandfatherCard = await this.createDogCard(pedigreeTree.paternalGrandfather, this.t('grandfatherLabel'), false, 2);
+        const paternalGrandmotherCard = await this.createDogCard(pedigreeTree.paternalGrandmother, this.t('grandmotherLabel'), false, 2);
+        const maternalGrandfatherCard = await this.createDogCard(pedigreeTree.maternalGrandfather, this.t('grandfatherLabel'), false, 2);
+        const maternalGrandmotherCard = await this.createDogCard(pedigreeTree.maternalGrandmother, this.t('grandmotherLabel'), false, 2);
         
         // Overgrootouders
-        const paternalGreatGrandfather1Card = await this.getDogCompactCardFromStamboomManager(
-            pedigreeTree.paternalGreatGrandfather1, 
-            this.t('greatGrandfatherLabel'), 
-            false, 
-            3
-        );
+        const paternalGreatGrandfather1Card = await this.createDogCard(pedigreeTree.paternalGreatGrandfather1, this.t('greatGrandfatherLabel'), false, 3);
+        const paternalGreatGrandmother1Card = await this.createDogCard(pedigreeTree.paternalGreatGrandmother1, this.t('greatGrandmotherLabel'), false, 3);
+        const paternalGreatGrandfather2Card = await this.createDogCard(pedigreeTree.paternalGreatGrandfather2, this.t('greatGrandfatherLabel'), false, 3);
+        const paternalGreatGrandmother2Card = await this.createDogCard(pedigreeTree.paternalGreatGrandmother2, this.t('greatGrandmotherLabel'), false, 3);
+        const maternalGreatGrandfather1Card = await this.createDogCard(pedigreeTree.maternalGreatGrandfather1, this.t('greatGrandfatherLabel'), false, 3);
+        const maternalGreatGrandmother1Card = await this.createDogCard(pedigreeTree.maternalGreatGrandmother1, this.t('greatGrandmotherLabel'), false, 3);
+        const maternalGreatGrandfather2Card = await this.createDogCard(pedigreeTree.maternalGreatGrandfather2, this.t('greatGrandfatherLabel'), false, 3);
+        const maternalGreatGrandmother2Card = await this.createDogCard(pedigreeTree.maternalGreatGrandmother2, this.t('greatGrandmotherLabel'), false, 3);
         
-        const paternalGreatGrandmother1Card = await this.getDogCompactCardFromStamboomManager(
-            pedigreeTree.paternalGreatGrandmother1, 
-            this.t('greatGrandmotherLabel'), 
-            false, 
-            3
-        );
-        
-        const paternalGreatGrandfather2Card = await this.getDogCompactCardFromStamboomManager(
-            pedigreeTree.paternalGreatGrandfather2, 
-            this.t('greatGrandfatherLabel'), 
-            false, 
-            3
-        );
-        
-        const paternalGreatGrandmother2Card = await this.getDogCompactCardFromStamboomManager(
-            pedigreeTree.paternalGreatGrandmother2, 
-            this.t('greatGrandmotherLabel'), 
-            false, 
-            3
-        );
-        
-        const maternalGreatGrandfather1Card = await this.getDogCompactCardFromStamboomManager(
-            pedigreeTree.maternalGreatGrandfather1, 
-            this.t('greatGrandfatherLabel'), 
-            false, 
-            3
-        );
-        
-        const maternalGreatGrandmother1Card = await this.getDogCompactCardFromStamboomManager(
-            pedigreeTree.maternalGreatGrandmother1, 
-            this.t('greatGrandmotherLabel'), 
-            false, 
-            3
-        );
-        
-        const maternalGreatGrandfather2Card = await this.getDogCompactCardFromStamboomManager(
-            pedigreeTree.maternalGreatGrandfather2, 
-            this.t('greatGrandfatherLabel'), 
-            false, 
-            3
-        );
-        
-        const maternalGreatGrandmother2Card = await this.getDogCompactCardFromStamboomManager(
-            pedigreeTree.maternalGreatGrandmother2, 
-            this.t('greatGrandmotherLabel'), 
-            false, 
-            3
-        );
-        
+        // EXACT dezelfde HTML structuur als StamboomManager.renderCompactPedigree()
         const gridHTML = `
             <div class="pedigree-grid-compact">
-                <!-- Generatie 0: Toekomstige Pup -->
+                <!-- Generatie 0: Hoofdhond (Toekomstige Pup) -->
                 <div class="pedigree-generation-col gen0">
                     <div class="generation-label" style="background: #198754; color: white;">
                         <i class="bi bi-stars me-1"></i>${this.t('futurePuppy')}
@@ -1775,12 +1700,13 @@ class ReuTeefCombinatie {
         this.setupFuturePuppyCardClickEvents(pedigreeTree);
     }
     
-    // Aangepaste card voor toekomstige pup (MET click functionaliteit)
-    getFuturePuppyCompactCardHTML(dog, relation = '', isMainDog = true, generation = 0) {
+    // Maak een card voor toekomstige pup die EXACT dezelfde styling heeft als StamboomManager
+    createFuturePuppyCard(dog, relation = '', isMainDog = true, generation = 0) {
         const genderIcon = 'bi-stars text-success';
         
+        // Zelfde HTML structuur als StamboomManager.getDogCompactCardHTML()
         return `
-            <div class="pedigree-card-compact horizontal future-puppy future-puppy-card ${isMainDog ? 'main-dog-compact' : ''} gen${generation}" 
+            <div class="pedigree-card-compact horizontal future-puppy ${isMainDog ? 'main-dog-compact' : ''} gen${generation}" 
                  data-dog-id="${dog.id}" 
                  data-dog-name="${dog.naam || ''}"
                  data-relation="${relation}"
@@ -1790,7 +1716,7 @@ class ReuTeefCombinatie {
                 <div class="pedigree-card-header-compact horizontal bg-success">
                     <div class="relation-compact">
                         <span class="relation-text">${relation}</span>
-                        <span class="main-dot">★</span>
+                        ${isMainDog ? '<span class="main-dot">★</span>' : ''}
                     </div>
                     <div class="gender-icon-compact">
                         <i class="bi ${genderIcon}"></i>
@@ -1830,8 +1756,10 @@ class ReuTeefCombinatie {
         `;
     }
     
-    async getDogCompactCardFromStamboomManager(dog, relation = '', isMainDog = false, generation = 0) {
+    // Gebruik StamboomManager voor consistente cards voor echte honden
+    async createDogCard(dog, relation = '', isMainDog = false, generation = 0) {
         if (!dog) {
+            // Zelfde lege card structuur als StamboomManager
             return `
                 <div class="pedigree-card-compact horizontal empty gen${generation}" data-dog-id="0">
                     <div class="pedigree-card-header-compact horizontal">
@@ -1844,7 +1772,7 @@ class ReuTeefCombinatie {
             `;
         }
         
-        // Gebruik de methode uit StamboomManager
+        // Gebruik StamboomManager's methode voor exact dezelfde styling
         return await this.stamboomManager.getDogCompactCardHTML(dog, relation, isMainDog, generation);
     }
     
