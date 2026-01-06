@@ -20,7 +20,7 @@ class ReuTeefCombinatie {
         // COI Calculator instance
         this.coiCalculator = null;
         
-        // VERTALINGEN - Vereenvoudigd, gebruikt dezelfde logica als SearchManager
+        // Vertalingen
         this.translations = {
             nl: {
                 title: "Reu en Teef Combinatie",
@@ -100,56 +100,7 @@ class ReuTeefCombinatie {
                 dwlmUnknown: "Dandy Walker niet bekend",
                 thyroidTested: "Schildklier getest",
                 thyroidUnknown: "Schildklier niet bekend",
-                occurrences: "Aantal keer",
-                // HEALTH INFO TRANSLATIONS
-                hipDysplasia: "Heupdysplasie",
-                elbowDysplasia: "Elleboogdysplasie",
-                patellaLuxation: "Patella Luxatie",
-                eyes: "Ogen",
-                eyesExplanation: "Verklaring ogen",
-                dandyWalker: "Dandy Walker Malformation",
-                thyroid: "Schildklier",
-                thyroidExplanation: "Toelichting schildklier",
-                country: "Land",
-                zipCode: "Postcode",
-                remarks: "Opmerkingen",
-                additionalInfo: "Extra informatie",
-                noAdditionalInfo: "Geen extra informatie beschikbaar",
-                noHealthInfo: "Geen gezondheidsinformatie beschikbaar",
-                grade: "Graad",
-                status: "Status",
-                notApplicable: "Niet van toepassing",
-                unknown: "Onbekend",
-                
-                // GEZONDHEIDSVERTALINGEN - DIRECT EN EENVOUDIG
-                hipGradeA: "A - Geen tekenen van HD",
-                hipGradeB: "B - Overgangsvorm",
-                hipGradeC: "C - Lichte HD",
-                hipGradeD: "D - Matige HD",
-                hipGradeE: "E - Ernstige HD",
-                
-                elbowGrade0: "0 - Geen ED",
-                elbowGrade1: "1 - Milde ED",
-                elbowGrade2: "2 - Matige ED",
-                elbowGrade3: "3 - Ernstige ED",
-                elbowGradeNB: "NB - Niet bekend",
-                
-                patellaGrade0: "0 - Geen PL",
-                patellaGrade1: "1 - Af en toe luxatie",
-                patellaGrade2: "2 - Regelmatig luxatie",
-                patellaGrade3: "3 - Constante luxatie",
-                
-                eyeStatusVrij: "Vrij",
-                eyeStatusDistichiasis: "Distichiasis",
-                eyeStatusOverig: "Overig",
-                
-                dandyStatusVrijDNA: "Vrij op DNA",
-                dandyStatusVrijOuders: "Vrij op ouders",
-                dandyStatusDrager: "Drager",
-                dandyStatusLijder: "Lijder",
-                
-                thyroidStatusNegatief: "Tgaa Negatief",
-                thyroidStatusPositief: "Tgaa Positief"
+                occurrences: "Aantal keer"
             },
             en: {
                 title: "Male and Female Combination",
@@ -229,55 +180,7 @@ class ReuTeefCombinatie {
                 dwlmUnknown: "Dandy Walker unknown",
                 thyroidTested: "Thyroid tested",
                 thyroidUnknown: "Thyroid unknown",
-                occurrences: "Occurrences",
-                // HEALTH INFO TRANSLATIONS - ADDITION
-                hipDysplasia: "Hip Dysplasia",
-                elbowDysplasia: "Elbow Dysplasia",
-                patellaLuxation: "Patella Luxation",
-                eyes: "Eyes",
-                eyesExplanation: "Eye explanation",
-                dandyWalker: "Dandy Walker Malformation",
-                thyroid: "Thyroid",
-                thyroidExplanation: "Thyroid explanation",
-                country: "Country",
-                zipCode: "Zip code",
-                remarks: "Remarks",
-                noAdditionalInfo: "No additional information available",
-                noHealthInfo: "No health information available",
-                grade: "Grade",
-                status: "Status",
-                notApplicable: "Not applicable",
-                unknown: "Unknown",
-                
-                // HEALTH STATUS TRANSLATIONS
-                hipGradeA: "A - No signs of HD",
-                hipGradeB: "B - Borderline",
-                hipGradeC: "C - Mild HD",
-                hipGradeD: "D - Moderate HD",
-                hipGradeE: "E - Severe HD",
-                
-                elbowGrade0: "0 - No ED",
-                elbowGrade1: "1 - Mild ED",
-                elbowGrade2: "2 - Moderate ED",
-                elbowGrade3: "3 - Severe ED",
-                elbowGradeNB: "NB - Not known",
-                
-                patellaGrade0: "0 - No PL",
-                patellaGrade1: "1 - Occasional luxation",
-                patellaGrade2: "2 - Frequent luxation",
-                patellaGrade3: "3 - Constant luxation",
-                
-                eyeStatusVrij: "Free",
-                eyeStatusDistichiasis: "Distichiasis",
-                eyeStatusOverig: "Other",
-                
-                dandyStatusVrijDNA: "Free on DNA",
-                dandyStatusVrijOuders: "Free on parents",
-                dandyStatusDrager: "Carrier",
-                dandyStatusLijder: "Affected",
-                
-                thyroidStatusNegatief: "Tgaa Negative",
-                thyroidStatusPositief: "Tgaa Positive"
+                occurrences: "Occurrences"
             },
             de: {
                 title: "Rüde und Hündin Kombination",
@@ -300,7 +203,7 @@ class ReuTeefCombinatie {
                 kennel: "Zwingername:",
                 pedigreeNumber: "Stammbuchnr:",
                 birthDate: "Geburtsdatum:",
-                healthInfo: "Gesundheitsinformationen",
+                healthInfo: "Health information",
                 color: "Fellfarbe:",
                 searchByName: "Suche nach Name oder Zwingername",
                 dogDetails: "Hund Details",
@@ -314,7 +217,7 @@ class ReuTeefCombinatie {
                 greatGrandfatherLabel: "Urgroßvater",
                 greatGrandmotherLabel: "Urgroßmutter",
                 typeToSearch: "Beginnen Sie mit der Eingabe, um zu suchen",
-                noDogsFound: "Keine Hunde gefonden",
+                noDogsFound: "Keine Hunde gefunden",
                 found: "gefunden",
                 futurePuppyName: "Zukünftiger Welpe",
                 futurePuppyDescription: "Vorhersage der Kombination {father} × {mother}",
@@ -357,55 +260,7 @@ class ReuTeefCombinatie {
                 dwlmUnknown: "Dandy Walker unbekannt",
                 thyroidTested: "Schilddrüse getestet",
                 thyroidUnknown: "Schilddrüse unbekannt",
-                occurrences: "Anzahl Mal",
-                // HEALTH INFO TRANSLATIONS - ERGÄNZUNG
-                hipDysplasia: "Hüftdysplasie",
-                elbowDysplasia: "Ellbogendysplasie",
-                patellaLuxation: "Patella Luxation",
-                eyes: "Augen",
-                eyesExplanation: "Augenerklärung",
-                dandyWalker: "Dandy Walker Malformation",
-                thyroid: "Schilddrüse",
-                thyroidExplanation: "Schilddrüse Erklärung",
-                country: "Land",
-                zipCode: "Postleitzahl",
-                remarks: "Bemerkungen",
-                noAdditionalInfo: "Keine zusätzlichen Informationen verfügbar",
-                noHealthInfo: "Keine Gesundheitsinformationen verfügbar",
-                grade: "Grade",
-                status: "Status",
-                notApplicable: "Nicht zutreffend",
-                unknown: "Unbekannt",
-                
-                // GESUNDHEITSAUSWERTUNGEN
-                hipGradeA: "A - Keine Anzeichen von HD",
-                hipGradeB: "B - Grenzfall",
-                hipGradeC: "C - Leichte HD",
-                hipGradeD: "D - Mäßige HD",
-                hipGradeE: "E - Schwere HD",
-                
-                elbowGrade0: "0 - Keine ED",
-                elbowGrade1: "1 - Leichte ED",
-                elbowGrade2: "2 - Mäßige ED",
-                elbowGrade3: "3 - Schwere ED",
-                elbowGradeNB: "NB - Nicht bekannt",
-                
-                patellaGrade0: "0 - Keine PL",
-                patellaGrade1: "1 - Gelegentliche Luxation",
-                patellaGrade2: "2 - Häufige Luxation",
-                patellaGrade3: "3 - Ständige Luxation",
-                
-                eyeStatusVrij: "Frei",
-                eyeStatusDistichiasis: "Distichiasis",
-                eyeStatusOverig: "Andere",
-                
-                dandyStatusVrijDNA: "DNA-Frei",
-                dandyStatusVrijOuders: "Eltern-Frei",
-                dandyStatusDrager: "Träger",
-                dandyStatusLijder: "Betroffen",
-                
-                thyroidStatusNegatief: "Tgaa Negativ",
-                thyroidStatusPositief: "Tgaa Positiv"
+                occurrences: "Anzahl Mal"
             }
         };
     }
@@ -427,138 +282,7 @@ class ReuTeefCombinatie {
         return text;
     }
     
-    // FUNCTIE VOOR GEZONDHEIDSVERTALINGEN - DIRECT EN EENVOUDIG
-    getHealthTranslation(type, value) {
-        if (!value || value.trim() === '') {
-            return this.t('unknown');
-        }
-        
-        const val = value.trim().toUpperCase();
-        const lang = this.currentLang;
-        
-        switch(type) {
-            case 'hip':
-                switch(val) {
-                    case 'A': return this.translations[lang]['hipGradeA'] || `${value} - HD A`;
-                    case 'B': return this.translations[lang]['hipGradeB'] || `${value} - HD B`;
-                    case 'C': return this.translations[lang]['hipGradeC'] || `${value} - HD C`;
-                    case 'D': return this.translations[lang]['hipGradeD'] || `${value} - HD D`;
-                    case 'E': return this.translations[lang]['hipGradeE'] || `${value} - HD E`;
-                    default: return `${value} - ${this.t('unknown')}`;
-                }
-                
-            case 'elbow':
-                switch(val) {
-                    case '0': return this.translations[lang]['elbowGrade0'] || `${value} - ED 0`;
-                    case '1': return this.translations[lang]['elbowGrade1'] || `${value} - ED 1`;
-                    case '2': return this.translations[lang]['elbowGrade2'] || `${value} - ED 2`;
-                    case '3': return this.translations[lang]['elbowGrade3'] || `${value} - ED 3`;
-                    case 'NB': return this.translations[lang]['elbowGradeNB'] || `${value} - ED NB`;
-                    default: return `${value} - ${this.t('unknown')}`;
-                }
-                
-            case 'patella':
-                switch(val) {
-                    case '0': return this.translations[lang]['patellaGrade0'] || `${value} - PL 0`;
-                    case '1': return this.translations[lang]['patellaGrade1'] || `${value} - PL 1`;
-                    case '2': return this.translations[lang]['patellaGrade2'] || `${value} - PL 2`;
-                    case '3': return this.translations[lang]['patellaGrade3'] || `${value} - PL 3`;
-                    default: return `${value} - ${this.t('unknown')}`;
-                }
-                
-            case 'eyes':
-                const eyesLower = value.toLowerCase();
-                if (eyesLower.includes('vrij') || eyesLower.includes('free')) {
-                    return this.translations[lang]['eyeStatusVrij'] || "Vrij";
-                }
-                if (eyesLower.includes('dist')) {
-                    return this.translations[lang]['eyeStatusDistichiasis'] || "Distichiasis";
-                }
-                return this.translations[lang]['eyeStatusOverig'] || "Overig";
-                
-            case 'dandy':
-                const dandyLower = value.toLowerCase();
-                if (dandyLower.includes('dna')) {
-                    return this.translations[lang]['dandyStatusVrijDNA'] || "Vrij op DNA";
-                }
-                if (dandyLower.includes('ouders') || dandyLower.includes('parents')) {
-                    return this.translations[lang]['dandyStatusVrijOuders'] || "Vrij op ouders";
-                }
-                if (dandyLower.includes('drager') || dandyLower.includes('carrier')) {
-                    return this.translations[lang]['dandyStatusDrager'] || "Drager";
-                }
-                if (dandyLower.includes('lijder') || dandyLower.includes('affected')) {
-                    return this.translations[lang]['dandyStatusLijder'] || "Lijder";
-                }
-                return value;
-                
-            case 'thyroid':
-                if (value.includes('Negatief') || value.includes('Negative')) {
-                    return this.translations[lang]['thyroidStatusNegatief'] || "Tgaa Negatief";
-                }
-                if (value.includes('Positief') || value.includes('Positive')) {
-                    return this.translations[lang]['thyroidStatusPositief'] || "Tgaa Positief";
-                }
-                return value;
-                
-            default:
-                return value;
-        }
-    }
-    
-    // Helper functie voor gezondheidsbadges - DIRECT EN WERKEND
-    getHealthBadge(value, type) {
-        console.log(`🔍 getHealthBadge aangeroepen: value="${value}", type="${type}"`);
-        
-        if (!value || value.trim() === '') {
-            return `<span class="badge bg-secondary">${this.t('unknown')}</span>`;
-        }
-        
-        // Haal vertaling op
-        const translation = this.getHealthTranslation(type, value);
-        console.log(`✅ Vertaling: "${translation}"`);
-        
-        // Bepaal badge kleur op basis van waarde
-        let badgeClass = 'bg-secondary';
-        const val = value.toUpperCase().trim();
-        
-        switch(type) {
-            case 'hip':
-                if (val === 'A') badgeClass = 'bg-success';
-                else if (val === 'B') badgeClass = 'bg-warning';
-                else if (val === 'C') badgeClass = 'bg-warning';
-                else if (val === 'D' || val === 'E') badgeClass = 'bg-danger';
-                break;
-            case 'elbow':
-                if (val === '0') badgeClass = 'bg-success';
-                else if (val === '1' || val === '2') badgeClass = 'bg-warning';
-                else if (val === '3') badgeClass = 'bg-danger';
-                break;
-            case 'patella':
-                if (val === '0') badgeClass = 'bg-success';
-                else if (val === '1' || val === '2') badgeClass = 'bg-warning';
-                else if (val === '3') badgeClass = 'bg-danger';
-                break;
-            case 'eyes':
-                badgeClass = 'bg-info';
-                break;
-            case 'dandy':
-                badgeClass = 'bg-primary';
-                break;
-            case 'thyroid':
-                if (value.includes('Negatief') || value.includes('Negative')) {
-                    badgeClass = 'bg-success';
-                } else {
-                    badgeClass = 'bg-danger';
-                }
-                break;
-        }
-        
-        return `<span class="badge ${badgeClass}">${translation}</span>`;
-    }
-    
     async loadContent() {
-        console.log('🚀 ReuTeefCombinatie.loadContent() aangeroepen');
         const t = this.t.bind(this);
         const content = document.getElementById('breedingContent');
         const buttons = document.getElementById('breedingButtons');
@@ -576,7 +300,7 @@ class ReuTeefCombinatie {
         // Initialiseer COI Calculator DIRECT met alle honden
         if (typeof COICalculator !== 'undefined') {
             this.coiCalculator = new COICalculator(this.allHonden);
-            console.log('✅ COICalculator direct geïninitialiseerd in ReuTeefCombinatie');
+            console.log('✅ COICalculator direct geïnitialiseerd in ReuTeefCombinatie');
         } else {
             console.error('❌ COICalculator klasse niet gevonden!');
         }
@@ -937,27 +661,6 @@ class ReuTeefCombinatie {
                     color: #155724 !important;
                 }
                 
-                /* BADGE STYLES - IDENTIEK AAN SEARCHMANAGER */
-                .badge-success {
-                    background-color: #198754 !important;
-                }
-                .badge-warning {
-                    background-color: #ffc107 !important;
-                    color: #000 !important;
-                }
-                .badge-danger {
-                    background-color: #dc3545 !important;
-                }
-                .badge-info {
-                    background-color: #0dcaf0 !important;
-                }
-                .badge-primary {
-                    background-color: #0d6efd !important;
-                }
-                .badge-secondary {
-                    background-color: #6c757d !important;
-                }
-                
                 /* RESPONSIVE STYLES */
                 @media (max-width: 768px) {
                     .search-input {
@@ -1044,20 +747,6 @@ class ReuTeefCombinatie {
                 this.allHonden = await this.db.getHonden();
                 console.log(`✅ Geladen: ${this.allHonden.length} honden uit database voor ReuTeefCombinatie`);
                 
-                // DEBUG: Controleer of de gegevens compleet zijn
-                if (this.allHonden.length > 0) {
-                    const sampleHond = this.allHonden[0];
-                    console.log(`📊 Voorbeeld hond ${sampleHond.id}:`, {
-                        naam: sampleHond.naam,
-                        heupdysplasie: sampleHond.heupdysplasie,
-                        elleboogdysplasie: sampleHond.elleboogdysplasie,
-                        patella: sampleHond.patella,
-                        ogen: sampleHond.ogen,
-                        dandyWalker: sampleHond.dandyWalker,
-                        schildklier: sampleHond.schildklier
-                    });
-                }
-                
                 // Voeg alle honden toe aan cache
                 this.allHonden.forEach(hond => {
                     this.hondenCache.set(hond.id, hond);
@@ -1078,18 +767,12 @@ class ReuTeefCombinatie {
     async getHondById(id) {
         // Controleer eerst cache
         if (this.hondenCache.has(id)) {
-            const cached = this.hondenCache.get(id);
-            // Controleer of cache compleet is (heeft gezondheidsinformatie)
-            if (cached.heupdysplasie !== undefined || cached.elleboogdysplasie !== undefined) {
-                console.log(`✅ Hond ${id} uit cache: HD=${cached.heupdysplasie}`);
-                return cached;
-            }
+            return this.hondenCache.get(id);
         }
         
         try {
             const hond = await this.db.getHondById(id);
             if (hond) {
-                console.log(`✅ Volledige hond ${id} uit database: HD=${hond.heupdysplasie}, ED=${hond.elleboogdysplasie}`);
                 // Voeg toe aan cache
                 this.hondenCache.set(id, hond);
                 if (hond.stamboomnr) {
@@ -1099,21 +782,6 @@ class ReuTeefCombinatie {
             return hond;
         } catch (error) {
             console.error(`❌ Fout bij ophalen hond ${id}:`, error);
-            return null;
-        }
-    }
-    
-    async getHondByIdFromDb(id) {
-        // Directe database call voor volledige informatie
-        try {
-            const hond = await this.db.getHondById(id);
-            if (hond) {
-                console.log(`✅ getHondByIdFromDb(${id}): HD=${hond.heupdysplasie}, ED=${hond.elleboogdysplasie}`);
-                this.hondenCache.set(id, hond);
-            }
-            return hond;
-        } catch (error) {
-            console.error(`❌ Fout in getHondByIdFromDb(${id}):`, error);
             return null;
         }
     }
@@ -1430,9 +1098,6 @@ class ReuTeefCombinatie {
     }
     
     async showHondDetails(elementId, hond, type) {
-        console.log(`🔍 showHondDetails voor ${type}: ${hond.naam}`);
-        console.log(`📊 Gezondheidsinfo: HD=${hond.heupdysplasie}, ED=${hond.elleboogdysplasie}`);
-        
         const t = this.t.bind(this);
         const detailsContainer = document.getElementById(elementId);
         
@@ -1448,12 +1113,6 @@ class ReuTeefCombinatie {
         
         // Haal ouders informatie op
         const oudersInfo = await this.getOudersInfo(hond);
-        
-        // Maak een lokale versie van getHealthBadge die WEL werkt
-        const getHealthBadge = (value, healthType) => {
-            console.log(`🎯 getHealthBadge lokaal: value="${value}", type="${healthType}"`);
-            return this.getHealthBadge(value, healthType);
-        };
         
         detailsContainer.innerHTML = `
             <div class="dog-details-card">
@@ -1498,7 +1157,7 @@ class ReuTeefCombinatie {
                 </div>
                 
                 <div class="dog-details-row">
-                    <div class="dog-details-label">Ouders:</div>
+                    <div class="dog-details-label">${t('parents')}:</div>
                     <div class="dog-details-value">
                         <div class="row">
                             ${oudersInfo.vader ? `
@@ -1537,44 +1196,38 @@ class ReuTeefCombinatie {
                             <div class="row">
                                 ${hond.heupdysplasie ? `
                                     <div class="col-md-6 mb-2">
-                                        <strong>${t('hipDysplasia')}:</strong><br>
-                                        ${getHealthBadge(hond.heupdysplasie, 'hip')}
+                                        <strong>HD:</strong> ${hond.heupdysplasie}
                                     </div>
                                 ` : ''}
                                 
                                 ${hond.elleboogdysplasie ? `
                                     <div class="col-md-6 mb-2">
-                                        <strong>${t('elbowDysplasia')}:</strong><br>
-                                        ${getHealthBadge(hond.elleboogdysplasie, 'elbow')}
+                                        <strong>ED:</strong> ${hond.elleboogdysplasie}
                                     </div>
                                 ` : ''}
                                 
                                 ${hond.patella ? `
                                     <div class="col-md-6 mb-2">
-                                        <strong>${t('patellaLuxation')}:</strong><br>
-                                        ${getHealthBadge(hond.patella, 'patella')}
+                                        <strong>Patella:</strong> ${hond.patella}
                                     </div>
                                 ` : ''}
                                 
                                 ${hond.ogen ? `
                                     <div class="col-md-6 mb-2">
-                                        <strong>${t('eyes')}:</strong><br>
-                                        ${getHealthBadge(hond.ogen, 'eyes')}
+                                        <strong>Ogen:</strong> ${hond.ogen}
                                         ${hond.ogenVerklaring ? `<br><small>${hond.ogenVerklaring}</small>` : ''}
                                     </div>
                                 ` : ''}
                                 
                                 ${hond.dandyWalker ? `
                                     <div class="col-md-6 mb-2">
-                                        <strong>${t('dandyWalker')}:</strong><br>
-                                        ${getHealthBadge(hond.dandyWalker, 'dandy')}
+                                        <strong>Dandy Walker:</strong> ${hond.dandyWalker}
                                     </div>
                                 ` : ''}
                                 
                                 ${hond.schildklier ? `
                                     <div class="col-md-6 mb-2">
-                                        <strong>${t('thyroid')}:</strong><br>
-                                        ${getHealthBadge(hond.schildklier, 'thyroid')}
+                                        <strong>Schildklier:</strong> ${hond.schildklier}
                                         ${hond.schildklierVerklaring ? `<br><small>${hond.schildklierVerklaring}</small>` : ''}
                                     </div>
                                 ` : ''}
@@ -1590,9 +1243,6 @@ class ReuTeefCombinatie {
                 </div>
             </div>
         `;
-        
-        // DEBUG: Log de gegenereerde HTML
-        console.log('✅ Details HTML gegenereerd voor', hond.naam);
     }
     
     clearSelection(detailsId, resultsId) {
@@ -1698,9 +1348,6 @@ class ReuTeefCombinatie {
             return;
         }
         
-        console.log('🚀 Start toekomstige pup stamboom...');
-        console.log(`👥 Ouders: Reu=${this.selectedReu?.id} ${this.selectedReu?.naam}, Teef=${this.selectedTeef?.id} ${this.selectedTeef?.naam}`);
-        
         // Maak een virtuele toekomstige pup
         const futurePuppy = {
             id: -999999, // Uniek ID voor virtuele pup
@@ -1731,16 +1378,6 @@ class ReuTeefCombinatie {
         console.log('🔍 Toekomstige pup aangemaakt voor COI berekening:', futurePuppy);
         
         try {
-            // ZORG DAT OUDERS VOLLEDIGE INFO HEBBEN IN CACHE
-            console.log('📥 Controleren ouders informatie...');
-            
-            // Haal ouders op met volledige informatie uit database
-            const fullReu = await this.getHondByIdFromDb(this.selectedReu.id);
-            const fullTeef = await this.getHondByIdFromDb(this.selectedTeef.id);
-            
-            console.log(`✅ Reu volledige info: HD=${fullReu?.heupdysplasie}, ED=${fullReu?.elleboogdysplasie}`);
-            console.log(`✅ Teef volledige info: HD=${fullTeef?.heupdysplasie}, ED=${fullTeef?.elleboogdysplasie}`);
-            
             // MAKEN VIRTUELE HOND VOOR COI BEREKENING
             // Voeg virtuele pup toe aan allHonden tijdelijk voor COI berekening
             const originalHonden = [...this.allHonden];
@@ -1863,16 +1500,16 @@ class ReuTeefCombinatie {
             // Voeg toe aan ancestors
             ancestors.push(currentDog);
             
-            // Haal ouders op met volledige informatie
+            // Voeg ouders toe aan queue
             if (currentDog.vaderId) {
-                const father = await this.getHondByIdFromDb(currentDog.vaderId);
+                const father = await this.getHondById(currentDog.vaderId);
                 if (father) {
                     queue.push({ dog: father, generation: generation + 1 });
                 }
             }
             
             if (currentDog.moederId) {
-                const mother = await this.getHondByIdFromDb(currentDog.moederId);
+                const mother = await this.getHondById(currentDog.moederId);
                 if (mother) {
                     queue.push({ dog: mother, generation: generation + 1 });
                 }
@@ -1937,27 +1574,26 @@ class ReuTeefCombinatie {
     }
     
     getHDKey(hdValue) {
-        const hd = (hdValue || '').toUpperCase().trim();
-        if (hd.includes('A')) return 'hd_a';
-        if (hd.includes('B')) return 'hd_b';
-        if (hd.includes('C')) return 'hd_c';
-        if (hd.includes('D')) return 'hd_d';
-        if (hd.includes('E')) return 'hd_e';
+        const hd = (hdValue || '').toLowerCase().trim();
+        if (hd.includes('a')) return 'hd_a';
+        if (hd.includes('b')) return 'hd_b';
+        if (hd.includes('c')) return 'hd_c';
+        if (hd.includes('d')) return 'hd_d';
+        if (hd.includes('e')) return 'hd_e';
         return null;
     }
     
     getEDKey(edValue) {
-        const ed = (edValue || '').toUpperCase().trim();
+        const ed = (edValue || '').toLowerCase().trim();
         if (ed.includes('0')) return 'ed_0';
         if (ed.includes('1')) return 'ed_1';
         if (ed.includes('2')) return 'ed_2';
         if (ed.includes('3')) return 'ed_3';
-        if (ed.includes('NB')) return 'ed_unknown';
         return null;
     }
     
     getPLKey(plValue) {
-        const pl = (plValue || '').toUpperCase().trim();
+        const pl = (plValue || '').toLowerCase().trim();
         if (pl.includes('0')) return 'pl_0';
         if (pl.includes('1')) return 'pl_1';
         if (pl.includes('2')) return 'pl_2';
@@ -1980,38 +1616,15 @@ class ReuTeefCombinatie {
     }
     
     async showStamboomWithFuturePuppy(futurePuppy, coiResult, healthAnalysis) {
-        console.log('🔄 Toon stamboom via StamboomManager...');
-        
         // Probeer eerst via StamboomManager
         if (this.stamboomManager && this.stamboomManager.allDogs) {
             const originalDogs = [...this.stamboomManager.allDogs];
-            
-            // Zorg dat ouders in de StamboomManager cache zitten
-            if (this.selectedReu) {
-                // Gebruik getHondByIdFromDb om volledige informatie te krijgen
-                const fullReu = await this.getHondByIdFromDb(this.selectedReu.id);
-                if (fullReu) {
-                    this.stamboomManager.allDogs.push(fullReu);
-                } else {
-                    this.stamboomManager.allDogs.push(this.selectedReu);
-                }
-            }
-            if (this.selectedTeef) {
-                // Gebruik getHondByIdFromDb om volledige informatie te krijgen
-                const fullTeef = await this.getHondByIdFromDb(this.selectedTeef.id);
-                if (fullTeef) {
-                    this.stamboomManager.allDogs.push(fullTeef);
-                } else {
-                    this.stamboomManager.allDogs.push(this.selectedTeef);
-                }
-            }
-            
             this.stamboomManager.allDogs.push(futurePuppy);
             
             try {
                 await this.stamboomManager.showPedigree(futurePuppy);
                 
-                // VOEG CLICK EVENT TOE - PAS DEZE METHODE AAN
+                // VOEG CLICK EVENT TOE
                 setTimeout(() => {
                     this.addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis);
                 }, 100);
@@ -2022,12 +1635,11 @@ class ReuTeefCombinatie {
             }
         } else {
             // Fallback
-            console.log('⚠️ Gebruik fallback stamboom');
             await this.showCustomFuturePuppyPedigree(futurePuppy, coiResult, healthAnalysis);
         }
     }
     
-    async addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis) {
+    addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis) {
         const futurePuppyCard = document.querySelector('.pedigree-card-compact.horizontal.main-dog-compact.gen0');
         if (futurePuppyCard) {
             futurePuppyCard.addEventListener('click', (e) => {
@@ -2041,267 +1653,6 @@ class ReuTeefCombinatie {
             if (clickHint) {
                 clickHint.innerHTML = '<i class="bi bi-info-circle"></i> ' + this.t('clickForDetails');
             }
-        }
-        
-        // IMPORTANT: Vervang de click handlers voor de ouders om volledige informatie te tonen
-        const parentCards = document.querySelectorAll('.pedigree-card-compact.horizontal.gen1');
-        parentCards.forEach(async (card) => {
-            const dogId = parseInt(card.getAttribute('data-dog-id'));
-            if (dogId === 0 || dogId === futurePuppy.id) return;
-            
-            // Vervang de bestaande click handler
-            card.removeEventListener('click', card._originalClickHandler);
-            
-            const newHandler = async (e) => {
-                e.stopPropagation();
-                
-                // Haal volledige informatie op uit de database
-                const fullDog = await this.getHondByIdFromDb(dogId);
-                if (!fullDog) return;
-                
-                const relation = card.getAttribute('data-relation') || '';
-                
-                // Gebruik StamboomManager om de popup te tonen met volledige informatie
-                if (this.stamboomManager) {
-                    await this.stamboomManager.showDogDetailPopup(fullDog, relation);
-                } else {
-                    // Fallback - gebruik nu de verbeterde showDogPopup met juiste gezondheidsinfo
-                    await this.showDogPopup(fullDog, relation);
-                }
-            };
-            
-            card._originalClickHandler = newHandler;
-            card.addEventListener('click', newHandler);
-            card.style.cursor = 'pointer';
-        });
-        
-        // Ook voor grootouders en overgrootouders
-        const ancestorCards = document.querySelectorAll('.pedigree-card-compact.horizontal.gen2, .pedigree-card-compact.horizontal.gen3');
-        ancestorCards.forEach(async (card) => {
-            const dogId = parseInt(card.getAttribute('data-dog-id'));
-            if (dogId === 0) return;
-            
-            // Vervang de bestaande click handler
-            card.removeEventListener('click', card._originalClickHandler);
-            
-            const newHandler = async (e) => {
-                e.stopPropagation();
-                
-                // Haal volledige informatie op uit de database
-                const fullDog = await this.getHondByIdFromDb(dogId);
-                if (!fullDog) return;
-                
-                const relation = card.getAttribute('data-relation') || '';
-                
-                // Gebruik StamboomManager om de popup te tonen met volledige informatie
-                if (this.stamboomManager) {
-                    await this.stamboomManager.showDogDetailPopup(fullDog, relation);
-                } else {
-                    // Fallback - gebruik nu de verbeterde showDogPopup met juiste gezondheidsinfo
-                    await this.showDogPopup(fullDog, relation);
-                }
-            };
-            
-            card._originalClickHandler = newHandler;
-            card.addEventListener('click', newHandler);
-            card.style.cursor = 'pointer';
-        });
-    }
-    
-    async showDogPopup(dog, relation) {
-        const t = this.t.bind(this);
-        
-        // Helper functie voor gezondheidsbadges - GEBRUIK DE WERKENDE FUNCTIE
-        const getHealthBadge = (value, healthType) => {
-            return this.getHealthBadge(value, healthType);
-        };
-        
-        // Formateer datum
-        const formatDate = (dateString) => {
-            if (!dateString) return '';
-            try {
-                const date = new Date(dateString);
-                return date.toLocaleDateString(this.currentLang === 'nl' ? 'nl-NL' : 
-                                              this.currentLang === 'de' ? 'de-DE' : 'en-US');
-            } catch {
-                return dateString;
-            }
-        };
-        
-        const genderText = dog.geslacht === 'reuen' ? t('genderReu') : 
-                          dog.geslacht === 'teven' ? t('genderTeef') : t('unknown');
-        
-        // Maak een eenvoudige popup die WEL de juiste gezondheidsinformatie toont
-        const popupHTML = `
-            <div class="dog-detail-popup">
-                <div class="popup-header">
-                    <h5 class="popup-title">
-                        <i class="${dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 'bi-gender-female text-danger'} me-2"></i>
-                        ${dog.naam || this.t('unknown')}
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" aria-label="${t('close')}"></button>
-                </div>
-                <div class="popup-body">
-                    <div class="info-section mb-2">
-                        <h6><i class="bi bi-card-text me-1"></i> Basisgegevens</h6>
-                        <div class="info-grid">
-                            ${dog.stamboomnr ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('pedigreeNumber')}:</span>
-                                    <span class="info-value">${dog.stamboomnr}</span>
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.ras ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">Ras:</span>
-                                    <span class="info-value">${dog.ras}</span>
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">Geslacht:</span>
-                                    <span class="info-value">${genderText}</span>
-                                </div>
-                            </div>
-                            
-                            ${dog.vachtkleur ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('color')}:</span>
-                                    <span class="info-value">${dog.vachtkleur}</span>
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.geboortedatum ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('birthDate')}:</span>
-                                    <span class="info-value">${formatDate(dog.geboortedatum)}</span>
-                                </div>
-                            </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                    
-                    <div class="info-section mb-2">
-                        <h6><i class="bi bi-heart-pulse me-1"></i> ${t('healthInfo')}</h6>
-                        <div class="info-grid">
-                            ${dog.heupdysplasie ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('hipDysplasia')}:</span>
-                                    <div class="info-value">${getHealthBadge(dog.heupdysplasie, 'hip')}</div>
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.elleboogdysplasie ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('elbowDysplasia')}:</span>
-                                    <div class="info-value">${getHealthBadge(dog.elleboogdysplasie, 'elbow')}</div>
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.patella ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('patellaLuxation')}:</span>
-                                    <div class="info-value">${getHealthBadge(dog.patella, 'patella')}</div>
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.ogen ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('eyes')}:</span>
-                                    <div class="info-value">${getHealthBadge(dog.ogen, 'eyes')}</div>
-                                    ${dog.ogenVerklaring ? `<div class="info-value"><small>${dog.ogenVerklaring}</small></div>` : ''}
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.dandyWalker ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('dandyWalker')}:</span>
-                                    <div class="info-value">${getHealthBadge(dog.dandyWalker, 'dandy')}</div>
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.schildklier ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('thyroid')}:</span>
-                                    <div class="info-value">${getHealthBadge(dog.schildklier, 'thyroid')}</div>
-                                    ${dog.schildklierVerklaring ? `<div class="info-value"><small>${dog.schildklierVerklaring}</small></div>` : ''}
-                                </div>
-                            </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                    
-                    ${dog.opmerkingen || dog.land || dog.postcode ? `
-                    <div class="info-section mb-2">
-                        <h6><i class="bi bi-info-circle me-1"></i> ${t('additionalInfo')}</h6>
-                        <div class="info-grid">
-                            ${dog.land ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('country')}:</span>
-                                    <span class="info-value">${dog.land}</span>
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.postcode ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('zipCode')}:</span>
-                                    <span class="info-value">${dog.postcode}</span>
-                                </div>
-                            </div>
-                            ` : ''}
-                            
-                            ${dog.opmerkingen ? `
-                            <div class="info-row">
-                                <div class="info-item info-item-full">
-                                    <span class="info-label">${t('remarks')}:</span>
-                                    <div class="info-value">${dog.opmerkingen}</div>
-                                </div>
-                            </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                    ` : ''}
-                </div>
-                <div class="popup-footer">
-                    <button type="button" class="btn btn-secondary popup-close-btn">
-                        <i class="bi bi-x-circle me-1"></i> ${t('closePopup')}
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        this.ensurePopupContainer();
-        
-        const overlay = document.getElementById('pedigreePopupOverlay');
-        const container = document.getElementById('pedigreePopupContainer');
-        
-        if (container) {
-            container.innerHTML = popupHTML;
-            overlay.style.display = 'flex';
-            this.setupPopupEventListeners();
         }
     }
     
@@ -2550,7 +1901,7 @@ class ReuTeefCombinatie {
                         </h5>
                         <div class="d-flex gap-2">
                             <button class="btn btn-sm btn-light btn-print">
-                                <i class="bi bi-printer me-1"></i> ${this.t('close')}
+                                <i class="bi bi-printer me-1"></i> ${this.t('print')}
                             </button>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${this.t('close')}"></button>
                         </div>
@@ -2591,8 +1942,7 @@ class ReuTeefCombinatie {
         const container = document.getElementById('futurePuppyContainer');
         if (!container) return;
         
-        // Gebruik async build methode die ouders uit database haalt
-        const pedigreeTree = await this.buildFuturePuppyPedigreeTree(futurePuppy);
+        const pedigreeTree = this.buildFuturePuppyPedigreeTree(futurePuppy);
         
         const mainDogCard = await this.generateDogCard(pedigreeTree.mainDog, this.t('futurePuppyName'), true, 0);
         const fatherCard = await this.generateDogCard(pedigreeTree.father, this.t('fatherLabel'), false, 1);
@@ -2622,13 +1972,13 @@ class ReuTeefCombinatie {
                 </div>
                 
                 <div class="pedigree-generation-col gen1">
-                    <div class="generation-label">Ouders</div>
+                    <div class="generation-label">${this.t('parents')}</div>
                     ${fatherCard}
                     ${motherCard}
                 </div>
                 
                 <div class="pedigree-generation-col gen2">
-                    <div class="generation-label">Grootouders</div>
+                    <div class="generation-label">${this.t('grandparents')}</div>
                     ${paternalGrandfatherCard}
                     ${paternalGrandmotherCard}
                     ${maternalGrandfatherCard}
@@ -2636,7 +1986,7 @@ class ReuTeefCombinatie {
                 </div>
                 
                 <div class="pedigree-generation-col gen3">
-                    <div class="generation-label">Overgrootouders</div>
+                    <div class="generation-label">${this.t('greatGrandparents')}</div>
                     ${paternalGreatGrandfather1Card}
                     ${paternalGreatGrandmother1Card}
                     ${paternalGreatGrandfather2Card}
@@ -2656,13 +2006,11 @@ class ReuTeefCombinatie {
         }
     }
     
-    async buildFuturePuppyPedigreeTree(futurePuppy) {
-        console.log('🌳 Bouw toekomstige pup stamboom...');
-        
+    buildFuturePuppyPedigreeTree(futurePuppy) {
         const pedigreeTree = {
             mainDog: futurePuppy,
-            father: null,
-            mother: null,
+            father: this.selectedReu,
+            mother: this.selectedTeef,
             paternalGrandfather: null,
             paternalGrandmother: null,
             maternalGrandfather: null,
@@ -2677,75 +2025,53 @@ class ReuTeefCombinatie {
             maternalGreatGrandmother2: null
         };
         
-        // HAAL OUDERS MET VOLLEDIGE INFO UIT DATABASE
-        console.log('📥 Haal ouders op uit database...');
-        if (this.selectedReu) {
-            pedigreeTree.father = await this.getHondByIdFromDb(this.selectedReu.id);
-            console.log(`✅ Reu opgehaald: ${pedigreeTree.father?.naam}, HD=${pedigreeTree.father?.heupdysplasie}`);
+        if (this.selectedReu && this.selectedReu.vaderId) {
+            pedigreeTree.paternalGrandfather = this.getDogById(this.selectedReu.vaderId);
         }
         
-        if (this.selectedTeef) {
-            pedigreeTree.mother = await this.getHondByIdFromDb(this.selectedTeef.id);
-            console.log(`✅ Teef opgehaald: ${pedigreeTree.mother?.naam}, HD=${pedigreeTree.mother?.heupdysplasie}`);
+        if (this.selectedReu && this.selectedReu.moederId) {
+            pedigreeTree.paternalGrandmother = this.getDogById(this.selectedReu.moederId);
         }
         
-        // Haal grootouders op
-        if (pedigreeTree.father && pedigreeTree.father.vaderId) {
-            pedigreeTree.paternalGrandfather = await this.getHondByIdFromDb(pedigreeTree.father.vaderId);
+        if (this.selectedTeef && this.selectedTeef.vaderId) {
+            pedigreeTree.maternalGrandfather = this.getDogById(this.selectedTeef.vaderId);
         }
         
-        if (pedigreeTree.father && pedigreeTree.father.moederId) {
-            pedigreeTree.paternalGrandmother = await this.getHondByIdFromDb(pedigreeTree.father.moederId);
+        if (this.selectedTeef && this.selectedTeef.moederId) {
+            pedigreeTree.maternalGrandmother = this.getDogById(this.selectedTeef.moederId);
         }
         
-        if (pedigreeTree.mother && pedigreeTree.mother.vaderId) {
-            pedigreeTree.maternalGrandfather = await this.getHondByIdFromDb(pedigreeTree.mother.vaderId);
-        }
-        
-        if (pedigreeTree.mother && pedigreeTree.mother.moederId) {
-            pedigreeTree.maternalGrandmother = await this.getHondByIdFromDb(pedigreeTree.mother.moederId);
-        }
-        
-        // Haal overgrootouders op
         if (pedigreeTree.paternalGrandfather && pedigreeTree.paternalGrandfather.vaderId) {
-            pedigreeTree.paternalGreatGrandfather1 = await this.getHondByIdFromDb(pedigreeTree.paternalGrandfather.vaderId);
+            pedigreeTree.paternalGreatGrandfather1 = this.getDogById(pedigreeTree.paternalGrandfather.vaderId);
         }
         
         if (pedigreeTree.paternalGrandfather && pedigreeTree.paternalGrandfather.moederId) {
-            pedigreeTree.paternalGreatGrandmother1 = await this.getHondByIdFromDb(pedigreeTree.paternalGrandfather.moederId);
+            pedigreeTree.paternalGreatGrandmother1 = this.getDogById(pedigreeTree.paternalGrandfather.moederId);
         }
         
         if (pedigreeTree.paternalGrandmother && pedigreeTree.paternalGrandmother.vaderId) {
-            pedigreeTree.paternalGreatGrandfather2 = await this.getHondByIdFromDb(pedigreeTree.paternalGrandmother.vaderId);
+            pedigreeTree.paternalGreatGrandfather2 = this.getDogById(pedigreeTree.paternalGrandmother.vaderId);
         }
         
         if (pedigreeTree.paternalGrandmother && pedigreeTree.paternalGrandmother.moederId) {
-            pedigreeTree.paternalGreatGrandmother2 = await this.getHondByIdFromDb(pedigreeTree.paternalGrandmother.moederId);
+            pedigreeTree.paternalGreatGrandmother2 = this.getDogById(pedigreeTree.paternalGrandmother.moederId);
         }
         
         if (pedigreeTree.maternalGrandfather && pedigreeTree.maternalGrandfather.vaderId) {
-            pedigreeTree.maternalGreatGrandfather1 = await this.getHondByIdFromDb(pedigreeTree.maternalGrandfather.vaderId);
+            pedigreeTree.maternalGreatGrandfather1 = this.getDogById(pedigreeTree.maternalGrandfather.vaderId);
         }
         
         if (pedigreeTree.maternalGrandfather && pedigreeTree.maternalGrandfather.moederId) {
-            pedigreeTree.maternalGreatGrandmother1 = await this.getHondByIdFromDb(pedigreeTree.maternalGrandfather.moederId);
+            pedigreeTree.maternalGreatGrandmother1 = this.getDogById(pedigreeTree.maternalGrandfather.moederId);
         }
         
         if (pedigreeTree.maternalGrandmother && pedigreeTree.maternalGrandmother.vaderId) {
-            pedigreeTree.maternalGreatGrandfather2 = await this.getHondByIdFromDb(pedigreeTree.maternalGrandmother.vaderId);
+            pedigreeTree.maternalGreatGrandfather2 = this.getDogById(pedigreeTree.maternalGrandmother.vaderId);
         }
         
         if (pedigreeTree.maternalGrandmother && pedigreeTree.maternalGrandmother.moederId) {
-            pedigreeTree.maternalGreatGrandmother2 = await this.getHondByIdFromDb(pedigreeTree.maternalGrandmother.moederId);
+            pedigreeTree.maternalGreatGrandmother2 = this.getDogById(pedigreeTree.maternalGrandmother.moederId);
         }
-        
-        console.log('✅ Stamboom opgebouwd met', 
-            (pedigreeTree.father ? 1 : 0) + (pedigreeTree.mother ? 1 : 0),
-            'ouders,',
-            (pedigreeTree.paternalGrandfather ? 1 : 0) + (pedigreeTree.paternalGrandmother ? 1 : 0) +
-            (pedigreeTree.maternalGrandfather ? 1 : 0) + (pedigreeTree.maternalGrandmother ? 1 : 0),
-            'grootouders'
-        );
         
         return pedigreeTree;
     }
@@ -2774,7 +2100,7 @@ class ReuTeefCombinatie {
                         <div class="relation-compact">${relation}</div>
                     </div>
                     <div class="pedigree-card-body-compact horizontal text-center py-3">
-                        <div class="no-data-text">${this.t('noDogFound')}</div>
+                        <div class="no-data-text">${this.t('noData')}</div>
                     </div>
                 </div>
             `;
