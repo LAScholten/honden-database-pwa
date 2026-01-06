@@ -256,7 +256,7 @@ class ReuTeefCombinatie {
                 eyesOther: "Augen sonstige",
                 eyesUnknown: "Augen unbekannt",
                 dwlmDnaFree: "Dandy Walker (DNA) frei",
-                dwlmParentsFree: "Dandy Walker (Eltern) frei",
+                dwlmParentsFree: "Dandy Walker (Eltern) vrij",
                 dwlmUnknown: "Dandy Walker unbekannt",
                 thyroidTested: "Schilddrüse getestet",
                 thyroidUnknown: "Schilddrüse unbekannt",
@@ -305,9 +305,13 @@ class ReuTeefCombinatie {
             console.error('❌ COICalculator klasse niet gevonden!');
         }
         
-        // Initialiseer StamboomManager als deze nog niet bestaat
+        // BELANGRIJK: Initialiseer StamboomManager met DEZELFDE volledige dataset
         if (!this.stamboomManager && this.db) {
             this.stamboomManager = new StamboomManager(this.db, this.currentLang);
+            
+            // ZORG DAT STAMBOOMMANAGER DEZELFDE ALLHONDEN KRIJGT ALS RUCTEEFCOMBINATIE
+            this.stamboomManager.allDogs = this.allHonden; // 👈 CRITIEKE FIX!
+            
             await this.stamboomManager.initialize();
         }
         
@@ -767,16 +771,49 @@ class ReuTeefCombinatie {
     async getHondById(id) {
         // Controleer eerst cache
         if (this.hondenCache.has(id)) {
-            return this.hondenCache.get(id);
+            const cachedDog = this.hondenCache.get(id);
+            // Controleer of we volledige gezondheidsdata hebben
+            if (cachedDog.heupdysplasie !== undefined || 
+                cachedDog.elleboogdysplasie !== undefined ||
+                cachedDog.patella !== undefined ||
+                cachedDog.ogen !== undefined ||
+                cachedDog.dandyWalker !== undefined ||
+                cachedDog.schildklier !== undefined) {
+                return cachedDog;
+            }
         }
         
         try {
             const hond = await this.db.getHondById(id);
             if (hond) {
+                // ZORG DAT WE ALLE GEZONDHEIDSVELDEN HEBBEN - zelfs als ze leeg zijn
+                hond.heupdysplasie = hond.heupdysplasie || '';
+                hond.elleboogdysplasie = hond.elleboogdysplasie || '';
+                hond.patella = hond.patella || '';
+                hond.ogen = hond.ogen || '';
+                hond.ogenVerklaring = hond.ogenVerklaring || '';
+                hond.dandyWalker = hond.dandyWalker || '';
+                hond.schildklier = hond.schildklier || '';
+                hond.schildklierVerklaring = hond.schildklierVerklaring || '';
+                
                 // Voeg toe aan cache
                 this.hondenCache.set(id, hond);
                 if (hond.stamboomnr) {
                     this.hondenCache.set(hond.stamboomnr, hond);
+                }
+                
+                // Voeg ook toe aan allHonden als niet al aanwezig
+                const existsInAllHonden = this.allHonden.some(dog => dog.id === id);
+                if (!existsInAllHonden) {
+                    this.allHonden.push(hond);
+                    
+                    // Update StamboomManager als die bestaat
+                    if (this.stamboomManager && this.stamboomManager.allDogs) {
+                        const existsInStamboomManager = this.stamboomManager.allDogs.some(dog => dog.id === id);
+                        if (!existsInStamboomManager) {
+                            this.stamboomManager.allDogs.push(hond);
+                        }
+                    }
                 }
             }
             return hond;
@@ -805,9 +842,33 @@ class ReuTeefCombinatie {
             if (result && result.length > 0) {
                 // Voeg gevonden hond toe aan cache
                 result.forEach(hond => {
+                    // Zorg voor volledige gezondheidsdata
+                    hond.heupdysplasie = hond.heupdysplasie || '';
+                    hond.elleboogdysplasie = hond.elleboogdysplasie || '';
+                    hond.patella = hond.patella || '';
+                    hond.ogen = hond.ogen || '';
+                    hond.ogenVerklaring = hond.ogenVerklaring || '';
+                    hond.dandyWalker = hond.dandyWalker || '';
+                    hond.schildklier = hond.schildklier || '';
+                    hond.schildklierVerklaring = hond.schildklierVerklaring || '';
+                    
                     this.hondenCache.set(hond.id, hond);
                     if (hond.stamboomnr) {
                         this.hondenCache.set(hond.stamboomnr, hond);
+                    }
+                    
+                    // Voeg ook toe aan allHonden als niet al aanwezig
+                    const exists = this.allHonden.some(dog => dog.id === hond.id);
+                    if (!exists) {
+                        this.allHonden.push(hond);
+                        
+                        // Update StamboomManager als die bestaat
+                        if (this.stamboomManager && this.stamboomManager.allDogs) {
+                            const existsInStamboomManager = this.stamboomManager.allDogs.some(dog => dog.id === hond.id);
+                            if (!existsInStamboomManager) {
+                                this.stamboomManager.allDogs.push(hond);
+                            }
+                        }
                     }
                 });
                 return result[0];
@@ -1108,10 +1169,10 @@ class ReuTeefCombinatie {
             resultsContainer.style.display = 'none';
         }
         
-        // Toon details container
+        // Toon details container - ZONDER GEZONDHEIDSINFO (zoals je wilt)
         detailsContainer.classList.remove('d-none');
         
-        // Haal ouders informatie op
+        // Haal ouders informatie op - maar toon geen gezondheidsinfo hier
         const oudersInfo = await this.getOudersInfo(hond);
         
         detailsContainer.innerHTML = `
@@ -1188,53 +1249,6 @@ class ReuTeefCombinatie {
                         </div>
                     </div>
                 </div>
-                
-                ${hond.heupdysplasie || hond.elleboogdysplasie || hond.patella || hond.ogen || hond.dandyWalker || hond.schildklier ? `
-                    <div class="dog-details-row">
-                        <div class="dog-details-label">${t('healthInfo')}:</div>
-                        <div class="dog-details-value">
-                            <div class="row">
-                                ${hond.heupdysplasie ? `
-                                    <div class="col-md-6 mb-2">
-                                        <strong>HD:</strong> ${hond.heupdysplasie}
-                                    </div>
-                                ` : ''}
-                                
-                                ${hond.elleboogdysplasie ? `
-                                    <div class="col-md-6 mb-2">
-                                        <strong>ED:</strong> ${hond.elleboogdysplasie}
-                                    </div>
-                                ` : ''}
-                                
-                                ${hond.patella ? `
-                                    <div class="col-md-6 mb-2">
-                                        <strong>Patella:</strong> ${hond.patella}
-                                    </div>
-                                ` : ''}
-                                
-                                ${hond.ogen ? `
-                                    <div class="col-md-6 mb-2">
-                                        <strong>Ogen:</strong> ${hond.ogen}
-                                        ${hond.ogenVerklaring ? `<br><small>${hond.ogenVerklaring}</small>` : ''}
-                                    </div>
-                                ` : ''}
-                                
-                                ${hond.dandyWalker ? `
-                                    <div class="col-md-6 mb-2">
-                                        <strong>Dandy Walker:</strong> ${hond.dandyWalker}
-                                    </div>
-                                ` : ''}
-                                
-                                ${hond.schildklier ? `
-                                    <div class="col-md-6 mb-2">
-                                        <strong>Schildklier:</strong> ${hond.schildklier}
-                                        ${hond.schildklierVerklaring ? `<br><small>${hond.schildklierVerklaring}</small>` : ''}
-                                    </div>
-                                ` : ''}
-                            </div>
-                        </div>
-                    </div>
-                ` : ''}
                 
                 <div class="mt-3 pt-3 border-top">
                     <button class="btn btn-sm btn-outline-secondary" onclick="window.reuTeefCombinatie.clearSelection('${elementId}', '${resultsId}')">
@@ -1394,16 +1408,26 @@ class ReuTeefCombinatie {
             const healthAnalysis = await this.analyzeHealthInLine(futurePuppy);
             console.log('✅ Gezondheidsanalyse resultaat:', healthAnalysis);
             
-            // Herstel originele lijst
-            this.allHonden = originalHonden;
-            this.coiCalculator = new COICalculator(this.allHonden);
+            // CRITICAL FIX: Zorg dat StamboomManager dezelfde uitgebreide dataset heeft
+            const originalStamboomManagerDogs = [...this.stamboomManager.allDogs];
+            this.stamboomManager.allDogs = [...this.allHonden]; // 👈 ZELFDE DATASET!
             
             // Toon stamboom via StamboomManager
             await this.showStamboomWithFuturePuppy(futurePuppy, coiResult, healthAnalysis);
             
+            // Herstel originele lijsten
+            this.allHonden = originalHonden;
+            this.stamboomManager.allDogs = originalStamboomManagerDogs;
+            this.coiCalculator = new COICalculator(this.allHonden);
+            
         } catch (error) {
             console.error('❌ Fout bij tonen toekomstige pup stamboom:', error);
             this.showAlert('Kon stamboom niet genereren. Probeer opnieuw.', 'danger');
+            
+            // Zorg dat we altijd teruggaan naar originele staat
+            if (this.stamboomManager) {
+                this.stamboomManager.allDogs = this.allHonden; // Terug naar origineel
+            }
         }
     }
     
@@ -1497,19 +1521,25 @@ class ReuTeefCombinatie {
             
             visited.add(currentDog.id);
             
+            // ZORG DAT WE VOLLEDIGE DATA HEBBEN VOOR DEZE VOOROUDER
+            let fullDog = currentDog;
+            if (!currentDog.heupdysplasie && currentDog.heupdysplasie === undefined) {
+                fullDog = await this.getHondById(currentDog.id) || currentDog;
+            }
+            
             // Voeg toe aan ancestors
-            ancestors.push(currentDog);
+            ancestors.push(fullDog);
             
             // Voeg ouders toe aan queue
-            if (currentDog.vaderId) {
-                const father = await this.getHondById(currentDog.vaderId);
+            if (fullDog.vaderId) {
+                const father = await this.getHondById(fullDog.vaderId);
                 if (father) {
                     queue.push({ dog: father, generation: generation + 1 });
                 }
             }
             
-            if (currentDog.moederId) {
-                const mother = await this.getHondById(currentDog.moederId);
+            if (fullDog.moederId) {
+                const mother = await this.getHondById(fullDog.moederId);
                 if (mother) {
                     queue.push({ dog: mother, generation: generation + 1 });
                 }
@@ -1616,12 +1646,13 @@ class ReuTeefCombinatie {
     }
     
     async showStamboomWithFuturePuppy(futurePuppy, coiResult, healthAnalysis) {
-        // Probeer eerst via StamboomManager
+        // CRITICAL FIX: Zorg dat StamboomManager dezelfde uitgebreide dataset heeft
         if (this.stamboomManager && this.stamboomManager.allDogs) {
-            const originalDogs = [...this.stamboomManager.allDogs];
-            this.stamboomManager.allDogs.push(futurePuppy);
-            
             try {
+                // Tijdelijk de virtuele pup toevoegen aan de dataset
+                const originalDogs = [...this.stamboomManager.allDogs];
+                this.stamboomManager.allDogs.push(futurePuppy);
+                
                 await this.stamboomManager.showPedigree(futurePuppy);
                 
                 // VOEG CLICK EVENT TOE
@@ -1629,9 +1660,13 @@ class ReuTeefCombinatie {
                     this.addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis);
                 }, 100);
                 
-            } finally {
                 // Herstel originele lijst
                 this.stamboomManager.allDogs = originalDogs;
+                
+            } catch (error) {
+                console.error('❌ Fout in StamboomManager:', error);
+                // Fallback
+                await this.showCustomFuturePuppyPedigree(futurePuppy, coiResult, healthAnalysis);
             }
         } else {
             // Fallback
