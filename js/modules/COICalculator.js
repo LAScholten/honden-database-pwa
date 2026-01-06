@@ -53,6 +53,17 @@ class COICalculator {
                 return { coi6Gen: '0.0', coiAllGen: '0.0' };
             }
             
+            console.log(`   ➡ Vader: ${vader.naam} (${vader.id})`);
+            console.log(`   ➡ Moeder: ${moeder.naam} (${moeder.id})`);
+
+            // VOLLE BROER/ZUS
+            const isFullSibling = vader.vaderId && moeder.vaderId && vader.vaderId === moeder.vaderId &&
+                                 vader.moederId && moeder.moederId && vader.moederId === moeder.moederId;
+            
+            if (isFullSibling) {
+                console.log(`   ➡ Ouders zijn volle broer/zus -> 25%`);
+                return { coi6Gen: '25.0', coiAllGen: '25.0' };
+            }
 
 
             // COMPLEXE BEREKENING - BEIDE VERSIES
