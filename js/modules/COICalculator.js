@@ -1,10 +1,10 @@
-// COICalculator V4 - CORRECTE INTEELT BEREKENING MET WRIGHT'S FORMULE
+// COICalculator V5 - CORRECTE INTEELT BEREKENING
 class COICalculator {
     constructor(allDogs = []) {
         this.allDogs = allDogs;
         this._dogMap = new Map();
         this._coiCache = new Map();
-        this._pathsCache = new Map();
+        this._ancestorCache = new Map();
         
         // Bouw snelle lookup
         allDogs.forEach(dog => {
@@ -13,7 +13,7 @@ class COICalculator {
             }
         });
         
-        console.log(`✅ COICalculator V4 geladen: ${this._dogMap.size} honden`);
+        console.log(`✅ COICalculator V5: ${this._dogMap.size} honden geladen`);
     }
 
     getDogById(id) {
@@ -53,14 +53,18 @@ class COICalculator {
                 return { coi6Gen: '0.0', coiAllGen: '0.0' };
             }
 
-            // CORRECTE BEREKENINGEN
-            console.log(`   ➡ Bereken met WRIGHT's formule...`);
+            // CORRECTE BEREKENING
+            console.log(`   ➡ Bereken COI volgens Wright's formule...`);
+            
+            // Reset cache voor nieuwe berekening
+            this._coiCache.clear();
+            this._ancestorCache.clear();
             
             // BEREKEN 6 GENERATIES
-            const coi6Gen = this._calculateCOIWright(dogId, 6);
+            const coi6Gen = this._calculateCOICorrect(dogId, 6);
             
-            // BEREKEN 25 GENERATIES (bijna volledig)
-            const coiAllGen = this._calculateCOIWright(dogId, 25);
+            // BEREKEN 25 GENERATIES
+            const coiAllGen = this._calculateCOICorrect(dogId, 25);
             
             const result = {
                 coi6Gen: (coi6Gen * 100).toFixed(1),
@@ -78,8 +82,8 @@ class COICalculator {
         }
     }
 
-    // CORRECTE IMPLEMENTATIE VAN WRIGHT'S FORMULE
-    _calculateCOIWright(dogId, maxDepth) {
+    // CORRECTE COI BEREKENING - SIMPEL EN ACCURAAT
+    _calculateCOICorrect(dogId, maxDepth) {
         const cacheKey = `${dogId}_${maxDepth}`;
         if (this._coiCache.has(cacheKey)) {
             return this._coiCache.get(cacheKey);
@@ -102,28 +106,53 @@ class COICalculator {
             return 0.25;
         }
         
-        // Zoek alle gemeenschappelijke voorouders
-        const commonAncestors = this._findCommonAncestors(dogId, maxDepth);
+        // Bereken COI volgens de formule: Fx = Σ [ (0.5)^(n1+n2+1) * (1 + Fa) ]
+        // Waarbij Fa de COI is van de gemeenschappelijke voorouder
+        
+        const commonAncestors = this._findCommonAncestorsCorrect(dogId, maxDepth);
         
         let totalCOI = 0;
         
         for (const ancestorId of commonAncestors) {
-            // Vind alle paden van vader naar voorouder
-            const pathsFromFather = this._findAllPaths(dog.vaderId, ancestorId, maxDepth - 1);
-            // Vind alle paden van moeder naar voorouder
-            const pathsFromMother = this._findAllPaths(dog.moederId, ancestorId, maxDepth - 1);
+            // Bereken alle UNIEKE paden van vader naar voorouder
+            const pathsFather = this._findAllUniquePaths(dog.vaderId, ancestorId, maxDepth - 1);
+            // Bereken alle UNIEKE paden van moeder naar voorouder
+            const pathsMother = this._findAllUniquePaths(dog.moederId, ancestorId, maxDepth - 1);
             
-            const ancestorCOI = this._calculateCOIWright(ancestorId, maxDepth - 1);
+            if (pathsFather.length === 0 || pathsMother.length === 0) continue;
             
-            // Combineer alle pad combinaties
-            for (const pathFather of pathsFromFather) {
-                for (const pathMother of pathsFromMother) {
-                    const n1 = pathFather.length; // aantal stappen van vader naar voorouder
-                    const n2 = pathMother.length; // aantal stappen van moeder naar voorouder
+            // Bereken COI van de voorouder (recursief)
+            const ancestorCOI = this._calculateCOICorrect(ancestorId, maxDepth - 1);
+            
+            // Voor ELK PAD van vader en ELK PAD van moeder:
+            // Bij volle broer/zus paring: 1 pad van vader en 1 pad van moeder
+            // Wright's formule: (0.5)^(n1 + n2 + 1) * (1 + Fa)
+            // n1 = lengte pad van vader, n2 = lengte pad van moeder
+            
+            for (let i = 0; i < pathsFather.length; i++) {
+                for (let j = 0; j < pathsMother.length; j++) {
+                    const n1 = pathsFather[i].length;
+                    const n2 = pathsMother[j].length;
                     
-                    // WRIGHT'S FORMULE: (0.5)^(n1 + n2 + 1) * (1 + F_ancestor)
+                    // VOORBEELD: volle broer/zus
+                    // n1 = 1 (vader -> gemeenschappelijke ouder)
+                    // n2 = 1 (moeder -> gemeenschappelijke ouder)
+                    // (0.5)^(1+1+1) = (0.5)^3 = 0.125
+                    // MAAR dit moet 0.25 zijn voor volle broer/zus!
+                    
+                    // AH! Ik zie het: bij volle broer/zus hebben we 2 gemeenschappelijke ouders!
+                    // Ouder B via vader: n1=1, via moeder: n2=1 -> (0.5)^3 = 0.125
+                    // Ouder C via vader: n1=1, via moeder: n2=1 -> (0.5)^3 = 0.125
+                    // Totaal: 0.25
+                    
                     const contribution = Math.pow(0.5, n1 + n2 + 1) * (1 + ancestorCOI);
                     totalCOI += contribution;
+                    
+                    // Debug logging
+                    if (maxDepth === 6) {
+                        const ancestor = this.getDogById(ancestorId);
+                        console.log(`   [6gen] Voorouder ${ancestor?.naam}: pad ${i+1}(n1=${n1}) + pad ${j+1}(n2=${n2}) -> ${(contribution*100).toFixed(3)}%`);
+                    }
                 }
             }
         }
@@ -132,132 +161,172 @@ class COICalculator {
         return totalCOI;
     }
 
-    _findCommonAncestors(dogId, maxDepth) {
-        const ancestorsFather = new Set();
-        const ancestorsMother = new Set();
-        const commonAncestors = new Set();
-        
+    _findCommonAncestorsCorrect(dogId, maxDepth) {
         const dog = this.getDogById(dogId);
         if (!dog || !dog.vaderId || !dog.moederId) {
-            return commonAncestors;
+            return new Set();
         }
         
         // Verzamel voorouders van vader
-        this._collectAncestors(dog.vaderId, maxDepth - 1, ancestorsFather);
+        const fatherAncestors = new Set();
+        this._collectAllAncestors(dog.vaderId, maxDepth - 1, fatherAncestors);
         
         // Verzamel voorouders van moeder
-        this._collectAncestors(dog.moederId, maxDepth - 1, ancestorsMother);
+        const motherAncestors = new Set();
+        this._collectAllAncestors(dog.moederId, maxDepth - 1, motherAncestors);
         
         // Vind intersectie
-        for (const ancestor of ancestorsFather) {
-            if (ancestorsMother.has(ancestor)) {
-                commonAncestors.add(ancestor);
+        const common = new Set();
+        for (const ancestor of fatherAncestors) {
+            if (motherAncestors.has(ancestor)) {
+                common.add(ancestor);
             }
         }
         
-        return commonAncestors;
+        return common;
     }
 
-    _collectAncestors(dogId, remainingDepth, result) {
-        if (remainingDepth <= 0 || !dogId) return;
+    _collectAllAncestors(dogId, depth, result) {
+        if (depth <= 0 || !dogId) return;
+        
+        const cacheKey = `${dogId}_${depth}`;
+        if (this._ancestorCache.has(cacheKey)) {
+            const cached = this._ancestorCache.get(cacheKey);
+            cached.forEach(id => result.add(id));
+            return;
+        }
         
         const dog = this.getDogById(dogId);
         if (!dog) return;
         
+        const tempResult = new Set(result);
+        
         if (dog.vaderId) {
-            result.add(dog.vaderId);
-            this._collectAncestors(dog.vaderId, remainingDepth - 1, result);
+            tempResult.add(dog.vaderId);
+            this._collectAllAncestors(dog.vaderId, depth - 1, tempResult);
         }
         
         if (dog.moederId) {
-            result.add(dog.moederId);
-            this._collectAncestors(dog.moederId, remainingDepth - 1, result);
-        }
-    }
-
-    _findAllPaths(startId, targetId, maxDepth, currentPath = []) {
-        const cacheKey = `${startId}_${targetId}_${maxDepth}_${currentPath.length}`;
-        if (this._pathsCache.has(cacheKey)) {
-            return this._pathsCache.get(cacheKey);
+            tempResult.add(dog.moederId);
+            this._collectAllAncestors(dog.moederId, depth - 1, tempResult);
         }
         
-        if (maxDepth < 0) {
-            return [];
-        }
+        // Cache het resultaat
+        this._ancestorCache.set(cacheKey, new Set(tempResult));
+        tempResult.forEach(id => result.add(id));
+    }
+
+    _findAllUniquePaths(startId, targetId, maxDepth, currentPath = [], visited = new Set()) {
+        if (maxDepth < 0) return [];
+        if (visited.has(startId)) return []; // Voorkom cycli
         
         if (startId === targetId) {
             return [currentPath];
         }
         
         const dog = this.getDogById(startId);
-        if (!dog || (!dog.vaderId && !dog.moederId)) {
-            return [];
-        }
+        if (!dog) return [];
+        
+        visited.add(startId);
         
         let allPaths = [];
         
         // Ga via vader
         if (dog.vaderId) {
             const newPath = [...currentPath, dog.vaderId];
-            const pathsViaVader = this._findAllPaths(dog.vaderId, targetId, maxDepth - 1, newPath);
+            const pathsViaVader = this._findAllUniquePaths(dog.vaderId, targetId, maxDepth - 1, newPath, new Set(visited));
             allPaths.push(...pathsViaVader);
         }
         
         // Ga via moeder
         if (dog.moederId) {
             const newPath = [...currentPath, dog.moederId];
-            const pathsViaMoeder = this._findAllPaths(dog.moederId, targetId, maxDepth - 1, newPath);
+            const pathsViaMoeder = this._findAllUniquePaths(dog.moederId, targetId, maxDepth - 1, newPath, new Set(visited));
             allPaths.push(...pathsViaMoeder);
         }
         
-        this._pathsCache.set(cacheKey, allPaths);
         return allPaths;
     }
 
-    // Voorbeeld van correcte berekening - TEST CASES
-    testWrightFormula() {
-        console.log("🧪 TEST WRIGHT'S FORMULE:");
+    // TEST FUNCTION om berekening te verifiëren
+    testCOICalculation() {
+        console.log("🧪 TEST COI BEREKENINGEN:");
+        console.log("==========================");
         
-        // TEST 1: Eenvoudig geval - volle broer/zus paring
-        // Stamboom: A = B × C, D = B × C, E = A × D
-        // A en D zijn volle broer/zus, hun ouders B en C zijn onverwant
-        // COI van E zou moeten zijn: 0.25 (25%)
-        
-        const testDogs = [
-            { id: 1, naam: "B", vaderId: null, moederId: null },
-            { id: 2, naam: "C", vaderId: null, moederId: null },
-            { id: 3, naam: "A", vaderId: 1, moederId: 2 },
+        // TEST 1: VOLLE BROER/ZUS PARING (moet 25% zijn)
+        console.log("\nTEST 1: Volle broer/zus paring");
+        const dogs1 = [
+            { id: 1, naam: "A", vaderId: null, moederId: null },
+            { id: 2, naam: "B", vaderId: null, moederId: null },
+            { id: 3, naam: "C", vaderId: 1, moederId: 2 },
             { id: 4, naam: "D", vaderId: 1, moederId: 2 },
             { id: 5, naam: "E", vaderId: 3, moederId: 4 }
         ];
         
-        const testCalculator = new COICalculator(testDogs);
-        const result = testCalculator.calculateCOI(5);
-        console.log(`TEST 1 - Volle broer/zus paring:`);
-        console.log(`   Verwacht: ~25%`);
-        console.log(`   Resultaat: ${result.coiAllGen}%`);
+        const calc1 = new COICalculator(dogs1);
+        const res1 = calc1.calculateCOI(5);
+        console.log(`   Verwacht: 25.0%`);
+        console.log(`   Resultaat: ${res1.coiAllGen}%`);
+        console.log(`   ✅ ${Math.abs(parseFloat(res1.coiAllGen) - 25.0) < 0.1 ? "CORRECT" : "FOUT"}`);
         
-        // TEST 2: Oom/nicht paring
-        // B = A × X, C = A × Y, D = B × C
-        // D is product van oom/nicht paring (B is oom van C via A)
-        // COI zou moeten zijn: 0.125 (12.5%)
-        
-        const testDogs2 = [
-            { id: 1, naam: "A", vaderId: null, moederId: null },
+        // TEST 2: OOM/NICHT PARING (moet 12.5% zijn)
+        console.log("\nTEST 2: Oom/nicht paring");
+        const dogs2 = [
+            { id: 1, naam: "Grootvader", vaderId: null, moederId: null },
             { id: 2, naam: "X", vaderId: null, moederId: null },
             { id: 3, naam: "Y", vaderId: null, moederId: null },
-            { id: 4, naam: "B", vaderId: 1, moederId: 2 },
-            { id: 5, naam: "C", vaderId: 1, moederId: 3 },
-            { id: 6, naam: "D", vaderId: 4, moederId: 5 }
+            { id: 4, naam: "Oom", vaderId: 1, moederId: 2 },
+            { id: 5, naam: "Nicht", vaderId: 1, moederId: 3 },
+            { id: 6, naam: "Pup", vaderId: 4, moederId: 5 }
         ];
         
-        const testCalculator2 = new COICalculator(testDogs2);
-        const result2 = testCalculator2.calculateCOI(6);
-        console.log(`TEST 2 - Oom/nicht paring:`);
-        console.log(`   Verwacht: ~12.5%`);
-        console.log(`   Resultaat: ${result2.coiAllGen}%`);
+        const calc2 = new COICalculator(dogs2);
+        const res2 = calc2.calculateCOI(6);
+        console.log(`   Verwacht: 12.5%`);
+        console.log(`   Resultaat: ${res2.coiAllGen}%`);
+        console.log(`   ✅ ${Math.abs(parseFloat(res2.coiAllGen) - 12.5) < 0.1 ? "CORRECT" : "FOUT"}`);
         
-        return "✅ Tests voltooid";
+        // TEST 3: NE/NICHT PARING (moet 6.25% zijn)
+        console.log("\nTEST 3: Neef/nicht paring (overgrootouder)");
+        const dogs3 = [
+            { id: 1, naam: "Overgrootouder", vaderId: null, moederId: null },
+            { id: 2, naam: "A", vaderId: null, moederId: null },
+            { id: 3, naam: "B", vaderId: null, moederId: null },
+            { id: 4, naam: "C", vaderId: null, moederId: null },
+            { id: 5, naam: "Opa1", vaderId: 1, moederId: 2 },
+            { id: 6, naam: "Oma1", vaderId: 3, moederId: 4 },
+            { id: 7, naam: "Opa2", vaderId: 1, moederId: 4 },
+            { id: 8, naam: "Oma2", vaderId: 2, moederId: 3 },
+            { id: 9, naam: "Vader", vaderId: 5, moederId: 6 },
+            { id: 10, naam: "Moeder", vaderId: 7, moederId: 8 },
+            { id: 11, naam: "Pup", vaderId: 9, moederId: 10 }
+        ];
+        
+        const calc3 = new COICalculator(dogs3);
+        const res3 = calc3.calculateCOI(11);
+        console.log(`   Verwacht: 6.25%`);
+        console.log(`   Resultaat: ${res3.coiAllGen}%`);
+        console.log(`   ✅ ${Math.abs(parseFloat(res3.coiAllGen) - 6.25) < 0.1 ? "CORRECT" : "FOUT"}`);
+        
+        // TEST 4: HALF BROER/ZUS PARING (moet 12.5% zijn)
+        console.log("\nTEST 4: Half broer/zus paring");
+        const dogs4 = [
+            { id: 1, naam: "Gemeenschappelijke ouder", vaderId: null, moederId: null },
+            { id: 2, naam: "Ouder A", vaderId: null, moederId: null },
+            { id: 3, naam: "Ouder B", vaderId: null, moederId: null },
+            { id: 4, naam: "HalfBroer", vaderId: 1, moederId: 2 },
+            { id: 5, naam: "HalfZus", vaderId: 1, moederId: 3 },
+            { id: 6, naam: "Pup", vaderId: 4, moederId: 5 }
+        ];
+        
+        const calc4 = new COICalculator(dogs4);
+        const res4 = calc4.calculateCOI(6);
+        console.log(`   Verwacht: 12.5%`);
+        console.log(`   Resultaat: ${res4.coiAllGen}%`);
+        console.log(`   ✅ ${Math.abs(parseFloat(res4.coiAllGen) - 12.5) < 0.1 ? "CORRECT" : "FOUT"}`);
+        
+        console.log("\n==========================");
+        console.log("✅ Alle tests voltooid");
     }
 
     // DEBUG functies
@@ -289,43 +358,44 @@ class COICalculator {
         }
     }
     
-    // Toon gedetailleerde berekening voor debugging
-    showDetailedCalculation(dogId, maxDepth = 6) {
+    // Toon gedetailleerde berekening
+    showCalculationDetails(dogId, maxDepth = 6) {
         dogId = Number(dogId);
         const dog = this.getDogById(dogId);
         
-        if (!dog || !dog.vaderId || !dog.moederId) {
-            console.log("Geen ouders voor gedetailleerde berekening");
+        if (!dog) {
+            console.log("Hond niet gevonden");
             return;
         }
         
-        console.log(`📊 GEDETAILLEERDE BEREKENING voor ${dog.naam}:`);
-        console.log(`Vader: ${this.getDogById(dog.vaderId)?.naam}`);
-        console.log(`Moeder: ${this.getDogById(dog.moederId)?.naam}`);
+        console.log(`📊 BEREKENINGSDETAILS voor ${dog.naam}:`);
+        console.log(`Maximale diepte: ${maxDepth} generaties`);
         
-        const commonAncestors = this._findCommonAncestors(dogId, maxDepth);
+        if (!dog.vaderId || !dog.moederId) {
+            console.log("Geen ouders bekend -> COI = 0%");
+            return;
+        }
         
-        console.log(`\nGemeenschappelijke voorouders (${commonAncestors.size}):`);
+        const commonAncestors = this._findCommonAncestorsCorrect(dogId, maxDepth);
+        console.log(`\nGemeenschappelijke voorouders: ${commonAncestors.size}`);
+        
         for (const ancestorId of commonAncestors) {
             const ancestor = this.getDogById(ancestorId);
-            const ancestorCOI = this._calculateCOIWright(ancestorId, maxDepth - 1);
-            console.log(`  - ${ancestor?.naam} (ID: ${ancestorId}), COI: ${(ancestorCOI * 100).toFixed(1)}%`);
+            console.log(`\n${ancestor?.naam} (ID: ${ancestorId}):`);
             
-            const pathsFather = this._findAllPaths(dog.vaderId, ancestorId, maxDepth - 1);
-            const pathsMother = this._findAllPaths(dog.moederId, ancestorId, maxDepth - 1);
+            const pathsFather = this._findAllUniquePaths(dog.vaderId, ancestorId, maxDepth - 1);
+            const pathsMother = this._findAllUniquePaths(dog.moederId, ancestorId, maxDepth - 1);
             
-            console.log(`    Paden via vader: ${pathsFather.length}`);
-            console.log(`    Paden via moeder: ${pathsMother.length}`);
+            console.log(`  Paden via vader: ${pathsFather.length}`);
+            console.log(`  Paden via moeder: ${pathsMother.length}`);
             
-            let totalForAncestor = 0;
-            for (const pf of pathsFather) {
-                for (const pm of pathsMother) {
-                    const contribution = Math.pow(0.5, pf.length + pm.length + 1) * (1 + ancestorCOI);
-                    totalForAncestor += contribution;
+            for (let i = 0; i < pathsFather.length; i++) {
+                for (let j = 0; j < pathsMother.length; j++) {
+                    const n1 = pathsFather[i].length;
+                    const n2 = pathsMother[j].length;
+                    console.log(`  Pad ${i+1}x${j+1}: n1=${n1}, n2=${n2}`);
                 }
             }
-            
-            console.log(`    Bijdrage: ${(totalForAncestor * 100).toFixed(2)}%`);
         }
     }
 }
@@ -333,10 +403,10 @@ class COICalculator {
 // Maak globaal beschikbaar
 if (typeof window !== 'undefined') {
     window.COICalculator = COICalculator;
-    console.log('✅ COICalculator V4 geladen met CORRECTE Wright formule');
+    console.log('✅ COICalculator V5 geladen met gecorrigeerde formule');
 }
 
-// Voorbeeld gebruik:
-// const calculator = new COICalculator(allDogs);
-// const result = calculator.calculateCOI(hondId);
-// calculator.testWrightFormula(); // Voer tests uit
+// Gebruik:
+// const calc = new COICalculator(allDogs);
+// calc.testCOICalculation();  // Test eerst de berekening
+// const result = calc.calculateCOI(hondId);
