@@ -1,73 +1,80 @@
-// COICalculator - Simpel maar correct
-class COICalculator {
-    constructor(allDogs = []) {
-        this.allDogs = allDogs;
-        this._dogMap = new Map();
-        this._coiCache = new Map();
-        
-        allDogs.forEach(dog => {
-            if (dog && dog.id) {
-                this._dogMap.set(Number(dog.id), dog);
-            }
-        });
+// EENVOUDIGE COI BEREKENING
+function calculateSimpleCOI(dog, allDogs, generations) {
+    if (!dog.vaderId || !dog.moederId) return 0;
+    if (dog.vaderId === dog.moederId) return 0.25;
+    
+    const vader = allDogs.find(d => d.id === dog.vaderId);
+    const moeder = allDogs.find(d => d.id === dog.moederId);
+    
+    if (!vader || !moeder) return 0;
+    
+    // Check of ouders broer/zus zijn
+    if (vader.vaderId === moeder.vaderId && vader.moederId === moeder.moederId) {
+        // Broer/zus paring
+        const fVader = calculateSimpleCOI(vader, allDogs, generations - 1);
+        const fMoeder = calculateSimpleCOI(moeder, allDogs, generations - 1);
+        return 0.25 * (1 + (fVader + fMoeder) / 2);
     }
-
-    getDogById(id) {
-        return this._dogMap.get(Number(id));
-    }
-
-    calculateCOI(dogId) {
-        try {
-            dogId = Number(dogId);
-            const dog = this.getDogById(dogId);
-            if (!dog || !dog.vaderId || !dog.moederId) {
-                return { coi6Gen: '0.0', coiAllGen: '0.0' };
-            }
-            
-            if (dog.vaderId === dog.moederId) {
-                return { coi6Gen: '25.0', coiAllGen: '25.0' };
-            }
-            
-            // Eenvoudige berekening: tel unieke voorouders
-            const ancestors6 = new Set();
-            this._collectAncestors(dogId, 6, ancestors6);
-            
-            const ancestorsAll = new Set();
-            this._collectAncestors(dogId, 10, ancestorsAll);
-            
-            // COI = 1 - (unieke voorouders / totale mogelijke voorouders)
-            const coi6Gen = 1 - (ancestors6.size / 126); // 2^7 - 2 = 126
-            const coiAllGen = 1 - (ancestorsAll.size / 2046); // 2^11 - 2 = 2046
-            
-            return {
-                coi6Gen: Math.max(0, Math.min(coi6Gen * 100, 100)).toFixed(1),
-                coiAllGen: Math.max(0, Math.min(coiAllGen * 100, 100)).toFixed(1)
-            };
-            
-        } catch (error) {
-            return { coi6Gen: '0.0', coiAllGen: '0.0' };
-        }
-    }
-
-    _collectAncestors(dogId, depth, result) {
-        if (depth <= 0 || !dogId) return;
-        
-        const dog = this.getDogById(dogId);
-        if (!dog) return;
-        
-        if (dog.vaderId) {
-            result.add(dog.vaderId);
-            this._collectAncestors(dog.vaderId, depth - 1, result);
-        }
-        
-        if (dog.moederId) {
-            result.add(dog.moederId);
-            this._collectAncestors(dog.moederId, depth - 1, result);
-        }
-    }
+    
+    // Voor complexere gevallen, gebruik recursie
+    return 0.5 * calculateRelationship(vader, moeder, allDogs, generations - 1);
 }
 
-// Maak beschikbaar
-if (typeof window !== 'undefined') {
-    window.COICalculator = COICalculator;
+function calculateRelationship(dog1, dog2, allDogs, generations) {
+    if (generations <= 0) return 0;
+    
+    // Als ze dezelfde hond zijn
+    if (dog1.id === dog2.id) return 1;
+    
+    // Ouder-kind relatie
+    if (dog1.vaderId === dog2.id || dog1.moederId === dog2.id ||
+        dog2.vaderId === dog1.id || dog2.moederId === dog1.id) {
+        return 0.5;
+    }
+    
+    // Broer/zus
+    if (dog1.vaderId === dog2.vaderId && dog1.moederId === dog2.moederId) {
+        return 0.5;
+    }
+    
+    // Recursief bereken
+    let relationship = 0;
+    
+    const vader1 = allDogs.find(d => d.id === dog1.vaderId);
+    const moeder1 = allDogs.find(d => d.id === dog1.moederId);
+    const vader2 = allDogs.find(d => d.id === dog2.vaderId);
+    const moeder2 = allDogs.find(d => d.id === dog2.moederId);
+    
+    if (vader1 && vader2) {
+        relationship += 0.25 * calculateRelationship(vader1, vader2, allDogs, generations - 1);
+    }
+    if (vader1 && moeder2) {
+        relationship += 0.25 * calculateRelationship(vader1, moeder2, allDogs, generations - 1);
+    }
+    if (moeder1 && vader2) {
+        relationship += 0.25 * calculateRelationship(moeder1, vader2, allDogs, generations - 1);
+    }
+    if (moeder1 && moeder2) {
+        relationship += 0.25 * calculateRelationship(moeder1, moeder2, allDogs, generations - 1);
+    }
+    
+    return relationship;
 }
+
+// Gebruik:
+function calculateCOIForDog(dogId, allDogs) {
+    const dog = allDogs.find(d => d.id === dogId);
+    if (!dog) return { coi6Gen: '0.0', coiAllGen: '0.0' };
+    
+    const coi6Gen = calculateSimpleCOI(dog, allDogs, 6);
+    const coiAllGen = calculateSimpleCOI(dog, allDogs, 10);
+    
+    return {
+        coi6Gen: (coi6Gen * 100).toFixed(1),
+        coiAllGen: (coiAllGen * 100).toFixed(1)
+    };
+}
+
+// Test met je data
+const result = calculateCOIForDog(27, allDogs);
+console.log("Droll COI:", result);
