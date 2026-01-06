@@ -4,7 +4,6 @@
  * HORIZONTALE LAYOUT - Van links naar rechts met liggende cards
  * Overgrootouders 60% hoogte, zelfde breedte voor alle generaties
  * GEBRUIKT: COICalculator.js (extern bestand)
- * VERBETERD: Zorgt altijd voor volledige, actuele dataset
  */
 
 class StamboomManager extends BaseModule {
@@ -13,20 +12,14 @@ class StamboomManager extends BaseModule {
         this.db = db;
         this.currentLang = currentLang;
         this.allDogs = [];
-        this.coiCalculator = null;
-        this.isInitialized = false;
+        this.coiCalculator = null; // WORDT GELINKT NAAR COICalculator.js
         
-        // Verbeterde cache systemen
         this.dogPhotosCache = new Map();
         this.dogHasPhotosCache = new Map();
         this.dogThumbnailsCache = new Map();
         this.fullPhotoCache = new Map();
         
-        // CRITIEKE VERBETERING: Cache voor volledige hondendata
-        this.fullDogDataCache = new Map();
-        this.dataLoadPromise = null;
-        
-        // Translations
+        // Translations (jouw volledige object - niet aangepast)
         this.translations = {
             nl: {
                 pedigreeTitle: "Stamboom van {name}",
@@ -79,11 +72,7 @@ class StamboomManager extends BaseModule {
                 photos: "Foto's",
                 noPhotos: "Geen foto's beschikbaar",
                 clickToEnlarge: "Klik om te vergroten",
-                closePhoto: "Sluiten",
-                loadingData: "Data laden...",
-                refreshingData: "Data vernieuwen...",
-                dataLoaded: "Data geladen",
-                errorLoadingData: "Fout bij laden data"
+                closePhoto: "Sluiten"
             },
             en: {
                 pedigreeTitle: "Pedigree of {name}",
@@ -136,11 +125,7 @@ class StamboomManager extends BaseModule {
                 photos: "Photos",
                 noPhotos: "No photos available",
                 clickToEnlarge: "Click to enlarge",
-                closePhoto: "Close",
-                loadingData: "Loading data...",
-                refreshingData: "Refreshing data...",
-                dataLoaded: "Data loaded",
-                errorLoadingData: "Error loading data"
+                closePhoto: "Close"
             },
             de: {
                 pedigreeTitle: "Ahnentafel von {name}",
@@ -181,7 +166,7 @@ class StamboomManager extends BaseModule {
                 female: "Hündin",
                 paternal: "Väterlich",
                 maternal: "Mütterlich",
-                clickForDetails: "Klicken für Details",
+                clickForDetails: "Klicken voor Details",
                 closePopup: "Schließen",
                 remarks: "Bemerkungen",
                 noRemarks: "Keine Bemerkungen",
@@ -193,11 +178,7 @@ class StamboomManager extends BaseModule {
                 photos: "Fotos",
                 noPhotos: "Keine Fotos verfügbaar",
                 clickToEnlarge: "Klicken zum Vergrößern",
-                closePhoto: "Schließen",
-                loadingData: "Daten laden...",
-                refreshingData: "Daten aktualisieren...",
-                dataLoaded: "Daten geladen",
-                errorLoadingData: "Fehler beim Laden der Daten"
+                closePhoto: "Schließen"
             }
         };
         
@@ -208,225 +189,27 @@ class StamboomManager extends BaseModule {
         return this.translations[this.currentLang][key] || key;
     }
     
-    // ==================== VERBETERDE INITIALISATIE ====================
-    
-    /**
-     * VERBETERING: Garandeert dat we altijd volledige, actuele data hebben
-     */
-    async ensureInitialized() {
-        if (this.isInitialized && this.allDogs.length > 0) {
-            console.log('✅ StamboomManager al geïnitialiseerd met', this.allDogs.length, 'honden');
-            return true;
-        }
-        
-        try {
-            console.log('🔄 StamboomManager initialiseren...');
-            await this.loadAllDogsWithFullData();
-            this.isInitialized = true;
-            console.log('✅ StamboomManager geïnitialiseerd met', this.allDogs.length, 'honden');
-            return true;
-        } catch (error) {
-            console.error('❌ Fout bij initialiseren StamboomManager:', error);
-            this.isInitialized = false;
-            return false;
-        }
-    }
-    
-    /**
-     * VERBETERING: Laad ALLE honden met VOLLEDIGE gezondheidsdata
-     */
-    async loadAllDogsWithFullData() {
-        try {
-            if (!this.db || typeof this.db.getHonden !== 'function') {
-                throw new Error('Database niet beschikbaar');
-            }
-            
-            console.log('🔄 Alle honden laden met volledige data...');
-            
-            // Haal alle honden op (NET ZO ALS SEARCHMANAGER)
-            const dogs = await this.db.getHonden();
-            console.log(`📊 ${dogs.length} honden geladen uit database`);
-            
-            // ZORG DAT ALLE VELDEN AANWEZIG ZIJN
-            this.allDogs = dogs.map(dog => this.enrichDogData(dog));
-            
-            // Cache voor snelle toegang
-            this.allDogs.forEach(dog => {
-                this.fullDogDataCache.set(dog.id, dog);
-                if (dog.stamboomnr) {
-                    this.fullDogDataCache.set(dog.stamboomnr, dog);
-                }
-            });
-            
-            // Initialiseer COI Calculator
-            if (typeof COICalculator !== 'undefined') {
-                this.coiCalculator = new COICalculator(this.allDogs);
-                console.log('✅ COICalculator geïnitialiseerd met', this.allDogs.length, 'honden');
-            } else {
-                console.error('⚠️ COICalculator klasse niet gevonden');
-                this.coiCalculator = null;
-            }
-            
-            return this.allDogs;
-            
-        } catch (error) {
-            console.error('❌ Fout bij laden honden:', error);
-            throw error;
-        }
-    }
-    
-    /**
-     * VERBETERING: Verrijk hondendata met alle vereiste velden
-     */
-    enrichDogData(dog) {
-        return {
-            // Basis velden
-            id: dog.id || 0,
-            naam: dog.naam || '',
-            kennelnaam: dog.kennelnaam || '',
-            stamboomnr: dog.stamboomnr || '',
-            ras: dog.ras || '',
-            geslacht: dog.geslacht || 'onbekend',
-            geboortedatum: dog.geboortedatum || null,
-            overlijdensdatum: dog.overlijdensdatum || null,
-            vaderId: dog.vaderId || null,
-            moederId: dog.moederId || null,
-            vader: dog.vader || '',
-            moeder: dog.moeder || '',
-            
-            // Gezondheidsvelden - ZORG DAT ZE ER ALTIJD ZIJN
-            heupdysplasie: dog.heupdysplasie || '',
-            elleboogdysplasie: dog.elleboogdysplasie || '',
-            patella: dog.patella || '',
-            ogen: dog.ogen || '',
-            ogenVerklaring: dog.ogenVerklaring || '',
-            dandyWalker: dog.dandyWalker || '',
-            schildklier: dog.schildklier || '',
-            schildklierVerklaring: dog.schildklierVerklaring || '',
-            
-            // Extra velden
-            vachtkleur: dog.vachtkleur || '',
-            land: dog.land || '',
-            postcode: dog.postcode || '',
-            opmerkingen: dog.opmerkingen || '',
-            createdAt: dog.createdAt || null,
-            updatedAt: dog.updatedAt || null
-        };
-    }
-    
-    /**
-     * VERBETERING: Haal een hond op met GARANTIE op volledige data
-     */
-    async getDogWithFullData(dogId) {
-        if (!dogId || dogId === 0) return null;
-        
-        // 1. Check cache eerst
-        if (this.fullDogDataCache.has(dogId)) {
-            const cachedDog = this.fullDogDataCache.get(dogId);
-            if (this.hasCompleteHealthData(cachedDog)) {
-                return cachedDog;
-            }
-        }
-        
-        // 2. Zoek in huidige dataset
-        let dog = this.allDogs.find(d => d.id === dogId);
-        
-        // 3. Als niet gevonden of onvolledig, haal uit database
-        if (!dog || !this.hasCompleteHealthData(dog)) {
-            console.log(`🔄 Volledige data ophalen voor hond ${dogId}...`);
-            try {
-                const freshDog = await this.db.getHondById(dogId);
-                if (freshDog) {
-                    dog = this.enrichDogData(freshDog);
-                    
-                    // Update lokale dataset
-                    const existingIndex = this.allDogs.findIndex(d => d.id === dogId);
-                    if (existingIndex !== -1) {
-                        this.allDogs[existingIndex] = { ...this.allDogs[existingIndex], ...dog };
-                    } else {
-                        this.allDogs.push(dog);
-                    }
-                    
-                    // Update cache
-                    this.fullDogDataCache.set(dogId, dog);
-                    if (dog.stamboomnr) {
-                        this.fullDogDataCache.set(dog.stamboomnr, dog);
-                    }
-                }
-            } catch (error) {
-                console.error(`❌ Fout bij ophalen hond ${dogId}:`, error);
-                // Gebruik wat we hebben
-            }
-        }
-        
-        return dog || null;
-    }
-    
-    /**
-     * Controleer of een hond volledige gezondheidsdata heeft
-     */
-    hasCompleteHealthData(dog) {
-        return dog && (
-            dog.heupdysplasie !== undefined &&
-            dog.elleboogdysplasie !== undefined &&
-            dog.patella !== undefined &&
-            dog.ogen !== undefined &&
-            dog.dandyWalker !== undefined &&
-            dog.schildklier !== undefined
-        );
-    }
-    
-    /**
-     * VERBETERING: Synchroniseer data met externe module
-     */
-    async syncWithExternalData(externalDogs = []) {
-        if (!externalDogs || externalDogs.length === 0) return;
-        
-        console.log(`🔄 Synchroniseren met ${externalDogs.length} externe honden...`);
-        
-        for (const externalDog of externalDogs) {
-            const enrichedDog = this.enrichDogData(externalDog);
-            const existingIndex = this.allDogs.findIndex(d => d.id === enrichedDog.id);
-            
-            if (existingIndex !== -1) {
-                // Merge: externe data heeft voorrang
-                this.allDogs[existingIndex] = { 
-                    ...this.allDogs[existingIndex], 
-                    ...enrichedDog 
-                };
-            } else {
-                // Nieuwe hond toevoegen
-                this.allDogs.push(enrichedDog);
-            }
-            
-            // Update cache
-            this.fullDogDataCache.set(enrichedDog.id, enrichedDog);
-            if (enrichedDog.stamboomnr) {
-                this.fullDogDataCache.set(enrichedDog.stamboomnr, enrichedDog);
-            }
-        }
-        
-        // Herinitialiseer COI calculator met nieuwe dataset
-        if (this.coiCalculator && typeof COICalculator !== 'undefined') {
-            this.coiCalculator = new COICalculator(this.allDogs);
-        }
-        
-        console.log(`✅ Synchronisatie voltooid. Totaal: ${this.allDogs.length} honden`);
-    }
-    
-    // ==================== BESTAANDE METHODES - VERBETERD ====================
-    
     async initialize() {
-        return this.ensureInitialized();
+        this.allDogs = await this.db.getHonden();
+        console.log(`${this.allDogs.length} honden geladen voor stambomen`);
+        
+        // VERWIJZING NAAR COICalculator.js
+        if (typeof COICalculator !== 'undefined') {
+            this.coiCalculator = new COICalculator(this.allDogs);
+            console.log('COI Calculator geïnitialiseerd vanuit extern bestand');
+        } else {
+            console.error('COICalculator klasse niet gevonden! Zorg dat COICalculator.js geladen is vóór StamboomManager.js');
+            this.coiCalculator = null;
+        }
     }
     
     getDogById(id) {
-        return this.allDogs.find(dog => dog.id === id) || null;
+        return this.allDogs.find(dog => dog.id === id);
     }
     
     async checkDogHasPhotos(dogId) {
         if (!dogId || dogId === 0) return false;
-        const dog = await this.getDogWithFullData(dogId);
+        const dog = this.getDogById(dogId);
         if (!dog || !dog.stamboomnr) return false;
         const cacheKey = `has_${dogId}_${dog.stamboomnr}`;
         if (this.dogHasPhotosCache.has(cacheKey)) {
@@ -444,7 +227,7 @@ class StamboomManager extends BaseModule {
     
     async getDogThumbnails(dogId, limit = 9) {
         if (!dogId || dogId === 0) return [];
-        const dog = await this.getDogWithFullData(dogId);
+        const dog = this.getDogById(dogId);
         if (!dog || !dog.stamboomnr) return [];
         const cacheKey = `thumbs_${dogId}_${dog.stamboomnr}_${limit}`;
         if (this.dogThumbnailsCache.has(cacheKey)) {
@@ -477,8 +260,8 @@ class StamboomManager extends BaseModule {
             return null;
         }
     }
-    
-    // ==================== COI BEREKENING ====================
+
+    // ==================== COI BEREKENING VIA COICalculator.js ====================
     
     calculateCOI(dogId) {
         console.log('COI berekening voor database ID:', dogId);
@@ -488,7 +271,7 @@ class StamboomManager extends BaseModule {
         const dog = this.getDogById(dogId);
         if (!dog) return { coi6Gen: '0.0', coiAllGen: '0.0' };
         
-        // Basisgevallen
+        // Basisgevallen eerst
         if (!dog.vaderId || !dog.moederId) {
             return { coi6Gen: '0.0', coiAllGen: '0.0' };
         }
@@ -497,18 +280,41 @@ class StamboomManager extends BaseModule {
             return { coi6Gen: '25.0', coiAllGen: '25.0' };
         }
         
-        // Gebruik COICalculator als beschikbaar
+        // GEBRUIK COICalculator.js als beschikbaar
         if (this.coiCalculator) {
             try {
                 const result = this.coiCalculator.calculateCOI(dogId);
-                console.log('COI resultaat:', result);
+                console.log(`COI resultaat via COICalculator:`, result);
                 return result;
             } catch (error) {
                 console.error('Fout in COICalculator:', error);
+                // Val terug op eenvoudige berekening
             }
+        } else {
+            console.warn('COICalculator niet beschikbaar, gebruik eenvoudige berekening');
         }
         
-        // Fallback berekening
+        // Eenvoudige berekening als COICalculator niet werkt
+        const vader = this.getDogById(dog.vaderId);
+        const moeder = this.getDogById(dog.moederId);
+        
+        if (!vader || !moeder) {
+            return { coi6Gen: '0.0', coiAllGen: '0.0' };
+        }
+        
+        // Volle broer/zus
+        if (vader.vaderId && moeder.vaderId && vader.vaderId === moeder.vaderId &&
+            vader.moederId && moeder.moederId && vader.moederId === moeder.moederId) {
+            return { coi6Gen: '25.0', coiAllGen: '25.0' };
+        }
+        
+        // Half broer/zus
+        if ((vader.vaderId && moeder.vaderId && vader.vaderId === moeder.vaderId) ||
+            (vader.moederId && moeder.moederId && vader.moederId === moeder.moederId)) {
+            return { coi6Gen: '12.5', coiAllGen: '12.5' };
+        }
+        
+        // Complexe gevallen - probeer minimaal iets
         return { coi6Gen: '0.0', coiAllGen: '0.0' };
     }
     
@@ -519,8 +325,14 @@ class StamboomManager extends BaseModule {
         return '#dc3545';
     }
     
-    // ==================== STAMBOOM OPBOUW ====================
+    // ==================== RESTO VAN JE CODE - ONGEWIJZIGD ====================
     
+
+/* ============================================= */
+/* COI BEREKENING EINDIGT HIER */
+/* ============================================= */
+
+
     buildPedigreeTree(dogId) {
         const pedigreeTree = {
             mainDog: null,
@@ -545,15 +357,13 @@ class StamboomManager extends BaseModule {
         
         pedigreeTree.mainDog = mainDog;
         
-        // Ouders - MET GARANTIE OP VOLLEDIGE DATA
+        // Ouders
         if (mainDog.vaderId) {
-            const father = this.getDogById(mainDog.vaderId);
-            if (father) pedigreeTree.father = father;
+            pedigreeTree.father = this.getDogById(mainDog.vaderId);
         }
         
         if (mainDog.moederId) {
-            const mother = this.getDogById(mainDog.moederId);
-            if (mother) pedigreeTree.mother = mother;
+            pedigreeTree.mother = this.getDogById(mainDog.moederId);
         }
         
         // Grootouders
@@ -639,8 +449,15 @@ class StamboomManager extends BaseModule {
         return `<span class="${badgeClass}">${value}</span>`;
     }
     
-    // ==================== CARD GENERATIE ====================
+    // Helper voor COI kleuren
+    getCOIColor(coiValue) {
+        const value = parseFloat(coiValue);
+        if (value < 4.0) return '#28a745'; // groen
+        if (value <= 6.0) return '#fd7e14'; // oranje
+        return '#dc3545'; // rood
+    }
     
+    // LIGGENDE CARD VOOR STAMBOOM - met fototoestelicoon
     async getDogCompactCardHTML(dog, relation = '', isMainDog = false, generation = 0) {
         if (!dog) {
             return `
@@ -661,20 +478,19 @@ class StamboomManager extends BaseModule {
         const mainDogClass = isMainDog ? 'main-dog-compact' : '';
         const headerColor = isMainDog ? 'bg-primary' : 'bg-secondary';
         
-        // VERBETERING: Garandeer dat we volledige data hebben voor deze hond
-        const fullDog = await this.getDogWithFullData(dog.id);
-        
-        const hasPhotos = await this.checkDogHasPhotos(fullDog?.id || dog.id);
+        // Check of deze hond foto's heeft (SNELLE CHECK)
+        const hasPhotos = await this.checkDogHasPhotos(dog.id);
         const cameraIcon = hasPhotos ? '<i class="bi bi-camera text-danger ms-1"></i>' : '';
 
-        const combinedName = fullDog?.naam || dog.naam || this.t('unknown');
-        const showKennel = fullDog?.kennelnaam && fullDog.kennelnaam.trim() !== '';
-        const fullDisplayText = combinedName + (showKennel ? ` ${fullDog.kennelnaam}` : '');
+        // Maak een gecombineerde naam+kennel string voor automatische aanpassing
+        const combinedName = dog.naam || this.t('unknown');
+        const showKennel = dog.kennelnaam && dog.kennelnaam.trim() !== '';
+        const fullDisplayText = combinedName + (showKennel ? ` ${dog.kennelnaam}` : '');
         
         return `
-            <div class="pedigree-card-compact horizontal ${fullDog?.geslacht === 'reuen' ? 'male' : 'female'} ${mainDogClass} gen${generation}" 
-                 data-dog-id="${fullDog?.id || dog.id}" 
-                 data-dog-name="${fullDog?.naam || dog.naam || ''}"
+            <div class="pedigree-card-compact horizontal ${dog.geslacht === 'reuen' ? 'male' : 'female'} ${mainDogClass} gen${generation}" 
+                 data-dog-id="${dog.id}" 
+                 data-dog-name="${dog.naam || ''}"
                  data-relation="${relation}"
                  data-generation="${generation}"
                  data-has-photos="${hasPhotos}">
@@ -697,15 +513,15 @@ class StamboomManager extends BaseModule {
                     
                     <!-- Regel 2: Stamboomnummer en ras -->
                     <div class="card-row card-row-2">
-                        ${fullDog?.stamboomnr ? `
-                        <div class="dog-pedigree-compact" title="${fullDog.stamboomnr}">
-                            ${fullDog.stamboomnr}
+                        ${dog.stamboomnr ? `
+                        <div class="dog-pedigree-compact" title="${dog.stamboomnr}">
+                            ${dog.stamboomnr}
                         </div>
                         ` : ''}
                         
-                        ${fullDog?.ras ? `
-                        <div class="dog-breed-compact" title="${fullDog.ras}">
-                            ${fullDog.ras}
+                        ${dog.ras ? `
+                        <div class="dog-breed-compact" title="${dog.ras}">
+                            ${dog.ras}
                         </div>
                         ` : ''}
                     </div>
@@ -721,75 +537,50 @@ class StamboomManager extends BaseModule {
         `;
     }
     
-    // ==================== DETAIL POPUP ====================
-    
+    // UPDATE: DETAIL POPUP met thumbnails
     async getDogDetailPopupHTML(dog, relation = '') {
         if (!dog) return '';
         
-        // VERBETERING: Garandeer volledige data voor de popup
-        const fullDog = await this.getDogWithFullData(dog.id);
-        if (!fullDog) {
-            return `
-                <div class="dog-detail-popup">
-                    <div class="popup-header">
-                        <h5 class="popup-title">${this.t('unknown')}</h5>
-                        <button type="button" class="btn-close btn-close-white"></button>
-                    </div>
-                    <div class="popup-body">
-                        <div class="alert alert-warning">
-                            <i class="bi bi-exclamation-triangle me-2"></i>
-                            ${this.t('errorLoadingData')}
-                        </div>
-                    </div>
-                    <div class="popup-footer">
-                        <button type="button" class="btn btn-secondary popup-close-btn">
-                            <i class="bi bi-x-circle me-1"></i> ${this.t('closePopup')}
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-        
-        const genderText = fullDog.geslacht === 'reuen' ? this.t('male') : 
-                          fullDog.geslacht === 'teven' ? this.t('female') : this.t('unknown');
+        const genderText = dog.geslacht === 'reuen' ? this.t('male') : 
+                          dog.geslacht === 'teven' ? this.t('female') : this.t('unknown');
         
         // Bereken COI waarden
-        const coiValues = this.calculateCOI(fullDog.id);
+        const coiValues = this.calculateCOI(dog.id);
         const coi6Color = this.getCOIColor(coiValues.coi6Gen);
         const coiAllColor = this.getCOIColor(coiValues.coiAllGen);
         
-        // Laad thumbnails
-        const thumbnails = await this.getDogThumbnails(fullDog.id, 9);
+        // NIEUW: Laad alleen thumbnails
+        const thumbnails = await this.getDogThumbnails(dog.id, 9);
         
-        // Maak gecombineerde naam+kennel string
-        const combinedName = fullDog.naam || this.t('unknown');
-        const showKennel = fullDog.kennelnaam && fullDog.kennelnaam.trim() !== '';
-        const kennelSuffix = showKennel ? ` ${fullDog.kennelnaam}` : '';
+        // Maak een gecombineerde naam+kennel string voor de header
+        const combinedName = dog.naam || this.t('unknown');
+        const showKennel = dog.kennelnaam && dog.kennelnaam.trim() !== '';
+        const kennelSuffix = showKennel ? ` ${dog.kennelnaam}` : '';
         const headerText = combinedName + kennelSuffix;
         
         return `
             <div class="dog-detail-popup">
                 <div class="popup-header">
                     <h5 class="popup-title">
-                        <i class="bi ${fullDog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 'bi-gender-female text-danger'} me-2"></i>
+                        <i class="bi ${dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 'bi-gender-female text-danger'} me-2"></i>
                         ${headerText}
                     </h5>
                     <button type="button" class="btn-close btn-close-white" aria-label="Sluiten"></button>
                 </div>
                 <div class="popup-body">
-                    <!-- THUMBNAILS SECTIE -->
+                    <!-- THUMBNAILS SECTIE BOVENAAN (indien beschikbaar) -->
                     ${thumbnails.length > 0 ? `
                     <div class="info-section mb-3">
                         <h6><i class="bi bi-camera me-1"></i> ${this.t('photos')} (${thumbnails.length})</h6>
-                        <div class="photos-grid" id="photosGrid${fullDog.id}">
+                        <div class="photos-grid" id="photosGrid${dog.id}">
                             ${thumbnails.map((thumb, index) => `
                                 <div class="photo-thumbnail" 
                                      data-photo-id="${thumb.id}" 
-                                     data-dog-id="${fullDog.id}" 
+                                     data-dog-id="${dog.id}" 
                                      data-photo-index="${index}"
                                      data-is-thumbnail="true">
                                     <img src="${thumb.thumbnail}" 
-                                         alt="${fullDog.naam || ''} - ${thumb.filename || ''}" 
+                                         alt="${dog.naam || ''} - ${thumb.filename || ''}" 
                                          class="thumbnail-img"
                                          loading="lazy">
                                     <div class="photo-hover">
@@ -804,43 +595,43 @@ class StamboomManager extends BaseModule {
                     </div>
                     ` : ''}
                     
-                    <!-- BASISGEGEVENS -->
+                    <!-- BASISGEGEVENS NA FOTO'S -->
                     <div class="info-section mb-2">
                         <h6><i class="bi bi-card-text me-1"></i> Basisgegevens</h6>
                         <div class="info-grid">
-                            <!-- Stamboomnummer en Ras -->
+                            <!-- Stamboomnummer en Ras naast elkaar -->
                             <div class="info-row">
-                                ${fullDog.stamboomnr ? `
+                                ${dog.stamboomnr ? `
                                 <div class="info-item info-item-half">
                                     <span class="info-label">${this.t('pedigreeNumber')}:</span>
-                                    <span class="info-value">${fullDog.stamboomnr}</span>
+                                    <span class="info-value">${dog.stamboomnr}</span>
                                 </div>
                                 ` : ''}
                                 
-                                ${fullDog.ras ? `
+                                ${dog.ras ? `
                                 <div class="info-item info-item-half">
                                     <span class="info-label">${this.t('breed')}:</span>
-                                    <span class="info-value">${fullDog.ras}</span>
+                                    <span class="info-value">${dog.ras}</span>
                                 </div>
                                 ` : ''}
                             </div>
                             
-                            <!-- Geslacht en Vachtkleur -->
+                            <!-- Geslacht en Vachtkleur naast elkaar -->
                             <div class="info-row">
                                 <div class="info-item info-item-half">
                                     <span class="info-label">${this.t('gender')}:</span>
                                     <span class="info-value">${genderText}</span>
                                 </div>
                                 
-                                ${fullDog.vachtkleur ? `
+                                ${dog.vachtkleur ? `
                                 <div class="info-item info-item-half">
                                     <span class="info-label">${this.t('coatColor')}:</span>
-                                    <span class="info-value">${fullDog.vachtkleur}</span>
+                                    <span class="info-value">${dog.vachtkleur}</span>
                                 </div>
                                 ` : ''}
                             </div>
                             
-                            <!-- COI waarden -->
+                            <!-- Beide COI waarden naast elkaar -->
                             <div class="info-row">
                                 <div class="info-item info-item-half">
                                     <span class="info-label">${this.t('coi6Gen')}:</span>
@@ -858,129 +649,127 @@ class StamboomManager extends BaseModule {
                             </div>
                             
                             <!-- Datums -->
-                            ${fullDog.geboortedatum ? `
+                            ${dog.geboortedatum ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
                                     <span class="info-label">${this.t('birthDate')}:</span>
-                                    <span class="info-value">${this.formatDate(fullDog.geboortedatum)}</span>
+                                    <span class="info-value">${this.formatDate(dog.geboortedatum)}</span>
                                 </div>
                             </div>
                             ` : ''}
                             
-                            ${fullDog.overlijdensdatum ? `
+                            ${dog.overlijdensdatum ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
                                     <span class="info-label">${this.t('deathDate')}:</span>
-                                    <span class="info-value">${this.formatDate(fullDog.overlijdensdatum)}</span>
+                                    <span class="info-value">${this.formatDate(dog.overlijdensdatum)}</span>
                                 </div>
                             </div>
                             ` : ''}
                             
                             <!-- Land en postcode -->
-                            ${fullDog.land ? `
+                            ${dog.land ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
                                     <span class="info-label">${this.t('country')}:</span>
-                                    <span class="info-value">${fullDog.land}</span>
+                                    <span class="info-value">${dog.land}</span>
                                 </div>
                             </div>
                             ` : ''}
                             
-                            ${fullDog.postcode ? `
+                            ${dog.postcode ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
                                     <span class="info-label">${this.t('zipCode')}:</span>
-                                    <span class="info-value">${fullDog.postcode}</span>
+                                    <span class="info-value">${dog.postcode}</span>
                                 </div>
                             </div>
                             ` : ''}
                         </div>
                     </div>
                     
-                    <!-- GEZONDHEIDSINFO -->
                     <div class="info-section mb-2">
                         <h6><i class="bi bi-heart-pulse me-1"></i> ${this.t('healthInfo')}</h6>
                         <div class="info-grid">
-                            ${fullDog.heupdysplasie ? `
+                            ${dog.heupdysplasie ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
                                     <span class="info-label">${this.t('hipDysplasia')}:</span>
-                                    <span class="info-value">${this.getHealthBadge(fullDog.heupdysplasie, 'hip')}</span>
+                                    <span class="info-value">${this.getHealthBadge(dog.heupdysplasie, 'hip')}</span>
                                 </div>
                             </div>
                             ` : ''}
                             
-                            ${fullDog.elleboogdysplasie ? `
+                            ${dog.elleboogdysplasie ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
                                     <span class="info-label">${this.t('elbowDysplasia')}:</span>
-                                    <span class="info-value">${this.getHealthBadge(fullDog.elleboogdysplasie, 'elbow')}</span>
+                                    <span class="info-value">${this.getHealthBadge(dog.elleboogdysplasie, 'elbow')}</span>
                                 </div>
                             </div>
                             ` : ''}
                             
-                            ${fullDog.patella ? `
+                            ${dog.patella ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
                                     <span class="info-label">${this.t('patellaLuxation')}:</span>
-                                    <span class="info-value">${this.getHealthBadge(fullDog.patella, 'patella')}</span>
+                                    <span class="info-value">${this.getHealthBadge(dog.patella, 'patella')}</span>
                                 </div>
                             </div>
                             ` : ''}
                             
-                            ${fullDog.ogen ? `
+                            ${dog.ogen ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
                                     <span class="info-label">${this.t('eyes')}:</span>
-                                    <span class="info-value">${this.getHealthBadge(fullDog.ogen, 'eyes')}</span>
+                                    <span class="info-value">${this.getHealthBadge(dog.ogen, 'eyes')}</span>
                                 </div>
                             </div>
                             ` : ''}
                             
-                            ${fullDog.ogenVerklaring ? `
+                            ${dog.ogenVerklaring ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
                                     <span class="info-label">${this.t('eyesExplanation')}:</span>
-                                    <span class="info-value">${fullDog.ogenVerklaring}</span>
+                                    <span class="info-value">${dog.ogenVerklaring}</span>
                                 </div>
                             </div>
                             ` : ''}
                             
-                            ${fullDog.dandyWalker ? `
+                            ${dog.dandyWalker ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
                                     <span class="info-label">${this.t('dandyWalker')}:</span>
-                                    <span class="info-value">${this.getHealthBadge(fullDog.dandyWalker, 'dandy')}</span>
+                                    <span class="info-value">${this.getHealthBadge(dog.dandyWalker, 'dandy')}</span>
                                 </div>
                             </div>
                             ` : ''}
                             
-                            ${fullDog.schildklier ? `
+                            ${dog.schildklier ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
                                     <span class="info-label">${this.t('thyroid')}:</span>
-                                    <span class="info-value">${this.getHealthBadge(fullDog.schildklier, 'thyroid')}</span>
+                                    <span class="info-value">${this.getHealthBadge(dog.schildklier, 'thyroid')}</span>
                                 </div>
                             </div>
                             ` : ''}
                             
-                            ${fullDog.schildklierVerklaring ? `
+                            ${dog.schildklierVerklaring ? `
                             <div class="info-row">
                                 <div class="info-item info-item-full">
                                     <span class="info-label">${this.t('thyroidExplanation')}:</span>
-                                    <span class="info-value">${fullDog.schildklierVerklaring}</span>
+                                    <span class="info-value">${dog.schildklierVerklaring}</span>
                                 </div>
                             </div>
                             ` : ''}
                         </div>
                     </div>
                     
-                    <!-- OPMERKINGEN -->
-                    ${fullDog.opmerkingen ? `
+                    ${dog.opmerkingen ? `
                     <div class="info-section mb-2">
                         <h6><i class="bi bi-chat-text me-1"></i> ${this.t('remarks')}</h6>
                         <div class="remarks-box">
-                            ${fullDog.opmerkingen}
+                            ${dog.opmerkingen}
                         </div>
                     </div>
                     ` : `
@@ -999,8 +788,7 @@ class StamboomManager extends BaseModule {
         `;
     }
     
-    // ==================== EVENT LISTENERS ====================
-    
+    // UPDATE: Setup globale event listeners voor gefaseerd foto laden
     setupGlobalEventListeners() {
         // Event delegation voor foto thumbnail clicks
         document.addEventListener('click', async (e) => {
@@ -1015,9 +803,11 @@ class StamboomManager extends BaseModule {
                 if (!photoId) return;
                 
                 try {
+                    // NIEUW: Laad pas de volledige foto als er op geklikt wordt
                     const fullPhoto = await this.getFullSizeFoto(photoId);
                     
                     if (fullPhoto && fullPhoto.data) {
+                        // Haal hondnaam op uit de popup
                         const popupTitle = document.querySelector('.popup-title');
                         let dogName = '';
                         if (popupTitle) {
@@ -1028,6 +818,7 @@ class StamboomManager extends BaseModule {
                         this.showLargePhoto(fullPhoto.data, dogName);
                     } else {
                         console.error('Kon volledige foto niet laden:', photoId);
+                        // Probeer de thumbnail als fallback
                         const imgElement = thumbnail.querySelector('img');
                         if (imgElement && imgElement.src) {
                             this.showLargePhoto(imgElement.src, dogName);
@@ -1070,7 +861,7 @@ class StamboomManager extends BaseModule {
     }
     
     showLargePhoto(photoData, dogName = '') {
-        console.log('Toon grote foto');
+        console.log('Toon grote foto:', photoData.substring(0, 100) + '...');
         
         // Verwijder bestaande overlay
         const existingOverlay = document.getElementById('photoLargeOverlay');
@@ -1130,16 +921,7 @@ class StamboomManager extends BaseModule {
         });
     }
     
-    // ==================== HOOFD STAMBOOM FUNCTIE ====================
-    
     async showPedigree(dog) {
-        // VERBETERING: Garandeer dat we geïnitialiseerd zijn VOOR we iets tonen
-        const isReady = await this.ensureInitialized();
-        if (!isReady) {
-            this.showError("Kon stamboom niet laden. Data niet beschikbaar.");
-            return;
-        }
-        
         if (!document.getElementById('pedigreeModal')) {
             this.createPedigreeModal();
         }
@@ -1176,6 +958,7 @@ class StamboomManager extends BaseModule {
                             </div>
                         </div>
                         <div class="modal-body p-0" style="overflow: hidden;">
+                            <!-- MOBIELE CONTAINER - 6.5 inch hoog -->
                             <div class="pedigree-mobile-wrapper" id="pedigreeMobileWrapper">
                                 <div class="pedigree-container-compact" id="pedigreeContainer">
                                     <div class="text-center py-5">
@@ -1187,6 +970,7 @@ class StamboomManager extends BaseModule {
                                 </div>
                             </div>
                         </div>
+                        <!-- FOOTER VERWIJDERD -->
                     </div>
                 </div>
             </div>
@@ -1199,7 +983,1203 @@ class StamboomManager extends BaseModule {
             </div>
             
             <style>
-                /* ... (zelfde CSS als voorheen, blijft ongewijzigd) ... */
+                /* MOBIELE WRAPPER */
+                .pedigree-mobile-wrapper {
+                    width: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    background: #f8f9fa;
+                    position: relative;
+                    border-radius: 12px;
+                }
+                
+                /* HORIZONTALE PEDIGREE CONTAINER */
+                .pedigree-container-compact {
+                    padding: 15px !important;
+                    margin: 0 !important;
+                    width: 100% !important;
+                    background: #f8f9fa;
+                    overflow-x: auto !important;
+                    overflow-y: auto !important;
+                    position: relative;
+                    min-height: 0 !important;
+                    box-sizing: border-box !important;
+                    border-radius: inherit;
+                }
+                
+                .pedigree-grid-compact {
+                    display: flex;
+                    flex-direction: row;
+                    height: auto;
+                    min-width: fit-content;
+                    padding: 10px 15px !important;
+                    gap: 20px;
+                    align-items: flex-start;
+                    box-sizing: border-box !important;
+                    margin: 0 auto;
+                }
+                
+                /* GENERATIE KOLOM - VERTICALE STACK VAN LIGGENDE CARDS */
+                .pedigree-generation-col {
+                    display: flex;
+                    flex-direction: column;
+                    height: auto;
+                    justify-content: flex-start;
+                    min-width: 0;
+                }
+                
+                /* ZELFDE SPACING PER GENERATIE - ALLES GELIJK ZETTEN */
+                .pedigree-generation-col.gen0 {
+                    gap: 4px !important;
+                }
+                
+                .pedigree-generation-col.gen1 {
+                    gap: 4px !important;
+                }
+                
+                .pedigree-generation-col.gen2 {
+                    gap: 4px !important;
+                }
+                
+                .pedigree-generation-col.gen3 {
+                    gap: 4px !important;
+                }
+                
+                /* BASIS LIGGENDE CARDS */
+                .pedigree-card-compact.horizontal {
+                    background: white;
+                    border-radius: 6px;
+                    border: 1px solid #dee2e6;
+                    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    flex-shrink: 0;
+                }
+                
+                /* ZELFDE BREEDTE VOOR ALLE GENERATIES - ANDERE HOOGTE VOOR OVERGROOTOUDERS */
+                .pedigree-card-compact.horizontal.gen0,
+                .pedigree-card-compact.horizontal.gen1,
+                .pedigree-card-compact.horizontal.gen2 {
+                    width: 160px !important;
+                    height: 120px !important;
+                }
+                
+                /* OVERGROOTOUDERS: 60% HOOGTE VAN NORMALE CARDS */
+                .pedigree-card-compact.horizontal.gen3 {
+                    width: 160px !important;
+                    height: 60px !important;
+                }
+                
+                /* Hoofdhond extra styling */
+                .pedigree-card-compact.horizontal.main-dog-compact {
+                    border: 2px solid #0d6efd !important;
+                    background: #f0f7ff;
+                    width: 170px !important;
+                    height: 110px !important;
+                }
+                
+                /* Geslacht kleuren */
+                .pedigree-card-compact.horizontal.male {
+                    border-left: 4px solid #0d6efd !important;
+                }
+                
+                .pedigree-card-compact.horizontal.female {
+                    border-left: 4px solid #dc3545 !important;
+                }
+                
+                .pedigree-card-compact.horizontal:hover {
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+                    transform: translateY(-1px);
+                    z-index: 1;
+                    position: relative;
+                }
+                
+                .pedigree-card-compact.horizontal.empty {
+                    background: #f8f9fa;
+                    cursor: default;
+                    opacity: 0.6;
+                }
+                
+                .pedigree-card-compact.horizontal.empty:hover {
+                    transform: none !important;
+                    box-shadow: 0 1px 2px rgba(0,0,0,0.08) !important;
+                }
+                
+                /* CARD HEADER */
+                .pedigree-card-header-compact.horizontal {
+                    color: white;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    overflow: hidden;
+                    flex-shrink: 0;
+                }
+                
+                /* Header voor gen0, gen1, gen2 */
+                .pedigree-card-compact.horizontal.gen0 .pedigree-card-header-compact.horizontal,
+                .pedigree-card-compact.horizontal.gen1 .pedigree-card-header-compact.horizontal,
+                .pedigree-card-compact.horizontal.gen2 .pedigree-card-header-compact.horizontal {
+                    padding: 5px 8px;
+                    font-size: 0.7rem;
+                    min-height: 22px;
+                }
+                
+                /* Header voor gen3 (overgrootouders) */
+                .pedigree-card-compact.horizontal.gen3 .pedigree-card-header-compact.horizontal {
+                    padding: 3px 6px;
+                    font-size: 0.56rem;
+                    min-height: 16px;
+                }
+                
+                .pedigree-card-header-compact.horizontal.bg-primary {
+                    background: #0d6efd !important;
+                }
+                
+                .pedigree-card-header-compact.horizontal.bg-secondary {
+                    background: #6c757d !important;
+                }
+                
+                .relation-compact {
+                    display: flex;
+                    align-items: center;
+                    gap: 3px;
+                    font-weight: 600;
+                    overflow: hidden;
+                    flex: 1;
+                }
+                
+                .relation-text {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+                
+                .main-dot {
+                    color: #ffc107;
+                    font-size: 0.7rem;
+                    flex-shrink: 0;
+                }
+                
+                .gender-icon-compact {
+                    flex-shrink: 0;
+                    margin-left: 4px;
+                }
+                
+                /* CARD BODY */
+                .pedigree-card-body-compact.horizontal {
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                    flex: 1;
+                }
+                
+                /* Body voor gen0, gen1, gen2 */
+                .pedigree-card-compact.horizontal.gen0 .pedigree-card-body-compact.horizontal,
+                .pedigree-card-compact.horizontal.gen1 .pedigree-card-body-compact.horizontal,
+                .pedigree-card-compact.horizontal.gen2 .pedigree-card-body-compact.horizontal {
+                    padding: 6px 8px;
+                }
+                
+                /* Body voor gen3 (overgrootouders) */
+                .pedigree-card-compact.horizontal.gen3 .pedigree-card-body-compact.horizontal {
+                    padding: 4px 6px;
+                }
+                
+                /* CARD ROWS voor liggende layout */
+                .card-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    gap: 4px;
+                    overflow: hidden;
+                }
+                
+                .card-row-1 {
+                    margin-bottom: 2px;
+                }
+                
+                .card-row-2 {
+                    margin-bottom: 2px;
+                }
+                
+                .card-row-3 {
+                    margin-top: auto;
+                }
+                
+                /* NAAM + KENNEL COMBINATIE STYLING */
+                .dog-name-kennel-compact {
+                    font-weight: 600;
+                    color: #0d6efd;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    line-height: 1.1;
+                    width: 100%;
+                }
+                
+                /* TEKST GROOTTES PER GENERATIE */
+                .pedigree-card-compact.horizontal.gen0 .dog-name-kennel-compact,
+                .pedigree-card-compact.horizontal.gen1 .dog-name-kennel-compact,
+                .pedigree-card-compact.horizontal.gen2 .dog-name-kennel-compact {
+                    font-size: 0.75rem;
+                }
+                
+                .pedigree-card-compact.horizontal.gen0 .dog-pedigree-compact,
+                .pedigree-card-compact.horizontal.gen1 .dog-pedigree-compact,
+                .pedigree-card-compact.horizontal.gen2 .dog-pedigree-compact,
+                .pedigree-card-compact.horizontal.gen0 .dog-breed-compact,
+                .pedigree-card-compact.horizontal.gen1 .dog-breed-compact,
+                .pedigree-card-compact.horizontal.gen2 .dog-breed-compact {
+                    font-size: 0.65rem;
+                }
+                
+                .pedigree-card-compact.horizontal.gen0 .click-hint-compact,
+                .pedigree-card-compact.horizontal.gen1 .click-hint-compact,
+                .pedigree-card-compact.horizontal.gen2 .click-hint-compact {
+                    font-size: 0.55rem;
+                }
+                
+                /* Overgrootouders (gen3) */
+                .pedigree-card-compact.horizontal.gen3 .dog-name-kennel-compact {
+                    font-size: 0.6rem;
+                }
+                
+                .pedigree-card-compact.horizontal.gen3 .dog-pedigree-compact,
+                .pedigree-card-compact.horizontal.gen3 .dog-breed-compact {
+                    font-size: 0.52rem;
+                }
+                
+                .pedigree-card-compact.horizontal.gen3 .click-hint-compact {
+                    font-size: 0.44rem;
+                }
+                
+                /* Algemene tekst styling */
+                .dog-pedigree-compact {
+                    font-weight: 600;
+                    color: #495057;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    line-height: 1.1;
+                    flex: 1;
+                }
+                
+                .dog-breed-compact {
+                    color: #28a745;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    line-height: 1.1;
+                    flex: 1;
+                    text-align: right;
+                }
+                
+                .no-data-text {
+                    color: #6c757d;
+                    font-style: italic;
+                    line-height: 1.3;
+                    font-size: 0.7rem;
+                }
+                
+                /* Click hint met fototoestelicoon */
+                .click-hint-compact {
+                    color: #6c757d;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 3px;
+                    line-height: 1;
+                    width: 100%;
+                    padding-top: 2px;
+                    border-top: 1px dashed #dee2e6;
+                    font-size: 0.55rem;
+                }
+                
+                .click-hint-compact .bi-camera {
+                    color: #1a15f4;
+                    font-size: 0.7rem;
+                }
+                
+                /* Generation labels styling */
+                .generation-label {
+                    font-weight: bold;
+                    color: #495057;
+                    text-align: center;
+                    margin-bottom: 8px !important;
+                    font-size: 0.75rem;
+                    background: #e9ecef;
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    white-space: nowrap;
+                    flex-shrink: 0;
+                }
+                
+                /* ============================================= */
+                /* MOBIELE AANPASSINGEN */
+                /* ============================================= */
+                @media (max-width: 767px) {
+                    #pedigreeModal.modal.fade .modal-dialog {
+                        max-width: 100%;
+                        margin: 0.5rem auto;
+                        height: auto;
+                    }
+                    
+                    #pedigreeModal.modal.fade .modal-content {
+                        width: 100%;
+                        height: auto;
+                        margin: 0;
+                        border-radius: 12px;
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    
+                    #pedigreeModal.modal.fade .modal-header {
+                        margin: 0;
+                        padding: 0.75rem 1rem;
+                        border: none;
+                        width: 100%;
+                        flex-shrink: 0;
+                        min-height: auto;
+                        z-index: 1;
+                        border-radius: 12px 12px 0 0;
+                    }
+                    
+                    #pedigreeModal.modal.fade .modal-body {
+                        width: 100%;
+                        padding: 0;
+                        margin: 0;
+                        flex: 1 1 auto;
+                        overflow: hidden;
+                        min-height: 0;
+                        max-height: 640px;
+                        border-radius: 0 0 12px 12px;
+                    }
+                    
+                    .pedigree-mobile-wrapper {
+                        width: 100%;
+                        height: 100%;
+                        display: flex;
+                        flex-direction: column;
+                        background: #f8f9fa;
+                        border-radius: 0 0 12px 12px;
+                    }
+                    
+                    .pedigree-container-compact {
+                        height: 640px !important;
+                        overflow-x: auto !important;
+                        overflow-y: hidden !important;
+                        padding: 10px !important;
+                        -webkit-overflow-scrolling: touch;
+                        display: flex;
+                        flex-direction: column;
+                        border-radius: 0 0 12px 12px;
+                    }
+                    
+                    .pedigree-grid-compact {
+                        display: flex !important;
+                        flex-direction: row !important;
+                        flex-wrap: nowrap !important;
+                        height: 100% !important;
+                        min-width: max-content !important;
+                        padding: 10px 15px !important;
+                        gap: 15px !important;
+                        margin: 0 !important;
+                        align-items: stretch !important;
+                        box-sizing: border-box !important;
+                        width: auto !important;
+                    }
+                    
+                    .pedigree-generation-col {
+                        display: flex !important;
+                        flex-direction: column !important;
+                        height: 100% !important;
+                        flex-shrink: 0 !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                        position: relative;
+                        justify-content: center !important;
+                        align-items: flex-start !important;
+                    }
+                    
+                    .pedigree-generation-col.gen0 {
+                        justify-content: center !important;
+                        align-items: flex-start !important;
+                        min-width: 220px !important;
+                        width: 220px !important;
+                        gap: 4px !important;
+                    }
+                    
+                    .pedigree-generation-col.gen1 {
+                        justify-content: center !important;
+                        align-items: flex-start !important;
+                        min-width: 220px !important;
+                        width: 220px !important;
+                        gap: 4px !important;
+                    }
+                    
+                    .pedigree-generation-col.gen1 > .pedigree-card-compact.horizontal:nth-child(2) {
+                        margin-top: -2px !important;
+                    }
+                    
+                    .pedigree-generation-col.gen1 > .pedigree-card-compact.horizontal:nth-child(3) {
+                        margin-top: 2px !important;
+                    }
+                    
+                    .pedigree-generation-col.gen2 {
+                        justify-content: center !important;
+                        align-items: flex-start !important;
+                        min-width: 220px !important;
+                        width: 220px !important;
+                        gap: 4px !important;
+                    }
+                    
+                    .pedigree-generation-col.gen2 > .pedigree-card-compact.horizontal:nth-child(2),
+                    .pedigree-generation-col.gen2 > .pedigree-card-compact.horizontal:nth-child(3) {
+                        margin-top: -4px !important;
+                    }
+                    
+                    .pedigree-generation-col.gen2 > .pedigree-card-compact.horizontal:nth-child(4),
+                    .pedigree-generation-col.gen2 > .pedigree-card-compact.horizontal:nth-child(5) {
+                        margin-top: 4px !important;
+                    }
+                    
+                    .pedigree-generation-col.gen3 {
+                        justify-content: center !important;
+                        align-items: flex-start !important;
+                        min-width: 220px !important;
+                        width: 220px !important;
+                        gap: 4px !important;
+                    }
+                    
+                    .pedigree-generation-col.gen3 > .pedigree-card-compact.horizontal:nth-child(2),
+                    .pedigree-generation-col.gen3 > .pedigree-card-compact.horizontal:nth-child(3) {
+                        margin-top: -8px !important;
+                    }
+                    
+                    .pedigree-generation-col.gen3 > .pedigree-card-compact.horizontal:nth-child(4),
+                    .pedigree-generation-col.gen3 > .pedigree-card-compact.horizontal:nth-child(5) {
+                        margin-top: -4px !important;
+                    }
+                    
+                    .pedigree-generation-col.gen3 > .pedigree-card-compact.horizontal:nth-child(6),
+                    .pedigree-generation-col.gen3 > .pedigree-card-compact.horizontal:nth-child(7) {
+                        margin-top: 0px !important;
+                    }
+                    
+                    .pedigree-generation-col.gen3 > .pedigree-card-compact.horizontal:nth-child(8),
+                    .pedigree-generation-col.gen3 > .pedigree-card-compact.horizontal:nth-child(9) {
+                        margin-top: 4px !important;
+                    }
+                    
+                    .pedigree-generation-col .generation-label {
+                        font-size: 0.7rem !important;
+                        padding: 3px 6px !important;
+                        margin-bottom: 8px !important;
+                        white-space: nowrap !important;
+                        width: 100%;
+                        text-align: center;
+                        position: static !important;
+                        margin-top: 0 !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen0,
+                    .pedigree-card-compact.horizontal.gen1,
+                    .pedigree-card-compact.horizontal.gen2 {
+                        width: 220px !important;
+                        height: 140px !important;
+                        margin: 0 !important;
+                        flex-shrink: 0 !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen3 {
+                        width: 220px !important;
+                        height: 70px !important;
+                        margin: 0 !important;
+                        flex-shrink: 0 !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.main-dog-compact {
+                        width: 220px !important;
+                        height: 140px !important;
+                        margin: 0 !important;
+                        flex-shrink: 0 !important;
+                    }
+                    
+                    .pedigree-generation-col > * {
+                        width: 100% !important;
+                    }
+                }
+                
+                @media (max-width: 480px) {
+                    .pedigree-container-compact {
+                        height: 640px !important;
+                        padding: 8px !important;
+                    }
+                    
+                    .pedigree-grid-compact {
+                        padding: 8px 12px !important;
+                        gap: 4px !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen0,
+                    .pedigree-card-compact.horizontal.gen1,
+                    .pedigree-card-compact.horizontal.gen2 {
+                        width: 220px !important;
+                        height: 140px !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen3 {
+                        width: 220px !important;
+                        height: 70px !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.main-dog-compact {
+                        width: 220px !important;
+                        height: 140px !important;
+                    }
+                    
+                    .pedigree-generation-col {
+                        min-width: 220px !important;
+                        width: 220px !important;
+                    }
+                    
+                    .pedigree-generation-col.gen0,
+                    .pedigree-generation-col.gen1,
+                    .pedigree-generation-col.gen2,
+                    .pedigree-generation-col.gen3 {
+                        min-width: 220px !important;
+                        width: 220px !important;
+                    }
+                    
+                    .generation-label {
+                        font-size: 0.65rem !important;
+                        padding: 2px 5px !important;
+                        margin-bottom: 8px !important;
+                    }
+                }
+                
+                /* ============================================= */
+                /* DESKTOP STYLES */
+                /* ============================================= */
+                @media (min-width: 768px) {
+                    #pedigreeModal.modal.fade .modal-dialog.modal-fullscreen {
+                        width: 100vw !important;
+                        height: 100vh !important;
+                        margin: 0 !important;
+                        max-width: none !important;
+                        padding: 0 !important;
+                    }
+                    
+                    #pedigreeModal.modal.fade .modal-content {
+                        width: 100% !important;
+                        height: 100vh !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        border: none !important;
+                        border-radius: 0 !important;
+                        display: flex !important;
+                        flex-direction: column !important;
+                    }
+                    
+                    #pedigreeModal.modal.fade .modal-header {
+                        margin: 0 !important;
+                        padding: 0.75rem 1rem !important;
+                        border: none !important;
+                        width: 100% !important;
+                        flex-shrink: 0 !important;
+                        min-height: auto !important;
+                        z-index: 1;
+                    }
+                    
+                    #pedigreeModal.modal.fade .modal-body {
+                        width: 100% !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                        flex: 1 1 auto !important;
+                        overflow: hidden !important;
+                        min-height: 0 !important;
+                    }
+                    
+                    .pedigree-mobile-wrapper {
+                        height: 100%;
+                        border-radius: 0;
+                    }
+                    
+                    .pedigree-container-compact {
+                        height: calc(100vh - 60px) !important;
+                        overflow-x: auto !important;
+                        overflow-y: hidden !important;
+                        align-items: center;
+                        padding: 0 !important;
+                        display: flex;
+                        border-radius: 0;
+                    }
+                    
+                    .pedigree-grid-compact {
+                        flex-direction: row;
+                        height: 100%;
+                        min-width: fit-content;
+                        padding: 0 20px !important;
+                        gap: 25px;
+                        align-items: center;
+                        box-sizing: border-box !important;
+                        margin: 0 auto;
+                    }
+                    
+                    .pedigree-generation-col {
+                        display: flex;
+                        flex-direction: column;
+                        height: 100%;
+                        justify-content: center;
+                        min-width: 0;
+                    }
+                    
+                    .pedigree-generation-col.gen0 {
+                        gap: 4px !important;
+                    }
+                    
+                    .pedigree-generation-col.gen1 {
+                        gap: 4px !important;
+                    }
+                    
+                    .pedigree-generation-col.gen2 {
+                        gap: 4px !important;
+                    }
+                    
+                    .pedigree-generation-col.gen3 {
+                        gap: 4px !important;
+                        justify-content: center;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen0,
+                    .pedigree-card-compact.horizontal.gen1,
+                    .pedigree-card-compact.horizontal.gen2 {
+                        width: 200px !important;
+                        height: 132px !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen3 {
+                        width: 200px !important;
+                        height: 66px !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.main-dog-compact {
+                        width: 200px !important;
+                        height: 132px !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen0 .dog-name-kennel-compact,
+                    .pedigree-card-compact.horizontal.gen1 .dog-name-kennel-compact,
+                    .pedigree-card-compact.horizontal.gen2 .dog-name-kennel-compact {
+                        font-size: 0.8rem;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen0 .dog-pedigree-compact,
+                    .pedigree-card-compact.horizontal.gen1 .dog-pedigree-compact,
+                    .pedigree-card-compact.horizontal.gen2 .dog-pedigree-compact,
+                    .pedigree-card-compact.horizontal.gen0 .dog-breed-compact,
+                    .pedigree-card-compact.horizontal.gen1 .dog-breed-compact,
+                    .pedigree-card-compact.horizontal.gen2 .dog-breed-compact {
+                        font-size: 0.7rem;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen0 .click-hint-compact,
+                    .pedigree-card-compact.horizontal.gen1 .click-hint-compact,
+                    .pedigree-card-compact.horizontal.gen2 .click-hint-compact {
+                        font-size: 0.6rem;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen3 .dog-name-kennel-compact {
+                        font-size: 0.64rem;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen3 .dog-pedigree-compact,
+                    .pedigree-card-compact.horizontal.gen3 .dog-breed-compact {
+                        font-size: 0.56rem;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen3 .click-hint-compact {
+                        font-size: 0.48rem;
+                    }
+                    
+                    .generation-label {
+                        font-size: 0.8rem;
+                        padding: 4px 8px;
+                        margin-bottom: 8px !important;
+                    }
+                }
+                
+                @media (min-width: 1024px) and (max-width: 1365px) {
+                    .pedigree-container-compact {
+                        height: calc(100vh - 60px) !important;
+                    }
+                    
+                    .pedigree-grid-compact {
+                        gap: 15px;
+                        padding: 0 12px !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen0,
+                    .pedigree-card-compact.horizontal.gen1,
+                    .pedigree-card-compact.horizontal.gen2 {
+                        width: 200px !important;
+                        height: 132px !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen3 {
+                        width: 200px !important;
+                        height: 63px !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.main-dog-compact {
+                        width: 200px !important;
+                        height: 132px !important;
+                    }
+                }
+                
+                /* ============================================= */
+                /* DETAIL POPUP STYLES MET THUMBNAILS BOVENAAN */
+                /* ============================================= */
+                .pedigree-popup-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.7);
+                    z-index: 1060;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    animation: fadeIn 0.3s;
+                    overflow-y: auto;
+                }
+                
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                
+                .pedigree-popup-container {
+                    background: white;
+                    border-radius: 12px;
+                    max-width: 400px;
+                    max-height: 80vh;
+                    overflow-y: auto;
+                    animation: slideUp 0.3s;
+                    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+                    width: calc(100% - 20px);
+                    margin: 10px;
+                }
+                
+                @keyframes slideUp {
+                    from { 
+                        opacity: 0;
+                        transform: translateY(30px);
+                    }
+                    to { 
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                
+                .dog-detail-popup {
+                    display: flex;
+                    flex-direction: column;
+                    height: 100%;
+                }
+                
+                .popup-header {
+                    background: #0d6efd;
+                    color: white;
+                    padding: 12px 16px;
+                    border-radius: 12px 12px 0 0;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    position: sticky;
+                    top: 0;
+                    z-index: 1;
+                }
+                
+                .popup-title {
+                    margin: 0;
+                    font-size: 1.1rem;
+                    display: flex;
+                    align-items: center;
+                    flex: 1;
+                }
+                
+                /* Eigen kruisje styling - WIT KRUISJE */
+                .popup-header .btn-close {
+                    display: inline-block;
+                    width: 24px;
+                    height: 24px;
+                    background: transparent;
+                    border: none;
+                    position: relative;
+                    cursor: pointer;
+                    opacity: 0.8;
+                    z-index: 2;
+                    filter: invert(1) grayscale(100%) brightness(200%) !important;
+                }
+                
+                .popup-header .btn-close::before,
+                .popup-header .btn-close::after {
+                    content: '';
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    width: 18px;
+                    height: 2px;
+                    background: #000 !important;
+                    transform-origin: center;
+                }
+                
+                .popup-header .btn-close::before {
+                    transform: translate(-50%, -50%) rotate(45deg);
+                }
+                
+                .popup-header .btn-close::after {
+                    transform: translate(-50%, -50%) rotate(-45deg);
+                }
+                
+                .popup-header .btn-close:hover {
+                    opacity: 1;
+                }
+                
+                .popup-body {
+                    padding: 15px;
+                    flex: 1;
+                    overflow-y: auto;
+                    -webkit-overflow-scrolling: touch;
+                }
+                
+                /* INFO SECTIES */
+                .info-section {
+                    margin-bottom: 20px;
+                }
+                
+                .info-section h6 {
+                    color: #495057;
+                    margin-bottom: 10px;
+                    padding-bottom: 6px;
+                    border-bottom: 2px solid #e9ecef;
+                    display: flex;
+                    align-items: center;
+                    font-size: 1rem;
+                }
+                
+                .info-grid {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                }
+                
+                .info-row {
+                    display: grid !important;
+                    grid-template-columns: 1fr 1fr !important;
+                    gap: 8px !important;
+                    margin-bottom: 0 !important;
+                    width: 100% !important;
+                }
+                
+                .info-item {
+                    display: flex;
+                    flex-direction: column;
+                    width: 100% !important;
+                    min-width: 0 !important;
+                }
+                
+                .info-item-half {
+                    grid-column: span 1 !important;
+                    width: 100% !important;
+                }
+                
+                .info-item-full {
+                    grid-column: 1 / -1 !important;
+                    width: 100% !important;
+                    margin-bottom: 4px;
+                }
+                
+                .coi-value {
+                    font-size: 1.05rem !important;
+                    font-weight: 700 !important;
+                }
+                
+                .info-label {
+                    font-weight: 600;
+                    color: #495057;
+                    font-size: 0.9rem;
+                    margin-bottom: 2px;
+                    line-height: 1.2;
+                }
+                
+                .info-value {
+                    color: #212529;
+                    font-size: 0.95rem;
+                    line-height: 1.3;
+                    word-break: break-word;
+                }
+                
+                .remarks-box {
+                    background: #f8f9fa;
+                    border: 1px solid #dee2e6;
+                    padding: 12px;
+                    border-radius: 6px;
+                    font-style: italic;
+                    color: #495057;
+                    font-size: 0.95rem;
+                    line-height: 1.5;
+                }
+                
+                /* THUMBNAILS SECTIE IN POPUP */
+                .photos-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 6px;
+                    margin-bottom: 10px;
+                    max-width: 240px;
+                    margin-left: auto;
+                    margin-right: auto;
+                }
+                
+                .photo-thumbnail {
+                    position: relative;
+                    aspect-ratio: 1 / 1;
+                    border-radius: 4px;
+                    overflow: hidden;
+                    cursor: pointer;
+                    border: 2px solid transparent;
+                    transition: all 0.2s;
+                }
+                
+                .photo-thumbnail:hover {
+                    border-color: #0d6efd;
+                    transform: scale(1.05);
+                }
+                
+                .thumbnail-img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+                
+                .photo-hover {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    opacity: 0;
+                    transition: opacity 0.2s;
+                }
+                
+                .photo-thumbnail:hover .photo-hover {
+                    opacity: 1;
+                }
+                
+                .photo-hover i {
+                    color: white;
+                    font-size: 1.2rem;
+                }
+                
+                .photo-hint {
+                    text-align: center;
+                    margin-bottom: 15px;
+                    font-size: 0.85rem;
+                }
+                
+                .popup-footer {
+                    padding: 16px 20px;
+                    border-top: 1px solid #dee2e6;
+                    display: flex;
+                    justify-content: center;
+                    background: #f8f9fa;
+                    border-radius: 0 0 12px 12px;
+                }
+                
+                .popup-close-btn {
+                    min-width: 130px;
+                    padding: 10px 25px;
+                    font-size: 1rem;
+                }
+                
+                /* ============================================= */
+                /* GROTE FOTO OVERLAY STYLES */
+                /* ============================================= */
+                .photo-large-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.85);
+                    z-index: 1070;
+                    display: none;
+                    align-items: center;
+                    justify-content: center;
+                    animation: fadeIn 0.3s;
+                }
+                
+                .photo-large-container {
+                    background: white;
+                    border-radius: 12px;
+                    overflow: hidden;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                    display: flex;
+                    flex-direction: column;
+                    max-height: 95vh;
+                    animation: slideUp 0.3s;
+                }
+                
+                .photo-large-header {
+                    padding: 12px 16px;
+                    background: #0d6efd;
+                    color: white;
+                    display: flex;
+                    justify-content: flex-end;
+                }
+                
+                .photo-large-close {
+                    background: none;
+                    border: none;
+                    color: white;
+                    opacity: 0.8;
+                    font-size: 1.3rem;
+                    cursor: pointer;
+                    width: 32px;
+                    height: 32px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 50%;
+                    transition: all 0.2s;
+                }
+                
+                .photo-large-close:hover {
+                    opacity: 1;
+                    background: rgba(255, 255, 255, 0.2);
+                }
+                
+                .photo-large-content {
+                    padding: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    overflow: hidden;
+                    flex: 1;
+                    min-height: 300px;
+                }
+                
+                .photo-large-img {
+                    max-width: 100%;
+                    max-height: 100%;
+                    object-fit: contain;
+                    border-radius: 4px;
+                }
+                
+                .photo-large-footer {
+                    padding: 16px;
+                    border-top: 1px solid #dee2e6;
+                    display: flex;
+                    justify-content: center;
+                    background: #f8f9fa;
+                }
+                
+                .photo-large-close-btn {
+                    min-width: 120px;
+                    padding: 8px 20px;
+                }
+                
+                /* Print styles */
+                @media print {
+                    .modal-dialog {
+                        max-width: none;
+                        margin: 0;
+                    }
+                    
+                    .modal-header {
+                        display: none !important;
+                    }
+                    
+                    .pedigree-container-compact {
+                        padding: 0;
+                        background: white;
+                        height: auto !important;
+                        overflow-x: visible !important;
+                        height: 100vh !important;
+                    }
+                    
+                    .pedigree-grid-compact {
+                        flex-direction: row !important;
+                        height: auto;
+                        padding: 20px !important;
+                        gap: 15px;
+                    }
+                    
+                    .pedigree-generation-col {
+                        flex-direction: column;
+                        gap: 10px;
+                    }
+                    
+                    .pedigree-card-compact.horizontal {
+                        break-inside: avoid;
+                        box-shadow: none;
+                        border: 1px solid #ccc !important;
+                        margin-bottom: 10px;
+                    }
+                    
+                    .main-dog-compact {
+                        border: 2px solid #000 !important;
+                    }
+                    
+                    .pedigree-popup-overlay,
+                    .photo-large-overlay {
+                        display: none !important;
+                    }
+                }
+                
+                /* Lege card styling */
+                .pedigree-card-compact.horizontal.empty {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                
+                /* VISUELE VERBINDINGEN */
+                .pedigree-generation-col {
+                    position: relative;
+                }
+                
+                .pedigree-generation-col:not(:first-child)::before {
+                    content: '';
+                    position: absolute;
+                    left: -10px;
+                    top: 50%;
+                    width: 10px;
+                    height: 1px;
+                    background: #adb5bd;
+                    opacity: 0.5;
+                }
+                
+                /* Overgrootouder styling */
+                .pedigree-card-compact.horizontal.gen3 {
+                    opacity: 0.9;
+                }
+                
+                .pedigree-card-compact.horizontal.gen3:hover {
+                    opacity: 1;
+                }
             </style>
         `;
         
@@ -1224,7 +2204,7 @@ class StamboomManager extends BaseModule {
         const container = document.getElementById('pedigreeContainer');
         if (!container) return;
         
-        // VERBETERING: Gebruik getDogWithFullData voor alle kaarten
+        // Maak alle cards asynchroon om foto checks te doen (SNELLE CHECK)
         const mainDogCard = await this.getDogCompactCardHTML(pedigreeTree.mainDog, this.t('mainDog'), true, 0);
         const fatherCard = await this.getDogCompactCardHTML(pedigreeTree.father, this.t('father'), false, 1);
         const motherCard = await this.getDogCompactCardHTML(pedigreeTree.mother, this.t('mother'), false, 1);
@@ -1295,7 +2275,7 @@ class StamboomManager extends BaseModule {
                 const dogId = parseInt(card.getAttribute('data-dog-id'));
                 if (dogId === 0) return;
                 
-                const dog = await this.getDogWithFullData(dogId); // 👈 VERBETERING: Volledige data garanderen
+                const dog = this.getDogById(dogId);
                 if (!dog) return;
                 
                 const relation = card.getAttribute('data-relation') || '';
@@ -1349,8 +2329,7 @@ class StamboomManager extends BaseModule {
         });
     }
     
-    // ==================== BASE MODULE HELPER METHODES ====================
-    
+    // Helper methodes van BaseModule
     showProgress(message) {
         if (typeof super.showProgress === 'function') {
             super.showProgress(message);
