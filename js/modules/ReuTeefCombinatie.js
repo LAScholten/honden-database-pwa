@@ -19,8 +19,9 @@ class ReuTeefCombinatie {
         this.dogThumbnailsCache = new Map();
         this.fullPhotoCache = new Map();
         
-        // COI Calculator instance
+        // COI Calculator instance - NU LAAT INITIALISEREN
         this.coiCalculator = null;
+        this.coiCalculatorReady = false;
         
         // Vertalingen
         this.translations = {
@@ -412,13 +413,9 @@ class ReuTeefCombinatie {
         // Laad honden data
         await this.loadAllHonden();
         
-        // Initialiseer COI Calculator DIRECT met alle honden
-        if (typeof COICalculator !== 'undefined') {
-            this.coiCalculator = new COICalculator(this.allHonden);
-            console.log('✅ COICalculator direct geïnitialiseerd in ReuTeefCombinatie');
-        } else {
-            console.error('❌ COICalculator klasse niet gevonden!');
-        }
+        // WAIT: Initialiseer COI Calculator NIET in constructor, maar pas bij berekening
+        this.coiCalculator = null;
+        this.coiCalculatorReady = false;
         
         content.innerHTML = `
             <div class="alert alert-info mb-4">
@@ -1426,6 +1423,11 @@ class ReuTeefCombinatie {
             return;
         }
         
+        // NIEUW: Initialiseer COICalculator PAS NU, bij het berekenen
+        if (!this.coiCalculator || !this.coiCalculatorReady) {
+            await this.initializeCOICalculator();
+        }
+        
         if (!this.coiCalculator) {
             console.error('❌ COICalculator niet beschikbaar');
             this.showAlert('COI berekening niet beschikbaar', 'danger');
@@ -1461,12 +1463,15 @@ class ReuTeefCombinatie {
         console.log('🔍 Toekomstige pup aangemaakt voor COI berekening:', futurePuppy);
         
         try {
-            const originalHonden = [...this.allHonden];
-            this.allHonden.push(futurePuppy);
+            // NIEUW: Maak tijdelijke kopie van honden zonder de toekomstige pup toe te voegen aan de hoofdarray
+            const tempHonden = [...this.allHonden, futurePuppy];
             
-            this.coiCalculator = new COICalculator(this.allHonden);
-            const coiResult = this.coiCalculator.calculateCOI(futurePuppy.id);
-            console.log('✅ COI resultaat via COICalculator:', coiResult);
+            // NIEUW: Maak tijdelijke COICalculator met de tijdelijke honden
+            const tempCOICalculator = new COICalculator(tempHonden);
+            
+            // Bereken COI met tijdelijke calculator
+            const coiResult = tempCOICalculator.calculateCOI(futurePuppy.id);
+            console.log('✅ COI resultaat via tijdelijke COICalculator:', coiResult);
             
             const healthAnalysis = await this.analyzeHealthInLine(futurePuppy);
             console.log('✅ Gezondheidsanalyse resultaat:', healthAnalysis);
@@ -1474,12 +1479,27 @@ class ReuTeefCombinatie {
             // Toon stamboom
             await this.showStamboomWithFuturePuppy(futurePuppy, coiResult, healthAnalysis);
             
-            this.allHonden = originalHonden;
-            this.coiCalculator = new COICalculator(this.allHonden);
-            
         } catch (error) {
             console.error('❌ Fout bij tonen toekomstige pup stamboom:', error);
             this.showAlert('Kon stamboom niet genereren. Probeer opnieuw.', 'danger');
+        }
+    }
+    
+    async initializeCOICalculator() {
+        try {
+            if (typeof COICalculator !== 'undefined') {
+                this.coiCalculator = new COICalculator(this.allHonden);
+                this.coiCalculatorReady = true;
+                console.log('✅ COICalculator geïnitialiseerd bij eerste berekening');
+            } else {
+                console.error('❌ COICalculator klasse niet gevonden!');
+                this.coiCalculator = null;
+                this.coiCalculatorReady = false;
+            }
+        } catch (error) {
+            console.error('❌ Fout bij initialiseren COICalculator:', error);
+            this.coiCalculator = null;
+            this.coiCalculatorReady = false;
         }
     }
     
@@ -2426,7 +2446,7 @@ class ReuTeefCombinatie {
                     .pedigree-card-compact.horizontal.gen0 .dog-pedigree-compact,
                     .pedigree-card-compact.horizontal.gen1 .dog-pedigree-compact,
                     .pedigree-card-compact.horizontal.gen2 .dog-pedigree-compact,
-                    .pedigree-card-compact.horizontal.gen0 .dog-breed-compact,
+                    .pedigree-card.compact.horizontal.gen0 .dog-breed-compact,
                     .pedigree-card-compact.horizontal.gen1 .dog-breed-compact,
                     .pedigree-card-compact.horizontal.gen2 .dog-breed-compact {
                         font-size: 0.7rem;
@@ -3012,8 +3032,8 @@ class ReuTeefCombinatie {
         });
         
         document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('photo-large-close') || 
-                e.target.classList.contains('photo-large-close-btn') ||
+            if (e.target.classList.contains('.photo-large-close') || 
+                e.target.classList.contains('.photo-large-close-btn') ||
                 e.target.closest('.photo-large-close') ||
                 e.target.closest('.photo-large-close-btn')) {
                 const overlay = document.getElementById('photoLargeOverlay');
