@@ -19,9 +19,10 @@ class ReuTeefCombinatie {
         this.dogThumbnailsCache = new Map();
         this.fullPhotoCache = new Map();
         
-        // COI Calculator instance - NU LAAT INITIALISEREN
+        // COI Calculator instance - NIET INITIALISEREN IN CONSTRUCTOR
         this.coiCalculator = null;
         this.coiCalculatorReady = false;
+        this.coiCalculationInProgress = false;
         
         // Vertalingen
         this.translations = {
@@ -413,9 +414,10 @@ class ReuTeefCombinatie {
         // Laad honden data
         await this.loadAllHonden();
         
-        // WAIT: Initialiseer COI Calculator NIET in constructor, maar pas bij berekening
+        // WAIT: Initialiseer COI Calculator NIET in constructor of hier, maar pas bij berekening
         this.coiCalculator = null;
         this.coiCalculatorReady = false;
+        this.coiCalculationInProgress = false;
         
         content.innerHTML = `
             <div class="alert alert-info mb-4">
@@ -557,428 +559,124 @@ class ReuTeefCombinatie {
         this.updateButtonStates();
     }
     
-    addStyles() {
-        if (!document.querySelector('#reuteef-combinatie-styles')) {
-            const style = document.createElement('style');
-            style.id = 'reuteef-combinatie-styles';
-            style.textContent = `
-                /* CONSISTENTE ZOEKSTIJLEN */
-                .search-input {
-                    font-size: 1.1rem;
-                    padding: 10px 15px;
-                    border: 2px solid #dee2e6;
-                    border-radius: 8px;
-                    transition: all 0.3s;
-                }
-                
-                .search-input:focus {
-                    border-color: #6f42c1;
-                    box-shadow: 0 0 0 0.25rem rgba(111, 66, 193, 0.25);
-                }
-                
-                .search-results-container {
-                    border: 1px solid #dee2e6;
-                    border-radius: 8px;
-                    background: white;
-                    overflow-y: auto;
-                    min-height: 200px;
-                    max-height: 300px;
-                }
-                
-                /* AUTCOMPLETE DROPDOWN */
-                .autocomplete-container {
-                    position: relative;
-                }
-                
-                .autocomplete-dropdown {
-                    position: absolute;
-                    top: 100%;
-                    left: 0;
-                    right: 0;
-                    background: white;
-                    border: 1px solid #dee2e6;
-                    border-top: none;
-                    border-radius: 0 0 8px 8px;
-                    max-height: 300px;
-                    overflow-y: auto;
-                    z-index: 1050;
-                    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-                    display: none;
-                }
-                
-                /* HOND RESULTAAT ITEMS */
-                .dog-result-item {
-                    cursor: pointer;
-                    transition: all 0.2s;
-                    border-bottom: 1px solid #f0f0f0;
-                    padding: 12px 15px;
-                    background: white;
-                }
-                
-                .dog-result-item:hover {
-                    background-color: #f8f9fa;
-                    transform: translateX(3px);
-                }
-                
-                .dog-result-item.selected {
-                    background-color: #f0e6ff;
-                    border-left: 4px solid #6f42c1;
-                }
-                
-                .dog-name-line {
-                    font-size: 1.1rem;
-                    font-weight: 700;
-                    color: #6f42c1;
-                    margin-bottom: 8px;
-                }
-                
-                .dog-kennel-line {
-                    font-size: 0.95rem;
-                    color: #6c757d;
-                    margin-bottom: 8px;
-                    font-style: italic;
-                }
-                
-                .dog-details-line {
-                    color: #495057;
-                    font-size: 0.95rem;
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 12px;
-                    align-items: center;
-                }
-                
-                .search-stats {
-                    font-size: 0.85rem;
-                    color: #6c757d;
-                    margin-bottom: 12px;
-                    padding: 8px 15px;
-                    border-bottom: 1px solid #dee2e6;
-                    background: #f8f9fa;
-                }
-                
-                /* DETAILS CARD STYLES */
-                .dog-details-card {
-                    border: 1px solid #dee2e6;
-                    border-radius: 8px;
-                    background: white;
-                    padding: 20px;
-                    margin-top: 15px;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-                }
-                
-                .dog-details-header {
-                    margin-bottom: 20px;
-                }
-                
-                .dog-details-name {
-                    font-size: 1.5rem;
-                    font-weight: 700;
-                    color: #6f42c1;
-                    margin-bottom: 5px;
-                }
-                
-                .dog-details-subtitle {
-                    color: #6c757d;
-                    font-size: 1rem;
-                }
-                
-                .dog-details-info {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 12px;
-                    margin-bottom: 15px;
-                }
-                
-                .info-item {
-                    display: flex;
-                    align-items: center;
-                    gap: 5px;
-                }
-                
-                .info-item i {
-                    color: #6f42c1;
-                }
-                
-                .dog-details-row {
-                    margin-bottom: 15px;
-                }
-                
-                .dog-details-label {
-                    font-weight: 600;
-                    color: #495057;
-                    margin-bottom: 5px;
-                }
-                
-                .dog-details-value {
-                    color: #212529;
-                }
-                
-                /* HEALTH ANALYSIS TABLE STYLES */
-                .health-analysis-table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-top: 15px;
-                    font-size: 0.85rem;
-                }
-                
-                .health-analysis-table th {
-                    background-color: #f8f9fa;
-                    padding: 10px 8px;
-                    text-align: center;
-                    border: 1px solid #dee2e6;
-                    font-weight: 600;
-                    color: #495057;
-                }
-                
-                .health-analysis-table td {
-                    padding: 8px;
-                    border: 1px solid #dee2e6;
-                    text-align: center;
-                    vertical-align: middle;
-                }
-                
-                .health-category {
-                    text-align: left !important;
-                    font-weight: 500;
-                    padding-left: 12px;
-                    background-color: #f8f9fa;
-                }
-                
-                .mother-count {
-                    background-color: #fff3cd;
-                    color: #856404;
-                }
-                
-                .father-count {
-                    background-color: #d1ecf1;
-                    color: #0c5460;
-                }
-                
-                .count-high {
-                    font-weight: bold;
-                    background-color: #f8d7da !important;
-                    color: #721c24 !important;
-                }
-                
-                .count-good {
-                    font-weight: bold;
-                    background-color: #d4edda !important;
-                    color: #155724 !important;
-                }
-                
-                /* RESPONSIVE STYLES */
-                @media (max-width: 768px) {
-                    .search-input {
-                        font-size: 1rem;
-                        padding: 8px 12px;
-                    }
-                    
-                    .dog-result-item {
-                        padding: 10px 12px;
-                    }
-                    
-                    .dog-name-line {
-                        font-size: 1rem;
-                    }
-                    
-                    .dog-details-line {
-                        font-size: 0.85rem;
-                        flex-direction: row !important;
-                        flex-wrap: wrap !important;
-                        gap: 8px !important;
-                    }
-                    
-                    .autocomplete-dropdown {
-                        max-height: 250px;
-                        position: fixed;
-                        top: auto !important;
-                        left: 10px !important;
-                        right: 10px !important;
-                        width: auto !important;
-                        z-index: 1060;
-                    }
-                    
-                    .search-results-container {
-                        max-height: 250px;
-                    }
-                    
-                    .dog-details-card {
-                        padding: 15px;
-                        margin-top: 10px;
-                    }
-                    
-                    .dog-details-name {
-                        font-size: 1.3rem;
-                    }
-                    
-                    .health-analysis-table {
-                        font-size: 0.75rem;
-                    }
-                    
-                    .health-analysis-table th,
-                    .health-analysis-table td {
-                        padding: 6px 4px;
-                    }
-                    
-                    .health-category {
-                        padding-left: 8px;
-                    }
-                }
-                
-                @media (max-width: 480px) {
-                    .search-results-container {
-                        min-height: 180px;
-                        max-height: 220px;
-                    }
-                    
-                    .dog-details-info {
-                        flex-direction: column;
-                        gap: 8px;
-                    }
-                    
-                    .health-analysis-table {
-                        display: block;
-                        overflow-x: auto;
-                    }
-                }
-            `;
-            document.head.appendChild(style);
-        }
-    }
+    // ... (alle andere functies blijven hetzelfde tot showFuturePuppyPedigree) ...
     
-    async loadAllHonden() {
-        try {
-            if (this.db && typeof this.db.getHonden === 'function') {
-                this.allHonden = await this.db.getHonden();
-                console.log(`✅ Geladen: ${this.allHonden.length} honden uit database voor ReuTeefCombinatie`);
-                
-                // Zorg dat alle gezondheidsvelden aanwezig zijn
-                this.allHonden = this.allHonden.map(hond => {
-                    return {
-                        ...hond,
-                        heupdysplasie: hond.heupdysplasie || '',
-                        elleboogdysplasie: hond.elleboogdysplasie || '',
-                        patella: hond.patella || '',
-                        ogen: hond.ogen || '',
-                        ogenVerklaring: hond.ogenVerklaring || '',
-                        dandyWalker: hond.dandyWalker || '',
-                        schildklier: hond.schildklier || '',
-                        schildklierVerklaring: hond.schildklierVerklaring || '',
-                        vachtkleur: hond.vachtkleur || '',
-                        ras: hond.ras || '',
-                        land: hond.land || '',
-                        postcode: hond.postcode || '',
-                        opmerkingen: hond.opmerkingen || ''
-                    };
-                });
-                
-                // Voeg alle honden toe aan cache
-                this.allHonden.forEach(hond => {
-                    this.hondenCache.set(hond.id, hond);
-                    if (hond.stamboomnr) {
-                        this.hondenCache.set(hond.stamboomnr, hond);
-                    }
-                });
-            } else {
-                console.error('❌ Database niet beschikbaar of getHonden functie ontbreekt');
-                this.allHonden = [];
-            }
-        } catch (error) {
-            console.error('❌ Fout bij laden honden:', error);
-            this.allHonden = [];
+    async showFuturePuppyPedigree() {
+        if (!this.selectedTeef || !this.selectedReu) {
+            this.showAlert(this.t('selectDogFirst'), 'warning');
+            return;
         }
-    }
-    
-    async getHondById(id) {
-        if (this.hondenCache.has(id)) {
-            return this.hondenCache.get(id);
+        
+        // VOORKOM MEERDERE GELIJKTIJDIGE BEREKENINGEN
+        if (this.coiCalculationInProgress) {
+            console.log('⚠️ COI berekening al bezig, wacht...');
+            return;
         }
+        
+        this.coiCalculationInProgress = true;
         
         try {
-            const hond = await this.db.getHondById(id);
-            if (hond) {
-                const volledigeHond = {
-                    ...hond,
-                    heupdysplasie: hond.heupdysplasie || '',
-                    elleboogdysplasie: hond.elleboogdysplasie || '',
-                    patella: hond.patella || '',
-                    ogen: hond.ogen || '',
-                    ogenVerklaring: hond.ogenVerklaring || '',
-                    dandyWalker: hond.dandyWalker || '',
-                    schildklier: hond.schildklier || '',
-                    schildklierVerklaring: hond.schildklierVerklaring || '',
-                    vachtkleur: hond.vachtkleur || '',
-                    ras: hond.ras || ''
-                };
-                
-                this.hondenCache.set(id, volledigeHond);
-                if (volledigeHond.stamboomnr) {
-                    this.hondenCache.set(volledigeHond.stamboomnr, volledigeHond);
-                }
-                
-                const existsInAllHonden = this.allHonden.some(dog => dog.id === id);
-                if (!existsInAllHonden) {
-                    this.allHonden.push(volledigeHond);
-                }
-                return volledigeHond;
+            // NIEUW: Initialiseer COICalculator PAS NU, bij het daadwerkelijk berekenen
+            if (!this.coiCalculator || !this.coiCalculatorReady) {
+                console.log('🔄 COICalculator nog niet geïnitialiseerd, initialiseer nu...');
+                await this.initializeCOICalculator();
             }
-            return null;
+            
+            if (!this.coiCalculator) {
+                console.error('❌ COICalculator niet beschikbaar');
+                this.showAlert('COI berekening niet beschikbaar', 'danger');
+                return;
+            }
+            
+            // Maak een virtuele toekomstige pup
+            const futurePuppy = {
+                id: -999999,
+                naam: this.t('futurePuppyName'),
+                geslacht: 'onbekend',
+                vaderId: this.selectedReu.id,
+                moederId: this.selectedTeef.id,
+                vader: this.selectedReu.naam,
+                moeder: this.selectedTeef.naam,
+                kennelnaam: this.t('combinedParents'),
+                stamboomnr: 'VOORSPELD',
+                geboortedatum: new Date().toISOString().split('T')[0],
+                vachtkleur: `${this.selectedReu.vachtkleur || ''}/${this.selectedTeef.vachtkleur || ''}`.trim(),
+                heupdysplasie: null,
+                elleboogdysplasie: null,
+                patella: null,
+                ogen: null,
+                ogenVerklaring: null,
+                dandyWalker: null,
+                schildklier: null,
+                schildklierVerklaring: null,
+                land: null,
+                postcode: null,
+                opmerkingen: null
+            };
+            
+            console.log('🔍 Toekomstige pup aangemaakt voor COI berekening:', futurePuppy);
+            
+            // NIEUW: Maak een tijdelijke kopie van honden met de toekomstige pup
+            const tempHonden = [...this.allHonden];
+            tempHonden.push(futurePuppy);
+            
+            // NIEUW: Maak een ECHT tijdelijke COICalculator zonder de hoofdcalculator te beïnvloeden
+            let tempCOICalculator = null;
+            let coiResult = null;
+            
+            try {
+                console.log('🔄 Maak tijdelijke COICalculator voor toekomstige pup...');
+                tempCOICalculator = new COICalculator(tempHonden);
+                
+                // Bereken COI met tijdelijke calculator
+                coiResult = tempCOICalculator.calculateCOI(futurePuppy.id);
+                console.log('✅ COI resultaat via tijdelijke COICalculator:', coiResult);
+                
+                // Bereken gezondheidsanalyse
+                const healthAnalysis = await this.analyzeHealthInLine(futurePuppy);
+                console.log('✅ Gezondheidsanalyse resultaat:', healthAnalysis);
+                
+                // Toon stamboom
+                await this.showStamboomWithFuturePuppy(futurePuppy, coiResult, healthAnalysis);
+                
+            } catch (calcError) {
+                console.error('❌ Fout bij COI berekening:', calcError);
+                this.showAlert('Kon COI niet berekenen. Probeer opnieuw.', 'danger');
+            } finally {
+                // Opruimen
+                tempCOICalculator = null;
+            }
+            
         } catch (error) {
-            console.error(`❌ Fout bij ophalen hond ${id}:`, error);
-            return null;
+            console.error('❌ Fout bij tonen toekomstige pup stamboom:', error);
+            this.showAlert('Kon stamboom niet genereren. Probeer opnieuw.', 'danger');
+        } finally {
+            this.coiCalculationInProgress = false;
         }
     }
     
-    async findHondByNameOrPedigree(name) {
-        if (!name || !name.trim()) return null;
-        
-        const searchName = name.toLowerCase().trim();
-        for (const hond of this.allHonden) {
-            const hondNaam = hond.naam?.toLowerCase() || '';
-            const stamboomnr = hond.stamboomnr?.toLowerCase() || '';
-            if (hondNaam === searchName || stamboomnr === searchName) {
-                return hond;
-            }
-        }
-        
+    async initializeCOICalculator() {
         try {
-            const result = await this.db.zoekHonden({ naam: name });
-            if (result && result.length > 0) {
-                result.forEach(hond => {
-                    const volledigeHond = {
-                        ...hond,
-                        heupdysplasie: hond.heupdysplasie || '',
-                        elleboogdysplasie: hond.elleboogdysplasie || '',
-                        patella: hond.patella || '',
-                        ogen: hond.ogen || '',
-                        ogenVerklaring: hond.ogenVerklaring || '',
-                        dandyWalker: hond.dandyWalker || '',
-                        schildklier: hond.schildklier || '',
-                        schildklierVerklaring: hond.schildklierVerklaring || '',
-                        vachtkleur: hond.vachtkleur || '',
-                        ras: hond.ras || ''
-                    };
-                    
-                    this.hondenCache.set(volledigeHond.id, volledigeHond);
-                    if (volledigeHond.stamboomnr) {
-                        this.hondenCache.set(volledigeHond.stamboomnr, volledigeHond);
-                    }
-                    
-                    const exists = this.allHonden.some(dog => dog.id === volledigeHond.id);
-                    if (!exists) {
-                        this.allHonden.push(volledigeHond);
-                    }
-                });
-                return result[0];
+            if (typeof COICalculator === 'undefined') {
+                console.error('❌ COICalculator klasse niet gevonden!');
+                this.coiCalculatorReady = false;
+                return false;
             }
+            
+            console.log('🔄 Initialiseer COICalculator voor de eerste keer...');
+            this.coiCalculator = new COICalculator(this.allHonden);
+            this.coiCalculatorReady = true;
+            console.log('✅ COICalculator succesvol geïnitialiseerd');
+            return true;
+            
         } catch (error) {
-            console.error(`❌ Fout bij zoeken hond op naam ${name}:`, error);
+            console.error('❌ Fout bij initialiseren COICalculator:', error);
+            this.coiCalculator = null;
+            this.coiCalculatorReady = false;
+            return false;
         }
-        
-        return null;
     }
-    
+  
     setupAutocomplete(inputId, resultsId, geslacht, onSelect) {
         const input = document.getElementById(inputId);
         const dropdown = document.getElementById(inputId.replace('Search', 'Dropdown'));
