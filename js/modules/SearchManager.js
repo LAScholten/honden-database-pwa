@@ -465,7 +465,7 @@ class SearchManager extends BaseModule {
                 e.target.id === 'offspringModalOverlay') {
                 const overlay = document.getElementById('offspringModalOverlay');
                 if (overlay) {
-                    overlay.style.display = 'none';
+                    overlay.style.display = 'noen';
                     setTimeout(() => {
                         if (overlay.parentNode) {
                             overlay.parentNode.removeChild(overlay);
@@ -621,7 +621,7 @@ class SearchManager extends BaseModule {
             if (e.key === 'Escape') {
                 const overlay = document.getElementById('photoLargeOverlay');
                 if (overlay) {
-                    overlay.style.display = 'none';
+                    overlay.style.display = 'noen';
                     setTimeout(() => {
                         if (overlay.parentNode) {
                             overlay.parentNode.removeChild(overlay);
@@ -636,7 +636,7 @@ class SearchManager extends BaseModule {
         // Clean up
         const overlay = document.getElementById('photoLargeOverlay');
         overlay.addEventListener('animationend', function handler() {
-            if (overlay.style.display === 'none') {
+            if (overlay.style.display === 'noen') {
                 document.removeEventListener('keydown', closeOnEscape);
                 overlay.removeEventListener('animationend', handler);
             }
@@ -688,7 +688,7 @@ class SearchManager extends BaseModule {
             if (e.key === 'Escape') {
                 const overlay = document.getElementById('offspringModalOverlay');
                 if (overlay) {
-                    overlay.style.display = 'none';
+                    overlay.style.display = 'noen';
                     setTimeout(() => {
                         if (overlay.parentNode) {
                             overlay.parentNode.removeChild(overlay);
@@ -703,7 +703,7 @@ class SearchManager extends BaseModule {
         // Clean up
         const overlay = document.getElementById('offspringModalOverlay');
         overlay.addEventListener('animationend', function handler() {
-            if (overlay.style.display === 'none') {
+            if (overlay.style.display === 'noen') {
                 document.removeEventListener('keydown', closeOnEscape);
                 overlay.removeEventListener('animationend', handler);
             }
@@ -806,7 +806,7 @@ class SearchManager extends BaseModule {
                         // Sluit de nakomelingen modal
                         const overlay = document.getElementById('offspringModalOverlay');
                         if (overlay) {
-                            overlay.style.display = 'none';
+                            overlay.style.display = 'noen';
                             setTimeout(() => {
                                 if (overlay.parentNode) {
                                     overlay.parentNode.removeChild(overlay);
@@ -1796,7 +1796,16 @@ class SearchManager extends BaseModule {
             
             searchModal.addEventListener('hidden.bs.modal', () => {
                 console.log('SearchModal wordt gesloten - FULL REFRESH');
-                this.fullRefresh(); // Volledige refresh bij sluiten
+                // Gebruik setTimeout om te wachten tot de modal volledig gesloten is
+                setTimeout(() => {
+                    try {
+                        this.fullRefresh();
+                    } catch (error) {
+                        console.warn('SearchManager: Refresh mislukt omdat modal gesloten is:', error.message);
+                        // Reset alleen interne state als DOM niet meer beschikbaar is
+                        this.resetInternalState();
+                    }
+                }, 100);
             });
         }
         
@@ -1806,20 +1815,71 @@ class SearchManager extends BaseModule {
         
         if (closeBtn) {
             closeBtn.addEventListener('click', () => {
-                this.fullRefresh(); // Volledige refresh bij klikken op kruisje
+                // Gebruik setTimeout om te wachten tot de modal volledig gesloten is
+                setTimeout(() => {
+                    try {
+                        this.fullRefresh();
+                    } catch (error) {
+                        console.warn('SearchManager: Refresh mislukt omdat modal gesloten is:', error.message);
+                        // Reset alleen interne state als DOM niet meer beschikbaar is
+                        this.resetInternalState();
+                    }
+                }, 100);
             });
         }
         
         if (closeBtnFooter) {
             closeBtnFooter.addEventListener('click', () => {
-                this.fullRefresh(); // Volledige refresh bij klikken op sluiten knop
+                // Gebruik setTimeout om te wachten tot de modal volledig gesloten is
+                setTimeout(() => {
+                    try {
+                        this.fullRefresh();
+                    } catch (error) {
+                        console.warn('SearchManager: Refresh mislukt omdat modal gesloten is:', error.message);
+                        // Reset alleen interne state als DOM niet meer beschikbaar is
+                        this.resetInternalState();
+                    }
+                }, 100);
             });
         }
+    }
+    
+    // NIEUWE HELPER METHODE: Reset alleen interne state zonder DOM-manipulatie
+    resetInternalState() {
+        console.log('SearchManager: Reset interne state');
+        
+        // Reset alleen de interne variabelen
+        this.allDogs = [];
+        this.filteredDogs = [];
+        this.searchType = 'name';
+        this.isMobileCollapsed = false;
+        this.dogPhotosCache.clear();
+        this.dogOffspringCache.clear();
+        
+        // Reset stamboomManager zodat het opnieuw geïnitialiseerd wordt
+        this.stamboomManager = null;
     }
     
     // NIEUWE METHODE: Volledige refresh (zoals F5 drukken)
     fullRefresh() {
         console.log('SearchManager: FULL REFRESH - net zoals F5/pagina refresh');
+        
+        // Controleer of de modal nog bestaat voor we DOM-operaties doen
+        const searchModal = document.getElementById('searchModal');
+        if (!searchModal) {
+            console.log('SearchManager: Modal bestaat niet meer, alleen interne state reset');
+            this.resetInternalState();
+            return;
+        }
+        
+        // Controleer of de modal nog open is
+        if (searchModal.classList.contains('show')) {
+            console.log('SearchManager: Modal is nog open, doe volledige refresh');
+        } else {
+            console.log('SearchManager: Modal is gesloten, doe alleen interne refresh');
+            this.resetInternalState();
+            return;
+        }
         
         // 1. CLEAR ALLE CACHES (precies zoals refresh)
         this.dogPhotosCache.clear();
@@ -1834,7 +1894,7 @@ class SearchManager extends BaseModule {
         this.isMobileCollapsed = false;
         this.stamboomManager = null;
         
-        // 4. RESET UI (precies zoals refresh)
+        // 4. RESET UI (precies zoals refresh) - MET CONTROLE OP DOM-ELEMENTEN
         const searchColumn = document.getElementById('searchColumn');
         const detailsColumn = document.getElementById('detailsColumn');
         
@@ -1850,16 +1910,21 @@ class SearchManager extends BaseModule {
             }
         }
         
-        // 5. CLEAR ALLE INPUT VELDEN (precies zoals refresh)
+        // 5. CLEAR ALLE INPUT VELDEN (precies zoals refresh) - MET CONTROLE
         const nameInput = document.getElementById('searchNameInput');
         const kennelInput = document.getElementById('searchKennelInput');
         
         if (nameInput) nameInput.value = '';
         if (kennelInput) kennelInput.value = '';
         
-        // 6. TOON INITIELE SCREENS (precies zoals refresh)
-        this.showInitialView();
-        this.clearDetails();
+        // 6. TOON INITIELE SCREENS (precies zoals refresh) - MET CONTROLE
+        const resultsContainer = document.getElementById('searchResultsContainer');
+        const detailsContainer = document.getElementById('detailsContainer');
+        
+        if (resultsContainer && detailsContainer) {
+            this.showInitialView();
+            this.clearDetails();
+        }
         
         // 7. FORCEER DAT DE VOLGENDE KEER ALLES OPNIEUW GELADEN WORDT
         // (Deze wordt later opnieuw geïnjecteerd door de UIHandler)
@@ -1874,7 +1939,7 @@ class SearchManager extends BaseModule {
         // Reset mobiele collapsed state
         this.isMobileCollapsed = false;
         
-        // Herstel de oorspronkelijke layout
+        // Herstel de oorspronkelijke layout - MET CONTROLE OP DOM-ELEMENTEN
         const searchColumn = document.getElementById('searchColumn');
         const detailsColumn = document.getElementById('detailsColumn');
         
@@ -1890,15 +1955,20 @@ class SearchManager extends BaseModule {
             }
         }
         
-        // Clear zoekvelden en toon initieel scherm
+        // Clear zoekvelden en toon initieel scherm - MET CONTROLE
         const nameInput = document.getElementById('searchNameInput');
         const kennelInput = document.getElementById('searchKennelInput');
         
         if (nameInput) nameInput.value = '';
         if (kennelInput) kennelInput.value = '';
         
-        this.showInitialView();
-        this.clearDetails();
+        const resultsContainer = document.getElementById('searchResultsContainer');
+        const detailsContainer = document.getElementById('detailsContainer');
+        
+        if (resultsContainer && detailsContainer) {
+            this.showInitialView();
+            this.clearDetails();
+        }
         
         // Reset filteredDogs
         this.filteredDogs = [];
@@ -1922,13 +1992,15 @@ class SearchManager extends BaseModule {
         const kennelField = document.getElementById('kennelSearchField');
         
         if (type === 'name') {
-            nameField.classList.remove('d-none');
-            kennelField.classList.add('d-none');
-            document.getElementById('searchNameInput').focus();
+            if (nameField) nameField.classList.remove('d-none');
+            if (kennelField) kennelField.classList.add('d-none');
+            const nameInput = document.getElementById('searchNameInput');
+            if (nameInput) nameInput.focus();
         } else {
-            nameField.classList.add('d-none');
-            kennelField.classList.remove('d-none');
-            document.getElementById('searchKennelInput').focus();
+            if (nameField) nameField.classList.add('d-none');
+            if (kennelField) kennelField.classList.remove('d-none');
+            const kennelInput = document.getElementById('searchKennelInput');
+            if (kennelInput) kennelInput.focus();
         }
         
         this.showInitialView();
@@ -1996,6 +2068,8 @@ class SearchManager extends BaseModule {
     
     showInitialView() {
         const container = document.getElementById('searchResultsContainer');
+        if (!container) return;
+        
         const t = this.t.bind(this);
         
         const message = this.searchType === 'name' ? t('typeToSearch') : t('typeToSearchKennel');
@@ -2010,6 +2084,8 @@ class SearchManager extends BaseModule {
     
     clearDetails() {
         const container = document.getElementById('detailsContainer');
+        if (!container) return;
+        
         const t = this.t.bind(this);
         
         container.innerHTML = `
