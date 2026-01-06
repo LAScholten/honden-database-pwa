@@ -137,7 +137,7 @@ class DataManager extends BaseModule {
                 exportDescription: "Exportieren Sie Daten in eine Datei für Backup oder Teilen.",
                 exportOptions: "Exportoptionen",
                 exportDataPhotos: "Daten und Fotos exportieren",
-                exportDataPhotosDescription: "Alle Hunde-Daten und Foto-Metadaten",
+                exportDataPhotosDescription: "Alle Hunde-Daten en Foto-Metadaten",
                 exportPrivateInfo: "Private Informationen exportieren",
                 exportPrivateInfoDescription: "Medizinische und finanzielle Informationen",
                 exportFormat: "Exportformat",
@@ -923,10 +923,50 @@ class DataManager extends BaseModule {
         
         // 3. Importeer foto's (indien beschikbaar)
         if (importData.fotos && Array.isArray(importData.fotos) && typeof this.db.voegFotoToe === 'function') {
+            // Haal eerst alle bestaande foto's op om dubbelen te voorkomen
+            let existingFotos = [];
+            try {
+                if (typeof this.db.getAllFotos === 'function') {
+                    existingFotos = await this.db.getAllFotos();
+                }
+            } catch (error) {
+                console.log('Kon bestaande foto\'s niet ophalen:', error);
+            }
+            
+            // Maak een set van bestaande foto identificatoren (bijvoorbeeld op basis van bestandsnaam of id)
+            const existingFotoIds = new Set();
+            existingFotos.forEach(foto => {
+                if (foto.id) existingFotoIds.add(foto.id);
+                if (foto.bestandsnaam) existingFotoIds.add(`file_${foto.bestandsnaam}`);
+                if (foto.url) existingFotoIds.add(`url_${foto.url}`);
+            });
+            
             for (const foto of importData.fotos) {
                 try {
-                    await this.db.voegFotoToe(foto);
-                    result.fotos.toegevoegd++;
+                    // Controleer of deze foto al bestaat
+                    let fotoBestaatAl = false;
+                    
+                    // Controleer op verschillende identificatoren
+                    if (foto.id && existingFotoIds.has(foto.id)) {
+                        fotoBestaatAl = true;
+                    } else if (foto.bestandsnaam && existingFotoIds.has(`file_${foto.bestandsnaam}`)) {
+                        fotoBestaatAl = true;
+                    } else if (foto.url && existingFotoIds.has(`url_${foto.url}`)) {
+                        fotoBestaatAl = true;
+                    }
+                    
+                    if (!fotoBestaatAl) {
+                        // Foto bestaat nog niet, voeg toe
+                        await this.db.voegFotoToe(foto);
+                        result.fotos.toegevoegd++;
+                        
+                        // Voeg toe aan set voor volgende iteraties
+                        if (foto.id) existingFotoIds.add(foto.id);
+                        if (foto.bestandsnaam) existingFotoIds.add(`file_${foto.bestandsnaam}`);
+                        if (foto.url) existingFotoIds.add(`url_${foto.url}`);
+                    } else {
+                        console.log(`Foto ${foto.id || foto.bestandsnaam || foto.url} bestaat al, overslaan`);
+                    }
                 } catch (error) {
                     console.log(`Foto ${foto.id} kan niet worden toegevoegd:`, error);
                 }
