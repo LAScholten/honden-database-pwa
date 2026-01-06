@@ -8,6 +8,11 @@
 class SearchManager extends BaseModule {
     constructor() {
         super();
+        this.initializeState(); // Aparte methode voor herinitialisatie
+    }
+    
+    // NIEUWE METHODE: Herinitialiseer de complete staat
+    initializeState() {
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';
         this.allDogs = [];
         this.filteredDogs = [];
@@ -102,7 +107,7 @@ class SearchManager extends BaseModule {
                 },
                 thyroidStatus: {
                     "Negatief": "Tgaa Negatief",
-                    "Positief": "Tgaa Positief"
+                    "Positief": "Tgaa Positive"
                 },
                 
                 // Labels
@@ -1812,10 +1817,22 @@ class SearchManager extends BaseModule {
     
     // NIEUWE METHODE: Reset de zoekstatus wanneer modal gesloten wordt
     resetSearchState() {
-        // Reset mobiele collapsed state
+        // COMPLETE HERINITIALISATIE VAN SEARCHMANAGER
+        console.log('SearchManager: Volledige herinitialisatie gestart');
+        
+        // 1. Clear alle caches
+        this.dogPhotosCache.clear();
+        this.dogOffspringCache.clear();
+        
+        // 2. Reset alle arrays
+        this.allDogs = [];
+        this.filteredDogs = [];
+        
+        // 3. Reset andere states
+        this.searchType = 'name';
         this.isMobileCollapsed = false;
         
-        // Herstel de oorspronkelijke layout
+        // 4. Reset UI elementen
         const searchColumn = document.getElementById('searchColumn');
         const detailsColumn = document.getElementById('detailsColumn');
         
@@ -1831,20 +1848,22 @@ class SearchManager extends BaseModule {
             }
         }
         
-        // Clear zoekvelden en toon initieel scherm
+        // 5. Clear alle zoekvelden
         const nameInput = document.getElementById('searchNameInput');
         const kennelInput = document.getElementById('searchKennelInput');
         
         if (nameInput) nameInput.value = '';
         if (kennelInput) kennelInput.value = '';
         
+        // 6. Toon initieel scherm
         this.showInitialView();
         this.clearDetails();
         
-        // Reset filteredDogs
-        this.filteredDogs = [];
+        // 7. Forceren dat de volgende keer opnieuw geladen wordt
+        this.db = null; // Zorg ervoor dat de db reference reset wordt
+        this.stamboomManager = null; // Reset stamboom manager
         
-        console.log('Search state reset na sluiten modal');
+        console.log('SearchManager: Volledige herinitialisatie voltooid - klaar voor nieuwe sessie');
     }
     
     switchSearchType(type) {
