@@ -8,11 +8,6 @@
 class SearchManager extends BaseModule {
     constructor() {
         super();
-        this.initializeState(); // Aparte methode voor herinitialisatie
-    }
-    
-    // NIEUWE METHODE: Herinitialiseer de complete staat
-    initializeState() {
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';
         this.allDogs = [];
         this.filteredDogs = [];
@@ -1793,8 +1788,15 @@ class SearchManager extends BaseModule {
         // Event listener voor wanneer de modal gesloten wordt
         const searchModal = document.getElementById('searchModal');
         if (searchModal) {
+            // Dit is de belangrijkste wijziging - VOEG DIT TOE:
+            searchModal.addEventListener('show.bs.modal', () => {
+                console.log('SearchModal wordt geopend - RESET STATE');
+                this.resetSearchState(); // Reset direct bij openen
+            });
+            
             searchModal.addEventListener('hidden.bs.modal', () => {
-                this.resetSearchState();
+                console.log('SearchModal wordt gesloten - FULL REFRESH');
+                this.fullRefresh(); // Volledige refresh bij sluiten
             });
         }
         
@@ -1804,35 +1806,75 @@ class SearchManager extends BaseModule {
         
         if (closeBtn) {
             closeBtn.addEventListener('click', () => {
-                this.resetSearchState();
+                this.fullRefresh(); // Volledige refresh bij klikken op kruisje
             });
         }
         
         if (closeBtnFooter) {
             closeBtnFooter.addEventListener('click', () => {
-                this.resetSearchState();
+                this.fullRefresh(); // Volledige refresh bij klikken op sluiten knop
             });
         }
     }
     
-    // NIEUWE METHODE: Reset de zoekstatus wanneer modal gesloten wordt
-    resetSearchState() {
-        // COMPLETE HERINITIALISATIE VAN SEARCHMANAGER
-        console.log('SearchManager: Volledige herinitialisatie gestart');
+    // NIEUWE METHODE: Volledige refresh (zoals F5 drukken)
+    fullRefresh() {
+        console.log('SearchManager: FULL REFRESH - net zoals F5/pagina refresh');
         
-        // 1. Clear alle caches
+        // 1. CLEAR ALLE CACHES (precies zoals refresh)
         this.dogPhotosCache.clear();
         this.dogOffspringCache.clear();
         
-        // 2. Reset alle arrays
+        // 2. RESET ALLE DATA (precies zoals refresh)
         this.allDogs = [];
         this.filteredDogs = [];
         
-        // 3. Reset andere states
+        // 3. RESET ALLE STATES (precies zoals refresh)
         this.searchType = 'name';
         this.isMobileCollapsed = false;
+        this.stamboomManager = null;
         
-        // 4. Reset UI elementen
+        // 4. RESET UI (precies zoals refresh)
+        const searchColumn = document.getElementById('searchColumn');
+        const detailsColumn = document.getElementById('detailsColumn');
+        
+        if (searchColumn && detailsColumn) {
+            searchColumn.classList.remove('d-none');
+            detailsColumn.classList.remove('col-12');
+            detailsColumn.classList.add('col-md-7');
+            
+            // Verwijder mobiele terugknop
+            const backButtonDiv = document.querySelector('.mobile-back-button');
+            if (backButtonDiv) {
+                backButtonDiv.remove();
+            }
+        }
+        
+        // 5. CLEAR ALLE INPUT VELDEN (precies zoals refresh)
+        const nameInput = document.getElementById('searchNameInput');
+        const kennelInput = document.getElementById('searchKennelInput');
+        
+        if (nameInput) nameInput.value = '';
+        if (kennelInput) kennelInput.value = '';
+        
+        // 6. TOON INITIELE SCREENS (precies zoals refresh)
+        this.showInitialView();
+        this.clearDetails();
+        
+        // 7. FORCEER DAT DE VOLGENDE KEER ALLES OPNIEUW GELADEN WORDT
+        // (Deze wordt later opnieuw geïnjecteerd door de UIHandler)
+        
+        console.log('SearchManager: FULL REFRESH COMPLEET - klaar voor nieuwe sessie');
+    }
+    
+    // NIEUWE METHODE: Reset de zoekstatus wanneer modal gesloten wordt
+    resetSearchState() {
+        console.log('SearchManager: Reset state bij openen modal');
+        
+        // Reset mobiele collapsed state
+        this.isMobileCollapsed = false;
+        
+        // Herstel de oorspronkelijke layout
         const searchColumn = document.getElementById('searchColumn');
         const detailsColumn = document.getElementById('detailsColumn');
         
@@ -1848,22 +1890,20 @@ class SearchManager extends BaseModule {
             }
         }
         
-        // 5. Clear alle zoekvelden
+        // Clear zoekvelden en toon initieel scherm
         const nameInput = document.getElementById('searchNameInput');
         const kennelInput = document.getElementById('searchKennelInput');
         
         if (nameInput) nameInput.value = '';
         if (kennelInput) kennelInput.value = '';
         
-        // 6. Toon initieel scherm
         this.showInitialView();
         this.clearDetails();
         
-        // 7. Forceren dat de volgende keer opnieuw geladen wordt
-        this.db = null; // Zorg ervoor dat de db reference reset wordt
-        this.stamboomManager = null; // Reset stamboom manager
+        // Reset filteredDogs
+        this.filteredDogs = [];
         
-        console.log('SearchManager: Volledige herinitialisatie voltooid - klaar voor nieuwe sessie');
+        console.log('Search state reset bij openen modal');
     }
     
     switchSearchType(type) {
