@@ -2,12 +2,8 @@
  * Reu en Teef Combinatie Module - ZELFSTANDIGE VERSIE
  * Voor het maken van fokplannen met specifieke reu en teef
  * MET ZELFDE STAMBOOM LAYOUT ALS STAMBOOMMANAGER
+ * OPGELOST VERSIE: Conflict met StamboomManager voorkomen
  */
-
-// REFRESH BIJ OPENEN VAN BESTAND - VERBETERDE VERSIE
-if (window.location.search.indexOf('?refresh=') === -1 && window.location.pathname.includes('.html')) {
-    window.location.search = '?refresh=' + new Date().getTime();
-}
 
 class ReuTeefCombinatie {
     constructor() {
@@ -27,10 +23,10 @@ class ReuTeefCombinatie {
         // COI Calculator instance
         this.coiCalculator = null;
         
-        // Popup management
-        this.popupContainerId = 'reuTeefPedigreePopupOverlay';
-        this.popupContentId = 'reuTeefPedigreePopupContainer';
-        this.photoOverlayId = 'reuTeefPhotoLargeOverlay';
+        // Event listener management
+        this.eventListeners = new Map();
+        this.modalInstance = null;
+        this.isActive = false;
         
         // Vertalingen
         this.translations = {
@@ -340,7 +336,7 @@ class ReuTeefCombinatie {
                 pl2: "PL 2",
                 pl3: "PL 3",
                 plUnknown: "PL unbekannt",
-                eyesFree: "Augen vrij",
+                eyesFree: "Augen frei",
                 eyesDist: "Augen Dist",
                 eyesOther: "Augen sonstige",
                 eyesUnknown: "Augen unbekannt",
@@ -407,7 +403,54 @@ class ReuTeefCombinatie {
         return text;
     }
     
+    // NIEUW: Cleanup methode voor proper event management
+    cleanup() {
+        this.removeAllEventListeners();
+        this.closeAllModals();
+        this.isActive = false;
+    }
+    
+    // NIEUW: Event listener management
+    addEventListener(element, event, handler, options = {}) {
+        if (!this.eventListeners.has(event)) {
+            this.eventListeners.set(event, []);
+        }
+        this.eventListeners.get(event).push({ element, handler, options });
+        element.addEventListener(event, handler, options);
+    }
+    
+    removeAllEventListeners() {
+        for (const [event, listeners] of this.eventListeners) {
+            for (const listener of listeners) {
+                listener.element.removeEventListener(event, listener.handler, listener.options);
+            }
+        }
+        this.eventListeners.clear();
+    }
+    
+    // NIEUW: Modal management
+    closeAllModals() {
+        if (this.modalInstance) {
+            this.modalInstance.hide();
+            this.modalInstance = null;
+        }
+        
+        // Close custom overlays
+        const overlays = ['pedigreePopupOverlay', 'photoLargeOverlay', 'futurePuppyModal'];
+        overlays.forEach(id => {
+            const overlay = document.getElementById(id);
+            if (overlay) {
+                overlay.style.display = 'none';
+                overlay.remove();
+            }
+        });
+    }
+    
     async loadContent() {
+        // Cleanup voor vorige instantie
+        this.cleanup();
+        this.isActive = true;
+        
         const t = this.t.bind(this);
         const content = document.getElementById('breedingContent');
         const buttons = document.getElementById('breedingButtons');
@@ -418,9 +461,6 @@ class ReuTeefCombinatie {
         this.selectedTeef = null;
         this.selectedReu = null;
         this.hondenCache.clear();
-        
-        // Clean up previous popup containers
-        this.cleanupPopupContainers();
         
         // Laad honden data
         await this.loadAllHonden();
@@ -550,14 +590,20 @@ class ReuTeefCombinatie {
         // Voeg CSS toe
         this.addStyles();
         
-        // Event handlers
-        document.getElementById('backBtn').addEventListener('click', () => {
-            this.goBack();
-        });
+        // NIEUW: Gebruik managed event listeners
+        const backBtn = document.getElementById('backBtn');
+        if (backBtn) {
+            this.addEventListener(backBtn, 'click', () => {
+                this.goBack();
+            });
+        }
         
-        document.getElementById('showPedigreeBtn').addEventListener('click', () => {
-            this.showFuturePuppyPedigree();
-        });
+        const showPedigreeBtn = document.getElementById('showPedigreeBtn');
+        if (showPedigreeBtn) {
+            this.addEventListener(showPedigreeBtn, 'click', () => {
+                this.showFuturePuppyPedigree();
+            });
+        }
         
         // Setup autocomplete voor teef
         this.setupAutocomplete('teefSearch', 'teefSearchResults', 'teven', (hond) => {
@@ -571,30 +617,6 @@ class ReuTeefCombinatie {
         
         // Update button states
         this.updateButtonStates();
-    }
-    
-    cleanupPopupContainers() {
-        // Verwijder eventuele bestaande popup containers van deze module
-        const existingOverlay = document.getElementById(this.popupContainerId);
-        if (existingOverlay) {
-            existingOverlay.remove();
-        }
-        
-        const existingPhotoOverlay = document.getElementById(this.photoOverlayId);
-        if (existingPhotoOverlay) {
-            existingPhotoOverlay.remove();
-        }
-        
-        // Verwijder ook de generieke containers die mogelijk conflicteren
-        const genericOverlay = document.getElementById('pedigreePopupOverlay');
-        if (genericOverlay && !document.querySelector('.modal.show')) {
-            genericOverlay.remove();
-        }
-        
-        const genericPhotoOverlay = document.getElementById('photoLargeOverlay');
-        if (genericPhotoOverlay && !document.querySelector('.modal.show')) {
-            genericPhotoOverlay.remove();
-        }
     }
     
     addStyles() {
@@ -882,36 +904,6 @@ class ReuTeefCombinatie {
                         overflow-x: auto;
                     }
                 }
-                
-                /* UNIEKE POPUP STYLES VOOR DEZE MODULE */
-                #${this.popupContainerId} {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0, 0, 0, 0.7);
-                    z-index: 1060;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    animation: fadeIn 0.3s;
-                    overflow-y: auto;
-                }
-                
-                #${this.photoOverlayId} {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0, 0, 0, 0.85);
-                    z-index: 1070;
-                    display: none;
-                    align-items: center;
-                    justify-content: center;
-                    animation: fadeIn 0.3s;
-                }
             `;
             document.head.appendChild(style);
         }
@@ -1108,7 +1100,7 @@ class ReuTeefCombinatie {
             resultsContainer.innerHTML = html;
             
             resultsContainer.querySelectorAll('.dog-result-item').forEach(item => {
-                item.addEventListener('click', (e) => {
+                this.addEventListener(item, 'click', (e) => {
                     const hondId = parseInt(item.getAttribute('data-id'));
                     const hond = currentResults.find(d => d.id === hondId);
                     if (hond) {
@@ -1130,13 +1122,13 @@ class ReuTeefCombinatie {
         
         showInitialView();
         
-        input.addEventListener('focus', async () => {
+        this.addEventListener(input, 'focus', async () => {
             if (this.allHonden.length === 0) {
                 await this.loadAllHonden();
             }
         });
         
-        input.addEventListener('input', (e) => {
+        this.addEventListener(input, 'input', (e) => {
             const searchTerm = e.target.value.toLowerCase().trim();
             
             if (searchTerm.length === 0) {
@@ -1198,7 +1190,7 @@ class ReuTeefCombinatie {
                 dropdown.style.display = 'block';
                 
                 dropdown.querySelectorAll('.autocomplete-item').forEach(item => {
-                    item.addEventListener('click', (e) => {
+                    this.addEventListener(item, 'click', (e) => {
                         e.stopPropagation();
                         const index = parseInt(item.getAttribute('data-index'));
                         const hond = currentResults[index];
@@ -1226,7 +1218,7 @@ class ReuTeefCombinatie {
             }
         });
         
-        input.addEventListener('keydown', (e) => {
+        this.addEventListener(input, 'keydown', (e) => {
             const items = dropdown.querySelectorAll('.autocomplete-item');
             const resultItems = resultsContainer.querySelectorAll('.dog-result-item');
             
@@ -1274,12 +1266,13 @@ class ReuTeefCombinatie {
             }
         });
         
-        document.addEventListener('click', (e) => {
+        // NIEUW: Gebruik managed event listener voor document click
+        this.addEventListener(document, 'click', (e) => {
             if (!input.contains(e.target) && !dropdown.contains(e.target)) {
                 dropdown.style.display = 'none';
                 activeIndex = -1;
             }
-        });
+        }, { capture: true });
     }
     
     updateActiveItem(items, activeIndex) {
@@ -1402,7 +1395,7 @@ class ReuTeefCombinatie {
                 </div>
                 
                 <div class="mt-3 pt-3 border-top">
-                    <button class="btn btn-sm btn-outline-secondary" onclick="window.reuTeefCombinatie.clearSelection('${elementId}', '${resultsId}')">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="window.reuTeefCombinatie?.clearSelection('${elementId}', '${resultsId}')">
                         <i class="bi bi-x-circle me-1"></i> Selectie wissen
                     </button>
                 </div>
@@ -1472,6 +1465,7 @@ class ReuTeefCombinatie {
     }
     
     goBack() {
+        this.cleanup();
         const breedingModal = document.getElementById('breedingPlanModal');
         if (breedingModal) {
             if (window.uiHandler && window.uiHandler.modules && window.uiHandler.modules.breeding) {
@@ -1749,6 +1743,9 @@ class ReuTeefCombinatie {
     }
     
     async showStamboomWithFuturePuppy(futurePuppy, coiResult, healthAnalysis) {
+        // Cleanup eerst
+        this.closeAllModals();
+        
         // Creëer dezelfde modal als StamboomManager
         await this.createFuturePuppyModal(futurePuppy);
         
@@ -1805,1226 +1802,39 @@ class ReuTeefCombinatie {
                     </div>
                 </div>
             </div>
-            
-            <!-- UNIEKE Popup overlay voor deze module -->
-            <div class="pedigree-popup-overlay" id="${this.popupContainerId}" style="display: none;">
-                <div class="pedigree-popup-container" id="${this.popupContentId}"></div>
-            </div>
-            
-            <!-- UNIEKE Foto overlay voor deze module -->
-            <div class="photo-large-overlay" id="${this.photoOverlayId}" style="display: none;"></div>
-            
-            <style>
-                /* MOBIELE WRAPPER - ZELFDE ALS STAMBOOMMANAGER */
-                .pedigree-mobile-wrapper {
-                    width: 100%;
-                    display: flex;
-                    flex-direction: column;
-                    background: #f8f9fa;
-                    position: relative;
-                    border-radius: 12px;
-                }
-                
-                /* HORIZONTALE PEDIGREE CONTAINER - ZELFDE ALS STAMBOOMMANAGER */
-                .pedigree-container-compact {
-                    padding: 15px !important;
-                    margin: 0 !important;
-                    width: 100% !important;
-                    background: #f8f9fa;
-                    overflow-x: auto !important;
-                    overflow-y: auto !important;
-                    position: relative;
-                    min-height: 0 !important;
-                    box-sizing: border-box !important;
-                    border-radius: inherit;
-                }
-                
-                .pedigree-grid-compact {
-                    display: flex;
-                    flex-direction: row;
-                    height: auto;
-                    min-width: fit-content;
-                    padding: 10px 15px !important;
-                    gap: 20px;
-                    align-items: flex-start;
-                    box-sizing: border-box !important;
-                    margin: 0 auto;
-                }
-                
-                /* GENERATIE KOLOM - VERTICALE STACK VAN LIGGENDE CARDS */
-                .pedigree-generation-col {
-                    display: flex;
-                    flex-direction: column;
-                    height: auto;
-                    justify-content: flex-start;
-                    min-width: 0;
-                }
-                
-                .pedigree-generation-col.gen0 {
-                    gap: 4px !important;
-                }
-                
-                .pedigree-generation-col.gen1 {
-                    gap: 4px !important;
-                }
-                
-                .pedigree-generation-col.gen2 {
-                    gap: 4px !important;
-                }
-                
-                .pedigree-generation-col.gen3 {
-                    gap: 4px !important;
-                }
-                
-                /* BASIS LIGGENDE CARDS - ZELFDE ALS STAMBOOMMANAGER */
-                .pedigree-card-compact.horizontal {
-                    background: white;
-                    border-radius: 6px;
-                    border: 1px solid #dee2e6;
-                    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
-                    cursor: pointer;
-                    transition: all 0.2s;
-                    display: flex;
-                    flex-direction: column;
-                    overflow: hidden;
-                    margin: 0 !important;
-                    padding: 0 !important;
-                    flex-shrink: 0;
-                }
-                
-                /* ZELFDE BREEDTE VOOR ALLE GENERATIES - ANDERE HOOGTE VOOR OVERGROOTOUDERS */
-                .pedigree-card-compact.horizontal.gen0,
-                .pedigree-card-compact.horizontal.gen1,
-                .pedigree-card-compact.horizontal.gen2 {
-                    width: 160px !important;
-                    height: 120px !important;
-                }
-                
-                /* OVERGROOTOUDERS: 60% HOOGTE VAN NORMALE CARDS */
-                .pedigree-card-compact.horizontal.gen3 {
-                    width: 160px !important;
-                    height: 60px !important;
-                }
-                
-                /* Hoofdhond extra styling */
-                .pedigree-card-compact.horizontal.main-dog-compact {
-                    border: 2px solid #198754 !important;
-                    background: #f0fff4;
-                    width: 170px !important;
-                    height: 110px !important;
-                }
-                
-                /* Geslacht kleuren */
-                .pedigree-card-compact.horizontal.male {
-                    border-left: 4px solid #0d6efd !important;
-                }
-                
-                .pedigree-card-compact.horizontal.female {
-                    border-left: 4px solid #dc3545 !important;
-                }
-                
-                .pedigree-card-compact.horizontal:hover {
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.12);
-                    transform: translateY(-1px);
-                    z-index: 1;
-                    position: relative;
-                }
-                
-                .pedigree-card-compact.horizontal.empty {
-                    background: #f8f9fa;
-                    cursor: default;
-                    opacity: 0.6;
-                }
-                
-                .pedigree-card-compact.horizontal.empty:hover {
-                    transform: none !important;
-                    box-shadow: 0 1px 2px rgba(0,0,0,0.08) !important;
-                }
-                
-                /* CARD HEADER */
-                .pedigree-card-header-compact.horizontal {
-                    color: white;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    overflow: hidden;
-                    flex-shrink: 0;
-                }
-                
-                /* Header voor gen0, gen1, gen2 */
-                .pedigree-card-compact.horizontal.gen0 .pedigree-card-header-compact.horizontal,
-                .pedigree-card-compact.horizontal.gen1 .pedigree-card-header-compact.horizontal,
-                .pedigree-card-compact.horizontal.gen2 .pedigree-card-header-compact.horizontal {
-                    padding: 5px 8px;
-                    font-size: 0.7rem;
-                    min-height: 22px;
-                }
-                
-                /* Header voor gen3 (overgrootouders) */
-                .pedigree-card-compact.horizontal.gen3 .pedigree-card-header-compact.horizontal {
-                    padding: 3px 6px;
-                    font-size: 0.56rem;
-                    min-height: 16px;
-                }
-                
-                .pedigree-card-header-compact.horizontal.bg-success {
-                    background: #198754 !important;
-                }
-                
-                .pedigree-card-header-compact.horizontal.bg-primary {
-                    background: #0d6efd !important;
-                }
-                
-                .pedigree-card-header-compact.horizontal.bg-secondary {
-                    background: #6c757d !important;
-                }
-                
-                .relation-compact {
-                    display: flex;
-                    align-items: center;
-                    gap: 3px;
-                    font-weight: 600;
-                    overflow: hidden;
-                    flex: 1;
-                }
-                
-                .relation-text {
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                }
-                
-                .main-dot {
-                    color: #ffc107;
-                    font-size: 0.7rem;
-                    flex-shrink: 0;
-                }
-                
-                .gender-icon-compact {
-                    flex-shrink: 0;
-                    margin-left: 4px;
-                }
-                
-                /* CARD BODY */
-                .pedigree-card-body-compact.horizontal {
-                    display: flex;
-                    flex-direction: column;
-                    overflow: hidden;
-                    flex: 1;
-                }
-                
-                /* Body voor gen0, gen1, gen2 */
-                .pedigree-card-compact.horizontal.gen0 .pedigree-card-body-compact.horizontal,
-                .pedigree-card-compact.horizontal.gen1 .pedigree-card-body-compact.horizontal,
-                .pedigree-card-compact.horizontal.gen2 .pedigree-card-body-compact.horizontal {
-                    padding: 6px 8px;
-                }
-                
-                /* Body voor gen3 (overgrootouders) */
-                .pedigree-card-compact.horizontal.gen3 .pedigree-card-body-compact.horizontal {
-                    padding: 4px 6px;
-                }
-                
-                /* CARD ROWS voor liggende layout */
-                .card-row {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    gap: 4px;
-                    overflow: hidden;
-                }
-                
-                .card-row-1 {
-                    margin-bottom: 2px;
-                }
-                
-                .card-row-2 {
-                    margin-bottom: 2px;
-                }
-                
-                .card-row-3 {
-                    margin-top: auto;
-                }
-                
-                /* NAAM + KENNEL COMBINATIE STYLING */
-                .dog-name-kennel-compact {
-                    font-weight: 600;
-                    color: #0d6efd;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    line-height: 1.1;
-                    width: 100%;
-                }
-                
-                /* TEKST GROOTTES PER GENERATIE */
-                .pedigree-card-compact.horizontal.gen0 .dog-name-kennel-compact,
-                .pedigree-card-compact.horizontal.gen1 .dog-name-kennel-compact,
-                .pedigree-card-compact.horizontal.gen2 .dog-name-kennel-compact {
-                    font-size: 0.75rem;
-                }
-                
-                .pedigree-card-compact.horizontal.gen0 .dog-pedigree-compact,
-                .pedigree-card-compact.horizontal.gen1 .dog-pedigree-compact,
-                .pedigree-card-compact.horizontal.gen2 .dog-pedigree-compact,
-                .pedigree-card-compact.horizontal.gen0 .dog-breed-compact,
-                .pedigree-card-compact.horizontal.gen1 .dog-breed-compact,
-                .pedigree-card-compact.horizontal.gen2 .dog-breed-compact {
-                    font-size: 0.65rem;
-                }
-                
-                .pedigree-card-compact.horizontal.gen0 .click-hint-compact,
-                .pedigree-card-compact.horizontal.gen1 .click-hint-compact,
-                .pedigree-card-compact.horizontal.gen2 .click-hint-compact {
-                    font-size: 0.55rem;
-                }
-                
-                /* Overgrootouders (gen3) */
-                .pedigree-card-compact.horizontal.gen3 .dog-name-kennel-compact {
-                    font-size: 0.6rem;
-                }
-                
-                .pedigree-card-compact.horizontal.gen3 .dog-pedigree-compact,
-                .pedigree-card-compact.horizontal.gen3 .dog-breed-compact {
-                    font-size: 0.52rem;
-                }
-                
-                .pedigree-card-compact.horizontal.gen3 .click-hint-compact {
-                    font-size: 0.44rem;
-                }
-                
-                /* Algemene tekst styling */
-                .dog-pedigree-compact {
-                    font-weight: 600;
-                    color: #495057;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    line-height: 1.1;
-                    flex: 1;
-                }
-                
-                .dog-breed-compact {
-                    color: #28a745;
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    line-height: 1.1;
-                    flex: 1;
-                    text-align: right;
-                }
-                
-                .no-data-text {
-                    color: #6c757d;
-                    font-style: italic;
-                    line-height: 1.3;
-                    font-size: 0.7rem;
-                }
-                
-                /* Click hint met fototoestelicoon */
-                .click-hint-compact {
-                    color: #6c757d;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 3px;
-                    line-height: 1;
-                    width: 100%;
-                    padding-top: 2px;
-                    border-top: 1px dashed #dee2e6;
-                    font-size: 0.55rem;
-                }
-                
-                .click-hint-compact .bi-camera {
-                    color: #1a15f4;
-                    font-size: 0.7rem;
-                }
-                
-                /* Generation labels styling */
-                .generation-label {
-                    font-weight: bold;
-                    color: #495057;
-                    text-align: center;
-                    margin-bottom: 8px !important;
-                    font-size: 0.75rem;
-                    background: #e9ecef;
-                    padding: 4px 8px;
-                    border-radius: 4px;
-                    white-space: nowrap;
-                    flex-shrink: 0;
-                }
-                
-                /* MOBIELE AANPASSINGEN */
-                @media (max-width: 767px) {
-                    #futurePuppyModal.modal.fade .modal-dialog {
-                        max-width: 100%;
-                        margin: 0.5rem auto;
-                        height: auto;
-                    }
-                    
-                    #futurePuppyModal.modal.fade .modal-content {
-                        width: 100%;
-                        height: auto;
-                        margin: 0;
-                        border-radius: 12px;
-                        display: flex;
-                        flex-direction: column;
-                    }
-                    
-                    #futurePuppyModal.modal.fade .modal-header {
-                        margin: 0;
-                        padding: 0.75rem 1rem;
-                        border: none;
-                        width: 100%;
-                        flex-shrink: 0;
-                        min-height: auto;
-                        z-index: 1;
-                        border-radius: 12px 12px 0 0;
-                    }
-                    
-                    #futurePuppyModal.modal.fade .modal-body {
-                        width: 100%;
-                        padding: 0;
-                        margin: 0;
-                        flex: 1 1 auto;
-                        overflow: hidden;
-                        min-height: 0;
-                        max-height: 640px;
-                        border-radius: 0 0 12px 12px;
-                    }
-                    
-                    .pedigree-mobile-wrapper {
-                        width: 100%;
-                        height: 100%;
-                        display: flex;
-                        flex-direction: column;
-                        background: #f8f9fa;
-                        border-radius: 0 0 12px 12px;
-                    }
-                    
-                    .pedigree-container-compact {
-                        height: 640px !important;
-                        overflow-x: auto !important;
-                        overflow-y: hidden !important;
-                        padding: 10px !important;
-                        -webkit-overflow-scrolling: touch;
-                        display: flex;
-                        flex-direction: column;
-                        border-radius: 0 0 12px 12px;
-                    }
-                    
-                    .pedigree-grid-compact {
-                        display: flex !important;
-                        flex-direction: row !important;
-                        flex-wrap: nowrap !important;
-                        height: 100% !important;
-                        min-width: max-content !important;
-                        padding: 10px 15px !important;
-                        gap: 15px !important;
-                        margin: 0 !important;
-                        align-items: stretch !important;
-                        box-sizing: border-box !important;
-                        width: auto !important;
-                    }
-                    
-                    .pedigree-generation-col {
-                        display: flex !important;
-                        flex-direction: column !important;
-                        height: 100% !important;
-                        flex-shrink: 0 !important;
-                        padding: 0 !important;
-                        margin: 0 !important;
-                        position: relative;
-                        justify-content: center !important;
-                        align-items: flex-start !important;
-                    }
-                    
-                    .pedigree-generation-col.gen0 {
-                        justify-content: center !important;
-                        align-items: flex-start !important;
-                        min-width: 220px !important;
-                        width: 220px !important;
-                        gap: 4px !important;
-                    }
-                    
-                    .pedigree-generation-col.gen1 {
-                        justify-content: center !important;
-                        align-items: flex-start !important;
-                        min-width: 220px !important;
-                        width: 220px !important;
-                        gap: 4px !important;
-                    }
-                    
-                    .pedigree-generation-col.gen1 > .pedigree-card-compact.horizontal:nth-child(2) {
-                        margin-top: -2px !important;
-                    }
-                    
-                    .pedigree-generation-col.gen1 > .pedigree-card-compact.horizontal:nth-child(3) {
-                        margin-top: 2px !important;
-                    }
-                    
-                    .pedigree-generation-col.gen2 {
-                        justify-content: center !important;
-                        align-items: flex-start !important;
-                        min-width: 220px !important;
-                        width: 220px !important;
-                        gap: 4px !important;
-                    }
-                    
-                    .pedigree-generation-col.gen2 > .pedigree-card-compact.horizontal:nth-child(2),
-                    .pedigree-generation-col.gen2 > .pedigree-card-compact.horizontal:nth-child(3) {
-                        margin-top: -4px !important;
-                    }
-                    
-                    .pedigree-generation-col.gen2 > .pedigree-card-compact.horizontal:nth-child(4),
-                    .pedigree-generation-col.gen2 > .pedigree-card-compact.horizontal:nth-child(5) {
-                        margin-top: 4px !important;
-                    }
-                    
-                    .pedigree-generation-col.gen3 {
-                        justify-content: center !important;
-                        align-items: flex-start !important;
-                        min-width: 220px !important;
-                        width: 220px !important;
-                        gap: 4px !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen0,
-                    .pedigree-card-compact.horizontal.gen1,
-                    .pedigree-card-compact.horizontal.gen2 {
-                        width: 220px !important;
-                        height: 140px !important;
-                        margin: 0 !important;
-                        flex-shrink: 0 !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen3 {
-                        width: 220px !important;
-                        height: 70px !important;
-                        margin: 0 !important;
-                        flex-shrink: 0 !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.main-dog-compact {
-                        width: 220px !important;
-                        height: 140px !important;
-                        margin: 0 !important;
-                        flex-shrink: 0 !important;
-                    }
-                    
-                    .pedigree-generation-col .generation-label {
-                        font-size: 0.7rem !important;
-                        padding: 3px 6px !important;
-                        margin-bottom: 8px !important;
-                        white-space: nowrap !important;
-                        width: 100%;
-                        text-align: center;
-                        position: static !important;
-                        margin-top: 0 !important;
-                    }
-                    
-                    .pedigree-generation-col > * {
-                        width: 100% !important;
-                    }
-                }
-                
-                @media (max-width: 480px) {
-                    .pedigree-container-compact {
-                        height: 640px !important;
-                        padding: 8px !important;
-                    }
-                    
-                    .pedigree-grid-compact {
-                        padding: 8px 12px !important;
-                        gap: 4px !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen0,
-                    .pedigree-card-compact.horizontal.gen1,
-                    .pedigree-card-compact.horizontal.gen2 {
-                        width: 220px !important;
-                        height: 140px !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen3 {
-                        width: 220px !important;
-                        height: 70px !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.main-dog-compact {
-                        width: 220px !important;
-                        height: 140px !important;
-                    }
-                    
-                    .pedigree-generation-col {
-                        min-width: 220px !important;
-                        width: 220px !important;
-                    }
-                    
-                    .pedigree-generation-col.gen0,
-                    .pedigree-generation-col.gen1,
-                    .pedigree-generation-col.gen2,
-                    .pedigree-generation-col.gen3 {
-                        min-width: 220px !important;
-                        width: 220px !important;
-                    }
-                    
-                    .generation-label {
-                        font-size: 0.65rem !important;
-                        padding: 2px 5px !important;
-                        margin-bottom: 8px !important;
-                    }
-                }
-                
-                /* DESKTOP STYLES */
-                @media (min-width: 768px) {
-                    #futurePuppyModal.modal.fade .modal-dialog.modal-fullscreen {
-                        width: 100vw !important;
-                        height: 100vh !important;
-                        margin: 0 !important;
-                        max-width: none !important;
-                        padding: 0 !important;
-                    }
-                    
-                    #futurePuppyModal.modal.fade .modal-content {
-                        width: 100% !important;
-                        height: 100vh !important;
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        border: none !important;
-                        border-radius: 0 !important;
-                        display: flex !important;
-                        flex-direction: column !important;
-                    }
-                    
-                    #futurePuppyModal.modal.fade .modal-header {
-                        margin: 0 !important;
-                        padding: 0.75rem 1rem !important;
-                        border: none !important;
-                        width: 100% !important;
-                        flex-shrink: 0 !important;
-                        min-height: auto !important;
-                        z-index: 1;
-                    }
-                    
-                    #futurePuppyModal.modal.fade .modal-body {
-                        width: 100% !important;
-                        padding: 0 !important;
-                        margin: 0 !important;
-                        flex: 1 1 auto !important;
-                        overflow: hidden !important;
-                        min-height: 0 !important;
-                    }
-                    
-                    .pedigree-mobile-wrapper {
-                        height: 100%;
-                        border-radius: 0;
-                    }
-                    
-                    .pedigree-container-compact {
-                        height: calc(100vh - 60px) !important;
-                        overflow-x: auto !important;
-                        overflow-y: hidden !important;
-                        align-items: center;
-                        padding: 0 !important;
-                        display: flex;
-                        border-radius: 0;
-                    }
-                    
-                    .pedigree-grid-compact {
-                        flex-direction: row;
-                        height: 100%;
-                        min-width: fit-content;
-                        padding: 0 20px !important;
-                        gap: 25px;
-                        align-items: center;
-                        box-sizing: border-box !important;
-                        margin: 0 auto;
-                    }
-                    
-                    .pedigree-generation-col {
-                        display: flex;
-                        flex-direction: column;
-                        height: 100%;
-                        justify-content: center;
-                        min-width: 0;
-                    }
-                    
-                    .pedigree-generation-col.gen0 {
-                        gap: 4px !important;
-                    }
-                    
-                    .pedigree-generation-col.gen1 {
-                        gap: 4px !important;
-                    }
-                    
-                    .pedigree-generation-col.gen2 {
-                        gap: 4px !important;
-                    }
-                    
-                    .pedigree-generation-col.gen3 {
-                        gap: 4px !important;
-                        justify-content: center;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen0,
-                    .pedigree-card-compact.horizontal.gen1,
-                    .pedigree-card-compact.horizontal.gen2 {
-                        width: 200px !important;
-                        height: 132px !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen3 {
-                        width: 200px !important;
-                        height: 66px !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.main-dog-compact {
-                        width: 200px !important;
-                        height: 132px !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen0 .dog-name-kennel-compact,
-                    .pedigree-card-compact.horizontal.gen1 .dog-name-kennel-compact,
-                    .pedigree-card-compact.horizontal.gen2 .dog-name-kennel-compact {
-                        font-size: 0.8rem;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen0 .dog-pedigree-compact,
-                    .pedigree-card-compact.horizontal.gen1 .dog-pedigree-compact,
-                    .pedigree-card-compact.horizontal.gen2 .dog-pedigree-compact,
-                    .pedigree-card-compact.horizontal.gen0 .dog-breed-compact,
-                    .pedigree-card-compact.horizontal.gen1 .dog-breed-compact,
-                    .pedigree-card-compact.horizontal.gen2 .dog-breed-compact {
-                        font-size: 0.7rem;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen0 .click-hint-compact,
-                    .pedigree-card-compact.horizontal.gen1 .click-hint-compact,
-                    .pedigree-card-compact.horizontal.gen2 .click-hint-compact {
-                        font-size: 0.6rem;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen3 .dog-name-kennel-compact {
-                        font-size: 0.64rem;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen3 .dog-pedigree-compact,
-                    .pedigree-card-compact.horizontal.gen3 .dog-breed-compact {
-                        font-size: 0.56rem;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen3 .click-hint-compact {
-                        font-size: 0.48rem;
-                    }
-                    
-                    .generation-label {
-                        font-size: 0.8rem;
-                        padding: 4px 8px;
-                        margin-bottom: 8px !important;
-                    }
-                }
-                
-                @media (min-width: 1024px) and (max-width: 1365px) {
-                    .pedigree-container-compact {
-                        height: calc(100vh - 60px) !important;
-                    }
-                    
-                    .pedigree-grid-compact {
-                        gap: 15px;
-                        padding: 0 12px !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen0,
-                    .pedigree-card-compact.horizontal.gen1,
-                    .pedigree-card-compact.horizontal.gen2 {
-                        width: 200px !important;
-                        height: 132px !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.gen3 {
-                        width: 200px !important;
-                        height: 63px !important;
-                    }
-                    
-                    .pedigree-card-compact.horizontal.main-dog-compact {
-                        width: 200px !important;
-                        height: 132px !important;
-                    }
-                }
-                
-                /* UNIEKE DETAIL POPUP STYLES VOOR DEZE MODULE */
-                #${this.popupContainerId} {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0, 0, 0, 0.7);
-                    z-index: 1060;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    animation: fadeIn 0.3s;
-                    overflow-y: auto;
-                }
-                
-                @keyframes fadeIn {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
-                }
-                
-                #${this.popupContentId} {
-                    background: white;
-                    border-radius: 12px;
-                    max-width: 400px;
-                    max-height: 80vh;
-                    overflow-y: auto;
-                    animation: slideUp 0.3s;
-                    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-                    width: calc(100% - 20px);
-                    margin: 10px;
-                }
-                
-                @keyframes slideUp {
-                    from { 
-                        opacity: 0;
-                        transform: translateY(30px);
-                    }
-                    to { 
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-                
-                .dog-detail-popup {
-                    display: flex;
-                    flex-direction: column;
-                    height: 100%;
-                }
-                
-                .popup-header {
-                    background: #0d6efd;
-                    color: white;
-                    padding: 12px 16px;
-                    border-radius: 12px 12px 0 0;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    position: sticky;
-                    top: 0;
-                    z-index: 1;
-                }
-                
-                .popup-title {
-                    margin: 0;
-                    font-size: 1.1rem;
-                    display: flex;
-                    align-items: center;
-                    flex: 1;
-                }
-                
-                .popup-header .btn-close {
-                    display: inline-block;
-                    width: 24px;
-                    height: 24px;
-                    background: transparent;
-                    border: none;
-                    position: relative;
-                    cursor: pointer;
-                    opacity: 0.8;
-                    z-index: 2;
-                    filter: invert(1) grayscale(100%) brightness(200%) !important;
-                }
-                
-                .popup-header .btn-close::before,
-                .popup-header .btn-close::after {
-                    content: '';
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    width: 18px;
-                    height: 2px;
-                    background: #000 !important;
-                    transform-origin: center;
-                }
-                
-                .popup-header .btn-close::before {
-                    transform: translate(-50%, -50%) rotate(45deg);
-                }
-                
-                .popup-header .btn-close::after {
-                    transform: translate(-50%, -50%) rotate(-45deg);
-                }
-                
-                .popup-header .btn-close:hover {
-                    opacity: 1;
-                }
-                
-                .popup-body {
-                    padding: 15px;
-                    flex: 1;
-                    overflow-y: auto;
-                    -webkit-overflow-scrolling: touch;
-                }
-                
-                .info-section {
-                    margin-bottom: 20px;
-                }
-                
-                .info-section h6 {
-                    color: #495057;
-                    margin-bottom: 10px;
-                    padding-bottom: 6px;
-                    border-bottom: 2px solid #e9ecef;
-                    display: flex;
-                    align-items: center;
-                    font-size: 1rem;
-                }
-                
-                .info-grid {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-                }
-                
-                .info-row {
-                    display: grid !important;
-                    grid-template-columns: 1fr 1fr !important;
-                    gap: 8px !important;
-                    margin-bottom: 0 !important;
-                    width: 100% !important;
-                }
-                
-                .info-item {
-                    display: flex;
-                    flex-direction: column;
-                    width: 100% !important;
-                    min-width: 0 !important;
-                }
-                
-                .info-item-half {
-                    grid-column: span 1 !important;
-                    width: 100% !important;
-                }
-                
-                .info-item-full {
-                    grid-column: 1 / -1 !important;
-                    width: 100% !important;
-                    margin-bottom: 4px;
-                }
-                
-                .coi-value {
-                    font-size: 1.05rem !important;
-                    font-weight: 700 !important;
-                }
-                
-                .info-label {
-                    font-weight: 600;
-                    color: #495057;
-                    font-size: 0.9rem;
-                    margin-bottom: 2px;
-                    line-height: 1.2;
-                }
-                
-                .info-value {
-                    color: #212529;
-                    font-size: 0.95rem;
-                    line-height: 1.3;
-                    word-break: break-word;
-                }
-                
-                .remarks-box {
-                    background: #f8f9fa;
-                    border: 1px solid #dee2e6;
-                    padding: 12px;
-                    border-radius: 6px;
-                    font-style: italic;
-                    color: #495057;
-                    font-size: 0.95rem;
-                    line-height: 1.5;
-                }
-                
-                /* THUMBNAILS SECTIE IN POPUP */
-                .photos-grid {
-                    display: grid;
-                    grid-template-columns: repeat(3, 1fr);
-                    gap: 6px;
-                    margin-bottom: 10px;
-                    max-width: 240px;
-                    margin-left: auto;
-                    margin-right: auto;
-                }
-                
-                .photo-thumbnail {
-                    position: relative;
-                    aspect-ratio: 1 / 1;
-                    border-radius: 4px;
-                    overflow: hidden;
-                    cursor: pointer;
-                    border: 2px solid transparent;
-                    transition: all 0.2s;
-                }
-                
-                .photo-thumbnail:hover {
-                    border-color: #0d6efd;
-                    transform: scale(1.05);
-                }
-                
-                .thumbnail-img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                }
-                
-                .photo-hover {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0, 0, 0, 0.3);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    opacity: 0;
-                    transition: opacity 0.2s;
-                }
-                
-                .photo-thumbnail:hover .photo-hover {
-                    opacity: 1;
-                }
-                
-                .photo-hover i {
-                    color: white;
-                    font-size: 1.2rem;
-                }
-                
-                .photo-hint {
-                    text-align: center;
-                    margin-bottom: 15px;
-                    font-size: 0.85rem;
-                }
-                
-                .popup-footer {
-                    padding: 16px 20px;
-                    border-top: 1px solid #dee2e6;
-                    display: flex;
-                    justify-content: center;
-                    background: #f8f9fa;
-                    border-radius: 0 0 12px 12px;
-                }
-                
-                .popup-close-btn {
-                    min-width: 130px;
-                    padding: 10px 25px;
-                    font-size: 1rem;
-                }
-                
-                /* UNIEKE GROTE FOTO OVERLAY STYLES VOOR DEZE MODULE */
-                #${this.photoOverlayId} {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0, 0, 0, 0.85);
-                    z-index: 1070;
-                    display: none;
-                    align-items: center;
-                    justify-content: center;
-                    animation: fadeIn 0.3s;
-                }
-                
-                .photo-large-container {
-                    background: white;
-                    border-radius: 12px;
-                    overflow: hidden;
-                    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-                    display: flex;
-                    flex-direction: column;
-                    max-height: 95vh;
-                    animation: slideUp 0.3s;
-                }
-                
-                .photo-large-header {
-                    padding: 12px 16px;
-                    background: #0d6efd;
-                    color: white;
-                    display: flex;
-                    justify-content: flex-end;
-                }
-                
-                .photo-large-close {
-                    background: none;
-                    border: none;
-                    color: white;
-                    opacity: 0.8;
-                    font-size: 1.3rem;
-                    cursor: pointer;
-                    width: 32px;
-                    height: 32px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    border-radius: 50%;
-                    transition: all 0.2s;
-                }
-                
-                .photo-large-close:hover {
-                    opacity: 1;
-                    background: rgba(255, 255, 255, 0.2);
-                }
-                
-                .photo-large-content {
-                    padding: 20px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    overflow: hidden;
-                    flex: 1;
-                    min-height: 300px;
-                }
-                
-                .photo-large-img {
-                    max-width: 100%;
-                    max-height: 100%;
-                    object-fit: contain;
-                    border-radius: 4px;
-                }
-                
-                .photo-large-footer {
-                    padding: 16px;
-                    border-top: 1px solid #dee2e6;
-                    display: flex;
-                    justify-content: center;
-                    background: #f8f9fa;
-                }
-                
-                .photo-large-close-btn {
-                    min-width: 120px;
-                    padding: 8px 20px;
-                }
-                
-                /* Print styles */
-                @media print {
-                    .modal-dialog {
-                        max-width: none;
-                        margin: 0;
-                    }
-                    
-                    .modal-header {
-                        display: none !important;
-                    }
-                    
-                    .pedigree-container-compact {
-                        padding: 0;
-                        background: white;
-                        height: auto !important;
-                        overflow-x: visible !important;
-                        height: 100vh !important;
-                    }
-                    
-                    .pedigree-grid-compact {
-                        flex-direction: row !important;
-                        height: auto;
-                        padding: 20px !important;
-                        gap: 15px;
-                    }
-                    
-                    .pedigree-generation-col {
-                        flex-direction: column;
-                        gap: 10px;
-                    }
-                    
-                    .pedigree-card-compact.horizontal {
-                        break-inside: avoid;
-                        box-shadow: none;
-                        border: 1px solid #ccc !important;
-                        margin-bottom: 10px;
-                    }
-                    
-                    .main-dog-compact {
-                        border: 2px solid #000 !important;
-                    }
-                    
-                    #${this.popupContainerId},
-                    #${this.photoOverlayId} {
-                        display: none !important;
-                    }
-                }
-                
-                /* Lege card styling */
-                .pedigree-card-compact.horizontal.empty {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                
-                /* VISUELE VERBINDINGEN */
-                .pedigree-generation-col {
-                    position: relative;
-                }
-                
-                .pedigree-generation-col:not(:first-child)::before {
-                    content: '';
-                    position: absolute;
-                    left: -10px;
-                    top: 50%;
-                    width: 10px;
-                    height: 1px;
-                    background: #adb5bd;
-                    opacity: 0.5;
-                }
-                
-                /* Overgrootouder styling */
-                .pedigree-card-compact.horizontal.gen3 {
-                    opacity: 0.9;
-                }
-                
-                .pedigree-card-compact.horizontal.gen3:hover {
-                    opacity: 1;
-                }
-                
-                /* HEALTH BADGES */
-                .badge-hd {
-                    background-color: #dc3545 !important;
-                    color: white !important;
-                }
-                
-                .badge-ed {
-                    background-color: #fd7e14 !important;
-                    color: white !important;
-                }
-                
-                .badge-pl {
-                    background-color: #6f42c1 !important;
-                    color: white !important;
-                }
-                
-                .badge-eyes {
-                    background-color: #20c997 !important;
-                    color: white !important;
-                }
-                
-                .badge-dandy {
-                    background-color: #6610f2 !important;
-                    color: white !important;
-                }
-                
-                .badge-thyroid {
-                    background-color: #e83e8c !important;
-                    color: white !important;
-                }
-            </style>
         `;
         
         document.body.insertAdjacentHTML('beforeend', modalHTML);
         
-        const modal = new bootstrap.Modal(document.getElementById(modalId));
-        modal.show();
+        const modalElement = document.getElementById(modalId);
+        this.modalInstance = new bootstrap.Modal(modalElement);
+        
+        // NIEUW: Add event listener voor modal close
+        modalElement.addEventListener('hidden.bs.modal', () => {
+            this.cleanupModalResources();
+        });
+        
+        this.modalInstance.show();
         
         this.setupFuturePuppyModalEvents();
+    }
+    
+    // NIEUW: Cleanup modal resources
+    cleanupModalResources() {
+        // Verwijder modal als het verborgen is
+        const modal = document.getElementById('futurePuppyModal');
+        if (modal) {
+            modal.remove();
+        }
+        
+        // Verwijder custom overlays
+        const overlays = ['pedigreePopupOverlay', 'photoLargeOverlay'];
+        overlays.forEach(id => {
+            const overlay = document.getElementById(id);
+            if (overlay) {
+                overlay.remove();
+            }
+        });
     }
     
     setupFuturePuppyModalEvents() {
@@ -3033,85 +1843,136 @@ class ReuTeefCombinatie {
         
         const printBtn = modal.querySelector('.btn-print');
         if (printBtn) {
-            printBtn.addEventListener('click', () => {
+            this.addEventListener(printBtn, 'click', () => {
                 window.print();
             });
         }
         
-        this.setupGlobalEventListeners();
+        // NIEUW: Setup custom event listeners voor deze modal
+        this.setupCustomEventListeners();
     }
     
-    setupGlobalEventListeners() {
-        // Gebruik event delegation voor foto thumbnails
-        document.addEventListener('click', async (e) => {
-            const thumbnail = e.target.closest('.photo-thumbnail');
-            if (thumbnail) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const photoId = thumbnail.getAttribute('data-photo-id');
-                
-                if (!photoId) return;
-                
-                try {
-                    const fullPhoto = await this.getFullSizeFoto(photoId);
-                    
-                    if (fullPhoto && fullPhoto.data) {
-                        const popupTitle = document.querySelector('.popup-title');
-                        let dogName = '';
-                        if (popupTitle) {
-                            dogName = popupTitle.textContent.trim();
-                            dogName = dogName.replace(/^[^a-zA-Z]*/, '').trim();
-                        }
-                        
-                        this.showLargePhoto(fullPhoto.data, dogName);
-                    } else {
-                        console.error('Kon volledige foto niet laden:', photoId);
-                        const imgElement = thumbnail.querySelector('img');
-                        if (imgElement && imgElement.src) {
-                            this.showLargePhoto(imgElement.src, dogName);
-                        }
-                    }
-                } catch (error) {
-                    console.error('Fout bij laden volledige foto:', error);
-                }
-            }
-        });
+    // NIEUW: Setup alleen de benodigde event listeners
+    setupCustomEventListeners() {
+        // Verwijder eerst eventuele bestaande listeners
+        this.removeAllEventListeners();
         
-        // Sluit foto overlay
-        document.addEventListener('click', (e) => {
-            const photoOverlay = document.getElementById(this.photoOverlayId);
-            if (!photoOverlay) return;
-            
-            if (e.target.classList.contains('photo-large-close') || 
-                e.target.classList.contains('photo-large-close-btn') ||
-                e.target.closest('.photo-large-close') ||
-                e.target.closest('.photo-large-close-btn') ||
-                e.target === photoOverlay) {
-                
+        // Setup event delegation voor de toekomstige pup modal
+        document.addEventListener('click', this.handleDocumentClick.bind(this));
+        document.addEventListener('keydown', this.handleKeyDown.bind(this));
+        
+        // Opslaan in event listeners map voor later cleanup
+        this.eventListeners.set('document-click', [{ 
+            element: document, 
+            handler: this.handleDocumentClick.bind(this), 
+            options: {} 
+        }]);
+        this.eventListeners.set('document-keydown', [{ 
+            element: document, 
+            handler: this.handleKeyDown.bind(this), 
+            options: {} 
+        }]);
+    }
+    
+    // NIEUW: Event handler voor document clicks
+    handleDocumentClick(e) {
+        // Handle thumbnail clicks
+        const thumbnail = e.target.closest('.photo-thumbnail');
+        if (thumbnail) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.handleThumbnailClick(thumbnail);
+            return;
+        }
+        
+        // Handle close buttons
+        if (e.target.classList.contains('photo-large-close') || 
+            e.target.classList.contains('photo-large-close-btn') ||
+            e.target.closest('.photo-large-close') ||
+            e.target.closest('.photo-large-close-btn')) {
+            const overlay = document.getElementById('photoLargeOverlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+                setTimeout(() => {
+                    if (overlay.parentNode) {
+                        overlay.parentNode.removeChild(overlay);
+                    }
+                }, 300);
+            }
+            return;
+        }
+        
+        // Click outside large photo to close
+        if (e.target.id === 'photoLargeOverlay') {
+            const overlay = e.target;
+            overlay.style.display = 'none';
+            setTimeout(() => {
+                if (overlay.parentNode) {
+                    overlay.parentNode.removeChild(overlay);
+                }
+            }, 300);
+            return;
+        }
+        
+        // Click outside popup to close
+        const popupOverlay = document.getElementById('pedigreePopupOverlay');
+        if (popupOverlay && e.target === popupOverlay) {
+            popupOverlay.style.display = 'none';
+            return;
+        }
+    }
+    
+    // NIEUW: Event handler voor keydown
+    handleKeyDown(e) {
+        if (e.key === 'Escape') {
+            // Close large photo overlay
+            const photoOverlay = document.getElementById('photoLargeOverlay');
+            if (photoOverlay && photoOverlay.style.display !== 'none') {
                 photoOverlay.style.display = 'none';
                 setTimeout(() => {
                     if (photoOverlay.parentNode) {
                         photoOverlay.parentNode.removeChild(photoOverlay);
                     }
                 }, 300);
+                return;
             }
-        });
+            
+            // Close popup overlay
+            const popupOverlay = document.getElementById('pedigreePopupOverlay');
+            if (popupOverlay && popupOverlay.style.display !== 'none') {
+                popupOverlay.style.display = 'none';
+                return;
+            }
+        }
+    }
+    
+    // NIEUW: Thumbnail click handler
+    async handleThumbnailClick(thumbnail) {
+        const photoId = thumbnail.getAttribute('data-photo-id');
+        if (!photoId) return;
         
-        // ESC toets om popups te sluiten
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                const popupOverlay = document.getElementById(this.popupContainerId);
-                if (popupOverlay && popupOverlay.style.display === 'flex') {
-                    popupOverlay.style.display = 'none';
+        try {
+            const fullPhoto = await this.getFullSizeFoto(photoId);
+            
+            if (fullPhoto && fullPhoto.data) {
+                const popupTitle = document.querySelector('.popup-title');
+                let dogName = '';
+                if (popupTitle) {
+                    dogName = popupTitle.textContent.trim();
+                    dogName = dogName.replace(/^[^a-zA-Z]*/, '').trim();
                 }
                 
-                const photoOverlay = document.getElementById(this.photoOverlayId);
-                if (photoOverlay && photoOverlay.style.display === 'flex') {
-                    photoOverlay.style.display = 'none';
+                this.showLargePhoto(fullPhoto.data, dogName);
+            } else {
+                console.error('Kon volledige foto niet laden:', photoId);
+                const imgElement = thumbnail.querySelector('img');
+                if (imgElement && imgElement.src) {
+                    this.showLargePhoto(imgElement.src, dogName);
                 }
             }
-        });
+        } catch (error) {
+            console.error('Fout bij laden volledige foto:', error);
+        }
     }
     
     async getFullSizeFoto(fotoId) {
@@ -3135,14 +1996,13 @@ class ReuTeefCombinatie {
     showLargePhoto(photoData, dogName = '') {
         console.log('Toon grote foto:', photoData.substring(0, 100) + '...');
         
-        // Verwijder bestaande overlay
-        const existingOverlay = document.getElementById(this.photoOverlayId);
+        const existingOverlay = document.getElementById('photoLargeOverlay');
         if (existingOverlay) {
             existingOverlay.remove();
         }
         
         const overlayHTML = `
-            <div class="photo-large-overlay" id="${this.photoOverlayId}" style="display: flex;">
+            <div class="photo-large-overlay" id="photoLargeOverlay" style="display: flex;">
                 <div class="photo-large-container" id="photoLargeContainer">
                     <div class="photo-large-header">
                         <button type="button" class="btn-close btn-close-white photo-large-close"></button>
@@ -3169,7 +2029,7 @@ class ReuTeefCombinatie {
     addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis) {
         const futurePuppyCard = document.querySelector('.pedigree-card-compact.horizontal.main-dog-compact.gen0');
         if (futurePuppyCard) {
-            futurePuppyCard.addEventListener('click', (e) => {
+            this.addEventListener(futurePuppyCard, 'click', (e) => {
                 e.stopPropagation();
                 this.showFuturePuppyPopup(futurePuppy, coiResult, healthAnalysis);
             });
@@ -3440,7 +2300,7 @@ class ReuTeefCombinatie {
     setupCardClickEvents() {
         const cards = document.querySelectorAll('.pedigree-card-compact.horizontal:not(.empty)');
         cards.forEach(card => {
-            card.addEventListener('click', async (e) => {
+            this.addEventListener(card, 'click', async (e) => {
                 const dogId = parseInt(card.getAttribute('data-dog-id'));
                 if (dogId === 0) return;
                 
@@ -3463,11 +2323,10 @@ class ReuTeefCombinatie {
     }
     
     async showDogDetailPopup(dog, relation) {
-        // Zorg dat de popup container bestaat
         this.ensurePopupContainer();
         
-        const overlay = document.getElementById(this.popupContainerId);
-        const container = document.getElementById(this.popupContentId);
+        const overlay = document.getElementById('pedigreePopupOverlay');
+        const container = document.getElementById('pedigreePopupContainer');
         
         if (!overlay || !container) return;
         
@@ -3476,8 +2335,18 @@ class ReuTeefCombinatie {
         
         overlay.style.display = 'flex';
         
-        // Voeg event listeners toe
-        this.setupPopupEventListeners();
+        const closeButtons = container.querySelectorAll('.btn-close, .popup-close-btn');
+        closeButtons.forEach(btn => {
+            this.addEventListener(btn, 'click', () => {
+                overlay.style.display = 'none';
+            });
+        });
+        
+        this.addEventListener(overlay, 'click', (e) => {
+            if (e.target === overlay) {
+                overlay.style.display = 'none';
+            }
+        });
     }
     
     async getDogDetailPopupHTML(dog, relation = '') {
@@ -3831,8 +2700,8 @@ class ReuTeefCombinatie {
         
         this.ensurePopupContainer();
         
-        const overlay = document.getElementById(this.popupContainerId);
-        const container = document.getElementById(this.popupContentId);
+        const overlay = document.getElementById('pedigreePopupOverlay');
+        const container = document.getElementById('pedigreePopupContainer');
         
         if (container) {
             container.innerHTML = popupHTML;
@@ -3921,46 +2790,34 @@ class ReuTeefCombinatie {
     }
     
     ensurePopupContainer() {
-        // Verwijder eerst bestaande container om conflicten te voorkomen
-        const existingOverlay = document.getElementById(this.popupContainerId);
-        if (existingOverlay) {
-            existingOverlay.remove();
+        if (!document.getElementById('pedigreePopupOverlay')) {
+            const overlayHTML = `
+                <div class="pedigree-popup-overlay" id="pedigreePopupOverlay" style="display: none;">
+                    <div class="pedigree-popup-container" id="pedigreePopupContainer"></div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', overlayHTML);
         }
-        
-        const existingContent = document.getElementById(this.popupContentId);
-        if (existingContent) {
-            existingContent.remove();
-        }
-        
-        // Creëer nieuwe unieke container
-        const overlayHTML = `
-            <div class="pedigree-popup-overlay" id="${this.popupContainerId}" style="display: none;">
-                <div class="pedigree-popup-container" id="${this.popupContentId}"></div>
-            </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', overlayHTML);
     }
     
     setupPopupEventListeners() {
-        const overlay = document.getElementById(this.popupContainerId);
-        const container = document.getElementById(this.popupContentId);
+        const overlay = document.getElementById('pedigreePopupOverlay');
+        const container = document.getElementById('pedigreePopupContainer');
         
         if (!overlay || !container) return;
         
         const closeButtons = container.querySelectorAll('.btn-close, .popup-close-btn');
         closeButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
+            this.addEventListener(btn, 'click', () => {
                 overlay.style.display = 'none';
             });
         });
         
-        overlay.addEventListener('click', (e) => {
+        this.addEventListener(overlay, 'click', (e) => {
             if (e.target === overlay) {
                 overlay.style.display = 'none';
             }
         });
-        
-        // ESC toets wordt al afgehandeld in setupGlobalEventListeners
     }
     
     showAlert(message, type = 'info') {
@@ -3991,7 +2848,8 @@ class ReuTeefCombinatie {
     }
 }
 
-window.reuTeefCombinatie = null;
+// Initialize global instance
+window.reuTeefCombinatie = new ReuTeefCombinatie();
 
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = ReuTeefCombinatie;
