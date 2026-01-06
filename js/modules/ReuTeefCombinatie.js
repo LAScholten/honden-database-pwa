@@ -217,7 +217,7 @@ class ReuTeefCombinatie {
                 greatGrandfatherLabel: "Urgroßvater",
                 greatGrandmotherLabel: "Urgroßmutter",
                 typeToSearch: "Beginnen Sie mit der Eingabe, um zu suchen",
-                noDogsFound: "Keine Hunde gefonden",
+                noDogsFound: "Keine Hunde gefunden",
                 found: "gefunden",
                 futurePuppyName: "Zukünftiger Welpe",
                 futurePuppyDescription: "Vorhersage der Kombination {father} × {mother}",
@@ -747,20 +747,6 @@ class ReuTeefCombinatie {
                 this.allHonden = await this.db.getHonden();
                 console.log(`✅ Geladen: ${this.allHonden.length} honden uit database voor ReuTeefCombinatie`);
                 
-                // DEBUG: Controleer of de gegevens compleet zijn
-                if (this.allHonden.length > 0) {
-                    const sampleHond = this.allHonden[0];
-                    console.log(`📊 Voorbeeld hond ${sampleHond.id}:`, {
-                        naam: sampleHond.naam,
-                        heupdysplasie: sampleHond.heupdysplasie,
-                        elleboogdysplasie: sampleHond.elleboogdysplasie,
-                        patella: sampleHond.patella,
-                        ogen: sampleHond.ogen,
-                        dandyWalker: sampleHond.dandyWalker,
-                        schildklier: sampleHond.schildklier
-                    });
-                }
-                
                 // Voeg alle honden toe aan cache
                 this.allHonden.forEach(hond => {
                     this.hondenCache.set(hond.id, hond);
@@ -781,17 +767,12 @@ class ReuTeefCombinatie {
     async getHondById(id) {
         // Controleer eerst cache
         if (this.hondenCache.has(id)) {
-            const cached = this.hondenCache.get(id);
-            // Controleer of cache compleet is (heeft gezondheidsinformatie)
-            if (cached.heupdysplasie !== undefined || cached.elleboogdysplasie !== undefined) {
-                return cached;
-            }
+            return this.hondenCache.get(id);
         }
         
         try {
             const hond = await this.db.getHondById(id);
             if (hond) {
-                console.log(`✅ Volledige hond ${id} uit database: HD=${hond.heupdysplasie}, ED=${hond.elleboogdysplasie}`);
                 // Voeg toe aan cache
                 this.hondenCache.set(id, hond);
                 if (hond.stamboomnr) {
@@ -801,21 +782,6 @@ class ReuTeefCombinatie {
             return hond;
         } catch (error) {
             console.error(`❌ Fout bij ophalen hond ${id}:`, error);
-            return null;
-        }
-    }
-    
-    async getHondByIdFromDb(id) {
-        // Directe database call voor volledige informatie
-        try {
-            const hond = await this.db.getHondById(id);
-            if (hond) {
-                console.log(`✅ getHondByIdFromDb(${id}): HD=${hond.heupdysplasie}, ED=${hond.elleboogdysplasie}`);
-                this.hondenCache.set(id, hond);
-            }
-            return hond;
-        } catch (error) {
-            console.error(`❌ Fout in getHondByIdFromDb(${id}):`, error);
             return null;
         }
     }
@@ -1382,9 +1348,6 @@ class ReuTeefCombinatie {
             return;
         }
         
-        console.log('🚀 Start toekomstige pup stamboom...');
-        console.log(`👥 Ouders: Reu=${this.selectedReu?.id} ${this.selectedReu?.naam}, Teef=${this.selectedTeef?.id} ${this.selectedTeef?.naam}`);
-        
         // Maak een virtuele toekomstige pup
         const futurePuppy = {
             id: -999999, // Uniek ID voor virtuele pup
@@ -1415,16 +1378,6 @@ class ReuTeefCombinatie {
         console.log('🔍 Toekomstige pup aangemaakt voor COI berekening:', futurePuppy);
         
         try {
-            // ZORG DAT OUDERS VOLLEDIGE INFO HEBBEN IN CACHE
-            console.log('📥 Controleren ouders informatie...');
-            
-            // Haal ouders op met volledige informatie uit database
-            const fullReu = await this.getHondByIdFromDb(this.selectedReu.id);
-            const fullTeef = await this.getHondByIdFromDb(this.selectedTeef.id);
-            
-            console.log(`✅ Reu volledige info: HD=${fullReu?.heupdysplasie}, ED=${fullReu?.elleboogdysplasie}`);
-            console.log(`✅ Teef volledige info: HD=${fullTeef?.heupdysplasie}, ED=${fullTeef?.elleboogdysplasie}`);
-            
             // MAKEN VIRTUELE HOND VOOR COI BEREKENING
             // Voeg virtuele pup toe aan allHonden tijdelijk voor COI berekening
             const originalHonden = [...this.allHonden];
@@ -1547,16 +1500,16 @@ class ReuTeefCombinatie {
             // Voeg toe aan ancestors
             ancestors.push(currentDog);
             
-            // Haal ouders op met volledige informatie
+            // Voeg ouders toe aan queue
             if (currentDog.vaderId) {
-                const father = await this.getHondByIdFromDb(currentDog.vaderId);
+                const father = await this.getHondById(currentDog.vaderId);
                 if (father) {
                     queue.push({ dog: father, generation: generation + 1 });
                 }
             }
             
             if (currentDog.moederId) {
-                const mother = await this.getHondByIdFromDb(currentDog.moederId);
+                const mother = await this.getHondById(currentDog.moederId);
                 if (mother) {
                     queue.push({ dog: mother, generation: generation + 1 });
                 }
@@ -1663,20 +1616,9 @@ class ReuTeefCombinatie {
     }
     
     async showStamboomWithFuturePuppy(futurePuppy, coiResult, healthAnalysis) {
-        console.log('🔄 Toon stamboom via StamboomManager...');
-        
         // Probeer eerst via StamboomManager
         if (this.stamboomManager && this.stamboomManager.allDogs) {
             const originalDogs = [...this.stamboomManager.allDogs];
-            
-            // Zorg dat ouders in de StamboomManager cache zitten
-            if (this.selectedReu) {
-                this.stamboomManager.allDogs.push(this.selectedReu);
-            }
-            if (this.selectedTeef) {
-                this.stamboomManager.allDogs.push(this.selectedTeef);
-            }
-            
             this.stamboomManager.allDogs.push(futurePuppy);
             
             try {
@@ -1693,7 +1635,6 @@ class ReuTeefCombinatie {
             }
         } else {
             // Fallback
-            console.log('⚠️ Gebruik fallback stamboom');
             await this.showCustomFuturePuppyPedigree(futurePuppy, coiResult, healthAnalysis);
         }
     }
@@ -2001,8 +1942,7 @@ class ReuTeefCombinatie {
         const container = document.getElementById('futurePuppyContainer');
         if (!container) return;
         
-        // Gebruik async build methode die ouders uit database haalt
-        const pedigreeTree = await this.buildFuturePuppyPedigreeTree(futurePuppy);
+        const pedigreeTree = this.buildFuturePuppyPedigreeTree(futurePuppy);
         
         const mainDogCard = await this.generateDogCard(pedigreeTree.mainDog, this.t('futurePuppyName'), true, 0);
         const fatherCard = await this.generateDogCard(pedigreeTree.father, this.t('fatherLabel'), false, 1);
@@ -2066,13 +2006,11 @@ class ReuTeefCombinatie {
         }
     }
     
-    async buildFuturePuppyPedigreeTree(futurePuppy) {
-        console.log('🌳 Bouw toekomstige pup stamboom...');
-        
+    buildFuturePuppyPedigreeTree(futurePuppy) {
         const pedigreeTree = {
             mainDog: futurePuppy,
-            father: null,
-            mother: null,
+            father: this.selectedReu,
+            mother: this.selectedTeef,
             paternalGrandfather: null,
             paternalGrandmother: null,
             maternalGrandfather: null,
@@ -2087,75 +2025,53 @@ class ReuTeefCombinatie {
             maternalGreatGrandmother2: null
         };
         
-        // HAAL OUDERS MET VOLLEDIGE INFO UIT DATABASE
-        console.log('📥 Haal ouders op uit database...');
-        if (this.selectedReu) {
-            pedigreeTree.father = await this.getHondByIdFromDb(this.selectedReu.id);
-            console.log(`✅ Reu opgehaald: ${pedigreeTree.father?.naam}, HD=${pedigreeTree.father?.heupdysplasie}`);
+        if (this.selectedReu && this.selectedReu.vaderId) {
+            pedigreeTree.paternalGrandfather = this.getDogById(this.selectedReu.vaderId);
         }
         
-        if (this.selectedTeef) {
-            pedigreeTree.mother = await this.getHondByIdFromDb(this.selectedTeef.id);
-            console.log(`✅ Teef opgehaald: ${pedigreeTree.mother?.naam}, HD=${pedigreeTree.mother?.heupdysplasie}`);
+        if (this.selectedReu && this.selectedReu.moederId) {
+            pedigreeTree.paternalGrandmother = this.getDogById(this.selectedReu.moederId);
         }
         
-        // Haal grootouders op
-        if (pedigreeTree.father && pedigreeTree.father.vaderId) {
-            pedigreeTree.paternalGrandfather = await this.getHondByIdFromDb(pedigreeTree.father.vaderId);
+        if (this.selectedTeef && this.selectedTeef.vaderId) {
+            pedigreeTree.maternalGrandfather = this.getDogById(this.selectedTeef.vaderId);
         }
         
-        if (pedigreeTree.father && pedigreeTree.father.moederId) {
-            pedigreeTree.paternalGrandmother = await this.getHondByIdFromDb(pedigreeTree.father.moederId);
+        if (this.selectedTeef && this.selectedTeef.moederId) {
+            pedigreeTree.maternalGrandmother = this.getDogById(this.selectedTeef.moederId);
         }
         
-        if (pedigreeTree.mother && pedigreeTree.mother.vaderId) {
-            pedigreeTree.maternalGrandfather = await this.getHondByIdFromDb(pedigreeTree.mother.vaderId);
-        }
-        
-        if (pedigreeTree.mother && pedigreeTree.mother.moederId) {
-            pedigreeTree.maternalGrandmother = await this.getHondByIdFromDb(pedigreeTree.mother.moederId);
-        }
-        
-        // Haal overgrootouders op
         if (pedigreeTree.paternalGrandfather && pedigreeTree.paternalGrandfather.vaderId) {
-            pedigreeTree.paternalGreatGrandfather1 = await this.getHondByIdFromDb(pedigreeTree.paternalGrandfather.vaderId);
+            pedigreeTree.paternalGreatGrandfather1 = this.getDogById(pedigreeTree.paternalGrandfather.vaderId);
         }
         
         if (pedigreeTree.paternalGrandfather && pedigreeTree.paternalGrandfather.moederId) {
-            pedigreeTree.paternalGreatGrandmother1 = await this.getHondByIdFromDb(pedigreeTree.paternalGrandfather.moederId);
+            pedigreeTree.paternalGreatGrandmother1 = this.getDogById(pedigreeTree.paternalGrandfather.moederId);
         }
         
         if (pedigreeTree.paternalGrandmother && pedigreeTree.paternalGrandmother.vaderId) {
-            pedigreeTree.paternalGreatGrandfather2 = await this.getHondByIdFromDb(pedigreeTree.paternalGrandmother.vaderId);
+            pedigreeTree.paternalGreatGrandfather2 = this.getDogById(pedigreeTree.paternalGrandmother.vaderId);
         }
         
         if (pedigreeTree.paternalGrandmother && pedigreeTree.paternalGrandmother.moederId) {
-            pedigreeTree.paternalGreatGrandmother2 = await this.getHondByIdFromDb(pedigreeTree.paternalGrandmother.moederId);
+            pedigreeTree.paternalGreatGrandmother2 = this.getDogById(pedigreeTree.paternalGrandmother.moederId);
         }
         
         if (pedigreeTree.maternalGrandfather && pedigreeTree.maternalGrandfather.vaderId) {
-            pedigreeTree.maternalGreatGrandfather1 = await this.getHondByIdFromDb(pedigreeTree.maternalGrandfather.vaderId);
+            pedigreeTree.maternalGreatGrandfather1 = this.getDogById(pedigreeTree.maternalGrandfather.vaderId);
         }
         
         if (pedigreeTree.maternalGrandfather && pedigreeTree.maternalGrandfather.moederId) {
-            pedigreeTree.maternalGreatGrandmother1 = await this.getHondByIdFromDb(pedigreeTree.maternalGrandfather.moederId);
+            pedigreeTree.maternalGreatGrandmother1 = this.getDogById(pedigreeTree.maternalGrandfather.moederId);
         }
         
         if (pedigreeTree.maternalGrandmother && pedigreeTree.maternalGrandmother.vaderId) {
-            pedigreeTree.maternalGreatGrandfather2 = await this.getHondByIdFromDb(pedigreeTree.maternalGrandmother.vaderId);
+            pedigreeTree.maternalGreatGrandfather2 = this.getDogById(pedigreeTree.maternalGrandmother.vaderId);
         }
         
         if (pedigreeTree.maternalGrandmother && pedigreeTree.maternalGrandmother.moederId) {
-            pedigreeTree.maternalGreatGrandmother2 = await this.getHondByIdFromDb(pedigreeTree.maternalGrandmother.moederId);
+            pedigreeTree.maternalGreatGrandmother2 = this.getDogById(pedigreeTree.maternalGrandmother.moederId);
         }
-        
-        console.log('✅ Stamboom opgebouwd met', 
-            (pedigreeTree.father ? 1 : 0) + (pedigreeTree.mother ? 1 : 0),
-            'ouders,',
-            (pedigreeTree.paternalGrandfather ? 1 : 0) + (pedigreeTree.paternalGrandmother ? 1 : 0) +
-            (pedigreeTree.maternalGrandfather ? 1 : 0) + (pedigreeTree.maternalGrandmother ? 1 : 0),
-            'grootouders'
-        );
         
         return pedigreeTree;
     }
