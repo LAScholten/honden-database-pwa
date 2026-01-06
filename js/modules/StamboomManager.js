@@ -302,18 +302,7 @@ class StamboomManager extends BaseModule {
             return { coi6Gen: '0.0', coiAllGen: '0.0' };
         }
         
-        // Volle broer/zus
-        if (vader.vaderId && moeder.vaderId && vader.vaderId === moeder.vaderId &&
-            vader.moederId && moeder.moederId && vader.moederId === moeder.moederId) {
-            return { coi6Gen: '25.0', coiAllGen: '25.0' };
-        }
-        
-        // Half broer/zus
-        if ((vader.vaderId && moeder.vaderId && vader.vaderId === moeder.vaderId) ||
-            (vader.moederId && moeder.moederId && vader.moederId === moeder.moederId)) {
-            return { coi6Gen: '12.5', coiAllGen: '12.5' };
-        }
-        
+
         // Complexe gevallen - probeer minimaal iets
         return { coi6Gen: '0.0', coiAllGen: '0.0' };
     }
