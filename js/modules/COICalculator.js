@@ -1,4 +1,4 @@
-// COICalculator V11 - ECHT SIMPEL VOLGENS JOUW BESCHRIJVING
+// COICalculator V12 - ALLE PADEN TELLEN
 class COICalculator {
     constructor(allDogs = []) {
         this.allDogs = allDogs;
@@ -9,7 +9,7 @@ class COICalculator {
             if (dog && dog.id) this._dogMap.set(Number(dog.id), dog);
         });
         
-        console.log(`✅ COICalculator V11: ${this._dogMap.size} honden geladen`);
+        console.log(`✅ COICalculator V12: ${this._dogMap.size} honden geladen`);
     }
 
     getDogById(id) {
@@ -44,9 +44,9 @@ class COICalculator {
                 return result;
             }
             
-            // ECHT SIMPELE BEREKENING
-            const coi6Gen = this._calculateCOIVerySimple(dogId, 6);
-            const coiAllGen = this._calculateCOIVerySimple(dogId, 25);
+            // BEREKEN MET ALLE PADEN
+            const coi6Gen = this._calculateCOIAllPaths(dogId, 6);
+            const coiAllGen = this._calculateCOIAllPaths(dogId, 25);
             
             const result = {
                 coi6Gen: (coi6Gen * 100).toFixed(1),
@@ -64,11 +64,11 @@ class COICalculator {
         }
     }
 
-    // ECHT SIMPELE BEREKENING VOLGENS JOUW BESCHRIJVING
-    _calculateCOIVerySimple(dogId, maxDepth) {
+    // BEREKEN MET ALLE PADEN
+    _calculateCOIAllPaths(dogId, maxDepth) {
         if (!dogId || maxDepth <= 0) return 0;
         
-        const cacheKey = `simple_${dogId}_${maxDepth}`;
+        const cacheKey = `allpaths_${dogId}_${maxDepth}`;
         if (this._coiCache.has(cacheKey)) {
             return this._coiCache.get(cacheKey);
         }
@@ -84,75 +84,67 @@ class COICalculator {
             return 0.25;
         }
         
-        // STAP 1: Verzamel alle voorouders van vader en moeder
-        const vaderAncestors = this._getAllAncestorsWithDepth(dog.vaderId, maxDepth);
-        const moederAncestors = this._getAllAncestorsWithDepth(dog.moederId, maxDepth);
+        // Verzamel ALLE paden van vader naar alle voorouders
+        const vaderPaths = this._getAllPathsComplete(dog.vaderId, maxDepth);
+        const moederPaths = this._getAllPathsComplete(dog.moederId, maxDepth);
+        
+        // Groepeer paden per voorouder
+        const vaderByAncestor = this._groupPathsByAncestor(vaderPaths);
+        const moederByAncestor = this._groupPathsByAncestor(moederPaths);
         
         let totalCOI = 0;
+        const contributions = [];
         
-        // STAP 2: Voor elke gemeenschappelijke voorouder
-        for (const [ancestorId, vDepth] of vaderAncestors.entries()) {
-            if (moederAncestors.has(ancestorId)) {
-                const mDepth = moederAncestors.get(ancestorId);
+        // Voor elke voorouder die in BEIDE ouders voorkomt
+        for (const [ancestorId, vaderDepths] of vaderByAncestor.entries()) {
+            if (moederByAncestor.has(ancestorId)) {
+                const moederDepths = moederByAncestor.get(ancestorId);
                 
-                // VOLGENS JOUW BESCHRIJVING:
-                // n = aantal generaties terug vanaf het dier tot aan de gemeenschappelijke voorouder
-                // Maar dit is via EEN pad, niet de som van beide!
-                
-                // Laten we kijken naar JOUW VOORBEELD:
-                // "volle neef/nicht (zelfde grootouders)" → (1/2)^3 = 12.5%
-                // Dier → Ouder → Grootouder = 2 stappen? Nee, 3 stappen!
-                // 1. Dier → Ouder (via vader)
-                // 2. Dier → Ouder (via moeder)  
-                // 3. Ouder → Grootouder
-                // n = 3!
-                
-                // Dus: n = vDepth + mDepth? Nee...
-                // Laten we logisch denken:
-                // Als grootouder gemeenschappelijk is:
-                // - Via vader: Dier → Vader → Grootouder = 2 stappen
-                // - Via moeder: Dier → Moeder → Grootouder = 2 stappen
-                // Totaal: 4 stappen? Maar formule zegt (1/2)^3
-                
-                // Ik denk dat de formule is: (1/2)^(vDepth + mDepth)?
-                // Voor grootouder: vDepth=1, mDepth=1 → (1/2)^2 = 25% (te hoog)
-                // Voor overgrootouder: vDepth=2, mDepth=2 → (1/2)^4 = 6.25%
-                
-                // Laten we TESTEN met bekende waarden:
-                // 1. Zelfde ouders: 25% = (1/2)^2? Nee, (1/2)^2 = 25% ✓
-                // 2. Volle broer/zus ouders: 25% = ouders delen beide ouders
-                //    vDepth=1, mDepth=1 → (1/2)^2 = 25% ✓
-                // 3. Half broer/zus ouders: 12.5% = ouders delen één ouder
-                //    vDepth=1, mDepth=1 → (1/2)^2 = 25% ✗ (fout!)
-                
-                // AH! Voor half broer/zus:
-                // Ouders delen één grootouder
-                // vDepth=1 (naar gedeelde grootouder), mDepth=1 (naar gedeelde grootouder)
-                // Maar dan (1/2)^2 = 25% wat fout is...
-                
-                // WACHT! Jouw voorbeeld: "volle neef/nicht = 12.5%"
-                // Dat is ouders zijn volle broer/zus van elkaar!
-                // Dus als ouders volle broer/zus zijn: COI = 25%
-                // Als DIEZELFDE ouders zelf volle broer/zus zijn: COI = 25%
-                // Maar jij zegt 12.5%...
-                
-                // Laten we de OFFICIËLE formule gebruiken die ik ken:
-                // COI = Σ (1/2)^(n1 + n2 + 1) * (1 + F_A)
-                // Waarbij n1 = stappen via vader, n2 = stappen via moeder
-                
-                const n1 = vDepth;  // stappen van dier naar voorouder via vader
-                const n2 = mDepth;  // stappen van dier naar voorouder via moeder
-                
-                // FORMULE: (1/2)^(n1 + n2 + 1)
-                const contribution = Math.pow(0.5, n1 + n2 + 1);
-                totalCOI += contribution;
-                
-                // Debug voor belangrijke bijdragen
-                if (maxDepth === 6 && contribution > 0.005) {
-                    const ancestorDog = this.getDogById(ancestorId);
-                    console.log(`   ➡ ${ancestorDog?.naam || ancestorId}: V${vDepth}+M${mDepth} = ${(contribution*100).toFixed(3)}%`);
+                // Voor elk pad van vader
+                for (const vDepth of vaderDepths) {
+                    // Voor elk pad van moeder
+                    for (const mDepth of moederDepths) {
+                        // FORMULE: (1/2)^(vDepth + mDepth + 1)
+                        const contribution = Math.pow(0.5, vDepth + mDepth + 1);
+                        totalCOI += contribution;
+                        
+                        // Voor debug
+                        if (maxDepth === 6 && contribution > 0.001) {
+                            contributions.push({
+                                ancestorId: ancestorId,
+                                vDepth: vDepth,
+                                mDepth: mDepth,
+                                contribution: contribution * 100
+                            });
+                        }
+                    }
                 }
             }
+        }
+        
+        // Toon bijdragen
+        if (maxDepth === 6 && contributions.length > 0) {
+            console.log(`   ➡ 6gen bijdragers (alle paden):`);
+            
+            // Groepeer per voorouder
+            const grouped = {};
+            contributions.forEach(c => {
+                const ancestorDog = this.getDogById(c.ancestorId);
+                const name = ancestorDog?.naam || `ID:${c.ancestorId}`;
+                
+                if (!grouped[name]) grouped[name] = { total: 0, details: [] };
+                grouped[name].total += c.contribution;
+                grouped[name].details.push(`V${c.vDepth}+M${c.mDepth}`);
+            });
+            
+            // Sorteer en toon
+            Object.entries(grouped)
+                .sort((a, b) => b[1].total - a[1].total)
+                .forEach(([name, data]) => {
+                    if (data.total > 0.1) {
+                        console.log(`      ${name}: ${data.total.toFixed(3)}% (${data.details.join(', ')})`);
+                    }
+                });
         }
         
         console.log(`   ➡ ${maxDepth}gen: totaal = ${(totalCOI * 100).toFixed(2)}%`);
@@ -161,136 +153,138 @@ class COICalculator {
         return totalCOI;
     }
 
-    // Verzamel voorouders met diepte
-    _getAllAncestorsWithDepth(startId, maxDepth, currentDepth = 1, result = new Map(), visited = new Set()) {
-        if (currentDepth > maxDepth || !startId || visited.has(startId)) {
-            return result;
-        }
+    // Verzamel ALLE paden (niet alleen kortste)
+    _getAllPathsComplete(dogId, maxDepth, currentDepth = 1, paths = [], visitedInPath = new Set()) {
+        if (currentDepth > maxDepth || !dogId) return paths;
         
-        visited.add(startId);
-        const dog = this.getDogById(startId);
-        if (!dog) return result;
+        // Voorkom cirkels in huidig pad
+        if (visitedInPath.has(dogId)) return paths;
+        visitedInPath.add(dogId);
+        
+        const dog = this.getDogById(dogId);
+        if (!dog) return paths;
         
         // Voeg vader toe
         if (dog.vaderId) {
-            // Gebruik de kleinste diepte als er meerdere paden zijn
-            if (!result.has(dog.vaderId) || result.get(dog.vaderId) > currentDepth) {
-                result.set(dog.vaderId, currentDepth);
-            }
+            paths.push({
+                ancestorId: dog.vaderId,
+                depth: currentDepth
+            });
             
-            // Recursie
-            this._getAllAncestorsWithDepth(
+            // Ga dieper
+            this._getAllPathsComplete(
                 dog.vaderId,
                 maxDepth,
                 currentDepth + 1,
-                result,
-                new Set(visited)
+                paths,
+                new Set(visitedInPath)
             );
         }
         
         // Voeg moeder toe
         if (dog.moederId) {
-            // Gebruik de kleinste diepte als er meerdere paden zijn
-            if (!result.has(dog.moederId) || result.get(dog.moederId) > currentDepth) {
-                result.set(dog.moederId, currentDepth);
-            }
+            paths.push({
+                ancestorId: dog.moederId,
+                depth: currentDepth
+            });
             
-            // Recursie
-            this._getAllAncestorsWithDepth(
+            // Ga dieper
+            this._getAllPathsComplete(
                 dog.moederId,
                 maxDepth,
                 currentDepth + 1,
-                result,
-                new Set(visited)
+                paths,
+                new Set(visitedInPath)
             );
         }
         
-        return result;
+        return paths;
     }
 
-    // DIRECTE RELATIE BEREKENING
-    calculateDirectCOI(dogId) {
+    // Groepeer paden per voorouder
+    _groupPathsByAncestor(paths) {
+        const grouped = new Map();
+        
+        for (const path of paths) {
+            if (!grouped.has(path.ancestorId)) {
+                grouped.set(path.ancestorId, []);
+            }
+            grouped.get(path.ancestorId).push(path.depth);
+        }
+        
+        return grouped;
+    }
+
+    // SNELLE SCHATTING
+    quickEstimate(dogId) {
         const dog = this.getDogById(dogId);
         if (!dog || !dog.vaderId || !dog.moederId) return 0;
         
-        // Zelfde ouders
-        if (dog.vaderId === dog.moederId) return 0.25;
+        // Bekende relaties
+        if (dog.vaderId === dog.moederId) return 25.0;
         
         const vader = this.getDogById(dog.vaderId);
         const moeder = this.getDogById(dog.moederId);
         if (!vader || !moeder) return 0;
         
-        // 1. Ouders zijn volle broer/zus
+        // Ouders zijn volle broer/zus
         if (vader.vaderId && moeder.vaderId && vader.vaderId === moeder.vaderId &&
             vader.moederId && moeder.moederId && vader.moederId === moeder.moederId) {
-            return 0.25;
+            return 25.0;
         }
         
-        // 2. Ouders zijn half broer/zus (gedeelde vader OF moeder)
-        let sharedAncestors = 0;
-        if (vader.vaderId && moeder.vaderId && vader.vaderId === moeder.vaderId) sharedAncestors++;
-        if (vader.moederId && moeder.moederId && vader.moederId === moeder.moederId) sharedAncestors++;
+        // Ouders zijn half broer/zus
+        let sharedParents = 0;
+        if (vader.vaderId && moeder.vaderId && vader.vaderId === moeder.vaderId) sharedParents++;
+        if (vader.moederId && moeder.moederId && vader.moederId === moeder.moederId) sharedParents++;
         
-        if (sharedAncestors === 1) return 0.125;  // half broer/zus
-        if (sharedAncestors === 2) return 0.25;   // volle broer/zus (al hierboven)
+        if (sharedParents === 1) return 12.5;
+        if (sharedParents === 2) return 25.0;
         
-        // 3. Oom/tante - neef/nicht
-        // Vader is broer/zus van moeder's ouder
-        if ((vader.vaderId === moeder.vaderId || vader.vaderId === moeder.moederId ||
-             vader.moederId === moeder.vaderId || vader.moederId === moeder.moederId)) {
-            return 0.125;
-        }
-        
-        // 4. Volle neef/nicht (zelfde grootouders)
-        if (vader.vaderId && vader.moederId && moeder.vaderId && moeder.moederId) {
-            const vaderGrandparents = new Set([vader.vaderId, vader.moederId]);
-            const moederGrandparents = new Set([moeder.vaderId, moeder.moederId]);
-            
-            let sharedGrandparents = 0;
-            for (const gp of vaderGrandparents) {
-                if (moederGrandparents.has(gp)) sharedGrandparents++;
-            }
-            
-            if (sharedGrandparents === 2) return 0.0625;  // 1/16 = 6.25%
-            if (sharedGrandparents === 1) return 0.03125; // 1/32 = 3.125%
-        }
-        
-        return 0;
+        // Voor complexere gevallen, gebruik berekening
+        return this._calculateCOIAllPaths(dogId, 6) * 100;
     }
 }
 
 // Maak globaal beschikbaar
 if (typeof window !== 'undefined') {
     window.COICalculator = COICalculator;
-    console.log('✅ COICalculator V11 geladen - ECHT SIMPEL');
+    console.log('✅ COICalculator V12 geladen - ALLE PADEN');
     
-    // Test met bekende waarden
-    window.testWithExamples = function(dogs, testId) {
+    // Test functie
+    window.testDetailed = function(dogs, testId) {
         const calculator = new COICalculator(dogs);
         
-        console.log('=== TEST MET BEKENDE WAARDEN ===');
+        console.log(`=== GEDETAILLEERDE COI ANALYSE VOOR ${testId} ===`);
         
-        // Test 1: Zelfde ouders
-        console.log('1. Zelfde ouders verwacht: 25.0%');
-        
-        // Test 2: Ouders zijn volle broer/zus  
-        console.log('2. Ouders volle broer/zus verwacht: 25.0%');
-        
-        // Test 3: Ouders zijn half broer/zus
-        console.log('3. Ouders half broer/zus verwacht: 12.5%');
-        
-        // Test 4: Volle neef/nicht
-        console.log('4. Volle neef/nicht verwacht: 12.5% (volgens jouw voorbeeld)');
-        console.log('   Maar volgens formule: (1/2)^(2+2+1) = (1/2)^5 = 3.125%');
-        console.log('   Of: (1/2)^(1+1+1) = (1/2)^3 = 12.5% (als grootouder gemeenschappelijk)');
-        
-        // Bereken voor test hond
+        // 1. Bereken COI
         const result = calculator.calculateCOI(testId);
-        const direct = calculator.calculateDirectCOI(testId) * 100;
         
-        console.log(`\nVoor ${testId}:`);
-        console.log(`- Complexe berekening: ${result.coi6Gen}%`);
-        console.log(`- Directe relatie: ${direct.toFixed(1)}%`);
+        // 2. Snel schatting
+        const quick = calculator.quickEstimate(testId);
+        console.log(`Snel schatting: ${quick.toFixed(1)}%`);
+        
+        // 3. Controleer ouders
+        const dog = calculator.getDogById(testId);
+        if (dog && dog.vaderId && dog.moederId) {
+            const vader = calculator.getDogById(dog.vaderId);
+            const moeder = calculator.getDogById(dog.moederId);
+            
+            if (vader && moeder) {
+                console.log(`\nOuders:`);
+                console.log(`- Vader: ${vader.naam} (${vader.id})`);
+                console.log(`- Moeder: ${moeder.naam} (${moeder.id})`);
+                
+                if (vader.vaderId && moeder.vaderId && vader.vaderId === moeder.vaderId) {
+                    console.log(`  ♂️ Gedeelde grootvader: ID ${vader.vaderId}`);
+                }
+                if (vader.moederId && moeder.moederId && vader.moederId === moeder.moederId) {
+                    console.log(`  ♀️ Gedeelde grootmoeder: ID ${vader.moederId}`);
+                }
+            }
+        }
+        
+        console.log(`===================================`);
         
         return result;
     };
