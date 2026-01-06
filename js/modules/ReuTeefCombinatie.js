@@ -4,6 +4,11 @@
  * MET ZELFDE STAMBOOM LAYOUT ALS STAMBOOMMANAGER
  */
 
+// REFRESH BIJ OPENEN VAN BESTAND
+if (window.location.search.indexOf('?refresh=') === -1) {
+    window.location.search = '?refresh=' + new Date().getTime();
+}
+
 class ReuTeefCombinatie {
     constructor() {
         this.currentLang = localStorage.getItem('appLanguage') || 'nl';
@@ -3012,8 +3017,8 @@ class ReuTeefCombinatie {
         });
         
         document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('photo-large-close') || 
-                e.target.classList.contains('photo-large-close-btn') ||
+            if (e.target.classList.contains('.photo-large-close') || 
+                e.target.classList.contains('.photo-large-close-btn') ||
                 e.target.closest('.photo-large-close') ||
                 e.target.closest('.photo-large-close-btn')) {
                 const overlay = document.getElementById('photoLargeOverlay');
