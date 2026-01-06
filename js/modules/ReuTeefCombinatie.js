@@ -4,8 +4,8 @@
  * MET ZELFDE STAMBOOM LAYOUT ALS STAMBOOMMANAGER
  */
 
-// REFRESH BIJ OPENEN VAN BESTAND
-if (window.location.search.indexOf('?refresh=') === -1) {
+// REFRESH BIJ OPENEN VAN BESTAND - VERBETERDE VERSIE
+if (window.location.search.indexOf('?refresh=') === -1 && window.location.pathname.includes('.html')) {
     window.location.search = '?refresh=' + new Date().getTime();
 }
 
@@ -26,6 +26,11 @@ class ReuTeefCombinatie {
         
         // COI Calculator instance
         this.coiCalculator = null;
+        
+        // Popup management
+        this.popupContainerId = 'reuTeefPedigreePopupOverlay';
+        this.popupContentId = 'reuTeefPedigreePopupContainer';
+        this.photoOverlayId = 'reuTeefPhotoLargeOverlay';
         
         // Vertalingen
         this.translations = {
@@ -335,7 +340,7 @@ class ReuTeefCombinatie {
                 pl2: "PL 2",
                 pl3: "PL 3",
                 plUnknown: "PL unbekannt",
-                eyesFree: "Augen frei",
+                eyesFree: "Augen vrij",
                 eyesDist: "Augen Dist",
                 eyesOther: "Augen sonstige",
                 eyesUnknown: "Augen unbekannt",
@@ -413,6 +418,9 @@ class ReuTeefCombinatie {
         this.selectedTeef = null;
         this.selectedReu = null;
         this.hondenCache.clear();
+        
+        // Clean up previous popup containers
+        this.cleanupPopupContainers();
         
         // Laad honden data
         await this.loadAllHonden();
@@ -563,6 +571,30 @@ class ReuTeefCombinatie {
         
         // Update button states
         this.updateButtonStates();
+    }
+    
+    cleanupPopupContainers() {
+        // Verwijder eventuele bestaande popup containers van deze module
+        const existingOverlay = document.getElementById(this.popupContainerId);
+        if (existingOverlay) {
+            existingOverlay.remove();
+        }
+        
+        const existingPhotoOverlay = document.getElementById(this.photoOverlayId);
+        if (existingPhotoOverlay) {
+            existingPhotoOverlay.remove();
+        }
+        
+        // Verwijder ook de generieke containers die mogelijk conflicteren
+        const genericOverlay = document.getElementById('pedigreePopupOverlay');
+        if (genericOverlay && !document.querySelector('.modal.show')) {
+            genericOverlay.remove();
+        }
+        
+        const genericPhotoOverlay = document.getElementById('photoLargeOverlay');
+        if (genericPhotoOverlay && !document.querySelector('.modal.show')) {
+            genericPhotoOverlay.remove();
+        }
     }
     
     addStyles() {
@@ -849,6 +881,36 @@ class ReuTeefCombinatie {
                         display: block;
                         overflow-x: auto;
                     }
+                }
+                
+                /* UNIEKE POPUP STYLES VOOR DEZE MODULE */
+                #${this.popupContainerId} {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.7);
+                    z-index: 1060;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    animation: fadeIn 0.3s;
+                    overflow-y: auto;
+                }
+                
+                #${this.photoOverlayId} {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.85);
+                    z-index: 1070;
+                    display: none;
+                    align-items: center;
+                    justify-content: center;
+                    animation: fadeIn 0.3s;
                 }
             `;
             document.head.appendChild(style);
@@ -1744,13 +1806,13 @@ class ReuTeefCombinatie {
                 </div>
             </div>
             
-            <!-- Popup overlay voor hond details (zoals in StamboomManager) -->
-            <div class="pedigree-popup-overlay" id="pedigreePopupOverlay" style="display: none;">
-                <div class="pedigree-popup-container" id="pedigreePopupContainer"></div>
+            <!-- UNIEKE Popup overlay voor deze module -->
+            <div class="pedigree-popup-overlay" id="${this.popupContainerId}" style="display: none;">
+                <div class="pedigree-popup-container" id="${this.popupContentId}"></div>
             </div>
             
-            <!-- Foto overlay -->
-            <div class="photo-large-overlay" id="photoLargeOverlay" style="display: none;"></div>
+            <!-- UNIEKE Foto overlay voor deze module -->
+            <div class="photo-large-overlay" id="${this.photoOverlayId}" style="display: none;"></div>
             
             <style>
                 /* MOBIELE WRAPPER - ZELFDE ALS STAMBOOMMANAGER */
@@ -2491,8 +2553,8 @@ class ReuTeefCombinatie {
                     }
                 }
                 
-                /* DETAIL POPUP STYLES - ZELFDE ALS STAMBOOMMANAGER */
-                .pedigree-popup-overlay {
+                /* UNIEKE DETAIL POPUP STYLES VOOR DEZE MODULE */
+                #${this.popupContainerId} {
                     position: fixed;
                     top: 0;
                     left: 0;
@@ -2512,7 +2574,7 @@ class ReuTeefCombinatie {
                     to { opacity: 1; }
                 }
                 
-                .pedigree-popup-container {
+                #${this.popupContentId} {
                     background: white;
                     border-radius: 12px;
                     max-width: 400px;
@@ -2759,8 +2821,8 @@ class ReuTeefCombinatie {
                     font-size: 1rem;
                 }
                 
-                /* GROTE FOTO OVERLAY STYLES */
-                .photo-large-overlay {
+                /* UNIEKE GROTE FOTO OVERLAY STYLES VOOR DEZE MODULE */
+                #${this.photoOverlayId} {
                     position: fixed;
                     top: 0;
                     left: 0;
@@ -2886,8 +2948,8 @@ class ReuTeefCombinatie {
                         border: 2px solid #000 !important;
                     }
                     
-                    .pedigree-popup-overlay,
-                    .photo-large-overlay {
+                    #${this.popupContainerId},
+                    #${this.photoOverlayId} {
                         display: none !important;
                     }
                 }
@@ -2980,6 +3042,7 @@ class ReuTeefCombinatie {
     }
     
     setupGlobalEventListeners() {
+        // Gebruik event delegation voor foto thumbnails
         document.addEventListener('click', async (e) => {
             const thumbnail = e.target.closest('.photo-thumbnail');
             if (thumbnail) {
@@ -2987,7 +3050,6 @@ class ReuTeefCombinatie {
                 e.stopPropagation();
                 
                 const photoId = thumbnail.getAttribute('data-photo-id');
-                const isThumbnail = thumbnail.getAttribute('data-is-thumbnail') === 'true';
                 
                 if (!photoId) return;
                 
@@ -3016,30 +3078,38 @@ class ReuTeefCombinatie {
             }
         });
         
+        // Sluit foto overlay
         document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('.photo-large-close') || 
-                e.target.classList.contains('.photo-large-close-btn') ||
-                e.target.closest('.photo-large-close') ||
-                e.target.closest('.photo-large-close-btn')) {
-                const overlay = document.getElementById('photoLargeOverlay');
-                if (overlay) {
-                    overlay.style.display = 'none';
-                    setTimeout(() => {
-                        if (overlay.parentNode) {
-                            overlay.parentNode.removeChild(overlay);
-                        }
-                    }, 300);
-                }
-            }
+            const photoOverlay = document.getElementById(this.photoOverlayId);
+            if (!photoOverlay) return;
             
-            if (e.target.id === 'photoLargeOverlay') {
-                const overlay = e.target;
-                overlay.style.display = 'none';
+            if (e.target.classList.contains('photo-large-close') || 
+                e.target.classList.contains('photo-large-close-btn') ||
+                e.target.closest('.photo-large-close') ||
+                e.target.closest('.photo-large-close-btn') ||
+                e.target === photoOverlay) {
+                
+                photoOverlay.style.display = 'none';
                 setTimeout(() => {
-                    if (overlay.parentNode) {
-                        overlay.parentNode.removeChild(overlay);
+                    if (photoOverlay.parentNode) {
+                        photoOverlay.parentNode.removeChild(photoOverlay);
                     }
                 }, 300);
+            }
+        });
+        
+        // ESC toets om popups te sluiten
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const popupOverlay = document.getElementById(this.popupContainerId);
+                if (popupOverlay && popupOverlay.style.display === 'flex') {
+                    popupOverlay.style.display = 'none';
+                }
+                
+                const photoOverlay = document.getElementById(this.photoOverlayId);
+                if (photoOverlay && photoOverlay.style.display === 'flex') {
+                    photoOverlay.style.display = 'none';
+                }
             }
         });
     }
@@ -3065,13 +3135,14 @@ class ReuTeefCombinatie {
     showLargePhoto(photoData, dogName = '') {
         console.log('Toon grote foto:', photoData.substring(0, 100) + '...');
         
-        const existingOverlay = document.getElementById('photoLargeOverlay');
+        // Verwijder bestaande overlay
+        const existingOverlay = document.getElementById(this.photoOverlayId);
         if (existingOverlay) {
             existingOverlay.remove();
         }
         
         const overlayHTML = `
-            <div class="photo-large-overlay" id="photoLargeOverlay" style="display: flex;">
+            <div class="photo-large-overlay" id="${this.photoOverlayId}" style="display: flex;">
                 <div class="photo-large-container" id="photoLargeContainer">
                     <div class="photo-large-header">
                         <button type="button" class="btn-close btn-close-white photo-large-close"></button>
@@ -3093,30 +3164,6 @@ class ReuTeefCombinatie {
         `;
         
         document.body.insertAdjacentHTML('beforeend', overlayHTML);
-        
-        const closeOnEscape = (e) => {
-            if (e.key === 'Escape') {
-                const overlay = document.getElementById('photoLargeOverlay');
-                if (overlay) {
-                    overlay.style.display = 'none';
-                    setTimeout(() => {
-                        if (overlay.parentNode) {
-                            overlay.parentNode.removeChild(overlay);
-                        }
-                    }, 300);
-                    document.removeEventListener('keydown', closeOnEscape);
-                }
-            }
-        };
-        document.addEventListener('keydown', closeOnEscape);
-        
-        const overlay = document.getElementById('photoLargeOverlay');
-        overlay.addEventListener('animationend', function handler() {
-            if (overlay.style.display === 'none') {
-                document.removeEventListener('keydown', closeOnEscape);
-                overlay.removeEventListener('animationend', handler);
-            }
-        });
     }
     
     addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis) {
@@ -3416,8 +3463,11 @@ class ReuTeefCombinatie {
     }
     
     async showDogDetailPopup(dog, relation) {
-        const overlay = document.getElementById('pedigreePopupOverlay');
-        const container = document.getElementById('pedigreePopupContainer');
+        // Zorg dat de popup container bestaat
+        this.ensurePopupContainer();
+        
+        const overlay = document.getElementById(this.popupContainerId);
+        const container = document.getElementById(this.popupContentId);
         
         if (!overlay || !container) return;
         
@@ -3426,33 +3476,8 @@ class ReuTeefCombinatie {
         
         overlay.style.display = 'flex';
         
-        const closeButtons = container.querySelectorAll('.btn-close, .popup-close-btn');
-        closeButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                overlay.style.display = 'none';
-            });
-        });
-        
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) {
-                overlay.style.display = 'none';
-            }
-        });
-        
-        const closeOnEscape = (e) => {
-            if (e.key === 'Escape') {
-                overlay.style.display = 'none';
-                document.removeEventListener('keydown', closeOnEscape);
-            }
-        };
-        document.addEventListener('keydown', closeOnEscape);
-        
-        overlay.addEventListener('animationend', function handler() {
-            if (overlay.style.display === 'none') {
-                document.removeEventListener('keydown', closeOnEscape);
-                overlay.removeEventListener('animationend', handler);
-            }
-        });
+        // Voeg event listeners toe
+        this.setupPopupEventListeners();
     }
     
     async getDogDetailPopupHTML(dog, relation = '') {
@@ -3806,8 +3831,8 @@ class ReuTeefCombinatie {
         
         this.ensurePopupContainer();
         
-        const overlay = document.getElementById('pedigreePopupOverlay');
-        const container = document.getElementById('pedigreePopupContainer');
+        const overlay = document.getElementById(this.popupContainerId);
+        const container = document.getElementById(this.popupContentId);
         
         if (container) {
             container.innerHTML = popupHTML;
@@ -3896,19 +3921,29 @@ class ReuTeefCombinatie {
     }
     
     ensurePopupContainer() {
-        if (!document.getElementById('pedigreePopupOverlay')) {
-            const overlayHTML = `
-                <div class="pedigree-popup-overlay" id="pedigreePopupOverlay" style="display: none;">
-                    <div class="pedigree-popup-container" id="pedigreePopupContainer"></div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', overlayHTML);
+        // Verwijder eerst bestaande container om conflicten te voorkomen
+        const existingOverlay = document.getElementById(this.popupContainerId);
+        if (existingOverlay) {
+            existingOverlay.remove();
         }
+        
+        const existingContent = document.getElementById(this.popupContentId);
+        if (existingContent) {
+            existingContent.remove();
+        }
+        
+        // Creëer nieuwe unieke container
+        const overlayHTML = `
+            <div class="pedigree-popup-overlay" id="${this.popupContainerId}" style="display: none;">
+                <div class="pedigree-popup-container" id="${this.popupContentId}"></div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', overlayHTML);
     }
     
     setupPopupEventListeners() {
-        const overlay = document.getElementById('pedigreePopupOverlay');
-        const container = document.getElementById('pedigreePopupContainer');
+        const overlay = document.getElementById(this.popupContainerId);
+        const container = document.getElementById(this.popupContentId);
         
         if (!overlay || !container) return;
         
@@ -3925,20 +3960,7 @@ class ReuTeefCombinatie {
             }
         });
         
-        const closeOnEscape = (e) => {
-            if (e.key === 'Escape') {
-                overlay.style.display = 'none';
-                document.removeEventListener('keydown', closeOnEscape);
-            }
-        };
-        document.addEventListener('keydown', closeOnEscape);
-        
-        overlay.addEventListener('animationend', function handler() {
-            if (overlay.style.display === 'none') {
-                document.removeEventListener('keydown', closeOnEscape);
-                overlay.removeEventListener('animationend', handler);
-            }
-        });
+        // ESC toets wordt al afgehandeld in setupGlobalEventListeners
     }
     
     showAlert(message, type = 'info') {
