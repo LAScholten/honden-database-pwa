@@ -19,6 +19,9 @@ class ReuTeefCombinatie {
         this.stamboomManager = null;
         this.coiCalculator = null;
         
+        // Track initialisatie status
+        this.isInitialized = false;
+        
         // Vertalingen
         this.translations = {
             nl: {
@@ -220,7 +223,7 @@ class ReuTeefCombinatie {
                 found: "gefunden",
                 futurePuppyName: "Zukünftiger Welpe",
                 futurePuppyDescription: "Vorhersage der Kombination {father} × {mother}",
-                futurePuppyTitle: "Stamboom für zukünftigen Welpen aus Kombination {father} × {mother}",
+                futurePuppyTitle: "Stamboom voor zukünftigen Welpen aus Kombination {father} × {mother}",
                 predictedPedigree: "Vorhergesagter Stammbaum",
                 combinedParents: "Kombination Eltern",
                 // COI labels hinzugefügt für Popup
@@ -264,12 +267,46 @@ class ReuTeefCombinatie {
         };
     }
     
-    injectDependencies(db, auth, searchManager, stamboomManager) {
+    injectDependencies(db, auth, searchManager) {
         this.db = db;
         this.auth = auth;
         this.searchManager = searchManager; // 👈 NIEUW: Gebruik SearchManager
-        this.stamboomManager = stamboomManager;
         console.log('✅ ReuTeefCombinatie: SearchManager geïnjecteerd voor consistente data');
+    }
+    
+    async initialize() {
+        console.log('🔄 ReuTeefCombinatie initialiseren...');
+        
+        if (this.isInitialized) {
+            console.log('✅ ReuTeefCombinatie al geïnitialiseerd');
+            return;
+        }
+        
+        try {
+            // 1. Initialiseer StamboomManager indien nodig
+            if (!this.stamboomManager && this.db) {
+                console.log('🔄 StamboomManager initialiseren...');
+                this.stamboomManager = new StamboomManager(this.db, this.currentLang);
+                
+                // Wacht op initialisatie
+                if (this.stamboomManager.initialize && typeof this.stamboomManager.initialize === 'function') {
+                    await this.stamboomManager.initialize();
+                    console.log('✅ StamboomManager geïnitialiseerd');
+                } else {
+                    console.log('ℹ️ StamboomManager heeft geen initialize methode, overslaan');
+                }
+            }
+            
+            // 2. Laad data via SearchManager voor consistentie
+            await this.loadDataViaSearchManager();
+            
+            this.isInitialized = true;
+            console.log('✅ ReuTeefCombinatie succesvol geïnitialiseerd');
+            
+        } catch (error) {
+            console.error('❌ Fout bij initialiseren ReuTeefCombinatie:', error);
+            throw error;
+        }
     }
     
     t(key, params = {}) {
@@ -284,19 +321,33 @@ class ReuTeefCombinatie {
     }
     
     async loadContent() {
+        console.log('🔄 ReuTeefCombinatie.loadContent() aangeroepen');
+        
+        // Controleer of we geïnitialiseerd zijn
+        if (!this.isInitialized) {
+            console.log('ℹ️ Nog niet geïnitialiseerd, initialiseer nu...');
+            try {
+                await this.initialize();
+            } catch (error) {
+                console.error('❌ Initialisatie mislukt:', error);
+                this.showAlert('Kon module niet initialiseren. Probeer opnieuw.', 'danger');
+                return;
+            }
+        }
+        
         const t = this.t.bind(this);
         const content = document.getElementById('breedingContent');
         const buttons = document.getElementById('breedingButtons');
         
-        if (!content) return;
+        if (!content) {
+            console.error('❌ Content container niet gevonden');
+            return;
+        }
         
         // Reset geselecteerde honden
         this.selectedTeef = null;
         this.selectedReu = null;
         this.hondenCache.clear();
-        
-        // 🔄 CRITICAL FIX: GEBRUIK SEARCHMANAGER'S DATASET
-        await this.loadDataViaSearchManager();
         
         content.innerHTML = `
             <div class="alert alert-info mb-4">
@@ -420,8 +471,8 @@ class ReuTeefCombinatie {
             this.goBack();
         });
         
-        document.getElementById('showPedigreeBtn').addEventListener('click', () => {
-            this.showFuturePuppyPedigree();
+        document.getElementById('showPedigreeBtn').addEventListener('click', async () => {
+            await this.showFuturePuppyPedigree();
         });
         
         // Setup autocomplete voor teef
@@ -436,6 +487,8 @@ class ReuTeefCombinatie {
         
         // Update button states
         this.updateButtonStates();
+        
+        console.log('✅ ReuTeefCombinatie content geladen');
     }
     
     addStyles() {
@@ -739,6 +792,7 @@ class ReuTeefCombinatie {
                 console.log(`✅ Data overgenomen van SearchManager: ${this.allHonden.length} honden`);
             } else {
                 // Laad data als SearchManager het nog niet heeft
+                console.log('ℹ️ SearchManager heeft nog geen data, laad nu...');
                 await this.searchManager.loadSearchData();
                 this.allHonden = [...this.searchManager.allDogs];
                 console.log(`✅ Data geladen via SearchManager: ${this.allHonden.length} honden`);
@@ -1388,52 +1442,60 @@ class ReuTeefCombinatie {
     }
     
     async showFuturePuppyPedigree() {
+        console.log('🔄 showFuturePuppyPedigree() aangeroepen');
+        
         if (!this.selectedTeef || !this.selectedReu) {
             this.showAlert(this.t('selectDogFirst'), 'warning');
             return;
         }
         
+        // Controleer StamboomManager initialisatie
         if (!this.stamboomManager) {
-            this.showAlert('StamboomManager niet geïnitialiseerd', 'danger');
+            console.error('❌ StamboomManager niet beschikbaar');
+            this.showAlert('StamboomManager niet geïnitialiseerd. Probeer opnieuw.', 'danger');
             return;
         }
         
+        // Controleer COI calculator
         if (!this.coiCalculator && typeof COICalculator === 'undefined') {
             console.error('❌ COICalculator niet beschikbaar');
             this.showAlert('COI berekening niet beschikbaar', 'danger');
             return;
         }
         
-        // Maak een virtuele toekomstige pup
-        const futurePuppy = {
-            id: -999999, // Uniek ID voor virtuele pup
-            naam: this.t('futurePuppyName'),
-            geslacht: 'onbekend',
-            vaderId: this.selectedReu.id,
-            moederId: this.selectedTeef.id,
-            vader: this.selectedReu.naam,
-            moeder: this.selectedTeef.naam,
-            kennelnaam: this.t('combinedParents'),
-            // Ras wordt nu leeg gelaten
-            stamboomnr: 'VOORSPELD',
-            geboortedatum: new Date().toISOString().split('T')[0],
-            vachtkleur: `${this.selectedReu.vachtkleur || ''}/${this.selectedTeef.vachtkleur || ''}`.trim(),
-            heupdysplasie: null,
-            elleboogdysplasie: null,
-            patella: null,
-            ogen: null,
-            ogenVerklaring: null,
-            dandyWalker: null,
-            schildklier: null,
-            schildklierVerklaring: null,
-            land: null,
-            postcode: null,
-            opmerkingen: null
-        };
-        
-        console.log('🔍 Toekomstige pup aangemaakt voor COI berekening:', futurePuppy);
+        // Toon laadindicator
+        this.showLoadingIndicator();
         
         try {
+            // Maak een virtuele toekomstige pup
+            const futurePuppy = {
+                id: -999999, // Uniek ID voor virtuele pup
+                naam: this.t('futurePuppyName'),
+                geslacht: 'onbekend',
+                vaderId: this.selectedReu.id,
+                moederId: this.selectedTeef.id,
+                vader: this.selectedReu.naam,
+                moeder: this.selectedTeef.naam,
+                kennelnaam: this.t('combinedParents'),
+                // Ras wordt nu leeg gelaten
+                stamboomnr: 'VOORSPELD',
+                geboortedatum: new Date().toISOString().split('T')[0],
+                vachtkleur: `${this.selectedReu.vachtkleur || ''}/${this.selectedTeef.vachtkleur || ''}`.trim(),
+                heupdysplasie: null,
+                elleboogdysplasie: null,
+                patella: null,
+                ogen: null,
+                ogenVerklaring: null,
+                dandyWalker: null,
+                schildklier: null,
+                schildklierVerklaring: null,
+                land: null,
+                postcode: null,
+                opmerkingen: null
+            };
+            
+            console.log('🔍 Toekomstige pup aangemaakt voor COI berekening:', futurePuppy);
+            
             // 🔄 CRITICAL FIX: ZORG DAT STAMBOOMMANAGER DE JUISTE DATA HEEFT
             await this.prepareStamboomManagerForFuturePuppy(futurePuppy);
             
@@ -1445,19 +1507,25 @@ class ReuTeefCombinatie {
             const healthAnalysis = await this.analyzeHealthInLine(futurePuppy);
             console.log('✅ Gezondheidsanalyse resultaat:', healthAnalysis);
             
+            // Verwijder laadindicator
+            this.removeLoadingIndicator();
+            
             // Toon stamboom via StamboomManager
             await this.stamboomManager.showPedigree(futurePuppy);
             
             // VOEG CLICK EVENT TOE VOOR DE TOEKOMSTIGE PUP
             setTimeout(() => {
                 this.addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis);
-            }, 100);
+            }, 500);
             
             // Zorg dat alle voorouders klikbaar zijn met volledige details
-            await this.ensureAllAncestorsHaveFullDetails();
+            setTimeout(() => {
+                this.ensureAllAncestorsHaveFullDetails();
+            }, 1000);
             
         } catch (error) {
             console.error('❌ Fout bij tonen toekomstige pup stamboom:', error);
+            this.removeLoadingIndicator();
             this.showAlert('Kon stamboom niet genereren. Probeer opnieuw.', 'danger');
         }
     }
@@ -1466,16 +1534,25 @@ class ReuTeefCombinatie {
     async prepareStamboomManagerForFuturePuppy(futurePuppy) {
         console.log('🔄 Bereid StamboomManager voor met SearchManager data');
         
-        // 1. Zorg dat StamboomManager SearchManager's dataset gebruikt
+        // 1. Zorg dat StamboomManager bestaat
+        if (!this.stamboomManager) {
+            throw new Error('StamboomManager niet beschikbaar');
+        }
+        
+        // 2. Zorg dat StamboomManager SearchManager's dataset gebruikt
         if (this.searchManager && this.searchManager.allDogs) {
             this.stamboomManager.allDogs = [...this.searchManager.allDogs];
             console.log(`✅ StamboomManager dataset bijgewerkt: ${this.stamboomManager.allDogs.length} honden`);
+        } else {
+            // Gebruik eigen dataset als fallback
+            this.stamboomManager.allDogs = [...this.allHonden];
+            console.log(`✅ StamboomManager dataset bijgewerkt (eigen data): ${this.stamboomManager.allDogs.length} honden`);
         }
         
-        // 2. Verzamel alle voorouders via SearchManager's consistente methode
+        // 3. Verzamel alle voorouders via SearchManager's consistente methode
         const allAncestors = await this.getAllAncestorsViaSearchManager();
         
-        // 3. Voeg voorouders toe aan StamboomManager (zonder duplicaten)
+        // 4. Voeg voorouders toe aan StamboomManager (zonder duplicaten)
         const existingIds = new Set(this.stamboomManager.allDogs.map(dog => dog.id));
         const newAncestors = allAncestors.filter(ancestor => !existingIds.has(ancestor.id));
         
@@ -1484,17 +1561,19 @@ class ReuTeefCombinatie {
             console.log(`✅ ${newAncestors.length} voorouders toegevoegd aan StamboomManager`);
         }
         
-        // 4. Voeg de virtuele pup toe
-        this.stamboomManager.allDogs.push(futurePuppy);
-        console.log('✅ Virtuele pup toegevoegd aan StamboomManager');
+        // 5. Voeg de virtuele pup toe (als die er nog niet is)
+        if (!this.stamboomManager.allDogs.some(dog => dog.id === futurePuppy.id)) {
+            this.stamboomManager.allDogs.push(futurePuppy);
+            console.log('✅ Virtuele pup toegevoegd aan StamboomManager');
+        }
         
-        // 5. HERINITIALISEER StamboomManager's COI calculator met de nieuwe dataset
+        // 6. HERINITIALISEER StamboomManager's COI calculator met de nieuwe dataset
         if (typeof COICalculator !== 'undefined') {
             this.stamboomManager.coiCalculator = new COICalculator(this.stamboomManager.allDogs);
             console.log('✅ StamboomManager COICalculator geherinitialiseerd');
         }
         
-        // 6. Update eigen COI calculator ook
+        // 7. Update eigen COI calculator ook
         this.coiCalculator = new COICalculator(this.stamboomManager.allDogs);
         console.log('✅ Eigen COICalculator bijgewerkt');
     }
@@ -1738,17 +1817,25 @@ class ReuTeefCombinatie {
     addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis) {
         const futurePuppyCard = document.querySelector('.pedigree-card-compact.horizontal.main-dog-compact.gen0');
         if (futurePuppyCard) {
-            futurePuppyCard.addEventListener('click', (e) => {
+            // Verwijder bestaande event listeners om duplicatie te voorkomen
+            const newFuturePuppyCard = futurePuppyCard.cloneNode(true);
+            futurePuppyCard.parentNode.replaceChild(newFuturePuppyCard, futurePuppyCard);
+            
+            newFuturePuppyCard.addEventListener('click', (e) => {
                 e.stopPropagation();
                 this.showFuturePuppyPopup(futurePuppy, coiResult, healthAnalysis);
             });
             
-            futurePuppyCard.style.cursor = 'pointer';
+            newFuturePuppyCard.style.cursor = 'pointer';
             
-            const clickHint = futurePuppyCard.querySelector('.click-hint-compact');
+            const clickHint = newFuturePuppyCard.querySelector('.click-hint-compact');
             if (clickHint) {
                 clickHint.innerHTML = '<i class="bi bi-info-circle"></i> ' + this.t('clickForDetails');
             }
+            
+            console.log('✅ Future puppy click handler toegevoegd');
+        } else {
+            console.warn('⚠️ Future puppy card niet gevonden');
         }
     }
     
@@ -2013,6 +2100,66 @@ class ReuTeefCombinatie {
         if (value < 4.0) return '#28a745';
         if (value <= 6.0) return '#fd7e14';
         return '#dc3545';
+    }
+    
+    showLoadingIndicator() {
+        // Verwijder bestaande laadindicator
+        this.removeLoadingIndicator();
+        
+        // Maak nieuwe laadindicator
+        const loadingDiv = document.createElement('div');
+        loadingDiv.id = 'reuteefLoadingIndicator';
+        loadingDiv.className = 'loading-indicator-overlay';
+        loadingDiv.innerHTML = `
+            <div class="loading-indicator-content">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">${this.t('loading')}</span>
+                </div>
+                <p class="mt-3">${this.t('loadingPedigree')}</p>
+            </div>
+        `;
+        
+        document.body.appendChild(loadingDiv);
+        
+        // Voeg CSS toe voor laadindicator
+        const style = document.createElement('style');
+        style.id = 'reuteefLoadingIndicatorStyle';
+        style.textContent = `
+            .loading-indicator-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+            }
+            
+            .loading-indicator-content {
+                background: white;
+                padding: 30px;
+                border-radius: 10px;
+                text-align: center;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            }
+        `;
+        
+        document.head.appendChild(style);
+    }
+    
+    removeLoadingIndicator() {
+        const loadingDiv = document.getElementById('reuteefLoadingIndicator');
+        if (loadingDiv) {
+            loadingDiv.remove();
+        }
+        
+        const style = document.getElementById('reuteefLoadingIndicatorStyle');
+        if (style) {
+            style.remove();
+        }
     }
     
     showAlert(message, type = 'info') {
