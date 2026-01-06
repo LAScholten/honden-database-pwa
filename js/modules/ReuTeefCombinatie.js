@@ -2,7 +2,6 @@
  * Reu en Teef Combinatie Module - ZELFSTANDIGE VERSIE
  * Voor het maken van fokplannen met specifieke reu en teef
  * MET ZELFDE STAMBOOM LAYOUT ALS STAMBOOMMANAGER
- * OPGELOST: Conflict met StamboomManager voorkomen
  */
 
 class ReuTeefCombinatie {
@@ -22,9 +21,6 @@ class ReuTeefCombinatie {
         
         // COI Calculator instance
         this.coiCalculator = null;
-        
-        // Event listener management
-        this.eventListeners = new Map();
         
         // Vertalingen
         this.translations = {
@@ -401,43 +397,6 @@ class ReuTeefCombinatie {
         return text;
     }
     
-    // NIEUW: Cleanup methode voor proper event management
-    cleanup() {
-        this.removeAllEventListeners();
-        this.closeAllModals();
-    }
-    
-    // NIEUW: Event listener management
-    addEventListener(element, event, handler, options = {}) {
-        if (!this.eventListeners.has(event)) {
-            this.eventListeners.set(event, []);
-        }
-        this.eventListeners.get(event).push({ element, handler, options });
-        element.addEventListener(event, handler, options);
-    }
-    
-    removeAllEventListeners() {
-        for (const [event, listeners] of this.eventListeners) {
-            for (const listener of listeners) {
-                listener.element.removeEventListener(event, listener.handler, listener.options);
-            }
-        }
-        this.eventListeners.clear();
-    }
-    
-    // NIEUW: Modal management
-    closeAllModals() {
-        // Close custom overlays
-        const overlays = ['futurePuppyModal', 'pedigreePopupOverlay', 'photoLargeOverlay'];
-        overlays.forEach(id => {
-            const overlay = document.getElementById(id);
-            if (overlay) {
-                overlay.style.display = 'none';
-                overlay.remove();
-            }
-        });
-    }
-    
     async loadContent() {
         const t = this.t.bind(this);
         const content = document.getElementById('breedingContent');
@@ -580,7 +539,6 @@ class ReuTeefCombinatie {
         
         // Event handlers
         document.getElementById('backBtn').addEventListener('click', () => {
-            this.cleanup();
             this.goBack();
         });
         
@@ -3017,8 +2975,7 @@ class ReuTeefCombinatie {
     }
     
     setupGlobalEventListeners() {
-        // NIEUW: Gebruik namespaced event handlers
-        const handleThumbnailClick = async (e) => {
+        document.addEventListener('click', async (e) => {
             const thumbnail = e.target.closest('.photo-thumbnail');
             if (thumbnail) {
                 e.preventDefault();
@@ -3052,9 +3009,9 @@ class ReuTeefCombinatie {
                     console.error('Fout bij laden volledige foto:', error);
                 }
             }
-        };
+        });
         
-        const handleCloseClick = (e) => {
+        document.addEventListener('click', (e) => {
             if (e.target.classList.contains('photo-large-close') || 
                 e.target.classList.contains('photo-large-close-btn') ||
                 e.target.closest('.photo-large-close') ||
@@ -3079,14 +3036,7 @@ class ReuTeefCombinatie {
                     }
                 }, 300);
             }
-        };
-        
-        // NIEUW: Opslaan van event listeners voor later cleanup
-        document.addEventListener('click', handleThumbnailClick);
-        document.addEventListener('click', handleCloseClick);
-        
-        this.eventListeners.set('thumbnail-click', [{ element: document, handler: handleThumbnailClick, options: {} }]);
-        this.eventListeners.set('close-click', [{ element: document, handler: handleCloseClick, options: {} }]);
+        });
     }
     
     async getFullSizeFoto(fotoId) {
@@ -3155,9 +3105,6 @@ class ReuTeefCombinatie {
         };
         document.addEventListener('keydown', closeOnEscape);
         
-        // Opslaan voor cleanup
-        this.eventListeners.set('escape-key', [{ element: document, handler: closeOnEscape, options: {} }]);
-        
         const overlay = document.getElementById('photoLargeOverlay');
         overlay.addEventListener('animationend', function handler() {
             if (overlay.style.display === 'none') {
@@ -3170,16 +3117,12 @@ class ReuTeefCombinatie {
     addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis) {
         const futurePuppyCard = document.querySelector('.pedigree-card-compact.horizontal.main-dog-compact.gen0');
         if (futurePuppyCard) {
-            const clickHandler = (e) => {
+            futurePuppyCard.addEventListener('click', (e) => {
                 e.stopPropagation();
                 this.showFuturePuppyPopup(futurePuppy, coiResult, healthAnalysis);
-            };
+            });
             
-            futurePuppyCard.addEventListener('click', clickHandler);
             futurePuppyCard.style.cursor = 'pointer';
-            
-            // Opslaan voor cleanup
-            this.eventListeners.set('future-puppy-click', [{ element: futurePuppyCard, handler: clickHandler, options: {} }]);
             
             const clickHint = futurePuppyCard.querySelector('.click-hint-compact');
             if (clickHint) {
@@ -3445,7 +3388,7 @@ class ReuTeefCombinatie {
     setupCardClickEvents() {
         const cards = document.querySelectorAll('.pedigree-card-compact.horizontal:not(.empty)');
         cards.forEach(card => {
-            const clickHandler = async (e) => {
+            card.addEventListener('click', async (e) => {
                 const dogId = parseInt(card.getAttribute('data-dog-id'));
                 if (dogId === 0) return;
                 
@@ -3459,15 +3402,7 @@ class ReuTeefCombinatie {
                 
                 const relation = card.getAttribute('data-relation') || '';
                 await this.showDogDetailPopup(dog, relation);
-            };
-            
-            card.addEventListener('click', clickHandler);
-            
-            // Opslaan voor cleanup
-            if (!this.eventListeners.has('card-clicks')) {
-                this.eventListeners.set('card-clicks', []);
-            }
-            this.eventListeners.get('card-clicks').push({ element: card, handler: clickHandler, options: {} });
+            });
         });
     }
     
@@ -3476,8 +3411,6 @@ class ReuTeefCombinatie {
     }
     
     async showDogDetailPopup(dog, relation) {
-        this.ensurePopupContainer();
-        
         const overlay = document.getElementById('pedigreePopupOverlay');
         const container = document.getElementById('pedigreePopupContainer');
         
@@ -3490,27 +3423,31 @@ class ReuTeefCombinatie {
         
         const closeButtons = container.querySelectorAll('.btn-close, .popup-close-btn');
         closeButtons.forEach(btn => {
-            const closeHandler = () => {
+            btn.addEventListener('click', () => {
                 overlay.style.display = 'none';
-            };
-            btn.addEventListener('click', closeHandler);
-            
-            // Opslaan voor cleanup
-            if (!this.eventListeners.has('popup-close')) {
-                this.eventListeners.set('popup-close', []);
-            }
-            this.eventListeners.get('popup-close').push({ element: btn, handler: closeHandler, options: {} });
+            });
         });
         
-        const overlayClickHandler = (e) => {
+        overlay.addEventListener('click', (e) => {
             if (e.target === overlay) {
                 overlay.style.display = 'none';
             }
-        };
-        overlay.addEventListener('click', overlayClickHandler);
+        });
         
-        // Opslaan voor cleanup
-        this.eventListeners.set('overlay-click', [{ element: overlay, handler: overlayClickHandler, options: {} }]);
+        const closeOnEscape = (e) => {
+            if (e.key === 'Escape') {
+                overlay.style.display = 'none';
+                document.removeEventListener('keydown', closeOnEscape);
+            }
+        };
+        document.addEventListener('keydown', closeOnEscape);
+        
+        overlay.addEventListener('animationend', function handler() {
+            if (overlay.style.display === 'none') {
+                document.removeEventListener('keydown', closeOnEscape);
+                overlay.removeEventListener('animationend', handler);
+            }
+        });
     }
     
     async getDogDetailPopupHTML(dog, relation = '') {
