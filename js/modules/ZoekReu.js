@@ -10,6 +10,7 @@ class ZoekReu {
         this.auth = null;
         this.teefInputTimer = null;
         this.selectedTeef = null;
+        this.allTeven = [];
         this.translations = {
             nl: {
                 title: "Zoek een Reu",
@@ -220,11 +221,11 @@ class ZoekReu {
                 elleboogdysplasie: "Ellbogengelenksdysplasie (ED)",
                 anyHealth: "Nicht wichtig",
                 searchRadius: "Suchradius",
-                radiusOptions: ["Niederlande", "Belgien", "Deutschland", "Europa", "Weltweit"],
+                radiusOptions: ["Niederlande", "België", "Deutschland", "Europa", "Weltweit"],
                 searchButton: "Rüden suchen",
                 results: "Suchergebnisse",
                 inDevelopment: "Diese Suchfunktion ist derzeit in Entwicklung",
-                devMessage: "Die vollständige Suchfunktionalität für Rüden wird demnächst verfügbar sein.",
+                devMessage: "Die vollständige Suchfunktionaliteit für Rüden wird demnächst verfügbar sein.",
                 features: [
                     "Erweiterte Suchfilter",
                     "Genetische Kompatibilitätsprüfung",
@@ -257,7 +258,7 @@ class ZoekReu {
                         "PL 1": "PL 1 (Leicht)",
                         "PL 2": "PL 2 (Mäßig)",
                         "PL 3": "PL 3 (Schwer)",
-                        "Nicht getestet": "Nicht getestet"
+                        "Nicht getestet": "Niet getestet"
                     },
                     ogen: {
                         "Frei": "Frei",
@@ -267,21 +268,21 @@ class ZoekReu {
                     },
                     dandyWalker: {
                         "Frei auf DNA": "Frei auf DNA",
-                        "Frei auf Eltern": "Frei auf Eltern",
+                        "Frei auf Eltern": "Frei auf ouders",
                         "Träger": "Träger",
                         "Niet getest": "Nicht getestet",
                         "Betroffen": "Betroffen"
                     },
                     schildklier: {
                         "TGAA negativ": "TGAA negativ",
-                        "Niet getest": "Nicht getestet"
+                        "Niet getest": "Niet getestet"
                     },
                     elleboogdysplasie: {
                         "ED 0": "ED 0 (Frei)",
                         "ED 1": "ED 1 (Leicht)",
                         "ED 2": "ED 2 (Mäßig)",
                         "ED 3": "ED 3 (Schwer)",
-                        "Niet getest": "Nicht getestet"
+                        "Niet getest": "Niet getestet"
                     }
                 },
                 resultColumns: {
@@ -320,7 +321,7 @@ class ZoekReu {
         
         // Laad honden data
         const honden = await this.getHonden();
-        const teven = honden.filter(h => h.geslacht === 'teven');
+        this.allTeven = honden.filter(h => h.geslacht === 'teven');
         const reuen = honden.filter(h => h.geslacht === 'reuen');
         
         // Verzamel unieke rassen
@@ -353,7 +354,12 @@ class ZoekReu {
                                            id="teefSearch" 
                                            placeholder="${t('selectTeefPlaceholder')}"
                                            autocomplete="off">
-                                    <div class="autocomplete-dropdown" id="teefDropdown" style="display: none;"></div>
+                                    <div class="autocomplete-dropdown" id="teefDropdown" style="display: none;">
+                                        <div class="autocomplete-header">
+                                            <small class="text-muted">Teven gevonden: <span id="teefCount">0</span></small>
+                                        </div>
+                                        <div class="autocomplete-results" id="teefResults"></div>
+                                    </div>
                                 </div>
                             </div>
                             <div id="selectedTeefInfo" class="small p-3 bg-light rounded">
@@ -459,20 +465,39 @@ class ZoekReu {
             clearTimeout(this.teefInputTimer);
             const searchTerm = e.target.value.trim();
             
-            if (searchTerm.length < 1) {
+            if (searchTerm.length === 0) {
                 teefDropdown.style.display = 'none';
                 return;
             }
             
             this.teefInputTimer = setTimeout(() => {
                 this.searchTeven(searchTerm);
-            }, 200);
+            }, 150);
         });
         
-        teefSearch.addEventListener('focus', () => {
-            const searchTerm = teefSearch.value.trim();
-            if (searchTerm.length >= 1) {
+        teefSearch.addEventListener('focus', (e) => {
+            const searchTerm = e.target.value.trim();
+            if (searchTerm.length > 0) {
                 this.searchTeven(searchTerm);
+            }
+        });
+        
+        teefSearch.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const searchTerm = teefSearch.value.trim();
+                if (searchTerm.length > 0) {
+                    this.handleManualTeefEntry(searchTerm);
+                }
+            }
+            
+            // Pijltje omlaag - navigeer in dropdown
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const firstItem = teefDropdown.querySelector('.autocomplete-item[data-id]');
+                if (firstItem) {
+                    firstItem.focus();
+                }
             }
         });
         
@@ -524,103 +549,254 @@ class ZoekReu {
         }
     }
     
-    async searchTeven(searchTerm) {
-        const honden = await this.getHonden();
-        const teven = honden.filter(h => 
-            h.geslacht === 'teven' && 
-            (h.naam?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-             h.kennelnaam?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-             h.stamboomnr?.toLowerCase().includes(searchTerm.toLowerCase()))
-        );
-        
-        this.showTeefDropdown(teven.slice(0, 10)); // Toon max 10 resultaten
-    }
-    
-    showTeefDropdown(teven) {
+    searchTeven(searchTerm) {
         const t = this.t.bind(this);
-        const dropdown = document.getElementById('teefDropdown');
         
-        if (teven.length === 0) {
-            dropdown.innerHTML = `
-                <div class="autocomplete-item text-muted">
-                    <i class="bi bi-search me-2"></i>Geen teven gevonden
-                </div>
-            `;
-            dropdown.style.display = 'block';
+        if (!searchTerm || searchTerm.length === 0) {
+            document.getElementById('teefDropdown').style.display = 'none';
             return;
         }
         
-        dropdown.innerHTML = teven.map(teef => `
-            <div class="autocomplete-item" data-id="${teef.id}">
-                <div class="fw-bold">${teef.naam || t('unknown')}</div>
-                <div class="small text-muted">
-                    ${teef.kennelnaam ? teef.kennelnaam + ' • ' : ''}
-                    ${teef.stamboomnr || t('unknown')}
-                </div>
-            </div>
-        `).join('');
+        const searchTerms = searchTerm.toLowerCase().split(' ');
         
-        dropdown.style.display = 'block';
+        // Filter teven op ALLE zoektermen (AND logica)
+        const filteredTeven = this.allTeven.filter(teef => {
+            // Maak een zoekbare string van alle relevante velden
+            const searchableText = `
+                ${teef.naam || ''}
+                ${teef.kennelnaam || ''}
+                ${teef.stamboomnr || ''}
+            `.toLowerCase();
+            
+            // Check of ALLE zoektermen voorkomen in de zoekbare tekst
+            return searchTerms.every(term => 
+                searchableText.includes(term)
+            );
+        });
+        
+        // Sorteer: exacte naam matches eerst, dan kennelnaam, dan stamboomnr
+        filteredTeven.sort((a, b) => {
+            const aName = (a.naam || '').toLowerCase();
+            const bName = (b.naam || '').toLowerCase();
+            const aKennel = (a.kennelnaam || '').toLowerCase();
+            const bKennel = (b.kennelnaam || '').toLowerCase();
+            
+            // Exacte naam match heeft voorrang
+            if (aName === searchTerm.toLowerCase() && bName !== searchTerm.toLowerCase()) return -1;
+            if (bName === searchTerm.toLowerCase() && aName !== searchTerm.toLowerCase()) return 1;
+            
+            // Begin van naam match
+            if (aName.startsWith(searchTerm.toLowerCase()) && !bName.startsWith(searchTerm.toLowerCase())) return -1;
+            if (bName.startsWith(searchTerm.toLowerCase()) && !aName.startsWith(searchTerm.toLowerCase())) return 1;
+            
+            // Kennelnaam match
+            if (aKennel.includes(searchTerm.toLowerCase()) && !bKennel.includes(searchTerm.toLowerCase())) return -1;
+            if (bKennel.includes(searchTerm.toLowerCase()) && !aKennel.includes(searchTerm.toLowerCase())) return 1;
+            
+            // Alfabetisch op naam
+            return aName.localeCompare(bName);
+        });
+        
+        this.showTeefDropdown(filteredTeven, searchTerm);
+    }
+    
+    showTeefDropdown(teven, searchTerm) {
+        const t = this.t.bind(this);
+        const dropdown = document.getElementById('teefDropdown');
+        const resultsDiv = document.getElementById('teefResults');
+        const countSpan = document.getElementById('teefCount');
+        
+        if (teven.length === 0) {
+            resultsDiv.innerHTML = `
+                <div class="autocomplete-item text-muted p-3 text-center">
+                    <i class="bi bi-search me-2"></i>Geen teven gevonden
+                    <br>
+                    <small>Typ een andere naam of gebruik spatie om te combineren</small>
+                </div>
+                <div class="autocomplete-item" data-manual="${searchTerm}">
+                    <div class="fw-bold text-primary">
+                        <i class="bi bi-plus-circle me-2"></i>Handmatig invullen
+                    </div>
+                    <div class="small text-muted">
+                        "${searchTerm}"
+                    </div>
+                </div>
+            `;
+            countSpan.textContent = '0';
+            dropdown.style.display = 'block';
+        } else {
+            countSpan.textContent = teven.length;
+            
+            // Toon max 15 resultaten, maar met scrollbar
+            const displayTeven = teven.slice(0, 15);
+            
+            resultsDiv.innerHTML = displayTeven.map(teef => {
+                // Markeer de zoekterm in de resultaten
+                const highlightText = (text) => {
+                    if (!text || !searchTerm) return text || '';
+                    const lowerText = text.toLowerCase();
+                    const lowerSearch = searchTerm.toLowerCase();
+                    const index = lowerText.indexOf(lowerSearch);
+                    
+                    if (index === -1) return text;
+                    
+                    return text.substring(0, index) + 
+                           '<mark>' + text.substring(index, index + searchTerm.length) + '</mark>' + 
+                           text.substring(index + searchTerm.length);
+                };
+                
+                const displayName = teef.naam ? 
+                    `${highlightText(teef.naam)} ${teef.kennelnaam ? `(${highlightText(teef.kennelnaam)})` : ''}` : 
+                    t('unknown');
+                
+                return `
+                    <div class="autocomplete-item" data-id="${teef.id}" tabindex="0">
+                        <div class="fw-bold">${displayName}</div>
+                        <div class="small text-muted">
+                            ${teef.stamboomnr ? 'Stamboom: ' + teef.stamboomnr : ''}
+                            ${teef.ras ? ' • Ras: ' + teef.ras : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            if (teven.length > 15) {
+                resultsDiv.innerHTML += `
+                    <div class="autocomplete-item text-muted p-2 text-center">
+                        <small>En nog ${teven.length - 15} meer... blijf typen om te verfijnen</small>
+                    </div>
+                `;
+            }
+            
+            dropdown.style.display = 'block';
+        }
         
         // Event listeners voor dropdown items
-        dropdown.querySelectorAll('.autocomplete-item[data-id]').forEach(item => {
+        resultsDiv.querySelectorAll('.autocomplete-item').forEach(item => {
             item.addEventListener('click', () => {
                 const teefId = item.getAttribute('data-id');
-                this.selectTeef(teefId);
+                const manualEntry = item.getAttribute('data-manual');
+                
+                if (teefId) {
+                    this.selectTeef(teefId);
+                } else if (manualEntry) {
+                    this.handleManualTeefEntry(manualEntry);
+                }
+                
                 dropdown.style.display = 'none';
                 document.getElementById('teefSearch').value = '';
+            });
+            
+            // Keyboard navigatie
+            item.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    item.click();
+                }
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const next = item.nextElementSibling;
+                    if (next && next.classList.contains('autocomplete-item')) {
+                        next.focus();
+                    }
+                }
+                
+                if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const prev = item.previousElementSibling;
+                    if (prev && prev.classList.contains('autocomplete-item')) {
+                        prev.focus();
+                    } else {
+                        document.getElementById('teefSearch').focus();
+                    }
+                }
             });
         });
     }
     
     async selectTeef(teefId) {
-        const honden = await this.getHonden();
-        const teef = honden.find(h => h.id == teefId);
+        const teef = this.allTeven.find(h => h.id == teefId);
         
         if (!teef) return;
         
         this.selectedTeef = teef;
+        this.updateTeefInfoDisplay(teef);
+    }
+    
+    handleManualTeefEntry(entry) {
+        // Creëer een tijdelijke teef object voor handmatige invoer
+        this.selectedTeef = {
+            id: 'manual',
+            naam: entry,
+            manualEntry: true
+        };
         
+        this.updateTeefInfoDisplay(this.selectedTeef);
+    }
+    
+    updateTeefInfoDisplay(teef) {
+        const t = this.t.bind(this);
         const infoDiv = document.getElementById('selectedTeefInfo');
-        infoDiv.innerHTML = `
-            <h6>${teef.naam || 'Onbekend'}</h6>
-            <div class="row">
-                <div class="col-6">
-                    <strong>Ras:</strong> ${teef.ras || '-'}<br>
-                    <strong>Kennel:</strong> ${teef.kennelnaam || '-'}
+        
+        if (teef.manualEntry) {
+            infoDiv.innerHTML = `
+                <h6>${teef.naam}</h6>
+                <div class="alert alert-info small p-2 mb-2">
+                    <i class="bi bi-info-circle me-1"></i>
+                    <small>Handmatig ingevoerde teef</small>
                 </div>
-                <div class="col-6">
-                    <strong>Stamboom:</strong> ${teef.stamboomnr || '-'}<br>
-                    <strong>Land:</strong> ${teef.land || '-'}
+                <div class="text-muted">
+                    Geen extra informatie beschikbaar voor handmatige invoer.
                 </div>
-            </div>
-            <div class="row mt-2">
-                <div class="col-6">
-                    <strong>HD:</strong> ${teef.heupdysplasie || '?'}<br>
-                    <strong>PL:</strong> ${teef.patella || '?'}
+                <hr class="my-2">
+                <div class="text-end">
+                    <button class="btn btn-sm btn-outline-purple" id="clearTeefBtn">
+                        <i class="bi bi-x"></i> Wis selectie
+                    </button>
                 </div>
-                <div class="col-6">
-                    <strong>Ogen:</strong> ${teef.ogen || '?'}<br>
-                    <strong>DW:</strong> ${teef.dandyWalker || '?'}
+            `;
+        } else {
+            infoDiv.innerHTML = `
+                <h6>${teef.naam || 'Onbekend'}</h6>
+                <div class="row">
+                    <div class="col-6">
+                        <strong>Ras:</strong> ${teef.ras || '-'}<br>
+                        <strong>Kennel:</strong> ${teef.kennelnaam || '-'}
+                    </div>
+                    <div class="col-6">
+                        <strong>Stamboom:</strong> ${teef.stamboomnr || '-'}<br>
+                        <strong>Land:</strong> ${teef.land || '-'}
+                    </div>
                 </div>
-            </div>
-            <div class="row mt-2">
-                <div class="col-6">
-                    <strong>Schildklier:</strong> ${teef.schildklier || '?'}<br>
-                    <strong>ED:</strong> ${teef.elleboogdysplasie || '?'}
+                <div class="row mt-2">
+                    <div class="col-6">
+                        <strong>HD:</strong> ${teef.heupdysplasie || '?'}<br>
+                        <strong>PL:</strong> ${teef.patella || '?'}
+                    </div>
+                    <div class="col-6">
+                        <strong>Ogen:</strong> ${teef.ogen || '?'}<br>
+                        <strong>DW:</strong> ${teef.dandyWalker || '?'}
+                    </div>
                 </div>
-                <div class="col-6">
-                    <strong>Geboortedatum:</strong> ${teef.geboortedatum ? 
-                        new Date(teef.geboortedatum).toLocaleDateString(this.currentLang) : '?'}
+                <div class="row mt-2">
+                    <div class="col-6">
+                        <strong>Schildklier:</strong> ${teef.schildklier || '?'}<br>
+                        <strong>ED:</strong> ${teef.elleboogdysplasie || '?'}
+                    </div>
+                    <div class="col-6">
+                        <strong>Geboortedatum:</strong> ${teef.geboortedatum ? 
+                            new Date(teef.geboortedatum).toLocaleDateString(this.currentLang) : '?'}
+                    </div>
                 </div>
-            </div>
-            <hr class="my-2">
-            <div class="text-end">
-                <button class="btn btn-sm btn-outline-purple" id="clearTeefBtn">
-                    <i class="bi bi-x"></i> Wis selectie
-                </button>
-            </div>
-        `;
+                <hr class="my-2">
+                <div class="text-end">
+                    <button class="btn btn-sm btn-outline-purple" id="clearTeefBtn">
+                        <i class="bi bi-x"></i> Wis selectie
+                    </button>
+                </div>
+            `;
+        }
         
         document.getElementById('clearTeefBtn').addEventListener('click', () => {
             this.selectedTeef = null;
@@ -881,8 +1057,8 @@ class ZoekReu {
                    value !== '' && 
                    value !== 'Niet getest' && 
                    value !== 'Niet onderzocht' &&
-                   !value.includes('getest') &&
-                   !value.includes('onderzocht');
+                   !value.toLowerCase().includes('getest') &&
+                   !value.toLowerCase().includes('onderzocht');
         }).length;
     }
     
@@ -922,7 +1098,7 @@ class ZoekReu {
                 
                 if (goodValues[testType]?.includes(value)) return 'text-success fw-bold';
                 if (warningValues[testType]?.includes(value)) return 'text-warning';
-                if (value.includes('getest') || value.includes('onderzocht')) return 'text-secondary';
+                if (value.toLowerCase().includes('getest') || value.toLowerCase().includes('onderzocht')) return 'text-secondary';
                 return 'text-danger';
             };
             
@@ -1007,7 +1183,8 @@ style.textContent = `
         top: 100%;
         left: 0;
         right: 0;
-        max-height: 300px;
+        max-height: 400px;
+        height: auto;
         overflow-y: auto;
         background: white;
         border: 1px solid #dee2e6;
@@ -1016,18 +1193,39 @@ style.textContent = `
         z-index: 1000;
     }
     
-    .autocomplete-item {
+    .autocomplete-header {
         padding: 0.5rem 1rem;
-        cursor: pointer;
-        border-bottom: 1px solid #f8f9fa;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+        font-size: 0.875rem;
     }
     
-    .autocomplete-item:hover {
+    .autocomplete-results {
+        max-height: 350px;
+        overflow-y: auto;
+    }
+    
+    .autocomplete-item {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        border-bottom: 1px solid #f8f9fa;
+        transition: background-color 0.2s;
+    }
+    
+    .autocomplete-item:hover,
+    .autocomplete-item:focus {
         background-color: #f8f9fa;
+        outline: none;
     }
     
     .autocomplete-item:last-child {
         border-bottom: none;
+    }
+    
+    .autocomplete-item mark {
+        background-color: #fff3cd;
+        padding: 0;
+        font-weight: bold;
     }
     
     .text-success { color: #198754 !important; }
@@ -1039,6 +1237,25 @@ style.textContent = `
     .table-sm th, .table-sm td {
         padding: 0.3rem 0.5rem;
         font-size: 0.875rem;
+    }
+    
+    /* Custom scrollbar voor dropdown */
+    .autocomplete-results::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .autocomplete-results::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    
+    .autocomplete-results::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 4px;
+    }
+    
+    .autocomplete-results::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
     }
 `;
 document.head.appendChild(style);
