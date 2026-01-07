@@ -14,7 +14,7 @@ class ZoekReu {
         this.translations = {
             nl: {
                 title: "Zoek een Reu",
-                description: "Vind een geschikte reu voor uw teef op basis van criteria",
+                description: "Vind een geschikte reuSS voor uw teef op basis van criteria",
                 selectTeef: "Selecteer uw teef",
                 selectTeefPlaceholder: "Typ naam, kennel of stamboomnummer...",
                 searchCriteria: "Zoekcriteria",
