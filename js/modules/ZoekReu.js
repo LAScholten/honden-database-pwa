@@ -916,7 +916,7 @@ class ZoekReu {
         // Filter op gezondheid (minimale eisen)
         reuen = this.filterByHealth(reuen, criteria.health);
         
-        // Sorteer ALTIJD op gezondheidsscore (beste bovenaan)
+        // Sorteer volgens de specifieke prioriteitsvolgorde
         reuen = this.sortByHealthScore(reuen);
         
         // Toon resultaten
@@ -1056,46 +1056,124 @@ class ZoekReu {
         return fieldMap[testKey] || testKey;
     }
     
+    normalizeValue(value) {
+        if (!value || value === '' || value === '?') return 'onbekend';
+        return value.toString().toLowerCase().trim();
+    }
+    
+    getHDPriority(value) {
+        const normalized = this.normalizeValue(value);
+        const priority = {
+            'a': 1,
+            'b': 2,
+            'c': 3,
+            'onbekend': 4,
+            'd': 5,
+            'e': 6
+        };
+        return priority[normalized] || 7;
+    }
+    
+    getPLPriority(value) {
+        const normalized = this.normalizeValue(value);
+        const priority = {
+            '0': 1,
+            '1': 2,
+            '2': 3,
+            '3': 4,
+            'onbekend': 5
+        };
+        return priority[normalized] || 6;
+    }
+    
+    getOgenPriority(value) {
+        const normalized = this.normalizeValue(value);
+        const priority = {
+            'vrij': 1,
+            'dist': 2,
+            'distichiasis': 2,
+            'overig': 3,
+            'onbekend': 4
+        };
+        return priority[normalized] || 5;
+    }
+    
+    getDWPriority(value) {
+        const normalized = this.normalizeValue(value);
+        const priority = {
+            'vrij op dna': 1,
+            'vrij op ouders': 2,
+            'drager': 3,
+            'onbekend': 4,
+            'lijder': 5
+        };
+        return priority[normalized] || 6;
+    }
+    
+    getTgaaPriority(value) {
+        const normalized = this.normalizeValue(value);
+        const priority = {
+            'tgaa negatief': 1,
+            'negatief': 1,
+            'onbekend': 2,
+            'tgaa positief': 3,
+            'positief': 3
+        };
+        return priority[normalized] || 4;
+    }
+    
+    getEDPriority(value) {
+        const normalized = this.normalizeValue(value);
+        const priority = {
+            '0': 1,
+            '1': 2,
+            'onbekend': 3,
+            '2': 4,
+            '3': 5
+        };
+        return priority[normalized] || 6;
+    }
+    
     sortByHealthScore(reuen) {
         return reuen.sort((a, b) => {
-            // 1. Sorteer op aantal bekende tests (meer is beter)
-            const knownTestsA = this.countKnownTests(a);
-            const knownTestsB = this.countKnownTests(b);
-            if (knownTestsB !== knownTestsA) {
-                return knownTestsB - knownTestsA;
-            }
+            // 1. Sorteer op HD volgens specifieke volgorde: A → B → C → onbekend → D → E
+            const hdA = this.getHDPriority(a.heupdysplasie);
+            const hdB = this.getHDPriority(b.heupdysplasie);
+            if (hdA !== hdB) return hdA - hdB;
             
-            // 2. HD score (A is beste)
-            const hdScore = this.compareHealthValue('heupdysplasie', a.heupdysplasie, b.heupdysplasie);
-            if (hdScore !== 0) return hdScore;
+            // 2. Binnen HD-categorie: sorteren op PL (0 → 1 → 2 → 3 → onbekend)
+            const plA = this.getPLPriority(a.patella);
+            const plB = this.getPLPriority(b.patella);
+            if (plA !== plB) return plA - plB;
             
-            // 3. PL score (PL 0 is beste)
-            const plScore = this.compareHealthValue('patellaluxatie', a.patella, b.patella);
-            if (plScore !== 0) return plScore;
+            // 3. Binnen HD+PL combinatie: sorteren op ogen (Vrij → Dist → Overig → onbekend)
+            const ogenA = this.getOgenPriority(a.ogen);
+            const ogenB = this.getOgenPriority(b.ogen);
+            if (ogenA !== ogenB) return ogenA - ogenB;
             
-            // 4. Ogen score (Vrij is beste)
-            const ogenScore = this.compareHealthValue('ogen', a.ogen, b.ogen);
-            if (ogenScore !== 0) return ogenScore;
+            // 4. Binnen HD+PL+ogen combinatie: sorteren op Dandy Walker
+            const dwA = this.getDWPriority(a.dandyWalker);
+            const dwB = this.getDWPriority(b.dandyWalker);
+            if (dwA !== dwB) return dwA - dwB;
             
-            // 5. Dandy Walker score (Vrij op DNA is beste)
-            const dwScore = this.compareHealthValue('dandyWalker', a.dandyWalker, b.dandyWalker);
-            if (dwScore !== 0) return dwScore;
+            // 5. Binnen HD+PL+ogen+DW combinatie: sorteren op Tgaa (Negatief → onbekend → Positief)
+            const tgaaA = this.getTgaaPriority(a.schildklier);
+            const tgaaB = this.getTgaaPriority(b.schildklier);
+            if (tgaaA !== tgaaB) return tgaaA - tgaaB;
             
-            // 6. Schildklier score (Tgaa Negatief is beste)
-            const thyroidScore = this.compareHealthValue('schildklier', a.schildklier, b.schildklier);
-            if (thyroidScore !== 0) return thyroidScore;
+            // 6. Binnen HD+PL+ogen+DW+Tgaa combinatie: sorteren op ED (0 → 1 → onbekend → 2 → 3)
+            const edA = this.getEDPriority(a.elleboogdysplasie);
+            const edB = this.getEDPriority(b.elleboogdysplasie);
+            if (edA !== edB) return edA - edB;
             
-            // 7. ED score (ED 0 is beste)
-            const edScore = this.compareHealthValue('elleboogdysplasie', a.elleboogdysplasie, b.elleboogdysplasie);
-            if (edScore !== 0) return edScore;
-            
-            // 8. Laatste sortering op naam
+            // 7. Laatste sortering op naam voor gelijke gezondheidsscores
             return (a.naam || '').localeCompare(b.naam || '');
         });
     }
     
     compareHealthValue(test, valueA, valueB) {
-        // Definieer de volgorde voor elke test (lage score = beter)
+        // Deze methode wordt niet meer gebruikt in de nieuwe sortering,
+        // maar blijft voor compatibiliteit met andere delen van de code
         const orders = {
             'heupdysplasie': { 'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4 },
             'patellaluxatie': { 'PL 0': 0, 'PL 1': 1, 'PL 2': 2, 'PL 3': 3, 'Niet getest': 4 },
