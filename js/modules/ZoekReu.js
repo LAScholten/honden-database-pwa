@@ -20,6 +20,8 @@ class ZoekReu {
                 searchCriteria: "Zoekcriteria",
                 ras: "Ras",
                 anyBreed: "Elk ras",
+                bornAfter: "Geboren na",
+                bornAfterPlaceholder: "dd-mm-jjjj",
                 healthFilter: "Gezondheid filter",
                 heupdysplasie: "Heupdysplasie (HD)",
                 patellaluxatie: "Patellaluxatie (PL)",
@@ -105,7 +107,8 @@ class ZoekReu {
                     locatie: "Locatie"
                 },
                 unknown: "Onbekend",
-                notTested: "Niet getest"
+                notTested: "Niet getest",
+                invalidDate: "Ongeldige datum. Gebruik formaat: dd-mm-jjjj"
             },
             en: {
                 title: "Find a Male",
@@ -115,6 +118,8 @@ class ZoekReu {
                 searchCriteria: "Search Criteria",
                 ras: "Breed",
                 anyBreed: "Any breed",
+                bornAfter: "Born after",
+                bornAfterPlaceholder: "dd-mm-yyyy",
                 healthFilter: "Health filter",
                 heupdysplasie: "Hip Dysplasia (HD)",
                 patellaluxatie: "Patellar Luxation (PL)",
@@ -200,7 +205,8 @@ class ZoekReu {
                     locatie: "Location"
                 },
                 unknown: "Unknown",
-                notTested: "Not tested"
+                notTested: "Not tested",
+                invalidDate: "Invalid date. Use format: dd-mm-yyyy"
             },
             de: {
                 title: "Finde einen Rüden",
@@ -210,6 +216,8 @@ class ZoekReu {
                 searchCriteria: "Suchkriterien",
                 ras: "Rasse",
                 anyBreed: "Jede Rasse",
+                bornAfter: "Geboren nach",
+                bornAfterPlaceholder: "dd-mm-jjjj",
                 healthFilter: "Gesundheitsfilter",
                 heupdysplasie: "Hüftgelenksdysplasie (HD)",
                 patellaluxatie: "Patellaluxation (PL)",
@@ -223,7 +231,7 @@ class ZoekReu {
                 searchButton: "Rüden suchen",
                 results: "Suchergebnisse",
                 inDevelopment: "Diese Suchfunktion ist derzeit in Entwicklung",
-                devMessage: "Die vollständige Suchfunktionalität für Rüden wird demnächst verfügbaar sein.",
+                devMessage: "Die vollständige Suchfunktionalität für Rüden wird demnächst verfügbar sein.",
                 features: [
                     "Erweiterte Suchfilter",
                     "Genetische Kompatibilitätsprüfung",
@@ -295,7 +303,8 @@ class ZoekReu {
                     locatie: "Standort"
                 },
                 unknown: "Unbekannt",
-                notTested: "Niet getestet"
+                notTested: "Niet getestet",
+                invalidDate: "Ungültiges Datum. Format: dd-mm-jjjj"
             }
         };
     }
@@ -396,6 +405,30 @@ class ZoekReu {
                                 </div>
                                 
                                 <div class="col-12">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">${t('bornAfter')}</label>
+                                            <input type="text" 
+                                                   class="form-control" 
+                                                   id="bornAfterFilter" 
+                                                   placeholder="${t('bornAfterPlaceholder')}"
+                                                   pattern="\\d{2}-\\d{2}-\\d{4}"
+                                                   title="${t('bornAfterPlaceholder')}">
+                                            <div class="form-text">
+                                                <small>Format: dag-maand-jaar (bijv. 01-01-1999)</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="d-flex align-items-end h-100">
+                                                <button class="btn btn-outline-secondary btn-sm" id="clearDateBtn">
+                                                    <i class="bi bi-x-lg"></i> Wis datum
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
                                     <h6 class="mt-4 mb-3">${t('healthFilter')}</h6>
                                     <div class="row g-3">
                                         ${this.generateHealthFilters(t)}
@@ -481,6 +514,29 @@ class ZoekReu {
                     firstItem.focus();
                 }
             }
+        });
+        
+        // Datum input validatie
+        const bornAfterInput = document.getElementById('bornAfterFilter');
+        bornAfterInput.addEventListener('blur', (e) => {
+            this.validateDateInput(e.target);
+        });
+        
+        bornAfterInput.addEventListener('input', (e) => {
+            // Auto-format datum: voeg streepjes toe
+            let value = e.target.value.replace(/[^\d]/g, '');
+            if (value.length > 2 && value.length <= 4) {
+                value = value.substring(0, 2) + '-' + value.substring(2);
+            } else if (value.length > 4) {
+                value = value.substring(0, 2) + '-' + value.substring(2, 4) + '-' + value.substring(4, 8);
+            }
+            e.target.value = value;
+        });
+        
+        // Wis datum knop
+        document.getElementById('clearDateBtn').addEventListener('click', () => {
+            bornAfterInput.value = '';
+            bornAfterInput.classList.remove('is-invalid');
         });
         
         document.getElementById('searchButton').addEventListener('click', () => {
@@ -697,6 +753,73 @@ class ZoekReu {
         });
     }
     
+    validateDateInput(input) {
+        const t = this.t.bind(this);
+        const value = input.value.trim();
+        
+        if (value === '') {
+            input.classList.remove('is-invalid');
+            return true;
+        }
+        
+        // Check het format: dd-mm-jjjj
+        const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/;
+        if (!dateRegex.test(value)) {
+            input.classList.add('is-invalid');
+            return false;
+        }
+        
+        const [, day, month, year] = value.match(dateRegex);
+        const dayNum = parseInt(day, 10);
+        const monthNum = parseInt(month, 10);
+        const yearNum = parseInt(year, 10);
+        
+        // Basis validatie
+        if (yearNum < 1900 || yearNum > new Date().getFullYear() + 1) {
+            input.classList.add('is-invalid');
+            return false;
+        }
+        
+        if (monthNum < 1 || monthNum > 12) {
+            input.classList.add('is-invalid');
+            return false;
+        }
+        
+        // Check dagen per maand
+        const daysInMonth = new Date(yearNum, monthNum, 0).getDate();
+        if (dayNum < 1 || dayNum > daysInMonth) {
+            input.classList.add('is-invalid');
+            return false;
+        }
+        
+        input.classList.remove('is-invalid');
+        return true;
+    }
+    
+    parseDate(dateString) {
+        if (!dateString) return null;
+        
+        // Format: dd-mm-jjjj
+        const parts = dateString.split('-');
+        if (parts.length !== 3) return null;
+        
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1; // JavaScript maanden zijn 0-indexed
+        const year = parseInt(parts[2], 10);
+        
+        // Controleer of het een geldige datum is
+        if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+        
+        const date = new Date(year, month, day);
+        
+        // Controleer of de datum geldig is (bijvoorbeeld geen 31 februari)
+        if (date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day) {
+            return null;
+        }
+        
+        return date;
+    }
+    
     async selectTeef(teefId) {
         const teef = this.allTeven.find(h => h.id == teefId);
         
@@ -876,6 +999,13 @@ class ZoekReu {
         const t = this.t.bind(this);
         const resultsDiv = document.getElementById('searchResults');
         
+        // Valideer datum input
+        const bornAfterInput = document.getElementById('bornAfterFilter');
+        if (!this.validateDateInput(bornAfterInput)) {
+            this.showAlert(t('invalidDate'), 'danger');
+            return;
+        }
+        
         // Toon laad indicator
         resultsDiv.innerHTML = `
             <div class="text-center py-4">
@@ -896,6 +1026,23 @@ class ZoekReu {
         // Filter op ras
         if (criteria.ras) {
             reuen = reuen.filter(r => r.ras === criteria.ras);
+        }
+        
+        // Filter op geboortedatum
+        if (criteria.bornAfter) {
+            const minDate = this.parseDate(criteria.bornAfter);
+            if (minDate) {
+                reuen = reuen.filter(r => {
+                    if (!r.geboortedatum) return false;
+                    
+                    try {
+                        const reuDate = this.parseHondenDate(r.geboortedatum);
+                        return reuDate && reuDate >= minDate;
+                    } catch (e) {
+                        return false;
+                    }
+                });
+            }
         }
         
         // Filter op gezondheid (minimale eisen)
@@ -944,10 +1091,72 @@ class ZoekReu {
         }, 1000);
     }
     
+    parseHondenDate(dateString) {
+        if (!dateString) return null;
+        
+        // Probeer verschillende datumformaten
+        // Format 1: ISO string (van database)
+        let date = new Date(dateString);
+        if (!isNaN(date.getTime())) {
+            return date;
+        }
+        
+        // Format 2: dd-mm-yyyy
+        const parts = dateString.split('-');
+        if (parts.length === 3) {
+            const day = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10) - 1;
+            const year = parseInt(parts[2], 10);
+            date = new Date(year, month, day);
+            if (!isNaN(date.getTime())) {
+                return date;
+            }
+        }
+        
+        // Format 3: yyyy-mm-dd
+        const parts2 = dateString.split('-');
+        if (parts2.length === 3 && parts2[0].length === 4) {
+            const year = parseInt(parts2[0], 10);
+            const month = parseInt(parts2[1], 10) - 1;
+            const day = parseInt(parts2[2], 10);
+            date = new Date(year, month, day);
+            if (!isNaN(date.getTime())) {
+                return date;
+            }
+        }
+        
+        // Format 4: andere scheidingstekens
+        const cleaned = dateString.replace(/[./]/g, '-');
+        const parts3 = cleaned.split('-');
+        if (parts3.length === 3) {
+            // Probeer beide formaten
+            if (parts3[0].length === 4) {
+                // yyyy-mm-dd
+                const year = parseInt(parts3[0], 10);
+                const month = parseInt(parts3[1], 10) - 1;
+                const day = parseInt(parts3[2], 10);
+                date = new Date(year, month, day);
+            } else {
+                // dd-mm-yyyy
+                const day = parseInt(parts3[0], 10);
+                const month = parseInt(parts3[1], 10) - 1;
+                const year = parseInt(parts3[2], 10);
+                date = new Date(year, month, day);
+            }
+            
+            if (!isNaN(date.getTime())) {
+                return date;
+            }
+        }
+        
+        return null;
+    }
+    
     getSearchCriteria() {
         const criteria = {
             ras: document.getElementById('rasFilter').value,
             radius: document.getElementById('radiusFilter').value,
+            bornAfter: document.getElementById('bornAfterFilter').value.trim(),
             health: {}
         };
         
@@ -1213,7 +1422,11 @@ class ZoekReu {
             const formatDate = (dateString) => {
                 if (!dateString) return '-';
                 try {
-                    return new Date(dateString).toLocaleDateString(this.currentLang);
+                    const date = this.parseHondenDate(dateString);
+                    if (date) {
+                        return date.toLocaleDateString(this.currentLang);
+                    }
+                    return dateString;
                 } catch (e) {
                     return dateString;
                 }
@@ -1391,6 +1604,20 @@ style.textContent = `
     
     #selectedTeefInfo hr {
         margin: 0.75rem 0;
+    }
+    
+    /* Datum input styling */
+    #bornAfterFilter:focus {
+        border-color: #6610f2;
+        box-shadow: 0 0 0 0.25rem rgba(102, 16, 242, 0.25);
+    }
+    
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+    
+    .is-invalid:focus {
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
     }
 `;
 document.head.appendChild(style);
