@@ -235,7 +235,7 @@ class ZoekReu {
                     "Bewertungen und Erfahrungsberichte"
                 ],
                 back: "Zurück",
-                noResults: "Keine Rüden gefonden, die Ihren Kriterien entsprechen",
+                noResults: "Keine Rüden gefunden, die Ihren Kriterien entsprechen",
                 tryAgain: "Versuchen Sie andere Suchkriterien",
                 healthOptions: {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
@@ -735,6 +735,52 @@ class ZoekReu {
         this.updateTeefInfoDisplay(this.selectedTeef);
     }
     
+    getHealthColor(value, type) {
+        if (!value || value === '' || value === '?' || value === 'Onbekend') {
+            return 'text-danger fw-bold';
+        }
+        
+        switch(type) {
+            case 'hd':
+                if (value === 'A') return 'text-success fw-bold';
+                if (value === 'B') return 'text-warning fw-bold';
+                if (value === 'C') return 'text-orange fw-bold';
+                if (value === 'D' || value === 'E') return 'text-danger fw-bold';
+                break;
+                
+            case 'pl':
+                if (value === 'PL 0') return 'text-success fw-bold';
+                if (value === 'PL 1') return 'text-orange fw-bold';
+                if (value === 'PL 2' || value === 'PL 3') return 'text-danger fw-bold';
+                break;
+                
+            case 'ogen':
+                if (value === 'Vrij') return 'text-success fw-bold';
+                if (value === 'Dist') return 'text-warning fw-bold';
+                if (value === 'Overig') return 'text-danger fw-bold';
+                break;
+                
+            case 'dw':
+                if (value === 'Vrij op DNA') return 'text-success fw-bold';
+                if (value === 'Vrij op ouders') return 'text-warning fw-bold';
+                if (value === 'Drager') return 'text-orange fw-bold';
+                if (value === 'Niet getest' || value === 'Lijder') return 'text-danger fw-bold';
+                break;
+                
+            case 'schildklier':
+                if (value === 'TGAA negatief') return 'text-success fw-bold';
+                return 'text-danger fw-bold';
+                
+            case 'ed':
+                if (value === 'ED 0') return 'text-success fw-bold';
+                if (value === 'ED 1') return 'text-orange fw-bold';
+                if (value === 'ED 2' || value === 'ED 3') return 'text-danger fw-bold';
+                break;
+        }
+        
+        return 'text-danger fw-bold';
+    }
+    
     updateTeefInfoDisplay(teef) {
         const t = this.t.bind(this);
         const infoDiv = document.getElementById('selectedTeefInfo');
@@ -757,57 +803,6 @@ class ZoekReu {
                 </div>
             `;
         } else {
-            const getHealthColor = (value, type) => {
-                if (!value || value === '' || value === '?' || value === 'Onbekend') {
-                    return 'text-danger';
-                }
-                
-                switch(type) {
-                    case 'hd':
-                        if (value === 'A') return 'text-success';
-                        if (value === 'B') return 'text-warning';
-                        if (value === 'C') return 'text-orange';
-                        if (value === 'D' || value === 'E') return 'text-danger';
-                        break;
-                        
-                    case 'pl':
-                        if (value === 'PL 0') return 'text-success';
-                        if (value === 'PL 1') return 'text-orange';
-                        if (value === 'PL 2' || value === 'PL 3') return 'text-danger';
-                        break;
-                        
-                    case 'ogen':
-                        if (value === 'Vrij') return 'text-success';
-                        if (value === 'Dist') return 'text-warning';
-                        if (value === 'Overig') return 'text-danger';
-                        break;
-                        
-                    case 'dw':
-                        if (value === 'Vrij op DNA') return 'text-success';
-                        if (value === 'Vrij op ouders') return 'text-warning';
-                        if (value === 'Drager') return 'text-orange';
-                        if (value === 'Niet getest' || value === 'Lijder') return 'text-danger';
-                        break;
-                        
-                    case 'schildklier':
-                        if (value === 'TGAA negatief') return 'text-success';
-                        return 'text-danger';
-                        
-                    case 'ed':
-                        if (value === 'ED 0') return 'text-success';
-                        if (value === 'ED 1') return 'text-orange';
-                        if (value === 'ED 2' || value === 'ED 3') return 'text-danger';
-                        break;
-                }
-                
-                return 'text-secondary';
-            };
-            
-            const formatHealthValue = (value) => {
-                if (!value || value === '') return '?';
-                return value;
-            };
-            
             infoDiv.innerHTML = `
                 <h6 class="mb-2">${teef.naam || 'Onbekend'} ${teef.kennelnaam ? `(${teef.kennelnaam})` : ''}</h6>
                 <div class="mb-3">
@@ -818,16 +813,16 @@ class ZoekReu {
                     <div class="col-6">
                         <div class="small">
                             <strong>HD:</strong> 
-                            <span class="${getHealthColor(teef.heupdysplasie, 'hd')} fw-bold">
-                                ${formatHealthValue(teef.heupdysplasie)}
+                            <span class="${this.getHealthColor(teef.heupdysplasie, 'hd')}">
+                                ${teef.heupdysplasie || '?'}
                             </span>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="small">
                             <strong>PL:</strong> 
-                            <span class="${getHealthColor(teef.patella, 'pl')} fw-bold">
-                                ${formatHealthValue(teef.patella)}
+                            <span class="${this.getHealthColor(teef.patella, 'pl')}">
+                                ${teef.patella || '?'}
                             </span>
                         </div>
                     </div>
@@ -837,16 +832,16 @@ class ZoekReu {
                     <div class="col-6">
                         <div class="small">
                             <strong>Ogen:</strong> 
-                            <span class="${getHealthColor(teef.ogen, 'ogen')} fw-bold">
-                                ${formatHealthValue(teef.ogen)}
+                            <span class="${this.getHealthColor(teef.ogen, 'ogen')}">
+                                ${teef.ogen || '?'}
                             </span>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="small">
                             <strong>Dandy Walker:</strong> 
-                            <span class="${getHealthColor(teef.dandyWalker, 'dw')} fw-bold">
-                                ${formatHealthValue(teef.dandyWalker)}
+                            <span class="${this.getHealthColor(teef.dandyWalker, 'dw')}">
+                                ${teef.dandyWalker || '?'}
                             </span>
                         </div>
                     </div>
@@ -856,16 +851,16 @@ class ZoekReu {
                     <div class="col-6">
                         <div class="small">
                             <strong>Schildklier:</strong> 
-                            <span class="${getHealthColor(teef.schildklier, 'schildklier')} fw-bold">
-                                ${formatHealthValue(teef.schildklier)}
+                            <span class="${this.getHealthColor(teef.schildklier, 'schildklier')}">
+                                ${teef.schildklier || '?'}
                             </span>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="small">
                             <strong>ED:</strong> 
-                            <span class="${getHealthColor(teef.elleboogdysplasie, 'ed')} fw-bold">
-                                ${formatHealthValue(teef.elleboogdysplasie)}
+                            <span class="${this.getHealthColor(teef.elleboogdysplasie, 'ed')}">
+                                ${teef.elleboogdysplasie || '?'}
                             </span>
                         </div>
                     </div>
@@ -1146,52 +1141,6 @@ class ZoekReu {
     
     generateResultsTable(reuen, t) {
         return reuen.map(reu => {
-            const getHealthColor = (value, type) => {
-                if (!value || value === '' || value === '?' || value === 'Onbekend') {
-                    return 'text-danger fw-bold';
-                }
-                
-                switch(type) {
-                    case 'hd':
-                        if (value === 'A') return 'text-success fw-bold';
-                        if (value === 'B') return 'text-warning';
-                        if (value === 'C') return 'text-orange';
-                        if (value === 'D' || value === 'E') return 'text-danger';
-                        break;
-                        
-                    case 'pl':
-                        if (value === 'PL 0') return 'text-success fw-bold';
-                        if (value === 'PL 1') return 'text-orange';
-                        if (value === 'PL 2' || value === 'PL 3') return 'text-danger';
-                        break;
-                        
-                    case 'ogen':
-                        if (value === 'Vrij') return 'text-success fw-bold';
-                        if (value === 'Dist') return 'text-warning';
-                        if (value === 'Overig') return 'text-danger';
-                        break;
-                        
-                    case 'dw':
-                        if (value === 'Vrij op DNA') return 'text-success fw-bold';
-                        if (value === 'Vrij op ouders') return 'text-warning';
-                        if (value === 'Drager') return 'text-orange';
-                        if (value === 'Niet getest' || value === 'Lijder') return 'text-danger';
-                        break;
-                        
-                    case 'schildklier':
-                        if (value === 'TGAA negatief') return 'text-success fw-bold';
-                        return 'text-danger';
-                        
-                    case 'ed':
-                        if (value === 'ED 0') return 'text-success fw-bold';
-                        if (value === 'ED 1') return 'text-orange';
-                        if (value === 'ED 2' || value === 'ED 3') return 'text-danger';
-                        break;
-                }
-                
-                return 'text-secondary';
-            };
-            
             const formatValue = (value) => {
                 if (!value || value === '') return '?';
                 if (value.length > 10) return value.substring(0, 10) + '...';
@@ -1203,22 +1152,22 @@ class ZoekReu {
                     <td>${reu.naam || t('unknown')}</td>
                     <td>${reu.ras || t('unknown')}</td>
                     <td><small>${reu.stamboomnr || ''}</small></td>
-                    <td class="${getHealthColor(reu.heupdysplasie, 'hd')}">
+                    <td class="${this.getHealthColor(reu.heupdysplasie, 'hd')}">
                         ${formatValue(reu.heupdysplasie)}
                     </td>
-                    <td class="${getHealthColor(reu.patella, 'pl')}">
+                    <td class="${this.getHealthColor(reu.patella, 'pl')}">
                         ${formatValue(reu.patella)}
                     </td>
-                    <td class="${getHealthColor(reu.ogen, 'ogen')}">
+                    <td class="${this.getHealthColor(reu.ogen, 'ogen')}">
                         ${formatValue(reu.ogen)}
                     </td>
-                    <td class="${getHealthColor(reu.dandyWalker, 'dw')}">
+                    <td class="${this.getHealthColor(reu.dandyWalker, 'dw')}">
                         ${formatValue(reu.dandyWalker)}
                     </td>
-                    <td class="${getHealthColor(reu.schildklier, 'schildklier')}">
+                    <td class="${this.getHealthColor(reu.schildklier, 'schildklier')}">
                         ${formatValue(reu.schildklier)}
                     </td>
-                    <td class="${getHealthColor(reu.elleboogdysplasie, 'ed')}">
+                    <td class="${this.getHealthColor(reu.elleboogdysplasie, 'ed')}">
                         ${formatValue(reu.elleboogdysplasie)}
                     </td>
                     <td><small>${reu.land || ''}</small></td>
