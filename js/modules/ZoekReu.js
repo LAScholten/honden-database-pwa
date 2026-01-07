@@ -15,7 +15,7 @@ class ZoekReu {
                 title: "Zoek een Reu",
                 description: "Vind een geschikte reu voor uw teef op basis van criteria",
                 selectTeef: "Selecteer uw teef",
-                selectTeefPlaceholder: "Typ naam of stamboomnummer...",
+                selectTeefPlaceholder: "Typ naam, kennel of stamboomnummer...",
                 searchCriteria: "Zoekcriteria",
                 ras: "Ras",
                 anyBreed: "Elk ras",
@@ -46,11 +46,11 @@ class ZoekReu {
                 tryAgain: "Probeer andere zoekcriteria",
                 healthOptions: {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
-                    patellaluxatie: ["0", "1", "2", "3", "4"],
-                    ogen: ["Vrij", "Gefokt niet toegestaan", "Tevens niet fokgeschikt", "Niet onderzocht"],
-                    dandyWalker: ["Vrij", "Drager", "Lijder", "Niet getest"],
-                    schildklier: ["Vrij", "Licht verlaagd", "Verlaagd", "Niet getest"],
-                    elleboogdysplasie: ["0", "1", "2", "3", "Niet getest"]
+                    patellaluxatie: ["PL 0", "PL 1", "PL 2", "PL 3", "Niet getest"],
+                    ogen: ["Vrij", "Dist", "Overig", "Niet onderzocht"],
+                    dandyWalker: ["Vrij op DNA", "Vrij op ouders", "Drager", "Niet getest", "Lijder"],
+                    schildklier: ["TGAA negatief", "Niet getest"],
+                    elleboogdysplasie: ["ED 0", "ED 1", "ED 2", "ED 3", "Niet getest"]
                 },
                 healthLabels: {
                     heupdysplasie: {
@@ -61,36 +61,35 @@ class ZoekReu {
                         "E": "HD-E (Zeer slecht)"
                     },
                     patellaluxatie: {
-                        "0": "PL-0 (Vrij)",
-                        "1": "PL-1 (Lichte afwijking)",
-                        "2": "PL-2 (Matige afwijking)",
-                        "3": "PL-3 (Ernstige afwijking)",
-                        "4": "PL-4 (Zeer ernstige afwijking)"
+                        "PL 0": "PL 0 (Vrij)",
+                        "PL 1": "PL 1 (Lichte afwijking)",
+                        "PL 2": "PL 2 (Matige afwijking)",
+                        "PL 3": "PL 3 (Ernstige afwijking)",
+                        "Niet getest": "Niet getest"
                     },
                     ogen: {
-                        "Vrij": "Ogen vrij",
-                        "Gefokt niet toegestaan": "Gefokt niet toegestaan",
-                        "Tevens niet fokgeschikt": "Tevens niet fokgeschikt",
+                        "Vrij": "Vrij",
+                        "Dist": "Distichiasis",
+                        "Overig": "Overig",
                         "Niet onderzocht": "Niet onderzocht"
                     },
                     dandyWalker: {
-                        "Vrij": "Dandy Walker vrij",
-                        "Drager": "Drager Dandy Walker",
-                        "Lijder": "Lijder Dandy Walker",
-                        "Niet getest": "Niet getest op Dandy Walker"
+                        "Vrij op DNA": "Vrij op DNA",
+                        "Vrij op ouders": "Vrij op ouders",
+                        "Drager": "Drager",
+                        "Niet getest": "Niet getest",
+                        "Lijder": "Lijder"
                     },
                     schildklier: {
-                        "Vrij": "Schildklier vrij",
-                        "Licht verlaagd": "Licht verlaagd",
-                        "Verlaagd": "Verlaagd",
-                        "Niet getest": "Niet getest op schildklier"
+                        "TGAA negatief": "TGAA negatief",
+                        "Niet getest": "Niet getest"
                     },
                     elleboogdysplasie: {
-                        "0": "ED-0 (Vrij)",
-                        "1": "ED-1 (Lichte afwijking)",
-                        "2": "ED-2 (Matige afwijking)",
-                        "3": "ED-3 (Ernstige afwijking)",
-                        "Niet getest": "Niet getest op ED"
+                        "ED 0": "ED 0 (Vrij)",
+                        "ED 1": "ED 1 (Lichte afwijking)",
+                        "ED 2": "ED 2 (Matige afwijking)",
+                        "ED 3": "ED 3 (Ernstige afwijking)",
+                        "Niet getest": "Niet getest"
                     }
                 },
                 resultColumns: {
@@ -112,7 +111,7 @@ class ZoekReu {
                 title: "Find a Male",
                 description: "Find a suitable male for your female based on criteria",
                 selectTeef: "Select your female",
-                selectTeefPlaceholder: "Type name or pedigree number...",
+                selectTeefPlaceholder: "Type name, kennel or pedigree number...",
                 searchCriteria: "Search Criteria",
                 ras: "Breed",
                 anyBreed: "Any breed",
@@ -143,11 +142,11 @@ class ZoekReu {
                 tryAgain: "Try different search criteria",
                 healthOptions: {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
-                    patellaluxatie: ["0", "1", "2", "3", "4"],
-                    ogen: ["Free", "Not allowed for breeding", "Not suitable for breeding", "Not examined"],
-                    dandyWalker: ["Free", "Carrier", "Affected", "Not tested"],
-                    schildklier: ["Free", "Slightly reduced", "Reduced", "Not tested"],
-                    elleboogdysplasie: ["0", "1", "2", "3", "Not tested"]
+                    patellaluxatie: ["PL 0", "PL 1", "PL 2", "PL 3", "Not tested"],
+                    ogen: ["Free", "Dist", "Other", "Not examined"],
+                    dandyWalker: ["Free on DNA", "Free on parents", "Carrier", "Not tested", "Affected"],
+                    schildklier: ["TGAA negative", "Not tested"],
+                    elleboogdysplasie: ["ED 0", "ED 1", "ED 2", "ED 3", "Not tested"]
                 },
                 healthLabels: {
                     heupdysplasie: {
@@ -158,36 +157,35 @@ class ZoekReu {
                         "E": "HD-E (Very poor)"
                     },
                     patellaluxatie: {
-                        "0": "PL-0 (Free)",
-                        "1": "PL-1 (Mild)",
-                        "2": "PL-2 (Moderate)",
-                        "3": "PL-3 (Severe)",
-                        "4": "PL-4 (Very severe)"
+                        "PL 0": "PL 0 (Free)",
+                        "PL 1": "PL 1 (Mild)",
+                        "PL 2": "PL 2 (Moderate)",
+                        "PL 3": "PL 3 (Severe)",
+                        "Not tested": "Not tested"
                     },
                     ogen: {
-                        "Free": "Eyes free",
-                        "Not allowed for breeding": "Not allowed for breeding",
-                        "Not suitable for breeding": "Not suitable for breeding",
+                        "Free": "Free",
+                        "Dist": "Distichiasis",
+                        "Other": "Other",
                         "Not examined": "Not examined"
                     },
                     dandyWalker: {
-                        "Free": "Dandy Walker free",
-                        "Carrier": "Dandy Walker carrier",
-                        "Affected": "Dandy Walker affected",
-                        "Not tested": "Not tested for Dandy Walker"
+                        "Free on DNA": "Free on DNA",
+                        "Free on parents": "Free on parents",
+                        "Carrier": "Carrier",
+                        "Not tested": "Not tested",
+                        "Affected": "Affected"
                     },
                     schildklier: {
-                        "Free": "Thyroid free",
-                        "Slightly reduced": "Slightly reduced",
-                        "Reduced": "Reduced",
-                        "Not tested": "Not tested for thyroid"
+                        "TGAA negative": "TGAA negative",
+                        "Not tested": "Not tested"
                     },
                     elleboogdysplasie: {
-                        "0": "ED-0 (Free)",
-                        "1": "ED-1 (Mild)",
-                        "2": "ED-2 (Moderate)",
-                        "3": "ED-3 (Severe)",
-                        "Not tested": "Not tested for ED"
+                        "ED 0": "ED 0 (Free)",
+                        "ED 1": "ED 1 (Mild)",
+                        "ED 2": "ED 2 (Moderate)",
+                        "ED 3": "ED 3 (Severe)",
+                        "Not tested": "Not tested"
                     }
                 },
                 resultColumns: {
@@ -209,7 +207,7 @@ class ZoekReu {
                 title: "Finde einen Rüden",
                 description: "Finden Sie einen geeigneten Rüden für Ihre Hündin basierend auf Kriterien",
                 selectTeef: "Wählen Sie Ihre Hündin",
-                selectTeefPlaceholder: "Name oder Stammbaumnummer eingeben...",
+                selectTeefPlaceholder: "Name, Zwingername oder Stammbaumnummer eingeben...",
                 searchCriteria: "Suchkriterien",
                 ras: "Rasse",
                 anyBreed: "Jede Rasse",
@@ -240,11 +238,11 @@ class ZoekReu {
                 tryAgain: "Versuchen Sie andere Suchkriterien",
                 healthOptions: {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
-                    patellaluxatie: ["0", "1", "2", "3", "4"],
-                    ogen: ["Frei", "Zucht nicht erlaubt", "Auch nicht zuchttauglich", "Nicht untersucht"],
-                    dandyWalker: ["Frei", "Träger", "Betroffen", "Nicht getestet"],
-                    schildklier: ["Frei", "Leicht verringert", "Verringert", "Nicht getestet"],
-                    elleboogdysplasie: ["0", "1", "2", "3", "Nicht getestet"]
+                    patellaluxatie: ["PL 0", "PL 1", "PL 2", "PL 3", "Nicht getestet"],
+                    ogen: ["Frei", "Dist", "Andere", "Nicht untersucht"],
+                    dandyWalker: ["Frei auf DNA", "Frei auf Eltern", "Träger", "Nicht getestet", "Betroffen"],
+                    schildklier: ["TGAA negativ", "Nicht getestet"],
+                    elleboogdysplasie: ["ED 0", "ED 1", "ED 2", "ED 3", "Nicht getestet"]
                 },
                 healthLabels: {
                     heupdysplasie: {
@@ -255,36 +253,35 @@ class ZoekReu {
                         "E": "HD-E (Sehr schlecht)"
                     },
                     patellaluxatie: {
-                        "0": "PL-0 (Frei)",
-                        "1": "PL-1 (Leicht)",
-                        "2": "PL-2 (Mäßig)",
-                        "3": "PL-3 (Schwer)",
-                        "4": "PL-4 (Sehr schwer)"
+                        "PL 0": "PL 0 (Frei)",
+                        "PL 1": "PL 1 (Leicht)",
+                        "PL 2": "PL 2 (Mäßig)",
+                        "PL 3": "PL 3 (Schwer)",
+                        "Nicht getestet": "Nicht getestet"
                     },
                     ogen: {
-                        "Frei": "Augen frei",
-                        "Zucht nicht erlaubt": "Zucht nicht erlaubt",
-                        "Auch nicht zuchttauglich": "Auch nicht zuchttauglich",
+                        "Frei": "Frei",
+                        "Dist": "Distichiasis",
+                        "Andere": "Andere",
                         "Nicht untersucht": "Nicht untersucht"
                     },
                     dandyWalker: {
-                        "Frei": "Dandy Walker frei",
-                        "Träger": "Dandy Walker Träger",
-                        "Betroffen": "Dandy Walker betroffen",
-                        "Nicht getestet": "Nicht auf Dandy Walker getestet"
+                        "Frei auf DNA": "Frei auf DNA",
+                        "Frei auf Eltern": "Frei auf Eltern",
+                        "Träger": "Träger",
+                        "Niet getest": "Nicht getestet",
+                        "Betroffen": "Betroffen"
                     },
                     schildklier: {
-                        "Frei": "Schilddrüse frei",
-                        "Leicht verringert": "Leicht verringert",
-                        "Verringert": "Verringert",
-                        "Nicht getestet": "Nicht auf Schilddrüse getestet"
+                        "TGAA negativ": "TGAA negativ",
+                        "Niet getest": "Nicht getestet"
                     },
                     elleboogdysplasie: {
-                        "0": "ED-0 (Frei)",
-                        "1": "ED-1 (Leicht)",
-                        "2": "ED-2 (Mäßig)",
-                        "3": "ED-3 (Schwer)",
-                        "Niet getest": "Nicht auf ED getestet"
+                        "ED 0": "ED 0 (Frei)",
+                        "ED 1": "ED 1 (Leicht)",
+                        "ED 2": "ED 2 (Mäßig)",
+                        "ED 3": "ED 3 (Schwer)",
+                        "Niet getest": "Nicht getestet"
                     }
                 },
                 resultColumns: {
@@ -462,25 +459,32 @@ class ZoekReu {
             clearTimeout(this.teefInputTimer);
             const searchTerm = e.target.value.trim();
             
-            if (searchTerm.length < 2) {
+            if (searchTerm.length < 1) {
                 teefDropdown.style.display = 'none';
                 return;
             }
             
             this.teefInputTimer = setTimeout(() => {
                 this.searchTeven(searchTerm);
-            }, 300);
+            }, 200);
         });
         
         teefSearch.addEventListener('focus', () => {
             const searchTerm = teefSearch.value.trim();
-            if (searchTerm.length >= 2) {
+            if (searchTerm.length >= 1) {
                 this.searchTeven(searchTerm);
             }
         });
         
         document.getElementById('searchButton').addEventListener('click', () => {
             this.performSearch();
+        });
+        
+        // Sluit dropdown bij klik buiten
+        document.addEventListener('click', (e) => {
+            if (!teefDropdown.contains(e.target) && e.target.id !== 'teefSearch') {
+                teefDropdown.style.display = 'none';
+            }
         });
     }
     
@@ -525,6 +529,7 @@ class ZoekReu {
         const teven = honden.filter(h => 
             h.geslacht === 'teven' && 
             (h.naam?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+             h.kennelnaam?.toLowerCase().includes(searchTerm.toLowerCase()) ||
              h.stamboomnr?.toLowerCase().includes(searchTerm.toLowerCase()))
         );
         
@@ -549,7 +554,8 @@ class ZoekReu {
             <div class="autocomplete-item" data-id="${teef.id}">
                 <div class="fw-bold">${teef.naam || t('unknown')}</div>
                 <div class="small text-muted">
-                    ${teef.ras || t('unknown')} • ${teef.stamboomnr || t('unknown')}
+                    ${teef.kennelnaam ? teef.kennelnaam + ' • ' : ''}
+                    ${teef.stamboomnr || t('unknown')}
                 </div>
             </div>
         `).join('');
@@ -565,13 +571,6 @@ class ZoekReu {
                 document.getElementById('teefSearch').value = '';
             });
         });
-        
-        // Sluit dropdown bij klik buiten
-        document.addEventListener('click', (e) => {
-            if (!dropdown.contains(e.target) && e.target.id !== 'teefSearch') {
-                dropdown.style.display = 'none';
-            }
-        }, { once: true });
     }
     
     async selectTeef(teefId) {
@@ -588,21 +587,31 @@ class ZoekReu {
             <div class="row">
                 <div class="col-6">
                     <strong>Ras:</strong> ${teef.ras || '-'}<br>
-                    <strong>Stamboom:</strong> ${teef.stamboomnr || '-'}
+                    <strong>Kennel:</strong> ${teef.kennelnaam || '-'}
                 </div>
                 <div class="col-6">
-                    <strong>HD:</strong> ${teef.heupdysplasie || '?'}<br>
-                    <strong>PL:</strong> ${teef.patella || '?'}
+                    <strong>Stamboom:</strong> ${teef.stamboomnr || '-'}<br>
+                    <strong>Land:</strong> ${teef.land || '-'}
                 </div>
             </div>
             <div class="row mt-2">
                 <div class="col-6">
+                    <strong>HD:</strong> ${teef.heupdysplasie || '?'}<br>
+                    <strong>PL:</strong> ${teef.patella || '?'}
+                </div>
+                <div class="col-6">
                     <strong>Ogen:</strong> ${teef.ogen || '?'}<br>
                     <strong>DW:</strong> ${teef.dandyWalker || '?'}
                 </div>
+            </div>
+            <div class="row mt-2">
                 <div class="col-6">
                     <strong>Schildklier:</strong> ${teef.schildklier || '?'}<br>
                     <strong>ED:</strong> ${teef.elleboogdysplasie || '?'}
+                </div>
+                <div class="col-6">
+                    <strong>Geboortedatum:</strong> ${teef.geboortedatum ? 
+                        new Date(teef.geboortedatum).toLocaleDateString(this.currentLang) : '?'}
                 </div>
             </div>
             <hr class="my-2">
@@ -650,11 +659,11 @@ class ZoekReu {
             reuen = reuen.filter(r => r.ras === criteria.ras);
         }
         
-        // Filter op gezondheid
+        // Filter op gezondheid (minimale eisen)
         reuen = this.filterByHealth(reuen, criteria.health);
         
-        // Sorteer op gezondheidsscore
-        reuen = this.sortByHealthScore(reuen, criteria.health);
+        // Sorteer ALTIJD op gezondheidsscore (beste bovenaan)
+        reuen = this.sortByHealthScore(reuen);
         
         // Toon resultaten
         setTimeout(() => {
@@ -669,8 +678,8 @@ class ZoekReu {
             } else {
                 resultsDiv.innerHTML = `
                     <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
+                        <table class="table table-hover table-sm">
+                            <thead class="table-light">
                                 <tr>
                                     <th>${t('resultColumns').naam}</th>
                                     <th>${t('resultColumns').ras}</th>
@@ -724,39 +733,62 @@ class ZoekReu {
         return reuen.filter(reu => {
             for (const [test, minValue] of Object.entries(healthCriteria)) {
                 const reuValue = reu[this.getHealthFieldName(test)];
-                if (!reuValue || reuValue === '') return false;
+                if (!reuValue || reuValue === '') {
+                    // Onbekende waarde = niet goed genoeg
+                    return false;
+                }
                 
-                // Speciale logica voor elke test
-                switch(test) {
-                    case 'heupdysplasie':
-                        // HD: A is beter dan B, etc.
-                        if (this.compareHD(reuValue, minValue) > 0) return false;
-                        break;
-                        
-                    case 'patellaluxatie':
-                        // PL: 0 is beter dan 1, etc.
-                        if (this.comparePL(reuValue, minValue) > 0) return false;
-                        break;
-                        
-                    case 'elleboogdysplasie':
-                        // ED: 0 is beter dan 1, etc.
-                        if (this.compareED(reuValue, minValue) > 0) return false;
-                        break;
-                        
-                    case 'ogen':
-                        // Ogen: "Vrij" is beter dan andere
-                        if (reuValue !== minValue && minValue === 'Vrij') return false;
-                        break;
-                        
-                    case 'dandyWalker':
-                    case 'schildklier':
-                        // Gelijk aan de geselecteerde waarde
-                        if (reuValue !== minValue && minValue.includes('Vrij')) return false;
-                        break;
+                // Check of reu voldoet aan MINIMALE eis (of beter is)
+                if (!this.meetsMinimumRequirement(test, reuValue, minValue)) {
+                    return false;
                 }
             }
             return true;
         });
+    }
+    
+    meetsMinimumRequirement(test, reuValue, minValue) {
+        // Alle waarden die voldoen aan de minimale eis (of beter zijn)
+        switch(test) {
+            case 'heupdysplasie':
+                // HD: A is beter dan B, etc. Als minimum is B, dan zijn A en B OK
+                const hdOrder = { 'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4 };
+                return (hdOrder[reuValue] || 5) <= (hdOrder[minValue] || 5);
+                
+            case 'patellaluxatie':
+                // PL: 0 is beter dan 1, etc.
+                const plOrder = { 'PL 0': 0, 'PL 1': 1, 'PL 2': 2, 'PL 3': 3, 'Niet getest': 4 };
+                return (plOrder[reuValue] || 5) <= (plOrder[minValue] || 5);
+                
+            case 'ogen':
+                // Ogen: Vrij > Dist > Overig > Niet onderzocht
+                const ogenOrder = { 'Vrij': 0, 'Dist': 1, 'Overig': 2, 'Niet onderzocht': 3 };
+                return (ogenOrder[reuValue] || 4) <= (ogenOrder[minValue] || 4);
+                
+            case 'dandyWalker':
+                // Dandy Walker: Vrij op DNA > Vrij op ouders > Drager > Niet getest > Lijder
+                const dwOrder = { 
+                    'Vrij op DNA': 0, 
+                    'Vrij op ouders': 1, 
+                    'Drager': 2, 
+                    'Niet getest': 3, 
+                    'Lijder': 4 
+                };
+                return (dwOrder[reuValue] || 5) <= (dwOrder[minValue] || 5);
+                
+            case 'schildklier':
+                // Schildklier: TGAA negatief > Niet getest
+                const thyroidOrder = { 'TGAA negatief': 0, 'Niet getest': 1 };
+                return (thyroidOrder[reuValue] || 2) <= (thyroidOrder[minValue] || 2);
+                
+            case 'elleboogdysplasie':
+                // ED: 0 is beter dan 1, etc.
+                const edOrder = { 'ED 0': 0, 'ED 1': 1, 'ED 2': 2, 'ED 3': 3, 'Niet getest': 4 };
+                return (edOrder[reuValue] || 5) <= (edOrder[minValue] || 5);
+                
+            default:
+                return reuValue === minValue;
+        }
     }
     
     getHealthFieldName(testKey) {
@@ -771,58 +803,66 @@ class ZoekReu {
         return fieldMap[testKey] || testKey;
     }
     
-    compareHD(a, b) {
-        const order = { 'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4 };
-        return (order[a] || 5) - (order[b] || 5);
-    }
-    
-    comparePL(a, b) {
-        const order = { '0': 0, '1': 1, '2': 2, '3': 3, '4': 4 };
-        return (order[a] || 5) - (order[b] || 5);
-    }
-    
-    compareED(a, b) {
-        const order = { '0': 0, '1': 1, '2': 2, '3': 3 };
-        return (order[a] || 4) - (order[b] || 4);
-    }
-    
-    sortByHealthScore(reuen, healthCriteria) {
+    sortByHealthScore(reuen) {
         return reuen.sort((a, b) => {
-            // Reuen met meer bekende uitslagen komen eerst
+            // 1. Sorteer op aantal bekende tests (meer is beter)
             const knownTestsA = this.countKnownTests(a);
             const knownTestsB = this.countKnownTests(b);
-            
-            if (knownTestsA !== knownTestsB) {
+            if (knownTestsB !== knownTestsA) {
                 return knownTestsB - knownTestsA;
             }
             
-            // Sorteer op HD (belangrijkste)
-            const hdScore = this.compareHD(a.heupdysplasie, b.heupdysplasie);
+            // 2. HD score (A is beste)
+            const hdScore = this.compareHealthValue('heupdysplasie', a.heupdysplasie, b.heupdysplasie);
             if (hdScore !== 0) return hdScore;
             
-            // Sorteer op PL
-            const plScore = this.comparePL(a.patella, b.patella);
+            // 3. PL score (PL 0 is beste)
+            const plScore = this.compareHealthValue('patellaluxatie', a.patella, b.patella);
             if (plScore !== 0) return plScore;
             
-            // Sorteer op ogen
-            const ogenScore = this.compareOgen(a.ogen, b.ogen);
+            // 4. Ogen score (Vrij is beste)
+            const ogenScore = this.compareHealthValue('ogen', a.ogen, b.ogen);
             if (ogenScore !== 0) return ogenScore;
             
-            // Sorteer op Dandy Walker
-            const dwScore = this.compareDW(a.dandyWalker, b.dandyWalker);
+            // 5. Dandy Walker score (Vrij op DNA is beste)
+            const dwScore = this.compareHealthValue('dandyWalker', a.dandyWalker, b.dandyWalker);
             if (dwScore !== 0) return dwScore;
             
-            // Sorteer op schildklier
-            const thyroidScore = this.compareThyroid(a.schildklier, b.schildklier);
+            // 6. Schildklier score (TGAA negatief is beste)
+            const thyroidScore = this.compareHealthValue('schildklier', a.schildklier, b.schildklier);
             if (thyroidScore !== 0) return thyroidScore;
             
-            // Sorteer op ED
-            const edScore = this.compareED(a.elleboogdysplasie, b.elleboogdysplasie);
+            // 7. ED score (ED 0 is beste)
+            const edScore = this.compareHealthValue('elleboogdysplasie', a.elleboogdysplasie, b.elleboogdysplasie);
             if (edScore !== 0) return edScore;
             
-            // Laatste sortering op naam
+            // 8. Laatste sortering op naam
             return (a.naam || '').localeCompare(b.naam || '');
         });
+    }
+    
+    compareHealthValue(test, valueA, valueB) {
+        // Definieer de volgorde voor elke test (lage score = beter)
+        const orders = {
+            'heupdysplasie': { 'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4 },
+            'patellaluxatie': { 'PL 0': 0, 'PL 1': 1, 'PL 2': 2, 'PL 3': 3, 'Niet getest': 4 },
+            'ogen': { 'Vrij': 0, 'Dist': 1, 'Overig': 2, 'Niet onderzocht': 3 },
+            'dandyWalker': { 
+                'Vrij op DNA': 0, 
+                'Vrij op ouders': 1, 
+                'Drager': 2, 
+                'Niet getest': 3, 
+                'Lijder': 4 
+            },
+            'schildklier': { 'TGAA negatief': 0, 'Niet getest': 1 },
+            'elleboogdysplasie': { 'ED 0': 0, 'ED 1': 1, 'ED 2': 2, 'ED 3': 3, 'Niet getest': 4 }
+        };
+        
+        const order = orders[test] || {};
+        const scoreA = valueA ? (order[valueA] !== undefined ? order[valueA] : 99) : 100;
+        const scoreB = valueB ? (order[valueB] !== undefined ? order[valueB] : 99) : 100;
+        
+        return scoreA - scoreB;
     }
     
     countKnownTests(reu) {
@@ -837,35 +877,59 @@ class ZoekReu {
         
         return tests.filter(test => {
             const value = reu[test];
-            return value && value !== '' && value !== 'Niet getest' && value !== 'Niet onderzocht';
+            return value && 
+                   value !== '' && 
+                   value !== 'Niet getest' && 
+                   value !== 'Niet onderzocht' &&
+                   !value.includes('getest') &&
+                   !value.includes('onderzocht');
         }).length;
-    }
-    
-    compareOgen(a, b) {
-        const order = { 'Vrij': 0, 'Gefokt niet toegestaan': 1, 'Tevens niet fokgeschikt': 2 };
-        return (order[a] || 3) - (order[b] || 3);
-    }
-    
-    compareDW(a, b) {
-        const order = { 'Vrij': 0, 'Drager': 1, 'Lijder': 2 };
-        return (order[a] || 3) - (order[b] || 3);
-    }
-    
-    compareThyroid(a, b) {
-        const order = { 'Vrij': 0, 'Licht verlaagd': 1, 'Verlaagd': 2 };
-        return (order[a] || 3) - (order[b] || 3);
     }
     
     generateResultsTable(reuen, t) {
         return reuen.map(reu => {
-            const getHealthClass = (value) => {
+            const getHealthClass = (value, test) => {
                 if (!value || value === '') return 'text-muted';
-                if (value === 'A' || value === '0' || value === 'Vrij') return 'text-success fw-bold';
-                if (value === 'B' || value === '1' || value === 'Licht verlaagd' || value === 'Drager') return 'text-warning';
-                if (value === 'C' || value === '2' || value === 'Verlaagd' || value === 'Lijder') return 'text-warning';
-                if (value === 'D' || value === '3') return 'text-danger';
-                if (value === 'E' || value === '4') return 'text-danger';
-                return 'text-secondary';
+                
+                const goodValues = {
+                    'heupdysplasie': ['A', 'B'],
+                    'patellaluxatie': ['PL 0', 'PL 1'],
+                    'ogen': ['Vrij'],
+                    'dandyWalker': ['Vrij op DNA', 'Vrij op ouders'],
+                    'schildklier': ['TGAA negatief'],
+                    'elleboogdysplasie': ['ED 0', 'ED 1']
+                };
+                
+                const warningValues = {
+                    'heupdysplasie': ['C'],
+                    'patellaluxatie': ['PL 2'],
+                    'ogen': ['Dist'],
+                    'dandyWalker': ['Drager'],
+                    'schildklier': [],
+                    'elleboogdysplasie': ['ED 2']
+                };
+                
+                const fieldMap = {
+                    'patella': 'patellaluxatie',
+                    'dandyWalker': 'dandyWalker',
+                    'schildklier': 'schildklier',
+                    'elleboogdysplasie': 'elleboogdysplasie',
+                    'heupdysplasie': 'heupdysplasie',
+                    'ogen': 'ogen'
+                };
+                
+                const testType = fieldMap[test] || test;
+                
+                if (goodValues[testType]?.includes(value)) return 'text-success fw-bold';
+                if (warningValues[testType]?.includes(value)) return 'text-warning';
+                if (value.includes('getest') || value.includes('onderzocht')) return 'text-secondary';
+                return 'text-danger';
+            };
+            
+            const formatValue = (value) => {
+                if (!value || value === '') return '?';
+                if (value.length > 10) return value.substring(0, 10) + '...';
+                return value;
             };
             
             return `
@@ -873,23 +937,23 @@ class ZoekReu {
                     <td>${reu.naam || t('unknown')}</td>
                     <td>${reu.ras || t('unknown')}</td>
                     <td><small>${reu.stamboomnr || ''}</small></td>
-                    <td class="${getHealthClass(reu.heupdysplasie)}">
-                        ${reu.heupdysplasie || '?'}
+                    <td class="${getHealthClass(reu.heupdysplasie, 'heupdysplasie')}">
+                        ${formatValue(reu.heupdysplasie)}
                     </td>
-                    <td class="${getHealthClass(reu.patella)}">
-                        ${reu.patella || '?'}
+                    <td class="${getHealthClass(reu.patella, 'patella')}">
+                        ${formatValue(reu.patella)}
                     </td>
-                    <td class="${getHealthClass(reu.ogen)}">
-                        ${reu.ogen ? reu.ogen.substring(0, 15) : '?'}
+                    <td class="${getHealthClass(reu.ogen, 'ogen')}">
+                        ${formatValue(reu.ogen)}
                     </td>
-                    <td class="${getHealthClass(reu.dandyWalker)}">
-                        ${reu.dandyWalker ? reu.dandyWalker.substring(0, 10) : '?'}
+                    <td class="${getHealthClass(reu.dandyWalker, 'dandyWalker')}">
+                        ${formatValue(reu.dandyWalker)}
                     </td>
-                    <td class="${getHealthClass(reu.schildklier)}">
-                        ${reu.schildklier ? reu.schildklier.substring(0, 10) : '?'}
+                    <td class="${getHealthClass(reu.schildklier, 'schildklier')}">
+                        ${formatValue(reu.schildklier)}
                     </td>
-                    <td class="${getHealthClass(reu.elleboogdysplasie)}">
-                        ${reu.elleboogdysplasie || '?'}
+                    <td class="${getHealthClass(reu.elleboogdysplasie, 'elleboogdysplasie')}">
+                        ${formatValue(reu.elleboogdysplasie)}
                     </td>
                     <td><small>${reu.land || ''}</small></td>
                 </tr>
@@ -971,5 +1035,10 @@ style.textContent = `
     .text-danger { color: #dc3545 !important; }
     .text-muted { color: #6c757d !important; }
     .text-secondary { color: #6c757d !important; }
+    
+    .table-sm th, .table-sm td {
+        padding: 0.3rem 0.5rem;
+        font-size: 0.875rem;
+    }
 `;
 document.head.appendChild(style);
