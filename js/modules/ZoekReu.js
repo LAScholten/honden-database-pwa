@@ -239,7 +239,7 @@ class ZoekReu {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
                     patellaluxatie: ["PL 0", "PL 1", "PL 2", "PL 3", "Nicht getestet"],
                     ogen: ["Frei", "Dist", "Andere", "Nicht untersucht"],
-                    dandyWalker: ["Frei auf DNA", "Frei auf Eltern", "Träger", "Niet getest", "Betroffen"],
+                    dandyWalker: ["Frei auf DNA", "Frei auf ouders", "Träger", "Niet getest", "Betroffen"],
                     schildklier: ["TGAA Negativ", "Niet getest"],
                     elleboogdysplasie: ["ED 0", "ED 1", "ED 2", "ED 3", "Niet getest"]
                 },
@@ -256,7 +256,7 @@ class ZoekReu {
                         "PL 1": "PL 1 (Leicht)",
                         "PL 2": "PL 2 (Mäßig)",
                         "PL 3": "PL 3 (Schwer)",
-                        "Nicht getestet": "Nicht getestet"
+                        "Niet getestet": "Niet getestet"
                     },
                     ogen: {
                         "Frei": "Frei",
@@ -767,7 +767,9 @@ class ZoekReu {
                 break;
                 
             case 'schildklier':
-                if (lowerValue.includes('tgaa negatief') || lowerValue === 'negatief') {
+                // ALLEEN DEZE IS GEWIJZIGD: TGAA Negatief = groen, alles anders = rood
+                if (lowerValue === 'tgaa negatief' || lowerValue === 'tg aa negatief' || 
+                    lowerValue === 'tgaanegatief' || (lowerValue.includes('tgaa') && lowerValue.includes('negatief'))) {
                     return 'text-success fw-bold';
                 }
                 return 'text-danger fw-bold';
@@ -1030,8 +1032,8 @@ class ZoekReu {
                 return (dwOrder[reuValue] || 5) <= (dwOrder[minValue] || 5);
                 
             case 'schildklier':
-                // Schildklier: Tgaa Negatief > Niet getest
-                const thyroidOrder = { 'Tgaa Negatief': 0, 'Niet getest': 1 };
+                // Schildklier: TGAA Negatief > Niet getest
+                const thyroidOrder = { 'TGAA Negatief': 0, 'Niet getest': 1 };
                 return (thyroidOrder[reuValue] || 2) <= (thyroidOrder[minValue] || 2);
                 
             case 'elleboogdysplasie':
@@ -1081,7 +1083,7 @@ class ZoekReu {
             const dwScore = this.compareHealthValue('dandyWalker', a.dandyWalker, b.dandyWalker);
             if (dwScore !== 0) return dwScore;
             
-            // 6. Schildklier score (Tgaa Negatief is beste)
+            // 6. Schildklier score (TGAA Negatief is beste)
             const thyroidScore = this.compareHealthValue('schildklier', a.schildklier, b.schildklier);
             if (thyroidScore !== 0) return thyroidScore;
             
@@ -1107,7 +1109,7 @@ class ZoekReu {
                 'Niet getest': 3, 
                 'Lijder': 4 
             },
-            'schildklier': { 'Tgaa Negatief': 0, 'Niet getest': 1 },
+            'schildklier': { 'TGAA Negatief': 0, 'Niet getest': 1 },
             'elleboogdysplasie': { 'ED 0': 0, 'ED 1': 1, 'ED 2': 2, 'ED 3': 3, 'Niet getest': 4 }
         };
         
