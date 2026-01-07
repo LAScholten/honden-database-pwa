@@ -233,7 +233,7 @@ class ZoekReu {
                 inDevelopment: "Diese Suchfunktion ist derzeit in ontwikkeling",
                 devMessage: "Die vollständige Suchfunktionalität für Rüden wird demnächst verfügbaar sein.",
                 features: [
-                    "Erweiterte Suchfilter",
+                    "Erweiterde Suchfilter",
                     "Genetische Kompatibilitätsprüfung",
                     "Stammbaumanalyse",
                     "Gesundheitswertvergleich",
@@ -1241,39 +1241,36 @@ class ZoekReu {
                 // Ogen: Vrij > Dist > Overig > Niet onderzocht
                 // Speciaal geval: Ogen filtering werkt anders!
                 // - Vrij: alleen Vrij
-                // - Dist: Vrij EN Dist
-                // - Overig: Vrij, Dist EN Overig
+                // - Dist: Vrij EN Dist(ichiasis)
+                // - Overig: Vrij, Dist(ichiasis) EN Overig
                 // - Niet onderzocht: alles
                 
-                // Eerst normaliseren naar NL waarden voor consistentie
+                // Eerst normaliseren: Dist in dropdown komt overeen met Distichiasis in database
                 let reuOgenValue = normalizedReuValue;
-                if (normalizedReuValue === 'Free') reuOgenValue = 'Vrij';
-                if (normalizedReuValue === 'Dist') reuOgenValue = 'Dist';
-                if (normalizedReuValue === 'Other') reuOgenValue = 'Overig';
-                if (normalizedReuValue === 'Not examined' || normalizedReuValue === 'Niet onderzocht') reuOgenValue = 'Niet onderzocht';
-                
                 let maxOgenValue = normalizedMaxValue;
-                if (normalizedMaxValue === 'Free') maxOgenValue = 'Vrij';
-                if (normalizedMaxValue === 'Dist') maxOgenValue = 'Dist';
-                if (normalizedMaxValue === 'Other') maxOgenValue = 'Overig';
-                if (normalizedMaxValue === 'Not examined' || normalizedMaxValue === 'Niet onderzocht') maxOgenValue = 'Niet onderzocht';
                 
-                // Check de speciale gevallen
-                if (maxOgenValue === 'Niet onderzocht') {
-                    return true; // Alles toegestaan
+                // Als de gebruiker "Dist" heeft geselecteerd, betekent dit zowel "Dist" als "Distichiasis"
+                if (maxOgenValue === 'Dist' || maxOgenValue === 'Distichiasis') {
+                    // Dist in filter betekent: Vrij en Dist/Distichiasis zijn OK
+                    if (reuOgenValue === 'Vrij' || reuOgenValue === 'Dist' || reuOgenValue === 'Distichiasis') {
+                        return true;
+                    }
+                    return false;
                 }
                 
                 if (maxOgenValue === 'Overig') {
-                    // Vrij, Dist en Overig zijn toegestaan
-                    return reuOgenValue === 'Vrij' || 
-                           reuOgenValue === 'Dist' || 
-                           reuOgenValue === 'Overig';
+                    // Overig betekent: Vrij, Dist/Distichiasis en Overig zijn OK
+                    if (reuOgenValue === 'Vrij' || 
+                        reuOgenValue === 'Dist' || 
+                        reuOgenValue === 'Distichiasis' || 
+                        reuOgenValue === 'Overig') {
+                        return true;
+                    }
+                    return false;
                 }
                 
-                if (maxOgenValue === 'Dist') {
-                    // Vrij en Dist zijn toegestaan
-                    return reuOgenValue === 'Vrij' || 
-                           reuOgenValue === 'Dist';
+                if (maxOgenValue === 'Niet onderzocht' || maxOgenValue === 'Not examined') {
+                    return true; // Alles toegestaan
                 }
                 
                 if (maxOgenValue === 'Vrij') {
@@ -1281,11 +1278,19 @@ class ZoekReu {
                     return reuOgenValue === 'Vrij';
                 }
                 
+                // Voor Engels: Free, Dist, Other
+                if (maxOgenValue === 'Free') {
+                    return reuOgenValue === 'Free' || reuOgenValue === 'Vrij';
+                }
+                
+                if (maxOgenValue === 'Other') {
+                    return reuOgenValue === 'Free' || reuOgenValue === 'Vrij' || 
+                           reuOgenValue === 'Dist' || reuOgenValue === 'Distichiasis' ||
+                           reuOgenValue === 'Other' || reuOgenValue === 'Overig';
+                }
+                
                 // Standaard geval (voor de zekerheid)
-                const ogenOrder = { 'Vrij': 0, 'Dist': 1, 'Overig': 2, 'Niet onderzocht': 3 };
-                const ogenScoreReu = ogenOrder[reuOgenValue] !== undefined ? ogenOrder[reuOgenValue] : 99;
-                const ogenScoreMax = ogenOrder[maxOgenValue] !== undefined ? ogenOrder[maxOgenValue] : 99;
-                return ogenScoreReu <= ogenScoreMax;
+                return normalizedReuValue === normalizedMaxValue;
                 
             case 'dandyWalker':
                 // Dandy Walker: Vrij op DNA > Vrij op ouders > Drager > Niet getest > Lijder
