@@ -603,7 +603,7 @@ class ZoekReu {
                 ${teef.stamboomnr || ''}
             `.toLowerCase();
             
-            // Check of ALLE zoektermen voorkomen in de zoekbare tekst
+            // Check of ALLE zoektermen voorkomen in de zoekable tekst
             return searchTerms.every(term => 
                 searchableText.includes(term)
             );
@@ -1214,11 +1214,15 @@ class ZoekReu {
     meetsSchildklierRequirement(reuValue, selectedValue) {
         // Speciaal geval voor Tgaa filtering:
         // - "Tgaa Negatief" moet zowel "Tgaa Negatief" als "Negatief" vinden
-        // - "Niet getest" moet zowel "Niet getest" als "Negatief" vinden
+        // - "Niet getest" moet zowel "Niet getest" als "Negatief" als lege waarden vinden
         // - Niets selecteren moet alle reuen tonen (geen filtering)
         
+        // Als er geen reu waarde is (leeg of onbekend)
         if (!reuValue || reuValue === '' || reuValue === '?' || reuValue.toLowerCase() === 'onbekend') {
-            return false; // Onbekende waarden uitsluiten
+            // Alleen toestaan bij "Niet getest" selectie
+            return selectedValue === 'Niet getest' || 
+                   selectedValue === 'Not tested' || 
+                   selectedValue === 'Niet getest';
         }
         
         const normalizedReuValue = reuValue.toLowerCase().trim();
@@ -1237,11 +1241,13 @@ class ZoekReu {
         }
         
         if (selectedValue === 'Niet getest' || selectedValue === 'Not tested' || selectedValue === 'Niet getest') {
-            // "Niet getest" moet zowel "Niet getest" als "Negatief" vinden
-            // (maar geen "Tgaa Positief" of "Positief")
+            // "Niet getest" moet zowel "Niet getest" als "Negatief" als lege waarden vinden
+            // MAAR geen "Tgaa Positief" of "Positief"
             return normalizedReuValue === 'niet getest' ||
                    normalizedReuValue === 'not tested' ||
                    normalizedReuValue === '' ||
+                   reuValue === '' ||
+                   reuValue === null ||
                    normalizedReuValue === 'tgaa negatief' || 
                    normalizedReuValue === 'negatief' ||
                    normalizedReuValue === 'tgaa negative' ||
