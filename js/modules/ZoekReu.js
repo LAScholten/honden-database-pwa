@@ -761,8 +761,7 @@ class ZoekReu {
                 break;
                 
             case 'dw':
-                if (value === 'Vrij op DNA') return 'text-success fw-bold';
-                if (value === 'Vrij op ouders') return 'text-warning fw-bold';
+                if (value === 'Vrij op DNA' || value === 'Vrij op ouders') return 'text-success fw-bold';
                 if (value === 'Drager') return 'text-orange fw-bold';
                 if (value === 'Niet getest' || value === 'Lijder') return 'text-danger fw-bold';
                 break;
