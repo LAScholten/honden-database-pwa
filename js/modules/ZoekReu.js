@@ -51,7 +51,7 @@ class ZoekReu {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
                     patellaluxatie: ["0", "1", "2", "3", "Niet getest"],
                     ogen: ["Vrij", "Dist", "Overig", "Niet onderzocht"],
-                    dandyWalker: ["Vrij op DNA", "Vrij op ouders", "Drager", "Niet getest", "Lijder"],
+                    dandyWalker: ["Vrij op DNA", "Vrij op ouders", "Drager", "Niet getest"],
                     schildklier: ["Tgaa Negatief", "Niet getest"],
                     elleboogdysplasie: ["0", "1", "2", "3", "Niet getest"]
                 },
@@ -80,8 +80,7 @@ class ZoekReu {
                         "Vrij op DNA": "Vrij op DNA",
                         "Vrij op ouders": "Vrij op ouders",
                         "Drager": "Drager",
-                        "Niet getest": "Niet getest",
-                        "Lijder": "Lijder"
+                        "Niet getest": "Niet getest"
                     },
                     schildklier: {
                         "Tgaa Negatief": "Tgaa Negatief",
@@ -149,7 +148,7 @@ class ZoekReu {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
                     patellaluxatie: ["0", "1", "2", "3", "Not tested"],
                     ogen: ["Free", "Dist", "Other", "Not examined"],
-                    dandyWalker: ["Free on DNA", "Free on parents", "Carrier", "Not tested", "Affected"],
+                    dandyWalker: ["Free on DNA", "Free on parents", "Carrier", "Not tested"],
                     schildklier: ["Tgaa Negative", "Not tested"],
                     elleboogdysplasie: ["0", "1", "2", "3", "Not tested"]
                 },
@@ -178,8 +177,7 @@ class ZoekReu {
                         "Free on DNA": "Free on DNA",
                         "Free on parents": "Free on parents",
                         "Carrier": "Carrier",
-                        "Not tested": "Not tested",
-                        "Affected": "Affected"
+                        "Not tested": "Not tested"
                     },
                     schildklier: {
                         "Tgaa Negative": "Tgaa Negative",
@@ -231,7 +229,7 @@ class ZoekReu {
                 searchButton: "Rüden suchen",
                 results: "Suchergebnisse",
                 inDevelopment: "Diese Suchfunktion ist derzeit in ontwikkeling",
-                devMessage: "Die vollständige Suchfunktionalität für Rüden wird demnächst verfügbaar sein.",
+                devMessage: "Die vollständige Suchfunktionalität für Rüden wird demnächst verfügbar sein.",
                 features: [
                     "Erweiterde Suchfilter",
                     "Genetische Kompatibilitätsprüfung",
@@ -247,7 +245,7 @@ class ZoekReu {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
                     patellaluxatie: ["0", "1", "2", "3", "Niet getestet"],
                     ogen: ["Frei", "Dist", "Andere", "Niet untersucht"],
-                    dandyWalker: ["Frei auf DNA", "Frei op ouders", "Träger", "Niet getest", "Betroffen"],
+                    dandyWalker: ["Frei auf DNA", "Frei op ouders", "Träger", "Niet getest"],
                     schildklier: ["Tgaa Negativ", "Niet getest"],
                     elleboogdysplasie: ["0", "1", "2", "3", "Niet getest"]
                 },
@@ -276,8 +274,7 @@ class ZoekReu {
                         "Frei auf DNA": "Frei auf DNA",
                         "Frei op ouders": "Frei op ouders",
                         "Träger": "Träger",
-                        "Niet getest": "Niet getest",
-                        "Betroffen": "Betroffen"
+                        "Niet getest": "Niet getest"
                     },
                     schildklier: {
                         "Tgaa Negativ": "Tgaa Negativ",
@@ -1178,20 +1175,27 @@ class ZoekReu {
         }
         
         return reuen.filter(reu => {
-            for (const [test, maxValue] of Object.entries(healthCriteria)) {
+            for (const [test, selectedValue] of Object.entries(healthCriteria)) {
                 const reuValue = reu[this.getHealthFieldName(test)];
+                
+                // Speciaal geval voor schildklier (Tgaa)
+                if (test === 'schildklier') {
+                    const passes = this.meetsSchildklierRequirement(reuValue, selectedValue);
+                    if (!passes) return false;
+                    continue;
+                }
                 
                 // Speciaal geval: als er geen waarde is, moet deze worden uitgesloten
                 // behalve bij "Niet getest" of "Niet onderzocht" als dat de maximumwaarde is
                 if (!reuValue || reuValue === '' || reuValue === '?' || reuValue.toLowerCase() === 'onbekend') {
                     // Controleer of "niet getest" of "niet onderzocht" is toegestaan
-                    if (test === 'patellaluxatie' && (maxValue === 'Niet getest' || maxValue === 'Not tested')) {
+                    if (test === 'patellaluxatie' && (selectedValue === 'Niet getest' || selectedValue === 'Not tested')) {
                         // Toegestaan voor PL "Niet getest"
                         continue;
-                    } else if (test === 'ogen' && (maxValue === 'Niet onderzocht' || maxValue === 'Not examined')) {
+                    } else if (test === 'ogen' && (selectedValue === 'Niet onderzocht' || selectedValue === 'Not examined')) {
                         // Toegestaan voor ogen "Niet onderzocht"
                         continue;
-                    } else if (maxValue === 'Niet getest' || maxValue === 'Not tested') {
+                    } else if (selectedValue === 'Niet getest' || selectedValue === 'Not tested') {
                         // Toegestaan voor andere tests met "Niet getest"
                         continue;
                     }
@@ -1199,12 +1203,57 @@ class ZoekReu {
                 }
                 
                 // Check of reu voldoet aan MAXIMALE eis (niet slechter is dan maximum)
-                if (!this.meetsMaximumRequirement(test, reuValue, maxValue)) {
+                if (!this.meetsMaximumRequirement(test, reuValue, selectedValue)) {
                     return false;
                 }
             }
             return true;
         });
+    }
+    
+    meetsSchildklierRequirement(reuValue, selectedValue) {
+        // Speciaal geval voor Tgaa filtering:
+        // - "Tgaa Negatief" moet zowel "Tgaa Negatief" als "Negatief" vinden
+        // - "Niet getest" moet zowel "Niet getest" als "Negatief" vinden
+        // - Niets selecteren moet alle reuen tonen (geen filtering)
+        
+        if (!reuValue || reuValue === '' || reuValue === '?' || reuValue.toLowerCase() === 'onbekend') {
+            return false; // Onbekende waarden uitsluiten
+        }
+        
+        const normalizedReuValue = reuValue.toLowerCase().trim();
+        
+        if (selectedValue === 'Tgaa Negatief' || selectedValue === 'Tgaa Negative' || selectedValue === 'Tgaa Negativ') {
+            // "Tgaa Negatief" moet zowel "Tgaa Negatief" als "Negatief" vinden
+            return normalizedReuValue === 'tgaa negatief' || 
+                   normalizedReuValue === 'negatief' ||
+                   normalizedReuValue === 'tgaa negative' ||
+                   normalizedReuValue === 'negative' ||
+                   normalizedReuValue === 'tgaa negativ' ||
+                   normalizedReuValue === 'negativ' ||
+                   normalizedReuValue === 'tg aa negatief' ||
+                   normalizedReuValue === 'tg aa negatief' ||
+                   normalizedReuValue === 'tg aa negatief';
+        }
+        
+        if (selectedValue === 'Niet getest' || selectedValue === 'Not tested' || selectedValue === 'Niet getest') {
+            // "Niet getest" moet zowel "Niet getest" als "Negatief" vinden
+            // (maar geen "Tgaa Positief" of "Positief")
+            return normalizedReuValue === 'niet getest' ||
+                   normalizedReuValue === 'not tested' ||
+                   normalizedReuValue === '' ||
+                   normalizedReuValue === 'tgaa negatief' || 
+                   normalizedReuValue === 'negatief' ||
+                   normalizedReuValue === 'tgaa negative' ||
+                   normalizedReuValue === 'negative' ||
+                   normalizedReuValue === 'tgaa negativ' ||
+                   normalizedReuValue === 'negativ' ||
+                   normalizedReuValue === 'tg aa negatief' ||
+                   normalizedReuValue === 'tg aa negatief' ||
+                   normalizedReuValue === 'tg aa negatief';
+        }
+        
+        return false;
     }
     
     meetsMaximumRequirement(test, reuValue, maxValue) {
@@ -1293,24 +1342,66 @@ class ZoekReu {
                 return normalizedReuValue === normalizedMaxValue;
                 
             case 'dandyWalker':
-                // Dandy Walker: Vrij op DNA > Vrij op ouders > Drager > Niet getest > Lijder
-                const dwOrder = { 
-                    'Vrij op DNA': 0, 
-                    'Vrij op ouders': 1, 
-                    'Drager': 2, 
-                    'Niet getest': 3, 
-                    'Lijder': 4 
-                };
-                const dwScoreReu = dwOrder[normalizedReuValue] !== undefined ? dwOrder[normalizedReuValue] : 99;
-                const dwScoreMax = dwOrder[normalizedMaxValue] !== undefined ? dwOrder[normalizedMaxValue] : 99;
-                return dwScoreReu <= dwScoreMax;
+                // Dandy Walker: aangepaste logica volgens specificaties
+                // - "Vrij op DNA": alleen "Vrij op DNA"
+                // - "Vrij op ouders": "Vrij op DNA" en "Vrij op ouders"
+                // - "Drager": "Vrij op DNA", "Vrij op ouders" en "Drager"
+                // - "Niet getest": "Vrij op DNA", "Vrij op ouders", "Drager" en "Niet getest"
+                // - "Lijder": wordt uitgesloten (niet in dropdown!)
+                
+                // Als maxValue leeg is, toon alle reuen (inclusief Lijder)
+                if (!normalizedMaxValue || normalizedMaxValue === '') {
+                    return true;
+                }
+                
+                // Expliciet Lijder uitsluiten (mag niet in de resultaten voorkomen)
+                if (normalizedReuValue.includes('lijder') || normalizedReuValue.includes('affected')) {
+                    return false;
+                }
+                
+                // Controleer op de juiste combinaties
+                if (normalizedMaxValue === 'Vrij op DNA') {
+                    // Alleen "Vrij op DNA"
+                    return normalizedReuValue.includes('vrij op dna') || normalizedReuValue.includes('vrij dna');
+                }
+                
+                if (normalizedMaxValue === 'Vrij op ouders') {
+                    // "Vrij op DNA" en "Vrij op ouders"
+                    return normalizedReuValue.includes('vrij op dna') || 
+                           normalizedReuValue.includes('vrij dna') ||
+                           normalizedReuValue.includes('vrij op ouders') ||
+                           normalizedReuValue.includes('vrij ouders');
+                }
+                
+                if (normalizedMaxValue === 'Drager') {
+                    // "Vrij op DNA", "Vrij op ouders" en "Drager"
+                    return normalizedReuValue.includes('vrij op dna') || 
+                           normalizedReuValue.includes('vrij dna') ||
+                           normalizedReuValue.includes('vrij op ouders') ||
+                           normalizedReuValue.includes('vrij ouders') ||
+                           normalizedReuValue.includes('drager') ||
+                           normalizedReuValue.includes('carrier');
+                }
+                
+                if (normalizedMaxValue === 'Niet getest') {
+                    // "Vrij op DNA", "Vrij op ouders", "Drager" en "Niet getest"
+                    return normalizedReuValue.includes('vrij op dna') || 
+                           normalizedReuValue.includes('vrij dna') ||
+                           normalizedReuValue.includes('vrij op ouders') ||
+                           normalizedReuValue.includes('vrij ouders') ||
+                           normalizedReuValue.includes('drager') ||
+                           normalizedReuValue.includes('carrier') ||
+                           normalizedReuValue.includes('niet getest') ||
+                           normalizedReuValue.includes('not tested');
+                }
+                
+                // "Lijder" is verwijderd uit de dropdown, maar voor de zekerheid
+                return false;
                 
             case 'schildklier':
-                // Schildklier: Tgaa Negatief > Niet getest
-                const thyroidOrder = { 'Tgaa Negatief': 0, 'Niet getest': 1 };
-                const thyroidScoreReu = thyroidOrder[normalizedReuValue] !== undefined ? thyroidOrder[normalizedReuValue] : 99;
-                const thyroidScoreMax = thyroidOrder[normalizedMaxValue] !== undefined ? thyroidOrder[normalizedMaxValue] : 99;
-                return thyroidScoreReu <= thyroidScoreMax;
+                // Deze case wordt afgehandeld in meetsSchildklierRequirement
+                // Hier terugvallen op standaard gedrag
+                return true;
                 
             case 'elleboogdysplasie':
                 // ED: 0 is beter dan 1, etc.
@@ -1462,8 +1553,7 @@ class ZoekReu {
                 'Vrij op DNA': 0, 
                 'Vrij op ouders': 1, 
                 'Drager': 2, 
-                'Niet getest': 3, 
-                'Lijder': 4 
+                'Niet getest': 3
             },
             'schildklier': { 'Tgaa Negatief': 0, 'Niet getest': 1 },
             'elleboogdysplasie': { '0': 0, '1': 1, '2': 2, '3': 3, 'Niet getest': 4 }
