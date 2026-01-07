@@ -773,9 +773,9 @@ class ZoekReu {
                 return 'text-danger fw-bold';
                 
             case 'ed':
-                if (lowerValue === 'ed 0' || lowerValue === 'ed0') return 'text-success fw-bold';
-                if (lowerValue === 'ed 1' || lowerValue === 'ed1') return 'text-orange fw-bold';
-                if (lowerValue === 'ed 2' || lowerValue === 'ed2' || lowerValue === 'ed 3' || lowerValue === 'ed3') return 'text-danger fw-bold';
+                if (lowerValue === '0' || lowerValue === '0') return 'text-success fw-bold';
+                if (lowerValue === '1' || lowerValue === '1') return 'text-orange fw-bold';
+                if (lowerValue === '2' || lowerValue === '2' || lowerValue === '3' || lowerValue === 'ed3') return 'text-danger fw-bold';
                 break;
         }
         
