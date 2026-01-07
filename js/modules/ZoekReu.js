@@ -50,7 +50,7 @@ class ZoekReu {
                     patellaluxatie: ["PL 0", "PL 1", "PL 2", "PL 3", "Niet getest"],
                     ogen: ["Vrij", "Dist", "Overig", "Niet onderzocht"],
                     dandyWalker: ["Vrij op DNA", "Vrij op ouders", "Drager", "Niet getest", "Lijder"],
-                    schildklier: ["Tgaa Negatief", "Niet getest"],
+                    schildklier: ["TGAA Negatief", "Niet getest"],
                     elleboogdysplasie: ["ED 0", "ED 1", "ED 2", "ED 3", "Niet getest"]
                 },
                 healthLabels: {
@@ -82,7 +82,7 @@ class ZoekReu {
                         "Lijder": "Lijder"
                     },
                     schildklier: {
-                        "Tgaa Negatief": "Tgaa Negatief",
+                        "TGAA Negatief": "TGAA Negatief",
                         "Niet getest": "Niet getest"
                     },
                     elleboogdysplasie: {
@@ -145,7 +145,7 @@ class ZoekReu {
                     patellaluxatie: ["PL 0", "PL 1", "PL 2", "PL 3", "Not tested"],
                     ogen: ["Free", "Dist", "Other", "Not examined"],
                     dandyWalker: ["Free on DNA", "Free on parents", "Carrier", "Not tested", "Affected"],
-                    schildklier: ["Tgaa Negative", "Not tested"],
+                    schildklier: ["TGAA Negative", "Not tested"],
                     elleboogdysplasie: ["ED 0", "ED 1", "ED 2", "ED 3", "Not tested"]
                 },
                 healthLabels: {
@@ -177,7 +177,7 @@ class ZoekReu {
                         "Affected": "Affected"
                     },
                     schildklier: {
-                        "Tgaa Negative": "Tgaa Negative",
+                        "TGAA Negative": "TGAA Negative",
                         "Not tested": "Not tested"
                     },
                     elleboogdysplasie: {
@@ -240,7 +240,7 @@ class ZoekReu {
                     patellaluxatie: ["PL 0", "PL 1", "PL 2", "PL 3", "Nicht getestet"],
                     ogen: ["Frei", "Dist", "Andere", "Nicht untersucht"],
                     dandyWalker: ["Frei auf DNA", "Frei auf Eltern", "Träger", "Niet getest", "Betroffen"],
-                    schildklier: ["Tgaa Negativ", "Niet getest"],
+                    schildklier: ["TGAA Negativ", "Niet getest"],
                     elleboogdysplasie: ["ED 0", "ED 1", "ED 2", "ED 3", "Niet getest"]
                 },
                 healthLabels: {
@@ -272,7 +272,7 @@ class ZoekReu {
                         "Betroffen": "Betroffen"
                     },
                     schildklier: {
-                        "Tgaa Negativ": "Tgaa Negativ",
+                        "TGAA Negativ": "TGAA Negativ",
                         "Niet getest": "Niet getest"
                     },
                     elleboogdysplasie: {
@@ -767,7 +767,7 @@ class ZoekReu {
                 break;
                 
             case 'schildklier':
-                if (lowerValue === 'tgaa negatief' || lowerValue === 'negatief' || lowerValue === 'tg aa negatief') {
+                if (lowerValue.includes('tgaa negatief') || lowerValue === 'negatief') {
                     return 'text-success fw-bold';
                 }
                 return 'text-danger fw-bold';
