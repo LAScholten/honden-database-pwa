@@ -24,10 +24,6 @@ class ReuTeefCombinatie {
         this.coiCalculatorReady = false;
         this.coiCalculationInProgress = false;
         
-        // NIEUW: Popup event handler tracking
-        this.currentOverlayHandler = null;
-        this.currentEscapeHandler = null;
-        
         // Vertalingen
         this.translations = {
             nl: {
@@ -2551,7 +2547,7 @@ class ReuTeefCombinatie {
                     right: 0;
                     bottom: 0;
                     background: rgba(0, 0, 0, 0.7);
-                    z-index: 9999;
+                    z-index: 1060;
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -3174,195 +3170,17 @@ class ReuTeefCombinatie {
     addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis) {
         const futurePuppyCard = document.querySelector('.pedigree-card-compact.horizontal.main-dog-compact.gen0');
         if (futurePuppyCard) {
-            // Verwijder eerst bestaande listeners om dubbelingen te voorkomen
-            const newFuturePuppyCard = futurePuppyCard.cloneNode(true);
-            futurePuppyCard.parentNode.replaceChild(newFuturePuppyCard, futurePuppyCard);
-            
-            newFuturePuppyCard.addEventListener('click', (e) => {
+            futurePuppyCard.addEventListener('click', (e) => {
                 e.stopPropagation();
-                e.preventDefault();
                 this.showFuturePuppyPopup(futurePuppy, coiResult, healthAnalysis);
             });
             
-            newFuturePuppyCard.style.cursor = 'pointer';
+            futurePuppyCard.style.cursor = 'pointer';
             
-            const clickHint = newFuturePuppyCard.querySelector('.click-hint-compact');
+            const clickHint = futurePuppyCard.querySelector('.click-hint-compact');
             if (clickHint) {
                 clickHint.innerHTML = '<i class="bi bi-info-circle"></i> ' + this.t('clickForDetails');
             }
-        }
-    }
-    
-    // NIEUW: showFuturePuppyPopup met betere isolatie
-    showFuturePuppyPopup(futurePuppy, coiResult, healthAnalysis) {
-        const coi6Color = this.getCOIColor(coiResult.coi6Gen);
-        const coiAllColor = this.getCOIColor(coiResult.coiAllGen);
-        
-        const healthAnalysisHTML = this.generateHealthAnalysisHTML(healthAnalysis);
-        
-        // BELANGRIJK: Unieke ID voor deze popup om conflicten te voorkomen
-        const uniquePopupId = 'futurePuppyPopup_' + Date.now();
-        
-        const popupHTML = `
-            <div class="dog-detail-popup" id="${uniquePopupId}">
-                <div class="popup-header">
-                    <h5 class="popup-title">
-                        <i class="bi bi-stars me-2" style="color: #ffc107;"></i>
-                        ${this.t('futurePuppyName')}
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" aria-label="${this.t('close')}" id="${uniquePopupId}_close"></button>
-                </div>
-                <div class="popup-body">
-                    <div class="info-section mb-4">
-                        <h6><i class="bi bi-calculator me-1"></i> ${this.t('predictedCoi')}</h6>
-                        <div class="info-grid">
-                            <div class="info-row">
-                                <div class="info-item info-item-half">
-                                    <span class="info-label">${this.t('coi6Gen')}:</span>
-                                    <span class="info-value coi-value" style="color: ${coi6Color}; font-weight: bold;">
-                                        ${coiResult.coi6Gen}%
-                                    </span>
-                                </div>
-                                
-                                <div class="info-item info-item-half">
-                                    <span class="info-label">${this.t('coiAllGen')}:</span>
-                                    <span class="info-value coi-value" style="color: ${coiAllColor}; font-weight: bold;">
-                                        ${coiResult.coiAllGen}%
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="info-section mb-4">
-                        <h6><i class="bi bi-heart-pulse me-1"></i> ${this.t('healthInLine')}</h6>
-                        ${healthAnalysisHTML}
-                    </div>
-                    
-                    <div class="info-section mb-2">
-                        <div class="alert alert-info mb-0">
-                            <i class="bi bi-info-circle me-2"></i>
-                            <strong>${this.t('predictedPedigree')}</strong><br>
-                            ${this.t('futurePuppyDescription', { 
-                                reu: this.selectedReu.naam || '?', 
-                                teef: this.selectedTeef.naam || '?' 
-                            })}
-                        </div>
-                    </div>
-                </div>
-                <div class="popup-footer">
-                    <button type="button" class="btn btn-secondary popup-close-btn" id="${uniquePopupId}_footerClose">
-                        <i class="bi bi-x-circle me-1"></i> ${this.t('closePopup')}
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        // Zorg dat we een proper overlay hebben
-        this.ensurePopupContainer();
-        
-        const overlay = document.getElementById('pedigreePopupOverlay');
-        const container = document.getElementById('pedigreePopupContainer');
-        
-        if (container) {
-            // Verwijder eerst eventuele bestaande content
-            container.innerHTML = '';
-            
-            // Voeg nieuwe popup toe
-            container.innerHTML = popupHTML;
-            overlay.style.display = 'flex';
-            
-            // BELANGRIJK: Gebruik unieke selectors voor deze popup
-            const closeBtn = document.getElementById(`${uniquePopupId}_close`);
-            const footerCloseBtn = document.getElementById(`${uniquePopupId}_footerClose`);
-            
-            if (closeBtn) {
-                closeBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    this.closePopup(overlay);
-                });
-            }
-            
-            if (footerCloseBtn) {
-                footerCloseBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    this.closePopup(overlay);
-                });
-            }
-            
-            // Overlay click handler - gebruik bind om de juiste context te houden
-            const overlayClickHandler = (e) => {
-                if (e.target === overlay) {
-                    this.closePopup(overlay);
-                }
-            };
-            
-            overlay.addEventListener('click', overlayClickHandler);
-            
-            // Sla de handler op zodat we hem kunnen verwijderen
-            this.currentOverlayHandler = overlayClickHandler;
-            
-            // Escape key handler
-            const escapeHandler = (e) => {
-                if (e.key === 'Escape') {
-                    this.closePopup(overlay);
-                    document.removeEventListener('keydown', escapeHandler);
-                }
-            };
-            
-            document.addEventListener('keydown', escapeHandler);
-            
-            // Sla de escape handler op
-            this.currentEscapeHandler = escapeHandler;
-        }
-    }
-    
-    // NIEUW: Methode om popup te sluiten
-    closePopup(overlay) {
-        if (overlay) {
-            overlay.style.display = 'none';
-            
-            // Verwijder event listeners
-            if (this.currentOverlayHandler) {
-                overlay.removeEventListener('click', this.currentOverlayHandler);
-                this.currentOverlayHandler = null;
-            }
-            
-            if (this.currentEscapeHandler) {
-                document.removeEventListener('keydown', this.currentEscapeHandler);
-                this.currentEscapeHandler = null;
-            }
-            
-            // Maak de container leeg om conflicten te voorkomen
-            const container = document.getElementById('pedigreePopupContainer');
-            if (container) {
-                container.innerHTML = '';
-            }
-        }
-    }
-    
-    // Ook update de ensurePopupContainer om conflicten te voorkomen:
-    ensurePopupContainer() {
-        let overlay = document.getElementById('pedigreePopupOverlay');
-        let container = document.getElementById('pedigreePopupContainer');
-        
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.className = 'pedigree-popup-overlay';
-            overlay.id = 'pedigreePopupOverlay';
-            overlay.style.display = 'none';
-            
-            container = document.createElement('div');
-            container.className = 'pedigree-popup-container';
-            container.id = 'pedigreePopupContainer';
-            
-            overlay.appendChild(container);
-            document.body.appendChild(overlay);
-            
-            // BELANGRIJK: Zorg dat deze overlay een hogere z-index heeft dan andere
-            overlay.style.zIndex = '9999';
         }
     }
     
@@ -3973,6 +3791,79 @@ class ReuTeefCombinatie {
         return '#dc3545';
     }
     
+    showFuturePuppyPopup(futurePuppy, coiResult, healthAnalysis) {
+        const coi6Color = this.getCOIColor(coiResult.coi6Gen);
+        const coiAllColor = this.getCOIColor(coiResult.coiAllGen);
+        
+        const healthAnalysisHTML = this.generateHealthAnalysisHTML(healthAnalysis);
+        
+        const popupHTML = `
+            <div class="dog-detail-popup">
+                <div class="popup-header">
+                    <h5 class="popup-title">
+                        <i class="bi bi-stars me-2" style="color: #ffc107;"></i>
+                        ${this.t('futurePuppyName')}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" aria-label="${this.t('close')}"></button>
+                </div>
+                <div class="popup-body">
+                    <div class="info-section mb-4">
+                        <h6><i class="bi bi-calculator me-1"></i> ${this.t('predictedCoi')}</h6>
+                        <div class="info-grid">
+                            <div class="info-row">
+                                <div class="info-item info-item-half">
+                                    <span class="info-label">${this.t('coi6Gen')}:</span>
+                                    <span class="info-value coi-value" style="color: ${coi6Color}; font-weight: bold;">
+                                        ${coiResult.coi6Gen}%
+                                    </span>
+                                </div>
+                                
+                                <div class="info-item info-item-half">
+                                    <span class="info-label">${this.t('coiAllGen')}:</span>
+                                    <span class="info-value coi-value" style="color: ${coiAllColor}; font-weight: bold;">
+                                        ${coiResult.coiAllGen}%
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-section mb-4">
+                        <h6><i class="bi bi-heart-pulse me-1"></i> ${this.t('healthInLine')}</h6>
+                        ${healthAnalysisHTML}
+                    </div>
+                    
+                    <div class="info-section mb-2">
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>${this.t('predictedPedigree')}</strong><br>
+                            ${this.t('futurePuppyDescription', { 
+                                reu: this.selectedReu.naam || '?', 
+                                teef: this.selectedTeef.naam || '?' 
+                            })}
+                        </div>
+                    </div>
+                </div>
+                <div class="popup-footer">
+                    <button type="button" class="btn btn-secondary popup-close-btn">
+                        <i class="bi bi-x-circle me-1"></i> ${this.t('closePopup')}
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        this.ensurePopupContainer();
+        
+        const overlay = document.getElementById('pedigreePopupOverlay');
+        const container = document.getElementById('pedigreePopupContainer');
+        
+        if (container) {
+            container.innerHTML = popupHTML;
+            overlay.style.display = 'flex';
+            this.setupPopupEventListeners();
+        }
+    }
+    
     generateHealthAnalysisHTML(analysis) {
         const t = this.t.bind(this);
         
@@ -4050,6 +3941,52 @@ class ReuTeefCombinatie {
                 </table>
             </div>
         `;
+    }
+    
+    ensurePopupContainer() {
+        if (!document.getElementById('pedigreePopupOverlay')) {
+            const overlayHTML = `
+                <div class="pedigree-popup-overlay" id="pedigreePopupOverlay" style="display: none;">
+                    <div class="pedigree-popup-container" id="pedigreePopupContainer"></div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', overlayHTML);
+        }
+    }
+    
+    setupPopupEventListeners() {
+        const overlay = document.getElementById('pedigreePopupOverlay');
+        const container = document.getElementById('pedigreePopupContainer');
+        
+        if (!overlay || !container) return;
+        
+        const closeButtons = container.querySelectorAll('.btn-close, .popup-close-btn');
+        closeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                overlay.style.display = 'none';
+            });
+        });
+        
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.style.display = 'none';
+            }
+        });
+        
+        const closeOnEscape = (e) => {
+            if (e.key === 'Escape') {
+                overlay.style.display = 'none';
+                document.removeEventListener('keydown', closeOnEscape);
+            }
+        };
+        document.addEventListener('keydown', closeOnEscape);
+        
+        overlay.addEventListener('animationend', function handler() {
+            if (overlay.style.display === 'none') {
+                document.removeEventListener('keydown', closeOnEscape);
+                overlay.removeEventListener('animationend', handler);
+            }
+        });
     }
     
     showAlert(message, type = 'info') {
