@@ -95,8 +95,7 @@ class ZoekReu {
                 },
                 resultColumns: {
                     naam: "Naam",
-                    ras: "Ras",
-                    stamboom: "Stamboom",
+                    geboortedatum: "Geboortedatum",
                     hd: "HD",
                     pl: "PL",
                     ogen: "Ogen",
@@ -191,8 +190,7 @@ class ZoekReu {
                 },
                 resultColumns: {
                     naam: "Name",
-                    ras: "Breed",
-                    stamboom: "Pedigree",
+                    geboortedatum: "Birth Date",
                     hd: "HD",
                     pl: "PL",
                     ogen: "Eyes",
@@ -287,8 +285,7 @@ class ZoekReu {
                 },
                 resultColumns: {
                     naam: "Name",
-                    ras: "Rasse",
-                    stamboom: "Stammbaum",
+                    geboortedatum: "Geburtsdatum",
                     hd: "HD",
                     pl: "PL",
                     ogen: "Augen",
@@ -767,6 +764,7 @@ class ZoekReu {
                 break;
                 
             case 'schildklier':
+                // TGAA negatief = groen, ALLE andere = rood
                 if (value === 'TGAA negatief') return 'text-success fw-bold';
                 return 'text-danger fw-bold';
                 
@@ -934,8 +932,7 @@ class ZoekReu {
                             <thead class="table-light">
                                 <tr>
                                     <th>${t('resultColumns').naam}</th>
-                                    <th>${t('resultColumns').ras}</th>
-                                    <th>${t('resultColumns').stamboom}</th>
+                                    <th>${t('resultColumns').geboortedatum}</th>
                                     <th>${t('resultColumns').hd}</th>
                                     <th>${t('resultColumns').pl}</th>
                                     <th>${t('resultColumns').ogen}</th>
@@ -1146,11 +1143,24 @@ class ZoekReu {
                 return value;
             };
             
+            const formatDate = (dateString) => {
+                if (!dateString) return '-';
+                try {
+                    return new Date(dateString).toLocaleDateString(this.currentLang);
+                } catch (e) {
+                    return dateString;
+                }
+            };
+            
+            // Toon naam en kennelnaam: "Naam (Kennelnaam)"
+            const displayName = reu.naam ? 
+                `${reu.naam} ${reu.kennelnaam ? `(${reu.kennelnaam})` : ''}` : 
+                t('unknown');
+            
             return `
                 <tr>
-                    <td>${reu.naam || t('unknown')}</td>
-                    <td>${reu.ras || t('unknown')}</td>
-                    <td><small>${reu.stamboomnr || ''}</small></td>
+                    <td>${displayName}</td>
+                    <td><small>${formatDate(reu.geboortedatum)}</small></td>
                     <td class="${this.getHealthColor(reu.heupdysplasie, 'hd')}">
                         ${formatValue(reu.heupdysplasie)}
                     </td>
