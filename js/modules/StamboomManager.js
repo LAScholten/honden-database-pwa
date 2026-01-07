@@ -130,7 +130,7 @@ class StamboomManager extends BaseModule {
             de: {
                 pedigreeTitle: "Ahnentafel von {name}",
                 pedigree4Gen: "4-Generationen Ahnentafel",
-                generatingPedigree: "Ahnentafel wird generiert...",
+                generatingPedigree: "Ahnentafel wordt generiert...",
                 close: "Schließen",
                 print: "Drucken",
                 noData: "Keine Daten",
@@ -182,6 +182,10 @@ class StamboomManager extends BaseModule {
             }
         };
         
+        // Referenties naar event handlers voor cleanup
+        this._eventHandlers = {};
+        this._isActive = false;
+        
         this.setupGlobalEventListeners();
     }
     
@@ -201,6 +205,51 @@ class StamboomManager extends BaseModule {
             console.error('COICalculator klasse niet gevonden! Zorg dat COICalculator.js geladen is vóór StamboomManager.js');
             this.coiCalculator = null;
         }
+        
+        this._isActive = true;
+    }
+    
+    // Methode om alle event listeners op te schonen
+    cleanup() {
+        this._isActive = false;
+        this.removeGlobalEventListeners();
+        
+        // Leeg de caches
+        this.dogPhotosCache.clear();
+        this.dogHasPhotosCache.clear();
+        this.dogThumbnailsCache.clear();
+        this.fullPhotoCache.clear();
+    }
+    
+    removeGlobalEventListeners() {
+        // Verwijder alle event listeners die we hebben toegevoegd
+        if (this._eventHandlers.thumbnailClick) {
+            document.removeEventListener('click', this._eventHandlers.thumbnailClick);
+            delete this._eventHandlers.thumbnailClick;
+        }
+        
+        if (this._eventHandlers.photoClose) {
+            document.removeEventListener('click', this._eventHandlers.photoClose);
+            delete this._eventHandlers.photoClose;
+        }
+        
+        if (this._eventHandlers.escapeKey) {
+            document.removeEventListener('keydown', this._eventHandlers.escapeKey);
+            delete this._eventHandlers.escapeKey;
+        }
+        
+        // Verwijder alle modale overlays die we hebben gemaakt
+        const overlays = [
+            document.getElementById('pedigreeModal'),
+            document.getElementById('pedigreePopupOverlay'),
+            document.getElementById('photoLargeOverlay')
+        ];
+        
+        overlays.forEach(overlay => {
+            if (overlay && overlay.parentNode) {
+                overlay.parentNode.removeChild(overlay);
+            }
+        });
     }
     
     getDogById(id) {
@@ -780,7 +829,9 @@ class StamboomManager extends BaseModule {
     // UPDATE: Setup globale event listeners voor gefaseerd foto laden
     setupGlobalEventListeners() {
         // Event delegation voor foto thumbnail clicks
-        document.addEventListener('click', async (e) => {
+        const thumbnailClickHandler = async (e) => {
+            if (!this._isActive) return;
+            
             const thumbnail = e.target.closest('.photo-thumbnail');
             if (thumbnail) {
                 e.preventDefault();
@@ -817,10 +868,12 @@ class StamboomManager extends BaseModule {
                     console.error('Fout bij laden volledige foto:', error);
                 }
             }
-        });
+        };
         
         // Event delegation voor grote foto sluitknoppen
-        document.addEventListener('click', (e) => {
+        const photoCloseHandler = (e) => {
+            if (!this._isActive) return;
+            
             if (e.target.classList.contains('photo-large-close') || 
                 e.target.classList.contains('photo-large-close-btn') ||
                 e.target.closest('.photo-large-close') ||
@@ -846,10 +899,47 @@ class StamboomManager extends BaseModule {
                     }
                 }, 300);
             }
-        });
+        };
+        
+        // Escape key handler voor foto overlays
+        const escapeKeyHandler = (e) => {
+            if (!this._isActive) return;
+            
+            if (e.key === 'Escape') {
+                // Sluit grote foto overlay
+                const photoOverlay = document.getElementById('photoLargeOverlay');
+                if (photoOverlay && photoOverlay.style.display !== 'none') {
+                    photoOverlay.style.display = 'none';
+                    setTimeout(() => {
+                        if (photoOverlay.parentNode) {
+                            photoOverlay.parentNode.removeChild(photoOverlay);
+                        }
+                    }, 300);
+                    return;
+                }
+                
+                // Sluit detail popup overlay
+                const popupOverlay = document.getElementById('pedigreePopupOverlay');
+                if (popupOverlay && popupOverlay.style.display !== 'none') {
+                    popupOverlay.style.display = 'none';
+                }
+            }
+        };
+        
+        // Voeg event listeners toe en sla referenties op
+        document.addEventListener('click', thumbnailClickHandler);
+        document.addEventListener('click', photoCloseHandler);
+        document.addEventListener('keydown', escapeKeyHandler);
+        
+        // Sla referenties op voor cleanup
+        this._eventHandlers.thumbnailClick = thumbnailClickHandler;
+        this._eventHandlers.photoClose = photoCloseHandler;
+        this._eventHandlers.escapeKey = escapeKeyHandler;
     }
     
     showLargePhoto(photoData, dogName = '') {
+        if (!this._isActive) return;
+        
         console.log('Toon grote foto:', photoData.substring(0, 100) + '...');
         
         // Verwijder bestaande overlay
@@ -883,34 +973,21 @@ class StamboomManager extends BaseModule {
         
         document.body.insertAdjacentHTML('beforeend', overlayHTML);
         
-        // Sluit met Escape key
-        const closeOnEscape = (e) => {
-            if (e.key === 'Escape') {
-                const overlay = document.getElementById('photoLargeOverlay');
-                if (overlay) {
-                    overlay.style.display = 'none';
-                    setTimeout(() => {
-                        if (overlay.parentNode) {
-                            overlay.parentNode.removeChild(overlay);
-                        }
-                    }, 300);
-                    document.removeEventListener('keydown', closeOnEscape);
-                }
-            }
-        };
-        document.addEventListener('keydown', closeOnEscape);
-        
-        // Clean up
+        // Sluit met Escape key (we gebruiken de globale handler)
+        // Clean up functie voor wanneer overlay gesloten wordt
         const overlay = document.getElementById('photoLargeOverlay');
-        overlay.addEventListener('animationend', function handler() {
-            if (overlay.style.display === 'none') {
-                document.removeEventListener('keydown', closeOnEscape);
-                overlay.removeEventListener('animationend', handler);
-            }
-        });
+        if (overlay) {
+            overlay.addEventListener('animationend', function handler() {
+                if (overlay.style.display === 'none') {
+                    overlay.removeEventListener('animationend', handler);
+                }
+            });
+        }
     }
     
     async showPedigree(dog) {
+        if (!this._isActive) return;
+        
         if (!document.getElementById('pedigreeModal')) {
             this.createPedigreeModal();
         }
@@ -928,6 +1005,28 @@ class StamboomManager extends BaseModule {
         
         const modal = new bootstrap.Modal(document.getElementById('pedigreeModal'));
         modal.show();
+        
+        // Voeg event listener toe voor wanneer modal gesloten wordt
+        const modalElement = document.getElementById('pedigreeModal');
+        if (modalElement) {
+            modalElement.addEventListener('hidden.bs.modal', () => {
+                // Verwijder popup overlays als die nog open zijn
+                const popupOverlay = document.getElementById('pedigreePopupOverlay');
+                if (popupOverlay) {
+                    popupOverlay.style.display = 'none';
+                }
+                
+                const photoOverlay = document.getElementById('photoLargeOverlay');
+                if (photoOverlay) {
+                    photoOverlay.style.display = 'none';
+                    setTimeout(() => {
+                        if (photoOverlay.parentNode) {
+                            photoOverlay.parentNode.removeChild(photoOverlay);
+                        }
+                    }, 300);
+                }
+            });
+        }
     }
     
     createPedigreeModal() {
@@ -2187,6 +2286,27 @@ class StamboomManager extends BaseModule {
                 window.print();
             });
         }
+        
+        // Voeg event listener toe voor wanneer modal gesloten wordt
+        modal.addEventListener('hidden.bs.modal', () => {
+            if (!this._isActive) return;
+            
+            // Verwijder popup overlays als die nog open zijn
+            const popupOverlay = document.getElementById('pedigreePopupOverlay');
+            if (popupOverlay) {
+                popupOverlay.style.display = 'none';
+            }
+            
+            const photoOverlay = document.getElementById('photoLargeOverlay');
+            if (photoOverlay) {
+                photoOverlay.style.display = 'none';
+                setTimeout(() => {
+                    if (photoOverlay.parentNode) {
+                        photoOverlay.parentNode.removeChild(photoOverlay);
+                    }
+                }, 300);
+            }
+        });
     }
     
     async renderCompactPedigree(pedigreeTree) {
@@ -2261,6 +2381,8 @@ class StamboomManager extends BaseModule {
         const cards = document.querySelectorAll('.pedigree-card-compact.horizontal:not(.empty)');
         cards.forEach(card => {
             card.addEventListener('click', async (e) => {
+                if (!this._isActive) return;
+                
                 const dogId = parseInt(card.getAttribute('data-dog-id'));
                 if (dogId === 0) return;
                 
@@ -2274,6 +2396,8 @@ class StamboomManager extends BaseModule {
     }
     
     async showDogDetailPopup(dog, relation) {
+        if (!this._isActive) return;
+        
         const overlay = document.getElementById('pedigreePopupOverlay');
         const container = document.getElementById('pedigreePopupContainer');
         
@@ -2300,19 +2424,9 @@ class StamboomManager extends BaseModule {
             }
         });
         
-        // Close with Escape key
-        const closeOnEscape = (e) => {
-            if (e.key === 'Escape') {
-                overlay.style.display = 'none';
-                document.removeEventListener('keydown', closeOnEscape);
-            }
-        };
-        document.addEventListener('keydown', closeOnEscape);
-        
         // Clean up event listener when popup closes
         overlay.addEventListener('animationend', function handler() {
             if (overlay.style.display === 'none') {
-                document.removeEventListener('keydown', closeOnEscape);
                 overlay.removeEventListener('animationend', handler);
             }
         });
