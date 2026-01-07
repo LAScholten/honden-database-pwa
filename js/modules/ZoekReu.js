@@ -47,11 +47,11 @@ class ZoekReu {
                 tryAgain: "Probeer andere zoekcriteria",
                 healthOptions: {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
-                    patellaluxatie: ["PL 0", "PL 1", "PL 2", "PL 3", "Niet getest"],
+                    patellaluxatie: ["0", "1", "2", "3", "Niet getest"],
                     ogen: ["Vrij", "Dist", "Overig", "Niet onderzocht"],
                     dandyWalker: ["Vrij op DNA", "Vrij op ouders", "Drager", "Niet getest", "Lijder"],
                     schildklier: ["Tgaa Negatief", "Niet getest"],
-                    elleboogdysplasie: ["ED 0", "ED 1", "ED 2", "ED 3", "Niet getest"]
+                    elleboogdysplasie: ["0", "1", "2", "3", "Niet getest"]
                 },
                 healthLabels: {
                     heupdysplasie: {
@@ -62,10 +62,10 @@ class ZoekReu {
                         "E": "HD-E (Zeer slecht)"
                     },
                     patellaluxatie: {
-                        "PL 0": "PL 0 (Vrij)",
-                        "PL 1": "PL 1 (Lichte afwijking)",
-                        "PL 2": "PL 2 (Matige afwijking)",
-                        "PL 3": "PL 3 (Ernstige afwijking)",
+                        "0": "0 (Vrij)",
+                        "1": "1 (Lichte afwijking)",
+                        "2": "2 (Matige afwijking)",
+                        "3": "3 (Ernstige afwijking)",
                         "Niet getest": "Niet getest"
                     },
                     ogen: {
@@ -86,10 +86,10 @@ class ZoekReu {
                         "Niet getest": "Niet getest"
                     },
                     elleboogdysplasie: {
-                        "ED 0": "ED 0 (Vrij)",
-                        "ED 1": "ED 1 (Lichte afwijking)",
-                        "ED 2": "ED 2 (Matige afwijking)",
-                        "ED 3": "ED 3 (Ernstige afwijking)",
+                        "0": "0 (Vrij)",
+                        "1": "1 (Lichte afwijking)",
+                        "2": "2 (Matige afwijking)",
+                        "3": "3 (Ernstige afwijking)",
                         "Niet getest": "Niet getest"
                     }
                 },
@@ -142,11 +142,11 @@ class ZoekReu {
                 tryAgain: "Try different search criteria",
                 healthOptions: {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
-                    patellaluxatie: ["PL 0", "PL 1", "PL 2", "PL 3", "Not tested"],
+                    patellaluxatie: ["0", "1", "2", "3", "Not tested"],
                     ogen: ["Free", "Dist", "Other", "Not examined"],
                     dandyWalker: ["Free on DNA", "Free on parents", "Carrier", "Not tested", "Affected"],
                     schildklier: ["Tgaa Negative", "Not tested"],
-                    elleboogdysplasie: ["ED 0", "ED 1", "ED 2", "ED 3", "Not tested"]
+                    elleboogdysplasie: ["0", "1", "2", "3", "Not tested"]
                 },
                 healthLabels: {
                     heupdysplasie: {
@@ -157,10 +157,10 @@ class ZoekReu {
                         "E": "HD-E (Very poor)"
                     },
                     patellaluxatie: {
-                        "PL 0": "PL 0 (Free)",
-                        "PL 1": "PL 1 (Mild)",
-                        "PL 2": "PL 2 (Moderate)",
-                        "PL 3": "PL 3 (Severe)",
+                        "0": "0 (Free)",
+                        "1": "1 (Mild)",
+                        "2": "2 (Moderate)",
+                        "3": "3 (Severe)",
                         "Not tested": "Not tested"
                     },
                     ogen: {
@@ -181,10 +181,10 @@ class ZoekReu {
                         "Not tested": "Not tested"
                     },
                     elleboogdysplasie: {
-                        "ED 0": "ED 0 (Free)",
-                        "ED 1": "ED 1 (Mild)",
-                        "ED 2": "ED 2 (Moderate)",
-                        "ED 3": "ED 3 (Severe)",
+                        "0": "0 (Free)",
+                        "1": "1 (Mild)",
+                        "2": "2 (Moderate)",
+                        "3": "3 (Severe)",
                         "Not tested": "Not tested"
                     }
                 },
@@ -237,11 +237,11 @@ class ZoekReu {
                 tryAgain: "Versuchen Sie andere Suchkriterien",
                 healthOptions: {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
-                    patellaluxatie: ["PL 0", "PL 1", "PL 2", "PL 3", "Nicht getestet"],
+                    patellaluxatie: ["0", "1", "2", "3", "Nicht getestet"],
                     ogen: ["Frei", "Dist", "Andere", "Nicht untersucht"],
                     dandyWalker: ["Frei auf DNA", "Frei auf Eltern", "Träger", "Niet getest", "Betroffen"],
                     schildklier: ["Tgaa Negativ", "Niet getest"],
-                    elleboogdysplasie: ["ED 0", "ED 1", "ED 2", "ED 3", "Niet getest"]
+                    elleboogdysplasie: ["0", "1", "2", "3", "Niet getest"]
                 },
                 healthLabels: {
                     heupdysplasie: {
@@ -252,10 +252,10 @@ class ZoekReu {
                         "E": "HD-E (Sehr schlecht)"
                     },
                     patellaluxatie: {
-                        "PL 0": "PL 0 (Frei)",
-                        "PL 1": "PL 1 (Leicht)",
-                        "PL 2": "PL 2 (Mäßig)",
-                        "PL 3": "PL 3 (Schwer)",
+                        "0": "0 (Frei)",
+                        "1": "1 (Leicht)",
+                        "2": "2 (Mäßig)",
+                        "3": "3 (Schwer)",
                         "Nicht getestet": "Nicht getestet"
                     },
                     ogen: {
@@ -276,10 +276,10 @@ class ZoekReu {
                         "Niet getest": "Niet getest"
                     },
                     elleboogdysplasie: {
-                        "ED 0": "ED 0 (Frei)",
-                        "ED 1": "ED 1 (Leicht)",
-                        "ED 2": "ED 2 (Mäßig)",
-                        "ED 3": "ED 3 (Schwer)",
+                        "0": "0 (Frei)",
+                        "1": "1 (Leicht)",
+                        "2": "2 (Mäßig)",
+                        "3": "3 (Schwer)",
                         "Niet getest": "Niet getest"
                     }
                 },
@@ -1010,7 +1010,7 @@ class ZoekReu {
                 
             case 'patellaluxatie':
                 // PL: 0 is beter dan 1, etc.
-                const plOrder = { 'PL 0': 0, 'PL 1': 1, 'PL 2': 2, 'PL 3': 3, 'Niet getest': 4 };
+                const plOrder = { '0': 0, '1': 1, '2': 2, '3': 3, 'Niet getest': 4 };
                 return (plOrder[reuValue] || 5) <= (plOrder[minValue] || 5);
                 
             case 'ogen':
@@ -1036,7 +1036,7 @@ class ZoekReu {
                 
             case 'elleboogdysplasie':
                 // ED: 0 is beter dan 1, etc.
-                const edOrder = { 'ED 0': 0, 'ED 1': 1, 'ED 2': 2, 'ED 3': 3, 'Niet getest': 4 };
+                const edOrder = { '0': 0, '1': 1, '2': 2, '3': 3, 'Niet getest': 4 };
                 return (edOrder[reuValue] || 5) <= (edOrder[minValue] || 5);
                 
             default:
@@ -1176,7 +1176,7 @@ class ZoekReu {
         // maar blijft voor compatibiliteit met andere delen van de code
         const orders = {
             'heupdysplasie': { 'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4 },
-            'patellaluxatie': { 'PL 0': 0, 'PL 1': 1, 'PL 2': 2, 'PL 3': 3, 'Niet getest': 4 },
+            'patellaluxatie': { '0': 0, '1': 1, '2': 2, '3': 3, 'Niet getest': 4 },
             'ogen': { 'Vrij': 0, 'Dist': 1, 'Overig': 2, 'Niet onderzocht': 3 },
             'dandyWalker': { 
                 'Vrij op DNA': 0, 
@@ -1186,7 +1186,7 @@ class ZoekReu {
                 'Lijder': 4 
             },
             'schildklier': { 'Tgaa Negatief': 0, 'Niet getest': 1 },
-            'elleboogdysplasie': { 'ED 0': 0, 'ED 1': 1, 'ED 2': 2, 'ED 3': 3, 'Niet getest': 4 }
+            'elleboogdysplasie': { '0': 0, '1': 1, '2': 2, '3': 3, 'Niet getest': 4 }
         };
         
         const order = orders[test] || {};
