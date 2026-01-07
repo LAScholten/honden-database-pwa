@@ -643,7 +643,7 @@ class ZoekReu {
                 };
                 
                 const displayName = teef.naam ? 
-                    `${highlightText(teef.naam)} ${teef.kennelnaam ? `(${highlightText(teef.kennelnaam)})` : ''}` : 
+                    `${highlightText(teef.naam)} ${teef.kennelnaam ? `${highlightText(teef.kennelnaam)}` : ''}` : 
                     t('unknown');
                 
                 return `
@@ -764,7 +764,6 @@ class ZoekReu {
                 break;
                 
             case 'schildklier':
-                // TGAA negatief = groen, ALLE andere = rood
                 if (value === 'TGAA negatief') return 'text-success fw-bold';
                 return 'text-danger fw-bold';
                 
@@ -801,7 +800,7 @@ class ZoekReu {
             `;
         } else {
             infoDiv.innerHTML = `
-                <h6 class="mb-2">${teef.naam || 'Onbekend'} ${teef.kennelnaam ? `(${teef.kennelnaam})` : ''}</h6>
+                <h6 class="mb-2">${teef.naam || 'Onbekend'} ${teef.kennelnaam ? teef.kennelnaam : ''}</h6>
                 <div class="mb-3">
                     <strong>Stamboom:</strong> ${teef.stamboomnr || '-'}
                 </div>
@@ -1152,9 +1151,9 @@ class ZoekReu {
                 }
             };
             
-            // Toon naam en kennelnaam: "Naam (Kennelnaam)"
+            // Toon naam en kennelnaam zonder haakjes: "Naam Kennelnaam"
             const displayName = reu.naam ? 
-                `${reu.naam} ${reu.kennelnaam ? `(${reu.kennelnaam})` : ''}` : 
+                `${reu.naam} ${reu.kennelnaam ? reu.kennelnaam : ''}`.trim() : 
                 t('unknown');
             
             return `
