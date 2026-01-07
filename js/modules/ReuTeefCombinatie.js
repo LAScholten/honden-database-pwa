@@ -24,6 +24,11 @@ class ReuTeefCombinatie {
         this.coiCalculatorReady = false;
         this.coiCalculationInProgress = false;
         
+        // NIEUW: Volledig eigen popup systeem om conflicten te voorkomen
+        this.ownPopupContainerId = 'reuteefCombinatiePopup';
+        this.ownPopupOverlayId = 'reuteefCombinatiePopupOverlay';
+        this.ownPhotoOverlayId = 'reuteefCombinatiePhotoOverlay';
+        
         // Vertalingen
         this.translations = {
             nl: {
@@ -1792,15 +1797,78 @@ class ReuTeefCombinatie {
                 </div>
             </div>
             
-            <!-- Popup overlay voor hond details (zoals in StamboomManager) -->
-            <div class="pedigree-popup-overlay" id="pedigreePopupOverlay" style="display: none;">
-                <div class="pedigree-popup-container" id="pedigreePopupContainer"></div>
+            <!-- EIGEN POPUP OVERLAY VOOR REUTEEF COMBINATIE - GEEN CONFlicT MET STAMBOOMMANAGER -->
+            <div class="reuteef-popup-overlay" id="${this.ownPopupOverlayId}" style="display: none; z-index: 9999;">
+                <div class="reuteef-popup-container" id="${this.ownPopupContainerId}"></div>
             </div>
             
-            <!-- Foto overlay -->
-            <div class="photo-large-overlay" id="photoLargeOverlay" style="display: none;"></div>
+            <!-- EIGEN FOTO OVERLAY -->
+            <div class="reuteef-photo-overlay" id="${this.ownPhotoOverlayId}" style="display: none; z-index: 10000;"></div>
             
             <style>
+                /* EIGEN POPUP STYLES VOOR REUTEEF COMBINATIE - GEEN CONFlicT */
+                .reuteef-popup-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.7);
+                    z-index: 9999;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    animation: reuteefFadeIn 0.3s;
+                    overflow-y: auto;
+                }
+                
+                @keyframes reuteefFadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                
+                .reuteef-popup-container {
+                    background: white;
+                    border-radius: 12px;
+                    max-width: 400px;
+                    max-height: 80vh;
+                    overflow-y: auto;
+                    animation: reuteefSlideUp 0.3s;
+                    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+                    width: calc(100% - 20px);
+                    margin: 10px;
+                }
+                
+                @keyframes reuteefSlideUp {
+                    from { 
+                        opacity: 0;
+                        transform: translateY(30px);
+                    }
+                    to { 
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+                
+                .reuteef-photo-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.85);
+                    z-index: 10000;
+                    display: none;
+                    align-items: center;
+                    justify-content: center;
+                    animation: reuteefFadeIn 0.3s;
+                }
+                
+                /* RESET ALLE GLOBALE EVENT LISTENERS IN DEZE MODAL */
+                #${modalId} * {
+                    pointer-events: auto !important;
+                }
+                
                 /* MOBIELE WRAPPER - ZELFDE ALS STAMBOOMMANAGER */
                 .pedigree-mobile-wrapper {
                     width: 100%;
@@ -2539,439 +2607,6 @@ class ReuTeefCombinatie {
                     }
                 }
                 
-                /* DETAIL POPUP STYLES - ZELFDE ALS STAMBOOMMANAGER */
-                .pedigree-popup-overlay {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0, 0, 0, 0.7);
-                    z-index: 1060;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    animation: fadeIn 0.3s;
-                    overflow-y: auto;
-                }
-                
-                @keyframes fadeIn {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
-                }
-                
-                .pedigree-popup-container {
-                    background: white;
-                    border-radius: 12px;
-                    max-width: 400px;
-                    max-height: 80vh;
-                    overflow-y: auto;
-                    animation: slideUp 0.3s;
-                    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-                    width: calc(100% - 20px);
-                    margin: 10px;
-                }
-                
-                @keyframes slideUp {
-                    from { 
-                        opacity: 0;
-                        transform: translateY(30px);
-                    }
-                    to { 
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-                
-                .dog-detail-popup {
-                    display: flex;
-                    flex-direction: column;
-                    height: 100%;
-                }
-                
-                .popup-header {
-                    background: #0d6efd;
-                    color: white;
-                    padding: 12px 16px;
-                    border-radius: 12px 12px 0 0;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    position: sticky;
-                    top: 0;
-                    z-index: 1;
-                }
-                
-                .popup-title {
-                    margin: 0;
-                    font-size: 1.1rem;
-                    display: flex;
-                    align-items: center;
-                    flex: 1;
-                }
-                
-                .popup-header .btn-close {
-                    display: inline-block;
-                    width: 24px;
-                    height: 24px;
-                    background: transparent;
-                    border: none;
-                    position: relative;
-                    cursor: pointer;
-                    opacity: 0.8;
-                    z-index: 2;
-                    filter: invert(1) grayscale(100%) brightness(200%) !important;
-                }
-                
-                .popup-header .btn-close::before,
-                .popup-header .btn-close::after {
-                    content: '';
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    width: 18px;
-                    height: 2px;
-                    background: #000 !important;
-                    transform-origin: center;
-                }
-                
-                .popup-header .btn-close::before {
-                    transform: translate(-50%, -50%) rotate(45deg);
-                }
-                
-                .popup-header .btn-close::after {
-                    transform: translate(-50%, -50%) rotate(-45deg);
-                }
-                
-                .popup-header .btn-close:hover {
-                    opacity: 1;
-                }
-                
-                .popup-body {
-                    padding: 15px;
-                    flex: 1;
-                    overflow-y: auto;
-                    -webkit-overflow-scrolling: touch;
-                }
-                
-                .info-section {
-                    margin-bottom: 20px;
-                }
-                
-                .info-section h6 {
-                    color: #495057;
-                    margin-bottom: 10px;
-                    padding-bottom: 6px;
-                    border-bottom: 2px solid #e9ecef;
-                    display: flex;
-                    align-items: center;
-                    font-size: 1rem;
-                }
-                
-                .info-grid {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 8px;
-                }
-                
-                .info-row {
-                    display: grid !important;
-                    grid-template-columns: 1fr 1fr !important;
-                    gap: 8px !important;
-                    margin-bottom: 0 !important;
-                    width: 100% !important;
-                }
-                
-                .info-item {
-                    display: flex;
-                    flex-direction: column;
-                    width: 100% !important;
-                    min-width: 0 !important;
-                }
-                
-                .info-item-half {
-                    grid-column: span 1 !important;
-                    width: 100% !important;
-                }
-                
-                .info-item-full {
-                    grid-column: 1 / -1 !important;
-                    width: 100% !important;
-                    margin-bottom: 4px;
-                }
-                
-                .coi-value {
-                    font-size: 1.05rem !important;
-                    font-weight: 700 !important;
-                }
-                
-                .info-label {
-                    font-weight: 600;
-                    color: #495057;
-                    font-size: 0.9rem;
-                    margin-bottom: 2px;
-                    line-height: 1.2;
-                }
-                
-                .info-value {
-                    color: #212529;
-                    font-size: 0.95rem;
-                    line-height: 1.3;
-                    word-break: break-word;
-                }
-                
-                .remarks-box {
-                    background: #f8f9fa;
-                    border: 1px solid #dee2e6;
-                    padding: 12px;
-                    border-radius: 6px;
-                    font-style: italic;
-                    color: #495057;
-                    font-size: 0.95rem;
-                    line-height: 1.5;
-                }
-                
-                /* THUMBNAILS SECTIE IN POPUP */
-                .photos-grid {
-                    display: grid;
-                    grid-template-columns: repeat(3, 1fr);
-                    gap: 6px;
-                    margin-bottom: 10px;
-                    max-width: 240px;
-                    margin-left: auto;
-                    margin-right: auto;
-                }
-                
-                .photo-thumbnail {
-                    position: relative;
-                    aspect-ratio: 1 / 1;
-                    border-radius: 4px;
-                    overflow: hidden;
-                    cursor: pointer;
-                    border: 2px solid transparent;
-                    transition: all 0.2s;
-                }
-                
-                .photo-thumbnail:hover {
-                    border-color: #0d6efd;
-                    transform: scale(1.05);
-                }
-                
-                .thumbnail-img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                }
-                
-                .photo-hover {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0, 0, 0, 0.3);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    opacity: 0;
-                    transition: opacity 0.2s;
-                }
-                
-                .photo-thumbnail:hover .photo-hover {
-                    opacity: 1;
-                }
-                
-                .photo-hover i {
-                    color: white;
-                    font-size: 1.2rem;
-                }
-                
-                .photo-hint {
-                    text-align: center;
-                    margin-bottom: 15px;
-                    font-size: 0.85rem;
-                }
-                
-                .popup-footer {
-                    padding: 16px 20px;
-                    border-top: 1px solid #dee2e6;
-                    display: flex;
-                    justify-content: center;
-                    background: #f8f9fa;
-                    border-radius: 0 0 12px 12px;
-                }
-                
-                .popup-close-btn {
-                    min-width: 130px;
-                    padding: 10px 25px;
-                    font-size: 1rem;
-                }
-                
-                /* GROTE FOTO OVERLAY STYLES */
-                .photo-large-overlay {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0, 0, 0, 0.85);
-                    z-index: 1070;
-                    display: none;
-                    align-items: center;
-                    justify-content: center;
-                    animation: fadeIn 0.3s;
-                }
-                
-                .photo-large-container {
-                    background: white;
-                    border-radius: 12px;
-                    overflow: hidden;
-                    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-                    display: flex;
-                    flex-direction: column;
-                    max-height: 95vh;
-                    animation: slideUp 0.3s;
-                }
-                
-                .photo-large-header {
-                    padding: 12px 16px;
-                    background: #0d6efd;
-                    color: white;
-                    display: flex;
-                    justify-content: flex-end;
-                }
-                
-                .photo-large-close {
-                    background: none;
-                    border: none;
-                    color: white;
-                    opacity: 0.8;
-                    font-size: 1.3rem;
-                    cursor: pointer;
-                    width: 32px;
-                    height: 32px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    border-radius: 50%;
-                    transition: all 0.2s;
-                }
-                
-                .photo-large-close:hover {
-                    opacity: 1;
-                    background: rgba(255, 255, 255, 0.2);
-                }
-                
-                .photo-large-content {
-                    padding: 20px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    overflow: hidden;
-                    flex: 1;
-                    min-height: 300px;
-                }
-                
-                .photo-large-img {
-                    max-width: 100%;
-                    max-height: 100%;
-                    object-fit: contain;
-                    border-radius: 4px;
-                }
-                
-                .photo-large-footer {
-                    padding: 16px;
-                    border-top: 1px solid #dee2e6;
-                    display: flex;
-                    justify-content: center;
-                    background: #f8f9fa;
-                }
-                
-                .photo-large-close-btn {
-                    min-width: 120px;
-                    padding: 8px 20px;
-                }
-                
-                /* Print styles */
-                @media print {
-                    .modal-dialog {
-                        max-width: none;
-                        margin: 0;
-                    }
-                    
-                    .modal-header {
-                        display: none !important;
-                    }
-                    
-                    .pedigree-container-compact {
-                        padding: 0;
-                        background: white;
-                        height: auto !important;
-                        overflow-x: visible !important;
-                        height: 100vh !important;
-                    }
-                    
-                    .pedigree-grid-compact {
-                        flex-direction: row !important;
-                        height: auto;
-                        padding: 20px !important;
-                        gap: 15px;
-                    }
-                    
-                    .pedigree-generation-col {
-                        flex-direction: column;
-                        gap: 10px;
-                    }
-                    
-                    .pedigree-card-compact.horizontal {
-                        break-inside: avoid;
-                        box-shadow: none;
-                        border: 1px solid #ccc !important;
-                        margin-bottom: 10px;
-                    }
-                    
-                    .main-dog-compact {
-                        border: 2px solid #000 !important;
-                    }
-                    
-                    .pedigree-popup-overlay,
-                    .photo-large-overlay {
-                        display: none !important;
-                    }
-                }
-                
-                /* Lege card styling */
-                .pedigree-card-compact.horizontal.empty {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                
-                /* VISUELE VERBINDINGEN */
-                .pedigree-generation-col {
-                    position: relative;
-                }
-                
-                .pedigree-generation-col:not(:first-child)::before {
-                    content: '';
-                    position: absolute;
-                    left: -10px;
-                    top: 50%;
-                    width: 10px;
-                    height: 1px;
-                    background: #adb5bd;
-                    opacity: 0.5;
-                }
-                
-                /* Overgrootouder styling */
-                .pedigree-card-compact.horizontal.gen3 {
-                    opacity: 0.9;
-                }
-                
-                .pedigree-card-compact.horizontal.gen3:hover {
-                    opacity: 1;
-                }
-                
                 /* HEALTH BADGES */
                 .badge-hd {
                     background-color: #dc3545 !important;
@@ -3010,7 +2645,25 @@ class ReuTeefCombinatie {
         const modal = new bootstrap.Modal(document.getElementById(modalId));
         modal.show();
         
+        // VERWIJDER DE GLOBALE EVENT LISTENERS VAN STAMBOOMMANAGER
+        this.removeStamboomManagerGlobalListeners();
+        
         this.setupFuturePuppyModalEvents();
+    }
+    
+    // NIEUW: Verwijder eventuele globale listeners van StamboomManager
+    removeStamboomManagerGlobalListeners() {
+        // Verwijder alle globale click listeners die door StamboomManager zijn toegevoegd
+        const clonedBody = document.body.cloneNode(false);
+        document.body.parentNode.replaceChild(clonedBody, document.body);
+        clonedBody.innerHTML = document.body.innerHTML;
+        
+        // Verwijder specifieke event listeners op de modal container
+        const modal = document.getElementById('futurePuppyModal');
+        if (modal) {
+            const newModal = modal.cloneNode(true);
+            modal.parentNode.replaceChild(newModal, modal);
+        }
     }
     
     setupFuturePuppyModalEvents() {
@@ -3024,72 +2677,51 @@ class ReuTeefCombinatie {
             });
         }
         
-        this.setupGlobalEventListeners();
+        // Gebruik EIGEN popup system, niet die van StamboomManager
+        this.setupOwnPopupSystem();
     }
     
-    setupGlobalEventListeners() {
-        document.addEventListener('click', async (e) => {
-            const thumbnail = e.target.closest('.photo-thumbnail');
-            if (thumbnail) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const photoId = thumbnail.getAttribute('data-photo-id');
-                const isThumbnail = thumbnail.getAttribute('data-is-thumbnail') === 'true';
-                
-                if (!photoId) return;
-                
-                try {
-                    const fullPhoto = await this.getFullSizeFoto(photoId);
-                    
-                    if (fullPhoto && fullPhoto.data) {
-                        const popupTitle = document.querySelector('.popup-title');
-                        let dogName = '';
-                        if (popupTitle) {
-                            dogName = popupTitle.textContent.trim();
-                            dogName = dogName.replace(/^[^a-zA-Z]*/, '').trim();
-                        }
-                        
-                        this.showLargePhoto(fullPhoto.data, dogName);
-                    } else {
-                        console.error('Kon volledige foto niet laden:', photoId);
-                        const imgElement = thumbnail.querySelector('img');
-                        if (imgElement && imgElement.src) {
-                            this.showLargePhoto(imgElement.src, dogName);
-                        }
-                    }
-                } catch (error) {
-                    console.error('Fout bij laden volledige foto:', error);
-                }
-            }
-        });
+    // NIEUW: Eigen popup systeem setup
+    setupOwnPopupSystem() {
+        // Verwijder eventuele bestaande overlays
+        this.removeOwnOverlays();
         
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('photo-large-close') || 
-                e.target.classList.contains('photo-large-close-btn') ||
-                e.target.closest('.photo-large-close') ||
-                e.target.closest('.photo-large-close-btn')) {
-                const overlay = document.getElementById('photoLargeOverlay');
-                if (overlay) {
-                    overlay.style.display = 'none';
-                    setTimeout(() => {
-                        if (overlay.parentNode) {
-                            overlay.parentNode.removeChild(overlay);
-                        }
-                    }, 300);
-                }
-            }
-            
-            if (e.target.id === 'photoLargeOverlay') {
-                const overlay = e.target;
-                overlay.style.display = 'none';
-                setTimeout(() => {
-                    if (overlay.parentNode) {
-                        overlay.parentNode.removeChild(overlay);
-                    }
-                }, 300);
-            }
-        });
+        // Maak eigen overlays aan
+        this.createOwnOverlays();
+    }
+    
+    removeOwnOverlays() {
+        const existingOverlay = document.getElementById(this.ownPopupOverlayId);
+        if (existingOverlay) {
+            existingOverlay.remove();
+        }
+        
+        const existingPhotoOverlay = document.getElementById(this.ownPhotoOverlayId);
+        if (existingPhotoOverlay) {
+            existingPhotoOverlay.remove();
+        }
+    }
+    
+    createOwnOverlays() {
+        // Maak eigen popup overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'reuteef-popup-overlay';
+        overlay.id = this.ownPopupOverlayId;
+        overlay.style.display = 'none';
+        
+        const container = document.createElement('div');
+        container.className = 'reuteef-popup-container';
+        container.id = this.ownPopupContainerId;
+        
+        overlay.appendChild(container);
+        document.body.appendChild(overlay);
+        
+        // Maak eigen foto overlay
+        const photoOverlay = document.createElement('div');
+        photoOverlay.className = 'reuteef-photo-overlay';
+        photoOverlay.id = this.ownPhotoOverlayId;
+        photoOverlay.style.display = 'none';
+        document.body.appendChild(photoOverlay);
     }
     
     async getFullSizeFoto(fotoId) {
@@ -3111,28 +2743,28 @@ class ReuTeefCombinatie {
     }
     
     showLargePhoto(photoData, dogName = '') {
-        console.log('Toon grote foto:', photoData.substring(0, 100) + '...');
+        console.log('Toon grote foto in eigen overlay:', photoData.substring(0, 100) + '...');
         
-        const existingOverlay = document.getElementById('photoLargeOverlay');
+        const existingOverlay = document.getElementById(this.ownPhotoOverlayId);
         if (existingOverlay) {
             existingOverlay.remove();
         }
         
         const overlayHTML = `
-            <div class="photo-large-overlay" id="photoLargeOverlay" style="display: flex;">
-                <div class="photo-large-container" id="photoLargeContainer">
+            <div class="reuteef-photo-overlay" id="${this.ownPhotoOverlayId}" style="display: flex;">
+                <div class="photo-large-container" id="reuteefPhotoLargeContainer">
                     <div class="photo-large-header">
-                        <button type="button" class="btn-close btn-close-white photo-large-close"></button>
+                        <button type="button" class="btn-close btn-close-white photo-large-close" id="reuteefPhotoClose"></button>
                     </div>
                     <div class="photo-large-content">
                         <img src="${photoData}" 
                              alt="${dogName || 'Foto'}" 
                              class="photo-large-img"
-                             id="photoLargeImg"
+                             id="reuteefPhotoLargeImg"
                              style="max-width: 90vw; max-height: 80vh; object-fit: contain;">
                     </div>
                     <div class="photo-large-footer">
-                        <button type="button" class="btn btn-secondary photo-large-close-btn">
+                        <button type="button" class="btn btn-secondary photo-large-close-btn" id="reuteefPhotoCloseBtn">
                             <i class="bi bi-x-circle me-1"></i> ${this.t('closePhoto')}
                         </button>
                     </div>
@@ -3142,118 +2774,375 @@ class ReuTeefCombinatie {
         
         document.body.insertAdjacentHTML('beforeend', overlayHTML);
         
+        // Voeg event listeners toe aan eigen overlay
+        const overlay = document.getElementById(this.ownPhotoOverlayId);
+        const closeBtn = document.getElementById('reuteefPhotoClose');
+        const closeBtn2 = document.getElementById('reuteefPhotoCloseBtn');
+        
+        const closePhoto = () => {
+            overlay.style.display = 'none';
+            setTimeout(() => {
+                if (overlay.parentNode) {
+                    overlay.parentNode.removeChild(overlay);
+                }
+            }, 300);
+            document.removeEventListener('keydown', closeOnEscape);
+        };
+        
         const closeOnEscape = (e) => {
             if (e.key === 'Escape') {
-                const overlay = document.getElementById('photoLargeOverlay');
-                if (overlay) {
-                    overlay.style.display = 'none';
-                    setTimeout(() => {
-                        if (overlay.parentNode) {
-                            overlay.parentNode.removeChild(overlay);
-                        }
-                    }, 300);
-                    document.removeEventListener('keydown', closeOnEscape);
-                }
+                closePhoto();
             }
         };
-        document.addEventListener('keydown', closeOnEscape);
         
-        const overlay = document.getElementById('photoLargeOverlay');
-        overlay.addEventListener('animationend', function handler() {
-            if (overlay.style.display === 'none') {
-                document.removeEventListener('keydown', closeOnEscape);
-                overlay.removeEventListener('animationend', handler);
+        if (closeBtn) closeBtn.addEventListener('click', closePhoto);
+        if (closeBtn2) closeBtn2.addEventListener('click', closePhoto);
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closePhoto();
             }
         });
+        
+        document.addEventListener('keydown', closeOnEscape);
     }
     
     addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis) {
         const futurePuppyCard = document.querySelector('.pedigree-card-compact.horizontal.main-dog-compact.gen0');
         if (futurePuppyCard) {
-            futurePuppyCard.addEventListener('click', (e) => {
+            // Verwijder alle bestaande event listeners
+            const newCard = futurePuppyCard.cloneNode(true);
+            futurePuppyCard.parentNode.replaceChild(newCard, futurePuppyCard);
+            
+            // Voeg ONZE eigen click handler toe
+            newCard.addEventListener('click', async (e) => {
                 e.stopPropagation();
-                this.showFuturePuppyPopup(futurePuppy, coiResult, healthAnalysis);
-            });
+                e.preventDefault();
+                e.stopImmediatePropagation(); // BELANGRIJK: Stop verdere propagatie
+                
+                console.log('🔄 Toekomstige pup aangeklikt, bereken COI...');
+                
+                // Laad COI en health analysis NU pas, niet eerder
+                try {
+                    // Maak tijdelijke COI calculator
+                    const tempCOICalculator = new COICalculator([...this.allHonden, futurePuppy]);
+                    const coiResult = tempCOICalculator.calculateCOI(futurePuppy.id);
+                    console.log('✅ COI berekend:', coiResult);
+                    
+                    // Bereken gezondheidsanalyse
+                    const healthAnalysis = await this.analyzeHealthInLine(futurePuppy);
+                    console.log('✅ Gezondheidsanalyse klaar');
+                    
+                    // Toon popup
+                    this.showFuturePuppyPopup(futurePuppy, coiResult, healthAnalysis);
+                    
+                } catch (error) {
+                    console.error('❌ Fout bij berekenen COI:', error);
+                    // Toon fallback popup zonder COI
+                    this.showFuturePuppyPopup(futurePuppy, 
+                        { coi6Gen: '0.0', coiAllGen: '0.0' }, 
+                        { motherLine: { total: 0, counts: {} }, fatherLine: { total: 0, counts: {} } }
+                    );
+                }
+            }, true); // Use capture phase to ensure our handler runs first
             
-            futurePuppyCard.style.cursor = 'pointer';
+            newCard.style.cursor = 'pointer';
             
-            const clickHint = futurePuppyCard.querySelector('.click-hint-compact');
+            const clickHint = newCard.querySelector('.click-hint-compact');
             if (clickHint) {
                 clickHint.innerHTML = '<i class="bi bi-info-circle"></i> ' + this.t('clickForDetails');
             }
         }
     }
     
-    async renderFuturePuppyPedigree(futurePuppy) {
-        const container = document.getElementById('futurePuppyContainer');
-        if (!container) return;
+    // NIEUW: showFuturePuppyPopup met EIGEN popup systeem
+    showFuturePuppyPopup(futurePuppy, coiResult, healthAnalysis) {
+        console.log('🔄 Toon toekomstige pup popup...');
         
-        const pedigreeTree = this.buildFuturePuppyPedigreeTree(futurePuppy);
+        const coi6Color = this.getCOIColor(coiResult.coi6Gen);
+        const coiAllColor = this.getCOIColor(coiResult.coiAllGen);
         
-        // Maak alle cards asynchroon
-        const mainDogCard = await this.generateDogCard(pedigreeTree.mainDog, this.t('mainDog'), true, 0);
-        const fatherCard = await this.generateDogCard(pedigreeTree.father, this.t('fatherLabel'), false, 1);
-        const motherCard = await this.generateDogCard(pedigreeTree.mother, this.t('motherLabel'), false, 1);
+        const healthAnalysisHTML = this.generateHealthAnalysisHTML(healthAnalysis);
         
-        const paternalGrandfatherCard = await this.generateDogCard(pedigreeTree.paternalGrandfather, this.t('grandfatherLabel'), false, 2);
-        const paternalGrandmotherCard = await this.generateDogCard(pedigreeTree.paternalGrandmother, this.t('grandmotherLabel'), false, 2);
-        const maternalGrandfatherCard = await this.generateDogCard(pedigreeTree.maternalGrandfather, this.t('grandfatherLabel'), false, 2);
-        const maternalGrandmotherCard = await this.generateDogCard(pedigreeTree.maternalGrandmother, this.t('grandmotherLabel'), false, 2);
+        const uniquePopupId = 'reuteefFuturePupPopup_' + Date.now();
         
-        const paternalGreatGrandfather1Card = await this.generateDogCard(pedigreeTree.paternalGreatGrandfather1, this.t('greatGrandfatherLabel'), false, 3);
-        const paternalGreatGrandmother1Card = await this.generateDogCard(pedigreeTree.paternalGreatGrandmother1, this.t('greatGrandmotherLabel'), false, 3);
-        const paternalGreatGrandfather2Card = await this.generateDogCard(pedigreeTree.paternalGreatGrandfather2, this.t('greatGrandfatherLabel'), false, 3);
-        const paternalGreatGrandmother2Card = await this.generateDogCard(pedigreeTree.paternalGreatGrandmother2, this.t('greatGrandmotherLabel'), false, 3);
-        const maternalGreatGrandfather1Card = await this.generateDogCard(pedigreeTree.maternalGreatGrandfather1, this.t('greatGrandfatherLabel'), false, 3);
-        const maternalGreatGrandmother1Card = await this.generateDogCard(pedigreeTree.maternalGreatGrandmother1, this.t('greatGrandmotherLabel'), false, 3);
-        const maternalGreatGrandfather2Card = await this.generateDogCard(pedigreeTree.maternalGreatGrandfather2, this.t('greatGrandfatherLabel'), false, 3);
-        const maternalGreatGrandmother2Card = await this.generateDogCard(pedigreeTree.maternalGreatGrandmother2, this.t('greatGrandmotherLabel'), false, 3);
-        
-        const gridHTML = `
-            <div class="pedigree-grid-compact">
-                <!-- Generatie 0: Toekomstige Pup -->
-                <div class="pedigree-generation-col gen0">
-                    <div class="generation-label" style="background: #198754; color: white;">
-                        <i class="bi bi-stars me-1"></i>${this.t('futurePuppyName')}
+        const popupHTML = `
+            <div class="dog-detail-popup" id="${uniquePopupId}">
+                <div class="popup-header">
+                    <h5 class="popup-title">
+                        <i class="bi bi-stars me-2" style="color: #ffc107;"></i>
+                        ${this.t('futurePuppyName')}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" aria-label="${this.t('close')}" id="${uniquePopupId}_close"></button>
+                </div>
+                <div class="popup-body">
+                    <div class="info-section mb-4">
+                        <h6><i class="bi bi-calculator me-1"></i> ${this.t('predictedCoi')}</h6>
+                        <div class="info-grid">
+                            <div class="info-row">
+                                <div class="info-item info-item-half">
+                                    <span class="info-label">${this.t('coi6Gen')}:</span>
+                                    <span class="info-value coi-value" style="color: ${coi6Color}; font-weight: bold;">
+                                        ${coiResult.coi6Gen}%
+                                    </span>
+                                </div>
+                                
+                                <div class="info-item info-item-half">
+                                    <span class="info-label">${this.t('coiAllGen')}:</span>
+                                    <span class="info-value coi-value" style="color: ${coiAllColor}; font-weight: bold;">
+                                        ${coiResult.coiAllGen}%
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    ${mainDogCard}
+                    
+                    <div class="info-section mb-4">
+                        <h6><i class="bi bi-heart-pulse me-1"></i> ${this.t('healthInLine')}</h6>
+                        ${healthAnalysisHTML}
+                    </div>
+                    
+                    <div class="info-section mb-2">
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>${this.t('predictedPedigree')}</strong><br>
+                            ${this.t('futurePuppyDescription', { 
+                                reu: this.selectedReu.naam || '?', 
+                                teef: this.selectedTeef.naam || '?' 
+                            })}
+                        </div>
+                    </div>
                 </div>
-                
-                <!-- Generatie 1: Ouders -->
-                <div class="pedigree-generation-col gen1">
-                    <div class="generation-label">${this.t('parents')}</div>
-                    ${fatherCard}
-                    ${motherCard}
-                </div>
-                
-                <!-- Generatie 2: Grootouders -->
-                <div class="pedigree-generation-col gen2">
-                    <div class="generation-label">${this.t('grandparents')}</div>
-                    ${paternalGrandfatherCard}
-                    ${paternalGrandmotherCard}
-                    ${maternalGrandfatherCard}
-                    ${maternalGrandmotherCard}
-                </div>
-                
-                <!-- Generatie 3: Overgrootouders -->
-                <div class="pedigree-generation-col gen3">
-                    <div class="generation-label">${this.t('greatGrandparents')}</div>
-                    ${paternalGreatGrandfather1Card}
-                    ${paternalGreatGrandmother1Card}
-                    ${paternalGreatGrandfather2Card}
-                    ${paternalGreatGrandmother2Card}
-                    ${maternalGreatGrandfather1Card}
-                    ${maternalGreatGrandmother1Card}
-                    ${maternalGreatGrandfather2Card}
-                    ${maternalGreatGrandmother2Card}
+                <div class="popup-footer">
+                    <button type="button" class="btn btn-secondary popup-close-btn" id="${uniquePopupId}_footerClose">
+                        <i class="bi bi-x-circle me-1"></i> ${this.t('closePopup')}
+                    </button>
                 </div>
             </div>
         `;
         
-        container.innerHTML = gridHTML;
+        // Gebruik EIGEN overlay
+        const overlay = document.getElementById(this.ownPopupOverlayId);
+        const container = document.getElementById(this.ownPopupContainerId);
         
-        // Voeg click events toe aan alle cards
-        this.setupCardClickEvents();
+        if (!overlay || !container) {
+            this.createOwnOverlays();
+            // Probeer opnieuw na kort moment
+            setTimeout(() => {
+                this.showFuturePuppyPopup(futurePuppy, coiResult, healthAnalysis);
+            }, 100);
+            return;
+        }
+        
+        // Verwijder vorige content
+        container.innerHTML = '';
+        
+        // Voeg nieuwe popup toe
+        container.innerHTML = popupHTML;
+        overlay.style.display = 'flex';
+        
+        // Voeg event listeners toe
+        const closeBtn = document.getElementById(`${uniquePopupId}_close`);
+        const footerCloseBtn = document.getElementById(`${uniquePopupId}_footerClose`);
+        
+        const closePopup = () => {
+            overlay.style.display = 'none';
+            container.innerHTML = '';
+            document.removeEventListener('keydown', escapeHandler);
+        };
+        
+        const escapeHandler = (e) => {
+            if (e.key === 'Escape') {
+                closePopup();
+            }
+        };
+        
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closePopup);
+        }
+        
+        if (footerCloseBtn) {
+            footerCloseBtn.addEventListener('click', closePopup);
+        }
+        
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                closePopup();
+            }
+        });
+        
+        document.addEventListener('keydown', escapeHandler);
+    }
+    
+    async renderFuturePuppyPedigree(futurePuppy) {
+        const container = document.getElementById('futurePuppyContainer');
+        if (!container) {
+            console.error('❌ Container niet gevonden');
+            return;
+        }
+        
+        console.log('🔄 Start renderen toekomstige pup stamboom...');
+        
+        try {
+            const pedigreeTree = this.buildFuturePuppyPedigreeTree(futurePuppy);
+            
+            // GEBRUIK EEN VERSIMPELDE VERSIE ZONDER FOTO CHECKS
+            const mainDogCard = this.generateSimpleDogCard(pedigreeTree.mainDog, this.t('mainDog'), true, 0);
+            const fatherCard = this.generateSimpleDogCard(pedigreeTree.father, this.t('fatherLabel'), false, 1);
+            const motherCard = this.generateSimpleDogCard(pedigreeTree.mother, this.t('motherLabel'), false, 1);
+            
+            const paternalGrandfatherCard = this.generateSimpleDogCard(pedigreeTree.paternalGrandfather, this.t('grandfatherLabel'), false, 2);
+            const paternalGrandmotherCard = this.generateSimpleDogCard(pedigreeTree.paternalGrandmother, this.t('grandmotherLabel'), false, 2);
+            const maternalGrandfatherCard = this.generateSimpleDogCard(pedigreeTree.maternalGrandfather, this.t('grandfatherLabel'), false, 2);
+            const maternalGrandmotherCard = this.generateSimpleDogCard(pedigreeTree.maternalGrandmother, this.t('grandmotherLabel'), false, 2);
+            
+            const paternalGreatGrandfather1Card = this.generateSimpleDogCard(pedigreeTree.paternalGreatGrandfather1, this.t('greatGrandfatherLabel'), false, 3);
+            const paternalGreatGrandmother1Card = this.generateSimpleDogCard(pedigreeTree.paternalGreatGrandmother1, this.t('greatGrandmotherLabel'), false, 3);
+            const paternalGreatGrandfather2Card = this.generateSimpleDogCard(pedigreeTree.paternalGreatGrandfather2, this.t('greatGrandfatherLabel'), false, 3);
+            const paternalGreatGrandmother2Card = this.generateSimpleDogCard(pedigreeTree.paternalGreatGrandmother2, this.t('greatGrandmotherLabel'), false, 3);
+            const maternalGreatGrandfather1Card = this.generateSimpleDogCard(pedigreeTree.maternalGreatGrandfather1, this.t('greatGrandfatherLabel'), false, 3);
+            const maternalGreatGrandmother1Card = this.generateSimpleDogCard(pedigreeTree.maternalGreatGrandmother1, this.t('greatGrandmotherLabel'), false, 3);
+            const maternalGreatGrandfather2Card = this.generateSimpleDogCard(pedigreeTree.maternalGreatGrandfather2, this.t('greatGrandfatherLabel'), false, 3);
+            const maternalGreatGrandmother2Card = this.generateSimpleDogCard(pedigreeTree.maternalGreatGrandmother2, this.t('greatGrandmotherLabel'), false, 3);
+            
+            const gridHTML = `
+                <div class="pedigree-grid-compact">
+                    <!-- Generatie 0: Toekomstige Pup -->
+                    <div class="pedigree-generation-col gen0">
+                        <div class="generation-label" style="background: #198754; color: white;">
+                            <i class="bi bi-stars me-1"></i>${this.t('futurePuppyName')}
+                        </div>
+                        ${mainDogCard}
+                    </div>
+                    
+                    <!-- Generatie 1: Ouders -->
+                    <div class="pedigree-generation-col gen1">
+                        <div class="generation-label">${this.t('parents')}</div>
+                        ${fatherCard}
+                        ${motherCard}
+                    </div>
+                    
+                    <!-- Generatie 2: Grootouders -->
+                    <div class="pedigree-generation-col gen2">
+                        <div class="generation-label">${this.t('grandparents')}</div>
+                        ${paternalGrandfatherCard}
+                        ${paternalGrandmotherCard}
+                        ${maternalGrandfatherCard}
+                        ${maternalGrandmotherCard}
+                    </div>
+                    
+                    <!-- Generatie 3: Overgrootouders -->
+                    <div class="pedigree-generation-col gen3">
+                        <div class="generation-label">${this.t('greatGrandparents')}</div>
+                        ${paternalGreatGrandfather1Card}
+                        ${paternalGreatGrandmother1Card}
+                        ${paternalGreatGrandfather2Card}
+                        ${paternalGreatGrandmother2Card}
+                        ${maternalGreatGrandfather1Card}
+                        ${maternalGreatGrandmother1Card}
+                        ${maternalGreatGrandfather2Card}
+                        ${maternalGreatGrandmother2Card}
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = gridHTML;
+            console.log('✅ Stamboom succesvol gerenderd');
+            
+            // Voeg click events toe aan alle cards
+            this.setupOwnCardClickEvents();
+            
+            // Voeg click handler toe voor toekomstige pup
+            setTimeout(() => {
+                this.addFuturePuppyClickHandler(futurePuppy);
+            }, 100);
+            
+        } catch (error) {
+            console.error('❌ Fout bij renderen stamboom:', error);
+            container.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Fout bij laden stamboom: ${error.message}
+                    <br><br>
+                    <button class="btn btn-sm btn-warning" onclick="window.location.reload()">
+                        <i class="bi bi-arrow-clockwise"></i> Herladen
+                    </button>
+                </div>
+            `;
+        }
+    }
+    
+    // NIEUWE METHODE: Simpele card generator zonder async operaties
+    generateSimpleDogCard(dog, relation, isMainDog = false, generation = 0) {
+        if (!dog) {
+            return `
+                <div class="pedigree-card-compact horizontal empty gen${generation}" data-dog-id="0">
+                    <div class="pedigree-card-header-compact horizontal">
+                        <div class="relation-compact">${relation}</div>
+                    </div>
+                    <div class="pedigree-card-body-compact horizontal text-center py-3">
+                        <div class="no-data-text">${this.t('noData')}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        const genderIcon = dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 
+                          dog.geslacht === 'teven' ? 'bi-gender-female text-danger' : 'bi-question-circle text-secondary';
+        
+        const mainDogClass = isMainDog ? 'main-dog-compact' : '';
+        const headerColor = isMainDog ? 'bg-success' : 'bg-secondary';
+
+        const combinedName = dog.naam || this.t('unknown');
+        const showKennel = dog.kennelnaam && dog.kennelnaam.trim() !== '';
+        const fullDisplayText = combinedName + (showKennel ? ` ${dog.kennelnaam}` : '');
+        
+        // Voor toekomstige pup geen ras tonen
+        const breedText = dog.ras && dog.id !== -999999 ? 
+                         `<div class="dog-breed-compact" title="${dog.ras}">${dog.ras}</div>` : '';
+        
+        // Simpele camera icon - geen async checks
+        const cameraIcon = '';
+        
+        return `
+            <div class="pedigree-card-compact horizontal ${dog.geslacht === 'reuen' ? 'male' : 'female'} ${mainDogClass} gen${generation}" 
+                 data-dog-id="${dog.id}" 
+                 data-dog-name="${dog.naam || ''}"
+                 data-relation="${relation}"
+                 data-generation="${generation}">
+                <div class="pedigree-card-header-compact horizontal ${headerColor}">
+                    <div class="relation-compact">
+                        <span class="relation-text">${relation}</span>
+                        ${isMainDog ? '<span class="main-dot">★</span>' : ''}
+                    </div>
+                    <div class="gender-icon-compact">
+                        <i class="bi ${genderIcon}"></i>
+                    </div>
+                </div>
+                <div class="pedigree-card-body-compact horizontal">
+                    <div class="card-row card-row-1">
+                        <div class="dog-name-kennel-compact" title="${fullDisplayText}">
+                            ${fullDisplayText}
+                        </div>
+                    </div>
+                    
+                    <div class="card-row card-row-2">
+                        ${dog.stamboomnr ? `
+                        <div class="dog-pedigree-compact" title="${dog.stamboomnr}">
+                            ${dog.stamboomnr}
+                        </div>
+                        ` : ''}
+                        
+                        ${breedText}
+                    </div>
+                    
+                    <div class="card-row card-row-3">
+                        <div class="click-hint-compact">
+                            <i class="bi bi-info-circle"></i> ${this.t('clickForDetails')}${cameraIcon}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
     }
     
     buildFuturePuppyPedigreeTree(futurePuppy) {
@@ -3327,81 +3216,6 @@ class ReuTeefCombinatie {
         return pedigreeTree;
     }
     
-    async generateDogCard(dog, relation, isMainDog = false, generation = 0) {
-        if (!dog) {
-            return `
-                <div class="pedigree-card-compact horizontal empty gen${generation}" data-dog-id="0">
-                    <div class="pedigree-card-header-compact horizontal">
-                        <div class="relation-compact">${relation}</div>
-                    </div>
-                    <div class="pedigree-card-body-compact horizontal text-center py-3">
-                        <div class="no-data-text">${this.t('noData')}</div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        const genderIcon = dog.geslacht === 'reuen' ? 'bi-gender-male text-primary' : 
-                          dog.geslacht === 'teven' ? 'bi-gender-female text-danger' : 'bi-question-circle text-secondary';
-        
-        const mainDogClass = isMainDog ? 'main-dog-compact' : '';
-        const headerColor = isMainDog ? 'bg-success' : 'bg-secondary';
-        
-        // Check of deze hond foto's heeft
-        const hasPhotos = await this.checkDogHasPhotos(dog.id);
-        const cameraIcon = hasPhotos ? '<i class="bi bi-camera text-danger ms-1"></i>' : '';
-
-        const combinedName = dog.naam || this.t('unknown');
-        const showKennel = dog.kennelnaam && dog.kennelnaam.trim() !== '';
-        const fullDisplayText = combinedName + (showKennel ? ` ${dog.kennelnaam}` : '');
-        
-        // Voor toekomstige pup geen ras tonen
-        const breedText = dog.ras && dog.id !== -999999 ? 
-                         `<div class="dog-breed-compact" title="${dog.ras}">${dog.ras}</div>` : '';
-        
-        return `
-            <div class="pedigree-card-compact horizontal ${dog.geslacht === 'reuen' ? 'male' : 'female'} ${mainDogClass} gen${generation}" 
-                 data-dog-id="${dog.id}" 
-                 data-dog-name="${dog.naam || ''}"
-                 data-relation="${relation}"
-                 data-generation="${generation}"
-                 data-has-photos="${hasPhotos}">
-                <div class="pedigree-card-header-compact horizontal ${headerColor}">
-                    <div class="relation-compact">
-                        <span class="relation-text">${relation}</span>
-                        ${isMainDog ? '<span class="main-dot">★</span>' : ''}
-                    </div>
-                    <div class="gender-icon-compact">
-                        <i class="bi ${genderIcon}"></i>
-                    </div>
-                </div>
-                <div class="pedigree-card-body-compact horizontal">
-                    <div class="card-row card-row-1">
-                        <div class="dog-name-kennel-compact" title="${fullDisplayText}">
-                            ${fullDisplayText}
-                        </div>
-                    </div>
-                    
-                    <div class="card-row card-row-2">
-                        ${dog.stamboomnr ? `
-                        <div class="dog-pedigree-compact" title="${dog.stamboomnr}">
-                            ${dog.stamboomnr}
-                        </div>
-                        ` : ''}
-                        
-                        ${breedText}
-                    </div>
-                    
-                    <div class="card-row card-row-3">
-                        <div class="click-hint-compact">
-                            <i class="bi bi-info-circle"></i> ${this.t('clickForDetails')}${cameraIcon}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-    
     async checkDogHasPhotos(dogId) {
         if (!dogId || dogId === 0) return false;
         const dog = this.getDogById(dogId);
@@ -3438,11 +3252,20 @@ class ReuTeefCombinatie {
         }
     }
     
-    setupCardClickEvents() {
+    // NIEUW: Eigen card click events setup
+    setupOwnCardClickEvents() {
         const cards = document.querySelectorAll('.pedigree-card-compact.horizontal:not(.empty)');
         cards.forEach(card => {
-            card.addEventListener('click', async (e) => {
-                const dogId = parseInt(card.getAttribute('data-dog-id'));
+            // Clone de card om alle bestaande event listeners te verwijderen
+            const newCard = card.cloneNode(true);
+            card.parentNode.replaceChild(newCard, card);
+            
+            newCard.addEventListener('click', async (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                e.stopImmediatePropagation(); // BELANGRIJK!
+                
+                const dogId = parseInt(newCard.getAttribute('data-dog-id'));
                 if (dogId === 0) return;
                 
                 // Speciale behandeling voor toekomstige pup
@@ -3453,9 +3276,9 @@ class ReuTeefCombinatie {
                 const dog = this.getDogById(dogId);
                 if (!dog) return;
                 
-                const relation = card.getAttribute('data-relation') || '';
+                const relation = newCard.getAttribute('data-relation') || '';
                 await this.showDogDetailPopup(dog, relation);
-            });
+            }, true); // Use capture phase
         });
     }
     
@@ -3464,43 +3287,47 @@ class ReuTeefCombinatie {
     }
     
     async showDogDetailPopup(dog, relation) {
-        const overlay = document.getElementById('pedigreePopupOverlay');
-        const container = document.getElementById('pedigreePopupContainer');
+        console.log('Toon hond detail popup via eigen systeem');
         
-        if (!overlay || !container) return;
+        // Gebruik EIGEN overlay
+        const overlay = document.getElementById(this.ownPopupOverlayId);
+        const container = document.getElementById(this.ownPopupContainerId);
+        
+        if (!overlay || !container) {
+            this.createOwnOverlays();
+            this.showDogDetailPopup(dog, relation);
+            return;
+        }
         
         const popupHTML = await this.getDogDetailPopupHTML(dog, relation);
         container.innerHTML = popupHTML;
-        
         overlay.style.display = 'flex';
         
+        // Voeg event listeners toe
         const closeButtons = container.querySelectorAll('.btn-close, .popup-close-btn');
+        const closePopup = () => {
+            overlay.style.display = 'none';
+            container.innerHTML = '';
+            document.removeEventListener('keydown', closeOnEscape);
+        };
+        
+        const closeOnEscape = (e) => {
+            if (e.key === 'Escape') {
+                closePopup();
+            }
+        };
+        
         closeButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                overlay.style.display = 'none';
-            });
+            btn.addEventListener('click', closePopup);
         });
         
         overlay.addEventListener('click', (e) => {
             if (e.target === overlay) {
-                overlay.style.display = 'none';
+                closePopup();
             }
         });
         
-        const closeOnEscape = (e) => {
-            if (e.key === 'Escape') {
-                overlay.style.display = 'none';
-                document.removeEventListener('keydown', closeOnEscape);
-            }
-        };
         document.addEventListener('keydown', closeOnEscape);
-        
-        overlay.addEventListener('animationend', function handler() {
-            if (overlay.style.display === 'none') {
-                document.removeEventListener('keydown', closeOnEscape);
-                overlay.removeEventListener('animationend', handler);
-            }
-        });
     }
     
     async getDogDetailPopupHTML(dog, relation = '') {
@@ -3791,79 +3618,6 @@ class ReuTeefCombinatie {
         return '#dc3545';
     }
     
-    showFuturePuppyPopup(futurePuppy, coiResult, healthAnalysis) {
-        const coi6Color = this.getCOIColor(coiResult.coi6Gen);
-        const coiAllColor = this.getCOIColor(coiResult.coiAllGen);
-        
-        const healthAnalysisHTML = this.generateHealthAnalysisHTML(healthAnalysis);
-        
-        const popupHTML = `
-            <div class="dog-detail-popup">
-                <div class="popup-header">
-                    <h5 class="popup-title">
-                        <i class="bi bi-stars me-2" style="color: #ffc107;"></i>
-                        ${this.t('futurePuppyName')}
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" aria-label="${this.t('close')}"></button>
-                </div>
-                <div class="popup-body">
-                    <div class="info-section mb-4">
-                        <h6><i class="bi bi-calculator me-1"></i> ${this.t('predictedCoi')}</h6>
-                        <div class="info-grid">
-                            <div class="info-row">
-                                <div class="info-item info-item-half">
-                                    <span class="info-label">${this.t('coi6Gen')}:</span>
-                                    <span class="info-value coi-value" style="color: ${coi6Color}; font-weight: bold;">
-                                        ${coiResult.coi6Gen}%
-                                    </span>
-                                </div>
-                                
-                                <div class="info-item info-item-half">
-                                    <span class="info-label">${this.t('coiAllGen')}:</span>
-                                    <span class="info-value coi-value" style="color: ${coiAllColor}; font-weight: bold;">
-                                        ${coiResult.coiAllGen}%
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="info-section mb-4">
-                        <h6><i class="bi bi-heart-pulse me-1"></i> ${this.t('healthInLine')}</h6>
-                        ${healthAnalysisHTML}
-                    </div>
-                    
-                    <div class="info-section mb-2">
-                        <div class="alert alert-info mb-0">
-                            <i class="bi bi-info-circle me-2"></i>
-                            <strong>${this.t('predictedPedigree')}</strong><br>
-                            ${this.t('futurePuppyDescription', { 
-                                reu: this.selectedReu.naam || '?', 
-                                teef: this.selectedTeef.naam || '?' 
-                            })}
-                        </div>
-                    </div>
-                </div>
-                <div class="popup-footer">
-                    <button type="button" class="btn btn-secondary popup-close-btn">
-                        <i class="bi bi-x-circle me-1"></i> ${this.t('closePopup')}
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        this.ensurePopupContainer();
-        
-        const overlay = document.getElementById('pedigreePopupOverlay');
-        const container = document.getElementById('pedigreePopupContainer');
-        
-        if (container) {
-            container.innerHTML = popupHTML;
-            overlay.style.display = 'flex';
-            this.setupPopupEventListeners();
-        }
-    }
-    
     generateHealthAnalysisHTML(analysis) {
         const t = this.t.bind(this);
         
@@ -3941,52 +3695,6 @@ class ReuTeefCombinatie {
                 </table>
             </div>
         `;
-    }
-    
-    ensurePopupContainer() {
-        if (!document.getElementById('pedigreePopupOverlay')) {
-            const overlayHTML = `
-                <div class="pedigree-popup-overlay" id="pedigreePopupOverlay" style="display: none;">
-                    <div class="pedigree-popup-container" id="pedigreePopupContainer"></div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', overlayHTML);
-        }
-    }
-    
-    setupPopupEventListeners() {
-        const overlay = document.getElementById('pedigreePopupOverlay');
-        const container = document.getElementById('pedigreePopupContainer');
-        
-        if (!overlay || !container) return;
-        
-        const closeButtons = container.querySelectorAll('.btn-close, .popup-close-btn');
-        closeButtons.forEach(btn => {
-            btn.addEventListener('click', () => {
-                overlay.style.display = 'none';
-            });
-        });
-        
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) {
-                overlay.style.display = 'none';
-            }
-        });
-        
-        const closeOnEscape = (e) => {
-            if (e.key === 'Escape') {
-                overlay.style.display = 'none';
-                document.removeEventListener('keydown', closeOnEscape);
-            }
-        };
-        document.addEventListener('keydown', closeOnEscape);
-        
-        overlay.addEventListener('animationend', function handler() {
-            if (overlay.style.display === 'none') {
-                document.removeEventListener('keydown', closeOnEscape);
-                overlay.removeEventListener('animationend', handler);
-            }
-        });
     }
     
     showAlert(message, type = 'info') {
