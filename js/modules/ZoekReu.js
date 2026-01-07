@@ -51,10 +51,10 @@ class ZoekReu {
                 back: "Terug",
                 noResults: "Geen reuen gevonden die voldoen aan uw criteria",
                 tryAgain: "Probeer andere zoekcriteria",
-                coiResult: "COI",
+                coiResult: "Combinatie COI",
                 coi6Gen: "COI 6 gen",
                 coiAllGen: "COI 25 gen",
-                coiCombo: "Combinatie COI",
+                individualCOI: "Individuele COI",
                 healthOptions: {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
                     patellaluxatie: ["0", "1", "2", "3", "Niet getest"],
@@ -112,8 +112,8 @@ class ZoekReu {
                     schildklier: "Tgaa",
                     ed: "ED",
                     locatie: "Locatie",
-                    coi: "COI",
-                    comboCOI: "Combinatie COI"
+                    coi: "Combinatie COI",
+                    individualCoi: "Individueel"
                 },
                 unknown: "Onbekend",
                 notTested: "Niet getest",
@@ -159,10 +159,10 @@ class ZoekReu {
                 back: "Back",
                 noResults: "No males found matching your criteria",
                 tryAgain: "Try different search criteria",
-                coiResult: "COI",
+                coiResult: "Combination COI",
                 coi6Gen: "COI 6 gen",
                 coiAllGen: "COI 25 gen",
-                coiCombo: "Combination COI",
+                individualCOI: "Individual COI",
                 healthOptions: {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
                     patellaluxatie: ["0", "1", "2", "3", "Not tested"],
@@ -220,8 +220,8 @@ class ZoekReu {
                     schildklier: "Tgaa",
                     ed: "ED",
                     locatie: "Location",
-                    coi: "COI",
-                    comboCOI: "Combination COI"
+                    coi: "Combination COI",
+                    individualCoi: "Individual"
                 },
                 unknown: "Unknown",
                 notTested: "Not tested",
@@ -260,17 +260,17 @@ class ZoekReu {
                     "Erweiterde Suchfilter",
                     "Genetische Kompatibilitätsprüfung",
                     "Stammbaumanalyse",
-                    "Gesundheitswertvergleich",
+                    "Gezundheitswertvergleich",
                     "Standortbasierte Suche",
                     "Bewertungen und Erfahrungsberichte"
                 ],
                 back: "Zurück",
                 noResults: "Keine Rüden gefunden, die Ihren Kriterien entsprechen",
                 tryAgain: "Versuchen Sie andere Suchkriterien",
-                coiResult: "COI",
+                coiResult: "Kombination COI",
                 coi6Gen: "COI 6 gen",
                 coiAllGen: "COI 25 gen",
-                coiCombo: "Kombination COI",
+                individualCOI: "Individuelle COI",
                 healthOptions: {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
                     patellaluxatie: ["0", "1", "2", "3", "Niet getestet"],
@@ -328,8 +328,8 @@ class ZoekReu {
                     schildklier: "Tgaa",
                     ed: "ED",
                     locatie: "Standort",
-                    coi: "COI",
-                    comboCOI: "Kombination COI"
+                    coi: "Kombination COI",
+                    individualCoi: "Individuell"
                 },
                 unknown: "Unbekannt",
                 notTested: "Niet getestet",
@@ -1159,12 +1159,17 @@ class ZoekReu {
             
             return {
                 coi6Gen: Math.min(combo6, 100).toFixed(1),
-                coiAllGen: Math.min(combo25, 100).toFixed(1)
+                coiAllGen: Math.min(combo25, 100).toFixed(1),
+                individualReu: reuCOI // Sla individuele COI van reu op voor weergave
             };
             
         } catch (error) {
             console.error('Fout bij combo COI berekening:', error);
-            return { coi6Gen: '0.0', coiAllGen: '0.0' };
+            return { 
+                coi6Gen: '0.0', 
+                coiAllGen: '0.0',
+                individualReu: { coi6Gen: '0.0', coiAllGen: '0.0' }
+            };
         }
     }
     
@@ -1268,8 +1273,7 @@ class ZoekReu {
                                     <th>${t('resultColumns').ed}</th>
                                     <th>${t('resultColumns').locatie}</th>
                                     <th>${t('resultColumns').coi}</th>
-                                    ${criteria.maxCOI > 0 && this.selectedTeef && !this.selectedTeef.manualEntry ? 
-                                        `<th>${t('resultColumns').comboCOI}</th>` : ''}
+                                    <th>${t('resultColumns').individualCoi}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1280,6 +1284,7 @@ class ZoekReu {
                     <div class="text-muted text-center mt-3">
                         <small>${reuen.length} reuen gevonden</small>
                         ${criteria.maxCOI > 0 ? `<br><small>Maximale COI: ${criteria.maxCOI}%</small>` : ''}
+                        ${this.selectedTeef && !this.selectedTeef.manualEntry ? `<br><small>Toont combinatie COI met ${this.selectedTeef.naam}</small>` : ''}
                     </div>
                 `;
             }
@@ -1301,18 +1306,14 @@ class ZoekReu {
                 const comboCOI = this.calculateComboCOI(teefId, reu.id);
                 const comboValue = parseFloat(comboCOI.coiAllGen) || 0;
                 
-                // Bereken ook individuele COI van reu
-                const reuCOI = this.coiCalculator.calculateCOI(reu.id);
-                const reuCOIValue = parseFloat(reuCOI.coiAllGen) || 0;
-                
                 // Sla COI waarden op in reu object voor latere weergave
                 reu._coiData = {
-                    individual: reuCOI,
+                    individual: comboCOI.individualReu || { coi6Gen: '0.0', coiAllGen: '0.0' },
                     combo: comboCOI,
                     passesFilter: comboValue <= maxCOI
                 };
                 
-                console.log(`   ➡ ${reu.naam}: combo=${comboValue}%, individueel=${reuCOIValue}% → ${comboValue <= maxCOI ? 'PASS' : 'FAIL'}`);
+                console.log(`   ➡ ${reu.naam}: combo=${comboValue}% → ${comboValue <= maxCOI ? 'PASS' : 'FAIL'}`);
                 return comboValue <= maxCOI;
                 
             } catch (error) {
@@ -1837,7 +1838,7 @@ class ZoekReu {
     }
     
     generateResultsTable(reuen, t, maxCOI) {
-        const showComboCOI = maxCOI > 0 && this.selectedTeef && !this.selectedTeef.manualEntry;
+        const showCOIColumn = maxCOI > 0 && this.selectedTeef && !this.selectedTeef.manualEntry;
         
         return reuen.map(reu => {
             const formatValue = (value) => {
@@ -1864,24 +1865,19 @@ class ZoekReu {
                 `${reu.naam} ${reu.kennelnaam ? reu.kennelnaam : ''}`.trim() : 
                 t('unknown');
             
-            // Bereken COI voor deze reu als nog niet gedaan
-            let reuCOI = { coi6Gen: '0.0', coiAllGen: '0.0' };
+            // Haal COI data op
             let comboCOI = { coi6Gen: '0.0', coiAllGen: '0.0' };
+            let individualCOI = { coi6Gen: '0.0', coiAllGen: '0.0' };
             
-            if (this.coiCalculator && reu.id) {
+            if (showCOIColumn && reu._coiData) {
+                comboCOI = reu._coiData.combo || { coi6Gen: '0.0', coiAllGen: '0.0' };
+                individualCOI = reu._coiData.individual || { coi6Gen: '0.0', coiAllGen: '0.0' };
+            } else if (this.coiCalculator && reu.id) {
+                // Als geen COI filter maar wel COI calculator, bereken individuele COI
                 try {
-                    if (!reu._coiData) {
-                        reuCOI = this.coiCalculator.calculateCOI(reu.id);
-                        reu._coiData = {
-                            individual: reuCOI,
-                            combo: { coi6Gen: '0.0', coiAllGen: '0.0' }
-                        };
-                    } else {
-                        reuCOI = reu._coiData.individual;
-                        comboCOI = reu._coiData.combo;
-                    }
+                    individualCOI = this.coiCalculator.calculateCOI(reu.id);
                 } catch (error) {
-                    console.error('Fout bij COI berekening reu:', error);
+                    console.error('Fout bij individuele COI berekening reu:', error);
                 }
             }
             
@@ -1908,18 +1904,20 @@ class ZoekReu {
                         ${formatValue(reu.elleboogdysplasie)}
                     </td>
                     <td><small>${reu.land || ''}</small></td>
-                    <td class="${this.getCOIColor(parseFloat(reuCOI.coiAllGen))}">
-                        ${reuCOI.coiAllGen}%
-                        <br>
-                        <small class="text-muted">(${reuCOI.coi6Gen}% 6g)</small>
-                    </td>
-                    ${showComboCOI ? `
-                        <td class="${this.getCOIColor(parseFloat(comboCOI.coiAllGen))}">
-                            ${comboCOI.coiAllGen}%
+                    <td class="${this.getCOIColor(parseFloat(comboCOI.coiAllGen))}">
+                        ${showCOIColumn ? `
+                            <strong>${comboCOI.coiAllGen}%</strong>
                             <br>
                             <small class="text-muted">(${comboCOI.coi6Gen}% 6g)</small>
-                        </td>
-                    ` : ''}
+                        ` : `
+                            <span class="text-muted">-</span>
+                        `}
+                    </td>
+                    <td class="${this.getCOIColor(parseFloat(individualCOI.coiAllGen))}">
+                        ${individualCOI.coiAllGen}%
+                        <br>
+                        <small class="text-muted">(${individualCOI.coi6Gen}% 6g)</small>
+                    </td>
                 </tr>
             `;
         }).join('');
@@ -2096,5 +2094,11 @@ style.textContent = `
     td.text-warning { font-weight: bold; }
     td.text-orange { font-weight: bold; }
     td.text-danger { font-weight: bold; }
+    
+    /* Tabel kolommen voor COI */
+    .table th:nth-last-child(2),
+    .table th:nth-last-child(1) {
+        background-color: #f8f9fa;
+    }
 `;
 document.head.appendChild(style);
