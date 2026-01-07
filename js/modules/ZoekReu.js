@@ -225,13 +225,13 @@ class ZoekReu {
                 dandyWalker: "Dandy Walker",
                 schildklier: "Tgaa",
                 elleboogdysplasie: "Ellbogengelenksdysplasie (ED)",
-                anyHealth: "Nicht wichtig",
+                anyHealth: "Niet wichtig",
                 searchRadius: "Suchradius",
                 radiusOptions: ["Niederlande", "België", "Deutschland", "Europa", "Weltweit"],
                 searchButton: "Rüden suchen",
                 results: "Suchergebnisse",
                 inDevelopment: "Diese Suchfunktion ist derzeit in Entwicklung",
-                devMessage: "Die vollständige Suchfunktionalität für Rüden wird demnächst verfügbar sein.",
+                devMessage: "Die vollständige Suchfunktionalität für Rüden wird demnächst verfügbaar sein.",
                 features: [
                     "Erweiterte Suchfilter",
                     "Genetische Kompatibilitätsprüfung",
@@ -246,8 +246,8 @@ class ZoekReu {
                 healthOptions: {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
                     patellaluxatie: ["0", "1", "2", "3", "Niet getestet"],
-                    ogen: ["Frei", "Dist", "Andere", "Nicht untersucht"],
-                    dandyWalker: ["Frei auf DNA", "Frei auf ouders", "Träger", "Niet getest", "Betroffen"],
+                    ogen: ["Frei", "Dist", "Andere", "Niet untersucht"],
+                    dandyWalker: ["Frei auf DNA", "Frei op ouders", "Träger", "Niet getest", "Betroffen"],
                     schildklier: ["Tgaa Negativ", "Niet getest"],
                     elleboogdysplasie: ["0", "1", "2", "3", "Niet getest"]
                 },
@@ -270,7 +270,7 @@ class ZoekReu {
                         "Frei": "Frei",
                         "Dist": "Distichiasis",
                         "Andere": "Andere",
-                        "Nicht untersucht": "Niet untersucht"
+                        "Niet untersucht": "Niet untersucht"
                     },
                     dandyWalker: {
                         "Frei auf DNA": "Frei auf DNA",
@@ -870,8 +870,8 @@ class ZoekReu {
             case 'dw':
                 if (lowerValue.includes('vrij op dna') || lowerValue.includes('vrij dna')) return 'text-success fw-bold';
                 if (lowerValue.includes('vrij op ouders') || lowerValue.includes('vrij ouders')) return 'text-success fw-bold';
-                if (lowerValue.includes('drager')) return 'text-orange fw-bold';
-                if (lowerValue.includes('lijder')) return 'text-danger fw-bold';
+                if (lowerValue.includes('drager') || lowerValue.includes('carrier')) return 'text-orange fw-bold';
+                if (lowerValue.includes('lijder') || lowerValue.includes('affected')) return 'text-danger fw-bold';
                 break;
                 
             case 'schildklier':
@@ -1180,13 +1180,26 @@ class ZoekReu {
         return reuen.filter(reu => {
             for (const [test, minValue] of Object.entries(healthCriteria)) {
                 const reuValue = reu[this.getHealthFieldName(test)];
-                if (!reuValue || reuValue === '') {
-                    // Onbekende waarde = niet goed genoeg
+                
+                // Speciaal geval: als er geen waarde is, moet deze worden uitgesloten
+                // behalve bij "Niet getest" of "Niet onderzocht" als dat de minimumwaarde is
+                if (!reuValue || reuValue === '' || reuValue === '?' || reuValue.toLowerCase() === 'onbekend') {
+                    // Controleer of "niet getest" of "niet onderzocht" is toegestaan
+                    if (test === 'patellaluxatie' && (minValue === 'Niet getest' || minValue === 'Not tested')) {
+                        // Toegestaan voor PL "Niet getest"
+                        continue;
+                    } else if (test === 'ogen' && (minValue === 'Niet onderzocht' || minValue === 'Not examined')) {
+                        // Toegestaan voor ogen "Niet onderzocht"
+                        continue;
+                    } else if (minValue === 'Niet getest' || minValue === 'Not tested') {
+                        // Toegestaan voor andere tests met "Niet getest"
+                        continue;
+                    }
                     return false;
                 }
                 
-                // Check of reu voldoet aan MINIMALE eis (of beter is)
-                if (!this.meetsMinimumRequirement(test, reuValue, minValue)) {
+                // Check of reu voldoet aan MAXIMALE eis (niet slechter is dan minimum)
+                if (!this.meetsMaximumRequirement(test, reuValue, minValue)) {
                     return false;
                 }
             }
@@ -1194,23 +1207,46 @@ class ZoekReu {
         });
     }
     
-    meetsMinimumRequirement(test, reuValue, minValue) {
-        // Alle waarden die voldoen aan de minimale eis (of beter zijn)
+    meetsMaximumRequirement(test, reuValue, maxValue) {
+        // Deze functie controleert of de reu-waarde NIET slechter is dan de maximumwaarde
+        // (dwz: de reu-waarde is beter dan of gelijk aan de maximumwaarde)
+        
         switch(test) {
             case 'heupdysplasie':
-                // HD: A is beter dan B, etc. Als minimum is B, dan zijn A en B OK
+                // HD: A is beter dan B, B beter dan C, etc.
+                // Als maximum is B, dan zijn A en B OK, maar C, D, E niet
                 const hdOrder = { 'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4 };
-                return (hdOrder[reuValue] || 5) <= (hdOrder[minValue] || 5);
+                const hdScoreReu = hdOrder[reuValue] !== undefined ? hdOrder[reuValue] : 99;
+                const hdScoreMax = hdOrder[maxValue] !== undefined ? hdOrder[maxValue] : 99;
+                return hdScoreReu <= hdScoreMax;
                 
             case 'patellaluxatie':
-                // PL: 0 is beter dan 1, etc.
+                // PL: 0 is beter dan 1, 1 beter dan 2, etc.
+                // Speciaal geval: "Niet getest" laat 0, 1 en zonder uitslag toe
                 const plOrder = { '0': 0, '1': 1, '2': 2, '3': 3, 'Niet getest': 4 };
-                return (plOrder[reuValue] || 5) <= (plOrder[minValue] || 5);
+                const plScoreReu = plOrder[reuValue] !== undefined ? plOrder[reuValue] : 
+                                  (reuValue === 'Niet getest' || reuValue === 'Not tested' ? 4 : 99);
+                const plScoreMax = plOrder[maxValue] !== undefined ? plOrder[maxValue] : 99;
+                
+                if (maxValue === 'Niet getest' || maxValue === 'Not tested') {
+                    // Bij "Niet getest" als max: alleen 0, 1, en "Niet getest" zijn toegestaan
+                    return plScoreReu <= 4 && plScoreReu !== 2 && plScoreReu !== 3;
+                }
+                return plScoreReu <= plScoreMax && plScoreReu !== 2 && plScoreReu !== 3;
                 
             case 'ogen':
                 // Ogen: Vrij > Dist > Overig > Niet onderzocht
+                // Als max is Dist: dan Vrij en Dist OK, Overig niet
                 const ogenOrder = { 'Vrij': 0, 'Dist': 1, 'Overig': 2, 'Niet onderzocht': 3 };
-                return (ogenOrder[reuValue] || 4) <= (ogenOrder[minValue] || 4);
+                const ogenScoreReu = ogenOrder[reuValue] !== undefined ? ogenOrder[reuValue] : 
+                                    (reuValue === 'Niet onderzocht' || reuValue === 'Not examined' ? 3 : 99);
+                const ogenScoreMax = ogenOrder[maxValue] !== undefined ? ogenOrder[maxValue] : 99;
+                
+                if (maxValue === 'Niet onderzocht' || maxValue === 'Not examined') {
+                    // Bij "Niet onderzocht" als max: alles is toegestaan
+                    return true;
+                }
+                return ogenScoreReu <= ogenScoreMax;
                 
             case 'dandyWalker':
                 // Dandy Walker: Vrij op DNA > Vrij op ouders > Drager > Niet getest > Lijder
@@ -1221,20 +1257,26 @@ class ZoekReu {
                     'Niet getest': 3, 
                     'Lijder': 4 
                 };
-                return (dwOrder[reuValue] || 5) <= (dwOrder[minValue] || 5);
+                const dwScoreReu = dwOrder[reuValue] !== undefined ? dwOrder[reuValue] : 99;
+                const dwScoreMax = dwOrder[maxValue] !== undefined ? dwOrder[maxValue] : 99;
+                return dwScoreReu <= dwScoreMax;
                 
             case 'schildklier':
                 // Schildklier: Tgaa Negatief > Niet getest
                 const thyroidOrder = { 'Tgaa Negatief': 0, 'Niet getest': 1 };
-                return (thyroidOrder[reuValue] || 2) <= (thyroidOrder[minValue] || 2);
+                const thyroidScoreReu = thyroidOrder[reuValue] !== undefined ? thyroidOrder[reuValue] : 99;
+                const thyroidScoreMax = thyroidOrder[maxValue] !== undefined ? thyroidOrder[maxValue] : 99;
+                return thyroidScoreReu <= thyroidScoreMax;
                 
             case 'elleboogdysplasie':
                 // ED: 0 is beter dan 1, etc.
                 const edOrder = { '0': 0, '1': 1, '2': 2, '3': 3, 'Niet getest': 4 };
-                return (edOrder[reuValue] || 5) <= (edOrder[minValue] || 5);
+                const edScoreReu = edOrder[reuValue] !== undefined ? edOrder[reuValue] : 99;
+                const edScoreMax = edOrder[maxValue] !== undefined ? edOrder[maxValue] : 99;
+                return edScoreReu <= edScoreMax;
                 
             default:
-                return reuValue === minValue;
+                return reuValue === maxValue;
         }
     }
     
