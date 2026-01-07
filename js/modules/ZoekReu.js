@@ -223,7 +223,7 @@ class ZoekReu {
                 searchButton: "Rüden suchen",
                 results: "Suchergebnisse",
                 inDevelopment: "Diese Suchfunktion ist derzeit in Entwicklung",
-                devMessage: "Die vollständige Suchfunktionalität für Rüden wird demnächst verfügbar sein.",
+                devMessage: "Die vollständige Suchfunktionalität für Rüden wird demnächst verfügbaar sein.",
                 features: [
                     "Erweiterte Suchfilter",
                     "Genetische Kompatibilitätsprüfung",
@@ -237,9 +237,9 @@ class ZoekReu {
                 tryAgain: "Versuchen Sie andere Suchkriterien",
                 healthOptions: {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
-                    patellaluxatie: ["0", "1", "2", "3", "Nicht getestet"],
+                    patellaluxatie: ["0", "1", "2", "3", "Niet getestet"],
                     ogen: ["Frei", "Dist", "Andere", "Nicht untersucht"],
-                    dandyWalker: ["Frei auf DNA", "Frei auf Eltern", "Träger", "Niet getest", "Betroffen"],
+                    dandyWalker: ["Frei auf DNA", "Frei auf ouders", "Träger", "Niet getest", "Betroffen"],
                     schildklier: ["Tgaa Negativ", "Niet getest"],
                     elleboogdysplasie: ["0", "1", "2", "3", "Niet getest"]
                 },
@@ -256,17 +256,17 @@ class ZoekReu {
                         "1": "1 (Leicht)",
                         "2": "2 (Mäßig)",
                         "3": "3 (Schwer)",
-                        "Nicht getestet": "Nicht getestet"
+                        "Niet getestet": "Niet getestet"
                     },
                     ogen: {
                         "Frei": "Frei",
                         "Dist": "Distichiasis",
                         "Andere": "Andere",
-                        "Nicht untersucht": "Nicht untersucht"
+                        "Nicht untersucht": "Niet untersucht"
                     },
                     dandyWalker: {
                         "Frei auf DNA": "Frei auf DNA",
-                        "Frei auf ouders": "Frei auf ouders",
+                        "Frei op ouders": "Frei op ouders",
                         "Träger": "Träger",
                         "Niet getest": "Niet getest",
                         "Betroffen": "Betroffen"
@@ -424,21 +424,6 @@ class ZoekReu {
                             <p class="mt-2">Gebruik de zoekcriteria om reuen te vinden</p>
                         </div>
                     </div>
-                </div>
-            </div>
-            
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h6 class="mb-0">Toekomstige functionaliteiten</h6>
-                </div>
-                <div class="card-body">
-                    <ul class="list-group list-group-flush">
-                        ${t('features').map(feature => `
-                            <li class="list-group-item">
-                                <i class="bi bi-check-circle text-success me-2"></i>${feature}
-                            </li>
-                        `).join('')}
-                    </ul>
                 </div>
             </div>
         `;
