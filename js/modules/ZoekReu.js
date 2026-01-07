@@ -230,7 +230,7 @@ class ZoekReu {
                 radiusOptions: ["Niederlande", "België", "Deutschland", "Europa", "Weltweit"],
                 searchButton: "Rüden suchen",
                 results: "Suchergebnisse",
-                inDevelopment: "Diese Suchfunktion ist derzeit in Entwicklung",
+                inDevelopment: "Diese Suchfunktion ist derzeit in ontwikkeling",
                 devMessage: "Die vollständige Suchfunktionalität für Rüden wird demnächst verfügbaar sein.",
                 features: [
                     "Erweiterte Suchfilter",
@@ -1178,28 +1178,28 @@ class ZoekReu {
         }
         
         return reuen.filter(reu => {
-            for (const [test, minValue] of Object.entries(healthCriteria)) {
+            for (const [test, maxValue] of Object.entries(healthCriteria)) {
                 const reuValue = reu[this.getHealthFieldName(test)];
                 
                 // Speciaal geval: als er geen waarde is, moet deze worden uitgesloten
-                // behalve bij "Niet getest" of "Niet onderzocht" als dat de minimumwaarde is
+                // behalve bij "Niet getest" of "Niet onderzocht" als dat de maximumwaarde is
                 if (!reuValue || reuValue === '' || reuValue === '?' || reuValue.toLowerCase() === 'onbekend') {
                     // Controleer of "niet getest" of "niet onderzocht" is toegestaan
-                    if (test === 'patellaluxatie' && (minValue === 'Niet getest' || minValue === 'Not tested')) {
+                    if (test === 'patellaluxatie' && (maxValue === 'Niet getest' || maxValue === 'Not tested')) {
                         // Toegestaan voor PL "Niet getest"
                         continue;
-                    } else if (test === 'ogen' && (minValue === 'Niet onderzocht' || minValue === 'Not examined')) {
+                    } else if (test === 'ogen' && (maxValue === 'Niet onderzocht' || maxValue === 'Not examined')) {
                         // Toegestaan voor ogen "Niet onderzocht"
                         continue;
-                    } else if (minValue === 'Niet getest' || minValue === 'Not tested') {
+                    } else if (maxValue === 'Niet getest' || maxValue === 'Not tested') {
                         // Toegestaan voor andere tests met "Niet getest"
                         continue;
                     }
                     return false;
                 }
                 
-                // Check of reu voldoet aan MAXIMALE eis (niet slechter is dan minimum)
-                if (!this.meetsMaximumRequirement(test, reuValue, minValue)) {
+                // Check of reu voldoet aan MAXIMALE eis (niet slechter is dan maximum)
+                if (!this.meetsMaximumRequirement(test, reuValue, maxValue)) {
                     return false;
                 }
             }
@@ -1211,24 +1211,27 @@ class ZoekReu {
         // Deze functie controleert of de reu-waarde NIET slechter is dan de maximumwaarde
         // (dwz: de reu-waarde is beter dan of gelijk aan de maximumwaarde)
         
+        const normalizedReuValue = reuValue ? reuValue.toString().trim() : '';
+        const normalizedMaxValue = maxValue ? maxValue.toString().trim() : '';
+        
         switch(test) {
             case 'heupdysplasie':
                 // HD: A is beter dan B, B beter dan C, etc.
                 // Als maximum is B, dan zijn A en B OK, maar C, D, E niet
                 const hdOrder = { 'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4 };
-                const hdScoreReu = hdOrder[reuValue] !== undefined ? hdOrder[reuValue] : 99;
-                const hdScoreMax = hdOrder[maxValue] !== undefined ? hdOrder[maxValue] : 99;
+                const hdScoreReu = hdOrder[normalizedReuValue] !== undefined ? hdOrder[normalizedReuValue] : 99;
+                const hdScoreMax = hdOrder[normalizedMaxValue] !== undefined ? hdOrder[normalizedMaxValue] : 99;
                 return hdScoreReu <= hdScoreMax;
                 
             case 'patellaluxatie':
                 // PL: 0 is beter dan 1, 1 beter dan 2, etc.
                 // Speciaal geval: "Niet getest" laat 0, 1 en zonder uitslag toe
                 const plOrder = { '0': 0, '1': 1, '2': 2, '3': 3, 'Niet getest': 4 };
-                const plScoreReu = plOrder[reuValue] !== undefined ? plOrder[reuValue] : 
-                                  (reuValue === 'Niet getest' || reuValue === 'Not tested' ? 4 : 99);
-                const plScoreMax = plOrder[maxValue] !== undefined ? plOrder[maxValue] : 99;
+                const plScoreReu = plOrder[normalizedReuValue] !== undefined ? plOrder[normalizedReuValue] : 
+                                  (normalizedReuValue === 'Niet getest' || normalizedReuValue === 'Not tested' ? 4 : 99);
+                const plScoreMax = plOrder[normalizedMaxValue] !== undefined ? plOrder[normalizedMaxValue] : 99;
                 
-                if (maxValue === 'Niet getest' || maxValue === 'Not tested') {
+                if (normalizedMaxValue === 'Niet getest' || normalizedMaxValue === 'Not tested') {
                     // Bij "Niet getest" als max: alleen 0, 1, en "Niet getest" zijn toegestaan
                     return plScoreReu <= 4 && plScoreReu !== 2 && plScoreReu !== 3;
                 }
@@ -1236,16 +1239,52 @@ class ZoekReu {
                 
             case 'ogen':
                 // Ogen: Vrij > Dist > Overig > Niet onderzocht
-                // Als max is Dist: dan Vrij en Dist OK, Overig niet
-                const ogenOrder = { 'Vrij': 0, 'Dist': 1, 'Overig': 2, 'Niet onderzocht': 3 };
-                const ogenScoreReu = ogenOrder[reuValue] !== undefined ? ogenOrder[reuValue] : 
-                                    (reuValue === 'Niet onderzocht' || reuValue === 'Not examined' ? 3 : 99);
-                const ogenScoreMax = ogenOrder[maxValue] !== undefined ? ogenOrder[maxValue] : 99;
+                // Speciaal geval: Ogen filtering werkt anders!
+                // - Vrij: alleen Vrij
+                // - Dist: Vrij EN Dist
+                // - Overig: Vrij, Dist EN Overig
+                // - Niet onderzocht: alles
                 
-                if (maxValue === 'Niet onderzocht' || maxValue === 'Not examined') {
-                    // Bij "Niet onderzocht" als max: alles is toegestaan
-                    return true;
+                // Eerst normaliseren naar NL waarden voor consistentie
+                let reuOgenValue = normalizedReuValue;
+                if (normalizedReuValue === 'Free') reuOgenValue = 'Vrij';
+                if (normalizedReuValue === 'Dist') reuOgenValue = 'Dist';
+                if (normalizedReuValue === 'Other') reuOgenValue = 'Overig';
+                if (normalizedReuValue === 'Not examined' || normalizedReuValue === 'Niet onderzocht') reuOgenValue = 'Niet onderzocht';
+                
+                let maxOgenValue = normalizedMaxValue;
+                if (normalizedMaxValue === 'Free') maxOgenValue = 'Vrij';
+                if (normalizedMaxValue === 'Dist') maxOgenValue = 'Dist';
+                if (normalizedMaxValue === 'Other') maxOgenValue = 'Overig';
+                if (normalizedMaxValue === 'Not examined' || normalizedMaxValue === 'Niet onderzocht') maxOgenValue = 'Niet onderzocht';
+                
+                // Check de speciale gevallen
+                if (maxOgenValue === 'Niet onderzocht') {
+                    return true; // Alles toegestaan
                 }
+                
+                if (maxOgenValue === 'Overig') {
+                    // Vrij, Dist en Overig zijn toegestaan
+                    return reuOgenValue === 'Vrij' || 
+                           reuOgenValue === 'Dist' || 
+                           reuOgenValue === 'Overig';
+                }
+                
+                if (maxOgenValue === 'Dist') {
+                    // Vrij en Dist zijn toegestaan
+                    return reuOgenValue === 'Vrij' || 
+                           reuOgenValue === 'Dist';
+                }
+                
+                if (maxOgenValue === 'Vrij') {
+                    // Alleen Vrij is toegestaan
+                    return reuOgenValue === 'Vrij';
+                }
+                
+                // Standaard geval (voor de zekerheid)
+                const ogenOrder = { 'Vrij': 0, 'Dist': 1, 'Overig': 2, 'Niet onderzocht': 3 };
+                const ogenScoreReu = ogenOrder[reuOgenValue] !== undefined ? ogenOrder[reuOgenValue] : 99;
+                const ogenScoreMax = ogenOrder[maxOgenValue] !== undefined ? ogenOrder[maxOgenValue] : 99;
                 return ogenScoreReu <= ogenScoreMax;
                 
             case 'dandyWalker':
@@ -1257,26 +1296,26 @@ class ZoekReu {
                     'Niet getest': 3, 
                     'Lijder': 4 
                 };
-                const dwScoreReu = dwOrder[reuValue] !== undefined ? dwOrder[reuValue] : 99;
-                const dwScoreMax = dwOrder[maxValue] !== undefined ? dwOrder[maxValue] : 99;
+                const dwScoreReu = dwOrder[normalizedReuValue] !== undefined ? dwOrder[normalizedReuValue] : 99;
+                const dwScoreMax = dwOrder[normalizedMaxValue] !== undefined ? dwOrder[normalizedMaxValue] : 99;
                 return dwScoreReu <= dwScoreMax;
                 
             case 'schildklier':
                 // Schildklier: Tgaa Negatief > Niet getest
                 const thyroidOrder = { 'Tgaa Negatief': 0, 'Niet getest': 1 };
-                const thyroidScoreReu = thyroidOrder[reuValue] !== undefined ? thyroidOrder[reuValue] : 99;
-                const thyroidScoreMax = thyroidOrder[maxValue] !== undefined ? thyroidOrder[maxValue] : 99;
+                const thyroidScoreReu = thyroidOrder[normalizedReuValue] !== undefined ? thyroidOrder[normalizedReuValue] : 99;
+                const thyroidScoreMax = thyroidOrder[normalizedMaxValue] !== undefined ? thyroidOrder[normalizedMaxValue] : 99;
                 return thyroidScoreReu <= thyroidScoreMax;
                 
             case 'elleboogdysplasie':
                 // ED: 0 is beter dan 1, etc.
                 const edOrder = { '0': 0, '1': 1, '2': 2, '3': 3, 'Niet getest': 4 };
-                const edScoreReu = edOrder[reuValue] !== undefined ? edOrder[reuValue] : 99;
-                const edScoreMax = edOrder[maxValue] !== undefined ? edOrder[maxValue] : 99;
+                const edScoreReu = edOrder[normalizedReuValue] !== undefined ? edOrder[normalizedReuValue] : 99;
+                const edScoreMax = edOrder[normalizedMaxValue] !== undefined ? edOrder[normalizedMaxValue] : 99;
                 return edScoreReu <= edScoreMax;
                 
             default:
-                return reuValue === maxValue;
+                return normalizedReuValue === normalizedMaxValue;
         }
     }
     
