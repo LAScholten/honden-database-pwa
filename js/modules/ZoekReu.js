@@ -25,7 +25,7 @@ class ZoekReu {
                 patellaluxatie: "Patellaluxatie (PL)",
                 ogen: "Ogen",
                 dandyWalker: "Dandy Walker",
-                schildklier: "Schildklier",
+                schildklier: "Tgaa",
                 elleboogdysplasie: "Elleboogdysplasie (ED)",
                 anyHealth: "Niet belangrijk",
                 searchRadius: "Zoekradius",
@@ -50,7 +50,7 @@ class ZoekReu {
                     patellaluxatie: ["PL 0", "PL 1", "PL 2", "PL 3", "Niet getest"],
                     ogen: ["Vrij", "Dist", "Overig", "Niet onderzocht"],
                     dandyWalker: ["Vrij op DNA", "Vrij op ouders", "Drager", "Niet getest", "Lijder"],
-                    schildklier: ["TGAA negatief", "Niet getest"],
+                    schildklier: ["Tgaa Negatief", "Niet getest"],
                     elleboogdysplasie: ["ED 0", "ED 1", "ED 2", "ED 3", "Niet getest"]
                 },
                 healthLabels: {
@@ -82,7 +82,7 @@ class ZoekReu {
                         "Lijder": "Lijder"
                     },
                     schildklier: {
-                        "TGAA negatief": "TGAA negatief",
+                        "Tgaa Negatief": "Tgaa Negatief",
                         "Niet getest": "Niet getest"
                     },
                     elleboogdysplasie: {
@@ -100,7 +100,7 @@ class ZoekReu {
                     pl: "PL",
                     ogen: "Ogen",
                     dw: "Dandy Walker",
-                    schildklier: "Schildklier",
+                    schildklier: "Tgaa",
                     ed: "ED",
                     locatie: "Locatie"
                 },
@@ -120,7 +120,7 @@ class ZoekReu {
                 patellaluxatie: "Patellar Luxation (PL)",
                 ogen: "Eyes",
                 dandyWalker: "Dandy Walker",
-                schildklier: "Thyroid",
+                schildklier: "Tgaa",
                 elleboogdysplasie: "Elbow Dysplasia (ED)",
                 anyHealth: "Not important",
                 searchRadius: "Search radius",
@@ -145,7 +145,7 @@ class ZoekReu {
                     patellaluxatie: ["PL 0", "PL 1", "PL 2", "PL 3", "Not tested"],
                     ogen: ["Free", "Dist", "Other", "Not examined"],
                     dandyWalker: ["Free on DNA", "Free on parents", "Carrier", "Not tested", "Affected"],
-                    schildklier: ["TGAA negative", "Not tested"],
+                    schildklier: ["Tgaa Negative", "Not tested"],
                     elleboogdysplasie: ["ED 0", "ED 1", "ED 2", "ED 3", "Not tested"]
                 },
                 healthLabels: {
@@ -177,7 +177,7 @@ class ZoekReu {
                         "Affected": "Affected"
                     },
                     schildklier: {
-                        "TGAA negative": "TGAA negative",
+                        "Tgaa Negative": "Tgaa Negative",
                         "Not tested": "Not tested"
                     },
                     elleboogdysplasie: {
@@ -195,7 +195,7 @@ class ZoekReu {
                     pl: "PL",
                     ogen: "Eyes",
                     dw: "Dandy Walker",
-                    schildklier: "Thyroid",
+                    schildklier: "Tgaa",
                     ed: "ED",
                     locatie: "Location"
                 },
@@ -215,7 +215,7 @@ class ZoekReu {
                 patellaluxatie: "Patellaluxation (PL)",
                 ogen: "Augen",
                 dandyWalker: "Dandy Walker",
-                schildklier: "Schilddrüse",
+                schildklier: "Tgaa",
                 elleboogdysplasie: "Ellbogengelenksdysplasie (ED)",
                 anyHealth: "Nicht wichtig",
                 searchRadius: "Suchradius",
@@ -239,9 +239,9 @@ class ZoekReu {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
                     patellaluxatie: ["PL 0", "PL 1", "PL 2", "PL 3", "Nicht getestet"],
                     ogen: ["Frei", "Dist", "Andere", "Nicht untersucht"],
-                    dandyWalker: ["Frei auf DNA", "Frei auf Eltern", "Träger", "Nicht getestet", "Betroffen"],
-                    schildklier: ["TGAA negativ", "Nicht getestet"],
-                    elleboogdysplasie: ["ED 0", "ED 1", "ED 2", "ED 3", "Nicht getestet"]
+                    dandyWalker: ["Frei auf DNA", "Frei auf Eltern", "Träger", "Niet getest", "Betroffen"],
+                    schildklier: ["Tgaa Negativ", "Niet getest"],
+                    elleboogdysplasie: ["ED 0", "ED 1", "ED 2", "ED 3", "Niet getest"]
                 },
                 healthLabels: {
                     heupdysplasie: {
@@ -266,21 +266,21 @@ class ZoekReu {
                     },
                     dandyWalker: {
                         "Frei auf DNA": "Frei auf DNA",
-                        "Frei auf Eltern": "Frei auf ouders",
+                        "Frei auf ouders": "Frei auf ouders",
                         "Träger": "Träger",
-                        "Niet getest": "Nicht getestet",
+                        "Niet getest": "Niet getest",
                         "Betroffen": "Betroffen"
                     },
                     schildklier: {
-                        "TGAA negativ": "TGAA negativ",
-                        "Niet getest": "Niet getestet"
+                        "Tgaa Negativ": "Tgaa Negativ",
+                        "Niet getest": "Niet getest"
                     },
                     elleboogdysplasie: {
                         "ED 0": "ED 0 (Frei)",
                         "ED 1": "ED 1 (Leicht)",
                         "ED 2": "ED 2 (Mäßig)",
                         "ED 3": "ED 3 (Schwer)",
-                        "Niet getest": "Niet getestet"
+                        "Niet getest": "Niet getest"
                     }
                 },
                 resultColumns: {
@@ -290,12 +290,12 @@ class ZoekReu {
                     pl: "PL",
                     ogen: "Augen",
                     dw: "Dandy Walker",
-                    schildklier: "Schilddrüse",
+                    schildklier: "Tgaa",
                     ed: "ED",
                     locatie: "Standort"
                 },
                 unknown: "Unbekannt",
-                notTested: "Nicht getestet"
+                notTested: "Niet getestet"
             }
         };
     }
@@ -737,40 +737,45 @@ class ZoekReu {
             return 'text-danger fw-bold';
         }
         
+        const lowerValue = value.toLowerCase().trim();
+        
         switch(type) {
             case 'hd':
-                if (value === 'A') return 'text-success fw-bold';
-                if (value === 'B') return 'text-warning fw-bold';
-                if (value === 'C') return 'text-orange fw-bold';
-                if (value === 'D' || value === 'E') return 'text-danger fw-bold';
+                if (lowerValue === 'a') return 'text-success fw-bold';
+                if (lowerValue === 'b') return 'text-warning fw-bold';
+                if (lowerValue === 'c') return 'text-orange fw-bold';
+                if (lowerValue === 'd' || lowerValue === 'e') return 'text-danger fw-bold';
                 break;
                 
             case 'pl':
-                if (value === 'PL 0') return 'text-success fw-bold';
-                if (value === 'PL 1') return 'text-orange fw-bold';
-                if (value === 'PL 2' || value === 'PL 3') return 'text-danger fw-bold';
+                if (lowerValue === 'pl 0' || lowerValue === 'pl0') return 'text-success fw-bold';
+                if (lowerValue === 'pl 1' || lowerValue === 'pl1') return 'text-orange fw-bold';
+                if (lowerValue === 'pl 2' || lowerValue === 'pl2' || lowerValue === 'pl 3' || lowerValue === 'pl3') return 'text-danger fw-bold';
                 break;
                 
             case 'ogen':
-                if (value === 'Vrij') return 'text-success fw-bold';
-                if (value === 'Dist') return 'text-warning fw-bold';
-                if (value === 'Overig') return 'text-danger fw-bold';
+                if (lowerValue === 'vrij') return 'text-success fw-bold';
+                if (lowerValue.includes('dist')) return 'text-warning fw-bold';
+                if (lowerValue === 'overig') return 'text-danger fw-bold';
                 break;
                 
             case 'dw':
-                if (value === 'Vrij op DNA' || value === 'Vrij op ouders') return 'text-success fw-bold';
-                if (value === 'Drager') return 'text-orange fw-bold';
-                if (value === 'Niet getest' || value === 'Lijder') return 'text-danger fw-bold';
+                if (lowerValue.includes('vrij op dna') || lowerValue.includes('vrij dna')) return 'text-success fw-bold';
+                if (lowerValue.includes('vrij op ouders') || lowerValue.includes('vrij ouders')) return 'text-success fw-bold';
+                if (lowerValue.includes('drager')) return 'text-orange fw-bold';
+                if (lowerValue.includes('lijder')) return 'text-danger fw-bold';
                 break;
                 
             case 'schildklier':
-                if (value === 'TGAA negatief') return 'text-success fw-bold';
+                if (lowerValue === 'tgaa negatief' || lowerValue === 'negatief' || lowerValue === 'tg aa negatief') {
+                    return 'text-success fw-bold';
+                }
                 return 'text-danger fw-bold';
                 
             case 'ed':
-                if (value === 'ED 0') return 'text-success fw-bold';
-                if (value === 'ED 1') return 'text-orange fw-bold';
-                if (value === 'ED 2' || value === 'ED 3') return 'text-danger fw-bold';
+                if (lowerValue === 'ed 0' || lowerValue === 'ed0') return 'text-success fw-bold';
+                if (lowerValue === 'ed 1' || lowerValue === 'ed1') return 'text-orange fw-bold';
+                if (lowerValue === 'ed 2' || lowerValue === 'ed2' || lowerValue === 'ed 3' || lowerValue === 'ed3') return 'text-danger fw-bold';
                 break;
         }
         
@@ -846,7 +851,7 @@ class ZoekReu {
                 <div class="row mb-3">
                     <div class="col-6">
                         <div class="small">
-                            <strong>Schildklier:</strong> 
+                            <strong>Tgaa:</strong> 
                             <span class="${this.getHealthColor(teef.schildklier, 'schildklier')}">
                                 ${teef.schildklier || '?'}
                             </span>
@@ -1025,8 +1030,8 @@ class ZoekReu {
                 return (dwOrder[reuValue] || 5) <= (dwOrder[minValue] || 5);
                 
             case 'schildklier':
-                // Schildklier: TGAA negatief > Niet getest
-                const thyroidOrder = { 'TGAA negatief': 0, 'Niet getest': 1 };
+                // Schildklier: Tgaa Negatief > Niet getest
+                const thyroidOrder = { 'Tgaa Negatief': 0, 'Niet getest': 1 };
                 return (thyroidOrder[reuValue] || 2) <= (thyroidOrder[minValue] || 2);
                 
             case 'elleboogdysplasie':
@@ -1076,7 +1081,7 @@ class ZoekReu {
             const dwScore = this.compareHealthValue('dandyWalker', a.dandyWalker, b.dandyWalker);
             if (dwScore !== 0) return dwScore;
             
-            // 6. Schildklier score (TGAA negatief is beste)
+            // 6. Schildklier score (Tgaa Negatief is beste)
             const thyroidScore = this.compareHealthValue('schildklier', a.schildklier, b.schildklier);
             if (thyroidScore !== 0) return thyroidScore;
             
@@ -1102,7 +1107,7 @@ class ZoekReu {
                 'Niet getest': 3, 
                 'Lijder': 4 
             },
-            'schildklier': { 'TGAA negatief': 0, 'Niet getest': 1 },
+            'schildklier': { 'Tgaa Negatief': 0, 'Niet getest': 1 },
             'elleboogdysplasie': { 'ED 0': 0, 'ED 1': 1, 'ED 2': 2, 'ED 3': 3, 'Niet getest': 4 }
         };
         
