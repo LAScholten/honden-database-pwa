@@ -352,7 +352,7 @@ class ZoekReu {
                 noTeefSelected: "Wählen Sie zuerst eine Hündin, um die COI-Berechnung zu verwenden",
                 showPedigree: "Stammbaum anzeigen",
                 pedigreeTooltip: "Klicken, um den 4-Generationen-Stammbaum dieses Rüden anzuzeigen",
-                pedigreeForPup: "COI von zukünftigem Welpen (Hündin + Rüde) - 6 Generationen",
+                pedigreeForPup: "COI van zukünftigem Welpen (Hündin + Rüde) - 6 Generationen",
                 reuCOI: "Rüde COI",
                 pupCOI: "Welpe COI",
                 calculatingCOI: "Berechne COI für zukünftige Welpen (6 Generationen)...",
@@ -1157,72 +1157,56 @@ class ZoekReu {
         }
         
         try {
-            // Gebruik de COICalculator voor nakomelingen - 6 generaties
-            // Controleer of de COICalculator een methode heeft voor nakomelingen
-            if (typeof this.coiCalculator.calculateCOIForOffspring === 'function') {
-                // Als er een speciale methode is voor nakomelingen
-                const offspringCOI = this.coiCalculator.calculateCOIForOffspring(teefId, reuId);
-                return {
-                    coi6Gen: offspringCOI.coi6Gen || '0.0',
-                    coiAllGen: offspringCOI.coiAllGen || '0.0',
-                    reuCOI6: '0.0',
-                    reuCOI25: '0.0'
-                };
-            } else {
-                // Bereken individuele COI's
-                const teefCOI = this.coiCalculator.calculateCOI(teefId);
-                const reuCOI = this.coiCalculator.calculateCOI(reuId);
-                
-                const teef6 = parseFloat(teefCOI.coi6Gen) || 0;
-                const reu6 = parseFloat(reuCOI.coi6Gen) || 0;
-                const teef25 = parseFloat(teefCOI.coiAllGen) || 0;
-                const reu25 = parseFloat(reuCOI.coiAllGen) || 0;
-                
-                // Simpele berekening voor nakomeling COI (6 generaties)
-                // Dit is een vereenvoudigde versie - de echte berekening zou complexer zijn
-                const pupCOI6 = (teef6 + reu6) / 2;
-                
-                // Bereken overlap gebaseerd op gemeenschappelijke voorouders (6 generaties)
-                let overlapFactor = 0;
-                
-                // Controleer op directe familie relaties
-                const teefHond = this.hondenData.find(h => h.id == teefId);
-                const reuHond = this.hondenData.find(h => h.id == reuId);
-                
-                if (teefHond && reuHond) {
-                    // Controleer op zelfde ouders (volle broer/zus)
-                    if (teefHond.vader_id && reuHond.vader_id && 
-                        teefHond.vader_id === reuHond.vader_id &&
-                        teefHond.moeder_id && reuHond.moeder_id &&
-                        teefHond.moeder_id === reuHond.moeder_id) {
-                        overlapFactor = 25; // 25% voor volle broer/zus
-                    }
-                    // Controleer op half broer/zus
-                    else if ((teefHond.vader_id && reuHond.vader_id && 
-                            teefHond.vader_id === reuHond.vader_id) ||
-                           (teefHond.moeder_id && reuHond.moeder_id && 
-                            teefHond.moeder_id === reuHond.moeder_id)) {
-                        overlapFactor = 12.5; // 12.5% voor half broer/zus
-                    }
-                    // Voor andere relaties: gebruik een statistische benadering
-                    else {
-                        overlapFactor = Math.min((teef6 + reu6) * 0.25, 10);
-                    }
-                }
-                
-                // Totale COI voor nakomeling (6 generaties)
-                const totalPupCOI6 = Math.min(pupCOI6 + overlapFactor, 100);
-                
-                return {
-                    coi6Gen: totalPupCOI6.toFixed(1),
-                    coiAllGen: ((teef25 + reu25) / 2).toFixed(1),
-                    reuCOI6: reu6.toFixed(1),
-                    reuCOI25: reu25.toFixed(1)
-                };
+            // Zoek teef en reu in de data
+            const teef = this.hondenData.find(h => h.id == teefId);
+            const reu = this.hondenData.find(h => h.id == reuId);
+            
+            if (!teef || !reu) {
+                console.warn(`Teef (${teefId}) of reu (${reuId}) niet gevonden`);
+                return { coi6Gen: '0.0', coiAllGen: '0.0', reuCOI6: '0.0', reuCOI25: '0.0' };
             }
             
+            // Maak een fictieve pup aan zoals in het andere deel van het programma
+            const fictievePupId = 999999;
+            
+            // Maak een fictieve pup object met ouders
+            const fictievePup = {
+                id: fictievePupId,
+                naam: `Pup van ${teef.naam} & ${reu.naam}`,
+                vader_id: reuId,
+                moeder_id: teefId,
+                vader: reu.naam,
+                moeder: teef.naam,
+                geslacht: 'onbekend',
+                ras: teef.ras || reu.ras || '',
+                geboortedatum: new Date().toISOString().split('T')[0]
+            };
+            
+            // Maak een tijdelijke kopie van honden data met de fictieve pup
+            const tempHondenData = [...this.hondenData, fictievePup];
+            
+            // Maak een nieuwe COICalculator met de uitgebreide data
+            const tempCOICalculator = new COICalculator(tempHondenData);
+            
+            // Bereken de COI voor de fictieve pup
+            const pupCOI = tempCOICalculator.calculateCOI(fictievePupId);
+            
+            // Bereken ook de individuele COI van de reu voor vergelijking
+            const reuCOI = this.coiCalculator.calculateCOI(reuId);
+            
+            console.log(`🔬 COI berekening voor combinatie ${teef.naam} + ${reu.naam}:`);
+            console.log(`   ➡ Pup COI (6 gen): ${pupCOI.coi6Gen}%`);
+            console.log(`   ➡ Reu COI (6 gen): ${reuCOI.coi6Gen}%`);
+            
+            return {
+                coi6Gen: pupCOI.coi6Gen || '0.0',
+                coiAllGen: pupCOI.coiAllGen || '0.0',
+                reuCOI6: reuCOI.coi6Gen || '0.0',
+                reuCOI25: reuCOI.coiAllGen || '0.0'
+            };
+            
         } catch (error) {
-            console.error('Fout bij toekomstige pup COI berekening (6 gen):', error);
+            console.error('❌ Fout bij toekomstige pup COI berekening (6 gen):', error);
             return { coi6Gen: '0.0', coiAllGen: '0.0', reuCOI6: '0.0', reuCOI25: '0.0' };
         }
     }
@@ -1257,6 +1241,7 @@ class ZoekReu {
         let reuen = this.hondenData.filter(h => h.geslacht === 'reuen');
         
         console.log(`🔍 Start zoeken met ${reuen.length} reuen, COI filter (6 gen): ${criteria.maxCOI}%`);
+        console.log(`   ➡ Geselecteerde teef: ${this.selectedTeef?.naam || 'geen'}`);
         
         if (criteria.ras) {
             reuen = reuen.filter(r => r.ras === criteria.ras);
@@ -1338,7 +1323,7 @@ class ZoekReu {
                 
                 this.attachReuNameClickEvents();
             }
-        }, 500);
+        }, 1000);
     }
     
     async calculateFuturePupCOI6GenForAllReuen(reuen) {
@@ -1351,6 +1336,9 @@ class ZoekReu {
         }
         
         const teefId = this.selectedTeef.id;
+        const teefNaam = this.selectedTeef.naam;
+        
+        console.log(`🔬 Start COI berekeningen voor ${reuen.length} reuen met teef: ${teefNaam} (${teefId})`);
         
         return reuen.map(reu => {
             if (!reu.id) {
@@ -1367,15 +1355,10 @@ class ZoekReu {
                 reu._futurePupCOI6Gen = futurePupCOI6Gen;
                 reu._futurePupCOI6GenPasses = true;
                 
-                // Log voor debugging
-                if (pupCOI6Value > 25) {
-                    console.log(`⚠️ Hoog COI gevonden (6 gen): ${reu.naam} - Pup COI: ${futurePupCOI6Gen.coi6Gen}% (Reu COI: ${futurePupCOI6Gen.reuCOI6}%)`);
-                }
-                
                 return reu;
                 
             } catch (error) {
-                console.error(`Fout bij toekomstige pup COI berekening (6 gen) reu ${reu.id}:`, error);
+                console.error(`❌ Fout bij toekomstige pup COI berekening (6 gen) reu ${reu.id}:`, error);
                 reu._futurePupCOI6Gen = { coi6Gen: '0.0', coiAllGen: '0.0', reuCOI6: '0.0', reuCOI25: '0.0' };
                 reu._futurePupCOI6GenPasses = false;
                 return reu;
