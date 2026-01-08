@@ -128,7 +128,23 @@ class ZoekReu {
                 calculatingCOI: "COI waarden berekenen...",
                 coiCalculationError: "Fout bij COI berekening",
                 virtualPuppy: "Virtuele combinatie pup",
-                coiCalculationProgress: "Berekent COI voor combinaties..."
+                coiCalculationProgress: "Berekent COI voor combinaties...",
+                noFemalesFound: "Geen teven gevonden",
+                refineSearch: "Typ een andere naam of gebruik spatie om te combineren",
+                manualEntry: "Handmatig invullen",
+                femalesFound: "Teven gevonden",
+                moreResults: "meer... blijf typen om te verfijnen",
+                pedigree: "Stamboom",
+                breed: "Ras",
+                manuallyEnteredFemale: "Handmatig ingevoerde teef",
+                coiNotAvailable: "COI berekening is niet beschikbaar voor handmatige invoer",
+                selectFemaleToStart: "Selecteer een teef om te beginnen",
+                useSearchCriteria: "Gebruik de zoekcriteria om reuen te vinden",
+                searchingMales: "Zoeken naar geschikte reuen...",
+                pedigreeFunctionalityUnavailable: "Stamboomfunctionaliteit is niet beschikbaar op dit moment",
+                maleNotFound: "Kon reu gegevens niet vinden",
+                errorShowingPedigree: "Er ging iets mis bij het tonen van de stamboom",
+                combinedParents: "Gecombineerde ouders"
             },
             en: {
                 title: "Find a Male",
@@ -240,7 +256,23 @@ class ZoekReu {
                 calculatingCOI: "Calculating COI values...",
                 coiCalculationError: "Error calculating COI",
                 virtualPuppy: "Virtual combination puppy",
-                coiCalculationProgress: "Calculating COI for combinations..."
+                coiCalculationProgress: "Calculating COI for combinations...",
+                noFemalesFound: "No females found",
+                refineSearch: "Type a different name or use space to combine",
+                manualEntry: "Manual entry",
+                femalesFound: "Females found",
+                moreResults: "more... keep typing to refine",
+                pedigree: "Pedigree",
+                breed: "Breed",
+                manuallyEnteredFemale: "Manually entered female",
+                coiNotAvailable: "COI calculation is not available for manual entry",
+                selectFemaleToStart: "Select a female to start",
+                useSearchCriteria: "Use search criteria to find males",
+                searchingMales: "Searching for suitable males...",
+                pedigreeFunctionalityUnavailable: "Pedigree functionality is not available at this time",
+                maleNotFound: "Could not find male data",
+                errorShowingPedigree: "Something went wrong while showing the pedigree",
+                combinedParents: "Combined parents"
             },
             de: {
                 title: "Finde einen Rüden",
@@ -262,7 +294,7 @@ class ZoekReu {
                 dandyWalker: "Dandy Walker",
                 schildklier: "Tgaa",
                 elleboogdysplasie: "Ellbogengelenksdysplasie (ED)",
-                anyHealth: "Niet wichtig",
+                anyHealth: "Nicht wichtig",
                 searchRadius: "Suchradius",
                 radiusOptions: ["Niederlande", "België", "Deutschland", "Europa", "Weltweit"],
                 searchButton: "Rüden suchen",
@@ -352,7 +384,23 @@ class ZoekReu {
                 calculatingCOI: "COI-Werte wurden berechnet...",
                 coiCalculationError: "Fehler bei COI-Berechnung",
                 virtualPuppy: "Virtuelle Kombination Welpe",
-                coiCalculationProgress: "Berechne COI für Kombinationen..."
+                coiCalculationProgress: "Berechne COI für Kombinationen...",
+                noFemalesFound: "Keine Hündinnen gefunden",
+                refineSearch: "Geben Sie einen anderen Namen ein oder verwenden Sie Leerzeichen zum Kombinieren",
+                manualEntry: "Manuelle Eingabe",
+                femalesFound: "Hündinnen gefunden",
+                moreResults: "weitere... weiter tippen zum Verfeinern",
+                pedigree: "Stammbaum",
+                breed: "Rasse",
+                manuallyEnteredFemale: "Manuell eingegebene Hündin",
+                coiNotAvailable: "COI-Berechnung ist für manuelle Eingaben nicht verfügbar",
+                selectFemaleToStart: "Wählen Sie eine Hündin, um zu beginnen",
+                useSearchCriteria: "Verwenden Sie Suchkriterien, um Rüden zu finden",
+                searchingMales: "Suche nach geeigneten Rüden...",
+                pedigreeFunctionalityUnavailable: "Stammbaumfunktionalität ist derzeit nicht verfügbar",
+                maleNotFound: "Konnte Rüdendaten nicht finden",
+                errorShowingPedigree: "Beim Anzeigen des Stammbaums ist ein Fehler aufgetreten",
+                combinedParents: "Kombinierte Eltern"
             }
         };
     }
@@ -442,12 +490,6 @@ class ZoekReu {
         const rassen = [...new Set(reuen.map(r => r.ras).filter(Boolean))].sort();
         
         content.innerHTML = `
-            <div class="alert alert-warning">
-                <i class="bi bi-tools"></i>
-                <strong>${t('inDevelopment')}</strong><br>
-                ${t('devMessage')}
-            </div>
-            
             <h5 class="mb-4">
                 <i class="bi bi-search text-purple"></i> ${t('title')}
             </h5>
@@ -470,7 +512,7 @@ class ZoekReu {
                                            autocomplete="off">
                                     <div class="autocomplete-dropdown" id="teefDropdown" style="display: none;">
                                         <div class="autocomplete-header">
-                                            <small class="text-muted">Teven gevonden: <span id="teefCount">0</span></small>
+                                            <small class="text-muted">${t('femalesFound')}: <span id="teefCount">0</span></small>
                                         </div>
                                         <div class="autocomplete-results" id="teefResults"></div>
                                     </div>
@@ -479,7 +521,7 @@ class ZoekReu {
                             <div id="selectedTeefInfo" class="small p-3 bg-light rounded">
                                 <div class="text-muted text-center">
                                     <i class="bi bi-gender-female"></i>
-                                    <p class="mb-0 mt-2">Selecteer een teef om te beginnen</p>
+                                    <p class="mb-0 mt-2">${t('selectFemaleToStart')}</p>
                                 </div>
                             </div>
                         </div>
@@ -526,7 +568,7 @@ class ZoekReu {
                                         <div class="col-md-6">
                                             <div class="d-flex align-items-end h-100">
                                                 <button class="btn btn-outline-secondary btn-sm" id="clearDateBtn">
-                                                    <i class="bi bi-x-lg"></i> Wis datum
+                                                    <i class="bi bi-x-lg"></i> ${t('back')} datum
                                                 </button>
                                             </div>
                                         </div>
@@ -576,7 +618,7 @@ class ZoekReu {
                     <div id="searchResults" class="text-center py-4">
                         <div class="text-muted">
                             <i class="bi bi-search" style="font-size: 2rem;"></i>
-                            <p class="mt-2">Gebruik de zoekcriteria om reuen te vinden</p>
+                            <p class="mt-2">${t('useSearchCriteria')}</p>
                         </div>
                     </div>
                 </div>
@@ -747,13 +789,13 @@ class ZoekReu {
         if (teven.length === 0) {
             resultsDiv.innerHTML = `
                 <div class="autocomplete-item text-muted p-3 text-center">
-                    <i class="bi bi-search me-2"></i>Geen teven gevonden
+                    <i class="bi bi-search me-2"></i>${t('noFemalesFound')}
                     <br>
-                    <small>Typ een andere naam of gebruik spatie om te combineren</small>
+                    <small>${t('refineSearch')}</small>
                 </div>
                 <div class="autocomplete-item" data-manual="${searchTerm}">
                     <div class="fw-bold text-primary">
-                        <i class="bi bi-plus-circle me-2"></i>Handmatig invullen
+                        <i class="bi bi-plus-circle me-2"></i>${t('manualEntry')}
                     </div>
                     <div class="small text-muted">
                         "${searchTerm}"
@@ -789,8 +831,8 @@ class ZoekReu {
                     <div class="autocomplete-item" data-id="${teef.id}" tabindex="0">
                         <div class="fw-bold">${displayName}</div>
                         <div class="small text-muted">
-                            ${teef.stamboomnr ? 'Stamboom: ' + teef.stamboomnr : ''}
-                            ${teef.ras ? ' • Ras: ' + teef.ras : ''}
+                            ${teef.stamboomnr ? t('pedigree') + ': ' + teef.stamboomnr : ''}
+                            ${teef.ras ? ' • ' + t('breed') + ': ' + teef.ras : ''}
                         </div>
                     </div>
                 `;
@@ -799,7 +841,7 @@ class ZoekReu {
             if (teven.length > 15) {
                 resultsDiv.innerHTML += `
                     <div class="autocomplete-item text-muted p-2 text-center">
-                        <small>En nog ${teven.length - 15} meer... blijf typen om te verfijnen</small>
+                        <small>${t('moreResults').replace('meer...', `En nog ${teven.length - 15} ${t('moreResults')}`)}</small>
                     </div>
                 `;
             }
@@ -1030,15 +1072,15 @@ class ZoekReu {
                 <h6>${teef.naam}</h6>
                 <div class="alert alert-warning small p-2 mb-2">
                     <i class="bi bi-exclamation-triangle me-1"></i>
-                    <small>Handmatig ingevoerde teef</small>
+                    <small>${t('manuallyEnteredFemale')}</small>
                 </div>
                 <div class="text-muted">
-                    <p class="small mb-2"><i class="bi bi-info-circle"></i> COI berekening is niet beschikbaar voor handmatige invoer.</p>
+                    <p class="small mb-2"><i class="bi bi-info-circle"></i> ${t('coiNotAvailable')}.</p>
                 </div>
                 <hr class="my-2">
                 <div class="text-end">
                     <button class="btn btn-sm btn-outline-purple" id="clearTeefBtn">
-                        <i class="bi bi-x"></i> Wis selectie
+                        <i class="bi bi-x"></i> ${t('back')} selectie
                     </button>
                 </div>
             `;
@@ -1054,9 +1096,9 @@ class ZoekReu {
             }
             
             infoDiv.innerHTML = `
-                <h6 class="mb-2">${teef.naam || 'Onbekend'} ${teef.kennelnaam ? teef.kennelnaam : ''}</h6>
+                <h6 class="mb-2">${teef.naam || t('unknown')} ${teef.kennelnaam ? teef.kennelnaam : ''}</h6>
                 <div class="mb-3">
-                    <strong>Stamboom:</strong> ${teef.stamboomnr || '-'}
+                    <strong>${t('pedigree')}:</strong> ${teef.stamboomnr || '-'}
                     <br>
                     <strong>${t('coi6Gen')}:</strong> <span class="${this.getCOIColor(parseFloat(teefCOI.coi6Gen))}">${teefCOI.coi6Gen}%</span>
                 </div>
@@ -1083,7 +1125,7 @@ class ZoekReu {
                 <div class="row mb-2">
                     <div class="col-6">
                         <div class="small">
-                            <strong>Ogen:</strong> 
+                            <strong>${t('ogen')}:</strong> 
                             <span class="${this.getHealthColor(teef.ogen, 'ogen')}">
                                 ${teef.ogen || '?'}
                             </span>
@@ -1091,7 +1133,7 @@ class ZoekReu {
                     </div>
                     <div class="col-6">
                         <div class="small">
-                            <strong>Dandy Walker:</strong> 
+                            <strong>${t('dandyWalker')}:</strong> 
                             <span class="${this.getHealthColor(teef.dandyWalker, 'dw')}">
                                 ${teef.dandyWalker || '?'}
                             </span>
@@ -1102,7 +1144,7 @@ class ZoekReu {
                 <div class="row mb-3">
                     <div class="col-6">
                         <div class="small">
-                            <strong>Tgaa:</strong> 
+                            <strong>${t('schildklier')}:</strong> 
                             <span class="${this.getHealthColor(teef.schildklier, 'schildklier')}">
                                 ${teef.schildklier || '?'}
                             </span>
@@ -1110,7 +1152,7 @@ class ZoekReu {
                     </div>
                     <div class="col-6">
                         <div class="small">
-                            <strong>ED:</strong> 
+                            <strong>${t('elleboogdysplasie')}:</strong> 
                             <span class="${this.getHealthColor(teef.elleboogdysplasie, 'ed')}">
                                 ${teef.elleboogdysplasie || '?'}
                             </span>
@@ -1121,7 +1163,7 @@ class ZoekReu {
                 <hr class="my-2">
                 <div class="text-end">
                     <button class="btn btn-sm btn-outline-purple" id="clearTeefBtn">
-                        <i class="bi bi-x"></i> Wis selectie
+                        <i class="bi bi-x"></i> ${t('back')} selectie
                     </button>
                 </div>
             `;
@@ -1132,7 +1174,7 @@ class ZoekReu {
             infoDiv.innerHTML = `
                 <div class="text-muted text-center">
                     <i class="bi bi-gender-female"></i>
-                    <p class="mb-0 mt-2">Selecteer een teef om te beginnen</p>
+                    <p class="mb-0 mt-2">${t('selectFemaleToStart')}</p>
                 </div>
             `;
             
@@ -1296,9 +1338,9 @@ class ZoekReu {
         resultsDiv.innerHTML = `
             <div class="text-center py-4">
                 <div class="spinner-border text-purple" role="status">
-                    <span class="visually-hidden">Zoeken...</span>
+                    <span class="visually-hidden">${t('searchingMales')}</span>
                 </div>
-                <p class="mt-3">Zoeken naar geschikte reuen...</p>
+                <p class="mt-3">${t('searchingMales')}</p>
             </div>
         `;
         
@@ -1372,7 +1414,7 @@ class ZoekReu {
                         </table>
                     </div>
                     <div class="text-muted text-center mt-3">
-                        <small>${reuen.length} reuen gevonden</small>
+                        <small>${reuen.length} ${t('searchButton').toLowerCase()} ${t('femalesFound').toLowerCase()}</small>
                         ${criteria.maxCOI > 0 ? `<br><small>Maximale COI 6g: ${criteria.maxCOI}%</small>` : ''}
                         ${this.selectedTeef && !this.selectedTeef.manualEntry ? `<br><small>Toont combinatie COI 6g met ${this.selectedTeef.naam}</small>` : ''}
                         <br><small><i class="bi bi-info-circle"></i> ${t('pedigreeTooltip')}</small>
@@ -1426,7 +1468,7 @@ class ZoekReu {
                 console.log('✅ StamboomManager geïnitialiseerd vanuit ZoekReu');
             } catch (error) {
                 console.error('❌ Fout bij initialiseren StamboomManager:', error);
-                this.showAlert('Stamboomfunctionaliteit is niet beschikbaar op dit moment.', 'warning');
+                this.showAlert(this.t('pedigreeFunctionalityUnavailable'), 'warning');
                 return;
             }
         }
@@ -1434,7 +1476,7 @@ class ZoekReu {
         const reu = this.allHonden.find(h => h.id == reuId);
         
         if (!reu) {
-            this.showAlert('Kon reu gegevens niet vinden.', 'warning');
+            this.showAlert(this.t('maleNotFound'), 'warning');
             return;
         }
         
@@ -1443,7 +1485,7 @@ class ZoekReu {
             console.log('✅ Stamboom getoond voor:', reu.naam);
         } catch (error) {
             console.error('❌ Fout bij tonen stamboom:', error);
-            this.showAlert('Er ging iets mis bij het tonen van de stamboom.', 'danger');
+            this.showAlert(this.t('errorShowingPedigree'), 'danger');
         }
     }
     
