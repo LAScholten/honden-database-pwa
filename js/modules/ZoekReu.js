@@ -51,10 +51,9 @@ class ZoekReu {
                 back: "Terug",
                 noResults: "Geen reuen gevonden die voldoen aan uw criteria",
                 tryAgain: "Probeer andere zoekcriteria",
-                coiResult: "Combinatie COI",
+                coiResult: "Combinatie<br>COI",
                 coi6Gen: "COI 6 gen",
                 coiAllGen: "COI 25 gen",
-                individualCOI: "Individuele COI",
                 healthOptions: {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
                     patellaluxatie: ["0", "1", "2", "3", "Niet getest"],
@@ -104,16 +103,15 @@ class ZoekReu {
                 },
                 resultColumns: {
                     naam: "Naam",
-                    geboortedatum: "Geboortedatum",
+                    geboortedatum: "Geboorte<br>datum",
                     hd: "HD",
                     pl: "PL",
                     ogen: "Ogen",
-                    dw: "Dandy Walker",
+                    dw: "Dandy<br>Walker",
                     schildklier: "Tgaa",
                     ed: "ED",
                     locatie: "Locatie",
-                    coi: "Combinatie COI",
-                    individualCoi: "Individueel"
+                    coi: "Combinatie<br>COI"
                 },
                 unknown: "Onbekend",
                 notTested: "Niet getest",
@@ -159,10 +157,9 @@ class ZoekReu {
                 back: "Back",
                 noResults: "No males found matching your criteria",
                 tryAgain: "Try different search criteria",
-                coiResult: "Combination COI",
+                coiResult: "Combination<br>COI",
                 coi6Gen: "COI 6 gen",
                 coiAllGen: "COI 25 gen",
-                individualCOI: "Individual COI",
                 healthOptions: {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
                     patellaluxatie: ["0", "1", "2", "3", "Not tested"],
@@ -212,16 +209,15 @@ class ZoekReu {
                 },
                 resultColumns: {
                     naam: "Name",
-                    geboortedatum: "Birth Date",
+                    geboortedatum: "Birth<br>Date",
                     hd: "HD",
                     pl: "PL",
                     ogen: "Eyes",
-                    dw: "Dandy Walker",
+                    dw: "Dandy<br>Walker",
                     schildklier: "Tgaa",
                     ed: "ED",
                     locatie: "Location",
-                    coi: "Combination COI",
-                    individualCoi: "Individual"
+                    coi: "Combination<br>COI"
                 },
                 unknown: "Unknown",
                 notTested: "Not tested",
@@ -265,12 +261,11 @@ class ZoekReu {
                     "Bewertungen und Erfahrungsberichte"
                 ],
                 back: "Zurück",
-                noResults: "Keine Rüden gefunden, die Ihren Kriterien entsprechen",
+                noResults: "Keine Rüden gefonden, die Ihren Kriterien entsprechen",
                 tryAgain: "Versuchen Sie andere Suchkriterien",
-                coiResult: "Kombination COI",
+                coiResult: "Kombination<br>COI",
                 coi6Gen: "COI 6 gen",
                 coiAllGen: "COI 25 gen",
-                individualCOI: "Individuelle COI",
                 healthOptions: {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
                     patellaluxatie: ["0", "1", "2", "3", "Niet getestet"],
@@ -320,16 +315,15 @@ class ZoekReu {
                 },
                 resultColumns: {
                     naam: "Name",
-                    geboortedatum: "Geburtsdatum",
+                    geboortedatum: "Geburts<br>datum",
                     hd: "HD",
                     pl: "PL",
                     ogen: "Augen",
-                    dw: "Dandy Walker",
+                    dw: "Dandy<br>Walker",
                     schildklier: "Tgaa",
                     ed: "ED",
                     locatie: "Standort",
-                    coi: "Kombination COI",
-                    individualCoi: "Individuell"
+                    coi: "Kombination<br>COI"
                 },
                 unknown: "Unbekannt",
                 notTested: "Niet getestet",
@@ -1159,17 +1153,12 @@ class ZoekReu {
             
             return {
                 coi6Gen: Math.min(combo6, 100).toFixed(1),
-                coiAllGen: Math.min(combo25, 100).toFixed(1),
-                individualReu: reuCOI // Sla individuele COI van reu op voor weergave
+                coiAllGen: Math.min(combo25, 100).toFixed(1)
             };
             
         } catch (error) {
             console.error('Fout bij combo COI berekening:', error);
-            return { 
-                coi6Gen: '0.0', 
-                coiAllGen: '0.0',
-                individualReu: { coi6Gen: '0.0', coiAllGen: '0.0' }
-            };
+            return { coi6Gen: '0.0', coiAllGen: '0.0' };
         }
     }
     
@@ -1273,7 +1262,6 @@ class ZoekReu {
                                     <th>${t('resultColumns').ed}</th>
                                     <th>${t('resultColumns').locatie}</th>
                                     <th>${t('resultColumns').coi}</th>
-                                    <th>${t('resultColumns').individualCoi}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1308,7 +1296,6 @@ class ZoekReu {
                 
                 // Sla COI waarden op in reu object voor latere weergave
                 reu._coiData = {
-                    individual: comboCOI.individualReu || { coi6Gen: '0.0', coiAllGen: '0.0' },
                     combo: comboCOI,
                     passesFilter: comboValue <= maxCOI
                 };
@@ -1319,7 +1306,6 @@ class ZoekReu {
             } catch (error) {
                 console.error(`Fout bij COI berekening reu ${reu.id}:`, error);
                 reu._coiData = {
-                    individual: { coi6Gen: '0.0', coiAllGen: '0.0' },
                     combo: { coi6Gen: '0.0', coiAllGen: '0.0' },
                     passesFilter: false
                 };
@@ -1852,12 +1838,43 @@ class ZoekReu {
                 try {
                     const date = this.parseHondenDate(dateString);
                     if (date) {
-                        return date.toLocaleDateString(this.currentLang);
+                        return date.toLocaleDateString(this.currentLang, { day: '2-digit', month: '2-digit', year: 'numeric' });
                     }
                     return dateString;
                 } catch (e) {
                     return dateString;
                 }
+            };
+            
+            // Formatteer speciale waarden voor compacte weergave
+            const formatTgaa = (value) => {
+                if (!value || value === '' || value === '?' || value === 'Onbekend') return '?';
+                const lowerValue = value.toLowerCase().trim();
+                if (lowerValue.includes('negatief') || lowerValue === 'neg' || lowerValue === 'negative') return 'Neg';
+                if (lowerValue.includes('positief') || lowerValue === 'pos' || lowerValue === 'positive') return 'Pos';
+                if (lowerValue.includes('niet getest') || lowerValue === 'niet getest' || lowerValue === 'not tested') return 'NG';
+                return value.substring(0, 3);
+            };
+            
+            const formatOgen = (value) => {
+                if (!value || value === '' || value === '?' || value === 'Onbekend') return '?';
+                const lowerValue = value.toLowerCase().trim();
+                if (lowerValue === 'vrij' || lowerValue === 'free') return 'Vrij';
+                if (lowerValue.includes('dist') || lowerValue === 'distichiasis') return 'Dist';
+                if (lowerValue === 'overig' || lowerValue === 'other') return 'Over';
+                if (lowerValue.includes('niet onderzocht') || lowerValue.includes('not examined')) return 'NO';
+                return value.substring(0, 4);
+            };
+            
+            const formatDW = (value) => {
+                if (!value || value === '' || value === '?' || value === 'Onbekend') return '?';
+                const lowerValue = value.toLowerCase().trim();
+                if (lowerValue.includes('vrij op dna') || lowerValue.includes('vrij dna')) return 'VrDNA';
+                if (lowerValue.includes('vrij op ouders') || lowerValue.includes('vrij ouders')) return 'VrOud';
+                if (lowerValue.includes('drager') || lowerValue.includes('carrier')) return 'Drag';
+                if (lowerValue.includes('niet getest') || lowerValue.includes('not tested')) return 'NG';
+                if (lowerValue.includes('lijder') || lowerValue.includes('affected')) return 'Lijdr';
+                return value.substring(0, 5);
             };
             
             // Toon naam en kennelnaam zonder haakjes: "Naam Kennelnaam"
@@ -1867,56 +1884,42 @@ class ZoekReu {
             
             // Haal COI data op
             let comboCOI = { coi6Gen: '0.0', coiAllGen: '0.0' };
-            let individualCOI = { coi6Gen: '0.0', coiAllGen: '0.0' };
             
             if (showCOIColumn && reu._coiData) {
                 comboCOI = reu._coiData.combo || { coi6Gen: '0.0', coiAllGen: '0.0' };
-                individualCOI = reu._coiData.individual || { coi6Gen: '0.0', coiAllGen: '0.0' };
-            } else if (this.coiCalculator && reu.id) {
-                // Als geen COI filter maar wel COI calculator, bereken individuele COI
-                try {
-                    individualCOI = this.coiCalculator.calculateCOI(reu.id);
-                } catch (error) {
-                    console.error('Fout bij individuele COI berekening reu:', error);
-                }
             }
             
             return `
                 <tr>
-                    <td>${displayName}</td>
-                    <td><small>${formatDate(reu.geboortedatum)}</small></td>
-                    <td class="${this.getHealthColor(reu.heupdysplasie, 'hd')}">
+                    <td class="small">${displayName}</td>
+                    <td class="small text-center">${formatDate(reu.geboortedatum)}</td>
+                    <td class="${this.getHealthColor(reu.heupdysplasie, 'hd')} text-center">
                         ${formatValue(reu.heupdysplasie)}
                     </td>
-                    <td class="${this.getHealthColor(reu.patella, 'pl')}">
+                    <td class="${this.getHealthColor(reu.patella, 'pl')} text-center">
                         ${formatValue(reu.patella)}
                     </td>
-                    <td class="${this.getHealthColor(reu.ogen, 'ogen')}">
-                        ${formatValue(reu.ogen)}
+                    <td class="${this.getHealthColor(reu.ogen, 'ogen')} text-center">
+                        ${formatOgen(reu.ogen)}
                     </td>
-                    <td class="${this.getHealthColor(reu.dandyWalker, 'dw')}">
-                        ${formatValue(reu.dandyWalker)}
+                    <td class="${this.getHealthColor(reu.dandyWalker, 'dw')} text-center">
+                        ${formatDW(reu.dandyWalker)}
                     </td>
-                    <td class="${this.getHealthColor(reu.schildklier, 'schildklier')}">
-                        ${formatValue(reu.schildklier)}
+                    <td class="${this.getHealthColor(reu.schildklier, 'schildklier')} text-center">
+                        ${formatTgaa(reu.schildklier)}
                     </td>
-                    <td class="${this.getHealthColor(reu.elleboogdysplasie, 'ed')}">
+                    <td class="${this.getHealthColor(reu.elleboogdysplasie, 'ed')} text-center">
                         ${formatValue(reu.elleboogdysplasie)}
                     </td>
-                    <td><small>${reu.land || ''}</small></td>
-                    <td class="${this.getCOIColor(parseFloat(comboCOI.coiAllGen))}">
+                    <td class="small text-center">${reu.land || ''}</td>
+                    <td class="${this.getCOIColor(parseFloat(comboCOI.coiAllGen))} text-center">
                         ${showCOIColumn ? `
                             <strong>${comboCOI.coiAllGen}%</strong>
                             <br>
-                            <small class="text-muted">(${comboCOI.coi6Gen}% 6g)</small>
+                            <small class="text-muted">${comboCOI.coi6Gen}%</small>
                         ` : `
                             <span class="text-muted">-</span>
                         `}
-                    </td>
-                    <td class="${this.getCOIColor(parseFloat(individualCOI.coiAllGen))}">
-                        ${individualCOI.coiAllGen}%
-                        <br>
-                        <small class="text-muted">(${individualCOI.coi6Gen}% 6g)</small>
                     </td>
                 </tr>
             `;
@@ -2022,9 +2025,31 @@ style.textContent = `
     .text-muted { color: #6c757d !important; }
     .text-secondary { color: #6c757d !important; }
     
+    /* Tabel styling voor compacte weergave */
     .table-sm th, .table-sm td {
-        padding: 0.3rem 0.5rem;
-        font-size: 0.875rem;
+        padding: 0.2rem 0.3rem;
+        font-size: 0.8rem;
+        vertical-align: middle;
+    }
+    
+    .table th {
+        white-space: nowrap;
+        font-weight: 600;
+        background-color: #f8f9fa;
+    }
+    
+    .table th.text-center {
+        text-align: center;
+    }
+    
+    .table td.text-center {
+        text-align: center;
+    }
+    
+    /* Compacte tekst in tabel */
+    .table .small {
+        font-size: 0.75rem;
+        line-height: 1.2;
     }
     
     /* Custom scrollbar voor dropdown */
@@ -2095,10 +2120,11 @@ style.textContent = `
     td.text-orange { font-weight: bold; }
     td.text-danger { font-weight: bold; }
     
-    /* Tabel kolommen voor COI */
-    .table th:nth-last-child(2),
-    .table th:nth-last-child(1) {
-        background-color: #f8f9fa;
+    /* Multiline table headers */
+    .table th br {
+        display: block;
+        content: "";
+        margin-top: 2px;
     }
 `;
 document.head.appendChild(style);
