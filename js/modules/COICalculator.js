@@ -108,7 +108,7 @@ class COICalculator {
                         if (!processed.has(routeKey)) {
                             processed.add(routeKey);
                             
-                            // Basisbijdrage: (0.5)^(n+m)
+                            // ✅ CRUCIAAL: Officiële formule is (0.5)^(n+m)
                             const baseContribution = Math.pow(0.5, n + m);
                             
                             // Totale bijdrage met IK van voorouder
@@ -255,7 +255,7 @@ class COICalculator {
             }
         }
         
-        console.log(`\nAhnen max.: ${Math.pow(2, 6) - 2 = 126}`);
+        console.log(`\nAhnen max.: ${Math.pow(2, 6) - 2}`); // = 126
         console.log(`Gleiche Ahnen: ${common.size}`);
     }
 
@@ -308,11 +308,27 @@ class COICalculator {
         // Totaal
         console.log(`\n3. Totaal zonder IK:`);
         console.log(`   Officieel: 7.42188%`);
-        console.log(`   Ons: [berekening volgt]`);
+        
+        const withoutIK = this._calculateOfficialWithoutIK(637, 6);
+        console.log(`   Ons: ${(withoutIK * 100).toFixed(5)}%`);
         
         console.log(`\n4. Totaal met IK:`);
         console.log(`   Officieel: 7.70369%`);
-        console.log(`   Ons: [berekening volgt]`);
+        
+        const withIK = this._calculateOfficialWithIK(637, 6);
+        console.log(`   Ons: ${(withIK * 100).toFixed(5)}%`);
+    }
+
+    // ✅ EENVOUDIGE INTERFACE VOOR JOUW BESTAANDE CODE
+    calculateSimpleCOI(dogId) {
+        // Deze functie werkt met jouw bestaande StamboomManager
+        const result = this.calculateCOI(dogId);
+        
+        // Retourneer het formaat dat StamboomManager verwacht
+        return {
+            coi6Gen: result.coi6Gen,
+            coiAllGen: result.coiAllGen
+        };
     }
 }
 
