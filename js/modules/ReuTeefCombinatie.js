@@ -187,8 +187,8 @@ class ReuTeefCombinatie {
                 noDogsFound: "No dogs found",
                 found: "found",
                 futurePuppyName: "Future Puppy",
-                futurePuppyDescription: "Prediction of combination {father} × {mother}",
-                futurePuppyTitle: "Pedigree for future puppy from combination {father} × {mother}",
+                futurePuppyDescription: "Prediction of combination {reu} × {teef}",
+                futurePuppyTitle: "Pedigree for future puppy from combination {reu} × {teef}",
                 predictedPedigree: "Predicted pedigree",
                 combinedParents: "Combination parents",
                 // COI labels
@@ -305,8 +305,8 @@ class ReuTeefCombinatie {
                 noDogsFound: "Keine Hunde gefunden",
                 found: "gefunden",
                 futurePuppyName: "Zukünftiger Welpe",
-                futurePuppyDescription: "Vorhersage der Kombination {father} × {mother}",
-                futurePuppyTitle: "Ahnentafel für zukünftigen Welpen aus Kombination {father} × {mother}",
+                futurePuppyDescription: "Vorhersage der Kombination {reu} × {teef}",
+                futurePuppyTitle: "Ahnentafel für zukünftigen Welpen aus Kombination {reu} × {teef}",
                 predictedPedigree: "Vorhergesagter Ahnentafel",
                 combinedParents: "Kombination Eltern",
                 // COI labels
