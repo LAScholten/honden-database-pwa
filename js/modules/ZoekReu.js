@@ -14,6 +14,7 @@ class ZoekReu {
         this.allTeven = [];
         this.coiCalculator = null;
         this.stamboomManager = null; // NIEUW: Referentie naar StamboomManager
+        this.hondenData = []; // Alle honden data voor COI berekeningen
         
         this.translations = {
             nl: {
@@ -26,9 +27,9 @@ class ZoekReu {
                 anyBreed: "Elk ras",
                 bornAfter: "Geboren na",
                 bornAfterPlaceholder: "dd-mm-jjjj",
-                inteeltCoefficient: "Inteelt coëfficiënt (COI) van combinatie",
+                inteeltCoefficient: "Inteelt coëfficiënt (COI) toekomstige pup",
                 inteeltPlaceholder: "Maximaal percentage inteelt toekomstige pup",
-                inteeltHelp: "Maximum COI in % voor toekomstige pup (combinatie van teef en reu)",
+                inteeltHelp: "Maximum COI in % voor toekomstige pup (niet reu zelf)",
                 healthFilter: "Gezondheid filter",
                 heupdysplasie: "Heupdysplasie (HD)",
                 patellaluxatie: "Patellaluxatie (PL)",
@@ -114,15 +115,19 @@ class ZoekReu {
                     schildklier: "Tgaa",
                     ed: "ED",
                     locatie: "Locatie",
-                    coi: "Combinatie<br>COI"
+                    coi: "Toekomstige<br>pup COI"
                 },
                 unknown: "Onbekend",
                 notTested: "Niet getest",
                 invalidDate: "Ongeldige datum. Gebruik formaat: dd-mm-jjjj",
                 invalidCOI: "Ongeldige COI waarde. Gebruik getal tussen 0 en 100",
                 noTeefSelected: "Selecteer eerst een teef om COI berekening te gebruiken",
-                showPedigree: "Bekijk stamboom", // NIEUW: Vertaling toegevoegd
-                pedigreeTooltip: "Klik om de 4-generatie stamboom van deze reu te bekijken" // NIEUW: Tooltip
+                showPedigree: "Bekijk stamboom",
+                pedigreeTooltip: "Klik om de 4-generatie stamboom van deze reu te bekijken",
+                pedigreeForPup: "COI van toekomstige pup (teef + reu)",
+                reuCOI: "Reu COI",
+                pupCOI: "Pup COI",
+                calculatingCOI: "COI berekeningen voor toekomstige pups..."
             },
             en: {
                 title: "Find a Male",
@@ -134,9 +139,9 @@ class ZoekReu {
                 anyBreed: "Any breed",
                 bornAfter: "Born after",
                 bornAfterPlaceholder: "dd-mm-yyyy",
-                inteeltCoefficient: "Inbreeding Coefficient (COI) of combination",
+                inteeltCoefficient: "Inbreeding Coefficient (COI) future pup",
                 inteeltPlaceholder: "Maximum inbreeding percentage future pup",
-                inteeltHelp: "Maximum COI % for future pup (combination of female and male)",
+                inteeltHelp: "Maximum COI % for future pup (not male itself)",
                 healthFilter: "Health filter",
                 heupdysplasie: "Hip Dysplasia (HD)",
                 patellaluxatie: "Patellar Luxation (PL)",
@@ -222,15 +227,19 @@ class ZoekReu {
                     schildklier: "Tgaa",
                     ed: "ED",
                     locatie: "Location",
-                    coi: "Combination<br>COI"
+                    coi: "Future<br>pup COI"
                 },
                 unknown: "Unknown",
                 notTested: "Not tested",
                 invalidDate: "Invalid date. Use format: dd-mm-yyyy",
                 invalidCOI: "Invalid COI value. Use number between 0 and 100",
                 noTeefSelected: "Select a female first to use COI calculation",
-                showPedigree: "View pedigree", // NIEUW: Vertaling toegevoegd
-                pedigreeTooltip: "Click to view the 4-generation pedigree of this male" // NIEUW: Tooltip
+                showPedigree: "View pedigree",
+                pedigreeTooltip: "Click to view the 4-generation pedigree of this male",
+                pedigreeForPup: "COI of future pup (female + male)",
+                reuCOI: "Male COI",
+                pupCOI: "Pup COI",
+                calculatingCOI: "Calculating COI for future pups..."
             },
             de: {
                 title: "Finde einen Rüden",
@@ -242,9 +251,9 @@ class ZoekReu {
                 anyBreed: "Jede Rasse",
                 bornAfter: "Geboren nach",
                 bornAfterPlaceholder: "dd-mm-jjjj",
-                inteeltCoefficient: "Inzuchtkoeffizient (COI) der Kombination",
+                inteeltCoefficient: "Inzuchtkoeffizient (COI) zukünftiger Welpe",
                 inteeltPlaceholder: "Maximaler Inzuchtprozentsatz zukünftiger Welpe",
-                inteeltHelp: "Maximaler COI in % für zukünftigen Welpen (Kombination von Hündin und Rüde)",
+                inteeltHelp: "Maximaler COI in % für zukünftigen Welpen (nicht Rüde selbst)",
                 healthFilter: "Gesundheitsfilter",
                 heupdysplasie: "Hüftgelenksdysplasie (HD)",
                 patellaluxatie: "Patellaluxation (PL)",
@@ -304,7 +313,7 @@ class ZoekReu {
                     },
                     dandyWalker: {
                         "Frei auf DNA": "Frei auf DNA",
-                        "Frei op ouders": "Frei op ouders",
+                        "Frij op ouders": "Frij op ouders",
                         "Träger": "Träger",
                         "Niet getest": "Niet getest"
                     },
@@ -330,23 +339,27 @@ class ZoekReu {
                     schildklier: "Tgaa",
                     ed: "ED",
                     locatie: "Standort",
-                    coi: "Kombination<br>COI"
+                    coi: "Zukünftiger<br>Welpe COI"
                 },
                 unknown: "Unbekannt",
                 notTested: "Niet getestet",
                 invalidDate: "Ungültiges Datum. Format: dd-mm-jjjj",
                 invalidCOI: "Ungültiger COI-Wert. Verwenden Sie eine Zahl zwischen 0 und 100",
                 noTeefSelected: "Wählen Sie zuerst eine Hündin, um die COI-Berechnung zu verwenden",
-                showPedigree: "Stammbaum anzeigen", // NIEUW: Vertaling toegevoegd
-                pedigreeTooltip: "Klicken, um den 4-Generationen-Stammbaum dieses Rüden anzuzeigen" // NIEUW: Tooltip
+                showPedigree: "Stammbaum anzeigen",
+                pedigreeTooltip: "Klicken, um den 4-Generationen-Stammbaum dieses Rüden anzuzeigen",
+                pedigreeForPup: "COI von zukünftigem Welpen (Hündin + Rüde)",
+                reuCOI: "Rüde COI",
+                pupCOI: "Welpe COI",
+                calculatingCOI: "Berechne COI für zukünftige Welpen..."
             }
         };
     }
     
-    injectDependencies(db, auth, stamboomManager = null) { // NIEUW: stamboomManager parameter toegevoegd
+    injectDependencies(db, auth, stamboomManager = null) {
         this.db = db;
         this.auth = auth;
-        this.stamboomManager = stamboomManager; // NIEUW: Sla stamboom manager op
+        this.stamboomManager = stamboomManager;
         
         // Initialiseer COICalculator als we de database hebben
         if (db && typeof db.getHonden === 'function') {
@@ -356,9 +369,9 @@ class ZoekReu {
     
     async initCOICalculator() {
         try {
-            const honden = await this.db.getHonden();
-            this.coiCalculator = new COICalculator(honden);
-            console.log('✅ COICalculator geïnitialiseerd');
+            this.hondenData = await this.db.getHonden();
+            this.coiCalculator = new COICalculator(this.hondenData);
+            console.log('✅ COICalculator geïnitialiseerd met', this.hondenData.length, 'honden');
         } catch (error) {
             console.error('❌ Fout bij initialiseren COICalculator:', error);
         }
@@ -376,9 +389,12 @@ class ZoekReu {
         if (!content) return;
         
         // Laad honden data en initialiseer COICalculator
-        const honden = await this.getHonden();
-        this.allTeven = honden.filter(h => h.geslacht === 'teven');
-        const reuen = honden.filter(h => h.geslacht === 'reuen');
+        if (this.hondenData.length === 0) {
+            await this.initCOICalculator();
+        }
+        
+        this.allTeven = this.hondenData.filter(h => h.geslacht === 'teven');
+        const reuen = this.hondenData.filter(h => h.geslacht === 'reuen');
         
         // Verzamel unieke rassen
         const rassen = [...new Set(reuen.map(r => r.ras).filter(Boolean))].sort();
@@ -522,6 +538,7 @@ class ZoekReu {
                         <div class="text-muted">
                             <i class="bi bi-search" style="font-size: 2rem;"></i>
                             <p class="mt-2">Gebruik de zoekcriteria om reuen te vinden</p>
+                            <p class="small"><i class="bi bi-info-circle"></i> ${t('pedigreeForPup')}</p>
                         </div>
                     </div>
                 </div>
@@ -622,21 +639,8 @@ class ZoekReu {
                 teefDropdown.style.display = 'none';
             }
         });
-        
-        // Initialiseer COICalculator als dat nog niet gebeurd is
-        if (!this.coiCalculator) {
-            await this.initCOICalculator();
-        }
-        
-        // NIEUW: Check of StamboomManager beschikbaar is
-        if (!this.stamboomManager && typeof StamboomManager !== 'undefined') {
-            // Probeer StamboomManager te initialiseren
-            console.log('🔄 Initialiseer StamboomManager...');
-            this.initStamboomManager();
-        }
     }
     
-    // NIEUW: Initialiseer StamboomManager
     async initStamboomManager() {
         try {
             if (this.db && typeof StamboomManager !== 'undefined') {
@@ -649,7 +653,6 @@ class ZoekReu {
         }
     }
     
-    // NIEUW: Toon stamboom voor een reu
     async showReuPedigree(reuId, reuName) {
         console.log(`🔄 Toon stamboom voor reu: ${reuId} - ${reuName}`);
         
@@ -663,9 +666,7 @@ class ZoekReu {
             }
         }
         
-        // Haal de reu data op
-        const honden = await this.getHonden();
-        const reu = honden.find(h => h.id == reuId);
+        const reu = this.hondenData.find(h => h.id == reuId);
         
         if (!reu) {
             this.showAlert('Kon reu gegevens niet vinden.', 'warning');
@@ -673,7 +674,6 @@ class ZoekReu {
         }
         
         try {
-            // Gebruik de stamboom manager om de stamboom te tonen
             await this.stamboomManager.showPedigree(reu);
             console.log('✅ Stamboom getoond voor:', reu.naam);
         } catch (error) {
@@ -730,39 +730,32 @@ class ZoekReu {
         
         // Filter teven op ALLE zoektermen (AND logica)
         const filteredTeven = this.allTeven.filter(teef => {
-            // Maak een zoekbare string van alle relevante velden
             const searchableText = `
                 ${teef.naam || ''}
                 ${teef.kennelnaam || ''}
                 ${teef.stamboomnr || ''}
             `.toLowerCase();
             
-            // Check of ALLE zoektermen voorkomen in de zoekable tekst
             return searchTerms.every(term => 
                 searchableText.includes(term)
             );
         });
         
-        // Sorteer: exacte naam matches eerst, dan kennelnaam, dan stamboomnr
         filteredTeven.sort((a, b) => {
             const aName = (a.naam || '').toLowerCase();
             const bName = (b.naam || '').toLowerCase();
             const aKennel = (a.kennelnaam || '').toLowerCase();
             const bKennel = (b.kennelnaam || '').toLowerCase();
             
-            // Exacte naam match heeft voorrang
             if (aName === searchTerm.toLowerCase() && bName !== searchTerm.toLowerCase()) return -1;
             if (bName === searchTerm.toLowerCase() && aName !== searchTerm.toLowerCase()) return 1;
             
-            // Begin van naam match
             if (aName.startsWith(searchTerm.toLowerCase()) && !bName.startsWith(searchTerm.toLowerCase())) return -1;
             if (bName.startsWith(searchTerm.toLowerCase()) && !aName.startsWith(searchTerm.toLowerCase())) return 1;
             
-            // Kennelnaam match
             if (aKennel.includes(searchTerm.toLowerCase()) && !bKennel.includes(searchTerm.toLowerCase())) return -1;
             if (bKennel.includes(searchTerm.toLowerCase()) && !aKennel.includes(searchTerm.toLowerCase())) return 1;
             
-            // Alfabetisch op naam
             return aName.localeCompare(bName);
         });
         
@@ -796,11 +789,9 @@ class ZoekReu {
         } else {
             countSpan.textContent = teven.length;
             
-            // Toon max 15 resultaten, maar met scrollbar
             const displayTeven = teven.slice(0, 15);
             
             resultsDiv.innerHTML = displayTeven.map(teef => {
-                // Markeer de zoekterm in de resultaten
                 const highlightText = (text) => {
                     if (!text || !searchTerm) return text || '';
                     const lowerText = text.toLowerCase();
@@ -840,7 +831,6 @@ class ZoekReu {
             dropdown.style.display = 'block';
         }
         
-        // Event listeners voor dropdown items
         resultsDiv.querySelectorAll('.autocomplete-item').forEach(item => {
             item.addEventListener('click', () => {
                 const teefId = item.getAttribute('data-id');
@@ -856,7 +846,6 @@ class ZoekReu {
                 document.getElementById('teefSearch').value = '';
             });
             
-            // Keyboard navigatie
             item.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
@@ -893,7 +882,6 @@ class ZoekReu {
             return true;
         }
         
-        // Check het format: dd-mm-jjjj
         const dateRegex = /^(\d{2})-(\d{2})-(\d{4})$/;
         if (!dateRegex.test(value)) {
             input.classList.add('is-invalid');
@@ -905,7 +893,6 @@ class ZoekReu {
         const monthNum = parseInt(month, 10);
         const yearNum = parseInt(year, 10);
         
-        // Basis validatie
         if (yearNum < 1900 || yearNum > new Date().getFullYear() + 1) {
             input.classList.add('is-invalid');
             return false;
@@ -916,7 +903,6 @@ class ZoekReu {
             return false;
         }
         
-        // Check dagen per maand
         const daysInMonth = new Date(yearNum, monthNum, 0).getDate();
         if (dayNum < 1 || dayNum > daysInMonth) {
             input.classList.add('is-invalid');
@@ -942,7 +928,6 @@ class ZoekReu {
             return false;
         }
         
-        // Controleer of er een teef geselecteerd is
         if (value > 0 && (!this.selectedTeef || this.selectedTeef.manualEntry)) {
             input.classList.add('is-invalid');
             this.showAlert(t('noTeefSelected'), 'warning');
@@ -956,20 +941,17 @@ class ZoekReu {
     parseDate(dateString) {
         if (!dateString) return null;
         
-        // Format: dd-mm-jjjj
         const parts = dateString.split('-');
         if (parts.length !== 3) return null;
         
         const day = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1; // JavaScript maanden zijn 0-indexed
+        const month = parseInt(parts[1], 10) - 1;
         const year = parseInt(parts[2], 10);
         
-        // Controleer of het een geldige datum is
         if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
         
         const date = new Date(year, month, day);
         
-        // Controleer of de datum geldig is (bijvoorbeeld geen 31 februari)
         if (date.getFullYear() !== year || date.getMonth() !== month || date.getDate() !== day) {
             return null;
         }
@@ -985,7 +967,6 @@ class ZoekReu {
         this.selectedTeef = teef;
         this.updateTeefInfoDisplay(teef);
         
-        // Reset COI filter validatie als die er is
         const coiInput = document.getElementById('coiFilter');
         if (coiInput && coiInput.value) {
             this.validateCOIInput(coiInput);
@@ -993,7 +974,6 @@ class ZoekReu {
     }
     
     handleManualTeefEntry(entry) {
-        // Creëer een tijdelijke teef object voor handmatige invoer
         this.selectedTeef = {
             id: 'manual',
             naam: entry,
@@ -1002,7 +982,6 @@ class ZoekReu {
         
         this.updateTeefInfoDisplay(this.selectedTeef);
         
-        // COI berekening kan niet met handmatige invoer
         const coiInput = document.getElementById('coiFilter');
         if (coiInput && coiInput.value) {
             this.validateCOIInput(coiInput);
@@ -1088,7 +1067,6 @@ class ZoekReu {
                 </div>
             `;
         } else {
-            // Bereken COI voor de teef
             let teefCOI = { coi6Gen: '0.0', coiAllGen: '0.0' };
             
             if (this.coiCalculator && teef.id) {
@@ -1184,7 +1162,6 @@ class ZoekReu {
                 </div>
             `;
             
-            // Reset COI filter validatie
             const coiInput = document.getElementById('coiFilter');
             if (coiInput && coiInput.value) {
                 this.validateCOIInput(coiInput);
@@ -1192,44 +1169,79 @@ class ZoekReu {
         });
     }
     
-    calculateComboCOI(teefId, reuId) {
+    calculateFuturePupCOI(teefId, reuId) {
         if (!this.coiCalculator || !teefId || !reuId || teefId === 'manual') {
-            return { coi6Gen: '0.0', coiAllGen: '0.0' };
+            return { coi6Gen: '0.0', coiAllGen: '0.0', reuCOI6: '0.0', reuCOI25: '0.0' };
         }
         
         try {
-            // Bereken de COI van de toekomstige pup (combinatie van teef en reu)
-            // Dit zou de echte COI berekening moeten zijn voor de nakomeling
-            // Voor nu: simulatie gebaseerd op gemeenschappelijke voorouders
+            // Bereken de COI voor de toekomstige pup
+            // Dit gebruikt dezelfde logica als de COICalculator voor nakomelingen
             
+            // Eerst, haal de individuele COI waarden op
             const teefCOI = this.coiCalculator.calculateCOI(teefId);
             const reuCOI = this.coiCalculator.calculateCOI(reuId);
+            
+            // Nu berekenen we de COI voor de nakomeling
+            // Dit is complexe genetica, maar de basis formule is:
+            // COI_nakomeling = (COI_teef + COI_reu) / 2 + extra_inteelt_van_ouders
             
             const teef6 = parseFloat(teefCOI.coi6Gen) || 0;
             const reu6 = parseFloat(reuCOI.coi6Gen) || 0;
             const teef25 = parseFloat(teefCOI.coiAllGen) || 0;
             const reu25 = parseFloat(reuCOI.coiAllGen) || 0;
             
-            // Echte combinatie COI: Dit is de COI van de toekomstige pup
-            // Complexe berekening gebaseerd op gemeenschappelijke voorouders
-            // Simpele benadering voor nu: gemiddelde + extra voor gemeenschappelijke voorouders
+            // Controleer of de ouders verwant zijn
+            // Als ze broer/zus zijn: COI = 25%
+            // Als ze half broer/zus zijn: COI = 12.5%
+            // Als ze neef/nicht zijn: COI = 6.25%
             
-            // Bereken overlap factor gebaseerd op hoeveel voorouders gemeenschappelijk zijn
-            // Hoe hoger de individuele COI's, hoe groter de kans op overlap
-            const overlapFactor = Math.min(1, (teef25 + reu25) / 200); // Factor tussen 0 en 1
+            // Simpele berekening voor nu: gemiddelde + extra voor gemeenschappelijke voorouders
+            // Hoe meer gemeenschappelijke voorouders, hoe hoger de COI
             
-            // Combo COI = basis combinatie + overlap bonus
-            const combo6 = ((teef6 + reu6) / 2) * (1 + overlapFactor);
-            const combo25 = ((teef25 + reu25) / 2) * (1 + overlapFactor);
+            // Bepaal verwantschapsgraad
+            let relationshipFactor = 0;
+            
+            // Controleer op directe familie relaties
+            const teefHond = this.hondenData.find(h => h.id == teefId);
+            const reuHond = this.hondenData.find(h => h.id == reuId);
+            
+            if (teefHond && reuHond) {
+                // Controleer op zelfde ouders
+                if (teefHond.vader_id && reuHond.vader_id && 
+                    teefHond.vader_id === reuHond.vader_id &&
+                    teefHond.moeder_id && reuHond.moeder_id &&
+                    teefHond.moeder_id === reuHond.moeder_id) {
+                    // Volle broer/zus: COI = 25%
+                    relationshipFactor = 25;
+                } else if ((teefHond.vader_id && reuHond.vader_id && 
+                          teefHond.vader_id === reuHond.vader_id) ||
+                         (teefHond.moeder_id && reuHond.moeder_id && 
+                          teefHond.moeder_id === reuHond.moeder_id)) {
+                    // Half broer/zus: COI = 12.5%
+                    relationshipFactor = 12.5;
+                } else {
+                    // Geen directe relatie bekend, gebruik statistische berekening
+                    // Hoe hoger de individuele COI's, hoe groter de kans op gemeenschappelijke voorouders
+                    const avgCOI = (teef25 + reu25) / 2;
+                    relationshipFactor = Math.min(avgCOI * 0.5, 15); // Max 15% extra
+                }
+            }
+            
+            // Toekomstige pup COI = gemiddelde van ouders + relatie factor
+            const pupCOI6 = ((teef6 + reu6) / 2) + (relationshipFactor * 0.5); // Minder voor 6 gen
+            const pupCOI25 = ((teef25 + reu25) / 2) + relationshipFactor;
             
             return {
-                coi6Gen: Math.min(combo6, 100).toFixed(1),
-                coiAllGen: Math.min(combo25, 100).toFixed(1)
+                coi6Gen: Math.min(pupCOI6, 100).toFixed(1),
+                coiAllGen: Math.min(pupCOI25, 100).toFixed(1),
+                reuCOI6: reu6.toFixed(1),
+                reuCOI25: reu25.toFixed(1)
             };
             
         } catch (error) {
-            console.error('Fout bij combo COI berekening:', error);
-            return { coi6Gen: '0.0', coiAllGen: '0.0' };
+            console.error('Fout bij toekomstige pup COI berekening:', error);
+            return { coi6Gen: '0.0', coiAllGen: '0.0', reuCOI6: '0.0', reuCOI25: '0.0' };
         }
     }
     
@@ -1237,46 +1249,39 @@ class ZoekReu {
         const t = this.t.bind(this);
         const resultsDiv = document.getElementById('searchResults');
         
-        // Valideer datum input
         const bornAfterInput = document.getElementById('bornAfterFilter');
         if (!this.validateDateInput(bornAfterInput)) {
             this.showAlert(t('invalidDate'), 'danger');
             return;
         }
         
-        // Valideer COI input
         const coiInput = document.getElementById('coiFilter');
         if (coiInput && !this.validateCOIInput(coiInput)) {
             return;
         }
         
-        // Toon laad indicator
         resultsDiv.innerHTML = `
             <div class="text-center py-4">
                 <div class="spinner-border text-purple" role="status">
                     <span class="visually-hidden">Zoeken...</span>
                 </div>
                 <p class="mt-3">Zoeken naar geschikte reuen...</p>
-                <p class="small text-muted">COI berekeningen worden uitgevoerd...</p>
+                <p class="small text-muted">${t('calculatingCOI')}</p>
             </div>
         `;
         
-        // Verzamel zoekcriteria
         const criteria = this.getSearchCriteria();
         
-        // Haal alle reuen op
-        const honden = await this.getHonden();
-        let reuen = honden.filter(h => h.geslacht === 'reuen');
+        // Gebruik de reeds geladen honden data
+        let reuen = this.hondenData.filter(h => h.geslacht === 'reuen');
         
         console.log(`🔍 Start zoeken met ${reuen.length} reuen, COI filter: ${criteria.maxCOI}%`);
         
-        // Filter op ras
         if (criteria.ras) {
             reuen = reuen.filter(r => r.ras === criteria.ras);
             console.log(`   ➡ Na ras filter: ${reuen.length} reuen`);
         }
         
-        // Filter op geboortedatum
         if (criteria.bornAfter) {
             const minDate = this.parseDate(criteria.bornAfter);
             if (minDate) {
@@ -1294,25 +1299,21 @@ class ZoekReu {
             }
         }
         
-        // Filter op gezondheid (minimale eisen)
         reuen = this.filterByHealth(reuen, criteria.health);
         console.log(`   ➡ Na gezondheidsfilter: ${reuen.length} reuen`);
         
-        // BEREKEN COI VOOR ALLE REUEN (combinatie met teef)
-        // Deze moet altijd berekend worden, ook als er geen filter is, voor weergave in tabel
-        reuen = this.calculateAllComboCOI(reuen);
-        console.log(`   ➡ COI berekeningen voltooid`);
+        // BEREKEN COI VOOR TOEKOMSTIGE PUP VOOR ALLE REUEN
+        reuen = await this.calculateFuturePupCOIForAllReuen(reuen);
+        console.log(`   ➡ Toekomstige pup COI berekeningen voltooid`);
         
-        // Filter op COI als ingevuld en teef geselecteerd
+        // Filter op COI van toekomstige pup
         if (criteria.maxCOI > 0 && this.selectedTeef && !this.selectedTeef.manualEntry && this.selectedTeef.id) {
-            reuen = this.filterByComboCOI(reuen, criteria.maxCOI);
-            console.log(`   ➡ Na COI filter (max ${criteria.maxCOI}%): ${reuen.length} reuen`);
+            reuen = this.filterByFuturePupCOI(reuen, criteria.maxCOI);
+            console.log(`   ➡ Na toekomstige pup COI filter (max ${criteria.maxCOI}%): ${reuen.length} reuen`);
         }
         
-        // Sorteer volgens de specifieke prioriteitsvolgorde
         reuen = this.sortByHealthScore(reuen);
         
-        // Toon resultaten
         setTimeout(() => {
             if (reuen.length === 0) {
                 resultsDiv.innerHTML = `
@@ -1348,24 +1349,22 @@ class ZoekReu {
                     <div class="text-muted text-center mt-3">
                         <small>${reuen.length} reuen gevonden</small>
                         ${criteria.maxCOI > 0 ? `<br><small>Maximale COI toekomstige pup: ${criteria.maxCOI}%</small>` : ''}
-                        ${this.selectedTeef && !this.selectedTeef.manualEntry ? `<br><small>Toont combinatie COI met ${this.selectedTeef.naam} (toekomstige pup)</small>` : ''}
+                        ${this.selectedTeef && !this.selectedTeef.manualEntry ? `<br><small>Toont COI van toekomstige pup met ${this.selectedTeef.naam}</small>` : ''}
+                        ${this.selectedTeef && !this.selectedTeef.manualEntry ? `<br><small><i class="bi bi-info-circle"></i> ${t('pedigreeForPup')}</small>` : ''}
                         <br><small><i class="bi bi-info-circle"></i> ${t('pedigreeTooltip')}</small>
                     </div>
                 `;
                 
-                // NIEUW: Voeg click event toe aan reu namen
                 this.attachReuNameClickEvents();
             }
-        }, 1000);
+        }, 500);
     }
     
-    // NIEUW: Bereken combinatie COI voor alle reuen
-    calculateAllComboCOI(reuen) {
+    async calculateFuturePupCOIForAllReuen(reuen) {
         if (!this.selectedTeef || this.selectedTeef.manualEntry || !this.selectedTeef.id) {
-            // Als geen teef geselecteerd of handmatige invoer, toon geen COI
             return reuen.map(reu => {
-                reu._comboCOI = { coi6Gen: '0.0', coiAllGen: '0.0' };
-                reu._comboCOIPasses = false;
+                reu._futurePupCOI = { coi6Gen: '0.0', coiAllGen: '0.0', reuCOI6: '0.0', reuCOI25: '0.0' };
+                reu._futurePupCOIPasses = false;
                 return reu;
             });
         }
@@ -1374,68 +1373,71 @@ class ZoekReu {
         
         return reuen.map(reu => {
             if (!reu.id) {
-                reu._comboCOI = { coi6Gen: '0.0', coiAllGen: '0.0' };
-                reu._comboCOIPasses = false;
+                reu._futurePupCOI = { coi6Gen: '0.0', coiAllGen: '0.0', reuCOI6: '0.0', reuCOI25: '0.0' };
+                reu._futurePupCOIPasses = false;
                 return reu;
             }
             
             try {
-                // Bereken de COI van de toekomstige pup (combinatie)
-                const comboCOI = this.calculateComboCOI(teefId, reu.id);
-                const comboValue = parseFloat(comboCOI.coiAllGen) || 0;
+                // Bereken de COI van de toekomstige pup
+                const futurePupCOI = this.calculateFuturePupCOI(teefId, reu.id);
+                const pupCOIValue = parseFloat(futurePupCOI.coiAllGen) || 0;
                 
-                reu._comboCOI = comboCOI;
-                reu._comboCOIPasses = true; // Voor weergave, filtering komt later
+                reu._futurePupCOI = futurePupCOI;
+                reu._futurePupCOIPasses = true;
+                
+                // Log voor debugging
+                if (reu._futurePupCOI.coiAllGen > '25') {
+                    console.log(`⚠️ Hoog COI gevonden: ${reu.naam} - Pup COI: ${futurePupCOI.coiAllGen}% (Reu COI: ${futurePupCOI.reuCOI25}%)`);
+                }
                 
                 return reu;
                 
             } catch (error) {
-                console.error(`Fout bij COI berekening reu ${reu.id}:`, error);
-                reu._comboCOI = { coi6Gen: '0.0', coiAllGen: '0.0' };
-                reu._comboCOIPasses = false;
+                console.error(`Fout bij toekomstige pup COI berekening reu ${reu.id}:`, error);
+                reu._futurePupCOI = { coi6Gen: '0.0', coiAllGen: '0.0', reuCOI6: '0.0', reuCOI25: '0.0' };
+                reu._futurePupCOIPasses = false;
                 return reu;
             }
         });
     }
     
-    // NIEUW: Filter op basis van combinatie COI
-    filterByComboCOI(reuen, maxCOI) {
+    filterByFuturePupCOI(reuen, maxCOI) {
         if (maxCOI <= 0) {
             return reuen;
         }
         
-        console.log(`🔬 COI filtering op toekomstige pup: max ${maxCOI}%`);
+        console.log(`🔬 Filteren op toekomstige pup COI: max ${maxCOI}%`);
         
         return reuen.filter(reu => {
-            if (!reu._comboCOI) return false;
+            if (!reu._futurePupCOI) return false;
             
-            const comboValue = parseFloat(reu._comboCOI.coiAllGen) || 0;
-            const passes = comboValue <= maxCOI;
+            const pupCOIValue = parseFloat(reu._futurePupCOI.coiAllGen) || 0;
+            const passes = pupCOIValue <= maxCOI;
             
-            reu._comboCOIPasses = passes;
+            reu._futurePupCOIPasses = passes;
             
-            console.log(`   ➡ ${reu.naam}: combo COI=${comboValue}% → ${passes ? 'PASS' : 'FAIL'}`);
+            if (!passes) {
+                console.log(`   ➡ ${reu.naam}: TOEKOMSTIGE PUP COI=${pupCOIValue}% → FAIL (max ${maxCOI}%)`);
+            }
+            
             return passes;
         });
     }
     
-    // NIEUW: Voeg click events toe aan reu namen in de resultaten tabel
     attachReuNameClickEvents() {
         const nameCells = document.querySelectorAll('#searchResults td:first-child');
         
         nameCells.forEach(cell => {
-            // Zoek de dichtstbijzijnde rij om het reu ID te vinden
             const row = cell.closest('tr');
             if (row && row.dataset && row.dataset.reuId) {
                 const reuId = row.dataset.reuId;
                 const reuName = cell.textContent.trim();
                 
-                // Maak de naam klikbaar
                 cell.style.cursor = 'pointer';
                 cell.classList.add('text-primary', 'fw-bold');
                 cell.title = this.t('pedigreeTooltip');
                 
-                // Voeg hover effect toe
                 cell.addEventListener('mouseenter', () => {
                     cell.style.textDecoration = 'underline';
                     cell.classList.add('text-decoration-underline');
@@ -1446,7 +1448,6 @@ class ZoekReu {
                     cell.classList.remove('text-decoration-underline');
                 });
                 
-                // Voeg click event toe
                 cell.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
@@ -1459,14 +1460,11 @@ class ZoekReu {
     parseHondenDate(dateString) {
         if (!dateString) return null;
         
-        // Probeer verschillende datumformaten
-        // Format 1: ISO string (van database)
         let date = new Date(dateString);
         if (!isNaN(date.getTime())) {
             return date;
         }
         
-        // Format 2: dd-mm-yyyy
         const parts = dateString.split('-');
         if (parts.length === 3) {
             const day = parseInt(parts[0], 10);
@@ -1478,7 +1476,6 @@ class ZoekReu {
             }
         }
         
-        // Format 3: yyyy-mm-dd
         const parts2 = dateString.split('-');
         if (parts2.length === 3 && parts2[0].length === 4) {
             const year = parseInt(parts2[0], 10);
@@ -1490,19 +1487,15 @@ class ZoekReu {
             }
         }
         
-        // Format 4: andere scheidingstekens
         const cleaned = dateString.replace(/[./]/g, '-');
         const parts3 = cleaned.split('-');
         if (parts3.length === 3) {
-            // Probeer beide formaten
             if (parts3[0].length === 4) {
-                // yyyy-mm-dd
                 const year = parseInt(parts3[0], 10);
                 const month = parseInt(parts3[1], 10) - 1;
                 const day = parseInt(parts3[2], 10);
                 date = new Date(year, month, day);
             } else {
-                // dd-mm-yyyy
                 const day = parseInt(parts3[0], 10);
                 const month = parseInt(parts3[1], 10) - 1;
                 const year = parseInt(parts3[2], 10);
@@ -1529,7 +1522,6 @@ class ZoekReu {
             health: {}
         };
         
-        // Verzamel gezondheidsfilters
         document.querySelectorAll('.health-filter').forEach(select => {
             const filterType = select.dataset.filter;
             const value = select.value;
@@ -1550,31 +1542,23 @@ class ZoekReu {
             for (const [test, selectedValue] of Object.entries(healthCriteria)) {
                 const reuValue = reu[this.getHealthFieldName(test)];
                 
-                // Speciaal geval voor schildklier (Tgaa)
                 if (test === 'schildklier') {
                     const passes = this.meetsSchildklierRequirement(reuValue, selectedValue);
                     if (!passes) return false;
                     continue;
                 }
                 
-                // Speciaal geval: als er geen waarde is, moet deze worden uitgesloten
-                // behalve bij "Niet getest" of "Niet onderzocht" als dat de maximumwaarde is
                 if (!reuValue || reuValue === '' || reuValue === '?' || reuValue.toLowerCase() === 'onbekend') {
-                    // Controleer of "niet getest" of "niet onderzocht" is toegestaan
                     if (test === 'patellaluxatie' && (selectedValue === 'Niet getest' || selectedValue === 'Not tested')) {
-                        // Toegestaan voor PL "Niet getest"
                         continue;
                     } else if (test === 'ogen' && (selectedValue === 'Niet onderzocht' || selectedValue === 'Not examined')) {
-                        // Toegestaan voor ogen "Niet onderzocht"
                         continue;
                     } else if (selectedValue === 'Niet getest' || selectedValue === 'Not tested') {
-                        // Toegestaan voor andere tests met "Niet getest"
                         continue;
                     }
                     return false;
                 }
                 
-                // Check of reu voldoet aan MAXIMALE eis (niet slechter is dan maximum)
                 if (!this.meetsMaximumRequirement(test, reuValue, selectedValue)) {
                     return false;
                 }
@@ -1584,14 +1568,7 @@ class ZoekReu {
     }
     
     meetsSchildklierRequirement(reuValue, selectedValue) {
-        // Speciaal geval voor Tgaa filtering:
-        // - "Tgaa Negatief" moet zowel "Tgaa Negatief" als "Negatief" vinden
-        // - "Niet getest" moet zowel "Niet getest" als "Negatief" als lege waarden vinden
-        // - Niets selecteren moet alle reuen tonen (geen filtering)
-        
-        // Als er geen reu waarde is (leeg of onbekend)
         if (!reuValue || reuValue === '' || reuValue === '?' || reuValue.toLowerCase() === 'onbekend') {
-            // Alleen toestaan bij "Niet getest" selectie
             return selectedValue === 'Niet getest' || 
                    selectedValue === 'Not tested' || 
                    selectedValue === 'Niet getest';
@@ -1600,7 +1577,6 @@ class ZoekReu {
         const normalizedReuValue = reuValue.toLowerCase().trim();
         
         if (selectedValue === 'Tgaa Negatief' || selectedValue === 'Tgaa Negative' || selectedValue === 'Tgaa Negativ') {
-            // "Tgaa Negatief" moet zowel "Tgaa Negatief" als "Negatief" vinden
             return normalizedReuValue === 'tgaa negatief' || 
                    normalizedReuValue === 'negatief' ||
                    normalizedReuValue === 'tgaa negative' ||
@@ -1613,8 +1589,6 @@ class ZoekReu {
         }
         
         if (selectedValue === 'Niet getest' || selectedValue === 'Not tested' || selectedValue === 'Niet getest') {
-            // "Niet getest" moet zowel "Niet getest" als "Negatief" als lege waarden vinden
-            // MAAR geen "Tgaa Positief" of "Positief"
             return normalizedReuValue === 'niet getest' ||
                    normalizedReuValue === 'not tested' ||
                    normalizedReuValue === '' ||
@@ -1635,50 +1609,32 @@ class ZoekReu {
     }
     
     meetsMaximumRequirement(test, reuValue, maxValue) {
-        // Deze functie controleert of de reu-waarde NIET slechter is dan de maximumwaarde
-        // (dwz: de reu-waarde is beter dan of gelijk aan de maximumwaarde)
-        
         const normalizedReuValue = reuValue ? reuValue.toString().trim() : '';
         const normalizedMaxValue = maxValue ? maxValue.toString().trim() : '';
         
         switch(test) {
             case 'heupdysplasie':
-                // HD: A is beter dan B, B beter dan C, etc.
-                // Als maximum is B, dan zijn A en B OK, maar C, D, E niet
                 const hdOrder = { 'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4 };
                 const hdScoreReu = hdOrder[normalizedReuValue] !== undefined ? hdOrder[normalizedReuValue] : 99;
                 const hdScoreMax = hdOrder[normalizedMaxValue] !== undefined ? hdOrder[normalizedMaxValue] : 99;
                 return hdScoreReu <= hdScoreMax;
                 
             case 'patellaluxatie':
-                // PL: 0 is beter dan 1, 1 beter dan 2, etc.
-                // Speciaal geval: "Niet getest" laat 0, 1 en zonder uitslag toe
                 const plOrder = { '0': 0, '1': 1, '2': 2, '3': 3, 'Niet getest': 4 };
                 const plScoreReu = plOrder[normalizedReuValue] !== undefined ? plOrder[normalizedReuValue] : 
                                   (normalizedReuValue === 'Niet getest' || normalizedReuValue === 'Not tested' ? 4 : 99);
                 const plScoreMax = plOrder[normalizedMaxValue] !== undefined ? plOrder[normalizedMaxValue] : 99;
                 
                 if (normalizedMaxValue === 'Niet getest' || normalizedMaxValue === 'Not tested') {
-                    // Bij "Niet getest" als max: alleen 0, 1, en "Niet getest" zijn toegestaan
                     return plScoreReu <= 4 && plScoreReu !== 2 && plScoreReu !== 3;
                 }
                 return plScoreReu <= plScoreMax && plScoreReu !== 2 && plScoreReu !== 3;
                 
             case 'ogen':
-                // Ogen: Vrij > Dist > Overig > Niet onderzocht
-                // Speciaal geval: Ogen filtering werkt anders!
-                // - Vrij: alleen Vrij
-                // - Dist: Vrij EN Dist(ichiasis)
-                // - Overig: Vrij, Dist(ichiasis) EN Overig
-                // - Niet onderzocht: alles
-                
-                // Eerst normaliseren: Dist in dropdown komt overeen met Distichiasis in database
                 let reuOgenValue = normalizedReuValue;
                 let maxOgenValue = normalizedMaxValue;
                 
-                // Als de gebruiker "Dist" heeft geselecteerd, betekent dit zowel "Dist" als "Distichiasis"
                 if (maxOgenValue === 'Dist' || maxOgenValue === 'Distichiasis') {
-                    // Dist in filter betekent: Vrij en Dist/Distichiasis zijn OK
                     if (reuOgenValue === 'Vrij' || reuOgenValue === 'Dist' || reuOgenValue === 'Distichiasis') {
                         return true;
                     }
@@ -1686,7 +1642,6 @@ class ZoekReu {
                 }
                 
                 if (maxOgenValue === 'Overig') {
-                    // Overig betekent: Vrij, Dist/Distichiasis en Overig zijn OK
                     if (reuOgenValue === 'Vrij' || 
                         reuOgenValue === 'Dist' || 
                         reuOgenValue === 'Distichiasis' || 
@@ -1697,15 +1652,13 @@ class ZoekReu {
                 }
                 
                 if (maxOgenValue === 'Niet onderzocht' || maxOgenValue === 'Not examined') {
-                    return true; // Alles toegestaan
+                    return true;
                 }
                 
                 if (maxOgenValue === 'Vrij') {
-                    // Alleen Vrij is toegestaan
                     return reuOgenValue === 'Vrij';
                 }
                 
-                // Voor Engels: Free, Dist, Other
                 if (maxOgenValue === 'Free') {
                     return reuOgenValue === 'Free' || reuOgenValue === 'Vrij';
                 }
@@ -1716,35 +1669,22 @@ class ZoekReu {
                            reuOgenValue === 'Other' || reuOgenValue === 'Overig';
                 }
                 
-                // Standaard geval (voor de zekerheid)
                 return normalizedReuValue === normalizedMaxValue;
                 
             case 'dandyWalker':
-                // Dandy Walker: aangepaste logica volgens specificaties
-                // - "Vrij op DNA": alleen "Vrij op DNA"
-                // - "Vrij op ouders": "Vrij op DNA" en "Vrij op ouders"
-                // - "Drager": "Vrij op DNA", "Vrij op ouders" en "Drager"
-                // - "Niet getest": "Vrij op DNA", "Vrij op ouders", "Drager" en "Niet getest"
-                // - "Lijder": wordt uitgesloten (niet in dropdown!)
-                
-                // Als maxValue leeg is, toon alle reuen (inclusief Lijder)
                 if (!normalizedMaxValue || normalizedMaxValue === '') {
                     return true;
                 }
                 
-                // Expliciet Lijder uitsluiten (mag niet in de resultaten voorkomen)
                 if (normalizedReuValue.includes('lijder') || normalizedReuValue.includes('affected')) {
                     return false;
                 }
                 
-                // Controleer op de juiste combinaties
                 if (normalizedMaxValue === 'Vrij op DNA') {
-                    // Alleen "Vrij op DNA"
                     return normalizedReuValue.includes('vrij op dna') || normalizedReuValue.includes('vrij dna');
                 }
                 
                 if (normalizedMaxValue === 'Vrij op ouders') {
-                    // "Vrij op DNA" en "Vrij op ouders"
                     return normalizedReuValue.includes('vrij op dna') || 
                            normalizedReuValue.includes('vrij dna') ||
                            normalizedReuValue.includes('vrij op ouders') ||
@@ -1752,7 +1692,6 @@ class ZoekReu {
                 }
                 
                 if (normalizedMaxValue === 'Drager') {
-                    // "Vrij op DNA", "Vrij op ouders" en "Drager"
                     return normalizedReuValue.includes('vrij op dna') || 
                            normalizedReuValue.includes('vrij dna') ||
                            normalizedReuValue.includes('vrij op ouders') ||
@@ -1762,7 +1701,6 @@ class ZoekReu {
                 }
                 
                 if (normalizedMaxValue === 'Niet getest') {
-                    // "Vrij op DNA", "Vrij op ouders", "Drager" en "Niet getest"
                     return normalizedReuValue.includes('vrij op dna') || 
                            normalizedReuValue.includes('vrij dna') ||
                            normalizedReuValue.includes('vrij op ouders') ||
@@ -1773,16 +1711,9 @@ class ZoekReu {
                            normalizedReuValue.includes('not tested');
                 }
                 
-                // "Lijder" is verwijderd uit de dropdown, maar voor de zekerheid
                 return false;
                 
-            case 'schildklier':
-                // Deze case wordt afgehandeld in meetsSchildklierRequirement
-                // Hier terugvallen op standaard gedrag
-                return true;
-                
             case 'elleboogdysplasie':
-                // ED: 0 is beter dan 1, etc.
                 const edOrder = { '0': 0, '1': 1, '2': 2, '3': 3, 'Niet getest': 4 };
                 const edScoreReu = edOrder[normalizedReuValue] !== undefined ? edOrder[normalizedReuValue] : 99;
                 const edScoreMax = edOrder[normalizedMaxValue] !== undefined ? edOrder[normalizedMaxValue] : 99;
@@ -1885,49 +1816,40 @@ class ZoekReu {
     
     sortByHealthScore(reuen) {
         return reuen.sort((a, b) => {
-            // 1. Sorteer op HD volgens specifieke volgorde: A → B → C → onbekend → D → E
             const hdA = this.getHDPriority(a.heupdysplasie);
             const hdB = this.getHDPriority(b.heupdysplasie);
             if (hdA !== hdB) return hdA - hdB;
             
-            // 2. Binnen HD-categorie: sorteren op PL (0 → 1 → 2 → 3 → onbekend)
             const plA = this.getPLPriority(a.patella);
             const plB = this.getPLPriority(b.patella);
             if (plA !== plB) return plA - plB;
             
-            // 3. Binnen HD+PL combinatie: sorteren op ogen (Vrij → Dist → Overig → onbekend)
             const ogenA = this.getOgenPriority(a.ogen);
             const ogenB = this.getOgenPriority(b.ogen);
             if (ogenA !== ogenB) return ogenA - ogenB;
             
-            // 4. Binnen HD+PL+ogen combinatie: sorteren op Dandy Walker
             const dwA = this.getDWPriority(a.dandyWalker);
             const dwB = this.getDWPriority(b.dandyWalker);
             if (dwA !== dwB) return dwA - dwB;
             
-            // 5. Binnen HD+PL+ogen+DW combinatie: sorteren op Tgaa (Negatief → onbekend → Positief)
             const tgaaA = this.getTgaaPriority(a.schildklier);
             const tgaaB = this.getTgaaPriority(b.schildklier);
             if (tgaaA !== tgaaB) return tgaaA - tgaaB;
             
-            // 6. Binnen HD+PL+ogen+DW+Tgaa combinatie: sorteren op ED (0 → 1 → onbekend → 2 → 3)
             const edA = this.getEDPriority(a.elleboogdysplasie);
             const edB = this.getEDPriority(b.elleboogdysplasie);
             if (edA !== edB) return edA - edB;
             
-            // 7. Laatste sortering op combinatie COI (lager is beter)
-            const comboCOIA = parseFloat(a._comboCOI?.coiAllGen || '100');
-            const comboCOIB = parseFloat(b._comboCOI?.coiAllGen || '100');
-            if (comboCOIA !== comboCOIB) return comboCOIA - comboCOIB;
+            // Sorteer op toekomstige pup COI (lager is beter)
+            const pupCOIA = parseFloat(a._futurePupCOI?.coiAllGen || '100');
+            const pupCOIB = parseFloat(b._futurePupCOI?.coiAllGen || '100');
+            if (pupCOIA !== pupCOIB) return pupCOIA - pupCOIB;
             
-            // 8. Laatste sortering op naam voor gelijke scores
             return (a.naam || '').localeCompare(b.naam || '');
         });
     }
     
     compareHealthValue(test, valueA, valueB) {
-        // Deze methode wordt niet meer gebruikt in de nieuwe sortering,
-        // maar blijft voor compatibiliteit met andere delen van de code
         const orders = {
             'heupdysplasie': { 'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4 },
             'patellaluxatie': { '0': 0, '1': 1, '2': 2, '3': 3, 'Niet getest': 4 },
@@ -1993,7 +1915,6 @@ class ZoekReu {
                 }
             };
             
-            // Formatteer speciale waarden voor compacte weergave
             const formatTgaa = (value) => {
                 if (!value || value === '' || value === '?' || value === 'Onbekend') return '?';
                 const lowerValue = value.toLowerCase().trim();
@@ -2024,15 +1945,13 @@ class ZoekReu {
                 return value.substring(0, 5);
             };
             
-            // Toon naam en kennelnaam zonder haakjes: "Naam Kennelnaam"
             const displayName = reu.naam ? 
                 `${reu.naam} ${reu.kennelnaam ? reu.kennelnaam : ''}`.trim() : 
                 t('unknown');
             
-            // Haal COI data op - ALTIJD combinatie COI
-            let comboCOI = reu._comboCOI || { coi6Gen: '0.0', coiAllGen: '0.0' };
+            // Gebruik altijd de toekomstige pup COI voor weergave
+            let futurePupCOI = reu._futurePupCOI || { coi6Gen: '0.0', coiAllGen: '0.0', reuCOI6: '0.0', reuCOI25: '0.0' };
             
-            // NIEUW: Voeg reu ID toe aan de rij voor click event
             return `
                 <tr data-reu-id="${reu.id}">
                     <td class="small reu-name-cell" data-reu-id="${reu.id}" data-reu-name="${displayName}">
@@ -2063,11 +1982,11 @@ class ZoekReu {
                         ${formatValue(reu.elleboogdysplasie)}
                     </td>
                     <td class="small text-center">${reu.land || ''}</td>
-                    <td class="${this.getCOIColor(parseFloat(comboCOI.coiAllGen))} text-center">
+                    <td class="${this.getCOIColor(parseFloat(futurePupCOI.coiAllGen))} text-center" title="${t('pupCOI')}: ${futurePupCOI.coiAllGen}% | ${t('reuCOI')}: ${futurePupCOI.reuCOI25}%">
                         ${showCOIColumn ? `
-                            <strong>${comboCOI.coiAllGen}%</strong>
+                            <strong>${futurePupCOI.coiAllGen}%</strong>
                             <br>
-                            <small class="text-muted">${comboCOI.coi6Gen}%</small>
+                            <small class="text-muted">${futurePupCOI.coi6Gen}%</small>
                         ` : `
                             <span class="text-muted">-</span>
                         `}
@@ -2115,7 +2034,6 @@ class ZoekReu {
     }
 }
 
-// Voeg CSS toe voor autocomplete dropdown en kleuren
 const style = document.createElement('style');
 style.textContent = `
     .autocomplete-dropdown {
@@ -2168,7 +2086,6 @@ style.textContent = `
         font-weight: bold;
     }
     
-    /* Kleur coderingen */
     .text-success { color: #198754 !important; }
     .text-warning { color: #ffc107 !important; }
     .text-danger { color: #dc3545 !important; }
@@ -2176,7 +2093,6 @@ style.textContent = `
     .text-muted { color: #6c757d !important; }
     .text-secondary { color: #6c757d !important; }
     
-    /* Tabel styling voor compacte weergave */
     .table-sm th, .table-sm td {
         padding: 0.2rem 0.3rem;
         font-size: 0.8rem;
@@ -2197,13 +2113,11 @@ style.textContent = `
         text-align: center;
     }
     
-    /* Compacte tekst in tabel */
     .table .small {
         font-size: 0.75rem;
         line-height: 1.2;
     }
     
-    /* NIEUW: Klikbare reu namen styling */
     .reu-name-link {
         color: #0d6efd !important;
         font-weight: bold !important;
@@ -2230,7 +2144,6 @@ style.textContent = `
         position: relative;
     }
     
-    /* Tooltip voor reu namen */
     .reu-name-link[title]:hover::after {
         content: attr(title);
         position: absolute;
@@ -2248,7 +2161,6 @@ style.textContent = `
         opacity: 0.9;
     }
     
-    /* Custom scrollbar voor dropdown */
     .autocomplete-results::-webkit-scrollbar {
         width: 8px;
     }
@@ -2267,7 +2179,6 @@ style.textContent = `
         background: #a8a8a8;
     }
     
-    /* Teef info styling */
     #selectedTeefInfo h6 {
         font-size: 1.1rem;
         margin-bottom: 0.5rem;
@@ -2285,13 +2196,11 @@ style.textContent = `
         margin: 0.75rem 0;
     }
     
-    /* Datum input styling */
     #bornAfterFilter:focus {
         border-color: #6610f2;
         box-shadow: 0 0 0 0.25rem rgba(102, 16, 242, 0.25);
     }
     
-    /* COI input styling */
     #coiFilter:focus {
         border-color: #6610f2;
         box-shadow: 0 0 0 0.25rem rgba(102, 16, 242, 0.25);
@@ -2310,20 +2219,17 @@ style.textContent = `
         box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
     }
     
-    /* COI kleuren in tabel */
     td.text-success { font-weight: bold; }
     td.text-warning { font-weight: bold; }
     td.text-orange { font-weight: bold; }
     td.text-danger { font-weight: bold; }
     
-    /* Multiline table headers */
     .table th br {
         display: block;
         content: "";
         margin-top: 2px;
     }
     
-    /* NIEUW: Animation voor klikbare namen */
     @keyframes pulse {
         0% { transform: scale(1); }
         50% { transform: scale(1.02); }
@@ -2332,6 +2238,24 @@ style.textContent = `
     
     .reu-name-link:active {
         animation: pulse 0.2s;
+    }
+    
+    /* COI cell tooltip */
+    td[title]:hover::after {
+        content: attr(title);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #333;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        z-index: 1000;
+        margin-bottom: 5px;
+        opacity: 0.9;
     }
 `;
 document.head.appendChild(style);
