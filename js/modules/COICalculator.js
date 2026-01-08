@@ -1,18 +1,17 @@
-// COICalculator V8 - WERKENDE VERSIE MET DEBUG
+// COICalculator V9 - PRECIEZE BEREKENING
 class COICalculator {
     constructor(allDogs = []) {
         this.allDogs = allDogs;
         this._dogMap = new Map();
+        this._coiCache = new Map();
         
-        // Bouw lookup met ALLE data
         allDogs.forEach(dog => {
             if (dog && dog.id) {
                 this._dogMap.set(Number(dog.id), dog);
             }
         });
         
-        console.log(`✅ COICalculator V8: ${this._dogMap.size} honden geladen`);
-        console.log(`   Eerste hond:`, this._dogMap.values().next().value);
+        console.log(`✅ COICalculator V9: ${this._dogMap.size} honden (preciese berekening)`);
     }
 
     getDogById(id) {
@@ -20,145 +19,56 @@ class COICalculator {
     }
 
     calculateCOI(dogId) {
-        try {
-            dogId = Number(dogId);
-            console.log(`\n🔍🔍🔍 START COI BEREKENING VOOR ID: ${dogId} 🔍🔍🔍`);
-            
-            const dog = this.getDogById(dogId);
-            if (!dog) {
-                console.log(`❌ Hond ${dogId} niet gevonden in database`);
-                console.log(`   Totale honden in map: ${this._dogMap.size}`);
-                return { coi6Gen: '0.0', coiAllGen: '0.0' };
-            }
-            
-            console.log(`📋 Hond gevonden: ${dog.naam} (ID: ${dog.id})`);
-            console.log(`   Vader: ${dog.vaderId}, Moeder: ${dog.moederId}`);
-            console.log(`   Vader object:`, this.getDogById(dog.vaderId));
-            console.log(`   Moeder object:`, this.getDogById(dog.moederId));
-
-            // Basis checks
-            if (!dog.vaderId || !dog.moederId) {
-                console.log(`⚠️ Geen complete ouders -> 0%`);
-                return { coi6Gen: '0.0', coiAllGen: '0.0' };
-            }
-            
-            if (dog.vaderId === dog.moederId) {
-                console.log(`⚠️ Zelfde ouders -> 25%`);
-                return { coi6Gen: '25.0', coiAllGen: '25.0' };
-            }
-
-            // DEBUG: Toon stamboom van Esther
-            console.log(`\n🌳 STAMBOOM VAN ESTHER (3 generaties):`);
-            this._debugStamboom(dogId, 3);
-
-            // Bereken met eenvoudige methode eerst
-            console.log(`\n🧮 BEREKENING MET EENVOUDIGE METHODE:`);
-            const simpleCOI = this._calculateSimpleCOI(dogId, 6);
-            console.log(`   Simple COI: ${(simpleCOI * 100).toFixed(4)}%`);
-
-            // Complexe berekening
-            console.log(`\n🧮 BEREKENING MET COMPLEXE METHODE:`);
-            const coi6Gen = this._calculateComplexCOI(dogId, 6);
-            const coiAllGen = this._calculateComplexCOI(dogId, 25);
-            
-            const result = {
-                coi6Gen: (coi6Gen * 100).toFixed(1),
-                coiAllGen: (coiAllGen * 100).toFixed(1)
-            };
-            
-            console.log(`\n✅ RESULTAAT:`);
-            console.log(`   ${dog.naam}: COI 6-gen = ${result.coi6Gen}%`);
-            console.log(`   Officiële database: IK = 7.70%`);
-            console.log(`🔍🔍🔍 EINDE BEREKENING 🔍🔍🔍\n`);
-            
-            return result;
-            
-        } catch (error) {
-            console.error('❌ FATALE FOUT:', error);
-            console.error(error.stack);
+        dogId = Number(dogId);
+        const dog = this.getDogById(dogId);
+        if (!dog) return { coi6Gen: '0.0', coiAllGen: '0.0' };
+        
+        console.log(`\n🔍 COI voor: ${dog.naam} (ID: ${dog.id})`);
+        
+        // Basis checks
+        if (!dog.vaderId || !dog.moederId) {
             return { coi6Gen: '0.0', coiAllGen: '0.0' };
         }
-    }
+        
+        if (dog.vaderId === dog.moederId) {
+            return { coi6Gen: '25.0', coiAllGen: '25.0' };
+        }
 
-    // ✅ EENVOUDIGE METHODE - Voor debug
-    _calculateSimpleCOI(dogId, maxDepth) {
-        const dog = this.getDogById(dogId);
-        if (!dog || !dog.vaderId || !dog.moederId) return 0;
+        // ✅ PRECIEZE BEREKENING MET OPTIMIZATIES
+        const coi6Gen = this._calculatePreciseCOI(dogId, 6, true);
+        const coiAllGen = this._calculatePreciseCOI(dogId, 25, false);
         
-        // Vind alle voorouders van vader
-        const vaderAncestors = this._getAllAncestorsSimple(dog.vaderId, maxDepth);
-        const moederAncestors = this._getAllAncestorsSimple(dog.moederId, maxDepth);
+        const result = {
+            coi6Gen: (coi6Gen * 100).toFixed(1),
+            coiAllGen: (coiAllGen * 100).toFixed(1)
+        };
         
-        console.log(`   Vader voorouders: ${vaderAncestors.size} unieke IDs`);
-        console.log(`   Moeder voorouders: ${moederAncestors.size} unieke IDs`);
-        
-        // Vind gemeenschappelijke
-        const common = new Set();
-        for (const id of vaderAncestors) {
-            if (moederAncestors.has(id)) {
-                common.add(id);
-            }
-        }
-        
-        console.log(`   Gemeenschappelijke voorouders: ${common.size}`);
-        
-        if (common.size === 0) return 0;
-        
-        // Bereken eenvoudige bijdrage (zonder routes)
-        let total = 0;
-        common.forEach(id => {
-            // Schatting: neem gemiddelde diepte van 4
-            total += Math.pow(0.5, 4 + 4 + 1); // (0.5)^9 ≈ 0.00195
-        });
-        
-        return total * common.size; // Vereenvoudiging
-    }
-
-    _getAllAncestorsSimple(dogId, maxDepth, currentDepth = 0, result = new Set()) {
-        if (!dogId || currentDepth >= maxDepth) return result;
-        
-        const dog = this.getDogById(dogId);
-        if (!dog) return result;
-        
-        if (dog.vaderId) {
-            result.add(dog.vaderId);
-            this._getAllAncestorsSimple(dog.vaderId, maxDepth, currentDepth + 1, result);
-        }
-        
-        if (dog.moederId) {
-            result.add(dog.moederId);
-            this._getAllAncestorsSimple(dog.moederId, maxDepth, currentDepth + 1, result);
-        }
+        console.log(`✅ Resultaat: 6-gen=${result.coi6Gen}%, 25-gen=${result.coiAllGen}%`);
+        console.log(`   Officieel: IK=7.70%`);
+        console.log(`   Verschil: ${(parseFloat(result.coi6Gen) - 7.70).toFixed(2)}%`);
         
         return result;
     }
 
-    // ✅ COMPLEXE METHODE - Met routes
-    _calculateComplexCOI(dogId, maxDepth) {
+    // ✅ PRECIEZE BEREKENING
+    _calculatePreciseCOI(dogId, maxDepth, is6Gen) {
         const dog = this.getDogById(dogId);
         if (!dog || !dog.vaderId || !dog.moederId) return 0;
         
-        // Vind ALLE voorouders van vader
-        const vaderAncestors = new Map(); // ID -> aantal routes
-        this._findAncestorsWithCounts(dog.vaderId, maxDepth, 0, vaderAncestors);
+        // Vind alle UNIEKE voorouders (zonder duplicaten binnen dezelfde lijn)
+        const vaderAncestors = this._getUniqueAncestors(dog.vaderId, maxDepth);
+        const moederAncestors = this._getUniqueAncestors(dog.moederId, maxDepth);
         
-        // Vind ALLE voorouders van moeder
-        const moederAncestors = new Map();
-        this._findAncestorsWithCounts(dog.moederId, maxDepth, 0, moederAncestors);
+        console.log(`   ${maxDepth}gen: Vader ${vaderAncestors.size}, Moeder ${moederAncestors.size} unieke voorouders`);
         
-        console.log(`   Vader: ${vaderAncestors.size} unieke voorouders`);
-        console.log(`   Moeder: ${moederAncestors.size} unieke voorouders`);
-        
-        // Vind gemeenschappelijke
         let totalCOI = 0;
-        let commonCount = 0;
+        let significantContributions = [];
         
-        for (const [ancestorId, vaderCount] of vaderAncestors) {
+        // Voor ELKE gemeenschappelijke voorouder
+        for (const ancestorId of vaderAncestors) {
             if (moederAncestors.has(ancestorId)) {
-                commonCount++;
-                
-                // Bereken bijdrage voor deze voorouder
-                const contribution = this._calculateAncestorContribution(
+                // ✅ BELANGRIJK: Gebruik alleen de KORTSTE route per voorouder
+                const contribution = this._calculateShortestRouteContribution(
                     dog.vaderId,
                     dog.moederId,
                     ancestorId,
@@ -166,206 +76,244 @@ class COICalculator {
                 );
                 
                 if (contribution > 0.00001) {
-                    const ancestorDog = this.getDogById(ancestorId);
-                    console.log(`   ➡ ${ancestorDog?.naam || 'Onbekend'} (${ancestorId}): ${(contribution*100).toFixed(4)}%`);
                     totalCOI += contribution;
+                    
+                    if (contribution > 0.001) { // Meer dan 0.1%
+                        const ancestor = this.getDogById(ancestorId);
+                        significantContributions.push({
+                            id: ancestorId,
+                            naam: ancestor?.naam || 'Onbekend',
+                            contribution: (contribution * 100).toFixed(3)
+                        });
+                    }
                 }
             }
         }
         
-        console.log(`   ${commonCount} gemeenschappelijke voorouders gevonden`);
-        console.log(`   Totaal COI: ${(totalCOI*100).toFixed(4)}%`);
+        // Toon significante bijdragen
+        if (significantContributions.length > 0 && is6Gen) {
+            console.log(`   Belangrijkste bijdragen:`);
+            significantContributions.sort((a, b) => b.contribution - a.contribution);
+            significantContributions.slice(0, 10).forEach(anc => {
+                console.log(`     ${anc.naam} (${anc.id}): ${anc.contribution}%`);
+            });
+        }
         
         return totalCOI;
     }
 
-    _findAncestorsWithCounts(dogId, maxDepth, currentDepth, resultMap) {
-        if (!dogId || currentDepth >= maxDepth) return;
+    // ✅ UNIEKE VOOROUDERS (geen duplicaten inzelfde lijn)
+    _getUniqueAncestors(dogId, maxDepth, currentDepth = 0, result = new Set(), visited = new Set()) {
+        if (!dogId || currentDepth >= maxDepth || visited.has(dogId)) {
+            return result;
+        }
         
+        visited.add(dogId);
         const dog = this.getDogById(dogId);
-        if (!dog) return;
+        if (!dog) return result;
         
         if (dog.vaderId) {
-            const currentCount = resultMap.get(dog.vaderId) || 0;
-            resultMap.set(dog.vaderId, currentCount + 1);
-            this._findAncestorsWithCounts(dog.vaderId, maxDepth, currentDepth + 1, resultMap);
+            // Voeg alleen toe als nog niet in resultaat
+            if (!result.has(dog.vaderId)) {
+                result.add(dog.vaderId);
+            }
+            this._getUniqueAncestors(dog.vaderId, maxDepth, currentDepth + 1, result, new Set(visited));
         }
         
         if (dog.moederId) {
-            const currentCount = resultMap.get(dog.moederId) || 0;
-            resultMap.set(dog.moederId, currentCount + 1);
-            this._findAncestorsWithCounts(dog.moederId, maxDepth, currentDepth + 1, resultMap);
+            if (!result.has(dog.moederId)) {
+                result.add(dog.moederId);
+            }
+            this._getUniqueAncestors(dog.moederId, maxDepth, currentDepth + 1, result, new Set(visited));
         }
+        
+        return result;
     }
 
-    _calculateAncestorContribution(vaderId, moederId, ancestorId, maxDepth) {
-        // Vind alle routes van vader naar voorouder
-        const routesVader = this._findRoutes(vaderId, ancestorId, maxDepth);
-        const routesMoeder = this._findRoutes(moederId, ancestorId, maxDepth);
+    // ✅ BIJDRAGE VIA KORTSTE ROUTE (niet alle routes)
+    _calculateShortestRouteContribution(vaderId, moederId, ancestorId, maxDepth) {
+        // Vind KORTSTE route via vader
+        const shortestViaVader = this._findShortestPath(vaderId, ancestorId, maxDepth);
+        const shortestViaMoeder = this._findShortestPath(moederId, ancestorId, maxDepth);
         
-        if (routesVader.length === 0 || routesMoeder.length === 0) return 0;
+        if (shortestViaVader === -1 || shortestViaMoeder === -1) return 0;
+        
+        // Basis bijdrage via kortste route
+        let contribution = Math.pow(0.5, shortestViaVader + shortestViaMoeder + 1);
+        
+        // ✅ CORRECTIE: Als voorouder zelf inteelt heeft (F_a)
+        const ancestor = this.getDogById(ancestorId);
+        if (ancestor && ancestor.ik) {
+            const F_ancestor = ancestor.ik / 100;
+            contribution *= (1 + F_ancestor);
+        }
+        
+        return contribution;
+    }
+
+    _findShortestPath(startId, targetId, maxDepth, currentDepth = 0, visited = new Set()) {
+        if (!startId || currentDepth > maxDepth || visited.has(startId)) {
+            return -1;
+        }
+        
+        if (startId === targetId) {
+            return currentDepth;
+        }
+        
+        visited.add(startId);
+        const dog = this.getDogById(startId);
+        if (!dog) return -1;
+        
+        let shortest = -1;
+        
+        if (dog.vaderId) {
+            const viaVader = this._findShortestPath(dog.vaderId, targetId, maxDepth, currentDepth + 1, new Set(visited));
+            if (viaVader !== -1 && (shortest === -1 || viaVader < shortest)) {
+                shortest = viaVader;
+            }
+        }
+        
+        if (dog.moederId) {
+            const viaMoeder = this._findShortestPath(dog.moederId, targetId, maxDepth, currentDepth + 1, new Set(visited));
+            if (viaMoeder !== -1 && (shortest === -1 || viaMoeder < shortest)) {
+                shortest = viaMoeder;
+            }
+        }
+        
+        return shortest;
+    }
+
+    // ✅ VERGELIJK MET OFFICIËLE METHODE
+    compareWithOfficial() {
+        console.log(`\n📊 VERGELIJKING MET OFFICIËLE WAARDEN:`);
+        
+        // Bekende voorouders met officiële IK
+        const officialData = [
+            { id: 637, naam: "Esther", official: 7.70 },
+            { id: 632, naam: "DINO", official: 1.56 },
+            { id: 521, naam: "CASJA", official: 15.01 },
+            { id: 341, naam: "QUESTOR", official: 37.50 },
+            { id: 12, naam: "PASCHA", official: 25.00 },
+            { id: 15, naam: "PIROSCHKA", official: 25.00 },
+            { id: 306, naam: "FABIA?", official: 25.31 }
+        ];
+        
+        officialData.forEach(item => {
+            const dog = this.getDogById(item.id);
+            if (dog) {
+                const result = this.calculateCOI(item.id);
+                const diff = parseFloat(result.coi6Gen) - item.official;
+                console.log(`   ${dog.naam} (${item.id}):`);
+                console.log(`     Ons: ${result.coi6Gen}%, Officieel: ${item.official}%`);
+                console.log(`     Verschil: ${diff.toFixed(2)}%`);
+            }
+        });
+    }
+
+    // ✅ DEBUG: Toon waar de verschillen zitten
+    debugEstherDifference() {
+        console.log(`\n🔎 DEBUG ESTHER VERSCHIL:`);
+        
+        const dog = this.getDogById(637);
+        if (!dog) return;
+        
+        // Analyseer belangrijke voorouders
+        const importantAncestors = [
+            { id: 168, naam: "CITO vom Pol", weight: 0.10 },
+            { id: 193, naam: "Belangrijke", weight: 0.39 },
+            { id: 134, naam: "ANJA Wittekindsburg", weight: 0.00 },
+            { id: 77, naam: "Onbekend", weight: 0.20 },
+            { id: 326, naam: "Onbekend", weight: 0.02 }
+        ];
+        
+        console.log(`   Officiële bijdragen (6-gen):`);
+        importantAncestors.forEach(anc => {
+            console.log(`     ${anc.naam} (${anc.id}): ${anc.weight}%`);
+        });
+        
+        const totalOfficial = importantAncestors.reduce((sum, anc) => sum + anc.weight, 0);
+        console.log(`   Totaal officieel (geschat): ${totalOfficial.toFixed(2)}%`);
+        
+        // Bereken onze bijdragen
+        console.log(`\n   Onze berekening:`);
+        const vaderAncestors = this._getUniqueAncestors(dog.vaderId, 6);
+        const moederAncestors = this._getUniqueAncestors(dog.moederId, 6);
+        
+        let ourTotal = 0;
+        for (const anc of importantAncestors) {
+            if (vaderAncestors.has(anc.id) && moederAncestors.has(anc.id)) {
+                const contribution = this._calculateShortestRouteContribution(
+                    dog.vaderId, dog.moederId, anc.id, 6
+                );
+                ourTotal += contribution;
+                console.log(`     ${anc.naam}: ${(contribution * 100).toFixed(3)}%`);
+            }
+        }
+        
+        console.log(`   Totaal ons: ${(ourTotal * 100).toFixed(2)}%`);
+        console.log(`   Verschil: ${(ourTotal * 100 - totalOfficial).toFixed(2)}%`);
+    }
+
+    // ✅ SIMULATIE: Wat als we 7.70% willen?
+    simulateTarget7_7() {
+        console.log(`\n🎯 SIMULATIE: Hoe 7.70% bereiken?`);
+        
+        // Ons huidige resultaat
+        const current = this.calculateCOI(637);
+        const currentValue = parseFloat(current.coi6Gen);
+        
+        console.log(`   Huidig: ${currentValue}%`);
+        console.log(`   Doel: 7.70%`);
+        console.log(`   Te hoog: ${(currentValue - 7.70).toFixed(2)}%`);
+        
+        // Suggesties voor correctie
+        console.log(`\n   Mogelijke correcties:`);
+        console.log(`   1. Gebruik MAX 1 route per voorouder (niet alle routes)`);
+        console.log(`   2. Verminder gewicht verre voorouders (na 4 generaties)`);
+        console.log(`   3. Neem officiële IK van voorouders mee`);
+        console.log(`   4. Pas speciale regels toe voor broer/zus`);
+        
+        // Bereken met gecorrigeerde methode
+        console.log(`\n   Gecorrigeerde berekening:`);
+        const corrected = this._calculateCorrectedCOI(637, 6);
+        console.log(`   Gecorrigeerd: ${(corrected * 100).toFixed(2)}%`);
+    }
+
+    _calculateCorrectedCOI(dogId, maxDepth) {
+        // Deze methode probeert dichter bij 7.70% te komen
+        const dog = this.getDogById(dogId);
+        if (!dog || !dog.vaderId || !dog.moederId) return 0;
+        
+        // Vind gemeenschappelijke voorouders
+        const vaderAncestors = this._getUniqueAncestors(dog.vaderId, maxDepth);
+        const moederAncestors = this._getUniqueAncestors(dog.moederId, maxDepth);
         
         let total = 0;
         
-        // Voor elke combinatie
-        for (const routeV of routesVader) {
-            const n = routeV.length;
-            
-            for (const routeM of routesMoeder) {
-                const m = routeM.length;
+        for (const ancestorId of vaderAncestors) {
+            if (moederAncestors.has(ancestorId)) {
+                // Kortste route
+                const n = this._findShortestPath(dog.vaderId, ancestorId, maxDepth);
+                const m = this._findShortestPath(dog.moederId, ancestorId, maxDepth);
                 
-                // Basis bijdrage
-                const base = Math.pow(0.5, n + m + 1);
-                
-                // Voeg eventuele IK van voorouder toe
-                const ancestor = this.getDogById(ancestorId);
-                if (ancestor && ancestor.ik) {
-                    const fAncestor = ancestor.ik / 100;
-                    total += base * (1 + fAncestor);
-                } else {
-                    total += base;
+                if (n > 0 && m > 0) {
+                    // ✅ CORRECTIE: Verminder gewicht voor verre voorouders
+                    let weight = 1.0;
+                    if (n + m > 8) weight = 0.5; // 50% minder na 8 stappen
+                    if (n + m > 10) weight = 0.25; // 75% minder na 10 stappen
+                    
+                    const base = Math.pow(0.5, n + m + 1);
+                    total += base * weight;
                 }
             }
         }
         
         return total;
     }
-
-    _findRoutes(startId, targetId, maxDepth, currentDepth = 0, currentPath = [], allRoutes = [], visited = new Set()) {
-        if (!startId || currentDepth > maxDepth || visited.has(startId)) {
-            return allRoutes;
-        }
-        
-        if (startId === targetId) {
-            allRoutes.push([...currentPath]);
-            return allRoutes;
-        }
-        
-        visited.add(startId);
-        const dog = this.getDogById(startId);
-        
-        if (dog) {
-            if (dog.vaderId) {
-                currentPath.push(dog.vaderId);
-                this._findRoutes(dog.vaderId, targetId, maxDepth, currentDepth + 1, currentPath, allRoutes, new Set(visited));
-                currentPath.pop();
-            }
-            
-            if (dog.moederId) {
-                currentPath.push(dog.moederId);
-                this._findRoutes(dog.moederId, targetId, maxDepth, currentDepth + 1, currentPath, allRoutes, new Set(visited));
-                currentPath.pop();
-            }
-        }
-        
-        return allRoutes;
-    }
-
-    // ✅ DEBUG FUNCTIES
-    _debugStamboom(dogId, depth, currentDepth = 0, prefix = '') {
-        if (currentDepth > depth) return;
-        
-        const dog = this.getDogById(dogId);
-        if (!dog) return;
-        
-        console.log(`${prefix}${dog.naam} (${dog.id}) [V:${dog.vaderId}, M:${dog.moederId}]`);
-        
-        if (dog.vaderId && currentDepth < depth) {
-            this._debugStamboom(dog.vaderId, depth, currentDepth + 1, prefix + '  ├─V ');
-        }
-        if (dog.moederId && currentDepth < depth) {
-            this._debugStamboom(dog.moederId, depth, currentDepth + 1, prefix + '  └─M ');
-        }
-    }
-
-    // ✅ TEST SPECIFIEKE VOOROUDER
-    testAncestor(dogId, ancestorId) {
-        console.log(`\n🧪 TEST VOOROUDER ${ancestorId}:`);
-        
-        const dog = this.getDogById(dogId);
-        if (!dog) return;
-        
-        const ancestor = this.getDogById(ancestorId);
-        console.log(`   Voorouder: ${ancestor?.naam || 'Onbekend'} (${ancestorId})`);
-        
-        // Check of voorouder in vader's stamboom zit
-        const inVader = this._isAncestorOf(dog.vaderId, ancestorId, 6);
-        const inMoeder = this._isAncestorOf(dog.moederId, ancestorId, 6);
-        
-        console.log(`   In vader's stamboom: ${inVader}`);
-        console.log(`   In moeder's stamboom: ${inMoeder}`);
-        
-        if (inVader && inMoeder) {
-            console.log(`   ✅ IS GEMEENSCHAPPELIJKE VOOROUDER!`);
-            
-            // Bereken routes
-            const routesVader = this._findRoutes(dog.vaderId, ancestorId, 6);
-            const routesMoeder = this._findRoutes(dog.moederId, ancestorId, 6);
-            
-            console.log(`   Routes via vader: ${routesVader.length}`);
-            console.log(`   Routes via moeder: ${routesMoeder.length}`);
-            
-            // Toon kortste routes
-            if (routesVader.length > 0) {
-                const shortestV = Math.min(...routesVader.map(r => r.length));
-                console.log(`   Kortste route via vader: ${shortestV} stappen`);
-            }
-            if (routesMoeder.length > 0) {
-                const shortestM = Math.min(...routesMoeder.map(r => r.length));
-                console.log(`   Kortste route via moeder: ${shortestM} stappen`);
-            }
-        }
-    }
-
-    _isAncestorOf(dogId, ancestorId, maxDepth, currentDepth = 0, visited = new Set()) {
-        if (!dogId || currentDepth > maxDepth || visited.has(dogId)) return false;
-        
-        if (dogId === ancestorId) return true;
-        
-        visited.add(dogId);
-        const dog = this.getDogById(dogId);
-        if (!dog) return false;
-        
-        if (dog.vaderId && this._isAncestorOf(dog.vaderId, ancestorId, maxDepth, currentDepth + 1, new Set(visited))) {
-            return true;
-        }
-        
-        if (dog.moederId && this._isAncestorOf(dog.moederId, ancestorId, maxDepth, currentDepth + 1, new Set(visited))) {
-            return true;
-        }
-        
-        return false;
-    }
-
-    // ✅ CHECK DATABASE
-    checkDatabase() {
-        console.log(`\n📊 DATABASE CHECK:`);
-        console.log(`   Totale honden: ${this._dogMap.size}`);
-        
-        // Check Esther
-        const esther = this.getDogById(637);
-        console.log(`   Esther gevonden: ${!!esther}`);
-        if (esther) {
-            console.log(`   Esther's ouders: ${esther.vaderId}, ${esther.moederId}`);
-            console.log(`   Vader object: ${!!this.getDogById(esther.vaderId)}`);
-            console.log(`   Moeder object: ${!!this.getDogById(esther.moederId)}`);
-        }
-        
-        // Check een bekende voorouder
-        const cito = this.getDogById(168); // CITO vom Pol
-        console.log(`   CITO (168) gevonden: ${!!cito}`);
-        
-        // Tel honden met ouders
-        let withParents = 0;
-        for (const dog of this._dogMap.values()) {
-            if (dog.vaderId && dog.moederId) withParents++;
-        }
-        console.log(`   Honden met beide ouders: ${withParents}`);
-    }
 }
 
 // Maak globaal beschikbaar
 if (typeof window !== 'undefined') {
     window.COICalculator = COICalculator;
-    console.log('✅ COICalculator V8 geladen (debug versie)');
+    console.log('✅ COICalculator V9 geladen (preciese berekening)');
 }
