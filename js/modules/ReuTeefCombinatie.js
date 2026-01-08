@@ -110,7 +110,7 @@ class ReuTeefCombinatie {
                 thyroidTested: "Schildklier getest",
                 thyroidUnknown: "Schildklier niet bekend",
                 occurrences: "Aantal keer",
-                // NIEUW: Stamboom manager vertalingen
+                // Stamboom manager vertalingen
                 pedigreeTitle: "Stamboom van {name}",
                 pedigree4Gen: "4-generatie stamboom",
                 generatingPedigree: "Stamboom genereren...",
@@ -123,8 +123,6 @@ class ReuTeefCombinatie {
                 greatGrandparents: "Overgrootouders",
                 paternal: "Paternaal",
                 maternal: "Maternaal",
-                clickForDetails: "Klik voor details",
-                closePopup: "Sluiten",
                 remarks: "Opmerkingen",
                 noRemarks: "Geen opmerkingen",
                 photos: "Foto's",
@@ -146,7 +144,79 @@ class ReuTeefCombinatie {
                 dandyWalker: "Dandy Walker Malformation",
                 thyroid: "Schildklier",
                 eyesExplanation: "Verklaring ogen",
-                thyroidExplanation: "Toelichting schildklier"
+                thyroidExplanation: "Toelichting schildklier",
+                // Nieuwe vertalingen
+                totalAncestors: "Totaal voorouders:",
+                mother: "Moeder",
+                father: "Vader",
+                grandparentsPaternal: "Grootouders (Vaderlijn)",
+                grandparentsMaternal: "Grootouders (Moederlijn)",
+                greatGrandparentsPaternal: "Overgrootouders (Vaderlijn)",
+                greatGrandparentsMaternal: "Overgrootouders (Moederlijn)",
+                healthStatistics: "Gezondheidsstatistieken",
+                pedigreeDetails: "Stamboomdetails",
+                combinationDetails: "Combinatiedetails",
+                breedingAdvice: "Fokadvies",
+                caution: "Let op",
+                goodCombination: "Goede combinatie",
+                moderateCombination: "Matige combinatie",
+                poorCombination: "Slechte combinatie",
+                coiWarning: "COI waarschuwing",
+                healthWarning: "Gezondheidswaarschuwing",
+                loadMore: "Meer laden",
+                clearSelection: "Selectie wissen",
+                selectBothParents: "Selecteer beide ouders",
+                calculateCOI: "COI berekenen",
+                calculating: "Berekening bezig...",
+                calculationComplete: "Berekening voltooid",
+                errorLoading: "Fout bij laden",
+                tryAgain: "Probeer opnieuw",
+                connectionError: "Verbindingsfout",
+                databaseError: "Database fout",
+                unauthorized: "Niet geautoriseerd",
+                loginRequired: "Login vereist",
+                saveCombination: "Combinatie opslaan",
+                savedCombinations: "Opgeslagen combinaties",
+                noSavedCombinations: "Geen opgeslagen combinaties",
+                deleteCombination: "Combinatie verwijderen",
+                confirmDelete: "Weet u zeker dat u deze combinatie wilt verwijderen?",
+                combinationSaved: "Combinatie opgeslagen",
+                combinationDeleted: "Combinatie verwijderd",
+                saveFailed: "Opslaan mislukt",
+                deleteFailed: "Verwijderen mislukt",
+                notes: "Notities",
+                addNotes: "Notities toevoegen...",
+                saveNotes: "Notities opslaan",
+                notesSaved: "Notities opgeslagen",
+                exportPedigree: "Stamboom exporteren",
+                exportAsPDF: "Exporteer als PDF",
+                exportAsImage: "Exporteer als afbeelding",
+                exportAsCSV: "Exporteer als CSV",
+                exportComplete: "Export voltooid",
+                exportFailed: "Export mislukt",
+                shareCombination: "Combinatie delen",
+                shareLink: "Deel link",
+                copyLink: "Kopieer link",
+                linkCopied: "Link gekopieerd",
+                shareFailed: "Delen mislukt",
+                generateReport: "Rapport genereren",
+                reportGenerated: "Rapport gegenereerd",
+                reportFailed: "Rapport genereren mislukt",
+                comprehensiveReport: "Uitgebreid rapport",
+                summaryReport: "Samenvatting rapport",
+                detailedReport: "Gedetailleerd rapport",
+                includePhotos: "Foto's toevoegen",
+                includeHealthData: "Gezondheidsdata toevoegen",
+                includeCOIData: "COI data toevoegen",
+                includeLineAnalysis: "Lijnanalyse toevoegen",
+                generatingReport: "Rapport genereren...",
+                pleaseWait: "Even geduld a.u.b.",
+                loadingData: "Data laden...",
+                processing: "Verwerken...",
+                success: "Succes",
+                warning: "Waarschuwing",
+                error: "Fout",
+                info: "Informatie"
             },
             en: {
                 title: "Male and Female Combination",
@@ -228,7 +298,7 @@ class ReuTeefCombinatie {
                 thyroidTested: "Thyroid tested",
                 thyroidUnknown: "Thyroid unknown",
                 occurrences: "Occurrences",
-                // NIEUW: Stamboom manager vertalingen
+                // Pedigree manager translations
                 pedigreeTitle: "Pedigree of {name}",
                 pedigree4Gen: "4-generation pedigree",
                 generatingPedigree: "Generating pedigree...",
@@ -240,7 +310,7 @@ class ReuTeefCombinatie {
                 grandparents: "Grandparents",
                 greatGrandparents: "Great Grandparents",
                 paternal: "Paternal",
-                maternal: "Maternaal",
+                maternal: "Maternal",
                 clickForDetails: "Click for details",
                 closePopup: "Close",
                 remarks: "Remarks",
@@ -264,7 +334,79 @@ class ReuTeefCombinatie {
                 dandyWalker: "Dandy Walker Malformation",
                 thyroid: "Thyroid",
                 eyesExplanation: "Eye explanation",
-                thyroidExplanation: "Thyroid explanation"
+                thyroidExplanation: "Thyroid explanation",
+                // New translations
+                totalAncestors: "Total ancestors:",
+                mother: "Mother",
+                father: "Father",
+                grandparentsPaternal: "Grandparents (Paternal)",
+                grandparentsMaternal: "Grandparents (Maternal)",
+                greatGrandparentsPaternal: "Great-grandparents (Paternal)",
+                greatGrandparentsMaternal: "Great-grandparents (Maternal)",
+                healthStatistics: "Health statistics",
+                pedigreeDetails: "Pedigree details",
+                combinationDetails: "Combination details",
+                breedingAdvice: "Breeding advice",
+                caution: "Caution",
+                goodCombination: "Good combination",
+                moderateCombination: "Moderate combination",
+                poorCombination: "Poor combination",
+                coiWarning: "COI warning",
+                healthWarning: "Health warning",
+                loadMore: "Load more",
+                clearSelection: "Clear selection",
+                selectBothParents: "Select both parents",
+                calculateCOI: "Calculate COI",
+                calculating: "Calculating...",
+                calculationComplete: "Calculation complete",
+                errorLoading: "Error loading",
+                tryAgain: "Try again",
+                connectionError: "Connection error",
+                databaseError: "Database error",
+                unauthorized: "Unauthorized",
+                loginRequired: "Login required",
+                saveCombination: "Save combination",
+                savedCombinations: "Saved combinations",
+                noSavedCombinations: "No saved combinations",
+                deleteCombination: "Delete combination",
+                confirmDelete: "Are you sure you want to delete this combination?",
+                combinationSaved: "Combination saved",
+                combinationDeleted: "Combination deleted",
+                saveFailed: "Save failed",
+                deleteFailed: "Delete failed",
+                notes: "Notes",
+                addNotes: "Add notes...",
+                saveNotes: "Save notes",
+                notesSaved: "Notes saved",
+                exportPedigree: "Export pedigree",
+                exportAsPDF: "Export as PDF",
+                exportAsImage: "Export as image",
+                exportAsCSV: "Export as CSV",
+                exportComplete: "Export complete",
+                exportFailed: "Export failed",
+                shareCombination: "Share combination",
+                shareLink: "Share link",
+                copyLink: "Copy link",
+                linkCopied: "Link copied",
+                shareFailed: "Share failed",
+                generateReport: "Generate report",
+                reportGenerated: "Report generated",
+                reportFailed: "Report generation failed",
+                comprehensiveReport: "Comprehensive report",
+                summaryReport: "Summary report",
+                detailedReport: "Detailed report",
+                includePhotos: "Include photos",
+                includeHealthData: "Include health data",
+                includeCOIData: "Include COI data",
+                includeLineAnalysis: "Include line analysis",
+                generatingReport: "Generating report...",
+                pleaseWait: "Please wait",
+                loadingData: "Loading data...",
+                processing: "Processing...",
+                success: "Success",
+                warning: "Warning",
+                error: "Error",
+                info: "Information"
             },
             de: {
                 title: "Rüde und Hündin Kombination",
@@ -288,7 +430,7 @@ class ReuTeefCombinatie {
                 kennel: "Zwingername:",
                 pedigreeNumber: "Stammbuchnr:",
                 birthDate: "Geburtsdatum:",
-                healthInfo: "Health information",
+                healthInfo: "Gesundheitsinformationen",
                 color: "Fellfarbe:",
                 searchByName: "Suche nach Name oder Zwingername",
                 dogDetails: "Hund Details",
@@ -341,15 +483,15 @@ class ReuTeefCombinatie {
                 eyesOther: "Augen sonstige",
                 eyesUnknown: "Augen unbekannt",
                 dwlmDnaFree: "Dandy Walker (DNA) frei",
-                dwlmParentsFree: "Dandy Walker (Eltern) vrij",
+                dwlmParentsFree: "Dandy Walker (Eltern) frei",
                 dwlmUnknown: "Dandy Walker unbekannt",
                 thyroidTested: "Schilddrüse getestet",
                 thyroidUnknown: "Schilddrüse unbekannt",
                 occurrences: "Anzahl Mal",
-                // NIEUW: Stamboom manager vertalingen
+                // Stammbaum Manager Übersetzungen
                 pedigreeTitle: "Ahnentafel von {name}",
                 pedigree4Gen: "4-Generationen Ahnentafel",
-                generatingPedigree: "Ahnentafel wordt generiert...",
+                generatingPedigree: "Ahnentafel wird generiert...",
                 noData: "Keine Daten",
                 unknown: "Unbekannt",
                 currentDog: "Aktueller Hund",
@@ -364,15 +506,15 @@ class ReuTeefCombinatie {
                 remarks: "Bemerkungen",
                 noRemarks: "Keine Bemerkungen",
                 photos: "Fotos",
-                noPhotos: "Keine Fotos verfügbaar",
+                noPhotos: "Keine Fotos verfügbar",
                 clickToEnlarge: "Klicken zum Vergrößern",
                 closePhoto: "Schließen",
                 male: "Rüde",
                 female: "Hündin",
                 breed: "Rasse",
-                gender: "Geslacht",
+                gender: "Geschlecht",
                 coatColor: "Fellfarbe",
-                country: "Country",
+                country: "Land",
                 zipCode: "Postleitzahl",
                 deathDate: "Sterbedatum",
                 hipDysplasia: "Hüftdysplasie",
@@ -382,7 +524,79 @@ class ReuTeefCombinatie {
                 dandyWalker: "Dandy Walker Malformation",
                 thyroid: "Schilddrüse",
                 eyesExplanation: "Augenerklärung",
-                thyroidExplanation: "Schilddrüse Erklärung"
+                thyroidExplanation: "Schilddrüse Erklärung",
+                // Neue Übersetzungen
+                totalAncestors: "Gesamte Vorfahren:",
+                mother: "Mutter",
+                father: "Vater",
+                grandparentsPaternal: "Großeltern (Väterlich)",
+                grandparentsMaternal: "Großeltern (Mütterlich)",
+                greatGrandparentsPaternal: "Urgroßeltern (Väterlich)",
+                greatGrandparentsMaternal: "Urgroßeltern (Mütterlich)",
+                healthStatistics: "Gesundheitsstatistiken",
+                pedigreeDetails: "Ahnentafeldetails",
+                combinationDetails: "Kombinationsdetails",
+                breedingAdvice: "Zuchtrat",
+                caution: "Achtung",
+                goodCombination: "Gute Kombination",
+                moderateCombination: "Mittelmäßige Kombination",
+                poorCombination: "Schlechte Kombination",
+                coiWarning: "COI Warnung",
+                healthWarning: "Gesundheitswarnung",
+                loadMore: "Mehr laden",
+                clearSelection: "Auswahl löschen",
+                selectBothParents: "Beide Eltern auswählen",
+                calculateCOI: "COI berechnen",
+                calculating: "Berechnung läuft...",
+                calculationComplete: "Berechnung abgeschlossen",
+                errorLoading: "Fehler beim Laden",
+                tryAgain: "Erneut versuchen",
+                connectionError: "Verbindungsfehler",
+                databaseError: "Datenbankfehler",
+                unauthorized: "Nicht autorisiert",
+                loginRequired: "Anmeldung erforderlich",
+                saveCombination: "Kombination speichern",
+                savedCombinations: "Gespeicherte Kombinationen",
+                noSavedCombinations: "Keine gespeicherten Kombinationen",
+                deleteCombination: "Kombination löschen",
+                confirmDelete: "Sind Sie sicher, dass Sie diese Kombination löschen möchten?",
+                combinationSaved: "Kombination gespeichert",
+                combinationDeleted: "Kombination gelöscht",
+                saveFailed: "Speichern fehlgeschlagen",
+                deleteFailed: "Löschen fehlgeschlagen",
+                notes: "Notizen",
+                addNotes: "Notizen hinzufügen...",
+                saveNotes: "Notizen speichern",
+                notesSaved: "Notizen gespeichert",
+                exportPedigree: "Ahnentafel exportieren",
+                exportAsPDF: "Als PDF exportieren",
+                exportAsImage: "Als Bild exportieren",
+                exportAsCSV: "Als CSV exportieren",
+                exportComplete: "Export abgeschlossen",
+                exportFailed: "Export fehlgeschlagen",
+                shareCombination: "Kombination teilen",
+                shareLink: "Link teilen",
+                copyLink: "Link kopieren",
+                linkCopied: "Link kopiert",
+                shareFailed: "Teilen fehlgeschlagen",
+                generateReport: "Bericht generieren",
+                reportGenerated: "Bericht generiert",
+                reportFailed: "Berichterstellung fehlgeschlagen",
+                comprehensiveReport: "Umfassender Bericht",
+                summaryReport: "Zusammenfassender Bericht",
+                detailedReport: "Detaillierter Bericht",
+                includePhotos: "Fotos einbeziehen",
+                includeHealthData: "Gesundheitsdaten einbeziehen",
+                includeCOIData: "COI-Daten einbeziehen",
+                includeLineAnalysis: "Linienanalyse einbeziehen",
+                generatingReport: "Bericht wird generiert...",
+                pleaseWait: "Bitte warten",
+                loadingData: "Daten laden...",
+                processing: "Verarbeiten...",
+                success: "Erfolg",
+                warning: "Warnung",
+                error: "Fehler",
+                info: "Information"
             }
         };
     }
@@ -857,7 +1071,7 @@ class ReuTeefCombinatie {
         try {
             if (this.db && typeof this.db.getHonden === 'function') {
                 this.allHonden = await this.db.getHonden();
-                console.log(`✅ Geladen: ${this.allHonden.length} honden uit database voor ReuTeefCombinatie`);
+                console.log(`✅ ${this.t('loadingData')}: ${this.allHonden.length} ${this.t('found')}`);
                 
                 // Zorg dat alle gezondheidsvelden aanwezig zijn
                 this.allHonden = this.allHonden.map(hond => {
@@ -887,11 +1101,11 @@ class ReuTeefCombinatie {
                     }
                 });
             } else {
-                console.error('❌ Database niet beschikbaar of getHonden functie ontbreekt');
+                console.error('❌ ${this.t('databaseError')}');
                 this.allHonden = [];
             }
         } catch (error) {
-            console.error('❌ Fout bij laden honden:', error);
+            console.error('❌ ${this.t('errorLoading')}:', error);
             this.allHonden = [];
         }
     }
@@ -931,7 +1145,7 @@ class ReuTeefCombinatie {
             }
             return null;
         } catch (error) {
-            console.error(`❌ Fout bij ophalen hond ${id}:`, error);
+            console.error(`❌ ${this.t('errorLoading')} hond ${id}:`, error);
             return null;
         }
     }
@@ -979,7 +1193,7 @@ class ReuTeefCombinatie {
                 return result[0];
             }
         } catch (error) {
-            console.error(`❌ Fout bij zoeken hond op naam ${name}:`, error);
+            console.error(`❌ ${this.t('errorLoading')} hond op naam ${name}:`, error);
         }
         
         return null;
@@ -1113,7 +1327,7 @@ class ReuTeefCombinatie {
                              data-id="${hond.id}">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div style="flex: 1;">
-                                    <div class="dog-name">${hond.naam || 'Onbekend'}</div>
+                                    <div class="dog-name">${hond.naam || this.t('unknown')}</div>
                                     <div class="dog-details">
                                         ${hond.kennelnaam ? `
                                             <span class="kennel-name">
@@ -1265,7 +1479,7 @@ class ReuTeefCombinatie {
         detailsContainer.innerHTML = `
             <div class="dog-details-card">
                 <div class="dog-details-header">
-                    <div class="dog-details-name">${hond.naam || 'Onbekend'}</div>
+                    <div class="dog-details-name">${hond.naam || this.t('unknown')}</div>
                     ${hond.kennelnaam ? `<div class="dog-details-subtitle">${hond.kennelnaam}</div>` : ''}
                     
                     <div class="dog-details-info mt-3">
@@ -1291,7 +1505,8 @@ class ReuTeefCombinatie {
                         ${hond.geboortedatum ? `
                             <div class="info-item">
                                 <i class="bi bi-calendar"></i>
-                                <span>${new Date(hond.geboortedatum).toLocaleDateString(this.currentLang)}</span>
+                                <span>${new Date(hond.geboortedatum).toLocaleDateString(this.currentLang === 'nl' ? 'nl-NL' : 
+                                  this.currentLang === 'de' ? 'de-DE' : 'en-US')}</span>
                             </div>
                         ` : ''}
                         
@@ -1311,7 +1526,7 @@ class ReuTeefCombinatie {
                             ${oudersInfo.vader ? `
                                 <div class="col-md-6 mb-2">
                                     <strong>${t('fatherLabel')}:</strong><br>
-                                    ${oudersInfo.vader.naam || 'Onbekend'}
+                                    ${oudersInfo.vader.naam || this.t('unknown')}
                                     ${oudersInfo.vader.stamboomnr ? `(${oudersInfo.vader.stamboomnr})` : ''}
                                 </div>
                             ` : `
@@ -1324,7 +1539,7 @@ class ReuTeefCombinatie {
                             ${oudersInfo.moeder ? `
                                 <div class="col-md-6 mb-2">
                                     <strong>${t('motherLabel')}:</strong><br>
-                                    ${oudersInfo.moeder.naam || 'Onbekend'}
+                                    ${oudersInfo.moeder.naam || this.t('unknown')}
                                     ${oudersInfo.moeder.stamboomnr ? `(${oudersInfo.moeder.stamboomnr})` : ''}
                                 </div>
                             ` : `
@@ -1339,7 +1554,7 @@ class ReuTeefCombinatie {
                 
                 <div class="mt-3 pt-3 border-top">
                     <button class="btn btn-sm btn-outline-secondary" onclick="window.reuTeefCombinatie.clearSelection('${elementId}', '${resultsId}')">
-                        <i class="bi bi-x-circle me-1"></i> Selectie wissen
+                        <i class="bi bi-x-circle me-1"></i> ${this.t('clearSelection')}
                     </button>
                 </div>
             </div>
@@ -1431,8 +1646,8 @@ class ReuTeefCombinatie {
         
         // VOORKOM MEERDERE GELIJKTIJDIGE BEREKENINGEN
         if (this.coiCalculationInProgress) {
-            console.log('⚠️ COI berekening al bezig, wacht...');
-            this.showAlert('COI berekening is al bezig, even wachten...', 'info');
+            console.log('⚠️ ${this.t('calculating')}...');
+            this.showAlert('${this.t('calculating')}', 'info');
             return;
         }
         
@@ -1441,17 +1656,17 @@ class ReuTeefCombinatie {
         try {
             // NIEUW: Initialiseer COICalculator PAS NU, bij het daadwerkelijk berekenen
             if (!this.coiCalculator || !this.coiCalculatorReady) {
-                console.log('🔄 COICalculator nog niet geïnitialiseerd, initialiseer nu...');
+                console.log('🔄 ${this.t('loadingData')}...');
                 const initialized = await this.initializeCOICalculator();
                 if (!initialized) {
-                    this.showAlert('Kon COI berekening niet initialiseren', 'danger');
+                    this.showAlert('${this.t('calculationComplete')}', 'danger');
                     return;
                 }
             }
             
             if (!this.coiCalculator) {
-                console.error('❌ COICalculator niet beschikbaar');
-                this.showAlert('COI berekening niet beschikbaar', 'danger');
+                console.error('❌ ${this.t('error')}');
+                this.showAlert('${this.t('calculationComplete')}', 'danger');
                 return;
             }
             
@@ -1481,38 +1696,38 @@ class ReuTeefCombinatie {
                 opmerkingen: null
             };
             
-            console.log('🔍 Toekomstige pup aangemaakt voor COI berekening:', futurePuppy);
+            console.log('🔍 ${this.t('futurePuppyName')} aangemaakt voor COI berekening:', futurePuppy);
             
             // NIEUW: Maak een ECHT tijdelijke COICalculator zonder de hoofdcalculator te beïnvloeden
             let tempCOICalculator = null;
             let coiResult = null;
             
             try {
-                console.log('🔄 Maak tijdelijke COICalculator voor toekomstige pup...');
+                console.log('🔄 ${this.t('generatingReport')}...');
                 tempCOICalculator = new COICalculator([...this.allHonden, futurePuppy]);
                 
                 // Bereken COI met tijdelijke calculator
                 coiResult = tempCOICalculator.calculateCOI(futurePuppy.id);
-                console.log('✅ COI resultaat via tijdelijke COICalculator:', coiResult);
+                console.log('✅ ${this.t('calculationComplete')}:', coiResult);
                 
                 // Bereken gezondheidsanalyse
                 const healthAnalysis = await this.analyzeHealthInLine(futurePuppy);
-                console.log('✅ Gezondheidsanalyse resultaat:', healthAnalysis);
+                console.log('✅ ${this.t('healthStatistics')}:', healthAnalysis);
                 
                 // Toon stamboom
                 await this.showStamboomWithFuturePuppy(futurePuppy, coiResult, healthAnalysis);
                 
             } catch (calcError) {
-                console.error('❌ Fout bij COI berekening:', calcError);
-                this.showAlert('Kon COI niet berekenen. Probeer opnieuw.', 'danger');
+                console.error('❌ ${this.t('error')}:', calcError);
+                this.showAlert('${this.t('tryAgain')}.', 'danger');
             } finally {
                 // Opruimen
                 tempCOICalculator = null;
             }
             
         } catch (error) {
-            console.error('❌ Fout bij tonen toekomstige pup stamboom:', error);
-            this.showAlert('Kon stamboom niet genereren. Probeer opnieuw.', 'danger');
+            console.error('❌ ${this.t('error')}:', error);
+            this.showAlert('${this.t('tryAgain')}.', 'danger');
         } finally {
             this.coiCalculationInProgress = false;
         }
@@ -1521,19 +1736,19 @@ class ReuTeefCombinatie {
     async initializeCOICalculator() {
         try {
             if (typeof COICalculator === 'undefined') {
-                console.error('❌ COICalculator klasse niet gevonden!');
+                console.error('❌ ${this.t('error')}!');
                 this.coiCalculatorReady = false;
                 return false;
             }
             
-            console.log('🔄 Initialiseer COICalculator voor de eerste keer...');
+            console.log('🔄 ${this.t('loadingData')}...');
             this.coiCalculator = new COICalculator(this.allHonden);
             this.coiCalculatorReady = true;
-            console.log('✅ COICalculator succesvol geïnitialiseerd');
+            console.log('✅ ${this.t('success')}');
             return true;
             
         } catch (error) {
-            console.error('❌ Fout bij initialiseren COICalculator:', error);
+            console.error('❌ ${this.t('error')}:', error);
             this.coiCalculator = null;
             this.coiCalculatorReady = false;
             return false;
@@ -1589,7 +1804,7 @@ class ReuTeefCombinatie {
         const motherAncestors = await this.collectAncestorsFromParent(this.selectedTeef, 6);
         const fatherAncestors = await this.collectAncestorsFromParent(this.selectedReu, 6);
         
-        console.log(`📊 Moederlijn voorouders: ${motherAncestors.length}, Vaderlijn voorouders: ${fatherAncestors.length}`);
+        console.log(`📊 ${t('motherLine')} ${t('totalAncestors')}: ${motherAncestors.length}, ${t('fatherLine')} ${t('totalAncestors')}: ${fatherAncestors.length}`);
         
         for (const ancestor of motherAncestors) {
             analysis.motherLine.total++;
@@ -3560,7 +3775,7 @@ class ReuTeefCombinatie {
         
         tableRows += `
             <tr style="border-top: 2px solid #dee2e6;">
-                <td class="health-category"><strong>Totaal voorouders:</strong></td>
+                <td class="health-category"><strong>${t('totalAncestors')}</strong></td>
                 <td class="mother-count"><strong>${analysis.motherLine.total}</strong></td>
                 <td class="father-count"><strong>${analysis.fatherLine.total}</strong></td>
             </tr>
