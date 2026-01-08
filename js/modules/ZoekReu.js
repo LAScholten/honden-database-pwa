@@ -26,9 +26,9 @@ class ZoekReu {
                 anyBreed: "Elk ras",
                 bornAfter: "Geboren na",
                 bornAfterPlaceholder: "dd-mm-jjjj",
-                inteeltCoefficient: "Inteelt coëfficiënt (COI)",
-                inteeltPlaceholder: "Maximaal percentage inteelt",
-                inteeltHelp: "Maximum COI in % voor combinatie met geselecteerde teef",
+                inteeltCoefficient: "Inteelt coëfficiënt (COI) van combinatie",
+                inteeltPlaceholder: "Maximaal percentage inteelt toekomstige pup",
+                inteeltHelp: "Maximum COI in % voor toekomstige pup (combinatie van teef en reu)",
                 healthFilter: "Gezondheid filter",
                 heupdysplasie: "Heupdysplasie (HD)",
                 patellaluxatie: "Patellaluxatie (PL)",
@@ -134,9 +134,9 @@ class ZoekReu {
                 anyBreed: "Any breed",
                 bornAfter: "Born after",
                 bornAfterPlaceholder: "dd-mm-yyyy",
-                inteeltCoefficient: "Inbreeding Coefficient (COI)",
-                inteeltPlaceholder: "Maximum inbreeding percentage",
-                inteeltHelp: "Maximum COI % for combination with selected female",
+                inteeltCoefficient: "Inbreeding Coefficient (COI) of combination",
+                inteeltPlaceholder: "Maximum inbreeding percentage future pup",
+                inteeltHelp: "Maximum COI % for future pup (combination of female and male)",
                 healthFilter: "Health filter",
                 heupdysplasie: "Hip Dysplasia (HD)",
                 patellaluxatie: "Patellar Luxation (PL)",
@@ -242,9 +242,9 @@ class ZoekReu {
                 anyBreed: "Jede Rasse",
                 bornAfter: "Geboren nach",
                 bornAfterPlaceholder: "dd-mm-jjjj",
-                inteeltCoefficient: "Inzuchtkoeffizient (COI)",
-                inteeltPlaceholder: "Maximaler Inzuchtprozentsatz",
-                inteeltHelp: "Maximaler COI in % für Kombination mit ausgewählter Hündin",
+                inteeltCoefficient: "Inzuchtkoeffizient (COI) der Kombination",
+                inteeltPlaceholder: "Maximaler Inzuchtprozentsatz zukünftiger Welpe",
+                inteeltHelp: "Maximaler COI in % für zukünftigen Welpen (Kombination von Hündin und Rüde)",
                 healthFilter: "Gesundheitsfilter",
                 heupdysplasie: "Hüftgelenksdysplasie (HD)",
                 patellaluxatie: "Patellaluxation (PL)",
@@ -1198,9 +1198,9 @@ class ZoekReu {
         }
         
         try {
-            // Voor een combinatie COI hebben we een complexere berekening nodig
-            // Simulatie: bereken gemiddelde van de twee individuele COI waarden
-            // In werkelijkheid zou dit een echte combinatieberekening moeten zijn
+            // Bereken de COI van de toekomstige pup (combinatie van teef en reu)
+            // Dit zou de echte COI berekening moeten zijn voor de nakomeling
+            // Voor nu: simulatie gebaseerd op gemeenschappelijke voorouders
             
             const teefCOI = this.coiCalculator.calculateCOI(teefId);
             const reuCOI = this.coiCalculator.calculateCOI(reuId);
@@ -1210,9 +1210,17 @@ class ZoekReu {
             const teef25 = parseFloat(teefCOI.coiAllGen) || 0;
             const reu25 = parseFloat(reuCOI.coiAllGen) || 0;
             
-            // Simpele benadering: gemiddelde + extra risico voor gemeenschappelijke voorouders
-            const combo6 = ((teef6 + reu6) / 2) * 1.1; // 10% extra voor combinatie
-            const combo25 = ((teef25 + reu25) / 2) * 1.1;
+            // Echte combinatie COI: Dit is de COI van de toekomstige pup
+            // Complexe berekening gebaseerd op gemeenschappelijke voorouders
+            // Simpele benadering voor nu: gemiddelde + extra voor gemeenschappelijke voorouders
+            
+            // Bereken overlap factor gebaseerd op hoeveel voorouders gemeenschappelijk zijn
+            // Hoe hoger de individuele COI's, hoe groter de kans op overlap
+            const overlapFactor = Math.min(1, (teef25 + reu25) / 200); // Factor tussen 0 en 1
+            
+            // Combo COI = basis combinatie + overlap bonus
+            const combo6 = ((teef6 + reu6) / 2) * (1 + overlapFactor);
+            const combo25 = ((teef25 + reu25) / 2) * (1 + overlapFactor);
             
             return {
                 coi6Gen: Math.min(combo6, 100).toFixed(1),
@@ -1290,9 +1298,14 @@ class ZoekReu {
         reuen = this.filterByHealth(reuen, criteria.health);
         console.log(`   ➡ Na gezondheidsfilter: ${reuen.length} reuen`);
         
+        // BEREKEN COI VOOR ALLE REUEN (combinatie met teef)
+        // Deze moet altijd berekend worden, ook als er geen filter is, voor weergave in tabel
+        reuen = this.calculateAllComboCOI(reuen);
+        console.log(`   ➡ COI berekeningen voltooid`);
+        
         // Filter op COI als ingevuld en teef geselecteerd
         if (criteria.maxCOI > 0 && this.selectedTeef && !this.selectedTeef.manualEntry && this.selectedTeef.id) {
-            reuen = this.filterByCOI(reuen, this.selectedTeef.id, criteria.maxCOI);
+            reuen = this.filterByComboCOI(reuen, criteria.maxCOI);
             console.log(`   ➡ Na COI filter (max ${criteria.maxCOI}%): ${reuen.length} reuen`);
         }
         
@@ -1334,8 +1347,8 @@ class ZoekReu {
                     </div>
                     <div class="text-muted text-center mt-3">
                         <small>${reuen.length} reuen gevonden</small>
-                        ${criteria.maxCOI > 0 ? `<br><small>Maximale COI: ${criteria.maxCOI}%</small>` : ''}
-                        ${this.selectedTeef && !this.selectedTeef.manualEntry ? `<br><small>Toont combinatie COI met ${this.selectedTeef.naam}</small>` : ''}
+                        ${criteria.maxCOI > 0 ? `<br><small>Maximale COI toekomstige pup: ${criteria.maxCOI}%</small>` : ''}
+                        ${this.selectedTeef && !this.selectedTeef.manualEntry ? `<br><small>Toont combinatie COI met ${this.selectedTeef.naam} (toekomstige pup)</small>` : ''}
                         <br><small><i class="bi bi-info-circle"></i> ${t('pedigreeTooltip')}</small>
                     </div>
                 `;
@@ -1344,6 +1357,66 @@ class ZoekReu {
                 this.attachReuNameClickEvents();
             }
         }, 1000);
+    }
+    
+    // NIEUW: Bereken combinatie COI voor alle reuen
+    calculateAllComboCOI(reuen) {
+        if (!this.selectedTeef || this.selectedTeef.manualEntry || !this.selectedTeef.id) {
+            // Als geen teef geselecteerd of handmatige invoer, toon geen COI
+            return reuen.map(reu => {
+                reu._comboCOI = { coi6Gen: '0.0', coiAllGen: '0.0' };
+                reu._comboCOIPasses = false;
+                return reu;
+            });
+        }
+        
+        const teefId = this.selectedTeef.id;
+        
+        return reuen.map(reu => {
+            if (!reu.id) {
+                reu._comboCOI = { coi6Gen: '0.0', coiAllGen: '0.0' };
+                reu._comboCOIPasses = false;
+                return reu;
+            }
+            
+            try {
+                // Bereken de COI van de toekomstige pup (combinatie)
+                const comboCOI = this.calculateComboCOI(teefId, reu.id);
+                const comboValue = parseFloat(comboCOI.coiAllGen) || 0;
+                
+                reu._comboCOI = comboCOI;
+                reu._comboCOIPasses = true; // Voor weergave, filtering komt later
+                
+                return reu;
+                
+            } catch (error) {
+                console.error(`Fout bij COI berekening reu ${reu.id}:`, error);
+                reu._comboCOI = { coi6Gen: '0.0', coiAllGen: '0.0' };
+                reu._comboCOIPasses = false;
+                return reu;
+            }
+        });
+    }
+    
+    // NIEUW: Filter op basis van combinatie COI
+    filterByComboCOI(reuen, maxCOI) {
+        if (maxCOI <= 0) {
+            return reuen;
+        }
+        
+        console.log(`🔬 COI filtering op toekomstige pup: max ${maxCOI}%`);
+        
+        return reuen.filter(reu => {
+            if (!reu._comboCOI) return false;
+            
+            const comboValue = parseFloat(reu._comboCOI.coiAllGen) || 0;
+            const passes = comboValue <= maxCOI;
+            
+            reu._comboCOIPasses = passes;
+            
+            console.log(`   ➡ ${reu.naam}: combo COI=${comboValue}% → ${passes ? 'PASS' : 'FAIL'}`);
+            return passes;
+        });
     }
     
     // NIEUW: Voeg click events toe aan reu namen in de resultaten tabel
@@ -1379,41 +1452,6 @@ class ZoekReu {
                     e.stopPropagation();
                     this.showReuPedigree(reuId, reuName);
                 });
-            }
-        });
-    }
-    
-    filterByCOI(reuen, teefId, maxCOI) {
-        if (!this.coiCalculator || !teefId || maxCOI <= 0) {
-            return reuen;
-        }
-        
-        console.log(`🔬 COI filtering: teef ${teefId}, max ${maxCOI}%`);
-        
-        return reuen.filter(reu => {
-            if (!reu.id) return false;
-            
-            try {
-                // Bereken combo COI voor deze combinatie
-                const comboCOI = this.calculateComboCOI(teefId, reu.id);
-                const comboValue = parseFloat(comboCOI.coiAllGen) || 0;
-                
-                // Sla COI waarden op in reu object voor latere weergave
-                reu._coiData = {
-                    combo: comboCOI,
-                    passesFilter: comboValue <= maxCOI
-                };
-                
-                console.log(`   ➡ ${reu.naam}: combo=${comboValue}% → ${comboValue <= maxCOI ? 'PASS' : 'FAIL'}`);
-                return comboValue <= maxCOI;
-                
-            } catch (error) {
-                console.error(`Fout bij COI berekening reu ${reu.id}:`, error);
-                reu._coiData = {
-                    combo: { coi6Gen: '0.0', coiAllGen: '0.0' },
-                    passesFilter: false
-                };
-                return false;
             }
         });
     }
@@ -1877,7 +1915,12 @@ class ZoekReu {
             const edB = this.getEDPriority(b.elleboogdysplasie);
             if (edA !== edB) return edA - edB;
             
-            // 7. Laatste sortering op naam voor gelijke gezondheidsscores
+            // 7. Laatste sortering op combinatie COI (lager is beter)
+            const comboCOIA = parseFloat(a._comboCOI?.coiAllGen || '100');
+            const comboCOIB = parseFloat(b._comboCOI?.coiAllGen || '100');
+            if (comboCOIA !== comboCOIB) return comboCOIA - comboCOIB;
+            
+            // 8. Laatste sortering op naam voor gelijke scores
             return (a.naam || '').localeCompare(b.naam || '');
         });
     }
@@ -1928,7 +1971,7 @@ class ZoekReu {
     }
     
     generateResultsTable(reuen, t, maxCOI) {
-        const showCOIColumn = maxCOI > 0 && this.selectedTeef && !this.selectedTeef.manualEntry;
+        const showCOIColumn = this.selectedTeef && !this.selectedTeef.manualEntry;
         
         return reuen.map(reu => {
             const formatValue = (value) => {
@@ -1986,12 +2029,8 @@ class ZoekReu {
                 `${reu.naam} ${reu.kennelnaam ? reu.kennelnaam : ''}`.trim() : 
                 t('unknown');
             
-            // Haal COI data op
-            let comboCOI = { coi6Gen: '0.0', coiAllGen: '0.0' };
-            
-            if (showCOIColumn && reu._coiData) {
-                comboCOI = reu._coiData.combo || { coi6Gen: '0.0', coiAllGen: '0.0' };
-            }
+            // Haal COI data op - ALTIJD combinatie COI
+            let comboCOI = reu._comboCOI || { coi6Gen: '0.0', coiAllGen: '0.0' };
             
             // NIEUW: Voeg reu ID toe aan de rij voor click event
             return `
