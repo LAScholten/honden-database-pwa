@@ -1,6 +1,7 @@
 /**
  * Zoek Reu Module
  * Voor het zoeken naar geschikte reuen voor een teef
+ * MET TOEGEVOEGDE FUNCTIE: Klik op reu naam om stamboom te zien
  */
 
 class ZoekReu {
@@ -12,6 +13,8 @@ class ZoekReu {
         this.selectedTeef = null;
         this.allTeven = [];
         this.coiCalculator = null;
+        this.stamboomManager = null; // NIEUW: Referentie naar StamboomManager
+        
         this.translations = {
             nl: {
                 title: "Zoek een Reu",
@@ -117,7 +120,9 @@ class ZoekReu {
                 notTested: "Niet getest",
                 invalidDate: "Ongeldige datum. Gebruik formaat: dd-mm-jjjj",
                 invalidCOI: "Ongeldige COI waarde. Gebruik getal tussen 0 en 100",
-                noTeefSelected: "Selecteer eerst een teef om COI berekening te gebruiken"
+                noTeefSelected: "Selecteer eerst een teef om COI berekening te gebruiken",
+                showPedigree: "Bekijk stamboom", // NIEUW: Vertaling toegevoegd
+                pedigreeTooltip: "Klik om de 4-generatie stamboom van deze reu te bekijken" // NIEUW: Tooltip
             },
             en: {
                 title: "Find a Male",
@@ -223,7 +228,9 @@ class ZoekReu {
                 notTested: "Not tested",
                 invalidDate: "Invalid date. Use format: dd-mm-yyyy",
                 invalidCOI: "Invalid COI value. Use number between 0 and 100",
-                noTeefSelected: "Select a female first to use COI calculation"
+                noTeefSelected: "Select a female first to use COI calculation",
+                showPedigree: "View pedigree", // NIEUW: Vertaling toegevoegd
+                pedigreeTooltip: "Click to view the 4-generation pedigree of this male" // NIEUW: Tooltip
             },
             de: {
                 title: "Finde einen Rüden",
@@ -329,14 +336,17 @@ class ZoekReu {
                 notTested: "Niet getestet",
                 invalidDate: "Ungültiges Datum. Format: dd-mm-jjjj",
                 invalidCOI: "Ungültiger COI-Wert. Verwenden Sie eine Zahl zwischen 0 und 100",
-                noTeefSelected: "Wählen Sie zuerst eine Hündin, um die COI-Berechnung zu verwenden"
+                noTeefSelected: "Wählen Sie zuerst eine Hündin, um die COI-Berechnung zu verwenden",
+                showPedigree: "Stammbaum anzeigen", // NIEUW: Vertaling toegevoegd
+                pedigreeTooltip: "Klicken, um den 4-Generationen-Stammbaum dieses Rüden anzuzeigen" // NIEUW: Tooltip
             }
         };
     }
     
-    injectDependencies(db, auth) {
+    injectDependencies(db, auth, stamboomManager = null) { // NIEUW: stamboomManager parameter toegevoegd
         this.db = db;
         this.auth = auth;
+        this.stamboomManager = stamboomManager; // NIEUW: Sla stamboom manager op
         
         // Initialiseer COICalculator als we de database hebben
         if (db && typeof db.getHonden === 'function') {
@@ -617,6 +627,59 @@ class ZoekReu {
         if (!this.coiCalculator) {
             await this.initCOICalculator();
         }
+        
+        // NIEUW: Check of StamboomManager beschikbaar is
+        if (!this.stamboomManager && typeof StamboomManager !== 'undefined') {
+            // Probeer StamboomManager te initialiseren
+            console.log('🔄 Initialiseer StamboomManager...');
+            this.initStamboomManager();
+        }
+    }
+    
+    // NIEUW: Initialiseer StamboomManager
+    async initStamboomManager() {
+        try {
+            if (this.db && typeof StamboomManager !== 'undefined') {
+                this.stamboomManager = new StamboomManager(this.db, this.currentLang);
+                await this.stamboomManager.initialize();
+                console.log('✅ StamboomManager geïnitialiseerd vanuit ZoekReu');
+            }
+        } catch (error) {
+            console.error('❌ Fout bij initialiseren StamboomManager:', error);
+        }
+    }
+    
+    // NIEUW: Toon stamboom voor een reu
+    async showReuPedigree(reuId, reuName) {
+        console.log(`🔄 Toon stamboom voor reu: ${reuId} - ${reuName}`);
+        
+        if (!this.stamboomManager) {
+            console.warn('⚠️ StamboomManager niet beschikbaar, probeer te initialiseren...');
+            await this.initStamboomManager();
+            
+            if (!this.stamboomManager) {
+                this.showAlert('Stamboomfunctionaliteit is niet beschikbaar op dit moment.', 'warning');
+                return;
+            }
+        }
+        
+        // Haal de reu data op
+        const honden = await this.getHonden();
+        const reu = honden.find(h => h.id == reuId);
+        
+        if (!reu) {
+            this.showAlert('Kon reu gegevens niet vinden.', 'warning');
+            return;
+        }
+        
+        try {
+            // Gebruik de stamboom manager om de stamboom te tonen
+            await this.stamboomManager.showPedigree(reu);
+            console.log('✅ Stamboom getoond voor:', reu.naam);
+        } catch (error) {
+            console.error('❌ Fout bij tonen stamboom:', error);
+            this.showAlert('Er ging iets mis bij het tonen van de stamboom.', 'danger');
+        }
     }
     
     generateHealthFilters(t) {
@@ -639,7 +702,7 @@ class ZoekReu {
                         return `<option value="${option}">${label}</option>`;
                     }).join('')}
                 </select>
-            </div>
+                </div>
         `).join('');
     }
     
@@ -1273,10 +1336,51 @@ class ZoekReu {
                         <small>${reuen.length} reuen gevonden</small>
                         ${criteria.maxCOI > 0 ? `<br><small>Maximale COI: ${criteria.maxCOI}%</small>` : ''}
                         ${this.selectedTeef && !this.selectedTeef.manualEntry ? `<br><small>Toont combinatie COI met ${this.selectedTeef.naam}</small>` : ''}
+                        <br><small><i class="bi bi-info-circle"></i> ${t('pedigreeTooltip')}</small>
                     </div>
                 `;
+                
+                // NIEUW: Voeg click event toe aan reu namen
+                this.attachReuNameClickEvents();
             }
         }, 1000);
+    }
+    
+    // NIEUW: Voeg click events toe aan reu namen in de resultaten tabel
+    attachReuNameClickEvents() {
+        const nameCells = document.querySelectorAll('#searchResults td:first-child');
+        
+        nameCells.forEach(cell => {
+            // Zoek de dichtstbijzijnde rij om het reu ID te vinden
+            const row = cell.closest('tr');
+            if (row && row.dataset && row.dataset.reuId) {
+                const reuId = row.dataset.reuId;
+                const reuName = cell.textContent.trim();
+                
+                // Maak de naam klikbaar
+                cell.style.cursor = 'pointer';
+                cell.classList.add('text-primary', 'fw-bold');
+                cell.title = this.t('pedigreeTooltip');
+                
+                // Voeg hover effect toe
+                cell.addEventListener('mouseenter', () => {
+                    cell.style.textDecoration = 'underline';
+                    cell.classList.add('text-decoration-underline');
+                });
+                
+                cell.addEventListener('mouseleave', () => {
+                    cell.style.textDecoration = 'none';
+                    cell.classList.remove('text-decoration-underline');
+                });
+                
+                // Voeg click event toe
+                cell.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.showReuPedigree(reuId, reuName);
+                });
+            }
+        });
     }
     
     filterByCOI(reuen, teefId, maxCOI) {
@@ -1889,9 +1993,17 @@ class ZoekReu {
                 comboCOI = reu._coiData.combo || { coi6Gen: '0.0', coiAllGen: '0.0' };
             }
             
+            // NIEUW: Voeg reu ID toe aan de rij voor click event
             return `
-                <tr>
-                    <td class="small">${displayName}</td>
+                <tr data-reu-id="${reu.id}">
+                    <td class="small reu-name-cell" data-reu-id="${reu.id}" data-reu-name="${displayName}">
+                        <span class="reu-name-link" 
+                              title="${t('pedigreeTooltip')}"
+                              data-reu-id="${reu.id}"
+                              data-reu-name="${displayName}">
+                            ${displayName}
+                        </span>
+                    </td>
                     <td class="small text-center">${formatDate(reu.geboortedatum)}</td>
                     <td class="${this.getHealthColor(reu.heupdysplasie, 'hd')} text-center">
                         ${formatValue(reu.heupdysplasie)}
@@ -2052,6 +2164,51 @@ style.textContent = `
         line-height: 1.2;
     }
     
+    /* NIEUW: Klikbare reu namen styling */
+    .reu-name-link {
+        color: #0d6efd !important;
+        font-weight: bold !important;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+        display: inline-block;
+        padding: 2px 4px;
+        border-radius: 3px;
+    }
+    
+    .reu-name-link:hover {
+        color: #0a58ca !important;
+        text-decoration: underline !important;
+        background-color: #f0f7ff;
+        transform: translateY(-1px);
+    }
+    
+    .reu-name-link:active {
+        transform: translateY(0);
+    }
+    
+    .reu-name-cell {
+        position: relative;
+    }
+    
+    /* Tooltip voor reu namen */
+    .reu-name-link[title]:hover::after {
+        content: attr(title);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #333;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        z-index: 1000;
+        margin-bottom: 5px;
+        opacity: 0.9;
+    }
+    
     /* Custom scrollbar voor dropdown */
     .autocomplete-results::-webkit-scrollbar {
         width: 8px;
@@ -2125,6 +2282,17 @@ style.textContent = `
         display: block;
         content: "";
         margin-top: 2px;
+    }
+    
+    /* NIEUW: Animation voor klikbare namen */
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+        100% { transform: scale(1); }
+    }
+    
+    .reu-name-link:active {
+        animation: pulse 0.2s;
     }
 `;
 document.head.appendChild(style);
