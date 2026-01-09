@@ -142,6 +142,23 @@
             width: 100%;
         }
         
+        /* Disclaimer knop styling */
+        #disclaimerBtn {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            color: white;
+            font-size: 0.9rem;
+            padding: 6px 12px;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        #disclaimerBtn:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+            transform: translateY(-2px);
+        }
+        
         /* Mobile-specifieke aanpassingen */
         @media (max-width: 768px) {
             .mobile-actions {
@@ -184,6 +201,12 @@
             .btn-group.btn-group-sm {
                 margin-right: 0 !important;
             }
+            
+            /* Disclaimer knop op mobiel */
+            #disclaimerBtn {
+                width: 100%;
+                margin-top: 10px;
+            }
         }
         
         /* Desktop: verberg mobiele layout */
@@ -194,6 +217,11 @@
             
             .action-buttons-row {
                 display: flex !important;
+            }
+            
+            /* Disclaimer knop op desktop */
+            #disclaimerBtn {
+                display: inline-block;
             }
         }
     </style>
@@ -368,6 +396,11 @@
                         <div class="alert alert-success">
                             <h5><i class="bi bi-check-circle"></i> <span class="app-text" data-key="welcomeTitle">Welkom bij de Hondendatabase PWA</span></h5>
                             <p class="app-text" data-key="welcomeText">Kies een optie uit het menu om te beginnen. De applicatie werkt volledig offline.</p>
+                            
+                            <!-- DISCLAIMER KNOOP HIER TOEGEVOEGD -->
+                            <button class="btn btn-secondary" id="disclaimerBtn">
+                                <i class="bi bi-info-circle"></i> Belangrijke informatie over COI berekening
+                            </button>
                         </div>
                         
                         <div class="row mt-3">
@@ -503,6 +536,79 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- DISCLAIMER MODAL -->
+    <div class="modal fade" id="disclaimerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Belangrijke informatie over COI berekening</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-light border">
+                        <h6><i class="bi bi-calculator text-primary"></i> Berekening voor de inteelt is als volgt:</h6>
+                        <div class="mt-3">
+                            <div class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Wetenschappelijk correct</strong> - Wright's formule exact geïmplementeerd
+                            </div>
+                            <div class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Compleet</strong> - Alle routes, niet alleen kortste pad
+                            </div>
+                            <div class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Diep</strong> - 25 generaties voor volledige analyse
+                            </div>
+                            <div class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Speciale gevallen</strong> - Ouder-kind en broer-zus automatisch 25%
+                            </div>
+                            <div class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Precies</strong> - 3 decimalen voor consistente resultaten
+                            </div>
+                            <div class="mb-2">
+                                <i class="bi bi-check-circle-fill text-success"></i> 
+                                <strong>Transparant</strong> - Uitgebreide logging voor debugging
+                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info mt-3">
+                            <p class="mb-0">
+                                <i class="bi bi-lightbulb"></i> 
+                                De calculator geeft realistischere (en vaak hogere) COI waarden dan veel online tools, 
+                                omdat hij geen shortcuts neemt. Dit is belangrijk voor verantwoord fokken.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-danger mt-4">
+                        <h6><i class="bi bi-shield-exclamation"></i> DISCLAIMER</h6>
+                        <p class="mb-0 fw-bold">
+                            Deze hondendatabase is ter informatie en is niet verantwoordelijk voor de gemaakte 
+                            combinaties van honden en hun nakomelingen op welke wijze dan ook.
+                        </p>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="dontShowAgainCheckbox">
+                            <label class="form-check-label" for="dontShowAgainCheckbox">
+                                Deze melding niet meer tonen
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="disclaimerCloseBtn" data-bs-dismiss="modal">
+                        Ik begrijp het
+                    </button>
                 </div>
             </div>
         </div>
@@ -700,7 +806,7 @@
                 adminRole: "Administrator",
                 adminRights: "Volle Rechte, einschließlich neuer Hunde hinzufügen.",
                 userRole: "Benutzer",
-                userRights: "Kann Daten importieren/exportieren und ansehen, maar keine neuen Hunde hinzufügen of bearbeiten.",
+                userRights: "Kann Daten importieren/exportieren en ansehen, maar keine neuen Hunde hinzufügen of bearbeiten.",
                 
                 // Backup Texte
                 backupNow: "Backup",
@@ -942,6 +1048,59 @@
         
         window.backupManager = backupManager;
         
+        // DISCLAIMER MANAGEMENT
+        const disclaimerManager = {
+            storageKey: 'honden_disclaimer_accepted',
+            storageKeyDontShow: 'honden_disclaimer_dont_show',
+            
+            init: function() {
+                this.setupEventListeners();
+                
+                // Toon disclaimer bij eerste keer bezoek (optioneel)
+                // const accepted = localStorage.getItem(this.storageKey);
+                // if (!accepted) {
+                //     this.showDisclaimer();
+                // }
+            },
+            
+            showDisclaimer: function() {
+                const modal = new bootstrap.Modal(document.getElementById('disclaimerModal'));
+                modal.show();
+                
+                // Setup checkbox event
+                const checkbox = document.getElementById('dontShowAgainCheckbox');
+                if (checkbox) {
+                    checkbox.addEventListener('change', function() {
+                        if (this.checked) {
+                            localStorage.setItem('honden_disclaimer_dont_show', 'true');
+                        } else {
+                            localStorage.removeItem('honden_disclaimer_dont_show');
+                        }
+                    });
+                }
+                
+                // Setup close button event
+                const closeBtn = document.getElementById('disclaimerCloseBtn');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', function() {
+                        localStorage.setItem('honden_disclaimer_accepted', new Date().toISOString());
+                    });
+                }
+            },
+            
+            setupEventListeners: function() {
+                // Disclaimer knop
+                const disclaimerBtn = document.getElementById('disclaimerBtn');
+                if (disclaimerBtn) {
+                    disclaimerBtn.addEventListener('click', () => {
+                        this.showDisclaimer();
+                    });
+                }
+            }
+        };
+        
+        window.disclaimerManager = disclaimerManager;
+        
         // Pagina tekst vertalen
         function translateAppPage(lang) {
             // Update backup manager taal
@@ -1051,6 +1210,9 @@
                 // Setup backup manager
                 backupManager.init();
                 backupManager.setupEventListeners();
+                
+                // Setup disclaimer manager
+                disclaimerManager.init();
                 
                 // Setup event listeners voor menu knoppen
                 setupMenuEventListeners();
