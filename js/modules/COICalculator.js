@@ -1,4 +1,4 @@
-// COICalculator V9.3 - GECORRIGEERDE VERSIE MET BROER-ZUS FIX
+// COICalculator V9.4 - GECORRIGEERDE VERSIE MET 3 DECIMALEN PRECISIE
 class COICalculator {
     constructor(allDogs = []) {
         this.allDogs = allDogs;
@@ -11,7 +11,7 @@ class COICalculator {
             }
         });
         
-        console.log(`✅ COICalculator V9.3: ${this._dogMap.size} honden geladen (25 gen voor ALL)`);
+        console.log(`✅ COICalculator V9.4: ${this._dogMap.size} honden geladen (25 gen voor ALL, 3 decimalen)`);
     }
 
     getDogById(id) {
@@ -27,9 +27,9 @@ class COICalculator {
             if (!dog) {
                 console.log(`❌ Hond ${dogId} niet gevonden`);
                 return { 
-                    coiAllGen: '0.0', 
-                    coi5Gen: '0.0', 
-                    coi6Gen: '0.0' // FIX: Voeg toe
+                    coiAllGen: '0.000', 
+                    coi5Gen: '0.000', 
+                    coi6Gen: '0.000'
                 };
             }
             
@@ -37,30 +37,30 @@ class COICalculator {
 
             // Check broer-zus combinatie
             if (this._isFullSiblingCombination(dog)) {
-                console.log(`⚠️ Broer-Zus combinatie -> 25%`);
+                console.log(`⚠️ Broer-Zus combinatie -> 25.000%`);
                 return { 
-                    coiAllGen: '25.0', 
-                    coi5Gen: '25.0',
-                    coi6Gen: '25.0' // FIX: Voeg toe
+                    coiAllGen: '25.000', 
+                    coi5Gen: '25.000',
+                    coi6Gen: '25.000'
                 };
             }
 
             // Basis checks
             if (!dog.vaderId || !dog.moederId) {
-                console.log(`⚠️ Geen complete ouders -> 0%`);
+                console.log(`⚠️ Geen complete ouders -> 0.000%`);
                 return { 
-                    coiAllGen: '0.0', 
-                    coi5Gen: '0.0',
-                    coi6Gen: '0.0' // FIX: Voeg toe
+                    coiAllGen: '0.000', 
+                    coi5Gen: '0.000',
+                    coi6Gen: '0.000'
                 };
             }
             
             if (dog.vaderId === dog.moederId) {
-                console.log(`⚠️ Zelfde ouders -> 25%`);
+                console.log(`⚠️ Zelfde ouders -> 25.000%`);
                 return { 
-                    coiAllGen: '25.0', 
-                    coi5Gen: '25.0',
-                    coi6Gen: '25.0' // FIX: Voeg toe
+                    coiAllGen: '25.000', 
+                    coi5Gen: '25.000',
+                    coi6Gen: '25.000'
                 };
             }
 
@@ -75,9 +75,9 @@ class COICalculator {
             const coi6Gen = this._calculateComplexCOI(dogId, 6);
             
             const result = {
-                coiAllGen: (coi25Gen * 100).toFixed(1),  // 25 generaties voor ALL
-                coi5Gen: (coi5Gen * 100).toFixed(1),     // 5 generaties voor VoorAll
-                coi6Gen: (coi6Gen * 100).toFixed(1)      // 6 generaties voor debug/info
+                coiAllGen: (coi25Gen * 100).toFixed(3),  // 25 generaties voor ALL met 3 decimalen
+                coi5Gen: (coi5Gen * 100).toFixed(3),     // 5 generaties voor VoorAll met 3 decimalen
+                coi6Gen: (coi6Gen * 100).toFixed(3)      // 6 generaties met 3 decimalen
             };
             
             console.log(`\n✅ RESULTAAT:`);
@@ -87,7 +87,9 @@ class COICalculator {
             
             // Toon officiële IK waarde als beschikbaar
             if (dog.ik !== undefined) {
-                console.log(`   Officiële database: IK = ${dog.ik}%`);
+                // Formatteer officiële IK ook met 3 decimalen
+                const officialIK = parseFloat(dog.ik).toFixed(3);
+                console.log(`   Officiële database: IK = ${officialIK}%`);
             } else {
                 console.log(`   Officiële database: IK = n.v.t.`);
             }
@@ -97,9 +99,9 @@ class COICalculator {
         } catch (error) {
             console.error('❌ FATALE FOUT:', error);
             return { 
-                coiAllGen: '0.0', 
-                coi5Gen: '0.0',
-                coi6Gen: '0.0' // FIX: Voeg toe
+                coiAllGen: '0.000', 
+                coi5Gen: '0.000',
+                coi6Gen: '0.000'
             };
         }
     }
@@ -158,14 +160,14 @@ class COICalculator {
                     const ancestorName = ancestorDog?.naam || `ID:${ancestorId}`;
                     const viaVaderDepth = vaderAncestors.get(ancestorId);
                     const viaMoederDepth = moederAncestors.get(ancestorId);
-                    console.log(`   ➡ ${ancestorName}: ${(contribution*100).toFixed(4)}% (via V:${viaVaderDepth}, M:${viaMoederDepth} gen)`);
+                    console.log(`   ➡ ${ancestorName}: ${(contribution*100).toFixed(6)}% (via V:${viaVaderDepth}, M:${viaMoederDepth} gen)`);
                     totalCOI += contribution;
                 }
             }
         }
         
         console.log(`   ${commonCount} gemeenschappelijke voorouders gevonden`);
-        console.log(`   Totaal COI: ${(totalCOI*100).toFixed(4)}%`);
+        console.log(`   Totaal COI: ${(totalCOI*100).toFixed(6)}%`);
         
         return totalCOI;
     }
@@ -317,8 +319,8 @@ class COICalculator {
             console.log(`\n🧮 Bijdrage berekening:`);
             const contrib5 = this._calculateAncestorContributionCorrect(dog.vaderId, dog.moederId, ancestorId, 5);
             const contrib25 = this._calculateAncestorContributionCorrect(dog.vaderId, dog.moederId, ancestorId, 25);
-            console.log(`   Bijdrage (5 gen): ${(contrib5*100).toFixed(4)}%`);
-            console.log(`   Bijdrage (25 gen): ${(contrib25*100).toFixed(4)}%`);
+            console.log(`   Bijdrage (5 gen): ${(contrib5*100).toFixed(6)}%`);
+            console.log(`   Bijdrage (25 gen): ${(contrib25*100).toFixed(6)}%`);
         }
     }
 
@@ -380,7 +382,7 @@ class COICalculator {
         
         for (let gen of [3, 4, 5, 6, 10, 25]) {
             const coi = this._calculateComplexCOI(dogId, gen);
-            console.log(`   ${gen.toString().padStart(2)} generaties: ${(coi*100).toFixed(4)}%`);
+            console.log(`   ${gen.toString().padStart(2)} generaties: ${(coi*100).toFixed(6)}%`);
         }
     }
 }
@@ -388,5 +390,5 @@ class COICalculator {
 // Maak globaal beschikbaar
 if (typeof window !== 'undefined') {
     window.COICalculator = COICalculator;
-    console.log('✅ COICalculator V9.3 geladen (25 generaties voor ALL, 5 gen voor VoorAll, broer-zus fix)');
+    console.log('✅ COICalculator V9.4 geladen (25 generaties voor ALL, 5 gen voor VoorAll, 3 decimalen precisie)');
 }
