@@ -75,7 +75,7 @@ class ReuTeefCombinatie {
                 combinedParents: "Combinatie ouders",
                 // COI labels
                 coi6Gen: "COI 6 Gen",
-                coiAllGen: "COI All Gen",
+                coiAllGen: "COI 25 Gen",
                 closePopup: "Sluiten",
                 predictedCoi: "Voorspelde Inteeltcoëfficiënt",
                 futurePuppyInfo: "Toekomstige Pup Informatie",
@@ -193,7 +193,7 @@ class ReuTeefCombinatie {
                 combinedParents: "Combination parents",
                 // COI labels
                 coi6Gen: "COI 6 Gen",
-                coiAllGen: "COI All Gen",
+                coiAllGen: "COI 25 Gen",
                 closePopup: "Close",
                 predictedCoi: "Predicted Inbreeding Coefficient",
                 futurePuppyInfo: "Future Puppy Information",
@@ -311,7 +311,7 @@ class ReuTeefCombinatie {
                 combinedParents: "Kombination Eltern",
                 // COI labels
                 coi6Gen: "COI 6 Gen",
-                coiAllGen: "COI All Gen",
+                coiAllGen: "COI 25 Gen",
                 closePopup: "Schließen",
                 predictedCoi: "Vorhergesagter Inzuchtkoeffizient",
                 futurePuppyInfo: "Zukünftiger Welpen-Informationen",

@@ -58,7 +58,7 @@ class ZoekReu {
                 tryAgain: "Probeer andere zoekcriteria",
                 coiResult: "Combinatie<br>COI 6g",
                 coi6Gen: "COI 6 generaties",
-                coiAllGen: "COI alle generaties",
+                coiAllGen: "COI 25 generaties",
                 healthOptions: {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
                     patellaluxatie: ["0", "1", "2", "3", "Niet getest"],
@@ -186,7 +186,7 @@ class ZoekReu {
                 tryAgain: "Try different search criteria",
                 coiResult: "Combination<br>COI 6g",
                 coi6Gen: "COI 6 generations",
-                coiAllGen: "COI all generations",
+                coiAllGen: "COI 25 generations",
                 healthOptions: {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
                     patellaluxatie: ["0", "1", "2", "3", "Not tested"],
@@ -314,7 +314,7 @@ class ZoekReu {
                 tryAgain: "Versuchen Sie andere Suchkriterien",
                 coiResult: "Kombination<br>COI 6g",
                 coi6Gen: "COI 6 Generationen",
-                coiAllGen: "COI alle Generationen",
+                coiAllGen: "COI 25 Generationen",
                 healthOptions: {
                     heupdysplasie: ["A", "B", "C", "D", "E"],
                     patellaluxatie: ["0", "1", "2", "3", "Niet getestet"],
