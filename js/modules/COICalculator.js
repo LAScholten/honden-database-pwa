@@ -1,4 +1,4 @@
-// COICalculator V9.1 - GECORRIGEERDE VERSIE MET 5 GENERATIES EN BROER-ZUS LOGICA
+// COICalculator V9.2 - GECORRIGEERDE VERSIE MET 25 GENERATIES VOOR ALL
 class COICalculator {
     constructor(allDogs = []) {
         this.allDogs = allDogs;
@@ -11,7 +11,7 @@ class COICalculator {
             }
         });
         
-        console.log(`✅ COICalculator V9.1: ${this._dogMap.size} honden geladen`);
+        console.log(`✅ COICalculator V9.2: ${this._dogMap.size} honden geladen (25 gen voor ALL)`);
     }
 
     getDogById(id) {
@@ -49,21 +49,24 @@ class COICalculator {
             }
 
             // Bereken voor verschillende generaties
-            console.log(`\n🧮 BEREKENING 5 GENERATIES (VOOR ALL):`);
+            console.log(`\n🧮 BEREKENING 5 GENERATIES (VOORALL TAB):`);
             const coi5Gen = this._calculateComplexCOI(dogId, 5);
             
-            console.log(`\n🧮 BEREKENING 6 GENERATIES (EXTRA):`);
+            console.log(`\n🧮 BEREKENING 25 GENERATIES (ALL TAB):`);
+            const coi25Gen = this._calculateComplexCOI(dogId, 25);
+            
+            console.log(`\n🧮 BEREKENING 6 GENERATIES (EXTRA INFO):`);
             const coi6Gen = this._calculateComplexCOI(dogId, 6);
             
             const result = {
-                coiAllGen: (coi5Gen * 100).toFixed(1),  // 5 generaties voor ALL
-                coi5Gen: (coi5Gen * 100).toFixed(1),     // Duplicaat voor consistentie
+                coiAllGen: (coi25Gen * 100).toFixed(1),  // 25 generaties voor ALL
+                coi5Gen: (coi5Gen * 100).toFixed(1),     // 5 generaties voor VoorAll
                 coi6Gen: (coi6Gen * 100).toFixed(1)      // Extra info voor debug
             };
             
             console.log(`\n✅ RESULTAAT:`);
-            console.log(`   ${dog.naam}: COI ALL (5-gen) = ${result.coiAllGen}%`);
-            console.log(`   ${dog.naam}: COI 5-gen = ${result.coi5Gen}%`);
+            console.log(`   ${dog.naam}: COI ALL (25-gen) = ${result.coiAllGen}%`);
+            console.log(`   ${dog.naam}: COI VoorAll (5-gen) = ${result.coi5Gen}%`);
             console.log(`   ${dog.naam}: COI 6-gen = ${result.coi6Gen}%`);
             console.log(`   Officiële database: IK = 7.70%`);
             
@@ -96,6 +99,8 @@ class COICalculator {
         const dog = this.getDogById(dogId);
         if (!dog || !dog.vaderId || !dog.moederId) return 0;
         
+        console.log(`   Berekenen over ${maxGenerations} generaties...`);
+        
         // Vind ALLE unieke voorouders van vader en moeder
         const vaderAncestors = new Map(); // ID -> {depth: minimale diepte}
         const moederAncestors = new Map();
@@ -103,8 +108,8 @@ class COICalculator {
         this._findAncestorsWithDepth(dog.vaderId, 1, maxGenerations, vaderAncestors);
         this._findAncestorsWithDepth(dog.moederId, 1, maxGenerations, moederAncestors);
         
-        console.log(`   Vader: ${vaderAncestors.size} unieke voorouders (${maxGenerations} gen)`);
-        console.log(`   Moeder: ${moederAncestors.size} unieke voorouders (${maxGenerations} gen)`);
+        console.log(`   Vader: ${vaderAncestors.size} unieke voorouders`);
+        console.log(`   Moeder: ${moederAncestors.size} unieke voorouders`);
         
         // Vind gemeenschappelijke voorouders
         let totalCOI = 0;
@@ -124,7 +129,10 @@ class COICalculator {
                 
                 if (contribution > 0.00001) {
                     const ancestorDog = this.getDogById(ancestorId);
-                    console.log(`   ➡ ${ancestorDog?.naam || 'Onbekend'} (${ancestorId}): ${(contribution*100).toFixed(4)}%`);
+                    const ancestorName = ancestorDog?.naam || `ID:${ancestorId}`;
+                    const viaVaderDepth = vaderAncestors.get(ancestorId);
+                    const viaMoederDepth = moederAncestors.get(ancestorId);
+                    console.log(`   ➡ ${ancestorName}: ${(contribution*100).toFixed(4)}% (via V:${viaVaderDepth}, M:${viaMoederDepth} gen)`);
                     totalCOI += contribution;
                 }
             }
@@ -253,18 +261,18 @@ class COICalculator {
         console.log(`   Voorouder: ${ancestor?.naam || 'Onbekend'} (${ancestorId})`);
         
         // Check of voorouder in vader's stamboom zit
-        const inVader = this._isAncestorOf(dog.vaderId, ancestorId, 6);
-        const inMoeder = this._isAncestorOf(dog.moederId, ancestorId, 6);
+        const inVader = this._isAncestorOf(dog.vaderId, ancestorId, 25);
+        const inMoeder = this._isAncestorOf(dog.moederId, ancestorId, 25);
         
-        console.log(`   In vader's stamboom: ${inVader}`);
-        console.log(`   In moeder's stamboom: ${inMoeder}`);
+        console.log(`   In vader's stamboom (25 gen): ${inVader}`);
+        console.log(`   In moeder's stamboom (25 gen): ${inMoeder}`);
         
         if (inVader && inMoeder) {
             console.log(`   ✅ IS GEMEENSCHAPPELIJKE VOOROUDER!`);
             
             // Bereken routes
-            const routesVader = this._findAllRoutes(dog.vaderId, ancestorId, 5);
-            const routesMoeder = this._findAllRoutes(dog.moederId, ancestorId, 5);
+            const routesVader = this._findAllRoutes(dog.vaderId, ancestorId, 24); // -1 voor start
+            const routesMoeder = this._findAllRoutes(dog.moederId, ancestorId, 24);
             
             console.log(`   Routes via vader: ${routesVader.length}`);
             console.log(`   Routes via moeder: ${routesMoeder.length}`);
@@ -278,6 +286,13 @@ class COICalculator {
                 const shortestM = Math.min(...routesMoeder.map(r => r.length));
                 console.log(`   Kortste route via moeder: ${shortestM} stappen`);
             }
+            
+            // Bereken bijdrage voor 5 en 25 generaties
+            console.log(`\n🧮 Bijdrage berekening:`);
+            const contrib5 = this._calculateAncestorContributionCorrect(dog.vaderId, dog.moederId, ancestorId, 5);
+            const contrib25 = this._calculateAncestorContributionCorrect(dog.vaderId, dog.moederId, ancestorId, 25);
+            console.log(`   Bijdrage (5 gen): ${(contrib5*100).toFixed(4)}%`);
+            console.log(`   Bijdrage (25 gen): ${(contrib25*100).toFixed(4)}%`);
         }
     }
 
@@ -313,6 +328,16 @@ class COICalculator {
             
             // Check broer-zus combinatie
             console.log(`   Is broer-zus combinatie: ${this._isFullSiblingCombination(esther)}`);
+            
+            // Toon diepte informatie
+            if (esther.vaderId && esther.moederId) {
+                const vaderMap = new Map();
+                const moederMap = new Map();
+                this._findAncestorsWithDepth(esther.vaderId, 1, 25, vaderMap);
+                this._findAncestorsWithDepth(esther.moederId, 1, 25, moederMap);
+                console.log(`   Voorouders vader (25 gen): ${vaderMap.size}`);
+                console.log(`   Voorouders moeder (25 gen): ${moederMap.size}`);
+            }
         }
         
         // Tel honden met ouders
@@ -322,10 +347,20 @@ class COICalculator {
         }
         console.log(`   Honden met beide ouders: ${withParents}`);
     }
+    
+    // ✅ QUICK TEST MULTIPLE GENERATIONS
+    quickTest(dogId) {
+        console.log(`\n⚡ QUICK TEST VOOR ID: ${dogId}`);
+        
+        for (let gen of [3, 4, 5, 6, 10, 25]) {
+            const coi = this._calculateComplexCOI(dogId, gen);
+            console.log(`   ${gen.toString().padStart(2)} generaties: ${(coi*100).toFixed(4)}%`);
+        }
+    }
 }
 
 // Maak globaal beschikbaar
 if (typeof window !== 'undefined') {
     window.COICalculator = COICalculator;
-    console.log('✅ COICalculator V9.1 geladen (gecorrigeerde versie met broer-zus 25% en 5 gen voor ALL)');
-}   //
+    console.log('✅ COICalculator V9.2 geladen (25 generaties voor ALL, 5 gen voor VoorAll)');
+}
