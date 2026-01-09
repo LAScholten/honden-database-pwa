@@ -28,7 +28,6 @@ class COICalculator {
                 console.log(`❌ Hond ${dogId} niet gevonden`);
                 return { 
                     coiAllGen: '0.000', 
-                    coi5Gen: '0.000', 
                     coi6Gen: '0.000'
                 };
             }
@@ -40,7 +39,6 @@ class COICalculator {
                 console.log(`⚠️ Ouder-Kind combinatie -> 25.000%`);
                 return { 
                     coiAllGen: '25.000', 
-                    coi5Gen: '25.000',
                     coi6Gen: '25.000'
                 };
             }
@@ -50,7 +48,6 @@ class COICalculator {
                 console.log(`⚠️ Broer-Zus combinatie -> 25.000%`);
                 return { 
                     coiAllGen: '25.000', 
-                    coi5Gen: '25.000',
                     coi6Gen: '25.000'
                 };
             }
@@ -60,7 +57,6 @@ class COICalculator {
                 console.log(`⚠️ Geen complete ouders -> 0.000%`);
                 return { 
                     coiAllGen: '0.000', 
-                    coi5Gen: '0.000',
                     coi6Gen: '0.000'
                 };
             }
@@ -69,15 +65,11 @@ class COICalculator {
                 console.log(`⚠️ Zelfde ouders -> 25.000%`);
                 return { 
                     coiAllGen: '25.000', 
-                    coi5Gen: '25.000',
                     coi6Gen: '25.000'
                 };
             }
 
             // Bereken voor verschillende generaties
-            console.log(`\n🧮 BEREKENING 5 GENERATIES (VOORALL TAB):`);
-            const coi5Gen = this._calculateComplexCOI(dogId, 5);
-            
             console.log(`\n🧮 BEREKENING 25 GENERATIES (ALL TAB):`);
             const coi25Gen = this._calculateComplexCOI(dogId, 25);
             
@@ -86,13 +78,11 @@ class COICalculator {
             
             const result = {
                 coiAllGen: (coi25Gen * 100).toFixed(3),  // 25 generaties voor ALL met 3 decimalen
-                coi5Gen: (coi5Gen * 100).toFixed(3),     // 5 generaties voor VoorAll met 3 decimalen
                 coi6Gen: (coi6Gen * 100).toFixed(3),     // 6 generaties met 3 decimalen
             };
             
             console.log(`\n✅ RESULTAAT:`);
             console.log(`   ${dog.naam}: COI ALL (25-gen) = ${result.coiAllGen}%`);
-            console.log(`   ${dog.naam}: COI VoorAll (5-gen) = ${result.coi5Gen}%`);
             console.log(`   ${dog.naam}: COI 6-gen = ${result.coi6Gen}%`);
             
             // Toon officiële IK waarde als beschikbaar
@@ -110,7 +100,6 @@ class COICalculator {
             console.error('❌ FATALE FOUT:', error);
             return { 
                 coiAllGen: '0.000', 
-                coi5Gen: '0.000',
                 coi6Gen: '0.000'
             };
         }
