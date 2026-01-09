@@ -84,23 +84,16 @@ class COICalculator {
             console.log(`\n🧮 BEREKENING 6 GENERATIES (EXTRA INFO):`);
             const coi6Gen = this._calculateComplexCOI(dogId, 6);
             
-            // NIEUW: 4 generaties berekening voor console
-            console.log(`\n🧮 BEREKENING 4 GENERATIES (EXTRA INFO):`);
-            const coi4Gen = this._calculateComplexCOI(dogId, 4);
-            
             const result = {
                 coiAllGen: (coi25Gen * 100).toFixed(3),  // 25 generaties voor ALL met 3 decimalen
                 coi5Gen: (coi5Gen * 100).toFixed(3),     // 5 generaties voor VoorAll met 3 decimalen
                 coi6Gen: (coi6Gen * 100).toFixed(3),     // 6 generaties met 3 decimalen
-                // Noot: coi4Gen wordt alleen in console getoond, niet in return object
             };
             
             console.log(`\n✅ RESULTAAT:`);
             console.log(`   ${dog.naam}: COI ALL (25-gen) = ${result.coiAllGen}%`);
             console.log(`   ${dog.naam}: COI VoorAll (5-gen) = ${result.coi5Gen}%`);
             console.log(`   ${dog.naam}: COI 6-gen = ${result.coi6Gen}%`);
-            // NIEUW: Toon ook 4 generaties resultaat in console
-            console.log(`   ${dog.naam}: COI 4-gen = ${(coi4Gen * 100).toFixed(3)}%`);
             
             // Toon officiële IK waarde als beschikbaar
             if (dog.ik !== undefined) {
@@ -418,16 +411,6 @@ class COICalculator {
             if (dog.vaderId && dog.moederId) withParents++;
         }
         console.log(`   Honden met beide ouders: ${withParents}`);
-    }
-    
-    // ✅ QUICK TEST MULTIPLE GENERATIONS
-    quickTest(dogId) {
-        console.log(`\n⚡ QUICK TEST VOOR ID: ${dogId}`);
-        
-        for (let gen of [3, 4, 5, 6, 10, 25]) {
-            const coi = this._calculateComplexCOI(dogId, gen);
-            console.log(`   ${gen.toString().padStart(2)} generaties: ${(coi*100).toFixed(6)}%`);
-        }
     }
 }
 
