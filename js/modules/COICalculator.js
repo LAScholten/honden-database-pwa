@@ -1,4 +1,4 @@
-// COICalculator V9.2 - GECORRIGEERDE VERSIE MET 25 GENERATIES VOOR ALL
+// COICalculator V9.3 - GECORRIGEERDE VERSIE MET BROER-ZUS FIX
 class COICalculator {
     constructor(allDogs = []) {
         this.allDogs = allDogs;
@@ -11,7 +11,7 @@ class COICalculator {
             }
         });
         
-        console.log(`✅ COICalculator V9.2: ${this._dogMap.size} honden geladen (25 gen voor ALL)`);
+        console.log(`✅ COICalculator V9.3: ${this._dogMap.size} honden geladen (25 gen voor ALL)`);
     }
 
     getDogById(id) {
@@ -26,7 +26,11 @@ class COICalculator {
             const dog = this.getDogById(dogId);
             if (!dog) {
                 console.log(`❌ Hond ${dogId} niet gevonden`);
-                return { coiAllGen: '0.0', coi5Gen: '0.0' };
+                return { 
+                    coiAllGen: '0.0', 
+                    coi5Gen: '0.0', 
+                    coi6Gen: '0.0' // FIX: Voeg toe
+                };
             }
             
             console.log(`📋 ${dog.naam} (ID: ${dog.id}) - Vader: ${dog.vaderId}, Moeder: ${dog.moederId}`);
@@ -34,18 +38,30 @@ class COICalculator {
             // Check broer-zus combinatie
             if (this._isFullSiblingCombination(dog)) {
                 console.log(`⚠️ Broer-Zus combinatie -> 25%`);
-                return { coiAllGen: '25.0', coi5Gen: '25.0' };
+                return { 
+                    coiAllGen: '25.0', 
+                    coi5Gen: '25.0',
+                    coi6Gen: '25.0' // FIX: Voeg toe
+                };
             }
 
             // Basis checks
             if (!dog.vaderId || !dog.moederId) {
                 console.log(`⚠️ Geen complete ouders -> 0%`);
-                return { coiAllGen: '0.0', coi5Gen: '0.0' };
+                return { 
+                    coiAllGen: '0.0', 
+                    coi5Gen: '0.0',
+                    coi6Gen: '0.0' // FIX: Voeg toe
+                };
             }
             
             if (dog.vaderId === dog.moederId) {
                 console.log(`⚠️ Zelfde ouders -> 25%`);
-                return { coiAllGen: '25.0', coi5Gen: '25.0' };
+                return { 
+                    coiAllGen: '25.0', 
+                    coi5Gen: '25.0',
+                    coi6Gen: '25.0' // FIX: Voeg toe
+                };
             }
 
             // Bereken voor verschillende generaties
@@ -61,20 +77,30 @@ class COICalculator {
             const result = {
                 coiAllGen: (coi25Gen * 100).toFixed(1),  // 25 generaties voor ALL
                 coi5Gen: (coi5Gen * 100).toFixed(1),     // 5 generaties voor VoorAll
-                coi6Gen: (coi6Gen * 100).toFixed(1)      // Extra info voor debug
+                coi6Gen: (coi6Gen * 100).toFixed(1)      // 6 generaties voor debug/info
             };
             
             console.log(`\n✅ RESULTAAT:`);
             console.log(`   ${dog.naam}: COI ALL (25-gen) = ${result.coiAllGen}%`);
             console.log(`   ${dog.naam}: COI VoorAll (5-gen) = ${result.coi5Gen}%`);
             console.log(`   ${dog.naam}: COI 6-gen = ${result.coi6Gen}%`);
-            console.log(`   Officiële database: IK = 7.70%`);
+            
+            // Toon officiële IK waarde als beschikbaar
+            if (dog.ik !== undefined) {
+                console.log(`   Officiële database: IK = ${dog.ik}%`);
+            } else {
+                console.log(`   Officiële database: IK = n.v.t.`);
+            }
             
             return result;
             
         } catch (error) {
             console.error('❌ FATALE FOUT:', error);
-            return { coiAllGen: '0.0', coi5Gen: '0.0' };
+            return { 
+                coiAllGen: '0.0', 
+                coi5Gen: '0.0',
+                coi6Gen: '0.0' // FIX: Voeg toe
+            };
         }
     }
 
@@ -362,5 +388,5 @@ class COICalculator {
 // Maak globaal beschikbaar
 if (typeof window !== 'undefined') {
     window.COICalculator = COICalculator;
-    console.log('✅ COICalculator V9.2 geladen (25 generaties voor ALL, 5 gen voor VoorAll)');
+    console.log('✅ COICalculator V9.3 geladen (25 generaties voor ALL, 5 gen voor VoorAll, broer-zus fix)');
 }
