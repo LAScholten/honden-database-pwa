@@ -70,7 +70,7 @@ class LitterManager {
                 dandyFreeParents: "Vrij op ouders",
                 dandyCarrier: "Drager",
                 dandyAffected: "Lijder",
-                thyroid: "Schildklier",
+                thyroid: "Schildklier (Tgaa)",
                 thyroidNegative: "Tgaa Negatief",
                 thyroidPositive: "Tgaa Positief",
                 thyroidExplanation: "Toelichting schildklier",
@@ -124,7 +124,17 @@ class LitterManager {
                 // Container titels
                 parentDetails: "Ouderdetails",
                 litterDetails: "Nestdetails",
-                otherDetails: "Overige details"
+                otherDetails: "Overige details",
+                
+                // Health test labels
+                healthHD: "HD",
+                healthED: "ED",
+                healthPL: "PL",
+                healthEyes: "Ogen",
+                healthDandy: "Dandy",
+                healthThyroid: "Tgaa",
+                healthCoat: "Vachtkleur",
+                healthGender: "Geslacht"
             },
             en: {
                 // Modal titles
@@ -184,7 +194,7 @@ class LitterManager {
                 dandyFreeParents: "Free on parents",
                 dandyCarrier: "Carrier",
                 dandyAffected: "Affected",
-                thyroid: "Thyroid",
+                thyroid: "Thyroid (Tgaa)",
                 thyroidNegative: "Tgaa Negative",
                 thyroidPositive: "Tgaa Positive",
                 thyroidExplanation: "Thyroid explanation",
@@ -238,7 +248,17 @@ class LitterManager {
                 // Container titles
                 parentDetails: "Parent Details",
                 litterDetails: "Litter Details",
-                otherDetails: "Other Details"
+                otherDetails: "Other Details",
+                
+                // Health test labels
+                healthHD: "HD",
+                healthED: "ED",
+                healthPL: "PL",
+                healthEyes: "Eyes",
+                healthDandy: "Dandy",
+                healthThyroid: "Tgaa",
+                healthCoat: "Coat Color",
+                healthGender: "Gender"
             },
             de: {
                 // Modal Titel
@@ -298,7 +318,7 @@ class LitterManager {
                 dandyFreeParents: "Frei op ouders",
                 dandyCarrier: "Träger",
                 dandyAffected: "Betroffen",
-                thyroid: "Schilddrüse",
+                thyroid: "Schilddrüse (Tgaa)",
                 thyroidNegative: "Tgaa Negativ",
                 thyroidPositive: "Tgaa Positief",
                 thyroidExplanation: "Schilddrüse Erklärung",
@@ -352,7 +372,17 @@ class LitterManager {
                 // Container Titel
                 parentDetails: "Elterndetails",
                 litterDetails: "Wurfdetails",
-                otherDetails: "Weitere Details"
+                otherDetails: "Weitere Details",
+                
+                // Health test labels
+                healthHD: "HD",
+                healthED: "ED",
+                healthPL: "PL",
+                healthEyes: "Augen",
+                healthDandy: "Dandy",
+                healthThyroid: "Tgaa",
+                healthCoat: "Fellfarbe",
+                healthGender: "Geschlecht"
             }
         };
         
@@ -570,8 +600,22 @@ class LitterManager {
                         padding: 8px 0;
                     }
                     
-                    .dog-item span {
-                        margin-right: 10px;
+                    .dog-item-header {
+                        font-size: 0.85em;
+                        font-weight: 600;
+                        margin-bottom: 5px;
+                    }
+                    
+                    .dog-item-health {
+                        font-size: 0.8em;
+                        margin-top: 5px;
+                    }
+                    
+                    .health-badge {
+                        font-size: 0.75em !important;
+                        padding: 2px 6px !important;
+                        margin-right: 4px;
+                        margin-bottom: 4px;
                     }
                     
                     /* Mobiele layout voor opslaan knoppen */
@@ -623,8 +667,22 @@ class LitterManager {
                         padding: 10px 0;
                     }
                     
-                    .dog-item span {
-                        margin-right: 15px;
+                    .dog-item-header {
+                        font-size: 0.95em;
+                        font-weight: 600;
+                        margin-bottom: 8px;
+                    }
+                    
+                    .dog-item-health {
+                        font-size: 0.85em;
+                        margin-top: 8px;
+                    }
+                    
+                    .health-badge {
+                        font-size: 0.8em;
+                        padding: 4px 8px;
+                        margin-right: 5px;
+                        margin-bottom: 5px;
                     }
                     
                     /* Desktop layout voor opslaan knoppen */
@@ -826,13 +884,53 @@ class LitterManager {
                     border-bottom: none;
                 }
                 
-                .dog-item span {
+                .dog-item-header {
+                    display: flex;
+                    flex-wrap: wrap;
+                    align-items: center;
+                    gap: 10px;
+                }
+                
+                .dog-item-name {
+                    font-weight: 600;
+                    color: #2c3e50;
+                }
+                
+                .dog-item-pedigree {
+                    color: #7f8c8d;
+                    font-size: 0.9em;
+                    background-color: #ecf0f1;
+                    padding: 2px 8px;
+                    border-radius: 4px;
+                }
+                
+                .dog-item-health {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 5px;
+                }
+                
+                .health-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    padding: 4px 10px;
+                    border-radius: 4px;
+                    font-size: 0.85em;
                     font-weight: 500;
                 }
                 
-                .dog-item small {
-                    color: #6c757d;
-                    font-size: 0.875em;
+                .health-badge.hd { background-color: #e8f4fd; color: #2980b9; border: 1px solid #3498db; }
+                .health-badge.ed { background-color: #e8f8f5; color: #27ae60; border: 1px solid #2ecc71; }
+                .health-badge.pl { background-color: #fff3e0; color: #f39c12; border: 1px solid #f39c12; }
+                .health-badge.eyes { background-color: #f4ecf7; color: #8e44ad; border: 1px solid #9b59b6; }
+                .health-badge.dandy { background-color: #fef9e7; color: #d68910; border: 1px solid #f1c40f; }
+                .health-badge.thyroid { background-color: #fbeee6; color: #e74c3c; border: 1px solid #e74c3c; }
+                .health-badge.coat { background-color: #e8f6f3; color: #16a085; border: 1px solid #1abc9c; }
+                .health-badge.gender { background-color: #f4ecf7; color: #8e44ad; border: 1px solid #9b59b6; }
+                
+                .health-badge-label {
+                    font-weight: 600;
+                    margin-right: 4px;
                 }
                 
                 #no-dogs-message {
@@ -1425,11 +1523,45 @@ class LitterManager {
             const genderText = dog.geslacht === 'reuen' ? this.t('male') : 
                               dog.geslacht === 'teven' ? this.t('female') : '';
             
+            // Genereer gezondheidsbadges
+            const healthBadges = [];
+            
+            if (dog.heupdysplasie) {
+                healthBadges.push(`<span class="health-badge hd"><span class="health-badge-label">${this.t('healthHD')}:</span>${dog.heupdysplasie}</span>`);
+            }
+            if (dog.elleboogdysplasie) {
+                healthBadges.push(`<span class="health-badge ed"><span class="health-badge-label">${this.t('healthED')}:</span>${dog.elleboogdysplasie}</span>`);
+            }
+            if (dog.patella) {
+                healthBadges.push(`<span class="health-badge pl"><span class="health-badge-label">${this.t('healthPL')}:</span>${dog.patella}</span>`);
+            }
+            if (dog.ogen) {
+                healthBadges.push(`<span class="health-badge eyes"><span class="health-badge-label">${this.t('healthEyes')}:</span>${dog.ogen}</span>`);
+            }
+            if (dog.dandyWalker) {
+                healthBadges.push(`<span class="health-badge dandy"><span class="health-badge-label">${this.t('healthDandy')}:</span>${dog.dandyWalker}</span>`);
+            }
+            if (dog.schildklier) {
+                healthBadges.push(`<span class="health-badge thyroid"><span class="health-badge-label">${this.t('healthThyroid')}:</span>${dog.schildklier}</span>`);
+            }
+            if (dog.vachtkleur) {
+                healthBadges.push(`<span class="health-badge coat"><span class="health-badge-label">${this.t('healthCoat')}:</span>${dog.vachtkleur}</span>`);
+            }
+            if (genderText) {
+                healthBadges.push(`<span class="health-badge gender"><span class="health-badge-label">${this.t('healthGender')}:</span>${genderText}</span>`);
+            }
+            
             html += `
                 <div class="dog-item">
-                    <span><strong>${dog.naam}</strong></span>
-                    <small>${dog.stamboomnr}</small>
-                    <small>${genderText}</small>
+                    <div class="dog-item-header">
+                        <span class="dog-item-name">${dog.naam}</span>
+                        <span class="dog-item-pedigree">${dog.stamboomnr}</span>
+                    </div>
+                    ${healthBadges.length > 0 ? `
+                        <div class="dog-item-health">
+                            ${healthBadges.join('')}
+                        </div>
+                    ` : ''}
                 </div>
             `;
         });
@@ -1818,9 +1950,11 @@ class LitterManager {
         
         let html = '';
         suggestions.forEach(dog => {
+            // Toon zowel naam als kennelnaam in de autocomplete
+            const displayName = dog.kennelnaam ? `${dog.naam} ${dog.kennelnaam}` : dog.naam;
             html += `
-                <div class="autocomplete-item" data-id="${dog.id}" data-name="${dog.naam}" data-pedigree="${dog.stamboomnr || ''}">
-                    <div class="dog-name">${dog.naam} ${dog.kennelnaam ? dog.kennelnaam : ''}</div>
+                <div class="autocomplete-item" data-id="${dog.id}" data-name="${dog.naam}" data-kennel="${dog.kennelnaam || ''}" data-pedigree="${dog.stamboomnr || ''}">
+                    <div class="dog-name">${displayName}</div>
                     <div class="dog-info">
                         ${dog.ras || 'Onbekend ras'} | ${dog.stamboomnr || 'Geen stamboom'}
                     </div>
@@ -1836,18 +1970,22 @@ class LitterManager {
             item.addEventListener('click', (e) => {
                 const dogId = item.getAttribute('data-id');
                 const dogName = item.getAttribute('data-name');
+                const dogKennel = item.getAttribute('data-kennel');
                 const input = document.getElementById(parentType);
                 const idInput = document.getElementById(`${parentType}Id`);
                 
+                // Voeg zowel naam als kennelnaam toe aan het input veld
+                const displayName = dogKennel ? `${dogName} ${dogKennel}` : dogName;
+                
                 if (input) {
-                    input.value = dogName;
+                    input.value = displayName;
                 }
                 if (idInput) {
                     idInput.value = dogId;
                 }
                 
                 dropdown.style.display = 'none';
-                console.log('LitterManager: Ouder geselecteerd:', dogName, 'ID:', dogId);
+                console.log('LitterManager: Ouder geselecteerd:', displayName, 'ID:', dogId);
             });
         });
     }
@@ -1996,12 +2134,18 @@ class LitterManager {
                 await this.uploadPhoto(dogData.stamboomnr, photoInput.files[0]);
             }
             
-            // Voeg toe aan de lijst met huidige nest honden
+            // Voeg toe aan de lijst met huidige nest honden met ALLE gezondheidsinformatie
             this.currentLitterDogs.push({
                 naam: dogData.naam,
                 stamboomnr: dogData.stamboomnr,
                 geslacht: dogData.geslacht,
-                vachtkleur: dogData.vachtkleur, // NIEUW: vachtkleur toevoegen
+                vachtkleur: dogData.vachtkleur,
+                heupdysplasie: dogData.heupdysplasie,
+                elleboogdysplasie: dogData.elleboogdysplasie,
+                patella: dogData.patella,
+                ogen: dogData.ogen,
+                dandyWalker: dogData.dandyWalker,
+                schildklier: dogData.schildklier,
                 vaderId: dogData.vaderId,
                 moederId: dogData.moederId
             });
