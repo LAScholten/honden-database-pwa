@@ -399,7 +399,8 @@
                             
                             <!-- DISCLAIMER KNOOP HIER TOEGEVOEGD -->
                             <button class="btn btn-secondary" id="disclaimerBtn">
-                                <i class="bi bi-info-circle"></i> Belangrijke informatie over COI berekening
+                                <i class="bi bi-info-circle"></i> 
+                                <span class="app-text" data-key="disclaimerBtn">Disclaimer/Informatie over COI berekening</span>
                             </button>
                         </div>
                         
@@ -546,51 +547,50 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-warning">
-                    <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Belangrijke informatie over COI berekening</h5>
+                    <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> <span id="disclaimerModalTitle">Belangrijke informatie over COI berekening</span></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="alert alert-light border">
-                        <h6><i class="bi bi-calculator text-primary"></i> Berekening voor de inteelt is als volgt:</h6>
+                        <h6><i class="bi bi-calculator text-primary"></i> <span id="disclaimerSubtitle">Berekening voor de inteelt is als volgt:</span></h6>
                         <div class="mt-3">
                             <div class="mb-2">
                                 <i class="bi bi-check-circle-fill text-success"></i> 
-                                <strong>Wetenschappelijk correct</strong> - Wright's formule exact geïmplementeerd
+                                <strong><span id="disclaimerFeature1">Wetenschappelijk correct</span></strong> - <span id="disclaimerDetail1">Wright's formule exact geïmplementeerd</span>
                             </div>
                             <div class="mb-2">
                                 <i class="bi bi-check-circle-fill text-success"></i> 
-                                <strong>Compleet</strong> - Alle routes, niet alleen kortste pad
+                                <strong><span id="disclaimerFeature2">Compleet</span></strong> - <span id="disclaimerDetail2">Alle routes, niet alleen kortste pad</span>
                             </div>
                             <div class="mb-2">
                                 <i class="bi bi-check-circle-fill text-success"></i> 
-                                <strong>Diep</strong> - 25 generaties voor volledige analyse
+                                <strong><span id="disclaimerFeature3">Diep</span></strong> - <span id="disclaimerDetail3">25 generaties voor volledige analyse</span>
                             </div>
                             <div class="mb-2">
                                 <i class="bi bi-check-circle-fill text-success"></i> 
-                                <strong>Speciale gevallen</strong> - Ouder-kind en broer-zus automatisch 25%
+                                <strong><span id="disclaimerFeature4">Speciale gevallen</span></strong> - <span id="disclaimerDetail4">Ouder-kind en broer-zus automatisch 25%</span>
                             </div>
                             <div class="mb-2">
                                 <i class="bi bi-check-circle-fill text-success"></i> 
-                                <strong>Precies</strong> - 3 decimalen voor consistente resultaten
+                                <strong><span id="disclaimerFeature5">Precies</span></strong> - <span id="disclaimerDetail5">3 decimalen voor consistente resultaten</span>
                             </div>
                             <div class="mb-2">
                                 <i class="bi bi-check-circle-fill text-success"></i> 
-                                <strong>Transparant</strong> - Uitgebreide logging voor debugging
+                                <strong><span id="disclaimerFeature6">Transparant</span></strong> - <span id="disclaimerDetail6">Uitgebreide logging voor debugging</span>
                             </div>
                         </div>
                         
                         <div class="alert alert-info mt-3">
                             <p class="mb-0">
                                 <i class="bi bi-lightbulb"></i> 
-                                De calculator geeft realistischere (en vaak hogere) COI waarden dan veel online tools, 
-                                omdat hij geen shortcuts neemt. Dit is belangrijk voor verantwoord fokken.
+                                <span id="disclaimerNote">De calculator geeft realistischere (en vaak hogere) COI waarden dan veel online tools, omdat hij geen shortcuts neemt. Dit is belangrijk voor verantwoord fokken.</span>
                             </p>
                         </div>
                     </div>
                     
                     <div class="alert alert-danger mt-4">
-                        <h6><i class="bi bi-shield-exclamation"></i> DISCLAIMER</h6>
-                        <p class="mb-0 fw-bold">
+                        <h6><i class="bi bi-shield-exclamation"></i> <span id="disclaimerTitle">DISCLAIMER</span></h6>
+                        <p class="mb-0 fw-bold" id="disclaimerText">
                             Deze hondendatabase is ter informatie en is niet verantwoordelijk voor de gemaakte 
                             combinaties van honden en hun nakomelingen op welke wijze dan ook.
                         </p>
@@ -599,7 +599,7 @@
                     <div class="mt-4">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="dontShowAgainCheckbox">
-                            <label class="form-check-label" for="dontShowAgainCheckbox">
+                            <label class="form-check-label" for="dontShowAgainCheckbox" id="dontShowAgainLabel">
                                 Deze melding niet meer tonen
                             </label>
                         </div>
@@ -607,7 +607,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" id="disclaimerCloseBtn" data-bs-dismiss="modal">
-                        Ik begrijp het
+                        <span id="disclaimerCloseText">Ik begrijp het</span>
                     </button>
                 </div>
             </div>
@@ -713,6 +713,28 @@
                 dashboardWarningNever: "Je hebt nog nooit een backup gemaakt! Als je browser data wist, ben je al je hondengegevens kwijt.",
                 dashboardWarningOld: "Je laatste backup was {days} dagen geleden. Overweeg een nieuwe backup te maken om dataverlies te voorkomen.",
                 
+                // Disclaimer teksten
+                disclaimerBtn: "Disclaimer/Informatie over COI berekening",
+                disclaimerModalTitle: "Belangrijke informatie over COI berekening",
+                disclaimerSubtitle: "Berekening voor de inteelt is als volgt:",
+                disclaimerFeature1: "Wetenschappelijk correct",
+                disclaimerDetail1: "Wright's formule exact geïmplementeerd",
+                disclaimerFeature2: "Compleet",
+                disclaimerDetail2: "Alle routes, niet alleen kortste pad",
+                disclaimerFeature3: "Diep",
+                disclaimerDetail3: "25 generaties voor volledige analyse",
+                disclaimerFeature4: "Speciale gevallen",
+                disclaimerDetail4: "Ouder-kind en broer-zus automatisch 25%",
+                disclaimerFeature5: "Precies",
+                disclaimerDetail5: "3 decimalen voor consistente resultaten",
+                disclaimerFeature6: "Transparant",
+                disclaimerDetail6: "Uitgebreide logging voor debugging",
+                disclaimerNote: "De calculator geeft realistischere (en vaak hogere) COI waarden dan veel online tools, omdat hij geen shortcuts neemt. Dit is belangrijk voor verantwoord fokken.",
+                disclaimerTitle: "DISCLAIMER",
+                disclaimerText: "Deze hondendatabase is ter informatie en is niet verantwoordelijk voor de gemaakte combinaties van honden en hun nakomelingen op welke wijze dan ook.",
+                dontShowAgainLabel: "Deze melding niet meer tonen",
+                disclaimerCloseText: "Ik begrijp het",
+                
                 installPWA: "Installeer App"
             },
             en: {
@@ -772,6 +794,28 @@
                 dashboardWarningNever: "You have never created a backup! If you clear browser data, you will lose all your dog records.",
                 dashboardWarningOld: "Your last backup was {days} days ago. Consider creating a new backup to prevent data loss.",
                 
+                // Disclaimer texts
+                disclaimerBtn: "Disclaimer/Information about COI calculation",
+                disclaimerModalTitle: "Important information about COI calculation",
+                disclaimerSubtitle: "Inbreeding calculation as follows:",
+                disclaimerFeature1: "Scientifically correct",
+                disclaimerDetail1: "Wright's formula exactly implemented",
+                disclaimerFeature2: "Complete",
+                disclaimerDetail2: "All routes, not just shortest path",
+                disclaimerFeature3: "Deep",
+                disclaimerDetail3: "25 generations for complete analysis",
+                disclaimerFeature4: "Special cases",
+                disclaimerDetail4: "Parent-child and sibling automatically 25%",
+                disclaimerFeature5: "Precise",
+                disclaimerDetail5: "3 decimals for consistent results",
+                disclaimerFeature6: "Transparent",
+                disclaimerDetail6: "Extensive logging for debugging",
+                disclaimerNote: "The calculator gives more realistic (and often higher) COI values than many online tools because it doesn't take shortcuts. This is important for responsible breeding.",
+                disclaimerTitle: "DISCLAIMER",
+                disclaimerText: "This dog database is for informational purposes only and is not responsible for any dog combinations and their offspring in any way.",
+                dontShowAgainLabel: "Don't show this message again",
+                disclaimerCloseText: "I understand",
+                
                 installPWA: "Install App"
             },
             de: {
@@ -815,9 +859,9 @@
                 backupNowDashboard: "Jetzt Backup erstellen",
                 dismissBackup: "Nicht mehr anzeigen",
                 backupModalTitle: "Data Backup - Warum is das wichtig?",
-                backupRisksTitle: "Risiken zonder Backup",
+                backupRisksTitle: "Risiken ohne Backup",
                 backupRisksText1: "Diese App speichert alle Daten <strong>nur lokal in Ihrem Browser</strong>.",
-                backupRisksText2: "Ihre Daten kunnen verloren gehen, wanneer Sie: ",
+                backupRisksText2: "Ihre Daten können verloren gehen, wenn Sie: ",
                 backupHowToTitle: "Wie man ein Backup erstellt",
                 backupHowToText1: "<strong>Empfohlen:</strong> Erstellen Sie wöchentliche Backups",
                 backupIOSHeading: "Auf iPhone/iPad:",
@@ -829,7 +873,29 @@
                 backupStatusWarning: "⚠ Letztes Backup: vor {days} Tagen",
                 backupStatusDanger: "🚨 NOCH NIE gebackupt!",
                 dashboardWarningNever: "Sie haben noch nie ein Backup erstellt! Wenn Sie Browser-Daten löschen, verlieren Sie alle Ihre Hundeaufzeichnungen.",
-                dashboardWarningOld: "Ihr letztes Backup was vor {days} Tagen. Erwägen Sie, ein neues Backup te machen, um Datenverlust zu vermeiden.",
+                dashboardWarningOld: "Ihr letztes Backup war vor {days} Tagen. Erwägen Sie, ein neues Backup zu machen, um Datenverlust zu vermeiden.",
+                
+                // Disclaimer Texte
+                disclaimerBtn: "Disclaimer/Information zur COI Berechnung",
+                disclaimerModalTitle: "Wichtige Informationen zur COI Berechnung",
+                disclaimerSubtitle: "Berechnung der Inzucht wie folgt:",
+                disclaimerFeature1: "Wissenschaftlich korrekt",
+                disclaimerDetail1: "Wrights Formel exakt implementiert",
+                disclaimerFeature2: "Vollständig",
+                disclaimerDetail2: "Alle Routen, nicht nur kürzester Pfad",
+                disclaimerFeature3: "Tief",
+                disclaimerDetail3: "25 Generationen für vollständige Analyse",
+                disclaimerFeature4: "Spezialfälle",
+                disclaimerDetail4: "Eltern-Kind und Geschwister automatisch 25%",
+                disclaimerFeature5: "Präzise",
+                disclaimerDetail5: "3 Dezimalstellen für konsistente Ergebnisse",
+                disclaimerFeature6: "Transparent",
+                disclaimerDetail6: "Umfangreiche Protokollierung für Debugging",
+                disclaimerNote: "Der Rechner liefert realistischere (und oft höhere) COI-Werte als viele Online-Tools, da er keine Abkürzungen nimmt. Dies ist wichtig für verantwortungsvolles Züchten.",
+                disclaimerTitle: "HAFTUNGSAUSSCHLUSS",
+                disclaimerText: "Diese Hundedatenbank dient nur zu Informationszwecken und ist in keiner Weise verantwortlich für die gemachten Hunde-Kombinationen und ihre Nachkommen.",
+                dontShowAgainLabel: "Diese Meldung nicht mehr anzeigen",
+                disclaimerCloseText: "Ich verstehe",
                 
                 installPWA: "App installieren"
             }
@@ -1052,20 +1118,18 @@
         const disclaimerManager = {
             storageKey: 'honden_disclaimer_accepted',
             storageKeyDontShow: 'honden_disclaimer_dont_show',
+            currentLang: appLanguage,
             
             init: function() {
                 this.setupEventListeners();
-                
-                // Toon disclaimer bij eerste keer bezoek (optioneel)
-                // const accepted = localStorage.getItem(this.storageKey);
-                // if (!accepted) {
-                //     this.showDisclaimer();
-                // }
             },
             
             showDisclaimer: function() {
                 const modal = new bootstrap.Modal(document.getElementById('disclaimerModal'));
                 modal.show();
+                
+                // Vertaal direct de modal
+                this.translateModal();
                 
                 // Setup checkbox event
                 const checkbox = document.getElementById('dontShowAgainCheckbox');
@@ -1077,6 +1141,9 @@
                             localStorage.removeItem('honden_disclaimer_dont_show');
                         }
                     });
+                    
+                    // Reset checkbox bij openen
+                    checkbox.checked = false;
                 }
                 
                 // Setup close button event
@@ -1085,6 +1152,35 @@
                     closeBtn.addEventListener('click', function() {
                         localStorage.setItem('honden_disclaimer_accepted', new Date().toISOString());
                     });
+                }
+            },
+            
+            translateModal: function() {
+                const lang = this.currentLang;
+                const translations = appTranslations[lang] || appTranslations.nl;
+                
+                // Update alle disclaimer elementen in de modal
+                const modal = document.getElementById('disclaimerModal');
+                if (modal) {
+                    const elements = modal.querySelectorAll('[id^="disclaimer"]');
+                    elements.forEach(element => {
+                        const id = element.id;
+                        if (translations[id]) {
+                            element.innerHTML = translations[id];
+                        }
+                    });
+                    
+                    // Update checkbox label
+                    const checkboxLabel = document.getElementById('dontShowAgainLabel');
+                    if (checkboxLabel && translations.dontShowAgainLabel) {
+                        checkboxLabel.textContent = translations.dontShowAgainLabel;
+                    }
+                    
+                    // Update close button
+                    const closeBtn = document.getElementById('disclaimerCloseBtn');
+                    if (closeBtn && translations.disclaimerCloseText) {
+                        closeBtn.textContent = translations.disclaimerCloseText;
+                    }
                 }
             },
             
@@ -1103,8 +1199,11 @@
         
         // Pagina tekst vertalen
         function translateAppPage(lang) {
-            // Update backup manager taal
+            // Update managers taal
             backupManager.currentLang = lang;
+            disclaimerManager.currentLang = lang;
+            
+            // Update backup manager UI
             backupManager.updateUI();
             
             // Update app teksten
@@ -1118,6 +1217,9 @@
             
             // Vertaal ook de backup info modal als die open is
             translateBackupInfoModal();
+            
+            // Vertaal ook de disclaimer modal als die open is
+            disclaimerManager.translateModal();
             
             // Update actieve vlag
             document.querySelectorAll('.app-lang-btn').forEach(btn => {
@@ -1141,6 +1243,16 @@
                 de: "Hundendatenbank PWA"
             };
             document.title = titles[lang] || titles.nl;
+            
+            // Update install knop tekst
+            const installButtons = ['pwaInstallBtn', 'pwaInstallBtnMobile'];
+            installButtons.forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                if (btn) {
+                    const text = appTranslations[lang]?.installPWA || appTranslations.nl.installPWA;
+                    btn.innerHTML = `<i class="bi bi-download"></i> ${text}`;
+                }
+            });
         }
         
         // Vertaal de backup info modal
