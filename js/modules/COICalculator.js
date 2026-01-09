@@ -327,3 +327,5 @@ class COICalculator {
 // Maak globaal beschikbaar
 if (typeof window !== 'undefined') {
     window.COICalculator = COICalculator;
+    console.log('✅ COICalculator V9.1 geladen (gecorrigeerde versie met broer-zus 25% en 5 gen voor ALL)');
+}   //
