@@ -1,4 +1,4 @@
-// COICalculator V9.4 - GECORRIGEERDE VERSIE MET 3 DECIMALEN PRECISIE
+// COICalculator V9.5 - MET OUDER-KIND COMBINATIE DETECTIE
 class COICalculator {
     constructor(allDogs = []) {
         this.allDogs = allDogs;
@@ -11,7 +11,7 @@ class COICalculator {
             }
         });
         
-        console.log(`✅ COICalculator V9.4: ${this._dogMap.size} honden geladen (25 gen voor ALL, 3 decimalen)`);
+        console.log(`✅ COICalculator V9.5: ${this._dogMap.size} honden geladen (25 gen voor ALL, 3 decimalen)`);
     }
 
     getDogById(id) {
@@ -34,6 +34,16 @@ class COICalculator {
             }
             
             console.log(`📋 ${dog.naam} (ID: ${dog.id}) - Vader: ${dog.vaderId}, Moeder: ${dog.moederId}`);
+
+            // Check directe ouder-kind combinatie (vader-dochter of moeder-zoon)
+            if (this._isParentChildCombination(dog)) {
+                console.log(`⚠️ Ouder-Kind combinatie -> 25.000%`);
+                return { 
+                    coiAllGen: '25.000', 
+                    coi5Gen: '25.000',
+                    coi6Gen: '25.000'
+                };
+            }
 
             // Check broer-zus combinatie
             if (this._isFullSiblingCombination(dog)) {
@@ -106,6 +116,49 @@ class COICalculator {
         }
     }
 
+    // ✅ Check ouder-kind combinatie (vader-dochter of moeder-zoon)
+    _isParentChildCombination(dog) {
+        if (!dog.vaderId || !dog.moederId) return false;
+        
+        // Check vader-dochter: is de vader van deze hond ook de vader van één van de ouders?
+        const vader = this.getDogById(dog.vaderId);
+        const moeder = this.getDogById(dog.moederId);
+        
+        if (!vader || !moeder) return false;
+        
+        // Vader-dochter: vader = vader van moeder
+        if (vader.id === moeder.vaderId) {
+            console.log(`   ✅ Vader-dochter combinatie gedetecteerd!`);
+            console.log(`      Hond: ${dog.naam} (ID: ${dog.id})`);
+            console.log(`      Vader: ${vader.naam} (ID: ${vader.id})`);
+            console.log(`      Moeder: ${moeder.naam} (ID: ${moeder.id}) is dochter van ${vader.naam}`);
+            return true;
+        }
+        
+        // Moeder-zoon: moeder = moeder van vader
+        if (moeder.id === vader.moederId) {
+            console.log(`   ✅ Moeder-zoon combinatie gedetecteerd!`);
+            console.log(`      Hond: ${dog.naam} (ID: ${dog.id})`);
+            console.log(`      Moeder: ${moeder.naam} (ID: ${moeder.id})`);
+            console.log(`      Vader: ${vader.naam} (ID: ${vader.id}) is zoon van ${moeder.naam}`);
+            return true;
+        }
+        
+        // Vader = grootvader via moeder (vader van moeder)
+        if (vader.vaderId && moeder.vaderId && vader.id === moeder.vaderId) {
+            console.log(`   ✅ Vader = grootvader via moeder combinatie!`);
+            return true;
+        }
+        
+        // Moeder = grootmoeder via vader (moeder van vader)
+        if (vader.moederId && moeder.moederId && moeder.id === vader.moederId) {
+            console.log(`   ✅ Moeder = grootmoeder via vader combinatie!`);
+            return true;
+        }
+        
+        return false;
+    }
+
     // ✅ Check broer-zus combinatie
     _isFullSiblingCombination(dog) {
         if (!dog.vaderId || !dog.moederId) return false;
@@ -116,10 +169,17 @@ class COICalculator {
         if (!vader || !moeder) return false;
         
         // Check of de ouders broer en zus zijn (zelfde ouders)
-        return vader.vaderId && vader.moederId && 
+        const isSiblings = vader.vaderId && vader.moederId && 
                moeder.vaderId && moeder.moederId &&
                vader.vaderId === moeder.vaderId && 
                vader.moederId === moeder.moederId;
+        
+        if (isSiblings) {
+            console.log(`   ✅ Broer-zus combinatie gedetecteerd!`);
+            console.log(`      Vader: ${vader.naam} en Moeder: ${moeder.naam} hebben dezelfde ouders`);
+        }
+        
+        return isSiblings;
     }
 
     // ✅ CORRECTE COMPLEXE BEREKENING
@@ -278,49 +338,35 @@ class COICalculator {
         }
     }
 
-    // ✅ TEST SPECIFIEKE VOOROUDER
-    testAncestor(dogId, ancestorId) {
-        console.log(`\n🧪 TEST VOOROUDER ${ancestorId}:`);
+    // ✅ TEST OUDER-KIND COMBINATIE
+    testParentChildCombination(dogId) {
+        console.log(`\n🧪 TEST OUDER-KIND COMBINATIE VOOR ID: ${dogId}`);
         
         const dog = this.getDogById(dogId);
         if (!dog) return;
         
-        const ancestor = this.getDogById(ancestorId);
-        console.log(`   Voorouder: ${ancestor?.naam || 'Onbekend'} (${ancestorId})`);
+        console.log(`   Hond: ${dog.naam} (ID: ${dog.id})`);
+        console.log(`   Vader ID: ${dog.vaderId}, Moeder ID: ${dog.moederId}`);
         
-        // Check of voorouder in vader's stamboom zit
-        const inVader = this._isAncestorOf(dog.vaderId, ancestorId, 25);
-        const inMoeder = this._isAncestorOf(dog.moederId, ancestorId, 25);
+        const isParentChild = this._isParentChildCombination(dog);
+        const isSiblings = this._isFullSiblingCombination(dog);
         
-        console.log(`   In vader's stamboom (25 gen): ${inVader}`);
-        console.log(`   In moeder's stamboom (25 gen): ${inMoeder}`);
+        console.log(`   Is ouder-kind combinatie: ${isParentChild}`);
+        console.log(`   Is broer-zus combinatie: ${isSiblings}`);
         
-        if (inVader && inMoeder) {
-            console.log(`   ✅ IS GEMEENSCHAPPELIJKE VOOROUDER!`);
+        if (dog.vaderId && dog.moederId) {
+            const vader = this.getDogById(dog.vaderId);
+            const moeder = this.getDogById(dog.moederId);
             
-            // Bereken routes
-            const routesVader = this._findAllRoutes(dog.vaderId, ancestorId, 24); // -1 voor start
-            const routesMoeder = this._findAllRoutes(dog.moederId, ancestorId, 24);
-            
-            console.log(`   Routes via vader: ${routesVader.length}`);
-            console.log(`   Routes via moeder: ${routesMoeder.length}`);
-            
-            // Toon kortste routes
-            if (routesVader.length > 0) {
-                const shortestV = Math.min(...routesVader.map(r => r.length));
-                console.log(`   Kortste route via vader: ${shortestV} stappen`);
-            }
-            if (routesMoeder.length > 0) {
-                const shortestM = Math.min(...routesMoeder.map(r => r.length));
-                console.log(`   Kortste route via moeder: ${shortestM} stappen`);
+            if (vader) {
+                console.log(`   Vader: ${vader.naam} (ID: ${vader.id})`);
+                console.log(`      Vader's ouders: ${vader.vaderId}, ${vader.moederId}`);
             }
             
-            // Bereken bijdrage voor 5 en 25 generaties
-            console.log(`\n🧮 Bijdrage berekening:`);
-            const contrib5 = this._calculateAncestorContributionCorrect(dog.vaderId, dog.moederId, ancestorId, 5);
-            const contrib25 = this._calculateAncestorContributionCorrect(dog.vaderId, dog.moederId, ancestorId, 25);
-            console.log(`   Bijdrage (5 gen): ${(contrib5*100).toFixed(6)}%`);
-            console.log(`   Bijdrage (25 gen): ${(contrib25*100).toFixed(6)}%`);
+            if (moeder) {
+                console.log(`   Moeder: ${moeder.naam} (ID: ${moeder.id})`);
+                console.log(`      Moeder's ouders: ${moeder.vaderId}, ${moeder.moederId}`);
+            }
         }
     }
 
@@ -354,18 +400,9 @@ class COICalculator {
         if (esther) {
             console.log(`   Esther's ouders: ${esther.vaderId}, ${esther.moederId}`);
             
-            // Check broer-zus combinatie
+            // Check speciale combinaties
+            console.log(`   Is ouder-kind combinatie: ${this._isParentChildCombination(esther)}`);
             console.log(`   Is broer-zus combinatie: ${this._isFullSiblingCombination(esther)}`);
-            
-            // Toon diepte informatie
-            if (esther.vaderId && esther.moederId) {
-                const vaderMap = new Map();
-                const moederMap = new Map();
-                this._findAncestorsWithDepth(esther.vaderId, 1, 25, vaderMap);
-                this._findAncestorsWithDepth(esther.moederId, 1, 25, moederMap);
-                console.log(`   Voorouders vader (25 gen): ${vaderMap.size}`);
-                console.log(`   Voorouders moeder (25 gen): ${moederMap.size}`);
-            }
         }
         
         // Tel honden met ouders
@@ -390,5 +427,5 @@ class COICalculator {
 // Maak globaal beschikbaar
 if (typeof window !== 'undefined') {
     window.COICalculator = COICalculator;
-    console.log('✅ COICalculator V9.4 geladen (25 generaties voor ALL, 5 gen voor VoorAll, 3 decimalen precisie)');
+    console.log('✅ COICalculator V9.5 geladen (25 generaties voor ALL, ouder-kind detectie, 3 decimalen)');
 }
