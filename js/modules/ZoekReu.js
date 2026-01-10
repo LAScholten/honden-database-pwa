@@ -28,8 +28,8 @@ class ZoekReu {
                 anyBreed: "Elk ras",
                 bornAfter: "Geboren na",
                 bornAfterPlaceholder: "dd-mm-jjjj",
-                inteeltCoefficient: "Inteelt coëfficiënt (COI)",
-                inteeltPlaceholder: "Maximaal percentage inteelt",
+                inteeltCoefficient: "Max COI 6 Generaties",
+                inteeltPlaceholder: "Max %",
                 inteeltHelp: "Maximum COI in % voor combinatie met geselecteerde teef (6 generaties)",
                 healthFilter: "Gezondheid filter",
                 heupdysplasie: "Heupdysplasie (HD)",
@@ -155,8 +155,8 @@ class ZoekReu {
                 anyBreed: "Any breed",
                 bornAfter: "Born after",
                 bornAfterPlaceholder: "dd-mm-yyyy",
-                inteeltCoefficient: "Inbreeding Coefficient (COI)",
-                inteeltPlaceholder: "Maximum inbreeding percentage",
+                inteeltCoefficient: "Max COI 6 Generations",
+                inteeltPlaceholder: "Max %",
                 inteeltHelp: "Maximum COI % for combination with selected female (6 generations)",
                 healthFilter: "Health filter",
                 heupdysplasie: "Hip Dysplasia (HD)",
@@ -282,8 +282,8 @@ class ZoekReu {
                 anyBreed: "Jede Rasse",
                 bornAfter: "Geboren nach",
                 bornAfterPlaceholder: "dd-mm-jjjj",
-                inteeltCoefficient: "Inzuchtkoeffizient (COI)",
-                inteeltPlaceholder: "Maximaler Inzuchtprozentsatz",
+                inteeltCoefficient: "Max COI 6 Generationen",
+                inteeltPlaceholder: "Max %",
                 inteeltHelp: "Maximaler COI in % für Kombination mit ausgewählter Hündin (6 Generationen)",
                 healthFilter: "Gesundheitsfilter",
                 heupdysplasie: "Hüftgelenksdysplasie (HD)",
@@ -396,7 +396,7 @@ class ZoekReu {
                 searchingMales: "Suche nach geeigneten Rüden...",
                 pedigreeFunctionalityUnavailable: "Stamboomfunktionalität ist derzeit nicht verfügbar",
                 maleNotFound: "Konnte Rüdendaten nicht finden",
-                errorShowingPedigree: "Beim Anzeigen des Stamboons ist ein Fehler aufgetreten",
+                errorShowingPedigree: "Beim Anzeigen des Stamboons ist een Fehler aufgetreten",
                 combinedParents: "Kombinierte Eltern"
             }
         };
@@ -551,7 +551,7 @@ class ZoekReu {
                                 </div>
                                 
                                 <div class="col-12">
-                                    <div class="row g-3">
+                                    <div class="row g-3 align-items-end">
                                         <div class="col-md-6">
                                             <label class="form-label">${t('bornAfter')}</label>
                                             <input type="text" 
@@ -562,29 +562,19 @@ class ZoekReu {
                                                    title="${t('bornAfterPlaceholder')}">
                                         </div>
                                         <div class="col-md-6">
-                                            <div class="d-flex align-items-end h-100">
-                                                <button class="btn btn-outline-secondary btn-sm" id="clearDateBtn">
-                                                    <i class="bi bi-x-lg"></i> ${t('back')} datum
-                                                </button>
+                                            <label class="form-label">${t('inteeltCoefficient')}</label>
+                                            <div class="input-group">
+                                                <input type="number" 
+                                                       class="form-control" 
+                                                       id="coiFilter" 
+                                                       placeholder="${t('inteeltPlaceholder')}"
+                                                       min="0" 
+                                                       max="100"
+                                                       step="0.1"
+                                                       style="width: 80px;">
+                                                <span class="input-group-text">%</span>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-12">
-                                    <label class="form-label">${t('inteeltCoefficient')}</label>
-                                    <div class="input-group">
-                                        <input type="number" 
-                                               class="form-control" 
-                                               id="coiFilter" 
-                                               placeholder="${t('inteeltPlaceholder')}"
-                                               min="0" 
-                                               max="100"
-                                               step="0.1">
-                                        <span class="input-group-text">%</span>
-                                    </div>
-                                    <div class="form-text">
-                                        <small><i class="bi bi-info-circle"></i> ${t('inteeltHelp')}</small>
                                     </div>
                                 </div>
                                 
@@ -686,11 +676,6 @@ class ZoekReu {
                 value = value.substring(0, 2) + '-' + value.substring(2, 4) + '-' + value.substring(4, 8);
             }
             e.target.value = value;
-        });
-        
-        document.getElementById('clearDateBtn').addEventListener('click', () => {
-            bornAfterInput.value = '';
-            bornAfterInput.classList.remove('is-invalid');
         });
         
         const coiInput = document.getElementById('coiFilter');
