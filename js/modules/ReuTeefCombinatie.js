@@ -1887,7 +1887,7 @@ class ReuTeefCombinatie {
                 .rtc-pedigree-card-compact.horizontal.gen1,
                 .rtc-pedigree-card-compact.horizontal.gen2 {
                     width: 160px !important;
-                    height: 140px !important;
+                    height: 145px !important;
                 }
                 
                 /* OVERGROOTOUDERS: 60% HOOGTE VAN NORMALE CARDS */
@@ -1901,7 +1901,7 @@ class ReuTeefCombinatie {
                     border: 2px solid #198754 !important;
                     background: #f0fff4;
                     width: 170px !important;
-                    height: 140px !important;
+                    height: 145px !important;
                 }
                 
                 /* Geslacht kleuren */
@@ -2302,7 +2302,7 @@ class ReuTeefCombinatie {
                     .rtc-pedigree-card-compact.horizontal.gen1,
                     .rtc-pedigree-card-compact.horizontal.gen2 {
                         width: 220px !important;
-                        height: 140px !important;
+                        height: 145px !important;
                         margin: 0 !important;
                         flex-shrink: 0 !important;
                     }
@@ -2316,7 +2316,7 @@ class ReuTeefCombinatie {
                     
                     .rtc-pedigree-card-compact.horizontal.main-dog-compact {
                         width: 220px !important;
-                        height: 140px !important;
+                        height: 145px !important;
                         margin: 0 !important;
                         flex-shrink: 0 !important;
                     }
@@ -2337,7 +2337,7 @@ class ReuTeefCombinatie {
                     .rtc-pedigree-card-compact.horizontal.gen1,
                     .rtc-pedigree-card-compact.horizontal.gen2 {
                         width: 220px !important;
-                        height: 140px !important;
+                        height: 145px !important;
                     }
                     
                     .rtc-pedigree-card-compact.horizontal.gen3 {
@@ -2347,7 +2347,7 @@ class ReuTeefCombinatie {
                     
                     .rtc-pedigree-card-compact.horizontal.main-dog-compact {
                         width: 220px !important;
-                        height: 140px !important;
+                        height: 145px !important;
                     }
                     
                     .rtc-pedigree-generation-col {
@@ -2460,7 +2460,7 @@ class ReuTeefCombinatie {
                     .rtc-pedigree-card-compact.horizontal.gen1,
                     .rtc-pedigree-card-compact.horizontal.gen2 {
                         width: 200px !important;
-                        height: 140px !important;
+                        height: 145px !important;
                     }
                     
                     .rtc-pedigree-card-compact.horizontal.gen3 {
@@ -2470,7 +2470,7 @@ class ReuTeefCombinatie {
                     
                     .rtc-pedigree-card-compact.horizontal.main-dog-compact {
                         width: 200px !important;
-                        height: 140px !important;
+                        height: 145px !important;
                     }
                     
                     .rtc-pedigree-card-compact.horizontal.gen0 .rtc-dog-name-kennel-compact,
@@ -2522,7 +2522,7 @@ class ReuTeefCombinatie {
                     .rtc-pedigree-card-compact.horizontal.gen1,
                     .rtc-pedigree-card-compact.horizontal.gen2 {
                         width: 200px !important;
-                        height: 140px !important;
+                        height: 145px !important;
                     }
                     
                     .rtc-pedigree-card-compact.horizontal.gen3 {
@@ -2532,7 +2532,7 @@ class ReuTeefCombinatie {
                     
                     .rtc-pedigree-card-compact.horizontal.main-dog-compact {
                         width: 200px !important;
-                        height: 140px !important;
+                        height: 145px !important;
                     }
                 }
                 
