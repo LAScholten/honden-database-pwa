@@ -65,6 +65,8 @@ class ReuTeefCombinatie {
                 grandmotherLabel: "Grootmoeder",
                 greatGrandfatherLabel: "Overgrootvader",
                 greatGrandmotherLabel: "Overgrootmoeder",
+                greatGreatGrandfatherLabel: "Over-overgrootvader",
+                greatGreatGrandmotherLabel: "Over-overgrootmoeder",
                 typeToSearch: "Begin met typen om te zoeken",
                 noDogsFound: "Geen honden gevonden",
                 found: "gevonden",
@@ -121,6 +123,7 @@ class ReuTeefCombinatie {
                 parents: "Ouders",
                 grandparents: "Grootouders",
                 greatGrandparents: "Overgrootouders",
+                greatGreatGrandparents: "Over-overgrootouders",
                 paternal: "Paternaal",
                 maternal: "Maternaal",
                 clickForDetails: "Klik voor details",
@@ -183,6 +186,8 @@ class ReuTeefCombinatie {
                 grandmotherLabel: "Grandmother",
                 greatGrandfatherLabel: "Great-grandfather",
                 greatGrandmotherLabel: "Great-grandmother",
+                greatGreatGrandfatherLabel: "Great-great-grandfather",
+                greatGreatGrandmotherLabel: "Great-great-grandmother",
                 typeToSearch: "Start typing to search",
                 noDogsFound: "No dogs found",
                 found: "found",
@@ -239,6 +244,7 @@ class ReuTeefCombinatie {
                 parents: "Parents",
                 grandparents: "Grandparents",
                 greatGrandparents: "Great Grandparents",
+                greatGreatGrandparents: "Great-great-grandparents",
                 paternal: "Paternal",
                 maternal: "Maternal",
                 clickForDetails: "Click for details",
@@ -301,6 +307,8 @@ class ReuTeefCombinatie {
                 grandmotherLabel: "Großmutter",
                 greatGrandfatherLabel: "Urgroßvater",
                 greatGrandmotherLabel: "Urgroßmutter",
+                greatGreatGrandfatherLabel: "Ur-urgroßvater",
+                greatGreatGrandmotherLabel: "Ur-urgroßmutter",
                 typeToSearch: "Beginnen Sie mit der Eingabe, um zu suchen",
                 noDogsFound: "Keine Hunde gefunden",
                 found: "gefunden",
@@ -357,6 +365,7 @@ class ReuTeefCombinatie {
                 parents: "Eltern",
                 grandparents: "Großeltern",
                 greatGrandparents: "Urgroßeltern",
+                greatGreatGrandparents: "Ur-urgroßeltern",
                 paternal: "Väterlich",
                 maternal: "Mütterlich",
                 clickForDetails: "Klicken für Details",
@@ -1826,7 +1835,7 @@ class ReuTeefCombinatie {
                     box-sizing: border-box !important;
                     border-radius: inherit;
                     display: flex !important;
-                    justify-content: flex-start !important; /* TOEKOMSTIGE PUP LINKS */
+                    justify-content: center !important; /* CENTREREN VAN ALLE GENERATIES */
                 }
                 
                 .rtc-pedigree-grid-compact {
@@ -1838,7 +1847,7 @@ class ReuTeefCombinatie {
                     gap: 20px;
                     align-items: flex-start;
                     box-sizing: border-box !important;
-                    margin: 0 !important; /* GEEN auto meer - links uitlijnen */
+                    margin: 0 auto !important; /* CENTREREN */
                 }
                 
                 /* GENERATIE KOLOM - VERTICALE STACK VAN LIGGENDE CARDS */
@@ -1866,6 +1875,10 @@ class ReuTeefCombinatie {
                     gap: 4px !important;
                 }
                 
+                .rtc-pedigree-generation-col.gen4 {
+                    gap: 4px !important;
+                }
+                
                 /* BASIS LIGGENDE CARDS - ZELFDE ALS STAMBOOMMANAGER */
                 .rtc-pedigree-card-compact.horizontal {
                     background: white;
@@ -1882,7 +1895,7 @@ class ReuTeefCombinatie {
                     flex-shrink: 0;
                 }
                 
-                /* ZELFDE BREEDTE VOOR ALLE GENERATIES - ANDERE HOOGTE VOOR OVERGROOTOUDERS */
+                /* ZELFDE BREEDTE VOOR ALLE GENERATIES - VERSCHILLENDE HOOGTE */
                 .rtc-pedigree-card-compact.horizontal.gen0,
                 .rtc-pedigree-card-compact.horizontal.gen1,
                 .rtc-pedigree-card-compact.horizontal.gen2 {
@@ -1894,6 +1907,13 @@ class ReuTeefCombinatie {
                 .rtc-pedigree-card-compact.horizontal.gen3 {
                     width: 160px !important;
                     height: 70px !important;
+                }
+                
+                /* OVER-OVERGROOTOUDERS: 34px HOOGTE */
+                .rtc-pedigree-card-compact.horizontal.gen4 {
+                    width: 160px !important;
+                    height: 34px !important;
+                    min-height: 34px !important;
                 }
                 
                 /* Hoofdhond extra styling */
@@ -1957,6 +1977,15 @@ class ReuTeefCombinatie {
                     min-height: 16px;
                 }
                 
+                /* Header voor gen4 (over-overgrootouders) - KLEINER */
+                .rtc-pedigree-card-compact.horizontal.gen4 .rtc-pedigree-card-header-compact.horizontal {
+                    padding: 1px 4px !important;
+                    font-size: 0.48rem !important;
+                    min-height: 10px !important;
+                    max-height: 10px !important;
+                    overflow: hidden !important;
+                }
+                
                 .rtc-pedigree-card-header-compact.horizontal.bg-success {
                     background: #198754 !important;
                 }
@@ -1982,6 +2011,7 @@ class ReuTeefCombinatie {
                     white-space: nowrap;
                     overflow: hidden;
                     text-overflow: ellipsis;
+                    font-size: inherit;
                 }
                 
                 .rtc-main-dot {
@@ -2015,6 +2045,14 @@ class ReuTeefCombinatie {
                     padding: 4px 6px;
                 }
                 
+                /* Body voor gen4 (over-overgrootouders) - ALLEEN NAAM EN KENNEL */
+                .rtc-pedigree-card-compact.horizontal.gen4 .rtc-pedigree-card-body-compact.horizontal {
+                    padding: 2px 4px !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                }
+                
                 /* CARD ROWS voor liggende layout */
                 .rtc-card-row {
                     display: flex;
@@ -2036,7 +2074,7 @@ class ReuTeefCombinatie {
                     margin-top: auto;
                 }
                 
-                /* NAAM + KENNEL COMBINATIE STYLING */
+                /* NAAM + KENNEL COMBINATIE STYLING - VOOR GEN4 ALLEEN NAAM */
                 .rtc-dog-name-kennel-compact {
                     font-weight: 600;
                     color: #0d6efd;
@@ -2045,6 +2083,16 @@ class ReuTeefCombinatie {
                     text-overflow: ellipsis;
                     line-height: 1.1;
                     width: 100%;
+                }
+                
+                /* Voor gen4 (over-overgrootouders): alleen naam, grotere tekst */
+                .rtc-pedigree-card-compact.horizontal.gen4 .rtc-dog-name-kennel-compact {
+                    font-size: 0.6rem !important;
+                    text-align: center !important;
+                    padding: 0 !important;
+                    margin: 0 !important;
+                    line-height: 1 !important;
+                    font-weight: 500 !important;
                 }
                 
                 /* TEKST GROOTTES PER GENERATIE */
@@ -2081,6 +2129,13 @@ class ReuTeefCombinatie {
                 
                 .rtc-pedigree-card-compact.horizontal.gen3 .rtc-click-hint-compact {
                     font-size: 0.44rem;
+                }
+                
+                /* Over-overgrootouders (gen4) - geen extra info, alleen naam */
+                .rtc-pedigree-card-compact.horizontal.gen4 .rtc-dog-pedigree-compact,
+                .rtc-pedigree-card-compact.horizontal.gen4 .rtc-dog-breed-compact,
+                .rtc-pedigree-card-compact.horizontal.gen4 .rtc-click-hint-compact {
+                    display: none !important;
                 }
                 
                 /* Algemene tekst styling */
@@ -2153,12 +2208,14 @@ class ReuTeefCombinatie {
                     opacity: 0.5;
                 }
                 
-                /* Overgrootouder styling */
-                .rtc-pedigree-card-compact.horizontal.gen3 {
+                /* Overgrootouder en over-overgrootouder styling */
+                .rtc-pedigree-card-compact.horizontal.gen3,
+                .rtc-pedigree-card-compact.horizontal.gen4 {
                     opacity: 0.9;
                 }
                 
-                .rtc-pedigree-card-compact.horizontal.gen3:hover {
+                .rtc-pedigree-card-compact.horizontal.gen3:hover,
+                .rtc-pedigree-card-compact.horizontal.gen4:hover {
                     opacity: 1;
                 }
                 
@@ -2219,7 +2276,7 @@ class ReuTeefCombinatie {
                         display: flex;
                         flex-direction: column;
                         border-radius: 0 0 12px 12px;
-                        justify-content: flex-start !important; /* TOEKOMSTIGE PUP LINKS */
+                        justify-content: center !important;
                     }
                     
                     .rtc-pedigree-grid-compact {
@@ -2230,7 +2287,7 @@ class ReuTeefCombinatie {
                         min-width: max-content !important;
                         padding: 10px 15px !important;
                         gap: 15px !important;
-                        margin: 0 !important;
+                        margin: 0 auto !important;
                         align-items: stretch !important;
                         box-sizing: border-box !important;
                         width: auto !important;
@@ -2298,6 +2355,14 @@ class ReuTeefCombinatie {
                         gap: 4px !important;
                     }
                     
+                    .rtc-pedigree-generation-col.gen4 {
+                        justify-content: center !important;
+                        align-items: flex-start !important;
+                        min-width: 220px !important;
+                        width: 220px !important;
+                        gap: 4px !important;
+                    }
+                    
                     .rtc-pedigree-card-compact.horizontal.gen0,
                     .rtc-pedigree-card-compact.horizontal.gen1,
                     .rtc-pedigree-card-compact.horizontal.gen2 {
@@ -2310,6 +2375,13 @@ class ReuTeefCombinatie {
                     .rtc-pedigree-card-compact.horizontal.gen3 {
                         width: 220px !important;
                         height: 70px !important;
+                        margin: 0 !important;
+                        flex-shrink: 0 !important;
+                    }
+                    
+                    .rtc-pedigree-card-compact.horizontal.gen4 {
+                        width: 220px !important;
+                        height: 34px !important;
                         margin: 0 !important;
                         flex-shrink: 0 !important;
                     }
@@ -2345,6 +2417,11 @@ class ReuTeefCombinatie {
                         height: 70px !important;
                     }
                     
+                    .rtc-pedigree-card-compact.horizontal.gen4 {
+                        width: 220px !important;
+                        height: 34px !important;
+                    }
+                    
                     .rtc-pedigree-card-compact.horizontal.main-dog-compact {
                         width: 220px !important;
                         height: 145px !important;
@@ -2358,7 +2435,8 @@ class ReuTeefCombinatie {
                     .rtc-pedigree-generation-col.gen0,
                     .rtc-pedigree-generation-col.gen1,
                     .rtc-pedigree-generation-col.gen2,
-                    .rtc-pedigree-generation-col.gen3 {
+                    .rtc-pedigree-generation-col.gen3,
+                    .rtc-pedigree-generation-col.gen4 {
                         min-width: 220px !important;
                         width: 220px !important;
                     }
@@ -2417,7 +2495,7 @@ class ReuTeefCombinatie {
                         padding: 0 !important;
                         display: flex;
                         border-radius: 0;
-                        justify-content: flex-start !important; /* TOEKOMSTIGE PUP LINKS */
+                        justify-content: center !important;
                     }
                     
                     .rtc-pedigree-grid-compact {
@@ -2428,7 +2506,7 @@ class ReuTeefCombinatie {
                         gap: 25px;
                         align-items: center;
                         box-sizing: border-box !important;
-                        margin: 0 !important; /* GEEN auto meer - links uitlijnen */
+                        margin: 0 auto !important; /* CENTREREN */
                     }
                     
                     .rtc-pedigree-generation-col {
@@ -2456,6 +2534,11 @@ class ReuTeefCombinatie {
                         justify-content: center;
                     }
                     
+                    .rtc-pedigree-generation-col.gen4 {
+                        gap: 4px !important;
+                        justify-content: center;
+                    }
+                    
                     .rtc-pedigree-card-compact.horizontal.gen0,
                     .rtc-pedigree-card-compact.horizontal.gen1,
                     .rtc-pedigree-card-compact.horizontal.gen2 {
@@ -2466,6 +2549,11 @@ class ReuTeefCombinatie {
                     .rtc-pedigree-card-compact.horizontal.gen3 {
                         width: 200px !important;
                         height: 70px !important;
+                    }
+                    
+                    .rtc-pedigree-card-compact.horizontal.gen4 {
+                        width: 200px !important;
+                        height: 34px !important;
                     }
                     
                     .rtc-pedigree-card-compact.horizontal.main-dog-compact {
@@ -2506,6 +2594,10 @@ class ReuTeefCombinatie {
                     .rtc-pedigree-card-compact.horizontal.gen3 .rtc-click-hint-compact {
                         font-size: 0.48rem;
                     }
+                    
+                    .rtc-pedigree-card-compact.horizontal.gen4 .rtc-dog-name-kennel-compact {
+                        font-size: 0.6rem !important;
+                    }
                 }
                 
                 @media (min-width: 1024px) and (max-width: 1365px) {
@@ -2528,6 +2620,11 @@ class ReuTeefCombinatie {
                     .rtc-pedigree-card-compact.horizontal.gen3 {
                         width: 200px !important;
                         height: 70px !important;
+                    }
+                    
+                    .rtc-pedigree-card-compact.horizontal.gen4 {
+                        width: 200px !important;
+                        height: 34px !important;
                     }
                     
                     .rtc-pedigree-card-compact.horizontal.main-dog-compact {
@@ -2855,7 +2952,24 @@ class ReuTeefCombinatie {
         const maternalGreatGrandfather2Card = await this.generateDogCard(pedigreeTree.maternalGreatGrandfather2, this.t('greatGrandfatherLabel'), false, 3);
         const maternalGreatGrandmother2Card = await this.generateDogCard(pedigreeTree.maternalGreatGrandmother2, this.t('greatGrandmotherLabel'), false, 3);
         
-        // GENERATIELABELS ZIJN VERWIJDERD
+        // NIEUW: Over-overgrootouders (generatie 4)
+        const paternalGreatGreatGrandfather1Card = await this.generateDogCard(pedigreeTree.paternalGreatGreatGrandfather1, this.t('greatGreatGrandfatherLabel'), false, 4);
+        const paternalGreatGreatGrandmother1Card = await this.generateDogCard(pedigreeTree.paternalGreatGreatGrandmother1, this.t('greatGreatGrandmotherLabel'), false, 4);
+        const paternalGreatGreatGrandfather2Card = await this.generateDogCard(pedigreeTree.paternalGreatGreatGrandfather2, this.t('greatGreatGrandfatherLabel'), false, 4);
+        const paternalGreatGreatGrandmother2Card = await this.generateDogCard(pedigreeTree.paternalGreatGreatGrandmother2, this.t('greatGreatGrandmotherLabel'), false, 4);
+        const paternalGreatGreatGrandfather3Card = await this.generateDogCard(pedigreeTree.paternalGreatGreatGrandfather3, this.t('greatGreatGrandfatherLabel'), false, 4);
+        const paternalGreatGreatGrandmother3Card = await this.generateDogCard(pedigreeTree.paternalGreatGreatGrandmother3, this.t('greatGreatGrandmotherLabel'), false, 4);
+        const paternalGreatGreatGrandfather4Card = await this.generateDogCard(pedigreeTree.paternalGreatGreatGrandfather4, this.t('greatGreatGrandfatherLabel'), false, 4);
+        const paternalGreatGreatGrandmother4Card = await this.generateDogCard(pedigreeTree.paternalGreatGreatGrandmother4, this.t('greatGreatGrandmotherLabel'), false, 4);
+        const maternalGreatGreatGrandfather1Card = await this.generateDogCard(pedigreeTree.maternalGreatGreatGrandfather1, this.t('greatGreatGrandfatherLabel'), false, 4);
+        const maternalGreatGreatGrandmother1Card = await this.generateDogCard(pedigreeTree.maternalGreatGreatGrandmother1, this.t('greatGreatGrandmotherLabel'), false, 4);
+        const maternalGreatGreatGrandfather2Card = await this.generateDogCard(pedigreeTree.maternalGreatGreatGrandfather2, this.t('greatGreatGrandfatherLabel'), false, 4);
+        const maternalGreatGreatGrandmother2Card = await this.generateDogCard(pedigreeTree.maternalGreatGreatGrandmother2, this.t('greatGreatGrandmotherLabel'), false, 4);
+        const maternalGreatGreatGrandfather3Card = await this.generateDogCard(pedigreeTree.maternalGreatGreatGrandfather3, this.t('greatGreatGrandfatherLabel'), false, 4);
+        const maternalGreatGreatGrandmother3Card = await this.generateDogCard(pedigreeTree.maternalGreatGreatGrandmother3, this.t('greatGreatGrandmotherLabel'), false, 4);
+        const maternalGreatGreatGrandfather4Card = await this.generateDogCard(pedigreeTree.maternalGreatGreatGrandfather4, this.t('greatGreatGrandfatherLabel'), false, 4);
+        const maternalGreatGreatGrandmother4Card = await this.generateDogCard(pedigreeTree.maternalGreatGreatGrandmother4, this.t('greatGreatGrandmotherLabel'), false, 4);
+        
         const gridHTML = `
             <div class="rtc-pedigree-grid-compact">
                 <!-- Generatie 0: Toekomstige Pup -->
@@ -2888,6 +3002,26 @@ class ReuTeefCombinatie {
                     ${maternalGreatGrandfather2Card}
                     ${maternalGreatGrandmother2Card}
                 </div>
+                
+                <!-- NIEUW: Generatie 4: Over-overgrootouders -->
+                <div class="rtc-pedigree-generation-col gen4">
+                    ${paternalGreatGreatGrandfather1Card}
+                    ${paternalGreatGreatGrandmother1Card}
+                    ${paternalGreatGreatGrandfather2Card}
+                    ${paternalGreatGreatGrandmother2Card}
+                    ${paternalGreatGreatGrandfather3Card}
+                    ${paternalGreatGreatGrandmother3Card}
+                    ${paternalGreatGreatGrandfather4Card}
+                    ${paternalGreatGreatGrandmother4Card}
+                    ${maternalGreatGreatGrandfather1Card}
+                    ${maternalGreatGreatGrandmother1Card}
+                    ${maternalGreatGreatGrandfather2Card}
+                    ${maternalGreatGreatGrandmother2Card}
+                    ${maternalGreatGreatGrandfather3Card}
+                    ${maternalGreatGreatGrandmother3Card}
+                    ${maternalGreatGreatGrandfather4Card}
+                    ${maternalGreatGreatGrandmother4Card}
+                </div>
             </div>
         `;
         
@@ -2913,7 +3047,24 @@ class ReuTeefCombinatie {
             maternalGreatGrandfather1: null,
             maternalGreatGrandmother1: null,
             maternalGreatGrandfather2: null,
-            maternalGreatGrandmother2: null
+            maternalGreatGrandmother2: null,
+            // NIEUW: Over-overgrootouders velden
+            paternalGreatGreatGrandfather1: null,
+            paternalGreatGreatGrandmother1: null,
+            paternalGreatGreatGrandfather2: null,
+            paternalGreatGreatGrandmother2: null,
+            paternalGreatGreatGrandfather3: null,
+            paternalGreatGreatGrandmother3: null,
+            paternalGreatGreatGrandfather4: null,
+            paternalGreatGreatGrandmother4: null,
+            maternalGreatGreatGrandfather1: null,
+            maternalGreatGreatGrandmother1: null,
+            maternalGreatGreatGrandfather2: null,
+            maternalGreatGreatGrandmother2: null,
+            maternalGreatGreatGrandfather3: null,
+            maternalGreatGreatGrandmother3: null,
+            maternalGreatGreatGrandfather4: null,
+            maternalGreatGreatGrandmother4: null
         };
         
         // Vul de stamboom op dezelfde manier als StamboomManager
@@ -2965,6 +3116,71 @@ class ReuTeefCombinatie {
             pedigreeTree.maternalGreatGrandmother2 = this.getDogById(pedigreeTree.maternalGrandmother.moederId);
         }
         
+        // NIEUW: Over-overgrootouders (generatie 4)
+        if (pedigreeTree.paternalGreatGrandfather1 && pedigreeTree.paternalGreatGrandfather1.vaderId) {
+            pedigreeTree.paternalGreatGreatGrandfather1 = this.getDogById(pedigreeTree.paternalGreatGrandfather1.vaderId);
+        }
+        
+        if (pedigreeTree.paternalGreatGrandfather1 && pedigreeTree.paternalGreatGrandfather1.moederId) {
+            pedigreeTree.paternalGreatGreatGrandmother1 = this.getDogById(pedigreeTree.paternalGreatGrandfather1.moederId);
+        }
+        
+        if (pedigreeTree.paternalGreatGrandmother1 && pedigreeTree.paternalGreatGrandmother1.vaderId) {
+            pedigreeTree.paternalGreatGreatGrandfather2 = this.getDogById(pedigreeTree.paternalGreatGrandmother1.vaderId);
+        }
+        
+        if (pedigreeTree.paternalGreatGrandmother1 && pedigreeTree.paternalGreatGrandmother1.moederId) {
+            pedigreeTree.paternalGreatGreatGrandmother2 = this.getDogById(pedigreeTree.paternalGreatGrandmother1.moederId);
+        }
+        
+        if (pedigreeTree.paternalGreatGrandfather2 && pedigreeTree.paternalGreatGrandfather2.vaderId) {
+            pedigreeTree.paternalGreatGreatGrandfather3 = this.getDogById(pedigreeTree.paternalGreatGrandfather2.vaderId);
+        }
+        
+        if (pedigreeTree.paternalGreatGrandfather2 && pedigreeTree.paternalGreatGrandfather2.moederId) {
+            pedigreeTree.paternalGreatGreatGrandmother3 = this.getDogById(pedigreeTree.paternalGreatGrandfather2.moederId);
+        }
+        
+        if (pedigreeTree.paternalGreatGrandmother2 && pedigreeTree.paternalGreatGrandmother2.vaderId) {
+            pedigreeTree.paternalGreatGreatGrandfather4 = this.getDogById(pedigreeTree.paternalGreatGrandmother2.vaderId);
+        }
+        
+        if (pedigreeTree.paternalGreatGrandmother2 && pedigreeTree.paternalGreatGrandmother2.moederId) {
+            pedigreeTree.paternalGreatGreatGrandmother4 = this.getDogById(pedigreeTree.paternalGreatGrandmother2.moederId);
+        }
+        
+        if (pedigreeTree.maternalGreatGrandfather1 && pedigreeTree.maternalGreatGrandfather1.vaderId) {
+            pedigreeTree.maternalGreatGreatGrandfather1 = this.getDogById(pedigreeTree.maternalGreatGrandfather1.vaderId);
+        }
+        
+        if (pedigreeTree.maternalGreatGrandfather1 && pedigreeTree.maternalGreatGrandfather1.moederId) {
+            pedigreeTree.maternalGreatGreatGrandmother1 = this.getDogById(pedigreeTree.maternalGreatGrandfather1.moederId);
+        }
+        
+        if (pedigreeTree.maternalGreatGrandmother1 && pedigreeTree.maternalGreatGrandmother1.vaderId) {
+            pedigreeTree.maternalGreatGreatGrandfather2 = this.getDogById(pedigreeTree.maternalGreatGrandmother1.vaderId);
+        }
+        
+        if (pedigreeTree.maternalGreatGrandmother1 && pedigreeTree.maternalGreatGrandmother1.moederId) {
+            pedigreeTree.maternalGreatGreatGrandmother2 = this.getDogById(pedigreeTree.maternalGreatGrandmother1.moederId);
+        }
+        
+        if (pedigreeTree.maternalGreatGrandfather2 && pedigreeTree.maternalGreatGrandfather2.vaderId) {
+            pedigreeTree.maternalGreatGreatGrandfather3 = this.getDogById(pedigreeTree.maternalGreatGrandfather2.vaderId);
+        }
+        
+        if (pedigreeTree.maternalGreatGrandfather2 && pedigreeTree.maternalGreatGrandfather2.moederId) {
+            pedigreeTree.maternalGreatGreatGrandmother3 = this.getDogById(pedigreeTree.maternalGreatGrandfather2.moederId);
+        }
+        
+        if (pedigreeTree.maternalGreatGrandmother2 && pedigreeTree.maternalGreatGrandmother2.vaderId) {
+            pedigreeTree.maternalGreatGreatGrandfather4 = this.getDogById(pedigreeTree.maternalGreatGrandmother2.vaderId);
+        }
+        
+        if (pedigreeTree.maternalGreatGrandmother2 && pedigreeTree.maternalGreatGrandmother2.moederId) {
+            pedigreeTree.maternalGreatGreatGrandmother4 = this.getDogById(pedigreeTree.maternalGreatGrandmother2.moederId);
+        }
+        
         return pedigreeTree;
     }
     
@@ -2993,6 +3209,32 @@ class ReuTeefCombinatie {
         const fullDisplayText = combinedName + (showKennel ? ` ${dog.kennelnaam}` : '');
         
         // Voor toekomstige pup geen ras tonen
+        // Voor generatie 4 (over-overgrootouders) alleen naam tonen
+        if (generation === 4) {
+            return `
+                <div class="rtc-pedigree-card-compact horizontal ${dog.geslacht === 'reuen' ? 'male' : 'female'} ${mainDogClass} gen${generation}" 
+                     data-dog-id="${dog.id}" 
+                     data-dog-name="${dog.naam || ''}"
+                     data-relation="${relation}"
+                     data-generation="${generation}">
+                    <div class="rtc-pedigree-card-header-compact horizontal ${headerColor}">
+                        <div class="rtc-relation-compact">
+                            <span class="rtc-relation-text">${relation}</span>
+                            ${isMainDog ? '<span class="rtc-main-dot">★</span>' : ''}
+                        </div>
+                        <div class="rtc-gender-icon-compact">
+                            <i class="bi ${genderIcon}"></i>
+                        </div>
+                    </div>
+                    <div class="rtc-pedigree-card-body-compact horizontal">
+                        <div class="rtc-dog-name-kennel-compact" title="${fullDisplayText}">
+                            ${fullDisplayText}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
         const breedText = dog.ras && dog.id !== -999999 ? 
                          `<div class="rtc-dog-breed-compact" title="${dog.ras}">${dog.ras}</div>` : '';
         
