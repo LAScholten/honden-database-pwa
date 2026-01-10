@@ -16,8 +16,8 @@ class ZoekReu {
         this.coiCalculator2 = null;
         this.coiCalculatorReady = false;
         this.stamboomManager = null;
-        this.excludeReuen = [];
-        this.excludeReuInputTimer = null;
+        this.excludeHonden = [];
+        this.excludeHondInputTimer = null;
         
         this.translations = {
             nl: {
@@ -33,12 +33,11 @@ class ZoekReu {
                 inteeltCoefficient: "Max COI 6 Generaties",
                 inteeltPlaceholder: "Max %",
                 inteeltHelp: "Maximum COI in % voor combinatie met geselecteerde teef (6 generaties)",
-                excludeReuenFilter: "Zonder de volgende reuen in de eerste generaties",
-                excludeReuenPlaceholder: "Typ naam of kennel van reu...",
+                excludeHondenFilter: "Zonder de volgende honden in de eerste X generaties",
+                excludeHondenPlaceholder: "Typ naam of kennel van hond...",
                 excludeGenerations: "Aantal generaties",
                 excludeGenerationsPlaceholder: "bv. 3",
-                excludeReuenLabel: "Uitgesloten reuen",
-                excludeReuenHelp: "Reuen die niet in de eerste X generaties mogen voorkomen",
+                excludeHondenLabel: "Uitgesloten honden",
                 removeExclude: "Verwijder",
                 healthFilter: "Gezondheid filter",
                 heupdysplasie: "Heupdysplasie (HD)",
@@ -153,9 +152,9 @@ class ZoekReu {
                 maleNotFound: "Kon reu gegevens niet vinden",
                 errorShowingPedigree: "Er ging iets mis bij het tonen van de stamboom",
                 combinedParents: "Gecombineerde ouders",
-                noMalesFound: "Geen reuen gevonden",
-                malesFound: "Reuen gevonden",
-                manuallyEnteredMale: "Handmatig ingevoerde reu"
+                noHondenFound: "Geen honden gevonden",
+                hondenFound: "Honden gevonden",
+                manuallyEnteredHond: "Handmatig ingevoerde hond"
             },
             en: {
                 title: "Find a Male",
@@ -170,12 +169,11 @@ class ZoekReu {
                 inteeltCoefficient: "Max COI 6 Generations",
                 inteeltPlaceholder: "Max %",
                 inteeltHelp: "Maximum COI % for combination with selected female (6 generations)",
-                excludeReuenFilter: "Exclude the following males in the first generations",
-                excludeReuenPlaceholder: "Type name or kennel of male...",
+                excludeHondenFilter: "Exclude the following dogs in the first X generations",
+                excludeHondenPlaceholder: "Type name or kennel of dog...",
                 excludeGenerations: "Number of generations",
                 excludeGenerationsPlaceholder: "e.g. 3",
-                excludeReuenLabel: "Excluded males",
-                excludeReuenHelp: "Males that should not appear in the first X generations",
+                excludeHondenLabel: "Excluded dogs",
                 removeExclude: "Remove",
                 healthFilter: "Health filter",
                 heupdysplasie: "Hip Dysplasia (HD)",
@@ -290,9 +288,9 @@ class ZoekReu {
                 maleNotFound: "Could not find male data",
                 errorShowingPedigree: "Something went wrong while showing the pedigree",
                 combinedParents: "Combined parents",
-                noMalesFound: "No males found",
-                malesFound: "Males found",
-                manuallyEnteredMale: "Manually entered male"
+                noHondenFound: "No dogs found",
+                hondenFound: "Dogs found",
+                manuallyEnteredHond: "Manually entered dog"
             },
             de: {
                 title: "Finde einen Rüden",
@@ -307,12 +305,11 @@ class ZoekReu {
                 inteeltCoefficient: "Max COI 6 Generationen",
                 inteeltPlaceholder: "Max %",
                 inteeltHelp: "Maximaler COI in % für Kombination mit ausgewählter Hündin (6 Generationen)",
-                excludeReuenFilter: "Ohne die folgenden Rüden in den ersten Generationen",
-                excludeReuenPlaceholder: "Name oder Zwinger des Rüden eingeben...",
+                excludeHondenFilter: "Ohne die folgenden Hunde in den ersten X Generationen",
+                excludeHondenPlaceholder: "Name oder Zwinger des Hundes eingeben...",
                 excludeGenerations: "Anzahl Generationen",
                 excludeGenerationsPlaceholder: "z.B. 3",
-                excludeReuenLabel: "Ausgeschlossene Rüden",
-                excludeReuenHelp: "Rüden, die nicht in den ersten X Generationen vorkommen dürfen",
+                excludeHondenLabel: "Ausgeschlossene Hunde",
                 removeExclude: "Entfernen",
                 healthFilter: "Gesundheitsfilter",
                 heupdysplasie: "Hüftgelenksdysplasie (HD)",
@@ -427,9 +424,9 @@ class ZoekReu {
                 maleNotFound: "Konnte Rüdendaten nicht finden",
                 errorShowingPedigree: "Beim Anzeigen des Stamboons ist een Fehler aufgetreten",
                 combinedParents: "Kombinierte Eltern",
-                noMalesFound: "Keine Rüden gefunden",
-                malesFound: "Rüden gefunden",
-                manuallyEnteredMale: "Manuell eingegebener Rüde"
+                noHondenFound: "Keine Hunde gefunden",
+                hondenFound: "Hunde gefunden",
+                manuallyEnteredHond: "Manuell eingegebener Hund"
             }
         };
     }
@@ -611,27 +608,24 @@ class ZoekReu {
                                 </div>
                                 
                                 <div class="col-12 mt-3">
-                                    <h6 class="mb-3">${t('excludeReuenFilter')}</h6>
+                                    <label class="form-label">${t('excludeHondenFilter')}</label>
                                     <div class="row g-3 align-items-end">
                                         <div class="col-md-8">
-                                            <label class="form-label">${t('excludeReuenLabel')}</label>
                                             <div class="position-relative">
                                                 <input type="text" 
                                                        class="form-control" 
-                                                       id="excludeReuSearch" 
-                                                       placeholder="${t('excludeReuenPlaceholder')}"
+                                                       id="excludeHondSearch" 
+                                                       placeholder="${t('excludeHondenPlaceholder')}"
                                                        autocomplete="off">
-                                                <div class="autocomplete-dropdown" id="excludeReuDropdown" style="display: none;">
+                                                <div class="autocomplete-dropdown" id="excludeHondDropdown" style="display: none;">
                                                     <div class="autocomplete-header">
-                                                        <small class="text-muted">${t('malesFound')}: <span id="excludeReuCount">0</span></small>
+                                                        <small class="text-muted">${t('hondenFound')}: <span id="excludeHondCount">0</span></small>
                                                     </div>
-                                                    <div class="autocomplete-results" id="excludeReuResults"></div>
+                                                    <div class="autocomplete-results" id="excludeHondResults"></div>
                                                 </div>
                                             </div>
-                                            <small class="text-muted">${t('excludeReuenHelp')}</small>
                                         </div>
                                         <div class="col-md-4">
-                                            <label class="form-label">${t('excludeGenerations')}</label>
                                             <input type="number" 
                                                    class="form-control" 
                                                    id="excludeGenerations" 
@@ -642,8 +636,8 @@ class ZoekReu {
                                         </div>
                                     </div>
                                     
-                                    <div id="excludedReuenList" class="mt-3">
-                                        ${this.generateExcludedReuenList()}
+                                    <div id="excludedHondenList" class="mt-3">
+                                        ${this.generateExcludedHondenList()}
                                     </div>
                                 </div>
                                 
@@ -691,7 +685,7 @@ class ZoekReu {
         });
         
         this.initializeTeefSearch();
-        this.initializeExcludeReuSearch();
+        this.initializeExcludeHondSearch();
         this.initializeFormValidation();
         this.initializeSearchButton();
     }
@@ -740,43 +734,43 @@ class ZoekReu {
         });
     }
     
-    initializeExcludeReuSearch() {
-        const excludeReuSearch = document.getElementById('excludeReuSearch');
-        const excludeReuDropdown = document.getElementById('excludeReuDropdown');
+    initializeExcludeHondSearch() {
+        const excludeHondSearch = document.getElementById('excludeHondSearch');
+        const excludeHondDropdown = document.getElementById('excludeHondDropdown');
         
-        excludeReuSearch.addEventListener('input', (e) => {
-            clearTimeout(this.excludeReuInputTimer);
+        excludeHondSearch.addEventListener('input', (e) => {
+            clearTimeout(this.excludeHondInputTimer);
             const searchTerm = e.target.value.trim();
             
             if (searchTerm.length === 0) {
-                excludeReuDropdown.style.display = 'none';
+                excludeHondDropdown.style.display = 'none';
                 return;
             }
             
-            this.excludeReuInputTimer = setTimeout(() => {
-                this.searchExcludeReuen(searchTerm);
+            this.excludeHondInputTimer = setTimeout(() => {
+                this.searchExcludeHonden(searchTerm);
             }, 150);
         });
         
-        excludeReuSearch.addEventListener('focus', (e) => {
+        excludeHondSearch.addEventListener('focus', (e) => {
             const searchTerm = e.target.value.trim();
             if (searchTerm.length > 0) {
-                this.searchExcludeReuen(searchTerm);
+                this.searchExcludeHonden(searchTerm);
             }
         });
         
-        excludeReuSearch.addEventListener('keydown', (e) => {
+        excludeHondSearch.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                const searchTerm = excludeReuSearch.value.trim();
+                const searchTerm = excludeHondSearch.value.trim();
                 if (searchTerm.length > 0) {
-                    this.handleManualExcludeReuEntry(searchTerm);
+                    this.handleManualExcludeHondEntry(searchTerm);
                 }
             }
             
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
-                const firstItem = excludeReuDropdown.querySelector('.autocomplete-item[data-id]');
+                const firstItem = excludeHondDropdown.querySelector('.autocomplete-item[data-id]');
                 if (firstItem) {
                     firstItem.focus();
                 }
@@ -784,8 +778,8 @@ class ZoekReu {
         });
         
         document.addEventListener('click', (e) => {
-            if (!excludeReuDropdown.contains(e.target) && e.target.id !== 'excludeReuSearch') {
-                excludeReuDropdown.style.display = 'none';
+            if (!excludeHondDropdown.contains(e.target) && e.target.id !== 'excludeHondSearch') {
+                excludeHondDropdown.style.display = 'none';
             }
         });
     }
@@ -818,30 +812,29 @@ class ZoekReu {
         });
     }
     
-    searchExcludeReuen(searchTerm) {
+    searchExcludeHonden(searchTerm) {
         const t = this.t.bind(this);
         
         if (!searchTerm || searchTerm.length === 0) {
-            document.getElementById('excludeReuDropdown').style.display = 'none';
+            document.getElementById('excludeHondDropdown').style.display = 'none';
             return;
         }
         
-        const reuen = this.allHonden.filter(h => h.geslacht === 'reuen');
         const searchTerms = searchTerm.toLowerCase().split(' ');
         
-        const filteredReuen = reuen.filter(reu => {
+        const filteredHonden = this.allHonden.filter(hond => {
             const searchableText = `
-                ${reu.naam || ''}
-                ${reu.kennelnaam || ''}
-                ${reu.stamboomnr || ''}
+                ${hond.naam || ''}
+                ${hond.kennelnaam || ''}
+                ${hond.stamboomnr || ''}
             `.toLowerCase();
             
             return searchTerms.every(term => 
                 searchableText.includes(term)
             );
-        }).filter(reu => !this.excludeReuen.some(excluded => excluded.id === reu.id));
+        }).filter(hond => !this.excludeHonden.some(excluded => excluded.id === hond.id));
         
-        filteredReuen.sort((a, b) => {
+        filteredHonden.sort((a, b) => {
             const aName = (a.naam || '').toLowerCase();
             const bName = (b.naam || '').toLowerCase();
             const aKennel = (a.kennelnaam || '').toLowerCase();
@@ -859,19 +852,19 @@ class ZoekReu {
             return aName.localeCompare(bName);
         });
         
-        this.showExcludeReuDropdown(filteredReuen, searchTerm);
+        this.showExcludeHondDropdown(filteredHonden, searchTerm);
     }
     
-    showExcludeReuDropdown(reuen, searchTerm) {
+    showExcludeHondDropdown(honden, searchTerm) {
         const t = this.t.bind(this);
-        const dropdown = document.getElementById('excludeReuDropdown');
-        const resultsDiv = document.getElementById('excludeReuResults');
-        const countSpan = document.getElementById('excludeReuCount');
+        const dropdown = document.getElementById('excludeHondDropdown');
+        const resultsDiv = document.getElementById('excludeHondResults');
+        const countSpan = document.getElementById('excludeHondCount');
         
-        if (reuen.length === 0) {
+        if (honden.length === 0) {
             resultsDiv.innerHTML = `
                 <div class="autocomplete-item text-muted p-3 text-center">
-                    <i class="bi bi-search me-2"></i>${t('noMalesFound')}
+                    <i class="bi bi-search me-2"></i>${t('noHondenFound')}
                     <br>
                     <small>${t('refineSearch')}</small>
                 </div>
@@ -887,11 +880,11 @@ class ZoekReu {
             countSpan.textContent = '0';
             dropdown.style.display = 'block';
         } else {
-            countSpan.textContent = reuen.length;
+            countSpan.textContent = honden.length;
             
-            const displayReuen = reuen.slice(0, 15);
+            const displayHonden = honden.slice(0, 15);
             
-            resultsDiv.innerHTML = displayReuen.map(reu => {
+            resultsDiv.innerHTML = displayHonden.map(hond => {
                 const highlightText = (text) => {
                     if (!text || !searchTerm) return text || '';
                     const lowerText = text.toLowerCase();
@@ -905,25 +898,30 @@ class ZoekReu {
                            text.substring(index + searchTerm.length);
                 };
                 
-                const displayName = reu.naam ? 
-                    `${highlightText(reu.naam)} ${reu.kennelnaam ? `${highlightText(reu.kennelnaam)}` : ''}` : 
+                const geslachtIcon = hond.geslacht === 'reuen' ? 
+                    '<i class="bi bi-gender-male text-primary me-1"></i>' : 
+                    hond.geslacht === 'teven' ? 
+                    '<i class="bi bi-gender-female text-danger me-1"></i>' : '';
+                
+                const displayName = hond.naam ? 
+                    `${geslachtIcon}${highlightText(hond.naam)} ${hond.kennelnaam ? `${highlightText(hond.kennelnaam)}` : ''}` : 
                     t('unknown');
                 
                 return `
-                    <div class="autocomplete-item" data-id="${reu.id}" tabindex="0">
+                    <div class="autocomplete-item" data-id="${hond.id}" tabindex="0">
                         <div class="fw-bold">${displayName}</div>
                         <div class="small text-muted">
-                            ${reu.stamboomnr ? t('pedigree') + ': ' + reu.stamboomnr : ''}
-                            ${reu.ras ? ' • ' + t('breed') + ': ' + reu.ras : ''}
+                            ${hond.stamboomnr ? t('pedigree') + ': ' + hond.stamboomnr : ''}
+                            ${hond.ras ? ' • ' + t('breed') + ': ' + hond.ras : ''}
                         </div>
                     </div>
                 `;
             }).join('');
             
-            if (reuen.length > 15) {
+            if (honden.length > 15) {
                 resultsDiv.innerHTML += `
                     <div class="autocomplete-item text-muted p-2 text-center">
-                        <small>${t('moreResults').replace('meer...', `En nog ${reuen.length - 15} ${t('moreResults')}`)}</small>
+                        <small>${t('moreResults').replace('meer...', `En nog ${honden.length - 15} ${t('moreResults')}`)}</small>
                     </div>
                 `;
             }
@@ -933,17 +931,17 @@ class ZoekReu {
         
         resultsDiv.querySelectorAll('.autocomplete-item').forEach(item => {
             item.addEventListener('click', () => {
-                const reuId = item.getAttribute('data-id');
+                const hondId = item.getAttribute('data-id');
                 const manualEntry = item.getAttribute('data-manual');
                 
-                if (reuId) {
-                    this.addExcludeReu(reuId);
+                if (hondId) {
+                    this.addExcludeHond(hondId);
                 } else if (manualEntry) {
-                    this.handleManualExcludeReuEntry(manualEntry);
+                    this.handleManualExcludeHondEntry(manualEntry);
                 }
                 
                 dropdown.style.display = 'none';
-                document.getElementById('excludeReuSearch').value = '';
+                document.getElementById('excludeHondSearch').value = '';
             });
             
             item.addEventListener('keydown', (e) => {
@@ -966,70 +964,77 @@ class ZoekReu {
                     if (prev && prev.classList.contains('autocomplete-item')) {
                         prev.focus();
                     } else {
-                        document.getElementById('excludeReuSearch').focus();
+                        document.getElementById('excludeHondSearch').focus();
                     }
                 }
             });
         });
     }
     
-    addExcludeReu(reuId) {
-        const reu = this.allHonden.find(h => h.id == reuId);
+    addExcludeHond(hondId) {
+        const hond = this.allHonden.find(h => h.id == hondId);
         
-        if (!reu) return;
+        if (!hond) return;
         
         const generations = parseInt(document.getElementById('excludeGenerations').value) || 3;
         
-        if (!this.excludeReuen.some(excluded => excluded.id === reu.id)) {
-            this.excludeReuen.push({
-                id: reu.id,
-                naam: reu.naam,
-                kennelnaam: reu.kennelnaam,
-                stamboomnr: reu.stamboomnr,
+        if (!this.excludeHonden.some(excluded => excluded.id === hond.id)) {
+            this.excludeHonden.push({
+                id: hond.id,
+                naam: hond.naam,
+                kennelnaam: hond.kennelnaam,
+                stamboomnr: hond.stamboomnr,
+                geslacht: hond.geslacht,
                 generations: generations
             });
             
-            this.updateExcludedReuenList();
+            this.updateExcludedHondenList();
         }
     }
     
-    handleManualExcludeReuEntry(entry) {
+    handleManualExcludeHondEntry(entry) {
         const generations = parseInt(document.getElementById('excludeGenerations').value) || 3;
         
-        if (!this.excludeReuen.some(excluded => excluded.manualEntry && excluded.naam === entry)) {
-            this.excludeReuen.push({
+        if (!this.excludeHonden.some(excluded => excluded.manualEntry && excluded.naam === entry)) {
+            this.excludeHonden.push({
                 id: 'manual-' + Date.now(),
                 naam: entry,
                 manualEntry: true,
                 generations: generations
             });
             
-            this.updateExcludedReuenList();
+            this.updateExcludedHondenList();
         }
     }
     
-    removeExcludeReu(index) {
-        this.excludeReuen.splice(index, 1);
-        this.updateExcludedReuenList();
+    removeExcludeHond(index) {
+        this.excludeHonden.splice(index, 1);
+        this.updateExcludedHondenList();
     }
     
-    generateExcludedReuenList() {
-        if (this.excludeReuen.length === 0) {
-            return '<div class="alert alert-light small mb-0"><i class="bi bi-info-circle"></i> Geen reuen uitgesloten</div>';
+    generateExcludedHondenList() {
+        if (this.excludeHonden.length === 0) {
+            return '<div class="alert alert-light small mb-0"><i class="bi bi-info-circle"></i> Geen honden uitgesloten</div>';
         }
         
         return `
             <div class="list-group">
-                ${this.excludeReuen.map((reu, index) => `
+                ${this.excludeHonden.map((hond, index) => `
                     <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center small">
                         <div>
-                            <strong>${reu.naam} ${reu.kennelnaam ? reu.kennelnaam : ''}</strong>
-                            ${reu.manualEntry ? 
-                                `<span class="badge bg-warning ms-2">${this.t('manuallyEnteredMale')}</span>` : 
-                                `<small class="text-muted ms-2">${reu.stamboomnr || ''}</small>`
+                            ${hond.geslacht === 'reuen' ? 
+                                '<i class="bi bi-gender-male text-primary me-1"></i>' : 
+                                hond.geslacht === 'teven' ? 
+                                '<i class="bi bi-gender-female text-danger me-1"></i>' : 
+                                ''
+                            }
+                            <strong>${hond.naam} ${hond.kennelnaam ? hond.kennelnaam : ''}</strong>
+                            ${hond.manualEntry ? 
+                                `<span class="badge bg-warning ms-2">${this.t('manuallyEnteredHond')}</span>` : 
+                                `<small class="text-muted ms-2">${hond.stamboomnr || ''}</small>`
                             }
                             <br>
-                            <small class="text-muted">${this.t('excludeGenerations')}: ${reu.generations}</small>
+                            <small class="text-muted">${this.t('excludeGenerations')}: ${hond.generations}</small>
                         </div>
                         <button type="button" class="btn btn-sm btn-outline-danger" data-index="${index}">
                             <i class="bi bi-x"></i> ${this.t('removeExclude')}
@@ -1040,15 +1045,15 @@ class ZoekReu {
         `;
     }
     
-    updateExcludedReuenList() {
-        const listDiv = document.getElementById('excludedReuenList');
+    updateExcludedHondenList() {
+        const listDiv = document.getElementById('excludedHondenList');
         if (listDiv) {
-            listDiv.innerHTML = this.generateExcludedReuenList();
+            listDiv.innerHTML = this.generateExcludedHondenList();
             
             listDiv.querySelectorAll('button[data-index]').forEach(button => {
                 button.addEventListener('click', (e) => {
                     const index = parseInt(e.target.closest('button').dataset.index);
-                    this.removeExcludeReu(index);
+                    this.removeExcludeHond(index);
                 });
             });
         }
@@ -1715,7 +1720,7 @@ class ZoekReu {
             }
         }
         
-        reuen = this.filterByExcludedReuen(reuen, criteria.excludeReuen, criteria.excludeGenerations);
+        reuen = this.filterByExcludedHonden(reuen, criteria.excludeHonden, criteria.excludeGenerations);
         console.log(`   ➡ Na exclusie filter: ${reuen.length} reuen`);
         
         reuen = this.filterByHealth(reuen, criteria.health);
@@ -1761,9 +1766,9 @@ class ZoekReu {
                         </table>
                     </div>
                     <div class="text-muted text-center mt-3">
-                        <small>${reuen.length} ${t('searchButton').toLowerCase()} ${t('malesFound').toLowerCase()}</small>
+                        <small>${reuen.length} ${t('searchButton').toLowerCase()} gevonden</small>
                         ${criteria.maxCOI > 0 ? `<br><small>Maximale COI 6g: ${criteria.maxCOI}%</small>` : ''}
-                        ${criteria.excludeReuen.length > 0 ? `<br><small>${criteria.excludeReuen.length} reuen uitgesloten in ${criteria.excludeGenerations} generaties</small>` : ''}
+                        ${criteria.excludeHonden.length > 0 ? `<br><small>${criteria.excludeHonden.length} honden uitgesloten in ${criteria.excludeGenerations} generaties</small>` : ''}
                         ${this.selectedTeef && !this.selectedTeef.manualEntry ? `<br><small>Toont combinatie COI 6g met ${this.selectedTeef.naam}</small>` : ''}
                         <br><small><i class="bi bi-info-circle"></i> ${t('pedigreeTooltip')}</small>
                     </div>
@@ -1774,16 +1779,16 @@ class ZoekReu {
         }, 100);
     }
     
-    filterByExcludedReuen(reuen, excludedReuen, generations) {
-        if (excludedReuen.length === 0) {
+    filterByExcludedHonden(reuen, excludedHonden, generations) {
+        if (excludedHonden.length === 0) {
             return reuen;
         }
         
-        console.log(`🔍 Filteren op ${excludedReuen.length} uitgesloten reuen in ${generations} generaties`);
+        console.log(`🔍 Filteren op ${excludedHonden.length} uitgesloten honden in ${generations} generaties`);
         
         return reuen.filter(reu => {
-            for (const excluded of excludedReuen) {
-                if (this.isReuInPedigree(reu.id, excluded.id, generations)) {
+            for (const excluded of excludedHonden) {
+                if (this.isHondInPedigree(reu.id, excluded.id, generations)) {
                     console.log(`   ❌ ${reu.naam} bevat ${excluded.naam} in stamboom`);
                     return false;
                 }
@@ -1792,7 +1797,7 @@ class ZoekReu {
         });
     }
     
-    isReuInPedigree(hondId, zoekReuId, maxGenerations) {
+    isHondInPedigree(hondId, zoekHondId, maxGenerations) {
         const getAncestors = (id, currentGeneration = 1) => {
             if (currentGeneration > maxGenerations) {
                 return false;
@@ -1803,7 +1808,7 @@ class ZoekReu {
                 return false;
             }
             
-            if (hond.id == zoekReuId) {
+            if (hond.id == zoekHondId) {
                 return true;
             }
             
@@ -1897,7 +1902,7 @@ class ZoekReu {
             radius: document.getElementById('radiusFilter').value,
             bornAfter: document.getElementById('bornAfterFilter').value.trim(),
             maxCOI: coiValue,
-            excludeReuen: this.excludeReuen,
+            excludeHonden: this.excludeHonden,
             excludeGenerations: excludeGenerations,
             health: {}
         };
@@ -2573,17 +2578,21 @@ style.textContent = `
         animation: pulse 0.2s;
     }
     
-    #excludedReuenList .list-group-item {
+    #excludedHondenList .list-group-item {
         padding: 0.5rem 1rem;
         border-left: 3px solid #dc3545;
     }
     
-    #excludedReuenList .badge {
+    #excludedHondenList .badge {
         font-size: 0.7rem;
     }
     
-    #excludeReuenPlaceholder {
-        font-size: 0.85rem;
+    .bi-gender-male {
+        color: #0d6efd;
+    }
+    
+    .bi-gender-female {
+        color: #dc3545;
     }
 `;
 document.head.appendChild(style);
