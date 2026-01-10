@@ -1154,13 +1154,13 @@ class StamboomManager extends BaseModule {
                 .pedigree-card-compact.horizontal.gen1,
                 .pedigree-card-compact.horizontal.gen2 {
                     width: 160px !important;
-                    height: 120px !important;
+                    height: 140px !important;
                 }
                 
                 /* OVERGROOTOUDERS: 60% HOOGTE VAN NORMALE CARDS */
                 .pedigree-card-compact.horizontal.gen3 {
                     width: 160px !important;
-                    height: 60px !important;
+                    height: 70px !important;
                 }
                 
                 /* Hoofdhond extra styling */
@@ -1168,7 +1168,7 @@ class StamboomManager extends BaseModule {
                     border: 2px solid #0d6efd !important;
                     background: #f0f7ff;
                     width: 170px !important;
-                    height: 110px !important;
+                    height: 140px !important;
                 }
                 
                 /* Geslacht kleuren */
@@ -1483,16 +1483,16 @@ class StamboomManager extends BaseModule {
                     .pedigree-generation-col.gen0 {
                         justify-content: center !important;
                         align-items: flex-start !important;
-                        min-width: 220px !important;
-                        width: 220px !important;
+                        min-width: 200px !important;
+                        width: 200px !important;
                         gap: 4px !important;
                     }
                     
                     .pedigree-generation-col.gen1 {
                         justify-content: center !important;
                         align-items: flex-start !important;
-                        min-width: 220px !important;
-                        width: 220px !important;
+                        min-width: 200px !important;
+                        width: 200px !important;
                         gap: 4px !important;
                     }
                     
@@ -1507,8 +1507,8 @@ class StamboomManager extends BaseModule {
                     .pedigree-generation-col.gen2 {
                         justify-content: center !important;
                         align-items: flex-start !important;
-                        min-width: 220px !important;
-                        width: 220px !important;
+                        min-width: 200px !important;
+                        width: 200px !important;
                         gap: 4px !important;
                     }
                     
@@ -1525,8 +1525,8 @@ class StamboomManager extends BaseModule {
                     .pedigree-generation-col.gen3 {
                         justify-content: center !important;
                         align-items: flex-start !important;
-                        min-width: 220px !important;
-                        width: 220px !important;
+                        min-width: 200px !important;
+                        width: 200px !important;
                         gap: 4px !important;
                     }
                     
@@ -1558,22 +1558,22 @@ class StamboomManager extends BaseModule {
                     .pedigree-card-compact.horizontal.gen0,
                     .pedigree-card-compact.horizontal.gen1,
                     .pedigree-card-compact.horizontal.gen2 {
-                        width: 220px !important;
-                        height: 140px !important;
+                        width: 200px !important;
+                        height: 150px !important;
                         margin: 0 !important;
                         flex-shrink: 0 !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen3 {
                         width: 220px !important;
-                        height: 70px !important;
+                        height: 75px !important;
                         margin: 0 !important;
                         flex-shrink: 0 !important;
                     }
                     
                     .pedigree-card-compact.horizontal.main-dog-compact {
-                        width: 220px !important;
-                        height: 140px !important;
+                        width: 200px !important;
+                        height: 150px !important;
                         margin: 0 !important;
                         flex-shrink: 0 !important;
                     }
@@ -1597,31 +1597,31 @@ class StamboomManager extends BaseModule {
                     .pedigree-card-compact.horizontal.gen0,
                     .pedigree-card-compact.horizontal.gen1,
                     .pedigree-card-compact.horizontal.gen2 {
-                        width: 220px !important;
-                        height: 140px !important;
+                        width: 200px !important;
+                        height: 150px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen3 {
-                        width: 220px !important;
-                        height: 70px !important;
+                        width: 200px !important;
+                        height: 75px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.main-dog-compact {
-                        width: 220px !important;
-                        height: 140px !important;
+                        width: 200px !important;
+                        height: 150px !important;
                     }
                     
                     .pedigree-generation-col {
-                        min-width: 220px !important;
-                        width: 220px !important;
+                        min-width: 200px !important;
+                        width: 200px !important;
                     }
                     
                     .pedigree-generation-col.gen0,
                     .pedigree-generation-col.gen1,
                     .pedigree-generation-col.gen2,
                     .pedigree-generation-col.gen3 {
-                        min-width: 220px !important;
-                        width: 220px !important;
+                        min-width: 200px !important;
+                        width: 200px !important;
                     }
                 }
                 
@@ -1722,17 +1722,17 @@ class StamboomManager extends BaseModule {
                     .pedigree-card-compact.horizontal.gen1,
                     .pedigree-card-compact.horizontal.gen2 {
                         width: 200px !important;
-                        height: 132px !important;
+                        height: 140px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen3 {
                         width: 200px !important;
-                        height: 66px !important;
+                        height: 70px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.main-dog-compact {
                         width: 200px !important;
-                        height: 132px !important;
+                        height: 140px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen0 .dog-name-kennel-compact,
