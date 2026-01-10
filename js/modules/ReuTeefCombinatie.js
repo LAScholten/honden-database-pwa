@@ -14,7 +14,8 @@ class ReuTeefCombinatie {
         this.allHonden = [];
         this.hondenCache = new Map();
         
-        // Foto caches
+        // Foto caches - IDENTIEK AAN STAMBOOMMANAGER
+        this.dogPhotosCache = new Map();
         this.dogHasPhotosCache = new Map();
         this.dogThumbnailsCache = new Map();
         this.fullPhotoCache = new Map();
@@ -28,7 +29,7 @@ class ReuTeefCombinatie {
         this.uniquePrefix = 'rtc-'; // ReuTeefCombinatie prefix
         this.isolatedEventListeners = new Map();
         
-        // Vertalingen
+        // Vertalingen - UITGEBREID MET STAMBOOMMANAGER VERTALINGEN
         this.translations = {
             nl: {
                 title: "Reu en Teef Combinatie",
@@ -112,9 +113,9 @@ class ReuTeefCombinatie {
                 thyroidTested: "Schildklier getest",
                 thyroidUnknown: "Schildklier niet bekend",
                 occurrences: "Aantal keer",
-                // NIEUW: Stamboom manager vertalingen
+                // STAMBOOMMANAGER VERTALINGEN - IDENTIEK
                 pedigreeTitle: "Stamboom van {name}",
-                pedigree4Gen: "4-generatie stamboom",
+                pedigree4Gen: "5-generatie stamboom",
                 generatingPedigree: "Stamboom genereren...",
                 noData: "Geen gegevens",
                 unknown: "Onbekend",
@@ -123,7 +124,7 @@ class ReuTeefCombinatie {
                 parents: "Ouders",
                 grandparents: "Grootouders",
                 greatGrandparents: "Overgrootouders",
-                greatGreatGrandparents: "Over-overgrootouders",
+                greatGreatGrandparents: "Overovergrootouders",
                 paternal: "Paternaal",
                 maternal: "Maternaal",
                 clickForDetails: "Klik voor details",
@@ -149,7 +150,11 @@ class ReuTeefCombinatie {
                 dandyWalker: "Dandy Walker Malformation",
                 thyroid: "Schildklier",
                 eyesExplanation: "Verklaring ogen",
-                thyroidExplanation: "Toelichting schildklier"
+                thyroidExplanation: "Toelichting schildklier",
+                name: "Naam",
+                kennel: "Kennel",
+                pedigreeNumber: "Stamboomnummer",
+                birthDate: "Geboortedatum"
             },
             en: {
                 title: "Male and Female Combination",
@@ -233,9 +238,9 @@ class ReuTeefCombinatie {
                 thyroidTested: "Thyroid tested",
                 thyroidUnknown: "Thyroid unknown",
                 occurrences: "Occurrences",
-                // NIEUW: Stamboom manager vertalingen
+                // STAMBOOMMANAGER VERTALINGEN - IDENTIEK
                 pedigreeTitle: "Pedigree of {name}",
-                pedigree4Gen: "4-generation pedigree",
+                pedigree4Gen: "5-generation pedigree",
                 generatingPedigree: "Generating pedigree...",
                 noData: "No data",
                 unknown: "Unknown",
@@ -270,7 +275,11 @@ class ReuTeefCombinatie {
                 dandyWalker: "Dandy Walker Malformation",
                 thyroid: "Thyroid",
                 eyesExplanation: "Eye explanation",
-                thyroidExplanation: "Thyroid explanation"
+                thyroidExplanation: "Thyroid explanation",
+                name: "Name",
+                kennel: "Kennel",
+                pedigreeNumber: "Pedigree number",
+                birthDate: "Birth date"
             },
             de: {
                 title: "Rüde und Hündin Kombination",
@@ -354,9 +363,9 @@ class ReuTeefCombinatie {
                 thyroidTested: "Schilddrüse getestet",
                 thyroidUnknown: "Schilddrüse unbekannt",
                 occurrences: "Anzahl Mal",
-                // NIEUW: Stamboom manager vertalingen
+                // STAMBOOMMANAGER VERTALINGEN - IDENTIEK
                 pedigreeTitle: "Ahnentafel von {name}",
-                pedigree4Gen: "4-Generationen Ahnentafel",
+                pedigree4Gen: "5-Generationen Ahnentafel",
                 generatingPedigree: "Ahnentafel wird generiert...",
                 noData: "Keine Daten",
                 unknown: "Unbekannt",
@@ -391,9 +400,18 @@ class ReuTeefCombinatie {
                 dandyWalker: "Dandy Walker Malformation",
                 thyroid: "Schilddrüse",
                 eyesExplanation: "Augenerklärung",
-                thyroidExplanation: "Schilddrüse Erklärung"
+                thyroidExplanation: "Schilddrüse Erklärung",
+                name: "Name",
+                kennel: "Kennel",
+                pedigreeNumber: "Stammbaum-Nummer",
+                birthDate: "Geboortedatum"
             }
         };
+        
+        // Globale event handlers voor foto's (IDENTIEK AAN STAMBOOMMANAGER)
+        this._eventHandlers = {};
+        this._isActive = true;
+        this.setupGlobalEventListeners();
     }
     
     injectDependencies(db, auth) {
@@ -411,6 +429,241 @@ class ReuTeefCombinatie {
         
         return text;
     }
+    
+    // ==================== FOTO CACHE METHODES - IDENTIEK AAN STAMBOOMMANAGER ====================
+    
+    async checkDogHasPhotos(dogId) {
+        if (!dogId || dogId === 0) return false;
+        const dog = this.getDogById(dogId);
+        if (!dog || !dog.stamboomnr) return false;
+        const cacheKey = `has_${dogId}_${dog.stamboomnr}`;
+        if (this.dogHasPhotosCache.has(cacheKey)) {
+            return this.dogHasPhotosCache.get(cacheKey);
+        }
+        try {
+            const hasPhotos = await this.db.checkFotosExist(dog.stamboomnr);
+            this.dogHasPhotosCache.set(cacheKey, hasPhotos);
+            return hasPhotos;
+        } catch (error) {
+            console.error('Fout bij checken foto\'s voor hond:', dogId, error);
+            return false;
+        }
+    }
+    
+    async getDogThumbnails(dogId, limit = 9) {
+        if (!dogId || dogId === 0) return [];
+        const dog = this.getDogById(dogId);
+        if (!dog || !dog.stamboomnr) return [];
+        const cacheKey = `thumbs_${dogId}_${dog.stamboomnr}_${limit}`;
+        if (this.dogThumbnailsCache.has(cacheKey)) {
+            return this.dogThumbnailsCache.get(cacheKey);
+        }
+        try {
+            const thumbnails = await this.db.getFotoThumbnails(dog.stamboomnr, limit);
+            this.dogThumbnailsCache.set(cacheKey, thumbnails || []);
+            return thumbnails || [];
+        } catch (error) {
+            console.error('Fout bij ophalen thumbnails voor hond:', dogId, error);
+            return [];
+        }
+    }
+    
+    async getFullSizeFoto(fotoId) {
+        if (!fotoId) return null;
+        const cacheKey = `full_${fotoId}`;
+        if (this.fullPhotoCache.has(cacheKey)) {
+            return this.fullPhotoCache.get(cacheKey);
+        }
+        try {
+            const foto = await this.db.getFotoById(fotoId);
+            if (foto) {
+                this.fullPhotoCache.set(cacheKey, foto);
+            }
+            return foto;
+        } catch (error) {
+            console.error('Fout bij ophalen volledige foto:', fotoId, error);
+            return null;
+        }
+    }
+    
+    // ==================== GLOBALE EVENT LISTENERS - IDENTIEK AAN STAMBOOMMANAGER ====================
+    
+    setupGlobalEventListeners() {
+        // Event delegation voor foto thumbnail clicks
+        const thumbnailClickHandler = async (e) => {
+            if (!this._isActive) return;
+            
+            const thumbnail = e.target.closest('.photo-thumbnail');
+            if (thumbnail) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const photoId = thumbnail.getAttribute('data-photo-id');
+                const isThumbnail = thumbnail.getAttribute('data-is-thumbnail') === 'true';
+                
+                if (!photoId) return;
+                
+                try {
+                    // Laad pas de volledige foto als er op geklikt wordt
+                    const fullPhoto = await this.getFullSizeFoto(photoId);
+                    
+                    if (fullPhoto && fullPhoto.data) {
+                        // Haal hondnaam op uit de popup
+                        const popupTitle = document.querySelector('.rtc-popup-title, .popup-title');
+                        let dogName = '';
+                        if (popupTitle) {
+                            dogName = popupTitle.textContent.trim();
+                            dogName = dogName.replace(/^[^a-zA-Z]*/, '').trim();
+                        }
+                        
+                        this.showLargePhoto(fullPhoto.data, dogName);
+                    } else {
+                        console.error('Kon volledige foto niet laden:', photoId);
+                        // Probeer de thumbnail als fallback
+                        const imgElement = thumbnail.querySelector('img');
+                        if (imgElement && imgElement.src) {
+                            this.showLargePhoto(imgElement.src, dogName);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Fout bij laden volledige foto:', error);
+                }
+            }
+        };
+        
+        // Event delegation voor grote foto sluitknoppen
+        const photoCloseHandler = (e) => {
+            if (!this._isActive) return;
+            
+            if (e.target.classList.contains('photo-large-close') || 
+                e.target.classList.contains('photo-large-close-btn') ||
+                e.target.closest('.photo-large-close') ||
+                e.target.closest('.photo-large-close-btn')) {
+                const overlay = document.getElementById('rtcPhotoLargeOverlay');
+                if (overlay) {
+                    overlay.style.display = 'none';
+                    setTimeout(() => {
+                        if (overlay.parentNode) {
+                            overlay.parentNode.removeChild(overlay);
+                        }
+                    }, 300);
+                }
+            }
+            
+            // Klik buiten de grote foto om te sluiten
+            if (e.target.id === 'rtcPhotoLargeOverlay') {
+                const overlay = e.target;
+                overlay.style.display = 'none';
+                setTimeout(() => {
+                    if (overlay.parentNode) {
+                        overlay.parentNode.removeChild(overlay);
+                    }
+                }, 300);
+            }
+        };
+        
+        // Escape key handler voor foto overlays
+        const escapeKeyHandler = (e) => {
+            if (!this._isActive) return;
+            
+            if (e.key === 'Escape') {
+                // Sluit grote foto overlay
+                const photoOverlay = document.getElementById('rtcPhotoLargeOverlay');
+                if (photoOverlay && photoOverlay.style.display !== 'none') {
+                    photoOverlay.style.display = 'none';
+                    setTimeout(() => {
+                        if (photoOverlay.parentNode) {
+                            photoOverlay.parentNode.removeChild(photoOverlay);
+                        }
+                    }, 300);
+                    return;
+                }
+                
+                // Sluit detail popup overlay
+                const popupOverlay = document.getElementById('rtcPedigreePopupOverlay');
+                if (popupOverlay && popupOverlay.style.display !== 'none') {
+                    popupOverlay.style.display = 'none';
+                }
+            }
+        };
+        
+        // Voeg event listeners toe en sla referenties op
+        document.addEventListener('click', thumbnailClickHandler);
+        document.addEventListener('click', photoCloseHandler);
+        document.addEventListener('keydown', escapeKeyHandler);
+        
+        // Sla referenties op voor cleanup
+        this._eventHandlers.thumbnailClick = thumbnailClickHandler;
+        this._eventHandlers.photoClose = photoCloseHandler;
+        this._eventHandlers.escapeKey = escapeKeyHandler;
+    }
+    
+    removeGlobalEventListeners() {
+        // Verwijder alle event listeners die we hebben toegevoegd
+        if (this._eventHandlers.thumbnailClick) {
+            document.removeEventListener('click', this._eventHandlers.thumbnailClick);
+            delete this._eventHandlers.thumbnailClick;
+        }
+        
+        if (this._eventHandlers.photoClose) {
+            document.removeEventListener('click', this._eventHandlers.photoClose);
+            delete this._eventHandlers.photoClose;
+        }
+        
+        if (this._eventHandlers.escapeKey) {
+            document.removeEventListener('keydown', this._eventHandlers.escapeKey);
+            delete this._eventHandlers.escapeKey;
+        }
+    }
+    
+    showLargePhoto(photoData, dogName = '') {
+        if (!this._isActive) return;
+        
+        console.log('Toon grote foto:', photoData.substring(0, 100) + '...');
+        
+        // Verwijder bestaande overlay
+        const existingOverlay = document.getElementById('rtcPhotoLargeOverlay');
+        if (existingOverlay) {
+            existingOverlay.remove();
+        }
+        
+        // Maak nieuwe overlay
+        const overlayHTML = `
+            <div class="photo-large-overlay" id="rtcPhotoLargeOverlay" style="display: flex;">
+                <div class="photo-large-container" id="rtcPhotoLargeContainer">
+                    <div class="photo-large-header">
+                        <button type="button" class="btn-close btn-close-white photo-large-close"></button>
+                    </div>
+                    <div class="photo-large-content">
+                        <img src="${photoData}" 
+                             alt="${dogName || 'Foto'}" 
+                             class="photo-large-img"
+                             id="rtcPhotoLargeImg"
+                             style="max-width: 90vw; max-height: 80vh; object-fit: contain;">
+                    </div>
+                    <div class="photo-large-footer">
+                        <button type="button" class="btn btn-secondary photo-large-close-btn">
+                            <i class="bi bi-x-circle me-1"></i> ${this.t('closePhoto')}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', overlayHTML);
+        
+        // Sluit met Escape key (we gebruiken de globale handler)
+        const overlay = document.getElementById('rtcPhotoLargeOverlay');
+        if (overlay) {
+            overlay.addEventListener('animationend', function handler() {
+                if (overlay.style.display === 'none') {
+                    overlay.removeEventListener('animationend', handler);
+                }
+            });
+        }
+    }
+    
+    // ==================== HOOFDFUNCTIES ====================
     
     async loadContent() {
         const t = this.t.bind(this);
@@ -856,6 +1109,37 @@ class ReuTeefCombinatie {
                         display: block;
                         overflow-x: auto;
                     }
+                }
+                
+                /* HEALTH BADGES - IDENTIEK AAN STAMBOOMMANAGER */
+                .badge-hd {
+                    background-color: #dc3545 !important;
+                    color: white !important;
+                }
+                
+                .badge-ed {
+                    background-color: #fd7e14 !important;
+                    color: white !important;
+                }
+                
+                .badge-pl {
+                    background-color: #6f42c1 !important;
+                    color: white !important;
+                }
+                
+                .badge-eyes {
+                    background-color: #20c997 !important;
+                    color: white !important;
+                }
+                
+                .badge-dandy {
+                    background-color: #6610f2 !important;
+                    color: white !important;
+                }
+                
+                .badge-thyroid {
+                    background-color: #e83e8c !important;
+                    color: white !important;
                 }
             `;
             document.head.appendChild(style);
@@ -2166,7 +2450,7 @@ class ReuTeefCombinatie {
                     font-size: 0.7rem;
                 }
                 
-                /* Click hint met fototoestelicoon */
+                /* Click hint met fototoestelicoon - IDENTIEK AAN STAMBOOMMANAGER */
                 .rtc-click-hint-compact {
                     color: #6c757d;
                     display: flex;
@@ -2633,7 +2917,7 @@ class ReuTeefCombinatie {
                     }
                 }
                 
-                /* GEÏSOLEERDE DETAIL POPUP STYLES */
+                /* GEÏSOLEERDE DETAIL POPUP STYLES - IDENTIEK AAN STAMBOOMMANAGER */
                 .rtc-pedigree-popup-overlay {
                     position: fixed;
                     top: 0;
@@ -2704,6 +2988,7 @@ class ReuTeefCombinatie {
                     flex: 1;
                 }
                 
+                /* Eigen kruisje styling - WIT KRUISJE - IDENTIEK AAN STAMBOOMMANAGER */
                 .rtc-popup-header .rtc-btn-close {
                     display: inline-block;
                     width: 24px;
@@ -2748,6 +3033,7 @@ class ReuTeefCombinatie {
                     -webkit-overflow-scrolling: touch;
                 }
                 
+                /* INFO SECTIES - IDENTIEK AAN STAMBOOMMANAGER */
                 .rtc-info-section {
                     margin-bottom: 20px;
                 }
@@ -2825,6 +3111,169 @@ class ReuTeefCombinatie {
                     line-height: 1.5;
                 }
                 
+                /* THUMBNAILS SECTIE IN POPUP - IDENTIEK AAN STAMBOOMMANAGER */
+                .photos-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 6px;
+                    margin-bottom: 10px;
+                    max-width: 240px;
+                    margin-left: auto;
+                    margin-right: auto;
+                }
+                
+                .photo-thumbnail {
+                    position: relative;
+                    aspect-ratio: 1 / 1;
+                    border-radius: 4px;
+                    overflow: hidden;
+                    cursor: pointer;
+                    border: 2px solid transparent;
+                    transition: all 0.2s;
+                }
+                
+                .photo-thumbnail:hover {
+                    border-color: #0d6efd;
+                    transform: scale(1.05);
+                }
+                
+                .thumbnail-img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+                
+                .photo-hover {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    opacity: 0;
+                    transition: opacity 0.2s;
+                }
+                
+                .photo-thumbnail:hover .photo-hover {
+                    opacity: 1;
+                }
+                
+                .photo-hover i {
+                    color: white;
+                    font-size: 1.2rem;
+                }
+                
+                .photo-hint {
+                    text-align: center;
+                    margin-bottom: 15px;
+                    font-size: 0.85rem;
+                }
+                
+                .rtc-popup-footer {
+                    padding: 16px 20px;
+                    border-top: 1px solid #dee2e6;
+                    display: flex;
+                    justify-content: center;
+                    background: #f8f9fa;
+                    border-radius: 0 0 12px 12px;
+                }
+                
+                .rtc-popup-close-btn {
+                    min-width: 130px;
+                    padding: 10px 25px;
+                    font-size: 1rem;
+                }
+                
+                /* ============================================= */
+                /* GROTE FOTO OVERLAY STYLES - IDENTIEK AAN STAMBOOMMANAGER */
+                /* ============================================= */
+                .photo-large-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.85);
+                    z-index: 1070;
+                    display: none;
+                    align-items: center;
+                    justify-content: center;
+                    animation: rtc-fadeIn 0.3s;
+                }
+                
+                .photo-large-container {
+                    background: white;
+                    border-radius: 12px;
+                    overflow: hidden;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+                    display: flex;
+                    flex-direction: column;
+                    max-height: 95vh;
+                    animation: rtc-slideUp 0.3s;
+                }
+                
+                .photo-large-header {
+                    padding: 12px 16px;
+                    background: #0d6efd;
+                    color: white;
+                    display: flex;
+                    justify-content: flex-end;
+                }
+                
+                .photo-large-close {
+                    background: none;
+                    border: none;
+                    color: white;
+                    opacity: 0.8;
+                    font-size: 1.3rem;
+                    cursor: pointer;
+                    width: 32px;
+                    height: 32px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 50%;
+                    transition: all 0.2s;
+                }
+                
+                .photo-large-close:hover {
+                    opacity: 1;
+                    background: rgba(255, 255, 255, 0.2);
+                }
+                
+                .photo-large-content {
+                    padding: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    overflow: hidden;
+                    flex: 1;
+                    min-height: 300px;
+                }
+                
+                .photo-large-img {
+                    max-width: 100%;
+                    max-height: 100%;
+                    object-fit: contain;
+                    border-radius: 4px;
+                }
+                
+                .photo-large-footer {
+                    padding: 16px;
+                    border-top: 1px solid #dee2e6;
+                    display: flex;
+                    justify-content: center;
+                    background: #f8f9fa;
+                }
+                
+                .photo-large-close-btn {
+                    min-width: 120px;
+                    padding: 8px 20px;
+                }
+                
                 /* Print styles */
                 @media print {
                     .modal-dialog {
@@ -2872,33 +3321,33 @@ class ReuTeefCombinatie {
                     }
                 }
                 
-                /* HEALTH BADGES */
-                .rtc-badge-hd {
+                /* HEALTH BADGES - IDENTIEK AAN STAMBOOMMANAGER */
+                .badge-hd {
                     background-color: #dc3545 !important;
                     color: white !important;
                 }
                 
-                .rtc-badge-ed {
+                .badge-ed {
                     background-color: #fd7e14 !important;
                     color: white !important;
                 }
                 
-                .rtc-badge-pl {
+                .badge-pl {
                     background-color: #6f42c1 !important;
                     color: white !important;
                 }
                 
-                .rtc-badge-eyes {
+                .badge-eyes {
                     background-color: #20c997 !important;
                     color: white !important;
                 }
                 
-                .rtc-badge-dandy {
+                .badge-dandy {
                     background-color: #6610f2 !important;
                     color: white !important;
                 }
                 
-                .rtc-badge-thyroid {
+                .badge-thyroid {
                     background-color: #e83e8c !important;
                     color: white !important;
                 }
@@ -3204,19 +3653,23 @@ class ReuTeefCombinatie {
         const mainDogClass = isMainDog ? 'main-dog-compact' : '';
         const headerColor = isMainDog ? 'bg-success' : 'bg-secondary';
         
+        // Check of deze hond foto's heeft (SNELLE CHECK) - IDENTIEK AAN STAMBOOMMANAGER
+        const hasPhotos = dog.id > 0 ? await this.checkDogHasPhotos(dog.id) : false;
+        const cameraIcon = hasPhotos ? '<i class="bi bi-camera text-danger ms-1"></i>' : '';
+        
         const combinedName = dog.naam || this.t('unknown');
         const showKennel = dog.kennelnaam && dog.kennelnaam.trim() !== '';
         const fullDisplayText = combinedName + (showKennel ? ` ${dog.kennelnaam}` : '');
         
-        // Voor toekomstige pup geen ras tonen
-        // Voor generatie 4 (over-overgrootouders) alleen naam tonen
+        // Voor overovergrootouders (gen4): alleen naam en kennelnaam - IDENTIEK AAN STAMBOOMMANAGER
         if (generation === 4) {
             return `
                 <div class="rtc-pedigree-card-compact horizontal ${dog.geslacht === 'reuen' ? 'male' : 'female'} ${mainDogClass} gen${generation}" 
                      data-dog-id="${dog.id}" 
                      data-dog-name="${dog.naam || ''}"
                      data-relation="${relation}"
-                     data-generation="${generation}">
+                     data-generation="${generation}"
+                     data-has-photos="${hasPhotos}">
                     <div class="rtc-pedigree-card-header-compact horizontal ${headerColor}">
                         <div class="rtc-relation-compact">
                             <span class="rtc-relation-text">${relation}</span>
@@ -3227,14 +3680,18 @@ class ReuTeefCombinatie {
                         </div>
                     </div>
                     <div class="rtc-pedigree-card-body-compact horizontal">
-                        <div class="rtc-dog-name-kennel-compact" title="${fullDisplayText}">
-                            ${fullDisplayText}
+                        <!-- Alleen naam en kennelnaam voor overovergrootouders -->
+                        <div class="rtc-card-row rtc-card-row-1-only">
+                            <div class="rtc-dog-name-kennel-compact" title="${fullDisplayText}">
+                                ${fullDisplayText}
+                            </div>
                         </div>
                     </div>
                 </div>
             `;
         }
         
+        // Voor andere generaties (0-3): originele layout - IDENTIEK AAN STAMBOOMMANAGER
         const breedText = dog.ras && dog.id !== -999999 ? 
                          `<div class="rtc-dog-breed-compact" title="${dog.ras}">${dog.ras}</div>` : '';
         
@@ -3243,7 +3700,8 @@ class ReuTeefCombinatie {
                  data-dog-id="${dog.id}" 
                  data-dog-name="${dog.naam || ''}"
                  data-relation="${relation}"
-                 data-generation="${generation}">
+                 data-generation="${generation}"
+                 data-has-photos="${hasPhotos}">
                 <div class="rtc-pedigree-card-header-compact horizontal ${headerColor}">
                     <div class="rtc-relation-compact">
                         <span class="rtc-relation-text">${relation}</span>
@@ -3254,12 +3712,14 @@ class ReuTeefCombinatie {
                     </div>
                 </div>
                 <div class="rtc-pedigree-card-body-compact horizontal">
+                    <!-- Regel 1: Naam en kennelnaam in één regel -->
                     <div class="rtc-card-row rtc-card-row-1">
                         <div class="rtc-dog-name-kennel-compact" title="${fullDisplayText}">
                             ${fullDisplayText}
                         </div>
                     </div>
                     
+                    <!-- Regel 2: Stamboomnummer en ras -->
                     <div class="rtc-card-row rtc-card-row-2">
                         ${dog.stamboomnr ? `
                         <div class="rtc-dog-pedigree-compact" title="${dog.stamboomnr}">
@@ -3270,9 +3730,10 @@ class ReuTeefCombinatie {
                         ${breedText}
                     </div>
                     
+                    <!-- Regel 3: Klik hint met fototoestelicoon - IDENTIEK AAN STAMBOOMMANAGER -->
                     <div class="rtc-card-row rtc-card-row-3">
                         <div class="rtc-click-hint-compact">
-                            <i class="bi bi-info-circle"></i> ${this.t('clickForDetails')}
+                            <i class="bi bi-info-circle"></i> ${this.t('clickForDetails')}${cameraIcon}
                         </div>
                     </div>
                 </div>
@@ -3307,55 +3768,22 @@ class ReuTeefCombinatie {
     }
     
     async showDogDetailPopup(dog, relation) {
+        // NIEUW: GEBRUIK DE IDENTIEKE POPUP ALS STAMBOOMMANAGER
+        const popupHTML = await this.getDogDetailPopupHTML(dog, relation);
+        
+        this.ensurePopupContainer();
+        
         const overlay = document.getElementById('rtcPedigreePopupOverlay');
         const container = document.getElementById('rtcPedigreePopupContainer');
         
-        if (!overlay || !container) return;
-        
-        const popupHTML = await this.getDogDetailPopupHTML(dog, relation);
-        container.innerHTML = popupHTML;
-        
-        overlay.style.display = 'flex';
-        
-        // Gebruik onze eigen geïsoleerde event listeners
-        const closeButton = container.querySelector('.rtc-btn-close');
-        const closePopupBtn = container.querySelector('.rtc-popup-close-btn');
-        
-        const closePopup = () => {
-            overlay.style.display = 'none';
-        };
-        
-        if (closeButton) {
-            closeButton.addEventListener('click', closePopup);
+        if (container) {
+            container.innerHTML = popupHTML;
+            overlay.style.display = 'flex';
+            this.setupIsolatedPopupEventListeners();
         }
-        
-        if (closePopupBtn) {
-            closePopupBtn.addEventListener('click', closePopup);
-        }
-        
-        // Gebruik een geïsoleerde event listener voor overlay click
-        const overlayClickHandler = (e) => {
-            if (e.target === overlay) {
-                closePopup();
-            }
-        };
-        
-        overlay.addEventListener('click', overlayClickHandler);
-        
-        // Gebruik een geïsoleerde escape key listener
-        const escapeKeyHandler = (e) => {
-            if (e.key === 'Escape') {
-                closePopup();
-            }
-        };
-        
-        document.addEventListener('keydown', escapeKeyHandler);
-        
-        // Sla de listeners op zodat we ze kunnen verwijderen
-        this.isolatedEventListeners.set('overlayClick', overlayClickHandler);
-        this.isolatedEventListeners.set('escapeKey', escapeKeyHandler);
     }
     
+    // NIEUW: GETDOGDETAILPOPUPHTML METHODE - IDENTIEK AAN STAMBOOMMANAGER
     async getDogDetailPopupHTML(dog, relation = '') {
         if (!dog) return '';
         
@@ -3363,13 +3791,12 @@ class ReuTeefCombinatie {
                           dog.geslacht === 'teven' ? this.t('female') : this.t('unknown');
         
         // Bereken COI waarden
-        let coiValues = { coi6Gen: '0.0', coiAllGen: '0.0' };
-        if (this.coiCalculator && dog.id !== -999999) {
-            coiValues = this.coiCalculator.calculateCOI(dog.id);
-        }
-        
+        const coiValues = this.calculateCOI(dog.id);
         const coi6Color = this.getCOIColor(coiValues.coi6Gen);
         const coiAllColor = this.getCOIColor(coiValues.coiAllGen);
+        
+        // NIEUW: Laad alleen thumbnails - IDENTIEK AAN STAMBOOMMANAGER
+        const thumbnails = dog.id > 0 ? await this.getDogThumbnails(dog.id, 9) : [];
         
         // Maak een gecombineerde naam+kennel string voor de header
         const combinedName = dog.naam || this.t('unknown');
@@ -3387,9 +3814,38 @@ class ReuTeefCombinatie {
                     <button type="button" class="rtc-btn-close" aria-label="${this.t('close')}"></button>
                 </div>
                 <div class="rtc-popup-body">
+                    <!-- THUMBNAILS SECTIE BOVENAAN (indien beschikbaar) - IDENTIEK AAN STAMBOOMMANAGER -->
+                    ${thumbnails.length > 0 ? `
+                    <div class="rtc-info-section mb-3">
+                        <h6><i class="bi bi-camera me-1"></i> ${this.t('photos')} (${thumbnails.length})</h6>
+                        <div class="photos-grid" id="rtcPhotosGrid${dog.id}">
+                            ${thumbnails.map((thumb, index) => `
+                                <div class="photo-thumbnail" 
+                                     data-photo-id="${thumb.id}" 
+                                     data-dog-id="${dog.id}" 
+                                     data-photo-index="${index}"
+                                     data-is-thumbnail="true">
+                                    <img src="${thumb.thumbnail}" 
+                                         alt="${dog.naam || ''} - ${thumb.filename || ''}" 
+                                         class="thumbnail-img"
+                                         loading="lazy">
+                                    <div class="photo-hover">
+                                        <i class="bi bi-zoom-in"></i>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="photo-hint">
+                            <small class="text-muted"><i class="bi bi-info-circle me-1"></i> ${this.t('clickToEnlarge')}</small>
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    <!-- BASISGEGEVENS NA FOTO'S - IDENTIEK AAN STAMBOOMMANAGER -->
                     <div class="rtc-info-section mb-2">
-                        <h6><i class="bi bi-card-text me-1"></i> ${this.t('dogDetails')}</h6>
+                        <h6><i class="bi bi-card-text me-1"></i> Basisgegevens</h6>
                         <div class="rtc-info-grid">
+                            <!-- Stamboomnummer en Ras naast elkaar -->
                             <div class="rtc-info-row">
                                 ${dog.stamboomnr ? `
                                 <div class="rtc-info-item rtc-info-item-half">
@@ -3406,6 +3862,7 @@ class ReuTeefCombinatie {
                                 ` : ''}
                             </div>
                             
+                            <!-- Geslacht en Vachtkleur naast elkaar -->
                             <div class="rtc-info-row">
                                 <div class="rtc-info-item rtc-info-item-half">
                                     <span class="rtc-info-label">${this.t('gender')}:</span>
@@ -3420,7 +3877,7 @@ class ReuTeefCombinatie {
                                 ` : ''}
                             </div>
                             
-                            ${dog.id !== -999999 ? `
+                            <!-- Beide COI waarden naast elkaar -->
                             <div class="rtc-info-row">
                                 <div class="rtc-info-item rtc-info-item-half">
                                     <span class="rtc-info-label">${this.t('coi6Gen')}:</span>
@@ -3436,8 +3893,8 @@ class ReuTeefCombinatie {
                                     </span>
                                 </div>
                             </div>
-                            ` : ''}
                             
+                            <!-- Datums -->
                             ${dog.geboortedatum ? `
                             <div class="rtc-info-row">
                                 <div class="rtc-info-item rtc-info-item-full">
@@ -3456,6 +3913,7 @@ class ReuTeefCombinatie {
                             </div>
                             ` : ''}
                             
+                            <!-- Land en postcode -->
                             ${dog.land ? `
                             <div class="rtc-info-row">
                                 <div class="rtc-info-item rtc-info-item-full">
@@ -3476,7 +3934,6 @@ class ReuTeefCombinatie {
                         </div>
                     </div>
                     
-                    ${dog.id !== -999999 ? `
                     <div class="rtc-info-section mb-2">
                         <h6><i class="bi bi-heart-pulse me-1"></i> ${this.t('healthInfo')}</h6>
                         <div class="rtc-info-grid">
@@ -3553,7 +4010,6 @@ class ReuTeefCombinatie {
                             ` : ''}
                         </div>
                     </div>
-                    ` : ''}
                     
                     ${dog.opmerkingen ? `
                     <div class="rtc-info-section mb-2">
@@ -3596,12 +4052,12 @@ class ReuTeefCombinatie {
         
         let badgeClass = 'badge ';
         switch(type) {
-            case 'hip': badgeClass += 'rtc-badge-hd'; break;
-            case 'elbow': badgeClass += 'rtc-badge-ed'; break;
-            case 'patella': badgeClass += 'rtc-badge-pl'; break;
-            case 'eyes': badgeClass += 'rtc-badge-eyes'; break;
-            case 'dandy': badgeClass += 'rtc-badge-dandy'; break;
-            case 'thyroid': badgeClass += 'rtc-badge-thyroid'; break;
+            case 'hip': badgeClass += 'badge-hd'; break;
+            case 'elbow': badgeClass += 'badge-ed'; break;
+            case 'patella': badgeClass += 'badge-pl'; break;
+            case 'eyes': badgeClass += 'badge-eyes'; break;
+            case 'dandy': badgeClass += 'badge-dandy'; break;
+            case 'thyroid': badgeClass += 'badge-thyroid'; break;
             default: badgeClass += 'bg-secondary';
         }
         
@@ -3613,6 +4069,50 @@ class ReuTeefCombinatie {
         if (value < 4.0) return '#28a745';
         if (value <= 6.0) return '#fd7e14';
         return '#dc3545';
+    }
+    
+    calculateCOI(dogId) {
+        console.log('COI berekening voor database ID:', dogId);
+        
+        if (!dogId || dogId === 0) return { coi6Gen: '0.0', coiAllGen: '0.0' };
+        
+        const dog = this.getDogById(dogId);
+        if (!dog) return { coi6Gen: '0.0', coiAllGen: '0.0' };
+        
+        // Basisgevallen eerst
+        if (!dog.vaderId || !dog.moederId) {
+            return { coi6Gen: '0.0', coiAllGen: '0.0' };
+        }
+        
+        if (dog.vaderId === dog.moederId) {
+            return { coi6Gen: '25.0', coiAllGen: '25.0' };
+        }
+        
+        // GEBRUIK COICalculator.js als beschikbaar
+        if (this.coiCalculator) {
+            try {
+                const result = this.coiCalculator.calculateCOI(dogId);
+                console.log(`COI resultaat via COICalculator:`, result);
+                return result;
+            } catch (error) {
+                console.error('Fout in COICalculator:', error);
+                // Val terug op eenvoudige berekening
+            }
+        } else {
+            console.warn('COICalculator niet beschikbaar, gebruik eenvoudige berekening');
+        }
+        
+        // Eenvoudige berekening als COICalculator niet werkt
+        const vader = this.getDogById(dog.vaderId);
+        const moeder = this.getDogById(dog.moederId);
+        
+        if (!vader || !moeder) {
+            return { coi6Gen: '0.0', coiAllGen: '0.0' };
+        }
+        
+
+        // Complexe gevallen - probeer minimaal iets
+        return { coi6Gen: '0.0', coiAllGen: '0.0' };
     }
     
     addFuturePuppyClickHandler(futurePuppy, coiResult, healthAnalysis) {
