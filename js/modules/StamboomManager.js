@@ -1,8 +1,8 @@
 /**
  * Stamboom Manager Module
- * Beheert 4-generatie stambomen voor honden - Zelfde layout op alle schermen
+ * Beheert 5-generatie stambomen voor honden - Zelfde layout op alle schermen
  * HORIZONTALE LAYOUT - Van links naar rechts met liggende cards
- * Overgrootouders 60% hoogte, zelfde breedte voor alle generaties
+ * Overgrootouders 60% hoogte, Overovergrootouders 30% hoogte (halve hoogte van overgrootouders - 5px)
  * GEBRUIKT: COICalculator.js (extern bestand)
  */
 
@@ -23,7 +23,7 @@ class StamboomManager extends BaseModule {
         this.translations = {
             nl: {
                 pedigreeTitle: "Stamboom van {name}",
-                pedigree4Gen: "4-generatie stamboom",
+                pedigree4Gen: "5-generatie stamboom",
                 generatingPedigree: "Stamboom genereren...",
                 close: "Sluiten",
                 print: "Afdrukken",
@@ -37,6 +37,8 @@ class StamboomManager extends BaseModule {
                 grandmother: "Grootmoeder",
                 greatGrandfather: "Overgrootvader",
                 greatGrandmother: "Overgrootmoeder",
+                greatGreatGrandfather: "Overovergrootvader",
+                greatGreatGrandmother: "Overovergrootmoeder",
                 name: "Naam",
                 kennel: "Kennel",
                 pedigreeNumber: "Stamboomnummer",
@@ -67,6 +69,7 @@ class StamboomManager extends BaseModule {
                 parents: "Ouders",
                 grandparents: "Grootouders",
                 greatGrandparents: "Overgrootouders",
+                greatGreatGrandparents: "Overovergrootouders",
                 coi6Gen: "COI 6 Gen",
                 coiAllGen: "COI 25 Gen",
                 photos: "Foto's",
@@ -76,7 +79,7 @@ class StamboomManager extends BaseModule {
             },
             en: {
                 pedigreeTitle: "Pedigree of {name}",
-                pedigree4Gen: "4-generation pedigree",
+                pedigree4Gen: "5-generation pedigree",
                 generatingPedigree: "Generating pedigree...",
                 close: "Close",
                 print: "Print",
@@ -90,6 +93,8 @@ class StamboomManager extends BaseModule {
                 grandmother: "Grandmother",
                 greatGrandfather: "Great Grandfather",
                 greatGrandmother: "Great Grandmother",
+                greatGreatGrandfather: "Great Great Grandfather",
+                greatGreatGrandmother: "Great Great Grandmother",
                 name: "Name",
                 kennel: "Kennel",
                 pedigreeNumber: "Pedigree number",
@@ -120,6 +125,7 @@ class StamboomManager extends BaseModule {
                 parents: "Parents",
                 grandparents: "Grandparents",
                 greatGrandparents: "Great Grandparents",
+                greatGreatGrandparents: "Great Great Grandparents",
                 coi6Gen: "COI 6 Gen",
                 coiAllGen: "COI 25 Gen",
                 photos: "Photos",
@@ -129,8 +135,8 @@ class StamboomManager extends BaseModule {
             },
             de: {
                 pedigreeTitle: "Ahnentafel von {name}",
-                pedigree4Gen: "4-Generationen Ahnentafel",
-                generatingPedigree: "Ahnentafel wordt generiert...",
+                pedigree4Gen: "5-Generationen Ahnentafel",
+                generatingPedigree: "Ahnentafel wird generiert...",
                 close: "Schließen",
                 print: "Drucken",
                 noData: "Keine Daten",
@@ -143,6 +149,8 @@ class StamboomManager extends BaseModule {
                 grandmother: "Großmutter",
                 greatGrandfather: "Urgroßvater",
                 greatGrandmother: "Urgroßmutter",
+                greatGreatGrandfather: "Ururgroßvater",
+                greatGreatGrandmother: "Ururgroßmutter",
                 name: "Name",
                 kennel: "Kennel",
                 pedigreeNumber: "Stammbaum-Nummer",
@@ -173,6 +181,7 @@ class StamboomManager extends BaseModule {
                 parents: "Eltern",
                 grandparents: "Großeltern",
                 greatGrandparents: "Urgroßeltern",
+                greatGreatGrandparents: "Ururgroßeltern",
                 coi6Gen: "COI 6 Gen",
                 coiAllGen: "COI 25 Gen",
                 photos: "Fotos",
@@ -387,7 +396,24 @@ class StamboomManager extends BaseModule {
             maternalGreatGrandfather1: null,
             maternalGreatGrandmother1: null,
             maternalGreatGrandfather2: null,
-            maternalGreatGrandmother2: null
+            maternalGreatGrandmother2: null,
+            // NIEUW: Overovergrootouders
+            paternalGreatGreatGrandfather1: null,
+            paternalGreatGreatGrandmother1: null,
+            paternalGreatGreatGrandfather2: null,
+            paternalGreatGreatGrandmother2: null,
+            paternalGreatGreatGrandfather3: null,
+            paternalGreatGreatGrandmother3: null,
+            paternalGreatGreatGrandfather4: null,
+            paternalGreatGreatGrandmother4: null,
+            maternalGreatGreatGrandfather1: null,
+            maternalGreatGreatGrandmother1: null,
+            maternalGreatGreatGrandfather2: null,
+            maternalGreatGreatGrandmother2: null,
+            maternalGreatGreatGrandfather3: null,
+            maternalGreatGreatGrandmother3: null,
+            maternalGreatGreatGrandfather4: null,
+            maternalGreatGreatGrandmother4: null
         };
         
         const mainDog = this.getDogById(dogId);
@@ -452,6 +478,73 @@ class StamboomManager extends BaseModule {
         
         if (pedigreeTree.maternalGrandmother && pedigreeTree.maternalGrandmother.moederId) {
             pedigreeTree.maternalGreatGrandmother2 = this.getDogById(pedigreeTree.maternalGrandmother.moederId);
+        }
+        
+        // NIEUW: Overovergrootouders (16 in totaal)
+        // Paternale overovergrootouders (8 stuks)
+        if (pedigreeTree.paternalGreatGrandfather1 && pedigreeTree.paternalGreatGrandfather1.vaderId) {
+            pedigreeTree.paternalGreatGreatGrandfather1 = this.getDogById(pedigreeTree.paternalGreatGrandfather1.vaderId);
+        }
+        
+        if (pedigreeTree.paternalGreatGrandfather1 && pedigreeTree.paternalGreatGrandfather1.moederId) {
+            pedigreeTree.paternalGreatGreatGrandmother1 = this.getDogById(pedigreeTree.paternalGreatGrandfather1.moederId);
+        }
+        
+        if (pedigreeTree.paternalGreatGrandmother1 && pedigreeTree.paternalGreatGrandmother1.vaderId) {
+            pedigreeTree.paternalGreatGreatGrandfather2 = this.getDogById(pedigreeTree.paternalGreatGrandmother1.vaderId);
+        }
+        
+        if (pedigreeTree.paternalGreatGrandmother1 && pedigreeTree.paternalGreatGrandmother1.moederId) {
+            pedigreeTree.paternalGreatGreatGrandmother2 = this.getDogById(pedigreeTree.paternalGreatGrandmother1.moederId);
+        }
+        
+        if (pedigreeTree.paternalGreatGrandfather2 && pedigreeTree.paternalGreatGrandfather2.vaderId) {
+            pedigreeTree.paternalGreatGreatGrandfather3 = this.getDogById(pedigreeTree.paternalGreatGrandfather2.vaderId);
+        }
+        
+        if (pedigreeTree.paternalGreatGrandfather2 && pedigreeTree.paternalGreatGrandfather2.moederId) {
+            pedigreeTree.paternalGreatGreatGrandmother3 = this.getDogById(pedigreeTree.paternalGreatGrandfather2.moederId);
+        }
+        
+        if (pedigreeTree.paternalGreatGrandmother2 && pedigreeTree.paternalGreatGrandmother2.vaderId) {
+            pedigreeTree.paternalGreatGreatGrandfather4 = this.getDogById(pedigreeTree.paternalGreatGrandmother2.vaderId);
+        }
+        
+        if (pedigreeTree.paternalGreatGrandmother2 && pedigreeTree.paternalGreatGrandmother2.moederId) {
+            pedigreeTree.paternalGreatGreatGrandmother4 = this.getDogById(pedigreeTree.paternalGreatGrandmother2.moederId);
+        }
+        
+        // Maternale overovergrootouders (8 stuks)
+        if (pedigreeTree.maternalGreatGrandfather1 && pedigreeTree.maternalGreatGrandfather1.vaderId) {
+            pedigreeTree.maternalGreatGreatGrandfather1 = this.getDogById(pedigreeTree.maternalGreatGrandfather1.vaderId);
+        }
+        
+        if (pedigreeTree.maternalGreatGrandfather1 && pedigreeTree.maternalGreatGrandfather1.moederId) {
+            pedigreeTree.maternalGreatGreatGrandmother1 = this.getDogById(pedigreeTree.maternalGreatGrandfather1.moederId);
+        }
+        
+        if (pedigreeTree.maternalGreatGrandmother1 && pedigreeTree.maternalGreatGrandmother1.vaderId) {
+            pedigreeTree.maternalGreatGreatGrandfather2 = this.getDogById(pedigreeTree.maternalGreatGrandmother1.vaderId);
+        }
+        
+        if (pedigreeTree.maternalGreatGrandmother1 && pedigreeTree.maternalGreatGrandmother1.moederId) {
+            pedigreeTree.maternalGreatGreatGrandmother2 = this.getDogById(pedigreeTree.maternalGreatGrandmother1.moederId);
+        }
+        
+        if (pedigreeTree.maternalGreatGrandfather2 && pedigreeTree.maternalGreatGrandfather2.vaderId) {
+            pedigreeTree.maternalGreatGreatGrandfather3 = this.getDogById(pedigreeTree.maternalGreatGrandfather2.vaderId);
+        }
+        
+        if (pedigreeTree.maternalGreatGrandfather2 && pedigreeTree.maternalGreatGrandfather2.moederId) {
+            pedigreeTree.maternalGreatGreatGrandmother3 = this.getDogById(pedigreeTree.maternalGreatGrandfather2.moederId);
+        }
+        
+        if (pedigreeTree.maternalGreatGrandmother2 && pedigreeTree.maternalGreatGrandmother2.vaderId) {
+            pedigreeTree.maternalGreatGreatGrandfather4 = this.getDogById(pedigreeTree.maternalGreatGrandmother2.vaderId);
+        }
+        
+        if (pedigreeTree.maternalGreatGrandmother2 && pedigreeTree.maternalGreatGrandmother2.moederId) {
+            pedigreeTree.maternalGreatGreatGrandmother4 = this.getDogById(pedigreeTree.maternalGreatGrandmother2.moederId);
         }
         
         return pedigreeTree;
@@ -520,7 +613,43 @@ class StamboomManager extends BaseModule {
         const hasPhotos = await this.checkDogHasPhotos(dog.id);
         const cameraIcon = hasPhotos ? '<i class="bi bi-camera text-danger ms-1"></i>' : '';
 
-        // Maak een gecombineerde naam+kennel string voor automatische aanpassing
+        // Voor overovergrootouders (gen4): alleen naam en kennelnaam
+        if (generation === 4) {
+            const combinedName = dog.naam || this.t('unknown');
+            const showKennel = dog.kennelnaam && dog.kennelnaam.trim() !== '';
+            const fullDisplayText = combinedName + (showKennel ? ` ${dog.kennelnaam}` : '');
+            
+            return `
+                <div class="pedigree-card-compact horizontal ${dog.geslacht === 'reuen' ? 'male' : 'female'} ${mainDogClass} gen${generation}" 
+                     data-dog-id="${dog.id}" 
+                     data-dog-name="${dog.naam || ''}"
+                     data-relation="${relation}"
+                     data-generation="${generation}"
+                     data-has-photos="${hasPhotos}">
+                    <div class="pedigree-card-header-compact horizontal ${headerColor}">
+                        <div class="relation-compact">
+                            <span class="relation-text">${relation}</span>
+                            ${isMainDog ? '<span class="main-dot">★</span>' : ''}
+                        </div>
+                        <div class="gender-icon-compact">
+                            <i class="bi ${genderIcon}"></i>
+                        </div>
+                    </div>
+                    <div class="pedigree-card-body-compact horizontal">
+                        <!-- Alleen naam en kennelnaam voor overovergrootouders -->
+                        <div class="card-row card-row-1-only">
+                            <div class="dog-name-kennel-only" title="${fullDisplayText}">
+                                ${fullDisplayText}
+                            </div>
+                        </div>
+                        
+                        <!-- Geen click hint voor overovergrootouders -->
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Voor andere generaties (0-3): originele layout
         const combinedName = dog.naam || this.t('unknown');
         const showKennel = dog.kennelnaam && dog.kennelnaam.trim() !== '';
         const fullDisplayText = combinedName + (showKennel ? ` ${dog.kennelnaam}` : '');
@@ -1133,6 +1262,10 @@ class StamboomManager extends BaseModule {
                     gap: 4px !important;
                 }
                 
+                .pedigree-generation-col.gen4 {
+                    gap: 4px !important;
+                }
+                
                 /* BASIS LIGGENDE CARDS */
                 .pedigree-card-compact.horizontal {
                     background: white;
@@ -1149,7 +1282,7 @@ class StamboomManager extends BaseModule {
                     flex-shrink: 0;
                 }
                 
-                /* ZELFDE BREEDTE VOOR ALLE GENERATIES - ANDERE HOOGTE VOOR OVERGROOTOUDERS */
+                /* ZELFDE BREEDTE VOOR ALLE GENERATIES - VERSCHILLENDE HOOGTES */
                 .pedigree-card-compact.horizontal.gen0,
                 .pedigree-card-compact.horizontal.gen1,
                 .pedigree-card-compact.horizontal.gen2 {
@@ -1161,6 +1294,12 @@ class StamboomManager extends BaseModule {
                 .pedigree-card-compact.horizontal.gen3 {
                     width: 160px !important;
                     height: 70px !important;
+                }
+                
+                /* OVEROVERGROOTOUDERS: 30% HOOGTE VAN NORMALE CARDS (halve hoogte van overgrootouders - 5px) */
+                .pedigree-card-compact.horizontal.gen4 {
+                    width: 160px !important;
+                    height: 30px !important;
                 }
                 
                 /* Hoofdhond extra styling */
@@ -1224,6 +1363,13 @@ class StamboomManager extends BaseModule {
                     min-height: 16px;
                 }
                 
+                /* Header voor gen4 (overovergrootouders) */
+                .pedigree-card-compact.horizontal.gen4 .pedigree-card-header-compact.horizontal {
+                    padding: 1px 4px;
+                    font-size: 0.45rem;
+                    min-height: 12px;
+                }
+                
                 .pedigree-card-header-compact.horizontal.bg-primary {
                     background: #0d6efd !important;
                 }
@@ -1278,6 +1424,11 @@ class StamboomManager extends BaseModule {
                     padding: 4px 6px;
                 }
                 
+                /* Body voor gen4 (overovergrootouders) */
+                .pedigree-card-compact.horizontal.gen4 .pedigree-card-body-compact.horizontal {
+                    padding: 2px 4px;
+                }
+                
                 /* CARD ROWS voor liggende layout */
                 .card-row {
                     display: flex;
@@ -1285,6 +1436,27 @@ class StamboomManager extends BaseModule {
                     align-items: center;
                     gap: 4px;
                     overflow: hidden;
+                }
+                
+                /* Speciale styling voor overovergrootouders (alleen naam) */
+                .card-row-1-only {
+                    margin: 0 !important;
+                    padding: 0 !important;
+                    height: 100% !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                }
+                
+                .dog-name-kennel-only {
+                    font-weight: 600;
+                    color: #0d6efd;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    line-height: 1;
+                    width: 100%;
+                    font-size: 0.5rem;
+                    text-align: center;
                 }
                 
                 .card-row-1 {
@@ -1346,6 +1518,8 @@ class StamboomManager extends BaseModule {
                     font-size: 0.44rem;
                 }
                 
+                /* Overovergrootouders (gen4) hebben alleen naam-kennel */
+                
                 /* Algemene tekst styling */
                 .dog-pedigree-compact {
                     font-weight: 600;
@@ -1386,6 +1560,11 @@ class StamboomManager extends BaseModule {
                     padding-top: 2px;
                     border-top: 1px dashed #dee2e6;
                     font-size: 0.55rem;
+                }
+                
+                /* Overovergrootouders hebben geen click hint */
+                .pedigree-card-compact.horizontal.gen4 .click-hint-compact {
+                    display: none !important;
                 }
                 
                 .click-hint-compact .bi-camera {
@@ -1550,6 +1729,14 @@ class StamboomManager extends BaseModule {
                         margin-top: 4px !important;
                     }
                     
+                    .pedigree-generation-col.gen4 {
+                        justify-content: center !important;
+                        align-items: flex-start !important;
+                        min-width: 200px !important;
+                        width: 200px !important;
+                        gap: 4px !important;
+                    }
+                    
                     /* VERWIJDERD: Generation labels styling */
                     /* .generation-label {
                         display: none !important;
@@ -1565,8 +1752,15 @@ class StamboomManager extends BaseModule {
                     }
                     
                     .pedigree-card-compact.horizontal.gen3 {
-                        width: 220px !important;
+                        width: 200px !important;
                         height: 75px !important;
+                        margin: 0 !important;
+                        flex-shrink: 0 !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen4 {
+                        width: 200px !important;
+                        height: 35px !important;
                         margin: 0 !important;
                         flex-shrink: 0 !important;
                     }
@@ -1606,6 +1800,11 @@ class StamboomManager extends BaseModule {
                         height: 75px !important;
                     }
                     
+                    .pedigree-card-compact.horizontal.gen4 {
+                        width: 200px !important;
+                        height: 35px !important;
+                    }
+                    
                     .pedigree-card-compact.horizontal.main-dog-compact {
                         width: 200px !important;
                         height: 150px !important;
@@ -1619,7 +1818,8 @@ class StamboomManager extends BaseModule {
                     .pedigree-generation-col.gen0,
                     .pedigree-generation-col.gen1,
                     .pedigree-generation-col.gen2,
-                    .pedigree-generation-col.gen3 {
+                    .pedigree-generation-col.gen3,
+                    .pedigree-generation-col.gen4 {
                         min-width: 200px !important;
                         width: 200px !important;
                     }
@@ -1718,6 +1918,11 @@ class StamboomManager extends BaseModule {
                         justify-content: center;
                     }
                     
+                    .pedigree-generation-col.gen4 {
+                        gap: 4px !important;
+                        justify-content: center;
+                    }
+                    
                     .pedigree-card-compact.horizontal.gen0,
                     .pedigree-card-compact.horizontal.gen1,
                     .pedigree-card-compact.horizontal.gen2 {
@@ -1728,6 +1933,11 @@ class StamboomManager extends BaseModule {
                     .pedigree-card-compact.horizontal.gen3 {
                         width: 200px !important;
                         height: 70px !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen4 {
+                        width: 200px !important;
+                        height: 30px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.main-dog-compact {
@@ -1769,6 +1979,10 @@ class StamboomManager extends BaseModule {
                         font-size: 0.48rem;
                     }
                     
+                    .pedigree-card-compact.horizontal.gen4 .dog-name-kennel-only {
+                        font-size: 0.54rem;
+                    }
+                    
                     /* VERWIJDERD: Generation label styling */
                     /* .generation-label {
                         display: none !important;
@@ -1795,6 +2009,11 @@ class StamboomManager extends BaseModule {
                     .pedigree-card-compact.horizontal.gen3 {
                         width: 200px !important;
                         height: 75px !important;
+                    }
+                    
+                    .pedigree-card-compact.horizontal.gen4 {
+                        width: 200px !important;
+                        height: 35px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.main-dog-compact {
@@ -2241,6 +2460,15 @@ class StamboomManager extends BaseModule {
                 .pedigree-card-compact.horizontal.gen3:hover {
                     opacity: 1;
                 }
+                
+                /* Overovergrootouder styling */
+                .pedigree-card-compact.horizontal.gen4 {
+                    opacity: 0.8;
+                }
+                
+                .pedigree-card-compact.horizontal.gen4:hover {
+                    opacity: 1;
+                }
             </style>
         `;
         
@@ -2305,6 +2533,24 @@ class StamboomManager extends BaseModule {
         const maternalGreatGrandfather2Card = await this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandfather2, this.t('greatGrandfather'), false, 3);
         const maternalGreatGrandmother2Card = await this.getDogCompactCardHTML(pedigreeTree.maternalGreatGrandmother2, this.t('greatGrandmother'), false, 3);
         
+        // NIEUW: Overovergrootouders (16 stuks)
+        const paternalGreatGreatGrandfather1Card = await this.getDogCompactCardHTML(pedigreeTree.paternalGreatGreatGrandfather1, this.t('greatGreatGrandfather'), false, 4);
+        const paternalGreatGreatGrandmother1Card = await this.getDogCompactCardHTML(pedigreeTree.paternalGreatGreatGrandmother1, this.t('greatGreatGrandmother'), false, 4);
+        const paternalGreatGreatGrandfather2Card = await this.getDogCompactCardHTML(pedigreeTree.paternalGreatGreatGrandfather2, this.t('greatGreatGrandfather'), false, 4);
+        const paternalGreatGreatGrandmother2Card = await this.getDogCompactCardHTML(pedigreeTree.paternalGreatGreatGrandmother2, this.t('greatGreatGrandmother'), false, 4);
+        const paternalGreatGreatGrandfather3Card = await this.getDogCompactCardHTML(pedigreeTree.paternalGreatGreatGrandfather3, this.t('greatGreatGrandfather'), false, 4);
+        const paternalGreatGreatGrandmother3Card = await this.getDogCompactCardHTML(pedigreeTree.paternalGreatGreatGrandmother3, this.t('greatGreatGrandmother'), false, 4);
+        const paternalGreatGreatGrandfather4Card = await this.getDogCompactCardHTML(pedigreeTree.paternalGreatGreatGrandfather4, this.t('greatGreatGrandfather'), false, 4);
+        const paternalGreatGreatGrandmother4Card = await this.getDogCompactCardHTML(pedigreeTree.paternalGreatGreatGrandmother4, this.t('greatGreatGrandmother'), false, 4);
+        const maternalGreatGreatGrandfather1Card = await this.getDogCompactCardHTML(pedigreeTree.maternalGreatGreatGrandfather1, this.t('greatGreatGrandfather'), false, 4);
+        const maternalGreatGreatGrandmother1Card = await this.getDogCompactCardHTML(pedigreeTree.maternalGreatGreatGrandmother1, this.t('greatGreatGrandmother'), false, 4);
+        const maternalGreatGreatGrandfather2Card = await this.getDogCompactCardHTML(pedigreeTree.maternalGreatGreatGrandfather2, this.t('greatGreatGrandfather'), false, 4);
+        const maternalGreatGreatGrandmother2Card = await this.getDogCompactCardHTML(pedigreeTree.maternalGreatGreatGrandmother2, this.t('greatGreatGrandmother'), false, 4);
+        const maternalGreatGreatGrandfather3Card = await this.getDogCompactCardHTML(pedigreeTree.maternalGreatGreatGrandfather3, this.t('greatGreatGrandfather'), false, 4);
+        const maternalGreatGreatGrandmother3Card = await this.getDogCompactCardHTML(pedigreeTree.maternalGreatGreatGrandmother3, this.t('greatGreatGrandmother'), false, 4);
+        const maternalGreatGreatGrandfather4Card = await this.getDogCompactCardHTML(pedigreeTree.maternalGreatGreatGrandfather4, this.t('greatGreatGrandfather'), false, 4);
+        const maternalGreatGreatGrandmother4Card = await this.getDogCompactCardHTML(pedigreeTree.maternalGreatGreatGrandmother4, this.t('greatGreatGrandmother'), false, 4);
+        
         const gridHTML = `
             <div class="pedigree-grid-compact">
                 <!-- Generatie 0: Hoofdhond -->
@@ -2336,6 +2582,26 @@ class StamboomManager extends BaseModule {
                     ${maternalGreatGrandmother1Card}
                     ${maternalGreatGrandfather2Card}
                     ${maternalGreatGrandmother2Card}
+                </div>
+                
+                <!-- Generatie 4: Overovergrootouders -->
+                <div class="pedigree-generation-col gen4">
+                    ${paternalGreatGreatGrandfather1Card}
+                    ${paternalGreatGreatGrandmother1Card}
+                    ${paternalGreatGreatGrandfather2Card}
+                    ${paternalGreatGreatGrandmother2Card}
+                    ${paternalGreatGreatGrandfather3Card}
+                    ${paternalGreatGreatGrandmother3Card}
+                    ${paternalGreatGreatGrandfather4Card}
+                    ${paternalGreatGreatGrandmother4Card}
+                    ${maternalGreatGreatGrandfather1Card}
+                    ${maternalGreatGreatGrandmother1Card}
+                    ${maternalGreatGreatGrandfather2Card}
+                    ${maternalGreatGreatGrandmother2Card}
+                    ${maternalGreatGreatGrandfather3Card}
+                    ${maternalGreatGreatGrandmother3Card}
+                    ${maternalGreatGreatGrandfather4Card}
+                    ${maternalGreatGreatGrandmother4Card}
                 </div>
             </div>
         `;
