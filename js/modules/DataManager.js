@@ -1,6 +1,6 @@
 /**
  * Data Management Module voor HondenDatabase
- * MET WERKENDE OK KNOppen
+ * COMPLEET MET ALLE FIXES
  */
 
 class DataManager extends BaseModule {
@@ -449,7 +449,173 @@ class DataManager extends BaseModule {
         });
     }
     
-    // ... (updateModalTexts, updateBackupWarningText functies blijven hetzelfde)
+    updateModalTexts() {
+        const t = this.t.bind(this);
+        const modal = document.getElementById('dataManagementModal');
+        
+        if (!modal) return;
+        
+        const title = modal.querySelector('#dataManagementModalLabel');
+        if (title) {
+            title.innerHTML = `<i class="bi bi-database-gear"></i> ${t('dataManagement')}`;
+        }
+        
+        const importCard = modal.querySelector('.card.border-success .card-header h5');
+        if (importCard) {
+            importCard.innerHTML = `<i class="bi bi-upload"></i> ${t('dataImport')}`;
+        }
+        
+        const importDesc = modal.querySelector('.card.border-success .card-body p.card-text');
+        if (importDesc) {
+            importDesc.textContent = t('importDescription');
+        }
+        
+        const importLabel = modal.querySelector('label[for="importFile"]');
+        if (importLabel) {
+            importLabel.textContent = t('selectJsonFile');
+        }
+        
+        const importHelp = modal.querySelector('.card.border-success .form-text');
+        if (importHelp) {
+            importHelp.textContent = t('chooseExportedFile');
+        }
+        
+        const strategyLabel = modal.querySelector('label[for="importStrategy"]');
+        if (strategyLabel) {
+            strategyLabel.textContent = t('importStrategy');
+        }
+        
+        const strategyHelp = modal.querySelectorAll('.card.border-success .form-text')[1];
+        if (strategyHelp) {
+            strategyHelp.textContent = t('importStrategyDescription');
+        }
+        
+        const importBtn = modal.querySelector('#startImportBtn');
+        if (importBtn) {
+            importBtn.innerHTML = `<i class="bi bi-upload"></i> ${t('startImport')}`;
+        }
+        
+        const exportCard = modal.querySelector('.card.border-primary .card-header h5');
+        if (exportCard) {
+            exportCard.innerHTML = `<i class="bi bi-download"></i> ${t('dataExport')}`;
+        }
+        
+        const exportDesc = modal.querySelector('.card.border-primary .card-body p.card-text');
+        if (exportDesc) {
+            exportDesc.textContent = t('exportDescription');
+        }
+        
+        const backupTypeLabel = modal.querySelector('.card.border-primary .form-label');
+        if (backupTypeLabel) {
+            backupTypeLabel.textContent = t('backupType');
+        }
+        
+        const backupEverythingLabel = modal.querySelector('label[for="backupEverything"] strong');
+        if (backupEverythingLabel) {
+            backupEverythingLabel.textContent = t('backupEverything');
+        }
+        
+        const backupEverythingHelp = modal.querySelectorAll('.card.border-primary .form-text')[0];
+        if (backupEverythingHelp) {
+            backupEverythingHelp.textContent = t('backupEverythingDescription');
+        }
+        
+        const shareDataLabel = modal.querySelector('label[for="shareData"] strong');
+        if (shareDataLabel) {
+            shareDataLabel.textContent = t('shareData');
+        }
+        
+        const shareDataHelp = modal.querySelectorAll('.card.border-primary .form-text')[1];
+        if (shareDataHelp) {
+            shareDataHelp.textContent = t('shareDataDescription');
+        }
+        
+        const exportOptionsLabel = modal.querySelector('#exportOptionsSection .form-label');
+        if (exportOptionsLabel) {
+            exportOptionsLabel.textContent = t('exportOptions');
+        }
+        
+        const exportDataPhotosLabel = modal.querySelector('label[for="exportDataPhotos"] strong');
+        if (exportDataPhotosLabel) {
+            exportDataPhotosLabel.textContent = t('exportDataPhotos');
+        }
+        
+        const exportDataPhotosHelp = modal.querySelectorAll('.card.border-primary .form-text')[2];
+        if (exportDataPhotosHelp) {
+            exportDataPhotosHelp.textContent = t('exportDataPhotosDescription');
+        }
+        
+        const exportPrivateInfoLabel = modal.querySelector('label[for="exportPrivateInfo"] strong');
+        if (exportPrivateInfoLabel) {
+            exportPrivateInfoLabel.textContent = t('exportPrivateInfo');
+        }
+        
+        const exportPrivateInfoHelp = modal.querySelectorAll('.card.border-primary .form-text')[3];
+        if (exportPrivateInfoHelp) {
+            exportPrivateInfoHelp.textContent = t('exportPrivateInfoDescription');
+        }
+        
+        const formatLabel = modal.querySelector('label[for="exportFormat"]');
+        if (formatLabel) {
+            formatLabel.textContent = t('exportFormat');
+        }
+        
+        const jsonOption = modal.querySelector('#exportFormat option[value="json"]');
+        if (jsonOption) {
+            jsonOption.textContent = t('jsonFormat');
+        }
+        
+        const csvOption = modal.querySelector('#exportFormat option[value="csv"]');
+        if (csvOption) {
+            csvOption.textContent = t('csvFormat');
+        }
+        
+        const exportBtn = modal.querySelector('#startExportBtn');
+        if (exportBtn) {
+            exportBtn.innerHTML = `<i class="bi bi-download"></i> ${t('startExport')}`;
+        }
+        
+        const statsCard = modal.querySelector('.card.border-info .card-header h5');
+        if (statsCard) {
+            statsCard.innerHTML = `<i class="bi bi-graph-up"></i> ${t('databaseStatistics')}`;
+        }
+        
+        const statsLabels = modal.querySelectorAll('#databaseStats .text-muted');
+        if (statsLabels.length >= 3) {
+            statsLabels[0].textContent = t('dogs');
+            statsLabels[1].textContent = t('photos');
+            statsLabels[2].textContent = t('privateRecords');
+        }
+        
+        const closeBtn = modal.querySelector('.modal-footer .btn-secondary');
+        if (closeBtn) {
+            closeBtn.textContent = t('close') || 'Sluiten';
+        }
+        
+        this.updateBackupWarningText();
+    }
+    
+    updateBackupWarningText() {
+        if (!window.backupManager) return;
+        
+        const status = window.backupManager.getStatus();
+        const daysSince = window.backupManager.getDaysSinceLastBackup();
+        const t = this.t.bind(this);
+        
+        const warningDiv = document.querySelector('#dataManagementModal .alert');
+        if (!warningDiv) return;
+        
+        if (status.level === 'danger') {
+            warningDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> 
+                <strong>${t('backupStatusDanger')}</strong><br>
+                ${t('backupDangerText')}`;
+        } else if (status.level === 'warning') {
+            const warningText = t('backupWarningText').replace('{days}', daysSince);
+            warningDiv.innerHTML = `<i class="bi bi-exclamation-triangle"></i> 
+                <strong>${t('backupStatusWarning')}</strong><br>
+                ${warningText}`;
+        }
+    }
     
     async handleImport() {
         const t = this.t.bind(this);
@@ -474,11 +640,11 @@ class DataManager extends BaseModule {
                     importData = JSON.parse(e.target.result);
                 }
                 
+                console.log('Start import...');
                 const result = await this.processImportWithRelations(importData);
                 
                 this.hideProgress();
                 this.showImportResults(result);
-                
                 await this.loadDatabaseStats();
                 
             } catch (error) {
@@ -660,18 +826,10 @@ class DataManager extends BaseModule {
             relaties: { hersteld: 0 }
         };
         
-        console.log('=== START IMPORT MET RELATIES ===');
+        console.log('=== START IMPORT ===');
         
         if (!this.db) {
             throw new Error('Database niet gevonden.');
-        }
-        
-        const hasVoegHondToe = typeof this.db.voegHondToe === 'function';
-        const hasUpdateHond = typeof this.db.updateHond === 'function';
-        
-        if (!hasVoegHondToe || !hasUpdateHond) {
-            this.showError('Database functies ontbreken. Kan niet importeren.');
-            return result;
         }
         
         // === FASE 1: Importeer alle honden ===
@@ -679,7 +837,7 @@ class DataManager extends BaseModule {
         const oldIdToStamboomMap = new Map();
         
         if (importData.honden && Array.isArray(importData.honden)) {
-            console.log(`Importeer ${importData.honden.length} honden (fase 1)...`);
+            console.log(`Fase 1: Importeer ${importData.honden.length} honden...`);
             
             const existingHonden = await this.db.getHonden();
             const existingStamboomMap = new Map();
@@ -779,12 +937,14 @@ class DataManager extends BaseModule {
             }
         }
         
-        // Update progress voor fase 2
-        this.showProgress(t('buildingRelations'));
+        console.log(`Fase 1 voltooid: ${result.honden.toegevoegd} toegevoegd, ${result.honden.bijgewerkt} bijgewerkt`);
         
         // === FASE 2: Herstel relaties ===
+        console.log('Fase 2: Herstel relaties...');
+        this.updateProgressMessage(t('buildingRelations'));
+        
         if (importData.honden && Array.isArray(importData.honden)) {
-            console.log('Herstel ouderlijke relaties (fase 2)...');
+            let relatiesGemaakt = 0;
             
             for (const importedHond of importData.honden) {
                 try {
@@ -797,7 +957,6 @@ class DataManager extends BaseModule {
                     let vaderId = null;
                     let moederId = null;
                     
-                    // VADER zoeken
                     if (importedHond.vaderStamboomnr) {
                         vaderId = stamboomToIdMap.get(importedHond.vaderStamboomnr);
                     } else if (importedHond.vaderId) {
@@ -807,7 +966,6 @@ class DataManager extends BaseModule {
                         }
                     }
                     
-                    // MOEDER zoeken
                     if (importedHond.moederStamboomnr) {
                         moederId = stamboomToIdMap.get(importedHond.moederStamboomnr);
                     } else if (importedHond.moederId) {
@@ -827,7 +985,7 @@ class DataManager extends BaseModule {
                         
                         try {
                             await this.db.updateHond(updateData);
-                            result.relaties.hersteld++;
+                            relatiesGemaakt++;
                         } catch (updateError) {
                             console.error(`Fout bij updaten relaties voor ${stamboomnr}:`, updateError);
                         }
@@ -836,14 +994,231 @@ class DataManager extends BaseModule {
                     console.error(`Fout bij herstellen relaties:`, error);
                 }
             }
+            
+            result.relaties.hersteld = relatiesGemaakt;
         }
         
-        // === FASE 3 & 4: Foto's en privé info ===
-        // ... (dezelfde code als eerder voor foto's en privé info)
+        console.log(`Fase 2 voltooid: ${result.relaties.hersteld} relaties hersteld`);
+        
+        // === FASE 3: Foto's ===
+        if (importData.fotos && Array.isArray(importData.fotos) && typeof this.db.voegFotoToe === 'function') {
+            console.log(`Fase 3: Importeer ${importData.fotos.length} foto's...`);
+            
+            let existingFotos = [];
+            try {
+                if (typeof this.db.getAllFotos === 'function') {
+                    existingFotos = await this.db.getAllFotos();
+                }
+            } catch (error) {
+                console.log('Kon bestaande foto\'s niet ophalen:', error);
+            }
+            
+            const existingFotoSet = new Set();
+            existingFotos.forEach(foto => {
+                if (foto.id) existingFotoSet.add(foto.id);
+                if (foto.bestandsnaam) existingFotoSet.add(`file_${foto.bestandsnaam}`);
+            });
+            
+            for (const foto of importData.fotos) {
+                try {
+                    let fotoBestaatAl = false;
+                    if (foto.id && existingFotoSet.has(foto.id)) {
+                        fotoBestaatAl = true;
+                    } else if (foto.bestandsnaam && existingFotoSet.has(`file_${foto.bestandsnaam}`)) {
+                        fotoBestaatAl = true;
+                    }
+                    
+                    if (!fotoBestaatAl) {
+                        const hondId = stamboomToIdMap.get(foto.stamboomnr);
+                        if (hondId) {
+                            const fotoZonderId = {
+                                stamboomnr: foto.stamboomnr,
+                                data: foto.data || '',
+                                thumbnail: foto.thumbnail || '',
+                                filename: foto.filename || 'onbekend.jpg',
+                                size: foto.size || 0,
+                                type: foto.type || 'image/jpeg',
+                                uploadedAt: foto.uploadedAt || new Date().toISOString(),
+                                geuploadDoor: foto.geuploadDoor || window.auth?.getCurrentUser()?.username || 'unknown'
+                            };
+                            
+                            await this.db.voegFotoToe(fotoZonderId);
+                            result.fotos.toegevoegd++;
+                        }
+                    }
+                } catch (error) {
+                    console.log(`Foto ${foto.id} kan niet worden toegevoegd:`, error);
+                }
+            }
+        }
+        
+        // === FASE 4: Privé info ===
+        if (importData.priveInfo && Array.isArray(importData.priveInfo) && typeof this.db.bewaarPriveInfo === 'function') {
+            console.log(`Fase 4: Importeer ${importData.priveInfo.length} privé records...`);
+            
+            try {
+                for (const prive of importData.priveInfo) {
+                    try {
+                        const hondId = stamboomToIdMap.get(prive.stamboomnr);
+                        if (hondId) {
+                            const priveZonderId = {
+                                stamboomnr: prive.stamboomnr,
+                                privateNotes: prive.privateNotes || '',
+                                vertrouwelijk: true,
+                                laatstGewijzigd: new Date().toISOString(),
+                                gewijzigdDoor: window.auth?.getCurrentUser()?.username || 'unknown'
+                            };
+                            
+                            await this.db.bewaarPriveInfo(priveZonderId);
+                            result.priveInfo.bijgewerkt++;
+                        }
+                    } catch (error) {
+                        console.log(`Privé info voor ${prive.stamboomnr} kan niet worden opgeslagen:`, error);
+                    }
+                }
+            } catch (authError) {
+                console.log('Geen rechten voor privé info import:', authError);
+            }
+        }
         
         console.log('=== IMPORT VOLTOOID ===', result);
-        
         return result;
+    }
+    
+    updateProgressMessage(message) {
+        const progressDiv = document.getElementById('dataManagerProgress');
+        if (progressDiv) {
+            const messageElement = progressDiv.querySelector('p');
+            if (messageElement) {
+                messageElement.textContent = message;
+            }
+        }
+    }
+    
+    showProgress(message) {
+        this.hideProgress();
+        
+        const progressHtml = `
+            <div class="modal-backdrop fade show"></div>
+            <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5);">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-body text-center">
+                            <div class="spinner-border text-primary mb-3" role="status"></div>
+                            <p>${message}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const progressDiv = document.createElement('div');
+        progressDiv.id = 'dataManagerProgress';
+        progressDiv.innerHTML = progressHtml;
+        document.body.appendChild(progressDiv);
+    }
+    
+    hideProgress() {
+        const progressDiv = document.getElementById('dataManagerProgress');
+        if (progressDiv) {
+            progressDiv.remove();
+        }
+        document.querySelectorAll('.modal-backdrop.fade.show').forEach(backdrop => {
+            if (backdrop.parentNode) {
+                backdrop.remove();
+            }
+        });
+    }
+    
+    showImportResults(result) {
+        const t = this.t.bind(this);
+        let summary = `<h5>${t('importSummary')}</h5><div class="alert alert-success">`;
+        
+        if (result.honden.toegevoegd > 0) {
+            summary += `<strong>${result.honden.toegevoegd}</strong> ${t('newDogsAdded')}<br>`;
+        }
+        if (result.honden.bijgewerkt > 0) {
+            summary += `<strong>${result.honden.bijgewerkt}</strong> ${t('dogsUpdated')}<br>`;
+        }
+        if (result.fotos.toegevoegd > 0) {
+            summary += `<strong>${result.fotos.toegevoegd}</strong> ${t('photosImported')}<br>`;
+        }
+        if (result.priveInfo.bijgewerkt > 0) {
+            summary += `<strong>${result.priveInfo.bijgewerkt}</strong> ${t('privateUpdated')}<br>`;
+        }
+        if (result.relaties.hersteld > 0) {
+            summary += `<strong>${result.relaties.hersteld}</strong> ${t('relationshipsBuilt')}<br>`;
+        }
+        
+        summary += `</div>`;
+        
+        this.showSuccess(`${t('importComplete')}<br>${summary}`);
+    }
+    
+    showSuccess(message) {
+        this.hideProgress();
+        
+        const modalId = 'successModal-' + Date.now();
+        const modal = document.createElement('div');
+        modal.id = modalId;
+        modal.className = 'modal fade show';
+        modal.style.display = 'block';
+        modal.innerHTML = `
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title"><i class="bi bi-check-circle"></i> Succes</h5>
+                        <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('${modalId}').remove(); document.querySelector('#${modalId}-backdrop').remove();"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${message.replace(/\n/g, '<br>')}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" onclick="document.getElementById('${modalId}').remove(); document.querySelector('#${modalId}-backdrop').remove();">OK</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        const backdrop = document.createElement('div');
+        backdrop.id = modalId + '-backdrop';
+        backdrop.className = 'modal-backdrop fade show';
+        document.body.appendChild(backdrop);
+    }
+    
+    showError(message) {
+        this.hideProgress();
+        
+        const modalId = 'errorModal-' + Date.now();
+        const modal = document.createElement('div');
+        modal.id = modalId;
+        modal.className = 'modal fade show';
+        modal.style.display = 'block';
+        modal.innerHTML = `
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Fout</h5>
+                        <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('${modalId}').remove(); document.querySelector('#${modalId}-backdrop').remove();"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${message.replace(/\n/g, '<br>')}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" onclick="document.getElementById('${modalId}').remove(); document.querySelector('#${modalId}-backdrop').remove();">OK</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        const backdrop = document.createElement('div');
+        backdrop.id = modalId + '-backdrop';
+        backdrop.className = 'modal-backdrop fade show';
+        document.body.appendChild(backdrop);
     }
     
     convertHondenToCSV(honden) {
@@ -958,141 +1333,5 @@ class DataManager extends BaseModule {
         } catch (error) {
             console.error(`${this.t('statsError')}${error}`);
         }
-    }
-    
-    showImportResults(result) {
-        const t = this.t.bind(this);
-        let summary = `<h5>${t('importSummary')}</h5><div class="alert alert-success">`;
-        
-        if (result.honden.toegevoegd > 0) {
-            summary += `<strong>${result.honden.toegevoegd}</strong> ${t('newDogsAdded')}<br>`;
-        }
-        if (result.honden.bijgewerkt > 0) {
-            summary += `<strong>${result.honden.bijgewerkt}</strong> ${t('dogsUpdated')}<br>`;
-        }
-        if (result.fotos.toegevoegd > 0) {
-            summary += `<strong>${result.fotos.toegevoegd}</strong> ${t('photosImported')}<br>`;
-        }
-        if (result.priveInfo.bijgewerkt > 0) {
-            summary += `<strong>${result.priveInfo.bijgewerkt}</strong> ${t('privateUpdated')}<br>`;
-        }
-        if (result.relaties.hersteld > 0) {
-            summary += `<strong>${result.relaties.hersteld}</strong> ${t('relationshipsBuilt')}<br>`;
-        }
-        
-        summary += `</div>`;
-        
-        this.showSuccess(`${t('importComplete')}<br>${summary}`);
-    }
-    
-    showProgress(message) {
-        const progressHtml = `
-            <div class="modal-backdrop fade show"></div>
-            <div class="modal fade show" style="display: block;">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-body text-center">
-                            <div class="spinner-border text-primary mb-3" role="status"></div>
-                            <p>${message}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        const progressDiv = document.createElement('div');
-        progressDiv.id = 'dataManagerProgress';
-        progressDiv.innerHTML = progressHtml;
-        document.body.appendChild(progressDiv);
-    }
-    
-    hideProgress() {
-        const progressDiv = document.getElementById('dataManagerProgress');
-        if (progressDiv) {
-            progressDiv.remove();
-        }
-    }
-    
-    showSuccess(message) {
-        const modalId = 'successModal-' + Date.now();
-        const modal = document.createElement('div');
-        modal.id = modalId;
-        modal.className = 'modal fade show';
-        modal.style.display = 'block';
-        modal.innerHTML = `
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title"><i class="bi bi-check-circle"></i> Succes</h5>
-                        <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('${modalId}').remove(); document.querySelector('#${modalId}-backdrop').remove();"></button>
-                    </div>
-                    <div class="modal-body">
-                        ${message.replace(/\n/g, '<br>')}
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-success" onclick="document.getElementById('${modalId}').remove(); document.querySelector('#${modalId}-backdrop').remove();">OK</button>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-        const backdrop = document.createElement('div');
-        backdrop.id = modalId + '-backdrop';
-        backdrop.className = 'modal-backdrop fade show';
-        document.body.appendChild(backdrop);
-        
-        // Ook sluiten met Escape key
-        const handleEscape = (e) => {
-            if (e.key === 'Escape') {
-                modal.remove();
-                backdrop.remove();
-                document.removeEventListener('keydown', handleEscape);
-            }
-        };
-        
-        document.addEventListener('keydown', handleEscape);
-    }
-    
-    showError(message) {
-        const modalId = 'errorModal-' + Date.now();
-        const modal = document.createElement('div');
-        modal.id = modalId;
-        modal.className = 'modal fade show';
-        modal.style.display = 'block';
-        modal.innerHTML = `
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-danger text-white">
-                        <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Fout</h5>
-                        <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('${modalId}').remove(); document.querySelector('#${modalId}-backdrop').remove();"></button>
-                    </div>
-                    <div class="modal-body">
-                        ${message.replace(/\n/g, '<br>')}
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" onclick="document.getElementById('${modalId}').remove(); document.querySelector('#${modalId}-backdrop').remove();">OK</button>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-        const backdrop = document.createElement('div');
-        backdrop.id = modalId + '-backdrop';
-        backdrop.className = 'modal-backdrop fade show';
-        document.body.appendChild(backdrop);
-        
-        const handleEscape = (e) => {
-            if (e.key === 'Escape') {
-                modal.remove();
-                backdrop.remove();
-                document.removeEventListener('keydown', handleEscape);
-            }
-        };
-        
-        document.addEventListener('keydown', handleEscape);
     }
 }
