@@ -1887,13 +1887,13 @@ class ReuTeefCombinatie {
                 .rtc-pedigree-card-compact.horizontal.gen1,
                 .rtc-pedigree-card-compact.horizontal.gen2 {
                     width: 160px !important;
-                    height: 120px !important;
+                    height: 140px !important;
                 }
                 
                 /* OVERGROOTOUDERS: 60% HOOGTE VAN NORMALE CARDS */
                 .rtc-pedigree-card-compact.horizontal.gen3 {
                     width: 160px !important;
-                    height: 60px !important;
+                    height: 70px !important;
                 }
                 
                 /* Hoofdhond extra styling */
@@ -1901,7 +1901,7 @@ class ReuTeefCombinatie {
                     border: 2px solid #198754 !important;
                     background: #f0fff4;
                     width: 170px !important;
-                    height: 110px !important;
+                    height: 140px !important;
                 }
                 
                 /* Geslacht kleuren */
@@ -2460,17 +2460,17 @@ class ReuTeefCombinatie {
                     .rtc-pedigree-card-compact.horizontal.gen1,
                     .rtc-pedigree-card-compact.horizontal.gen2 {
                         width: 200px !important;
-                        height: 132px !important;
+                        height: 140px !important;
                     }
                     
                     .rtc-pedigree-card-compact.horizontal.gen3 {
                         width: 200px !important;
-                        height: 66px !important;
+                        height: 70px !important;
                     }
                     
                     .rtc-pedigree-card-compact.horizontal.main-dog-compact {
                         width: 200px !important;
-                        height: 132px !important;
+                        height: 140px !important;
                     }
                     
                     .rtc-pedigree-card-compact.horizontal.gen0 .rtc-dog-name-kennel-compact,
@@ -2522,17 +2522,17 @@ class ReuTeefCombinatie {
                     .rtc-pedigree-card-compact.horizontal.gen1,
                     .rtc-pedigree-card-compact.horizontal.gen2 {
                         width: 200px !important;
-                        height: 132px !important;
+                        height: 140px !important;
                     }
                     
                     .rtc-pedigree-card-compact.horizontal.gen3 {
                         width: 200px !important;
-                        height: 63px !important;
+                        height: 70px !important;
                     }
                     
                     .rtc-pedigree-card-compact.horizontal.main-dog-compact {
                         width: 200px !important;
-                        height: 132px !important;
+                        height: 140px !important;
                     }
                 }
                 
