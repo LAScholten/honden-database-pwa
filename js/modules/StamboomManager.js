@@ -1154,13 +1154,13 @@ class StamboomManager extends BaseModule {
                 .pedigree-card-compact.horizontal.gen1,
                 .pedigree-card-compact.horizontal.gen2 {
                     width: 160px !important;
-                    height: 160px !important;
+                    height: 154px !important;
                 }
                 
                 /* OVERGROOTOUDERS: 60% HOOGTE VAN NORMALE CARDS */
                 .pedigree-card-compact.horizontal.gen3 {
                     width: 160px !important;
-                    height: 80px !important;
+                    height: 77px !important;
                 }
                 
                 /* Hoofdhond extra styling */
@@ -1168,7 +1168,7 @@ class StamboomManager extends BaseModule {
                     border: 2px solid #0d6efd !important;
                     background: #f0f7ff;
                     width: 170px !important;
-                    height: 160px !important;
+                    height: 154px !important;
                 }
                 
                 /* Geslacht kleuren */
@@ -1722,7 +1722,7 @@ class StamboomManager extends BaseModule {
                     .pedigree-card-compact.horizontal.gen1,
                     .pedigree-card-compact.horizontal.gen2 {
                         width: 200px !important;
-                        height: 160px !important;
+                        height: 154px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen3 {
@@ -1732,7 +1732,7 @@ class StamboomManager extends BaseModule {
                     
                     .pedigree-card-compact.horizontal.main-dog-compact {
                         width: 200px !important;
-                        height: 160px !important;
+                        height: 154px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen0 .dog-name-kennel-compact,
@@ -1789,17 +1789,17 @@ class StamboomManager extends BaseModule {
                     .pedigree-card-compact.horizontal.gen1,
                     .pedigree-card-compact.horizontal.gen2 {
                         width: 200px !important;
-                        height: 160px !important;
+                        height: 154px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.gen3 {
                         width: 200px !important;
-                        height: 80px !important;
+                        height: 77px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.main-dog-compact {
                         width: 200px !important;
-                        height: 160px !important;
+                        height: 154px !important;
                     }
                 }
                 
