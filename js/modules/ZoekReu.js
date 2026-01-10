@@ -2748,7 +2748,7 @@ style.textContent = `
         top: 100%;
         left: 0;
         right: 0;
-        max-height: 400px;
+        max-height: 800px;
         height: auto;
         overflow-y: auto;
         background: white;
