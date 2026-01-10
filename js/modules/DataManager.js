@@ -171,7 +171,7 @@ class DataManager extends BaseModule {
                 totalPrivateExported: "Gesamte private Aufzeichnungen exportiert: ",
                 backupType: "Backup-Typ",
                 backupEverything: "Alles sichern (sichere Aufbewahrung)",
-                backupEverythingDescription: "Exportieren Sie alle Daten einschließlich privater Notizen",
+                backupEverythingDescription: "Exportieren Sie alle data einschließlich privater Notizen",
                 shareData: "Zum Teilen exportieren",
                 shareDataDescription: "Exportieren Sie nur öffentliche data (ohne private Notizen)",
                 backupStatusWarning: "Backup empfohlen",
@@ -863,26 +863,21 @@ class DataManager extends BaseModule {
             
             for (const importedHond of importData.honden) {
                 try {
-                    // Zoek of deze hond al bestaat
+                    // Zoek of deze hond al bestaat - ALLEEN op stamboomnr
                     let existingHond = null;
                     
-                    // Eerst zoeken op ID
-                    if (importedHond.id) {
-                        existingHond = currentHondMap.get(importedHond.id);
-                    }
-                    
-                    // Als niet gevonden, zoek op stamboomnr
-                    if (!existingHond && importedHond.stamboomnr) {
+                    // Zoek ALLEEN op stamboomnr, niet op ID
+                    if (importedHond.stamboomnr) {
                         existingHond = currentHondMap.get(`stamboom_${importedHond.stamboomnr}`);
                     }
                     
                     if (!existingHond) {
                         // NIEUWE HOND: Voeg toe
-                        console.log(`Nieuwe hond: ${importedHond.naam || 'onbekend'} (ID: ${importedHond.id})`);
+                        console.log(`Nieuwe hond: ${importedHond.naam || 'onbekend'} (Stamboom: ${importedHond.stamboomnr})`);
                         
-                        // Voor nieuwe honden moeten we het ID verwijderen zodat de database een nieuw ID genereert
+                        // BELANGRIJK: Verwijder ID voor nieuwe honden
                         const hondZonderId = { ...importedHond };
-                        delete hondZonderId.id;
+                        delete hondZonderId.id; // Database genereert zelf ID
                         
                         try {
                             const newId = await this.db.voegHondToe(hondZonderId);
@@ -890,22 +885,13 @@ class DataManager extends BaseModule {
                             result.honden.toegevoegd++;
                         } catch (addError) {
                             console.error(`Fout bij toevoegen hond:`, addError);
-                            // Probeer het nog eens met update als add faalt
-                            if (importedHond.id) {
-                                try {
-                                    console.log(`Probeer hond ${importedHond.id} te updaten als fallback...`);
-                                    await this.db.updateHond(importedHond);
-                                    result.honden.bijgewerkt++;
-                                } catch (updateError) {
-                                    console.error(`Kon hond ${importedHond.id} niet toevoegen of updaten:`, updateError);
-                                }
-                            }
+                            this.showError(`Fout bij toevoegen hond ${importedHond.naam}: ${addError.message}`);
                         }
                     } else {
                         // BESTAANDE HOND: Update
                         console.log(`Bestaande hond: ${existingHond.naam} (ID: ${existingHond.id})`);
                         
-                        // Zorg dat we het juiste ID gebruiken
+                        // Zorg dat we het juiste database ID gebruiken
                         const hondData = { ...importedHond, id: existingHond.id };
                         
                         try {
@@ -913,10 +899,12 @@ class DataManager extends BaseModule {
                             result.honden.bijgewerkt++;
                         } catch (updateError) {
                             console.error(`Fout bij updaten hond ${existingHond.id}:`, updateError);
+                            this.showError(`Fout bij updaten hond ${existingHond.naam}: ${updateError.message}`);
                         }
                     }
                 } catch (error) {
                     console.error(`Fout bij verwerken hond:`, error);
+                    this.showError(`Fout bij importeren hond: ${error.message}`);
                 }
             }
         }
@@ -933,7 +921,7 @@ class DataManager extends BaseModule {
                 console.log('Kon bestaande foto\'s niet ophalen:', error);
             }
             
-            // Maak een set van bestaande foto identificatoren (bijvoorbeeld op basis van bestandsnaam of id)
+            // Maak een set van bestaande foto identificatoren
             const existingFotoIds = new Set();
             existingFotos.forEach(foto => {
                 if (foto.id) existingFotoIds.add(foto.id);
@@ -946,7 +934,6 @@ class DataManager extends BaseModule {
                     // Controleer of deze foto al bestaat
                     let fotoBestaatAl = false;
                     
-                    // Controleer op verschillende identificatoren
                     if (foto.id && existingFotoIds.has(foto.id)) {
                         fotoBestaatAl = true;
                     } else if (foto.bestandsnaam && existingFotoIds.has(`file_${foto.bestandsnaam}`)) {
@@ -956,8 +943,11 @@ class DataManager extends BaseModule {
                     }
                     
                     if (!fotoBestaatAl) {
-                        // Foto bestaat nog niet, voeg toe
-                        await this.db.voegFotoToe(foto);
+                        // Verwijder ID voor nieuwe foto
+                        const fotoZonderId = { ...foto };
+                        delete fotoZonderId.id;
+                        
+                        await this.db.voegFotoToe(fotoZonderId);
                         result.fotos.toegevoegd++;
                         
                         // Voeg toe aan set voor volgende iteraties
@@ -978,7 +968,11 @@ class DataManager extends BaseModule {
             try {
                 for (const prive of importData.priveInfo) {
                     try {
-                        await this.db.bewaarPriveInfo(prive);
+                        // Verwijder ID voor nieuwe privé info
+                        const priveZonderId = { ...prive };
+                        delete priveZonderId.id;
+                        
+                        await this.db.bewaarPriveInfo(priveZonderId);
                         result.priveInfo.bijgewerkt++;
                     } catch (error) {
                         console.log(`Privé info voor ${prive.stamboomnr} kan niet worden opgeslagen:`, error);
