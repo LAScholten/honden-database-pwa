@@ -26,9 +26,7 @@ class COICalculator2 {
             const dog = this.getDogById(dogId);
             if (!dog) {
                 console.log(`❌ Hond ${dogId} niet gevonden`);
-                return { 
-                    coi6Gen: '0.000'
-                };
+                return '0.000';
             }
             
             console.log(`📋 ${dog.naam} (ID: ${dog.id}) - Vader: ${dog.vaderId}, Moeder: ${dog.moederId}`);
@@ -36,44 +34,33 @@ class COICalculator2 {
             // Check directe ouder-kind combinatie (vader-dochter of moeder-zoon)
             if (this._isParentChildCombination(dog)) {
                 console.log(`⚠️ Ouder-Kind combinatie -> 25.000%`);
-                return { 
-                    coi6Gen: '25.000'
-                };
+                return '25.000';
             }
 
             // Check broer-zus combinatie
             if (this._isFullSiblingCombination(dog)) {
                 console.log(`⚠️ Broer-Zus combinatie -> 25.000%`);
-                return { 
-                    coi6Gen: '25.000'
-                };
+                return '25.000';
             }
 
             // Basis checks
             if (!dog.vaderId || !dog.moederId) {
                 console.log(`⚠️ Geen complete ouders -> 0.000%`);
-                return { 
-                    coi6Gen: '0.000'
-                };
+                return '0.000';
             }
             
             if (dog.vaderId === dog.moederId) {
                 console.log(`⚠️ Zelfde ouders -> 25.000%`);
-                return { 
-                    coi6Gen: '25.000'
-                };
+                return '25.000';
             }
 
             // Bereken voor 6 generaties
             console.log(`\n🧮 BEREKENING 6 GENERATIES:`);
             const coi6Gen = this._calculateComplexCOI(dogId, 6);
-            
-            const result = {
-                coi6Gen: (coi6Gen * 100).toFixed(3),     // 6 generaties met 3 decimalen
-            };
+            const result = (coi6Gen * 100).toFixed(3);  // 6 generaties met 3 decimalen
             
             console.log(`\n✅ RESULTAAT:`);
-            console.log(`   ${dog.naam}: COI 6-gen = ${result.coi6Gen}%`);
+            console.log(`   ${dog.naam}: COI 6-gen = ${result}%`);
             
             // Toon officiële IK waarde als beschikbaar
             if (dog.ik !== undefined) {
@@ -88,9 +75,7 @@ class COICalculator2 {
             
         } catch (error) {
             console.error('❌ FATALE FOUT:', error);
-            return { 
-                coi6Gen: '0.000'
-            };
+            return '0.000';
         }
     }
 
@@ -406,4 +391,6 @@ class COICalculator2 {
 if (typeof window !== 'undefined') {
     window.COICalculator2 = COICalculator2;
     console.log('✅ COICalculator2 V9.5 geladen (6 generaties, ouder-kind detectie, 3 decimalen)');
+    window.ZoekReu = ZoekReu;
+    console.log('✅ ZoekReu module geladen (COI waarden getoond in resultaten)');
 }
