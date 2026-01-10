@@ -1299,7 +1299,7 @@ class StamboomManager extends BaseModule {
                 /* OVEROVERGROOTOUDERS: 30% HOOGTE VAN NORMALE CARDS (halve hoogte van overgrootouders - 5px) */
                 .pedigree-card-compact.horizontal.gen4 {
                     width: 160px !important;
-                    height: 30px !important;
+                    height: 35px !important;
                 }
                 
                 /* Hoofdhond extra styling */
@@ -1760,7 +1760,7 @@ class StamboomManager extends BaseModule {
                     
                     .pedigree-card-compact.horizontal.gen4 {
                         width: 200px !important;
-                        height: 35px !important;
+                        height: 38px !important;
                         margin: 0 !important;
                         flex-shrink: 0 !important;
                     }
@@ -1802,7 +1802,7 @@ class StamboomManager extends BaseModule {
                     
                     .pedigree-card-compact.horizontal.gen4 {
                         width: 200px !important;
-                        height: 35px !important;
+                        height: 38px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.main-dog-compact {
@@ -1937,7 +1937,7 @@ class StamboomManager extends BaseModule {
                     
                     .pedigree-card-compact.horizontal.gen4 {
                         width: 200px !important;
-                        height: 30px !important;
+                        height: 35px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.main-dog-compact {
