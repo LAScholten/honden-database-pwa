@@ -1825,6 +1825,8 @@ class ReuTeefCombinatie {
                     min-height: 0 !important;
                     box-sizing: border-box !important;
                     border-radius: inherit;
+                    display: flex !important;
+                    justify-content: flex-start !important; /* TOEKOMSTIGE PUP LINKS */
                 }
                 
                 .rtc-pedigree-grid-compact {
@@ -1836,7 +1838,7 @@ class ReuTeefCombinatie {
                     gap: 20px;
                     align-items: flex-start;
                     box-sizing: border-box !important;
-                    margin: 0 auto;
+                    margin: 0 !important; /* GEEN auto meer - links uitlijnen */
                 }
                 
                 /* GENERATIE KOLOM - VERTICALE STACK VAN LIGGENDE CARDS */
@@ -2128,18 +2130,36 @@ class ReuTeefCombinatie {
                     font-size: 0.7rem;
                 }
                 
-                /* Generation labels styling */
-                .rtc-generation-label {
-                    font-weight: bold;
-                    color: #495057;
-                    text-align: center;
-                    margin-bottom: 8px !important;
-                    font-size: 0.75rem;
-                    background: #e9ecef;
-                    padding: 4px 8px;
-                    border-radius: 4px;
-                    white-space: nowrap;
-                    flex-shrink: 0;
+                /* Lege card styling */
+                .rtc-pedigree-card-compact.horizontal.empty {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                
+                /* VISUELE VERBINDINGEN */
+                .rtc-pedigree-generation-col {
+                    position: relative;
+                }
+                
+                .rtc-pedigree-generation-col:not(:first-child)::before {
+                    content: '';
+                    position: absolute;
+                    left: -10px;
+                    top: 50%;
+                    width: 10px;
+                    height: 1px;
+                    background: #adb5bd;
+                    opacity: 0.5;
+                }
+                
+                /* Overgrootouder styling */
+                .rtc-pedigree-card-compact.horizontal.gen3 {
+                    opacity: 0.9;
+                }
+                
+                .rtc-pedigree-card-compact.horizontal.gen3:hover {
+                    opacity: 1;
                 }
                 
                 /* MOBIELE AANPASSINGEN */
@@ -2199,6 +2219,7 @@ class ReuTeefCombinatie {
                         display: flex;
                         flex-direction: column;
                         border-radius: 0 0 12px 12px;
+                        justify-content: flex-start !important; /* TOEKOMSTIGE PUP LINKS */
                     }
                     
                     .rtc-pedigree-grid-compact {
@@ -2299,21 +2320,6 @@ class ReuTeefCombinatie {
                         margin: 0 !important;
                         flex-shrink: 0 !important;
                     }
-                    
-                    .rtc-pedigree-generation-col .rtc-generation-label {
-                        font-size: 0.7rem !important;
-                        padding: 3px 6px !important;
-                        margin-bottom: 8px !important;
-                        white-space: nowrap !important;
-                        width: 100%;
-                        text-align: center;
-                        position: static !important;
-                        margin-top: 0 !important;
-                    }
-                    
-                    .rtc-pedigree-generation-col > * {
-                        width: 100% !important;
-                    }
                 }
                 
                 @media (max-width: 480px) {
@@ -2355,12 +2361,6 @@ class ReuTeefCombinatie {
                     .rtc-pedigree-generation-col.gen3 {
                         min-width: 220px !important;
                         width: 220px !important;
-                    }
-                    
-                    .rtc-generation-label {
-                        font-size: 0.65rem !important;
-                        padding: 2px 5px !important;
-                        margin-bottom: 8px !important;
                     }
                 }
                 
@@ -2417,6 +2417,7 @@ class ReuTeefCombinatie {
                         padding: 0 !important;
                         display: flex;
                         border-radius: 0;
+                        justify-content: flex-start !important; /* TOEKOMSTIGE PUP LINKS */
                     }
                     
                     .rtc-pedigree-grid-compact {
@@ -2427,7 +2428,7 @@ class ReuTeefCombinatie {
                         gap: 25px;
                         align-items: center;
                         box-sizing: border-box !important;
-                        margin: 0 auto;
+                        margin: 0 !important; /* GEEN auto meer - links uitlijnen */
                     }
                     
                     .rtc-pedigree-generation-col {
@@ -2504,12 +2505,6 @@ class ReuTeefCombinatie {
                     
                     .rtc-pedigree-card-compact.horizontal.gen3 .rtc-click-hint-compact {
                         font-size: 0.48rem;
-                    }
-                    
-                    .rtc-generation-label {
-                        font-size: 0.8rem;
-                        padding: 4px 8px;
-                        margin-bottom: 8px !important;
                     }
                 }
                 
@@ -2780,38 +2775,6 @@ class ReuTeefCombinatie {
                     }
                 }
                 
-                /* Lege card styling */
-                .rtc-pedigree-card-compact.horizontal.empty {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                
-                /* VISUELE VERBINDINGEN */
-                .rtc-pedigree-generation-col {
-                    position: relative;
-                }
-                
-                .rtc-pedigree-generation-col:not(:first-child)::before {
-                    content: '';
-                    position: absolute;
-                    left: -10px;
-                    top: 50%;
-                    width: 10px;
-                    height: 1px;
-                    background: #adb5bd;
-                    opacity: 0.5;
-                }
-                
-                /* Overgrootouder styling */
-                .rtc-pedigree-card-compact.horizontal.gen3 {
-                    opacity: 0.9;
-                }
-                
-                .rtc-pedigree-card-compact.horizontal.gen3:hover {
-                    opacity: 1;
-                }
-                
                 /* HEALTH BADGES */
                 .rtc-badge-hd {
                     background-color: #dc3545 !important;
@@ -2892,26 +2855,22 @@ class ReuTeefCombinatie {
         const maternalGreatGrandfather2Card = await this.generateDogCard(pedigreeTree.maternalGreatGrandfather2, this.t('greatGrandfatherLabel'), false, 3);
         const maternalGreatGrandmother2Card = await this.generateDogCard(pedigreeTree.maternalGreatGrandmother2, this.t('greatGrandmotherLabel'), false, 3);
         
+        // GENERATIELABELS ZIJN VERWIJDERD
         const gridHTML = `
             <div class="rtc-pedigree-grid-compact">
                 <!-- Generatie 0: Toekomstige Pup -->
                 <div class="rtc-pedigree-generation-col gen0">
-                    <div class="rtc-generation-label" style="background: #198754; color: white;">
-                        <i class="bi bi-stars me-1"></i>${this.t('futurePuppyName')}
-                    </div>
                     ${mainDogCard}
                 </div>
                 
                 <!-- Generatie 1: Ouders -->
                 <div class="rtc-pedigree-generation-col gen1">
-                    <div class="rtc-generation-label">${this.t('parents')}</div>
                     ${fatherCard}
                     ${motherCard}
                 </div>
                 
                 <!-- Generatie 2: Grootouders -->
                 <div class="rtc-pedigree-generation-col gen2">
-                    <div class="rtc-generation-label">${this.t('grandparents')}</div>
                     ${paternalGrandfatherCard}
                     ${paternalGrandmotherCard}
                     ${maternalGrandfatherCard}
@@ -2920,7 +2879,6 @@ class ReuTeefCombinatie {
                 
                 <!-- Generatie 3: Overgrootouders -->
                 <div class="rtc-pedigree-generation-col gen3">
-                    <div class="rtc-generation-label">${this.t('greatGrandparents')}</div>
                     ${paternalGreatGrandfather1Card}
                     ${paternalGreatGrandmother1Card}
                     ${paternalGreatGrandfather2Card}
