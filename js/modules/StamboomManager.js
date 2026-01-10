@@ -1760,7 +1760,7 @@ class StamboomManager extends BaseModule {
                     
                     .pedigree-card-compact.horizontal.gen4 {
                         width: 200px !important;
-                        height: 38px !important;
+                        height: 34px !important;
                         margin: 0 !important;
                         flex-shrink: 0 !important;
                     }
@@ -1802,7 +1802,7 @@ class StamboomManager extends BaseModule {
                     
                     .pedigree-card-compact.horizontal.gen4 {
                         width: 200px !important;
-                        height: 38px !important;
+                        height: 34px !important;
                     }
                     
                     .pedigree-card-compact.horizontal.main-dog-compact {
