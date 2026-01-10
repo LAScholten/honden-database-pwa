@@ -3,6 +3,7 @@
  * Beheert het zoeken naar honden met real-time filtering op naam en kennelnaam
  * Inclusief foto functionaliteit met thumbnail viewer en fullscreen viewer
  * Inclusief nakomelingen functionaliteit
+ * Beide kolommen zijn nu scrollbaar
  */
 
 class SearchManager extends BaseModule {
@@ -465,7 +466,7 @@ class SearchManager extends BaseModule {
                 e.target.id === 'offspringModalOverlay') {
                 const overlay = document.getElementById('offspringModalOverlay');
                 if (overlay) {
-                    overlay.style.display = 'noen';
+                    overlay.style.display = 'none';
                     setTimeout(() => {
                         if (overlay.parentNode) {
                             overlay.parentNode.removeChild(overlay);
@@ -591,7 +592,7 @@ class SearchManager extends BaseModule {
             existingOverlay.remove();
         }
         
-        // Maak nieuwe overlay - MET SLUITENKNOOND ONDERAAN NET ALS STAMBOOMMANAGER
+        // Maak nieuwe overlay - MET SLUITENKNOOP ONDERAAN NET ALS STAMBOOMMANAGER
         const overlayHTML = `
             <div class="photo-large-overlay" id="photoLargeOverlay" style="display: flex;">
                 <div class="photo-large-container" id="photoLargeContainer">
@@ -621,7 +622,7 @@ class SearchManager extends BaseModule {
             if (e.key === 'Escape') {
                 const overlay = document.getElementById('photoLargeOverlay');
                 if (overlay) {
-                    overlay.style.display = 'noen';
+                    overlay.style.display = 'none';
                     setTimeout(() => {
                         if (overlay.parentNode) {
                             overlay.parentNode.removeChild(overlay);
@@ -636,7 +637,7 @@ class SearchManager extends BaseModule {
         // Clean up
         const overlay = document.getElementById('photoLargeOverlay');
         overlay.addEventListener('animationend', function handler() {
-            if (overlay.style.display === 'noen') {
+            if (overlay.style.display === 'none') {
                 document.removeEventListener('keydown', closeOnEscape);
                 overlay.removeEventListener('animationend', handler);
             }
@@ -688,7 +689,7 @@ class SearchManager extends BaseModule {
             if (e.key === 'Escape') {
                 const overlay = document.getElementById('offspringModalOverlay');
                 if (overlay) {
-                    overlay.style.display = 'noen';
+                    overlay.style.display = 'none';
                     setTimeout(() => {
                         if (overlay.parentNode) {
                             overlay.parentNode.removeChild(overlay);
@@ -703,7 +704,7 @@ class SearchManager extends BaseModule {
         // Clean up
         const overlay = document.getElementById('offspringModalOverlay');
         overlay.addEventListener('animationend', function handler() {
-            if (overlay.style.display === 'noen') {
+            if (overlay.style.display === 'none') {
                 document.removeEventListener('keydown', closeOnEscape);
                 overlay.removeEventListener('animationend', handler);
             }
@@ -806,7 +807,7 @@ class SearchManager extends BaseModule {
                         // Sluit de nakomelingen modal
                         const overlay = document.getElementById('offspringModalOverlay');
                         if (overlay) {
-                            overlay.style.display = 'noen';
+                            overlay.style.display = 'none';
                             setTimeout(() => {
                                 if (overlay.parentNode) {
                                     overlay.parentNode.removeChild(overlay);
@@ -841,75 +842,97 @@ class SearchManager extends BaseModule {
         
         return `
             <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-xl">
-                    <div class="modal-content">
+                <div class="modal-dialog modal-xl modal-fullscreen-lg-down">
+                    <div class="modal-content h-100">
                         <div class="modal-header bg-info text-white">
                             <h5 class="modal-title" id="searchModalLabel">
                                 <i class="bi bi-search me-2"></i> ${t('searchDog')}
                             </h5>
                             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="${t('close')}" id="searchModalCloseBtn"></button>
                         </div>
-                        <div class="modal-body p-0">
-                            <div class="container-fluid">
-                                <div class="row">
-                                    <!-- Zoekkolom -->
-                                    <div class="col-md-5 border-end p-3" id="searchColumn">
-                                        <div class="sticky-top" style="top: 15px;">
-                                            <!-- Tab knoppen voor zoektype -->
-                                            <div class="d-flex mb-3 border-bottom">
-                                                <button type="button" class="btn btn-search-type btn-outline-info active me-2" data-search-type="name">
-                                                    ${t('searchName')}
-                                                </button>
-                                                <button type="button" class="btn btn-search-type btn-outline-info" data-search-type="kennel">
-                                                    ${t('searchKennel')}
-                                                </button>
-                                            </div>
-                                            
-                                            <!-- Zoekveld voor naam -->
-                                            <div class="mb-4" id="nameSearchField">
-                                                <label for="searchNameInput" class="form-label fw-bold">${t('searchName')}</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text bg-white border-end-0">
-                                                        <i class="bi bi-person text-muted"></i>
-                                                    </span>
-                                                    <input type="text" class="form-control search-input border-start-0 ps-0" 
-                                                           id="searchNameInput" 
-                                                           placeholder="${t('searchPlaceholder')}" 
-                                                           autocomplete="off">
+                        <div class="modal-body p-0 flex-grow-1">
+                            <div class="container-fluid h-100">
+                                <div class="row h-100">
+                                    <!-- Zoekkolom - NIEUW: scrollbaar gemaakt -->
+                                    <div class="col-md-5 border-end p-0" id="searchColumn">
+                                        <div class="h-100 d-flex flex-column">
+                                            <!-- Vaste header voor zoekfunctionaliteit -->
+                                            <div class="sticky-top bg-white z-1 border-bottom" style="top: 0;">
+                                                <!-- Tab knoppen voor zoektype -->
+                                                <div class="p-3 pb-2">
+                                                    <div class="d-flex mb-3">
+                                                        <button type="button" class="btn btn-search-type btn-outline-info active me-2" data-search-type="name">
+                                                            ${t('searchName')}
+                                                        </button>
+                                                        <button type="button" class="btn btn-search-type btn-outline-info" data-search-type="kennel">
+                                                            ${t('searchKennel')}
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    <!-- Zoekveld voor naam -->
+                                                    <div class="mb-3" id="nameSearchField">
+                                                        <label for="searchNameInput" class="form-label fw-bold small">${t('searchName')}</label>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text bg-white border-end-0">
+                                                                <i class="bi bi-person text-muted"></i>
+                                                            </span>
+                                                            <input type="text" class="form-control search-input border-start-0 ps-0" 
+                                                                   id="searchNameInput" 
+                                                                   placeholder="${t('searchPlaceholder')}" 
+                                                                   autocomplete="off">
+                                                        </div>
+                                                        <div class="form-text mt-1 small">${t('typeToSearch')}</div>
+                                                    </div>
+                                                    
+                                                    <!-- Zoekveld voor kennelnaam -->
+                                                    <div class="mb-3 d-none" id="kennelSearchField">
+                                                        <label for="searchKennelInput" class="form-label fw-bold small">${t('searchKennel')}</label>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text bg-white border-end-0">
+                                                                <i class="bi bi-house text-muted"></i>
+                                                            </span>
+                                                            <input type="text" class="form-control search-input border-start-0 ps-0" 
+                                                                   id="searchKennelInput" 
+                                                                   placeholder="${t('kennelPlaceholder')}" 
+                                                                   autocomplete="off">
+                                                        </div>
+                                                        <div class="form-text mt-1 small">${t('typeToSearchKennel')}</div>
+                                                    </div>
                                                 </div>
-                                                <div class="form-text mt-1">${t('typeToSearch')}</div>
                                             </div>
                                             
-                                            <!-- Zoekveld voor kennelnaam -->
-                                            <div class="mb-4 d-none" id="kennelSearchField">
-                                                <label for="searchKennelInput" class="form-label fw-bold">${t('searchKennel')}</label>
-                                                <div class="input-group">
-                                                    <span class="input-group-text bg-white border-end-0">
-                                                        <i class="bi bi-house text-muted"></i>
-                                                    </span>
-                                                    <input type="text" class="form-control search-input border-start-0 ps-0" 
-                                                           id="searchKennelInput" 
-                                                           placeholder="${t('kennelPlaceholder')}" 
-                                                           autocomplete="off">
-                                                </div>
-                                                <div class="form-text mt-1">${t('typeToSearchKennel')}</div>
-                                            </div>
-                                            
-                                            <div id="searchResultsContainer">
-                                                <div class="text-center py-5">
-                                                    <i class="bi bi-search display-1 text-muted opacity-50"></i>
-                                                    <p class="mt-3 text-muted">${t('typeToSearch')}</p>
+                                            <!-- Scrollbaar gedeelte voor zoekresultaten -->
+                                            <div class="flex-grow-1 overflow-auto" id="searchResultsContainer">
+                                                <div class="p-3">
+                                                    <div class="text-center py-5">
+                                                        <i class="bi bi-search display-1 text-muted opacity-50"></i>
+                                                        <p class="mt-3 text-muted">${t('typeToSearch')}</p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                     
-                                    <!-- Details kolom -->
-                                    <div class="col-md-7 p-3" id="detailsColumn">
-                                        <div id="detailsContainer">
-                                            <div class="text-center py-5">
-                                                <i class="bi bi-eye display-1 text-muted opacity-50"></i>
-                                                <p class="mt-3 text-muted">${t('selectDogToView')}</p>
+                                    <!-- Details kolom - NIEUW: scrollbaar gemaakt -->
+                                    <div class="col-md-7 p-0" id="detailsColumn">
+                                        <div class="h-100 d-flex flex-column">
+                                            <!-- Vaste header voor details (alleen zichtbaar als er geen mobiele terugknop is) -->
+                                            <div class="d-none d-md-block sticky-top bg-white z-1 border-bottom" style="top: 0;">
+                                                <div class="p-3">
+                                                    <h6 class="mb-0 text-muted">
+                                                        <i class="bi bi-info-circle me-2"></i> ${t('dogDetails')}
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Scrollbaar gedeelte voor hond details -->
+                                            <div class="flex-grow-1 overflow-auto" id="detailsContainer">
+                                                <div class="p-3">
+                                                    <div class="text-center py-5">
+                                                        <i class="bi bi-eye display-1 text-muted opacity-50"></i>
+                                                        <p class="mt-3 text-muted">${t('selectDogToView')}</p>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -958,6 +981,19 @@ class SearchManager extends BaseModule {
                 }
                 
                 /* SEARCH MANAGER STYLES */
+                .modal-xl.modal-fullscreen-lg-down {
+                    max-width: 95vw;
+                    height: 90vh;
+                }
+                
+                @media (max-width: 992px) {
+                    .modal-xl.modal-fullscreen-lg-down {
+                        max-width: 100vw;
+                        height: 100vh;
+                        margin: 0;
+                    }
+                }
+                
                 .search-input {
                     font-size: 1.1rem;
                     padding: 10px 15px;
@@ -976,12 +1012,27 @@ class SearchManager extends BaseModule {
                     border-radius: 8px;
                     padding: 8px 12px;
                     transition: all 0.3s;
+                    font-size: 0.9rem;
                 }
                 
                 .btn-search-type.active {
                     background-color: #0d6efd;
                     color: white;
                     border-color: #0d6efd;
+                }
+                
+                /* ZOEKRESULTATEN CONTAINER STYLES - NIEUW: scrollbaar */
+                #searchResultsContainer {
+                    max-height: calc(100vh - 200px);
+                    overflow-y: auto;
+                    -webkit-overflow-scrolling: touch;
+                }
+                
+                /* DETAILS CONTAINER STYLES - NIEUW: scrollbaar */
+                #detailsContainer {
+                    max-height: calc(100vh - 150px);
+                    overflow-y: auto;
+                    -webkit-overflow-scrolling: touch;
                 }
                 
                 .dog-result-item {
@@ -1362,7 +1413,7 @@ class SearchManager extends BaseModule {
                 }
                 
                 /* ============================================= */
-                /* GROTE FOTO OVERLAY STYLES - IDENTIEK AAN STAMBOOM MET SLUITENKNOOND ONDERAAN */
+                /* GROTE FOTO OVERLAY STYLES - IDENTIEK AAN STAMBOOM MET SLUITENKNOOP ONDERAAN */
                 /* ============================================= */
                 .photo-large-overlay {
                     position: fixed;
@@ -1518,6 +1569,44 @@ class SearchManager extends BaseModule {
                     vertical-align: middle;
                 }
                 
+                /* MOBILE BACK BUTTON STYLES */
+                .mobile-back-button {
+                    position: sticky;
+                    top: 0;
+                    z-index: 100;
+                    background: white;
+                    padding: 10px 15px;
+                    margin: -15px -15px 15px -15px;
+                    border-bottom: 1px solid #dee2e6;
+                }
+                
+                .mobile-back-button button {
+                    width: 100%;
+                }
+                
+                /* Scrollbar styling */
+                #searchResultsContainer::-webkit-scrollbar,
+                #detailsContainer::-webkit-scrollbar {
+                    width: 8px;
+                }
+                
+                #searchResultsContainer::-webkit-scrollbar-track,
+                #detailsContainer::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                    border-radius: 4px;
+                }
+                
+                #searchResultsContainer::-webkit-scrollbar-thumb,
+                #detailsContainer::-webkit-scrollbar-thumb {
+                    background: #c1c1c1;
+                    border-radius: 4px;
+                }
+                
+                #searchResultsContainer::-webkit-scrollbar-thumb:hover,
+                #detailsContainer::-webkit-scrollbar-thumb:hover {
+                    background: #a8a8a8;
+                }
+                
                 /* Animations */
                 @keyframes fadeIn {
                     from { opacity: 0; }
@@ -1569,16 +1658,6 @@ class SearchManager extends BaseModule {
                         flex-wrap: wrap !important;
                         align-items: center !important;
                         gap: 8px !important;
-                    }
-                    
-                    .mobile-back-button {
-                        position: sticky;
-                        top: 0;
-                        z-index: 100;
-                        background: white;
-                        padding: 10px 0;
-                        margin-bottom: 15px;
-                        border-bottom: 1px solid #dee2e6;
                     }
                     
                     /* Responsive photo adjustments */
@@ -2075,9 +2154,11 @@ class SearchManager extends BaseModule {
         const message = this.searchType === 'name' ? t('typeToSearch') : t('typeToSearchKennel');
         
         container.innerHTML = `
-            <div class="text-center py-5">
-                <i class="bi bi-search display-1 text-muted opacity-50"></i>
-                <p class="mt-3 text-muted">${message}</p>
+            <div class="p-3">
+                <div class="text-center py-5">
+                    <i class="bi bi-search display-1 text-muted opacity-50"></i>
+                    <p class="mt-3 text-muted">${message}</p>
+                </div>
             </div>
         `;
     }
@@ -2089,9 +2170,11 @@ class SearchManager extends BaseModule {
         const t = this.t.bind(this);
         
         container.innerHTML = `
-            <div class="text-center py-5">
-                <i class="bi bi-eye display-1 text-muted opacity-50"></i>
-                <p class="mt-3 text-muted">${t('selectDogToView')}</p>
+            <div class="p-3">
+                <div class="text-center py-5">
+                    <i class="bi bi-eye display-1 text-muted opacity-50"></i>
+                    <p class="mt-3 text-muted">${t('selectDogToView')}</p>
+                </div>
             </div>
         `;
     }
@@ -2164,19 +2247,22 @@ class SearchManager extends BaseModule {
         
         if (this.filteredDogs.length === 0) {
             container.innerHTML = `
-                <div class="text-center py-5">
-                    <i class="bi bi-search-x display-1 text-muted opacity-50"></i>
-                    <p class="mt-3 text-muted">${t('noDogsFound')}</p>
+                <div class="p-3">
+                    <div class="text-center py-5">
+                        <i class="bi bi-search-x display-1 text-muted opacity-50"></i>
+                        <p class="mt-3 text-muted">${t('noDogsFound')}</p>
+                    </div>
                 </div>
             `;
             return;
         }
         
         let html = `
-            <div class="search-stats">
-                <i class="bi bi-info-circle me-1"></i>
-                ${this.filteredDogs.length} ${t('found')}
-            </div>
+            <div class="p-3">
+                <div class="search-stats">
+                    <i class="bi bi-info-circle me-1"></i>
+                    ${this.filteredDogs.length} ${t('found')}
+                </div>
         `;
         
         this.filteredDogs.forEach(dog => {
@@ -2201,6 +2287,7 @@ class SearchManager extends BaseModule {
             `;
         });
         
+        html += `</div>`;
         container.innerHTML = html;
         
         document.querySelectorAll('.dog-result-item').forEach(item => {
@@ -2432,222 +2519,224 @@ class SearchManager extends BaseModule {
         const offspringCount = await this.getOffspringCount(dog.id);
         
         const html = `
-            <div class="details-card">
-                ${isParentView ? `
-                <div class="details-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <button class="btn btn-sm btn-outline-secondary back-button" data-original-dog="${originalDogId}">
-                            <i class="bi bi-arrow-left me-1"></i> ${t('backToSearch')}
-                        </button>
-                        <div class="text-muted small">
-                            <i class="bi bi-info-circle me-1"></i> ${t('viewingParent')}
-                        </div>
-                    </div>
-                </div>
-                ` : ''}
-                
-                <div class="details-header ${isParentView ? 'pt-0' : ''}">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="dog-name-header">${displayValue(dog.naam)}</div>
-                            ${dog.kennelnaam ? `<div class="text-muted mb-2">${displayValue(dog.kennelnaam)}</div>` : ''}
-                            
-                            <!-- VOLGORDE: Stamboomnummer + Ras + Geslacht + Vachtkleur + Nakomelingen - ACHTER ELKAAR -->
-                            <div class="dog-detail-header-line mt-2">
-                                ${dog.stamboomnr ? `<span class="stamboom">${dog.stamboomnr}</span>` : ''}
-                                ${dog.ras ? `<span class="ras">${dog.ras}</span>` : ''}
-                                <span class="geslacht">${genderText}</span>
-                                ${dog.vachtkleur && dog.vachtkleur.trim() !== '' ? 
-                                  `<span class="vachtkleur">${dog.vachtkleur}</span>` : 
-                                  `<span class="text-muted fst-italic">geen vachtkleur</span>`}
-                                
-                                <!-- NAKOMELINGEN KNOOP -->
-                                ${offspringCount > 0 ? `
-                                <a href="#" class="offspring-badge offspring-button" 
-                                   data-dog-id="${dog.id}" 
-                                   data-dog-name="${displayValue(dog.naam)}">
-                                    <i class="bi bi-people-fill"></i>
-                                    ${offspringCount} ${t('offspringCount')}
-                                </a>
-                                ` : `
-                                <span class="offspring-badge" style="background: #6c757d; cursor: default;">
-                                    <i class="bi bi-people"></i>
-                                    0 ${t('offspringCount')}
-                                </span>
-                                `}
-                            </div>
-                        </div>
-                        <div class="text-end">
-                            <!-- Geboortedatum - behouden -->
-                            ${dog.geboortedatum ? `
-                            <div class="text-muted">
-                                <i class="bi bi-calendar me-1"></i>
-                                ${formatDate(dog.geboortedatum)}
-                            </div>
-                            ` : ''}
-                            
-                            <!-- Overlijdensdatum - behouden -->
-                            ${dog.overlijdensdatum ? `
-                            <div class="text-muted ${dog.geboortedatum ? 'mt-1' : ''}">
-                                <i class="bi bi-calendar-x me-1"></i>
-                                ${formatDate(dog.overlijdensdatum)}
-                            </div>
-                            ` : ''}
-                            
-                            <!-- STAMBOOM KNOOP VERWIJDERD - Nu alleen bij de ouders sectie -->
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="details-body">
-                    <!-- FOTO'S SECTIE BOVENAAN (indien beschikbaar) - NIEUWE LAYOUT -->
-                    ${hasPhotos ? `
-                    <div class="photos-section">
-                        <div class="photos-title">
-                            <div class="photos-title-text">
-                                <i class="bi bi-camera"></i>
-                                <span>${t('photos')}</span>
-                            </div>
-                            <div class="click-hint-text">${t('clickToEnlarge')}</div>
-                        </div>
-                        <div class="photos-grid-container" id="photosGrid${dog.id}">
-                            <!-- Foto's worden hier ingeladen -->
-                        </div>
-                    </div>
-                    ` : ''}
-                    
-                    <div class="info-group">
-                        <div class="info-group-title d-flex justify-content-between align-items-center">
-                            <div>
-                                <i class="bi bi-people me-1"></i> ${t('parents')}
-                            </div>
-                            <!-- ENIGE STAMBOOM KNOOP - alleen hier behouden -->
-                            <button class="btn btn-sm btn-outline-primary btn-pedigree" data-dog-id="${dog.id}">
-                                <i class="bi bi-diagram-3 me-1"></i> ${t('pedigreeButton')}
+            <div class="p-3">
+                <div class="details-card">
+                    ${isParentView ? `
+                    <div class="details-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button class="btn btn-sm btn-outline-secondary back-button" data-original-dog="${originalDogId}">
+                                <i class="bi bi-arrow-left me-1"></i> ${t('backToSearch')}
                             </button>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <div class="father-card" ${fatherInfo.id ? `data-parent-id="${fatherInfo.id}" data-original-dog="${dog.id}"` : ''}>
-                                    <div class="fw-bold mb-1 text-primary">
-                                        <i class="bi bi-gender-male me-1"></i> ${t('father')}
-                                    </div>
-                                    <div class="parent-name">${fatherInfo.naam} ${fatherInfo.kennelnaam}</div>
-                                    ${fatherInfo.stamboomnr ? `<div class="parent-info">${fatherInfo.stamboomnr}</div>` : ''}
-                                    ${fatherInfo.ras ? `<div class="parent-info">${fatherInfo.ras}</div>` : ''}
-                                    ${fatherInfo.id ? `
-                                    <div class="click-hint">
-                                        <i class="bi bi-arrow-right-circle"></i>
-                                        ${t('clickToView')}
-                                    </div>
-                                    ` : ''}
-                                </div>
+                            <div class="text-muted small">
+                                <i class="bi bi-info-circle me-1"></i> ${t('viewingParent')}
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <div class="mother-card" ${motherInfo.id ? `data-parent-id="${motherInfo.id}" data-original-dog="${dog.id}"` : ''}>
-                                    <div class="fw-bold mb-1 text-danger">
-                                        <i class="bi bi-gender-female me-1"></i> ${t('mother')}
-                                    </div>
-                                    <div class="parent-mother-name">${motherInfo.naam} ${motherInfo.kennelnaam}</div>
-                                    ${motherInfo.stamboomnr ? `<div class="parent-info">${motherInfo.stamboomnr}</div>` : ''}
-                                    ${motherInfo.ras ? `<div class="parent-info">${motherInfo.ras}</div>` : ''}
-                                    ${motherInfo.id ? `
-                                    <div class="click-hint">
-                                        <i class="bi bi-arrow-right-circle"></i>
-                                        ${t('clickToView')}
-                                    </div>
-                                    ` : ''}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="info-group">
-                        <div class="info-group-title">
-                            <i class="bi bi-heart-pulse me-1"></i> ${t('healthInfo')}
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <div class="fw-bold mb-1">${t('hipDysplasia')}</div>
-                                <div>${getHealthBadge(dog.heupdysplasie, 'hip')}</div>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <div class="fw-bold mb-1">${t('elbowDysplasia')}</div>
-                                <div>${getHealthBadge(dog.elleboogdysplasie, 'elbow')}</div>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <div class="fw-bold mb-1">${t('patellaLuxation')}</div>
-                                <div>${getHealthBadge(dog.patella, 'patella')}</div>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <div class="fw-bold mb-1">${t('eyes')}</div>
-                                <div>${getHealthBadge(dog.ogen, 'eyes')}</div>
-                                ${dog.ogenVerklaring ? `<div class="text-muted small mt-1">${dog.ogenVerklaring}</div>` : ''}
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <div class="fw-bold mb-1">${t('dandyWalker')}</div>
-                                <div>${getHealthBadge(dog.dandyWalker, 'dandy')}</div>
-                            </div>
-                            
-                            <div class="col-md-6 mb-3">
-                                <div class="fw-bold mb-1">${t('thyroid')}</div>
-                                <div>${getHealthBadge(dog.schildklier, 'thyroid')}</div>
-                                ${dog.schildklierVerklaring ? `<div class="text-muted small mt-1">${dog.schildklierVerklaring}</div>` : ''}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="info-group">
-                        <div class="info-group-title">
-                            <i class="bi bi-info-circle me-1"></i> ${t('additionalInfo')}
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <div class="fw-bold mb-1">${t('country')}</div>
-                                <div>${displayValue(dog.land)}</div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <div class="fw-bold mb-1">${t('zipCode')}</div>
-                                <div>${displayValue(dog.postcode)}</div>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-3">
-                            <div class="fw-bold mb-2">${t('remarks')}</div>
-                            <div class="remarks-box">
-                                ${dog.opmerkingen ? dog.opmerkingen : t('noAdditionalInfo')}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    ${dog.createdAt || dog.updatedAt ? `
-                    <div class="info-group">
-                        <div class="info-group-title">
-                            <i class="bi bi-clock-history me-1"></i> Systeem informatie
-                        </div>
-                        <div class="row">
-                            ${dog.createdAt ? `
-                            <div class="col-md-6">
-                                <div class="text-muted small">Aangemaakt</div>
-                                <div class="small">${formatDate(dog.createdAt)}</div>
-                            </div>
-                            ` : ''}
-                            ${dog.updatedAt ? `
-                            <div class="col-md-6">
-                                <div class="text-muted small">Laatst bijgewerkt</div>
-                                <div class="small">${formatDate(dog.updatedAt)}</div>
-                            </div>
-                            ` : ''}
                         </div>
                     </div>
                     ` : ''}
+                    
+                    <div class="details-header ${isParentView ? 'pt-0' : ''}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="dog-name-header">${displayValue(dog.naam)}</div>
+                                ${dog.kennelnaam ? `<div class="text-muted mb-2">${displayValue(dog.kennelnaam)}</div>` : ''}
+                                
+                                <!-- VOLGORDE: Stamboomnummer + Ras + Geslacht + Vachtkleur + Nakomelingen - ACHTER ELKAAR -->
+                                <div class="dog-detail-header-line mt-2">
+                                    ${dog.stamboomnr ? `<span class="stamboom">${dog.stamboomnr}</span>` : ''}
+                                    ${dog.ras ? `<span class="ras">${dog.ras}</span>` : ''}
+                                    <span class="geslacht">${genderText}</span>
+                                    ${dog.vachtkleur && dog.vachtkleur.trim() !== '' ? 
+                                      `<span class="vachtkleur">${dog.vachtkleur}</span>` : 
+                                      `<span class="text-muted fst-italic">geen vachtkleur</span>`}
+                                    
+                                    <!-- NAKOMELINGEN KNOOP -->
+                                    ${offspringCount > 0 ? `
+                                    <a href="#" class="offspring-badge offspring-button" 
+                                       data-dog-id="${dog.id}" 
+                                       data-dog-name="${displayValue(dog.naam)}">
+                                        <i class="bi bi-people-fill"></i>
+                                        ${offspringCount} ${t('offspringCount')}
+                                    </a>
+                                    ` : `
+                                    <span class="offspring-badge" style="background: #6c757d; cursor: default;">
+                                        <i class="bi bi-people"></i>
+                                        0 ${t('offspringCount')}
+                                    </span>
+                                    `}
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <!-- Geboortedatum - behouden -->
+                                ${dog.geboortedatum ? `
+                                <div class="text-muted">
+                                    <i class="bi bi-calendar me-1"></i>
+                                    ${formatDate(dog.geboortedatum)}
+                                </div>
+                                ` : ''}
+                                
+                                <!-- Overlijdensdatum - behouden -->
+                                ${dog.overlijdensdatum ? `
+                                <div class="text-muted ${dog.geboortedatum ? 'mt-1' : ''}">
+                                    <i class="bi bi-calendar-x me-1"></i>
+                                    ${formatDate(dog.overlijdensdatum)}
+                                </div>
+                                ` : ''}
+                                
+                                <!-- STAMBOOM KNOOP VERWIJDERD - Nu alleen bij de ouders sectie -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="details-body">
+                        <!-- FOTO'S SECTIE BOVENAAN (indien beschikbaar) - NIEUWE LAYOUT -->
+                        ${hasPhotos ? `
+                        <div class="photos-section">
+                            <div class="photos-title">
+                                <div class="photos-title-text">
+                                    <i class="bi bi-camera"></i>
+                                    <span>${t('photos')}</span>
+                                </div>
+                                <div class="click-hint-text">${t('clickToEnlarge')}</div>
+                            </div>
+                            <div class="photos-grid-container" id="photosGrid${dog.id}">
+                                <!-- Foto's worden hier ingeladen -->
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        <div class="info-group">
+                            <div class="info-group-title d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-people me-1"></i> ${t('parents')}
+                                </div>
+                                <!-- ENIGE STAMBOOM KNOOP - alleen hier behouden -->
+                                <button class="btn btn-sm btn-outline-primary btn-pedigree" data-dog-id="${dog.id}">
+                                    <i class="bi bi-diagram-3 me-1"></i> ${t('pedigreeButton')}
+                                </button>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="father-card" ${fatherInfo.id ? `data-parent-id="${fatherInfo.id}" data-original-dog="${dog.id}"` : ''}>
+                                        <div class="fw-bold mb-1 text-primary">
+                                            <i class="bi bi-gender-male me-1"></i> ${t('father')}
+                                        </div>
+                                        <div class="parent-name">${fatherInfo.naam} ${fatherInfo.kennelnaam}</div>
+                                        ${fatherInfo.stamboomnr ? `<div class="parent-info">${fatherInfo.stamboomnr}</div>` : ''}
+                                        ${fatherInfo.ras ? `<div class="parent-info">${fatherInfo.ras}</div>` : ''}
+                                        ${fatherInfo.id ? `
+                                        <div class="click-hint">
+                                            <i class="bi bi-arrow-right-circle"></i>
+                                            ${t('clickToView')}
+                                        </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="mother-card" ${motherInfo.id ? `data-parent-id="${motherInfo.id}" data-original-dog="${dog.id}"` : ''}>
+                                        <div class="fw-bold mb-1 text-danger">
+                                            <i class="bi bi-gender-female me-1"></i> ${t('mother')}
+                                        </div>
+                                        <div class="parent-mother-name">${motherInfo.naam} ${motherInfo.kennelnaam}</div>
+                                        ${motherInfo.stamboomnr ? `<div class="parent-info">${motherInfo.stamboomnr}</div>` : ''}
+                                        ${motherInfo.ras ? `<div class="parent-info">${motherInfo.ras}</div>` : ''}
+                                        ${motherInfo.id ? `
+                                        <div class="click-hint">
+                                            <i class="bi bi-arrow-right-circle"></i>
+                                            ${t('clickToView')}
+                                        </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-group">
+                            <div class="info-group-title">
+                                <i class="bi bi-heart-pulse me-1"></i> ${t('healthInfo')}
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="fw-bold mb-1">${t('hipDysplasia')}</div>
+                                    <div>${getHealthBadge(dog.heupdysplasie, 'hip')}</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <div class="fw-bold mb-1">${t('elbowDysplasia')}</div>
+                                    <div>${getHealthBadge(dog.elleboogdysplasie, 'elbow')}</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <div class="fw-bold mb-1">${t('patellaLuxation')}</div>
+                                    <div>${getHealthBadge(dog.patella, 'patella')}</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <div class="fw-bold mb-1">${t('eyes')}</div>
+                                    <div>${getHealthBadge(dog.ogen, 'eyes')}</div>
+                                    ${dog.ogenVerklaring ? `<div class="text-muted small mt-1">${dog.ogenVerklaring}</div>` : ''}
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <div class="fw-bold mb-1">${t('dandyWalker')}</div>
+                                    <div>${getHealthBadge(dog.dandyWalker, 'dandy')}</div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <div class="fw-bold mb-1">${t('thyroid')}</div>
+                                    <div>${getHealthBadge(dog.schildklier, 'thyroid')}</div>
+                                    ${dog.schildklierVerklaring ? `<div class="text-muted small mt-1">${dog.schildklierVerklaring}</div>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-group">
+                            <div class="info-group-title">
+                                <i class="bi bi-info-circle me-1"></i> ${t('additionalInfo')}
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="fw-bold mb-1">${t('country')}</div>
+                                    <div>${displayValue(dog.land)}</div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="fw-bold mb-1">${t('zipCode')}</div>
+                                    <div>${displayValue(dog.postcode)}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <div class="fw-bold mb-2">${t('remarks')}</div>
+                                <div class="remarks-box">
+                                    ${dog.opmerkingen ? dog.opmerkingen : t('noAdditionalInfo')}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${dog.createdAt || dog.updatedAt ? `
+                        <div class="info-group">
+                            <div class="info-group-title">
+                                <i class="bi bi-clock-history me-1"></i> Systeem informatie
+                            </div>
+                            <div class="row">
+                                ${dog.createdAt ? `
+                                <div class="col-md-6">
+                                    <div class="text-muted small">Aangemaakt</div>
+                                    <div class="small">${formatDate(dog.createdAt)}</div>
+                                </div>
+                                ` : ''}
+                                ${dog.updatedAt ? `
+                                <div class="col-md-6">
+                                    <div class="text-muted small">Laatst bijgewerkt</div>
+                                    <div class="small">${formatDate(dog.updatedAt)}</div>
+                                </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
                 </div>
             </div>
         `;
