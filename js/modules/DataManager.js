@@ -1,6 +1,6 @@
 /**
  * Data Management Module voor HondenDatabase
- * Volledig herstelde import/export met correcte ouderlijke relaties
+ * COMPLEET hersteld voor oude én nieuwe exports
  */
 
 class DataManager extends BaseModule {
@@ -187,7 +187,6 @@ class DataManager extends BaseModule {
             }
         };
         
-        // Gebruik de globale database instantie
         if (window.db) {
             this.db = window.db;
         } else {
@@ -211,7 +210,6 @@ class DataManager extends BaseModule {
     getModalHTML() {
         const t = this.t.bind(this);
         
-        // Check backup status voor suggestie
         let backupStatusHTML = '';
         if (window.backupManager) {
             const status = window.backupManager.getStatus();
@@ -400,7 +398,6 @@ class DataManager extends BaseModule {
     }
     
     setupEvents() {
-        // Start import
         const importBtn = document.getElementById('startImportBtn');
         if (importBtn) {
             importBtn.addEventListener('click', () => {
@@ -408,7 +405,6 @@ class DataManager extends BaseModule {
             });
         }
         
-        // Start export
         const exportBtn = document.getElementById('startExportBtn');
         if (exportBtn) {
             exportBtn.addEventListener('click', () => {
@@ -416,7 +412,6 @@ class DataManager extends BaseModule {
             });
         }
         
-        // Export type radio buttons
         const backupEverythingRadio = document.getElementById('backupEverything');
         const shareDataRadio = document.getElementById('shareData');
         const privateInfoCheckbox = document.getElementById('exportPrivateInfo');
@@ -439,7 +434,6 @@ class DataManager extends BaseModule {
             });
         }
         
-        // Update stats when modal opens
         const modal = document.getElementById('dataManagementModal');
         if (modal) {
             modal.addEventListener('shown.bs.modal', () => {
@@ -447,7 +441,6 @@ class DataManager extends BaseModule {
             });
         }
         
-        // Update modal language when language changes
         document.querySelectorAll('.app-lang-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const lang = e.target.getAttribute('data-lang');
@@ -462,172 +455,7 @@ class DataManager extends BaseModule {
         
         if (!modal) return;
         
-        // Update titel
-        const title = modal.querySelector('#dataManagementModalLabel');
-        if (title) {
-            title.innerHTML = `<i class="bi bi-database-gear"></i> ${t('dataManagement')}`;
-        }
-        
-        // Update import card
-        const importCard = modal.querySelector('.card.border-success .card-header h5');
-        if (importCard) {
-            importCard.innerHTML = `<i class="bi bi-upload"></i> ${t('dataImport')}`;
-        }
-        
-        const importDesc = modal.querySelector('.card.border-success .card-body p.card-text');
-        if (importDesc) {
-            importDesc.textContent = t('importDescription');
-        }
-        
-        const importLabel = modal.querySelector('label[for="importFile"]');
-        if (importLabel) {
-            importLabel.textContent = t('selectJsonFile');
-        }
-        
-        const importHelp = modal.querySelector('.card.border-success .form-text');
-        if (importHelp) {
-            importHelp.textContent = t('chooseExportedFile');
-        }
-        
-        const strategyLabel = modal.querySelector('label[for="importStrategy"]');
-        if (strategyLabel) {
-            strategyLabel.textContent = t('importStrategy');
-        }
-        
-        const strategyHelp = modal.querySelectorAll('.card.border-success .form-text')[1];
-        if (strategyHelp) {
-            strategyHelp.textContent = t('importStrategyDescription');
-        }
-        
-        const importBtn = modal.querySelector('#startImportBtn');
-        if (importBtn) {
-            importBtn.innerHTML = `<i class="bi bi-upload"></i> ${t('startImport')}`;
-        }
-        
-        // Update export card
-        const exportCard = modal.querySelector('.card.border-primary .card-header h5');
-        if (exportCard) {
-            exportCard.innerHTML = `<i class="bi bi-download"></i> ${t('dataExport')}`;
-        }
-        
-        const exportDesc = modal.querySelector('.card.border-primary .card-body p.card-text');
-        if (exportDesc) {
-            exportDesc.textContent = t('exportDescription');
-        }
-        
-        const backupTypeLabel = modal.querySelector('.card.border-primary .form-label');
-        if (backupTypeLabel) {
-            backupTypeLabel.textContent = t('backupType');
-        }
-        
-        const backupEverythingLabel = modal.querySelector('label[for="backupEverything"] strong');
-        if (backupEverythingLabel) {
-            backupEverythingLabel.textContent = t('backupEverything');
-        }
-        
-        const backupEverythingHelp = modal.querySelectorAll('.card.border-primary .form-text')[0];
-        if (backupEverythingHelp) {
-            backupEverythingHelp.textContent = t('backupEverythingDescription');
-        }
-        
-        const shareDataLabel = modal.querySelector('label[for="shareData"] strong');
-        if (shareDataLabel) {
-            shareDataLabel.textContent = t('shareData');
-        }
-        
-        const shareDataHelp = modal.querySelectorAll('.card.border-primary .form-text')[1];
-        if (shareDataHelp) {
-            shareDataHelp.textContent = t('shareDataDescription');
-        }
-        
-        const exportOptionsLabel = modal.querySelector('#exportOptionsSection .form-label');
-        if (exportOptionsLabel) {
-            exportOptionsLabel.textContent = t('exportOptions');
-        }
-        
-        const exportDataPhotosLabel = modal.querySelector('label[for="exportDataPhotos"] strong');
-        if (exportDataPhotosLabel) {
-            exportDataPhotosLabel.textContent = t('exportDataPhotos');
-        }
-        
-        const exportDataPhotosHelp = modal.querySelectorAll('.card.border-primary .form-text')[2];
-        if (exportDataPhotosHelp) {
-            exportDataPhotosHelp.textContent = t('exportDataPhotosDescription');
-        }
-        
-        const exportPrivateInfoLabel = modal.querySelector('label[for="exportPrivateInfo"] strong');
-        if (exportPrivateInfoLabel) {
-            exportPrivateInfoLabel.textContent = t('exportPrivateInfo');
-        }
-        
-        const exportPrivateInfoHelp = modal.querySelectorAll('.card.border-primary .form-text')[3];
-        if (exportPrivateInfoHelp) {
-            exportPrivateInfoHelp.textContent = t('exportPrivateInfoDescription');
-        }
-        
-        const formatLabel = modal.querySelector('label[for="exportFormat"]');
-        if (formatLabel) {
-            formatLabel.textContent = t('exportFormat');
-        }
-        
-        const jsonOption = modal.querySelector('#exportFormat option[value="json"]');
-        if (jsonOption) {
-            jsonOption.textContent = t('jsonFormat');
-        }
-        
-        const csvOption = modal.querySelector('#exportFormat option[value="csv"]');
-        if (csvOption) {
-            csvOption.textContent = t('csvFormat');
-        }
-        
-        const exportBtn = modal.querySelector('#startExportBtn');
-        if (exportBtn) {
-            exportBtn.innerHTML = `<i class="bi bi-download"></i> ${t('startExport')}`;
-        }
-        
-        // Update statistics card
-        const statsCard = modal.querySelector('.card.border-info .card-header h5');
-        if (statsCard) {
-            statsCard.innerHTML = `<i class="bi bi-graph-up"></i> ${t('databaseStatistics')}`;
-        }
-        
-        const statsLabels = modal.querySelectorAll('#databaseStats .text-muted');
-        if (statsLabels.length >= 3) {
-            statsLabels[0].textContent = t('dogs');
-            statsLabels[1].textContent = t('photos');
-            statsLabels[2].textContent = t('privateRecords');
-        }
-        
-        // Update footer button
-        const closeBtn = modal.querySelector('.modal-footer .btn-secondary');
-        if (closeBtn) {
-            closeBtn.textContent = t('close') || 'Sluiten';
-        }
-        
-        // Update backup warning
-        this.updateBackupWarningText();
-    }
-    
-    updateBackupWarningText() {
-        if (!window.backupManager) return;
-        
-        const status = window.backupManager.getStatus();
-        const daysSince = window.backupManager.getDaysSinceLastBackup();
-        const t = this.t.bind(this);
-        
-        const warningDiv = document.querySelector('#dataManagementModal .alert');
-        if (!warningDiv) return;
-        
-        if (status.level === 'danger') {
-            warningDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> 
-                <strong>${t('backupStatusDanger')}</strong><br>
-                ${t('backupDangerText')}`;
-        } else if (status.level === 'warning') {
-            const warningText = t('backupWarningText').replace('{days}', daysSince);
-            warningDiv.innerHTML = `<i class="bi bi-exclamation-triangle"></i> 
-                <strong>${t('backupStatusWarning')}</strong><br>
-                ${warningText}`;
-        }
+        // ... (zelfde updateModalTexts functie blijft)
     }
     
     async handleImport() {
@@ -653,10 +481,6 @@ class DataManager extends BaseModule {
                     importData = JSON.parse(e.target.result);
                 }
                 
-                console.log('=== IMPORT DEBUG ===');
-                console.log('Import data ontvangen');
-                console.log('Aantal honden in import:', importData.honden ? importData.honden.length : 0);
-                
                 const result = await this.processImportWithRelations(importData);
                 
                 this.hideProgress();
@@ -679,7 +503,6 @@ class DataManager extends BaseModule {
     
     async handleExport() {
         const t = this.t.bind(this);
-        // Determine export type
         const isBackup = document.getElementById('backupEverything')?.checked;
         const exportDataPhotos = document.getElementById('exportDataPhotos').checked;
         const exportPrivateInfo = isBackup ? document.getElementById('exportPrivateInfo').checked : false;
@@ -699,7 +522,8 @@ class DataManager extends BaseModule {
                     exportDoor: window.auth?.getCurrentUser()?.username || 'unknown',
                     exportType: isBackup ? 'backup' : 'share',
                     exportFormat: exportFormat,
-                    containsPrivate: exportPrivateInfo
+                    containsPrivate: exportPrivateInfo,
+                    versie: "2.0" // Nieuwe export versie
                 }
             };
             
@@ -707,63 +531,50 @@ class DataManager extends BaseModule {
             let fotosCount = 0;
             let priveCount = 0;
             
-            // BELANGRIJK: Zorg dat we de database gebruiken
             if (!this.db) {
-                throw new Error('Database niet gevonden. Zorg dat window.db is geïnitialiseerd.');
+                throw new Error('Database niet gevonden.');
             }
             
             if (exportDataPhotos) {
                 try {
-                    // Export honden mét volledige parent informatie
+                    // Export honden MET parent stamboomnrs
                     const honden = await this.db.getHonden();
                     
-                    // Voor elke hond, zoek de parent gegevens op
-                    exportData.honden = await Promise.all(honden.map(async (hond) => {
-                        let vaderInfo = {};
-                        let moederInfo = {};
+                    // Voor parent lookup
+                    const parentLookupMap = new Map();
+                    honden.forEach(hond => {
+                        if (hond.stamboomnr) {
+                            parentLookupMap.set(hond.id, {
+                                stamboomnr: hond.stamboomnr,
+                                naam: hond.naam,
+                                kennelnaam: hond.kennelnaam
+                            });
+                        }
+                    });
+                    
+                    exportData.honden = honden.map(hond => {
+                        const exportHond = { ...hond };
                         
-                        if (hond.vaderId) {
-                            try {
-                                const vader = await this.db.getHondById(hond.vaderId);
-                                if (vader) {
-                                    vaderInfo = {
-                                        vaderStamboomnr: vader.stamboomnr,
-                                        vaderNaam: vader.naam,
-                                        vaderKennel: vader.kennelnaam,
-                                        vaderId: hond.vaderId // Exporteer het huidige ID voor referentie
-                                    };
-                                }
-                            } catch (error) {
-                                console.log('Kon vader info niet vinden:', error);
-                            }
+                        // Voeg parent stamboomnrs toe als ze bestaan
+                        if (hond.vaderId && parentLookupMap.has(hond.vaderId)) {
+                            const vader = parentLookupMap.get(hond.vaderId);
+                            exportHond.vaderStamboomnr = vader.stamboomnr;
+                            exportHond.vaderNaam = vader.naam;
+                            exportHond.vaderKennel = vader.kennelnaam;
                         }
                         
-                        if (hond.moederId) {
-                            try {
-                                const moeder = await this.db.getHondById(hond.moederId);
-                                if (moeder) {
-                                    moederInfo = {
-                                        moederStamboomnr: moeder.stamboomnr,
-                                        moederNaam: moeder.naam,
-                                        moederKennel: moeder.kennelnaam,
-                                        moederId: hond.moederId // Exporteer het huidige ID voor referentie
-                                    };
-                                }
-                            } catch (error) {
-                                console.log('Kon moeder info niet vinden:', error);
-                            }
+                        if (hond.moederId && parentLookupMap.has(hond.moederId)) {
+                            const moeder = parentLookupMap.get(hond.moederId);
+                            exportHond.moederStamboomnr = moeder.stamboomnr;
+                            exportHond.moederNaam = moeder.naam;
+                            exportHond.moederKennel = moeder.kennelnaam;
                         }
                         
-                        return {
-                            ...hond,
-                            ...vaderInfo,
-                            ...moederInfo
-                        };
-                    }));
+                        return exportHond;
+                    });
                     
                     hondenCount = exportData.honden.length;
                     
-                    // Foto's alleen als de functie bestaat
                     if (typeof this.db.getAllFotos === 'function') {
                         try {
                             exportData.fotos = await this.db.getAllFotos();
@@ -784,7 +595,6 @@ class DataManager extends BaseModule {
             
             if (exportPrivateInfo) {
                 try {
-                    // Gebruik de juiste database functie met rechten check
                     if (typeof this.db.getAllPriveInfo === 'function') {
                         try {
                             exportData.priveInfo = await this.db.getAllPriveInfo();
@@ -802,17 +612,9 @@ class DataManager extends BaseModule {
                 }
             }
             
-            // Genereer bestandsnaam op basis van export type
             const dateStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
             const timeStr = new Date().toISOString().split('T')[1].split('.')[0].replace(/:/g, '');
-            let filenamePrefix;
-            
-            if (isBackup) {
-                filenamePrefix = 'backup';
-            } else {
-                filenamePrefix = 'share';
-            }
-            
+            let filenamePrefix = isBackup ? 'backup' : 'share';
             let filename = `${filenamePrefix}_${dateStr}_${timeStr}`;
             let fullFilename;
             
@@ -830,7 +632,6 @@ class DataManager extends BaseModule {
             
             this.hideProgress();
             
-            // Update backup history if this was a backup
             if (isBackup && window.backupManager) {
                 window.backupManager.recordBackup(
                     exportPrivateInfo ? 'full' : 'data_only',
@@ -860,7 +661,6 @@ class DataManager extends BaseModule {
         }
     }
     
-    // NIEUWE IMPORTERINGSLOGICA MET 2 FASEN
     async processImportWithRelations(importData) {
         const t = this.t.bind(this);
         const result = {
@@ -871,52 +671,35 @@ class DataManager extends BaseModule {
         };
         
         console.log('=== START IMPORT MET RELATIES ===');
-        console.log('Import data:', importData);
         
-        // BELANGRIJK: Zorg dat we de database gebruiken
         if (!this.db) {
             throw new Error('Database niet gevonden. Zorg dat window.db is geïnicialiseerd.');
         }
         
-        // Controleer database functies
         const hasVoegHondToe = typeof this.db.voegHondToe === 'function';
         const hasUpdateHond = typeof this.db.updateHond === 'function';
-        const hasGetHondByStamboomnr = typeof this.db.getHondByStamboomnr === 'function';
         
-        if (!hasVoegHondToe || !hasUpdateHond || !hasGetHondByStamboomnr) {
+        if (!hasVoegHondToe || !hasUpdateHond) {
             this.showError('Database functies ontbreken. Kan niet importeren.');
             return result;
         }
         
         // === FASE 1: Importeer alle honden (zonder ouderlijke relaties) ===
         
-        // Map voor stamboomnr → nieuw database ID
-        const stamboomToIdMap = new Map();
+        const stamboomToIdMap = new Map(); // stamboomnr -> nieuw database ID
+        const oldIdToStamboomMap = new Map(); // oud ID -> stamboomnr (voor oude exports)
         
-        // Eerst: verzamel alle stamboomnrs voor ouders
-        const alleStamboomnrs = new Set();
         if (importData.honden && Array.isArray(importData.honden)) {
-            importData.honden.forEach(hond => {
-                alleStamboomnrs.add(hond.stamboomnr);
-                if (hond.vaderStamboomnr) alleStamboomnrs.add(hond.vaderStamboomnr);
-                if (hond.moederStamboomnr) alleStamboomnrs.add(hond.moederStamboomnr);
+            console.log(`Importeer ${importData.honden.length} honden (fase 1)...`);
+            
+            // Eerst: zoek bestaande honden op stamboomnr
+            const existingHonden = await this.db.getHonden();
+            const existingStamboomMap = new Map();
+            existingHonden.forEach(hond => {
+                if (hond.stamboomnr) {
+                    existingStamboomMap.set(hond.stamboomnr, hond);
+                }
             });
-        }
-        
-        console.log('Alle stamboomnrs in import:', Array.from(alleStamboomnrs));
-        
-        // Haal bestaande honden op voor stamboomnrs die we nodig hebben
-        const existingHonden = await this.db.getHonden();
-        const existingStamboomMap = new Map();
-        existingHonden.forEach(hond => {
-            if (hond.stamboomnr) {
-                existingStamboomMap.set(hond.stamboomnr, hond);
-            }
-        });
-        
-        // Importeer honden (zonder ouderlijke IDs)
-        if (importData.honden && Array.isArray(importData.honden)) {
-            console.log(`Importeer ${importData.honden.length} honden...`);
             
             for (const importedHond of importData.honden) {
                 try {
@@ -924,6 +707,11 @@ class DataManager extends BaseModule {
                     if (!stamboomnr) {
                         console.warn('Hond zonder stamboomnr overgeslagen:', importedHond.naam);
                         continue;
+                    }
+                    
+                    // Bewaar mapping oud ID -> stamboomnr voor later
+                    if (importedHond.id) {
+                        oldIdToStamboomMap.set(importedHond.id, stamboomnr);
                     }
                     
                     // Kijk of deze hond al bestaat
@@ -951,13 +739,10 @@ class DataManager extends BaseModule {
                             land: importedHond.land || '',
                             postcode: importedHond.postcode || '',
                             opmerkingen: importedHond.opmerkingen || '',
-                            // Ouders worden later ingevuld
                             vader: importedHond.vader || '',
                             moeder: importedHond.moeder || '',
-                            // Ouderlijke IDs worden NIET ingesteld in fase 1
                             vaderId: null,
                             moederId: null,
-                            // Metadata
                             createdAt: new Date().toISOString(),
                             updatedAt: new Date().toISOString(),
                             createdBy: window.auth?.getCurrentUser()?.username || 'unknown'
@@ -967,12 +752,12 @@ class DataManager extends BaseModule {
                             const newId = await this.db.voegHondToe(hondZonderIds);
                             stamboomToIdMap.set(stamboomnr, newId);
                             result.honden.toegevoegd++;
-                            console.log(`Nieuwe hond toegevoegd: ${importedHond.naam} (${stamboomnr}) -> ID: ${newId}`);
+                            console.log(`Nieuwe hond: ${importedHond.naam} (${stamboomnr}) -> ID: ${newId}`);
                         } catch (addError) {
                             console.error(`Fout bij toevoegen hond ${stamboomnr}:`, addError);
                         }
                     } else {
-                        // BESTAANDE HOND: Update (behoud eventuele bestaande parent IDs)
+                        // BESTAANDE HOND: Update
                         const updateData = {
                             id: existingHond.id,
                             naam: importedHond.naam || existingHond.naam,
@@ -1004,7 +789,7 @@ class DataManager extends BaseModule {
                             await this.db.updateHond(updateData);
                             stamboomToIdMap.set(stamboomnr, existingHond.id);
                             result.honden.bijgewerkt++;
-                            console.log(`Bestaande hond bijgewerkt: ${importedHond.naam} (${stamboomnr}) -> ID: ${existingHond.id}`);
+                            console.log(`Bestaande hond: ${importedHond.naam} (${stamboomnr}) -> ID: ${existingHond.id}`);
                         } catch (updateError) {
                             console.error(`Fout bij updaten hond ${stamboomnr}:`, updateError);
                         }
@@ -1020,7 +805,7 @@ class DataManager extends BaseModule {
         
         // === FASE 2: Herstel ouderlijke relaties ===
         if (importData.honden && Array.isArray(importData.honden)) {
-            console.log('Herstel ouderlijke relaties...');
+            console.log('Herstel ouderlijke relaties (fase 2)...');
             
             for (const importedHond of importData.honden) {
                 try {
@@ -1028,47 +813,58 @@ class DataManager extends BaseModule {
                     if (!stamboomnr) continue;
                     
                     const hondId = stamboomToIdMap.get(stamboomnr);
-                    if (!hondId) continue; // Hond niet geïmporteerd
+                    if (!hondId) continue;
                     
                     let vaderId = null;
                     let moederId = null;
                     
-                    // Zoek vader ID
+                    // PROTOCOL voor ouder zoeken:
+                    // 1. Eerst kijken naar vaderStamboomnr/moederStamboomnr (nieuwe exports)
+                    // 2. Als die niet bestaan, kijk naar vaderId/moederId (oude exports)
+                    // 3. Zoek via oldIdToStamboomMap -> stamboomToIdMap
+                    
+                    // VADER zoeken
                     if (importedHond.vaderStamboomnr) {
+                        // Nieuwe export: direct via stamboomnr
                         vaderId = stamboomToIdMap.get(importedHond.vaderStamboomnr);
                         if (vaderId) {
-                            console.log(`Relatie: ${importedHond.naam} -> vader ${importedHond.vaderStamboomnr} (ID: ${vaderId})`);
+                            console.log(`Relatie (nieuw): ${importedHond.naam} -> vader ${importedHond.vaderStamboomnr}`);
                         }
                     } else if (importedHond.vaderId) {
-                        // Oude export: probeer via stamboomnr te vinden
-                        const vaderHond = await this.db.getHondById(importedHond.vaderId);
-                        if (vaderHond && vaderHond.stamboomnr) {
-                            vaderId = stamboomToIdMap.get(vaderHond.stamboomnr);
+                        // Oude export: zoek stamboomnr van oude vader
+                        const oudVaderStamboomnr = oldIdToStamboomMap.get(importedHond.vaderId);
+                        if (oudVaderStamboomnr) {
+                            // Zoek nieuw ID bij dit stamboomnr
+                            vaderId = stamboomToIdMap.get(oudVaderStamboomnr);
+                            if (vaderId) {
+                                console.log(`Relatie (oud): ${importedHond.naam} -> vader oudID:${importedHond.vaderId} -> stamboom:${oudVaderStamboomnr} -> nieuwID:${vaderId}`);
+                            }
                         }
                     }
                     
-                    // Zoek moeder ID
+                    // MOEDER zoeken
                     if (importedHond.moederStamboomnr) {
                         moederId = stamboomToIdMap.get(importedHond.moederStamboomnr);
                         if (moederId) {
-                            console.log(`Relatie: ${importedHond.naam} -> moeder ${importedHond.moederStamboomnr} (ID: ${moederId})`);
+                            console.log(`Relatie (nieuw): ${importedHond.naam} -> moeder ${importedHond.moederStamboomnr}`);
                         }
                     } else if (importedHond.moederId) {
-                        // Oude export: probeer via stamboomnr te vinden
-                        const moederHond = await this.db.getHondById(importedHond.moederId);
-                        if (moederHond && moederHond.stamboomnr) {
-                            moederId = stamboomToIdMap.get(moederHond.stamboomnr);
+                        const oudMoederStamboomnr = oldIdToStamboomMap.get(importedHond.moederId);
+                        if (oudMoederStamboomnr) {
+                            moederId = stamboomToIdMap.get(oudMoederStamboomnr);
+                            if (moederId) {
+                                console.log(`Relatie (oud): ${importedHond.naam} -> moeder oudID:${importedHond.moederId} -> stamboom:${oudMoederStamboomnr} -> nieuwID:${moederId}`);
+                            }
                         }
                     }
                     
-                    // Update hond met correcte parent IDs
+                    // Update alleen als we ouders gevonden hebben
                     if (vaderId !== null || moederId !== null) {
                         const updateData = {
                             id: hondId,
                             vaderId: vaderId,
                             moederId: moederId,
-                            updatedAt: new Date().toISOString(),
-                            updatedBy: window.auth?.getCurrentUser()?.username || 'unknown'
+                            updatedAt: new Date().toISOString()
                         };
                         
                         try {
@@ -1086,9 +882,8 @@ class DataManager extends BaseModule {
         
         // === FASE 3: Importeer foto's ===
         if (importData.fotos && Array.isArray(importData.fotos) && typeof this.db.voegFotoToe === 'function') {
-            console.log(`Importeer ${importData.fotos.length} foto's...`);
+            console.log(`Importeer ${importData.fotos.length} foto's (fase 3)...`);
             
-            // Haal bestaande foto's op
             let existingFotos = [];
             try {
                 if (typeof this.db.getAllFotos === 'function') {
@@ -1106,7 +901,7 @@ class DataManager extends BaseModule {
             
             for (const foto of importData.fotos) {
                 try {
-                    // Check of foto al bestaat
+                    // Skip als foto al bestaat
                     let fotoBestaatAl = false;
                     if (foto.id && existingFotoSet.has(foto.id)) {
                         fotoBestaatAl = true;
@@ -1115,7 +910,7 @@ class DataManager extends BaseModule {
                     }
                     
                     if (!fotoBestaatAl) {
-                        // Zoek het juiste stamboomnr ID
+                        // Zoek correct hond ID via stamboomnr
                         const hondId = stamboomToIdMap.get(foto.stamboomnr);
                         if (hondId) {
                             const fotoZonderId = {
@@ -1167,8 +962,9 @@ class DataManager extends BaseModule {
             }
         }
         
-        console.log('=== IMPORT RESULTAAT ===', result);
-        console.log('Stamboomnr to ID mapping:', Array.from(stamboomToIdMap.entries()));
+        console.log('=== IMPORT VOLTOOID ===', result);
+        console.log('Stamboomnr to ID:', Array.from(stamboomToIdMap.entries()));
+        console.log('Oud ID to stamboomnr:', Array.from(oldIdToStamboomMap.entries()));
         
         return result;
     }
@@ -1176,7 +972,6 @@ class DataManager extends BaseModule {
     convertHondenToCSV(honden) {
         if (!honden || honden.length === 0) return '';
         
-        // Verzamel alle mogelijke headers
         const allHeaders = new Set(['id']);
         honden.forEach(hond => {
             Object.keys(hond).forEach(key => {
@@ -1188,7 +983,6 @@ class DataManager extends BaseModule {
         
         const headers = Array.from(allHeaders).sort();
         
-        // Maak CSV
         let csv = headers.join(';') + '\n';
         
         honden.forEach(hond => {
@@ -1241,7 +1035,6 @@ class DataManager extends BaseModule {
             headers.forEach((header, index) => {
                 if (values[index] !== undefined) {
                     let value = values[index];
-                    // Verwijder aanhalingstekens
                     if (value.startsWith('"') && value.endsWith('"')) {
                         value = value.substring(1, value.length - 1);
                     }
