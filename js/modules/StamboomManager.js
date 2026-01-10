@@ -1393,20 +1393,6 @@ class StamboomManager extends BaseModule {
                     font-size: 0.7rem;
                 }
                 
-                /* Generation labels styling */
-                .generation-label {
-                    font-weight: bold;
-                    color: #495057;
-                    text-align: center;
-                    margin-bottom: 8px !important;
-                    font-size: 0.75rem;
-                    background: #e9ecef;
-                    padding: 4px 8px;
-                    border-radius: 4px;
-                    white-space: nowrap;
-                    flex-shrink: 0;
-                }
-                
                 /* ============================================= */
                 /* MOBIELE AANPASSINGEN */
                 /* ============================================= */
@@ -1564,16 +1550,10 @@ class StamboomManager extends BaseModule {
                         margin-top: 4px !important;
                     }
                     
-                    .pedigree-generation-col .generation-label {
-                        font-size: 0.7rem !important;
-                        padding: 3px 6px !important;
-                        margin-bottom: 8px !important;
-                        white-space: nowrap !important;
-                        width: 100%;
-                        text-align: center;
-                        position: static !important;
-                        margin-top: 0 !important;
-                    }
+                    /* VERWIJDERD: Generation labels styling */
+                    /* .generation-label {
+                        display: none !important;
+                    } */
                     
                     .pedigree-card-compact.horizontal.gen0,
                     .pedigree-card-compact.horizontal.gen1,
@@ -1642,12 +1622,6 @@ class StamboomManager extends BaseModule {
                     .pedigree-generation-col.gen3 {
                         min-width: 220px !important;
                         width: 220px !important;
-                    }
-                    
-                    .generation-label {
-                        font-size: 0.65rem !important;
-                        padding: 2px 5px !important;
-                        margin-bottom: 8px !important;
                     }
                 }
                 
@@ -1795,11 +1769,10 @@ class StamboomManager extends BaseModule {
                         font-size: 0.48rem;
                     }
                     
-                    .generation-label {
-                        font-size: 0.8rem;
-                        padding: 4px 8px;
-                        margin-bottom: 8px !important;
-                    }
+                    /* VERWIJDERD: Generation label styling */
+                    /* .generation-label {
+                        display: none !important;
+                    } */
                 }
                 
                 @media (min-width: 1024px) and (max-width: 1365px) {
@@ -2336,20 +2309,17 @@ class StamboomManager extends BaseModule {
             <div class="pedigree-grid-compact">
                 <!-- Generatie 0: Hoofdhond -->
                 <div class="pedigree-generation-col gen0">
-                    <div class="generation-label">${this.t('currentDog')}</div>
                     ${mainDogCard}
                 </div>
                 
                 <!-- Generatie 1: Ouders -->
                 <div class="pedigree-generation-col gen1">
-                    <div class="generation-label">${this.t('parents')}</div>
                     ${fatherCard}
                     ${motherCard}
                 </div>
                 
                 <!-- Generatie 2: Grootouders -->
                 <div class="pedigree-generation-col gen2">
-                    <div class="generation-label">${this.t('grandparents')}</div>
                     ${paternalGrandfatherCard}
                     ${paternalGrandmotherCard}
                     ${maternalGrandfatherCard}
@@ -2358,7 +2328,6 @@ class StamboomManager extends BaseModule {
                 
                 <!-- Generatie 3: Overgrootouders -->
                 <div class="pedigree-generation-col gen3">
-                    <div class="generation-label">${this.t('greatGrandparents')}</div>
                     ${paternalGreatGrandfather1Card}
                     ${paternalGreatGrandmother1Card}
                     ${paternalGreatGrandfather2Card}
