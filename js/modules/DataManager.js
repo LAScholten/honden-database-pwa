@@ -1,6 +1,6 @@
 /**
- * Data Management Module aangepast voor HondenDatabase
- * Nu met backup tracking en taalondersteuning
+ * Data Management Module voor HondenDatabase
+ * Volledig herstelde import/export met correcte ouderlijke relaties
  */
 
 class DataManager extends BaseModule {
@@ -19,6 +19,7 @@ class DataManager extends BaseModule {
                 updateAndComplete: "Volledige herstel",
                 startImport: "Start Import",
                 importingData: "Data importeren...",
+                buildingRelations: "Relaties opbouwen...",
                 dataExport: "Data Exporteren",
                 exportDescription: "Exporteer data naar een bestand voor backup of delen.",
                 exportOptions: "Export opties",
@@ -44,6 +45,7 @@ class DataManager extends BaseModule {
                 dogsUpdated: "Honden bijgewerkt",
                 photosImported: "Foto's geïmporteerd",
                 privateUpdated: "Privé records bijgewerkt",
+                relationshipsBuilt: "Relaties hersteld",
                 exportSuccess: "Export succesvol voltooid!",
                 exportFailed: "Export mislukt: ",
                 exportFileSaved: "Bestand opgeslagen als: ",
@@ -76,6 +78,7 @@ class DataManager extends BaseModule {
                 updateAndComplete: "Full restore",
                 startImport: "Start Import",
                 importingData: "Importing data...",
+                buildingRelations: "Building relationships...",
                 dataExport: "Data Export",
                 exportDescription: "Export data to a file for backup or sharing.",
                 exportOptions: "Export options",
@@ -101,6 +104,7 @@ class DataManager extends BaseModule {
                 dogsUpdated: "Dogs updated",
                 photosImported: "Photos imported",
                 privateUpdated: "Private records updated",
+                relationshipsBuilt: "Relationships restored",
                 exportSuccess: "Export successfully completed!",
                 exportFailed: "Export failed: ",
                 exportFileSaved: "File saved as: ",
@@ -133,6 +137,7 @@ class DataManager extends BaseModule {
                 updateAndComplete: "Vollständige Wiederherstellung",
                 startImport: "Import starten",
                 importingData: "Daten werden importiert...",
+                buildingRelations: "Beziehungen werden aufgebaut...",
                 dataExport: "Datenexport",
                 exportDescription: "Exportieren Sie Daten in eine Datei für Backup oder Teilen.",
                 exportOptions: "Exportoptionen",
@@ -158,6 +163,7 @@ class DataManager extends BaseModule {
                 dogsUpdated: "Hunde aktualisiert",
                 photosImported: "Fotos importiert",
                 privateUpdated: "Private Aufzeichnungen aktualisiert",
+                relationshipsBuilt: "Beziehungen wiederhergestellt",
                 exportSuccess: "Export erfolgreich abgeschlossen!",
                 exportFailed: "Export fehlgeschlagen: ",
                 exportFileSaved: "Datei gespeichert als: ",
@@ -182,12 +188,10 @@ class DataManager extends BaseModule {
         };
         
         // Gebruik de globale database instantie
-        // BELANGRIJK: Zorg ervoor dat dit naar window.db verwijst
         if (window.db) {
             this.db = window.db;
         } else {
             console.error('Database niet gevonden in window object');
-            // Fallback: probeer het te vinden
             this.db = window.hondenDatabase || window.database || db;
         }
     }
@@ -653,7 +657,7 @@ class DataManager extends BaseModule {
                 console.log('Import data ontvangen');
                 console.log('Aantal honden in import:', importData.honden ? importData.honden.length : 0);
                 
-                const result = await this.processImport(importData);
+                const result = await this.processImportWithRelations(importData);
                 
                 this.hideProgress();
                 this.showImportResults(result);
@@ -710,8 +714,53 @@ class DataManager extends BaseModule {
             
             if (exportDataPhotos) {
                 try {
-                    // Gebruik de juiste database functie
-                    exportData.honden = await this.db.getHonden();
+                    // Export honden mét volledige parent informatie
+                    const honden = await this.db.getHonden();
+                    
+                    // Voor elke hond, zoek de parent gegevens op
+                    exportData.honden = await Promise.all(honden.map(async (hond) => {
+                        let vaderInfo = {};
+                        let moederInfo = {};
+                        
+                        if (hond.vaderId) {
+                            try {
+                                const vader = await this.db.getHondById(hond.vaderId);
+                                if (vader) {
+                                    vaderInfo = {
+                                        vaderStamboomnr: vader.stamboomnr,
+                                        vaderNaam: vader.naam,
+                                        vaderKennel: vader.kennelnaam,
+                                        vaderId: hond.vaderId // Exporteer het huidige ID voor referentie
+                                    };
+                                }
+                            } catch (error) {
+                                console.log('Kon vader info niet vinden:', error);
+                            }
+                        }
+                        
+                        if (hond.moederId) {
+                            try {
+                                const moeder = await this.db.getHondById(hond.moederId);
+                                if (moeder) {
+                                    moederInfo = {
+                                        moederStamboomnr: moeder.stamboomnr,
+                                        moederNaam: moeder.naam,
+                                        moederKennel: moeder.kennelnaam,
+                                        moederId: hond.moederId // Exporteer het huidige ID voor referentie
+                                    };
+                                }
+                            } catch (error) {
+                                console.log('Kon moeder info niet vinden:', error);
+                            }
+                        }
+                        
+                        return {
+                            ...hond,
+                            ...vaderInfo,
+                            ...moederInfo
+                        };
+                    }));
+                    
                     hondenCount = exportData.honden.length;
                     
                     // Foto's alleen als de functie bestaat
@@ -811,107 +860,235 @@ class DataManager extends BaseModule {
         }
     }
     
-    async processImport(importData) {
+    // NIEUWE IMPORTERINGSLOGICA MET 2 FASEN
+    async processImportWithRelations(importData) {
+        const t = this.t.bind(this);
         const result = {
             honden: { toegevoegd: 0, bijgewerkt: 0 },
             fotos: { toegevoegd: 0 },
-            priveInfo: { bijgewerkt: 0 }
+            priveInfo: { bijgewerkt: 0 },
+            relaties: { hersteld: 0 }
         };
         
-        console.log('=== START IMPORT ===');
+        console.log('=== START IMPORT MET RELATIES ===');
         console.log('Import data:', importData);
         
         // BELANGRIJK: Zorg dat we de database gebruiken
         if (!this.db) {
-            throw new Error('Database niet gevonden. Zorg dat window.db is geïnitialiseerd.');
+            throw new Error('Database niet gevonden. Zorg dat window.db is geïnicialiseerd.');
         }
         
-        // Eerst kijken welke functies we hebben
+        // Controleer database functies
         const hasVoegHondToe = typeof this.db.voegHondToe === 'function';
         const hasUpdateHond = typeof this.db.updateHond === 'function';
-        const hasGetHonden = typeof this.db.getHonden === 'function';
+        const hasGetHondByStamboomnr = typeof this.db.getHondByStamboomnr === 'function';
         
-        console.log('Database functies beschikbaar:');
-        console.log('- voegHondToe:', hasVoegHondToe);
-        console.log('- updateHond:', hasUpdateHond);
-        console.log('- getHonden:', hasGetHonden);
-        
-        if (!hasVoegHondToe || !hasUpdateHond || !hasGetHonden) {
-            console.error('BELANGRIJKE database functies ontbreken!');
-            console.log('Beschikbare functies:', Object.keys(this.db).filter(key => typeof this.db[key] === 'function'));
+        if (!hasVoegHondToe || !hasUpdateHond || !hasGetHondByStamboomnr) {
             this.showError('Database functies ontbreken. Kan niet importeren.');
             return result;
         }
         
-        // 1. Haal alle huidige honden op
-        const currentHonden = await this.db.getHonden();
-        const currentHondMap = new Map();
-        currentHonden.forEach(hond => {
-            currentHondMap.set(hond.id, hond);
-            // Ook indexeren op stamboomnr voor snelle lookup
+        // === FASE 1: Importeer alle honden (zonder ouderlijke relaties) ===
+        
+        // Map voor stamboomnr → nieuw database ID
+        const stamboomToIdMap = new Map();
+        
+        // Eerst: verzamel alle stamboomnrs voor ouders
+        const alleStamboomnrs = new Set();
+        if (importData.honden && Array.isArray(importData.honden)) {
+            importData.honden.forEach(hond => {
+                alleStamboomnrs.add(hond.stamboomnr);
+                if (hond.vaderStamboomnr) alleStamboomnrs.add(hond.vaderStamboomnr);
+                if (hond.moederStamboomnr) alleStamboomnrs.add(hond.moederStamboomnr);
+            });
+        }
+        
+        console.log('Alle stamboomnrs in import:', Array.from(alleStamboomnrs));
+        
+        // Haal bestaande honden op voor stamboomnrs die we nodig hebben
+        const existingHonden = await this.db.getHonden();
+        const existingStamboomMap = new Map();
+        existingHonden.forEach(hond => {
             if (hond.stamboomnr) {
-                currentHondMap.set(`stamboom_${hond.stamboomnr}`, hond);
+                existingStamboomMap.set(hond.stamboomnr, hond);
             }
         });
         
-        console.log('Huidige honden in database:', currentHonden.length);
-        console.log('Huidige hond IDs:', Array.from(currentHondMap.keys()));
-        
-        // 2. Importeer honden
+        // Importeer honden (zonder ouderlijke IDs)
         if (importData.honden && Array.isArray(importData.honden)) {
-            console.log('Te importeren honden:', importData.honden.length);
+            console.log(`Importeer ${importData.honden.length} honden...`);
             
             for (const importedHond of importData.honden) {
                 try {
-                    // Zoek of deze hond al bestaat - ALLEEN op stamboomnr
-                    let existingHond = null;
-                    
-                    // Zoek ALLEEN op stamboomnr, niet op ID
-                    if (importedHond.stamboomnr) {
-                        existingHond = currentHondMap.get(`stamboom_${importedHond.stamboomnr}`);
+                    const stamboomnr = importedHond.stamboomnr;
+                    if (!stamboomnr) {
+                        console.warn('Hond zonder stamboomnr overgeslagen:', importedHond.naam);
+                        continue;
                     }
                     
+                    // Kijk of deze hond al bestaat
+                    const existingHond = existingStamboomMap.get(stamboomnr);
+                    
                     if (!existingHond) {
-                        // NIEUWE HOND: Voeg toe
-                        console.log(`Nieuwe hond: ${importedHond.naam || 'onbekend'} (Stamboom: ${importedHond.stamboomnr})`);
-                        
-                        // BELANGRIJK: Verwijder ID voor nieuwe honden
-                        const hondZonderId = { ...importedHond };
-                        delete hondZonderId.id; // Database genereert zelf ID
+                        // NIEUWE HOND: Voeg toe zonder parent IDs
+                        const hondZonderIds = {
+                            naam: importedHond.naam || '',
+                            kennelnaam: importedHond.kennelnaam || '',
+                            stamboomnr: stamboomnr,
+                            ras: importedHond.ras || '',
+                            vachtkleur: importedHond.vachtkleur || '',
+                            geslacht: importedHond.geslacht || '',
+                            geboortedatum: importedHond.geboortedatum || '',
+                            overlijdensdatum: importedHond.overlijdensdatum || '',
+                            heupdysplasie: importedHond.heupdysplasie || '',
+                            elleboogdysplasie: importedHond.elleboogdysplasie || '',
+                            patella: importedHond.patella || '',
+                            ogen: importedHond.ogen || '',
+                            ogenVerklaring: importedHond.ogenVerklaring || '',
+                            dandyWalker: importedHond.dandyWalker || '',
+                            schildklier: importedHond.schildklier || '',
+                            schildklierVerklaring: importedHond.schildklierVerklaring || '',
+                            land: importedHond.land || '',
+                            postcode: importedHond.postcode || '',
+                            opmerkingen: importedHond.opmerkingen || '',
+                            // Ouders worden later ingevuld
+                            vader: importedHond.vader || '',
+                            moeder: importedHond.moeder || '',
+                            // Ouderlijke IDs worden NIET ingesteld in fase 1
+                            vaderId: null,
+                            moederId: null,
+                            // Metadata
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString(),
+                            createdBy: window.auth?.getCurrentUser()?.username || 'unknown'
+                        };
                         
                         try {
-                            const newId = await this.db.voegHondToe(hondZonderId);
-                            console.log(`Hond toegevoegd met nieuw ID: ${newId}`);
+                            const newId = await this.db.voegHondToe(hondZonderIds);
+                            stamboomToIdMap.set(stamboomnr, newId);
                             result.honden.toegevoegd++;
+                            console.log(`Nieuwe hond toegevoegd: ${importedHond.naam} (${stamboomnr}) -> ID: ${newId}`);
                         } catch (addError) {
-                            console.error(`Fout bij toevoegen hond:`, addError);
-                            this.showError(`Fout bij toevoegen hond ${importedHond.naam}: ${addError.message}`);
+                            console.error(`Fout bij toevoegen hond ${stamboomnr}:`, addError);
                         }
                     } else {
-                        // BESTAANDE HOND: Update
-                        console.log(`Bestaande hond: ${existingHond.naam} (ID: ${existingHond.id})`);
-                        
-                        // Zorg dat we het juiste database ID gebruiken
-                        const hondData = { ...importedHond, id: existingHond.id };
+                        // BESTAANDE HOND: Update (behoud eventuele bestaande parent IDs)
+                        const updateData = {
+                            id: existingHond.id,
+                            naam: importedHond.naam || existingHond.naam,
+                            kennelnaam: importedHond.kennelnaam || existingHond.kennelnaam,
+                            stamboomnr: stamboomnr,
+                            ras: importedHond.ras || existingHond.ras,
+                            vachtkleur: importedHond.vachtkleur || existingHond.vachtkleur,
+                            geslacht: importedHond.geslacht || existingHond.geslacht,
+                            geboortedatum: importedHond.geboortedatum || existingHond.geboortedatum,
+                            overlijdensdatum: importedHond.overlijdensdatum || existingHond.overlijdensdatum,
+                            heupdysplasie: importedHond.heupdysplasie || existingHond.heupdysplasie,
+                            elleboogdysplasie: importedHond.elleboogdysplasie || existingHond.elleboogdysplasie,
+                            patella: importedHond.patella || existingHond.patella,
+                            ogen: importedHond.ogen || existingHond.ogen,
+                            ogenVerklaring: importedHond.ogenVerklaring || existingHond.ogenVerklaring,
+                            dandyWalker: importedHond.dandyWalker || existingHond.dandyWalker,
+                            schildklier: importedHond.schildklier || existingHond.schildklier,
+                            schildklierVerklaring: importedHond.schildklierVerklaring || existingHond.schildklierVerklaring,
+                            land: importedHond.land || existingHond.land,
+                            postcode: importedHond.postcode || existingHond.postcode,
+                            opmerkingen: importedHond.opmerkingen || existingHond.opmerkingen,
+                            vader: importedHond.vader || existingHond.vader,
+                            moeder: importedHond.moeder || existingHond.moeder,
+                            updatedAt: new Date().toISOString(),
+                            updatedBy: window.auth?.getCurrentUser()?.username || 'unknown'
+                        };
                         
                         try {
-                            await this.db.updateHond(hondData);
+                            await this.db.updateHond(updateData);
+                            stamboomToIdMap.set(stamboomnr, existingHond.id);
                             result.honden.bijgewerkt++;
+                            console.log(`Bestaande hond bijgewerkt: ${importedHond.naam} (${stamboomnr}) -> ID: ${existingHond.id}`);
                         } catch (updateError) {
-                            console.error(`Fout bij updaten hond ${existingHond.id}:`, updateError);
-                            this.showError(`Fout bij updaten hond ${existingHond.naam}: ${updateError.message}`);
+                            console.error(`Fout bij updaten hond ${stamboomnr}:`, updateError);
                         }
                     }
                 } catch (error) {
                     console.error(`Fout bij verwerken hond:`, error);
-                    this.showError(`Fout bij importeren hond: ${error.message}`);
                 }
             }
         }
         
-        // 3. Importeer foto's (indien beschikbaar)
+        // Update progress voor fase 2
+        this.showProgress(t('buildingRelations'));
+        
+        // === FASE 2: Herstel ouderlijke relaties ===
+        if (importData.honden && Array.isArray(importData.honden)) {
+            console.log('Herstel ouderlijke relaties...');
+            
+            for (const importedHond of importData.honden) {
+                try {
+                    const stamboomnr = importedHond.stamboomnr;
+                    if (!stamboomnr) continue;
+                    
+                    const hondId = stamboomToIdMap.get(stamboomnr);
+                    if (!hondId) continue; // Hond niet geïmporteerd
+                    
+                    let vaderId = null;
+                    let moederId = null;
+                    
+                    // Zoek vader ID
+                    if (importedHond.vaderStamboomnr) {
+                        vaderId = stamboomToIdMap.get(importedHond.vaderStamboomnr);
+                        if (vaderId) {
+                            console.log(`Relatie: ${importedHond.naam} -> vader ${importedHond.vaderStamboomnr} (ID: ${vaderId})`);
+                        }
+                    } else if (importedHond.vaderId) {
+                        // Oude export: probeer via stamboomnr te vinden
+                        const vaderHond = await this.db.getHondById(importedHond.vaderId);
+                        if (vaderHond && vaderHond.stamboomnr) {
+                            vaderId = stamboomToIdMap.get(vaderHond.stamboomnr);
+                        }
+                    }
+                    
+                    // Zoek moeder ID
+                    if (importedHond.moederStamboomnr) {
+                        moederId = stamboomToIdMap.get(importedHond.moederStamboomnr);
+                        if (moederId) {
+                            console.log(`Relatie: ${importedHond.naam} -> moeder ${importedHond.moederStamboomnr} (ID: ${moederId})`);
+                        }
+                    } else if (importedHond.moederId) {
+                        // Oude export: probeer via stamboomnr te vinden
+                        const moederHond = await this.db.getHondById(importedHond.moederId);
+                        if (moederHond && moederHond.stamboomnr) {
+                            moederId = stamboomToIdMap.get(moederHond.stamboomnr);
+                        }
+                    }
+                    
+                    // Update hond met correcte parent IDs
+                    if (vaderId !== null || moederId !== null) {
+                        const updateData = {
+                            id: hondId,
+                            vaderId: vaderId,
+                            moederId: moederId,
+                            updatedAt: new Date().toISOString(),
+                            updatedBy: window.auth?.getCurrentUser()?.username || 'unknown'
+                        };
+                        
+                        try {
+                            await this.db.updateHond(updateData);
+                            result.relaties.hersteld++;
+                        } catch (updateError) {
+                            console.error(`Fout bij updaten relaties voor ${stamboomnr}:`, updateError);
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Fout bij herstellen relaties:`, error);
+                }
+            }
+        }
+        
+        // === FASE 3: Importeer foto's ===
         if (importData.fotos && Array.isArray(importData.fotos) && typeof this.db.voegFotoToe === 'function') {
-            // Haal eerst alle bestaande foto's op om dubbelen te voorkomen
+            console.log(`Importeer ${importData.fotos.length} foto's...`);
+            
+            // Haal bestaande foto's op
             let existingFotos = [];
             try {
                 if (typeof this.db.getAllFotos === 'function') {
@@ -921,41 +1098,40 @@ class DataManager extends BaseModule {
                 console.log('Kon bestaande foto\'s niet ophalen:', error);
             }
             
-            // Maak een set van bestaande foto identificatoren
-            const existingFotoIds = new Set();
+            const existingFotoSet = new Set();
             existingFotos.forEach(foto => {
-                if (foto.id) existingFotoIds.add(foto.id);
-                if (foto.bestandsnaam) existingFotoIds.add(`file_${foto.bestandsnaam}`);
-                if (foto.url) existingFotoIds.add(`url_${foto.url}`);
+                if (foto.id) existingFotoSet.add(foto.id);
+                if (foto.bestandsnaam) existingFotoSet.add(`file_${foto.bestandsnaam}`);
             });
             
             for (const foto of importData.fotos) {
                 try {
-                    // Controleer of deze foto al bestaat
+                    // Check of foto al bestaat
                     let fotoBestaatAl = false;
-                    
-                    if (foto.id && existingFotoIds.has(foto.id)) {
+                    if (foto.id && existingFotoSet.has(foto.id)) {
                         fotoBestaatAl = true;
-                    } else if (foto.bestandsnaam && existingFotoIds.has(`file_${foto.bestandsnaam}`)) {
-                        fotoBestaatAl = true;
-                    } else if (foto.url && existingFotoIds.has(`url_${foto.url}`)) {
+                    } else if (foto.bestandsnaam && existingFotoSet.has(`file_${foto.bestandsnaam}`)) {
                         fotoBestaatAl = true;
                     }
                     
                     if (!fotoBestaatAl) {
-                        // Verwijder ID voor nieuwe foto
-                        const fotoZonderId = { ...foto };
-                        delete fotoZonderId.id;
-                        
-                        await this.db.voegFotoToe(fotoZonderId);
-                        result.fotos.toegevoegd++;
-                        
-                        // Voeg toe aan set voor volgende iteraties
-                        if (foto.id) existingFotoIds.add(foto.id);
-                        if (foto.bestandsnaam) existingFotoIds.add(`file_${foto.bestandsnaam}`);
-                        if (foto.url) existingFotoIds.add(`url_${foto.url}`);
-                    } else {
-                        console.log(`Foto ${foto.id || foto.bestandsnaam || foto.url} bestaat al, overslaan`);
+                        // Zoek het juiste stamboomnr ID
+                        const hondId = stamboomToIdMap.get(foto.stamboomnr);
+                        if (hondId) {
+                            const fotoZonderId = {
+                                stamboomnr: foto.stamboomnr,
+                                data: foto.data || '',
+                                thumbnail: foto.thumbnail || '',
+                                filename: foto.filename || 'onbekend.jpg',
+                                size: foto.size || 0,
+                                type: foto.type || 'image/jpeg',
+                                uploadedAt: foto.uploadedAt || new Date().toISOString(),
+                                geuploadDoor: foto.geuploadDoor || window.auth?.getCurrentUser()?.username || 'unknown'
+                            };
+                            
+                            await this.db.voegFotoToe(fotoZonderId);
+                            result.fotos.toegevoegd++;
+                        }
                     }
                 } catch (error) {
                     console.log(`Foto ${foto.id} kan niet worden toegevoegd:`, error);
@@ -963,17 +1139,25 @@ class DataManager extends BaseModule {
             }
         }
         
-        // 4. Importeer privé info (indien beschikbaar en gebruiker heeft rechten)
+        // === FASE 4: Importeer privé info ===
         if (importData.priveInfo && Array.isArray(importData.priveInfo) && typeof this.db.bewaarPriveInfo === 'function') {
             try {
                 for (const prive of importData.priveInfo) {
                     try {
-                        // Verwijder ID voor nieuwe privé info
-                        const priveZonderId = { ...prive };
-                        delete priveZonderId.id;
-                        
-                        await this.db.bewaarPriveInfo(priveZonderId);
-                        result.priveInfo.bijgewerkt++;
+                        // Controleer of hond bestaat
+                        const hondId = stamboomToIdMap.get(prive.stamboomnr);
+                        if (hondId) {
+                            const priveZonderId = {
+                                stamboomnr: prive.stamboomnr,
+                                privateNotes: prive.privateNotes || '',
+                                vertrouwelijk: true,
+                                laatstGewijzigd: new Date().toISOString(),
+                                gewijzigdDoor: window.auth?.getCurrentUser()?.username || 'unknown'
+                            };
+                            
+                            await this.db.bewaarPriveInfo(priveZonderId);
+                            result.priveInfo.bijgewerkt++;
+                        }
                     } catch (error) {
                         console.log(`Privé info voor ${prive.stamboomnr} kan niet worden opgeslagen:`, error);
                     }
@@ -984,6 +1168,8 @@ class DataManager extends BaseModule {
         }
         
         console.log('=== IMPORT RESULTAAT ===', result);
+        console.log('Stamboomnr to ID mapping:', Array.from(stamboomToIdMap.entries()));
+        
         return result;
     }
     
@@ -1120,6 +1306,9 @@ class DataManager extends BaseModule {
         if (result.priveInfo.bijgewerkt > 0) {
             summary += `<strong>${result.priveInfo.bijgewerkt}</strong> ${t('privateUpdated')}<br>`;
         }
+        if (result.relaties.hersteld > 0) {
+            summary += `<strong>${result.relaties.hersteld}</strong> ${t('relationshipsBuilt')}<br>`;
+        }
         
         summary += `</div>`;
         
@@ -1155,7 +1344,6 @@ class DataManager extends BaseModule {
     }
     
     showSuccess(message) {
-        // Gebruik alert voor eenvoud
         const modal = document.createElement('div');
         modal.className = 'modal fade show';
         modal.style.display = 'block';
@@ -1178,12 +1366,10 @@ class DataManager extends BaseModule {
         
         document.body.appendChild(modal);
         
-        // Voeg backdrop toe
         const backdrop = document.createElement('div');
         backdrop.className = 'modal-backdrop fade show';
         document.body.appendChild(backdrop);
         
-        // Remove on click
         modal.querySelector('[data-bs-dismiss="modal"]').addEventListener('click', () => {
             modal.remove();
             backdrop.remove();
@@ -1191,7 +1377,6 @@ class DataManager extends BaseModule {
     }
     
     showError(message) {
-        // Gebruik alert voor eenvoud
         const modal = document.createElement('div');
         modal.className = 'modal fade show';
         modal.style.display = 'block';
@@ -1214,12 +1399,10 @@ class DataManager extends BaseModule {
         
         document.body.appendChild(modal);
         
-        // Voeg backdrop toe
         const backdrop = document.createElement('div');
         backdrop.className = 'modal-backdrop fade show';
         document.body.appendChild(backdrop);
         
-        // Remove on click
         modal.querySelector('[data-bs-dismiss="modal"]').addEventListener('click', () => {
             modal.remove();
             backdrop.remove();
