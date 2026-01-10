@@ -13,7 +13,7 @@ class ZoekReu {
         this.selectedTeef = null;
         this.allTeven = [];
         this.allHonden = [];
-        this.coiCalculator2 = null;  // ← VARIABLE NAAM CORRIGEREN
+        this.coiCalculator2 = null;
         this.coiCalculatorReady = false;
         this.stamboomManager = null;
         
@@ -222,7 +222,7 @@ class ZoekReu {
                     },
                     schildklier: {
                         "Tgaa Negative": "Tgaa Negative",
-                        "Not tested": "Not tested"
+                        "Niet getest": "Not tested"
                     },
                     elleboogdysplasie: {
                         "0": "0 (Free)",
@@ -378,13 +378,13 @@ class ZoekReu {
                 noTeefSelected: "Wählen Sie zuerst eine Hündin, um die COI-Berechnung zu verwenden",
                 showPedigree: "Stammbaum anzeigen",
                 pedigreeTooltip: "Klicken, um den 4-Generationen-Stammbaum dieses Rüden anzuzeigen",
-                calculatingCOI: "COI-Werte werden berechnet...",
+                calculatingCOI: "COI-Werte worden berechnet...",
                 coiCalculationError: "Fehler bei COI-Berechnung",
                 virtualPuppy: "Virtuelle Kombination Welpe",
                 coiCalculationProgress: "Berechne COI für Kombinationen...",
                 noFemalesFound: "Keine Hündinnen gefunden",
                 refineSearch: "Geben Sie einen anderen Namen ein oder verwenden Sie Leerzeichen zum Kombinieren",
-                manualEntry: "Manuelle Eingabe",
+                manualEntry: "Manuele Eingabe",
                 femalesFound: "Hündinnen gefonden",
                 moreResults: "weitere... weiter tippen zum Verfeinern",
                 pedigree: "Stamboom",
@@ -1183,7 +1183,7 @@ class ZoekReu {
     
     async calculateComboCOI(teefId, reuId) {
         if (!this.coiCalculator2 || !teefId || !reuId || teefId === 'manual') {
-            return '0.0';
+            return '0.000';
         }
         
         try {
@@ -1194,7 +1194,7 @@ class ZoekReu {
             
             if (!teef || !reu) {
                 console.error('❌ Teef of reu niet gevonden in database');
-                return '0.0';
+                return '0.000';
             }
             
             const futurePuppy = {
@@ -1233,7 +1233,7 @@ class ZoekReu {
             
         } catch (error) {
             console.error('❌ Fout bij combinatie COI berekening:', error);
-            return '0.0';
+            return '0.000';
         }
     }
     
@@ -1246,15 +1246,16 @@ class ZoekReu {
         
         const filteredReuen = [];
         
+        // ✅ TOON BERICHT ALLEEN ALS WE EFFECTIEF GAAN BEREKENEN
         const resultsDiv = document.getElementById('searchResults');
-        if (reuen.length > 5 && resultsDiv) {
+        if (reuen.length > 0 && resultsDiv) {
             resultsDiv.innerHTML = `
                 <div class="text-center py-4">
                     <div class="spinner-border text-purple" role="status">
                         <span class="visually-hidden">COI berekeningen...</span>
                     </div>
                     <p class="mt-3">${this.t('calculatingCOI')}</p>
-                    <p class="small text-muted">${this.t('coiCalculationProgress')}</p>
+                    <p class="small text-muted">${this.t('coiCalculationProgress')} (${reuen.length} reuen)</p>
                 </div>
             `;
         }
@@ -1264,15 +1265,18 @@ class ZoekReu {
                 const reu = reuen[i];
                 
                 try {
+                    // ✅ BEREKEN COMBINATIE COI
                     const comboCOI = await this.calculateComboCOI(teefId, reu.id);
                     const comboValue = parseFloat(comboCOI) || 0;
                     
                     console.log(`   ➡ ${reu.naam}: combo 6g=${comboValue}% (max: ${maxCOI}%) → ${comboValue <= maxCOI ? 'PASS' : 'FAIL'}`);
                     
-                    reu._coiData = {
-                        combo: comboCOI,
-                        passesFilter: comboValue <= maxCOI
-                    };
+                    // ✅ ZORG DAT _coiData ALTIJD BESTAAT
+                    if (!reu._coiData) {
+                        reu._coiData = {};
+                    }
+                    reu._coiData.combo = comboCOI;
+                    reu._coiData.passesFilter = comboValue <= maxCOI;
                     
                     if (comboValue <= maxCOI) {
                         filteredReuen.push(reu);
@@ -1280,10 +1284,13 @@ class ZoekReu {
                     
                 } catch (calcError) {
                     console.error(`Fout bij COI berekening reu ${reu.id}:`, calcError);
-                    reu._coiData = {
-                        combo: '0.0',
-                        passesFilter: false
-                    };
+                    
+                    // ✅ ZET STANDARDWAARDEN BIJ FOUT
+                    if (!reu._coiData) {
+                        reu._coiData = {};
+                    }
+                    reu._coiData.combo = '0.000';
+                    reu._coiData.passesFilter = false;
                 }
             }
             
@@ -1872,10 +1879,17 @@ class ZoekReu {
                 `${reu.naam} ${reu.kennelnaam ? reu.kennelnaam : ''}`.trim() : 
                 t('unknown');
             
-            let comboCOI = '0.0';
+            let comboCOI = '0.000';
             
-            if (showCOIColumn && reu._coiData) {
-                comboCOI = reu._coiData.combo || '0.0';
+            if (showCOIColumn) {
+                // ✅ VERSCHIL: Eerst checken of _coiData bestaat, anders berekenen
+                if (!reu._coiData || !reu._coiData.combo) {
+                    // Bereken opnieuw als nodig
+                    comboCOI = '0.000';
+                    console.log(`⚠️ Geen COI data voor ${reu.naam}, standaardwaarde gebruikt`);
+                } else {
+                    comboCOI = reu._coiData.combo || '0.000';
+                }
             }
             
             return `
