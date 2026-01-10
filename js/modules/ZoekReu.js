@@ -534,7 +534,7 @@ class ZoekReu {
         const reuen = this.allHonden.filter(h => h.geslacht === 'reuen');
         const rassen = [...new Set(reuen.map(r => r.ras).filter(Boolean))].sort();
         
-        content.innerHTML = `
+       content.innerHTML = `
             <h5 class="mb-4">
                 <i class="bi bi-search text-purple"></i> ${t('title')}
             </h5>
@@ -542,7 +542,7 @@ class ZoekReu {
             
             <div class="row g-4">
                 <div class="col-md-4">
-                    <div class="card">
+                    <div class="card teef-selector-card">
                         <div class="card-header">
                             <h6 class="mb-0">${t('selectTeef')}</h6>
                         </div>
@@ -723,7 +723,6 @@ class ZoekReu {
                             <i class="bi bi-search" style="font-size: 2rem;"></i>
                             <p class="mt-2">${t('useSearchCriteria')}</p>
                         </div>
-                    </div>
                 </div>
             </div>
         `;
