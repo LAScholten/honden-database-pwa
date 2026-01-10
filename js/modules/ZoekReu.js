@@ -437,7 +437,7 @@ class ZoekReu {
                 selectFemaleToStart: "Wählen Sie eine Hündin, um zu beginnen",
                 useSearchCriteria: "Verwenden Sie Suchkriterien, um Rüden zu finden",
                 searchingMales: "Suche nach geeigneten Rüden...",
-                pedigreeFunctionalityUnavailable: "Stamboomfunktionalität ist derzeit nicht verfügbar",
+                pedigreeFunctionalityUnavailable: "Stamboomfunktionalität ist derzeit niet verfügbar",
                 maleNotFound: "Konnte Rüdendaten nicht finden",
                 errorShowingPedigree: "Beim Anzeigen des Stamboons ist een Fehler aufgetreten",
                 combinedParents: "Kombinierte Eltern",
@@ -534,7 +534,7 @@ class ZoekReu {
         const reuen = this.allHonden.filter(h => h.geslacht === 'reuen');
         const rassen = [...new Set(reuen.map(r => r.ras).filter(Boolean))].sort();
         
-       content.innerHTML = `
+        content.innerHTML = `
             <h5 class="mb-4">
                 <i class="bi bi-search text-purple"></i> ${t('title')}
             </h5>
@@ -542,7 +542,7 @@ class ZoekReu {
             
             <div class="row g-4">
                 <div class="col-md-4">
-                    <div class="card teef-selector-card">
+                    <div class="card">
                         <div class="card-header">
                             <h6 class="mb-0">${t('selectTeef')}</h6>
                         </div>
@@ -723,6 +723,7 @@ class ZoekReu {
                             <i class="bi bi-search" style="font-size: 2rem;"></i>
                             <p class="mt-2">${t('useSearchCriteria')}</p>
                         </div>
+                    </div>
                 </div>
             </div>
         `;
@@ -2342,7 +2343,6 @@ class ZoekReu {
         if (selectedValue === 'Niet getest' || selectedValue === 'Not tested' || selectedValue === 'Niet getest') {
             return normalizedReuValue === 'niet getest' ||
                    normalizedReuValue === 'not tested' ||
-                   normalizedReuValue === '' ||
                    reuValue === '' ||
                    reuValue === null ||
                    normalizedReuValue === 'tgaa negatief' || 
@@ -2754,7 +2754,7 @@ style.textContent = `
         border: 1px solid #dee2e6;
         border-radius: 0.375rem;
         box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-        z-index: 1000;
+        z-index: 1050; /* Verhoogd voor overlay effect */
     }
     
     .autocomplete-header {
@@ -2971,6 +2971,25 @@ style.textContent = `
     
     .bi-house-door {
         color: #6c757d;
+    }
+    
+    /* Fix voor dropdown zichtbaarheid */
+    .position-relative {
+        position: relative;
+    }
+    
+    /* Voorkom clipping door parent containers */
+    .card-body {
+        overflow: visible !important;
+    }
+    
+    .row.g-4 > .col-md-4,
+    .row.g-4 > .col-md-8 {
+        overflow: visible !important;
+    }
+    
+    .card {
+        overflow: visible !important;
     }
 `;
 document.head.appendChild(style);
