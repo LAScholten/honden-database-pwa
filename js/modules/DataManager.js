@@ -23,8 +23,10 @@ class DataManager extends BaseModule {
                 dataExport: "Data Exporteren",
                 exportDescription: "Exporteer data naar een bestand voor backup of delen.",
                 exportOptions: "Export opties",
-                exportDataPhotos: "Data en foto's exporteren",
-                exportDataPhotosDescription: "Alle hondengegevens en foto metadata",
+                exportData: "Data exporteren",
+                exportDataDescription: "Alle hondengegevens zonder foto's",
+                exportPhotos: "Foto's exporteren",
+                exportPhotosDescription: "Foto metadata en relaties",
                 exportPrivateInfo: "Privé informatie exporteren",
                 exportPrivateInfoDescription: "Medische en financiële gegevens",
                 exportFormat: "Export formaat",
@@ -82,8 +84,10 @@ class DataManager extends BaseModule {
                 dataExport: "Data Export",
                 exportDescription: "Export data to a file for backup or sharing.",
                 exportOptions: "Export options",
-                exportDataPhotos: "Export data and photos",
-                exportDataPhotosDescription: "All dog data and photo metadata",
+                exportData: "Export data",
+                exportDataDescription: "All dog data without photos",
+                exportPhotos: "Export photos",
+                exportPhotosDescription: "Photo metadata and relationships",
                 exportPrivateInfo: "Export private information",
                 exportPrivateInfoDescription: "Medical and financial information",
                 exportFormat: "Export format",
@@ -141,8 +145,10 @@ class DataManager extends BaseModule {
                 dataExport: "Datenexport",
                 exportDescription: "Exportieren Sie Daten in eine Datei für Backup oder Teilen.",
                 exportOptions: "Exportoptionen",
-                exportDataPhotos: "Daten und Fotos exportieren",
-                exportDataPhotosDescription: "Alle Hunde-Daten en Foto-Metadaten",
+                exportData: "Daten exportieren",
+                exportDataDescription: "Alle Hunde-Daten ohne Fotos",
+                exportPhotos: "Fotos exportieren",
+                exportPhotosDescription: "Foto-Metadaten und Beziehungen",
                 exportPrivateInfo: "Private Informationen exportieren",
                 exportPrivateInfoDescription: "Medizinische und finanzielle Informationen",
                 exportFormat: "Exportformat",
@@ -326,12 +332,23 @@ class DataManager extends BaseModule {
                                                 <label class="form-label">${t('exportOptions')}</label>
                                                 <div class="mb-3">
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="checkbox" id="exportDataPhotos" checked disabled>
-                                                        <label class="form-check-label" for="exportDataPhotos">
-                                                            <strong>${t('exportDataPhotos')}</strong>
+                                                        <input class="form-check-input" type="checkbox" id="exportData" checked>
+                                                        <label class="form-check-label" for="exportData">
+                                                            <strong>${t('exportData')}</strong>
                                                         </label>
                                                         <div class="form-text">
-                                                            ${t('exportDataPhotosDescription')}
+                                                            ${t('exportDataDescription')}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="exportPhotos" checked>
+                                                        <label class="form-check-label" for="exportPhotos">
+                                                            <strong>${t('exportPhotos')}</strong>
+                                                        </label>
+                                                        <div class="form-text">
+                                                            ${t('exportPhotosDescription')}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -354,6 +371,9 @@ class DataManager extends BaseModule {
                                                     <option value="json" selected>${t('jsonFormat')}</option>
                                                     <option value="csv">${t('csvFormat')}</option>
                                                 </select>
+                                                <div class="form-text">
+                                                    CSV is alleen beschikbaar wanneer "Data exporteren" is geselecteerd
+                                                </div>
                                             </div>
                                             
                                             <button class="btn btn-primary w-100" id="startExportBtn">
@@ -414,23 +434,44 @@ class DataManager extends BaseModule {
         
         const backupEverythingRadio = document.getElementById('backupEverything');
         const shareDataRadio = document.getElementById('shareData');
-        const privateInfoCheckbox = document.getElementById('exportPrivateInfo');
+        const exportDataCheckbox = document.getElementById('exportData');
+        const exportPhotosCheckbox = document.getElementById('exportPhotos');
+        const exportPrivateInfoCheckbox = document.getElementById('exportPrivateInfo');
+        const exportFormatSelect = document.getElementById('exportFormat');
         
         if (backupEverythingRadio) {
             backupEverythingRadio.addEventListener('change', () => {
-                if (privateInfoCheckbox) {
-                    privateInfoCheckbox.checked = true;
-                    privateInfoCheckbox.disabled = false;
+                if (exportDataCheckbox) exportDataCheckbox.checked = true;
+                if (exportPhotosCheckbox) exportPhotosCheckbox.checked = true;
+                if (exportPrivateInfoCheckbox) {
+                    exportPrivateInfoCheckbox.checked = true;
+                    exportPrivateInfoCheckbox.disabled = false;
                 }
+                this.updateExportFormatOptions();
             });
         }
         
         if (shareDataRadio) {
             shareDataRadio.addEventListener('change', () => {
-                if (privateInfoCheckbox) {
-                    privateInfoCheckbox.checked = false;
-                    privateInfoCheckbox.disabled = true;
+                if (exportDataCheckbox) exportDataCheckbox.checked = true;
+                if (exportPhotosCheckbox) exportPhotosCheckbox.checked = true;
+                if (exportPrivateInfoCheckbox) {
+                    exportPrivateInfoCheckbox.checked = false;
+                    exportPrivateInfoCheckbox.disabled = true;
                 }
+                this.updateExportFormatOptions();
+            });
+        }
+        
+        if (exportDataCheckbox) {
+            exportDataCheckbox.addEventListener('change', () => {
+                this.updateExportFormatOptions();
+            });
+        }
+        
+        if (exportFormatSelect) {
+            exportFormatSelect.addEventListener('change', () => {
+                this.updateExportFormatOptions();
             });
         }
         
@@ -438,6 +479,7 @@ class DataManager extends BaseModule {
         if (modal) {
             modal.addEventListener('shown.bs.modal', () => {
                 this.loadDatabaseStats();
+                this.updateExportFormatOptions();
             });
         }
         
@@ -447,6 +489,30 @@ class DataManager extends BaseModule {
                 this.updateLanguage(lang);
             });
         });
+    }
+    
+    updateExportFormatOptions() {
+        const exportDataCheckbox = document.getElementById('exportData');
+        const exportFormatSelect = document.getElementById('exportFormat');
+        const csvOption = exportFormatSelect?.querySelector('option[value="csv"]');
+        
+        if (exportDataCheckbox && exportFormatSelect && csvOption) {
+            const isDataChecked = exportDataCheckbox.checked;
+            const isCSVSelected = exportFormatSelect.value === 'csv';
+            
+            csvOption.disabled = !isDataChecked;
+            
+            if (isCSVSelected && !isDataChecked) {
+                exportFormatSelect.value = 'json';
+            }
+            
+            const formText = exportFormatSelect.nextElementSibling;
+            if (formText && formText.classList.contains('form-text')) {
+                formText.textContent = isDataChecked 
+                    ? 'CSV is alleen beschikbaar wanneer "Data exporteren" is geselecteerd' 
+                    : 'CSV is niet beschikbaar zonder "Data exporteren"';
+            }
+        }
     }
     
     updateModalTexts() {
@@ -535,14 +601,24 @@ class DataManager extends BaseModule {
             exportOptionsLabel.textContent = t('exportOptions');
         }
         
-        const exportDataPhotosLabel = modal.querySelector('label[for="exportDataPhotos"] strong');
-        if (exportDataPhotosLabel) {
-            exportDataPhotosLabel.textContent = t('exportDataPhotos');
+        const exportDataLabel = modal.querySelector('label[for="exportData"] strong');
+        if (exportDataLabel) {
+            exportDataLabel.textContent = t('exportData');
         }
         
-        const exportDataPhotosHelp = modal.querySelectorAll('.card.border-primary .form-text')[2];
-        if (exportDataPhotosHelp) {
-            exportDataPhotosHelp.textContent = t('exportDataPhotosDescription');
+        const exportDataHelp = modal.querySelectorAll('.card.border-primary .form-text')[2];
+        if (exportDataHelp) {
+            exportDataHelp.textContent = t('exportDataDescription');
+        }
+        
+        const exportPhotosLabel = modal.querySelector('label[for="exportPhotos"] strong');
+        if (exportPhotosLabel) {
+            exportPhotosLabel.textContent = t('exportPhotos');
+        }
+        
+        const exportPhotosHelp = modal.querySelectorAll('.card.border-primary .form-text')[3];
+        if (exportPhotosHelp) {
+            exportPhotosHelp.textContent = t('exportPhotosDescription');
         }
         
         const exportPrivateInfoLabel = modal.querySelector('label[for="exportPrivateInfo"] strong');
@@ -550,7 +626,7 @@ class DataManager extends BaseModule {
             exportPrivateInfoLabel.textContent = t('exportPrivateInfo');
         }
         
-        const exportPrivateInfoHelp = modal.querySelectorAll('.card.border-primary .form-text')[3];
+        const exportPrivateInfoHelp = modal.querySelectorAll('.card.border-primary .form-text')[4];
         if (exportPrivateInfoHelp) {
             exportPrivateInfoHelp.textContent = t('exportPrivateInfoDescription');
         }
@@ -593,6 +669,7 @@ class DataManager extends BaseModule {
         }
         
         this.updateBackupWarningText();
+        this.updateExportFormatOptions();
     }
     
     updateBackupWarningText() {
@@ -663,24 +740,32 @@ class DataManager extends BaseModule {
     async handleExport() {
         const t = this.t.bind(this);
         const isBackup = document.getElementById('backupEverything')?.checked;
-        const exportDataPhotos = document.getElementById('exportDataPhotos').checked;
+        const exportData = document.getElementById('exportData').checked;
+        const exportPhotos = document.getElementById('exportPhotos').checked;
         const exportPrivateInfo = isBackup ? document.getElementById('exportPrivateInfo').checked : false;
         const exportFormat = document.getElementById('exportFormat').value;
         
-        if (!exportDataPhotos && !exportPrivateInfo) {
+        if (!exportData && !exportPhotos && !exportPrivateInfo) {
             this.showError(t('nothingToExport'));
+            return;
+        }
+        
+        if (exportFormat === 'csv' && !exportData) {
+            this.showError('CSV export is alleen beschikbaar met "Data exporteren"');
             return;
         }
         
         this.showProgress(t('exportingData'));
         
         try {
-            const exportData = {
+            const exportDataObj = {
                 metadata: {
                     exportDatum: new Date().toISOString(),
                     exportDoor: window.auth?.getCurrentUser()?.username || 'unknown',
                     exportType: isBackup ? 'backup' : 'share',
                     exportFormat: exportFormat,
+                    containsData: exportData,
+                    containsPhotos: exportPhotos,
                     containsPrivate: exportPrivateInfo,
                     versie: "2.0"
                 }
@@ -694,7 +779,7 @@ class DataManager extends BaseModule {
                 throw new Error('Database niet gevonden.');
             }
             
-            if (exportDataPhotos) {
+            if (exportData) {
                 try {
                     const honden = await this.db.getHonden();
                     
@@ -709,7 +794,7 @@ class DataManager extends BaseModule {
                         }
                     });
                     
-                    exportData.honden = honden.map(hond => {
+                    exportDataObj.honden = honden.map(hond => {
                         const exportHond = { ...hond };
                         
                         if (hond.vaderId && parentLookupMap.has(hond.vaderId)) {
@@ -729,23 +814,29 @@ class DataManager extends BaseModule {
                         return exportHond;
                     });
                     
-                    hondenCount = exportData.honden.length;
-                    
-                    if (typeof this.db.getAllFotos === 'function') {
-                        try {
-                            exportData.fotos = await this.db.getAllFotos();
-                            fotosCount = exportData.fotos.length;
-                        } catch (fotoError) {
-                            console.log('Kon foto\'s niet exporteren:', fotoError);
-                            exportData.fotos = [];
-                        }
-                    } else {
-                        exportData.fotos = [];
-                    }
+                    hondenCount = exportDataObj.honden.length;
                 } catch (error) {
                     console.error('Kon honden niet ophalen:', error);
-                    exportData.honden = [];
-                    exportData.fotos = [];
+                    exportDataObj.honden = [];
+                }
+            }
+            
+            if (exportPhotos) {
+                try {
+                    if (typeof this.db.getAllFotos === 'function') {
+                        try {
+                            exportDataObj.fotos = await this.db.getAllFotos();
+                            fotosCount = exportDataObj.fotos.length;
+                        } catch (fotoError) {
+                            console.log('Kon foto\'s niet exporteren:', fotoError);
+                            exportDataObj.fotos = [];
+                        }
+                    } else {
+                        exportDataObj.fotos = [];
+                    }
+                } catch (error) {
+                    console.error('Kon foto\'s niet ophalen:', error);
+                    exportDataObj.fotos = [];
                 }
             }
             
@@ -753,34 +844,43 @@ class DataManager extends BaseModule {
                 try {
                     if (typeof this.db.getAllPriveInfo === 'function') {
                         try {
-                            exportData.priveInfo = await this.db.getAllPriveInfo();
-                            priveCount = exportData.priveInfo.length;
+                            exportDataObj.priveInfo = await this.db.getAllPriveInfo();
+                            priveCount = exportDataObj.priveInfo.length;
                         } catch (priveError) {
                             console.log('Geen rechten voor privé info export:', priveError);
-                            exportData.priveInfo = [];
+                            exportDataObj.priveInfo = [];
                         }
                     } else {
-                        exportData.priveInfo = [];
+                        exportDataObj.priveInfo = [];
                     }
                 } catch (error) {
                     console.error('Kon privé info niet ophalen:', error);
-                    exportData.priveInfo = [];
+                    exportDataObj.priveInfo = [];
                 }
             }
             
             const dateStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
             const timeStr = new Date().toISOString().split('T')[1].split('.')[0].replace(/:/g, '');
             let filenamePrefix = isBackup ? 'backup' : 'share';
+            
+            if (!exportData && exportPhotos && !exportPrivateInfo) {
+                filenamePrefix = 'fotos';
+            } else if (exportData && !exportPhotos && !exportPrivateInfo) {
+                filenamePrefix = 'data';
+            } else if (exportPrivateInfo && !exportData && !exportPhotos) {
+                filenamePrefix = 'prive';
+            }
+            
             let filename = `${filenamePrefix}_${dateStr}_${timeStr}`;
             let fullFilename;
             
-            if (exportFormat === 'csv' && exportDataPhotos && exportData.honden && exportData.honden.length > 0) {
-                const csv = this.convertHondenToCSV(exportData.honden);
+            if (exportFormat === 'csv' && exportData) {
+                const csv = this.convertHondenToCSV(exportDataObj.honden);
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                 fullFilename = `${filename}.csv`;
                 this.downloadFile(blob, fullFilename);
             } else {
-                const jsonString = JSON.stringify(exportData, null, 2);
+                const jsonString = JSON.stringify(exportDataObj, null, 2);
                 const blob = new Blob([jsonString], { type: 'application/json' });
                 fullFilename = `${filename}.json`;
                 this.downloadFile(blob, fullFilename);
@@ -788,19 +888,19 @@ class DataManager extends BaseModule {
             
             this.hideProgress();
             
-            if (isBackup && window.backupManager) {
+            if (isBackup && window.backupManager && exportData && exportPhotos && exportPrivateInfo) {
                 window.backupManager.recordBackup(
-                    exportPrivateInfo ? 'full' : 'data_only',
+                    'full',
                     fullFilename
                 );
             }
             
             let successDetails = `${t('exportComplete')}<br>`;
-            if (exportDataPhotos) {
+            if (exportData) {
                 successDetails += `${t('totalDogsExported')}${hondenCount}<br>`;
-                if (fotosCount > 0) {
-                    successDetails += `${t('totalPhotosExported')}${fotosCount}<br>`;
-                }
+            }
+            if (exportPhotos && fotosCount > 0) {
+                successDetails += `${t('totalPhotosExported')}${fotosCount}<br>`;
             }
             if (exportPrivateInfo && priveCount > 0) {
                 successDetails += `${t('totalPrivateExported')}${priveCount}<br>`;
@@ -832,7 +932,7 @@ class DataManager extends BaseModule {
             throw new Error('Database niet gevonden.');
         }
         
-        // === FASE 1: Importeer alle honden ===
+        // === FASE 1: Importeer alle honden (indien aanwezig) ===
         const stamboomToIdMap = new Map();
         const oldIdToStamboomMap = new Map();
         
@@ -939,11 +1039,11 @@ class DataManager extends BaseModule {
         
         console.log(`Fase 1 voltooid: ${result.honden.toegevoegd} toegevoegd, ${result.honden.bijgewerkt} bijgewerkt`);
         
-        // === FASE 2: Herstel relaties ===
-        console.log('Fase 2: Herstel relaties...');
-        this.updateProgressMessage(t('buildingRelations'));
-        
+        // === FASE 2: Herstel relaties (indien honden aanwezig) ===
         if (importData.honden && Array.isArray(importData.honden)) {
+            console.log('Fase 2: Herstel relaties...');
+            this.updateProgressMessage(t('buildingRelations'));
+            
             let relatiesGemaakt = 0;
             
             for (const importedHond of importData.honden) {
@@ -996,11 +1096,10 @@ class DataManager extends BaseModule {
             }
             
             result.relaties.hersteld = relatiesGemaakt;
+            console.log(`Fase 2 voltooid: ${result.relaties.hersteld} relaties hersteld`);
         }
         
-        console.log(`Fase 2 voltooid: ${result.relaties.hersteld} relaties hersteld`);
-        
-        // === FASE 3: Foto's ===
+        // === FASE 3: Foto's (indien aanwezig) ===
         if (importData.fotos && Array.isArray(importData.fotos) && typeof this.db.voegFotoToe === 'function') {
             console.log(`Fase 3: Importeer ${importData.fotos.length} foto's...`);
             
@@ -1052,7 +1151,7 @@ class DataManager extends BaseModule {
             }
         }
         
-        // === FASE 4: Privé info ===
+        // === FASE 4: Privé info (indien aanwezig) ===
         if (importData.priveInfo && Array.isArray(importData.priveInfo) && typeof this.db.bewaarPriveInfo === 'function') {
             console.log(`Fase 4: Importeer ${importData.priveInfo.length} privé records...`);
             
