@@ -28,7 +28,7 @@ class DataManager extends BaseModule {
                 exportPhotos: "Foto's exporteren",
                 exportPhotosDescription: "Foto metadata en relaties",
                 exportPrivateInfo: "Privé informatie exporteren",
-                exportPrivateInfoDescription: "Medische en financiële gegevens",
+                exportPrivateInfoDescription: "Vertrouwelijke notities en informatie",
                 exportFormat: "Export formaat",
                 jsonFormat: "JSON (aanbevolen)",
                 csvFormat: "CSV (alleen hondengegevens)",
@@ -63,7 +63,7 @@ class DataManager extends BaseModule {
                 backupEverything: "Backup alles (veilig opslaan)",
                 backupEverythingDescription: "Exporteer alle data inclusief privé notities",
                 shareData: "Exporteren voor delen",
-                shareDataDescription: "Exporteer alleen publieke data (zonder privé notities)",
+                shareDataDescription: "Exporteer naar keuze wat je wilt delen",
                 backupStatusWarning: "Backup aanbevolen",
                 backupStatusDanger: "Belangrijk",
                 backupWarningText: "Laatste backup was {days} dagen geleden",
@@ -89,7 +89,7 @@ class DataManager extends BaseModule {
                 exportPhotos: "Export photos",
                 exportPhotosDescription: "Photo metadata and relationships",
                 exportPrivateInfo: "Export private information",
-                exportPrivateInfoDescription: "Medical and financial information",
+                exportPrivateInfoDescription: "Confidential notes and information",
                 exportFormat: "Export format",
                 jsonFormat: "JSON (recommended)",
                 csvFormat: "CSV (dog data only)",
@@ -124,7 +124,7 @@ class DataManager extends BaseModule {
                 backupEverything: "Backup everything (safe storage)",
                 backupEverythingDescription: "Export all data including private notes",
                 shareData: "Export for sharing",
-                shareDataDescription: "Export only public data (without private notes)",
+                shareDataDescription: "Export what you want to share",
                 backupStatusWarning: "Backup recommended",
                 backupStatusDanger: "Important",
                 backupWarningText: "Last backup was {days} days ago",
@@ -150,7 +150,7 @@ class DataManager extends BaseModule {
                 exportPhotos: "Fotos exportieren",
                 exportPhotosDescription: "Foto-Metadaten und Beziehungen",
                 exportPrivateInfo: "Private Informationen exportieren",
-                exportPrivateInfoDescription: "Medizinische und finanzielle Informationen",
+                exportPrivateInfoDescription: "Vertrauliche Notizen und Informationen",
                 exportFormat: "Exportformat",
                 jsonFormat: "JSON (empfohlen)",
                 csvFormat: "CSV (nur Hunde-Daten)",
@@ -185,7 +185,7 @@ class DataManager extends BaseModule {
                 backupEverything: "Alles sichern (sichere Aufbewahrung)",
                 backupEverythingDescription: "Exportieren Sie alle data einschließlich privater Notizen",
                 shareData: "Zum Teilen exportieren",
-                shareDataDescription: "Exportieren Sie nur öffentliche data (ohne private Notizen)",
+                shareDataDescription: "Exportieren Sie was Sie teilen möchten",
                 backupStatusWarning: "Backup empfohlen",
                 backupStatusDanger: "Wichtig",
                 backupWarningText: "Letztes Backup war vor {days} Tagen",
@@ -352,7 +352,7 @@ class DataManager extends BaseModule {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="mb-3" id="privateInfoOption">
+                                                <div class="mb-3">
                                                     <div class="form-check">
                                                         <input class="form-check-input" type="checkbox" id="exportPrivateInfo" checked>
                                                         <label class="form-check-label" for="exportPrivateInfo">
@@ -443,22 +443,17 @@ class DataManager extends BaseModule {
             backupEverythingRadio.addEventListener('change', () => {
                 if (exportDataCheckbox) exportDataCheckbox.checked = true;
                 if (exportPhotosCheckbox) exportPhotosCheckbox.checked = true;
-                if (exportPrivateInfoCheckbox) {
-                    exportPrivateInfoCheckbox.checked = true;
-                    exportPrivateInfoCheckbox.disabled = false;
-                }
+                if (exportPrivateInfoCheckbox) exportPrivateInfoCheckbox.checked = true;
                 this.updateExportFormatOptions();
             });
         }
         
         if (shareDataRadio) {
             shareDataRadio.addEventListener('change', () => {
+                // Bij delen: alles staat standaard aan, maar kan worden uitgeschakeld
                 if (exportDataCheckbox) exportDataCheckbox.checked = true;
                 if (exportPhotosCheckbox) exportPhotosCheckbox.checked = true;
-                if (exportPrivateInfoCheckbox) {
-                    exportPrivateInfoCheckbox.checked = false;
-                    exportPrivateInfoCheckbox.disabled = true;
-                }
+                if (exportPrivateInfoCheckbox) exportPrivateInfoCheckbox.checked = true;
                 this.updateExportFormatOptions();
             });
         }
@@ -742,7 +737,7 @@ class DataManager extends BaseModule {
         const isBackup = document.getElementById('backupEverything')?.checked;
         const exportData = document.getElementById('exportData').checked;
         const exportPhotos = document.getElementById('exportPhotos').checked;
-        const exportPrivateInfo = isBackup ? document.getElementById('exportPrivateInfo').checked : false;
+        const exportPrivateInfo = document.getElementById('exportPrivateInfo').checked;
         const exportFormat = document.getElementById('exportFormat').value;
         
         if (!exportData && !exportPhotos && !exportPrivateInfo) {
@@ -863,12 +858,21 @@ class DataManager extends BaseModule {
             const timeStr = new Date().toISOString().split('T')[1].split('.')[0].replace(/:/g, '');
             let filenamePrefix = isBackup ? 'backup' : 'share';
             
-            if (!exportData && exportPhotos && !exportPrivateInfo) {
-                filenamePrefix = 'fotos';
+            // Bepaal een duidelijke bestandsnaam op basis van wat wordt geëxporteerd
+            if (exportData && exportPhotos && exportPrivateInfo) {
+                filenamePrefix = isBackup ? 'backup_compleet' : 'share_compleet';
             } else if (exportData && !exportPhotos && !exportPrivateInfo) {
                 filenamePrefix = 'data';
-            } else if (exportPrivateInfo && !exportData && !exportPhotos) {
+            } else if (!exportData && exportPhotos && !exportPrivateInfo) {
+                filenamePrefix = 'fotos';
+            } else if (!exportData && !exportPhotos && exportPrivateInfo) {
                 filenamePrefix = 'prive';
+            } else if (exportData && exportPhotos && !exportPrivateInfo) {
+                filenamePrefix = 'data_fotos';
+            } else if (exportData && !exportPhotos && exportPrivateInfo) {
+                filenamePrefix = 'data_prive';
+            } else if (!exportData && exportPhotos && exportPrivateInfo) {
+                filenamePrefix = 'fotos_prive';
             }
             
             let filename = `${filenamePrefix}_${dateStr}_${timeStr}`;
@@ -888,6 +892,7 @@ class DataManager extends BaseModule {
             
             this.hideProgress();
             
+            // Backup registratie alleen bij volledige backup
             if (isBackup && window.backupManager && exportData && exportPhotos && exportPrivateInfo) {
                 window.backupManager.recordBackup(
                     'full',
