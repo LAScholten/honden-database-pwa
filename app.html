@@ -564,6 +564,46 @@
     <!-- DISCLAIMER MANAGER - Nieuw bestand - HIER NAAR VERWEZEN -->
     <script src="js/disclaimer-NIEUW.js"></script>
     
+    <!-- Database Initialization with Ready Event -->
+    <script>
+    // Database initialisatie
+    (function() {
+        console.log('🚀 Database initialization started...');
+        
+        function initializeDatabase() {
+            // Maak database instance
+            window.db = new HondenDatabase();
+            
+            // Initialiseer database
+            window.db.initialize().then(() => {
+                console.log('✅ Database succesvol geïnitialiseerd');
+                
+                // Stuur database-ready event
+                const event = new Event('database-ready');
+                window.dispatchEvent(event);
+                console.log('📢 Database ready event verstuurd');
+                
+            }).catch(error => {
+                console.error('❌ Database initialisatie fout:', error);
+                
+                // Fallback database
+                window.db = {
+                    initialize: function() {
+                        return Promise.reject(new Error('Database not available'));
+                    }
+                };
+            });
+        }
+        
+        // Start database initialisatie
+        document.addEventListener('DOMContentLoaded', function() {
+            // Start database initialisatie met korte vertraging
+            setTimeout(initializeDatabase, 200);
+        });
+        
+    })();
+    </script>
+    
     <!-- Storage Manager Initialization -->
     <script>
     // Storage Manager initialisatie - ZORGT ERVOOR DAT HIJ BESCHIKBAAR IS VOOR ALLE MODULES
@@ -907,7 +947,7 @@
                 learnMore: "Info",
                 backupWarningTitle: "Backup empfohlen",
                 backupNowDashboard: "Jetzt Backup erstellen",
-                dismissBackup: "Nicht meer anzeigen",
+                dismissBackup: "Nicht mehr anzeigen",
                 backupModalTitle: "Data Backup - Warum is das wichtig?",
                 backupRisksTitle: "Risiken ohne Backup",
                 backupRisksText1: "Diese App speichert alle Daten <strong>nur lokal in Ihrem Browser</strong>.",
@@ -923,7 +963,7 @@
                 backupStatusWarning: "⚠ Letztes Backup: vor {days} Tagen",
                 backupStatusDanger: "🚨 NOCH NIE gebackupt!",
                 dashboardWarningNever: "Sie haben noch nie ein Backup erstellt! Wenn Sie Browser-Daten löschen, verlieren Sie alle Ihre Hundeaufzeichnungen.",
-                dashboardWarningOld: "Ihr letztes Backup was vor {days} Tagen. Erwägen Sie, ein neues Backup te machen, um Datenverlust te vermeiden.",
+                dashboardWarningOld: "Ihr letztes Backup was vor {days} Tagen. Erwägen Sie, ein neues Backup te maken, um Datenverlust te vermeiden.",
                 
                 // NEUE Disclaimer Texte
                 disclaimerBtn: "Disclaimer/Information zur COI Berechnung",
@@ -1635,4 +1675,4 @@
     
 
 </body>
-</html>                   
+</html>            
