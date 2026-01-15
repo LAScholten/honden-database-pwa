@@ -369,7 +369,7 @@
                         
                         <div class="alert alert-success">
                             <h5><i class="bi bi-check-circle"></i> <span class="app-text" data-key="welcomeTitle">Welkom bij de Hondendatabase PWA</span></h5>
-                            <p class="app-text" data-key="welcomeText">Kies een optie uit het menu om te beginnen. Deze Desktop Edition ondersteunt File System API voor directe bestandsopslag.</p>
+                            <p class="app-text" data-key="welcomeText">Kies een optie uit het menu om te beginnen. Deze PWA slaat alle gegevens lokaal in uw browser op.</p>
                             
                             <!-- DISCLAIMER KNOOP - Wordt nu afgehandeld door disclaimer.js -->
                             <button class="btn btn-secondary" id="disclaimerBtn">
@@ -382,14 +382,14 @@
                             <div class="col-md-6">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5><i class="bi bi-info-circle text-primary"></i> <span class="app-text" data-key="aboutApp">Over deze Desktop PWA</span></h5>
-                                        <p>Deze speciale versie heeft extra mogelijkheden:</p>
+                                        <h5><i class="bi bi-info-circle text-primary"></i> <span class="app-text" data-key="aboutApp">Over deze PWA</span></h5>
+                                        <p>Deze Progressive Web App heeft verschillende mogelijkheden:</p>
                                         <ul>
-                                            <li><strong>💾 Bestandsopslag:</strong> Sla data op in echte bestanden op je computer</li>
-                                            <li><strong>📁 Map selectie:</strong> Kies zelf waar je data wordt opgeslagen</li>
-                                            <li><strong>🔄 Easy backup:</strong> Kopieer gewoon de map voor een backup</li>
-                                            <li><strong>⚡ Snelle toegang:</strong> Open data direct vanuit je bestandsverkenner</li>
-                                            <li><strong>🔒 Meer controle:</strong> Jij bepaalt waar en hoe je data wordt opgeslagen</li>
+                                            <li><strong>💾 Browser opslag:</strong> Sla data op in je browser</li>
+                                            <li><strong>📱 Offline toegang:</strong> Werkt ook zonder internet</li>
+                                            <li><strong>🔄 Easy backup:</strong> Exporteer je data gemakkelijk</li>
+                                            <li><strong>⚡ Snelle werking:</strong> Directe toegang tot je gegevens</li>
+                                            <li><strong>🔒 Veilige opslag:</strong> Gegevens blijven op je eigen apparaat</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -657,22 +657,22 @@
                     if (info.current === 'filesystem') {
                         statusEl.style.display = 'block';
                         statusEl.style.background = '#4CAF50';
-                        statusEl.textContent = '💾 Desktop Edition (Bestanden)';
+                        statusEl.textContent = '💾 Bestanden opslag';
                         statusEl.title = `Opslag in map: ${info.directoryName || 'Geselecteerde map'}`;
                     } else if (info.current === 'indexeddb' || info.current === 'indexeddb-temp') {
                         statusEl.style.display = 'block';
                         statusEl.style.background = '#2196F3';
-                        statusEl.textContent = '💾 Desktop Edition (Browser)';
-                        statusEl.title = 'Opslag in browser (tijdelijk)';
+                        statusEl.textContent = '💾 Browser opslag';
+                        statusEl.title = 'Opslag in browser';
                     } else if (info.current === 'none') {
                         statusEl.style.display = 'block';
                         statusEl.style.background = '#FF9800';
-                        statusEl.textContent = '💾 Desktop Edition (Bezig...)';
+                        statusEl.textContent = '💾 Bezig met laden...';
                         statusEl.title = 'Initialiseren...';
                     } else if (info.current === 'error') {
                         statusEl.style.display = 'block';
                         statusEl.style.background = '#f44336';
-                        statusEl.textContent = '💾 Desktop Edition (Fout)';
+                        statusEl.textContent = '💾 Opslag fout';
                         statusEl.title = 'Opslag initialisatie fout';
                     } else {
                         statusEl.style.display = 'none';
@@ -680,13 +680,13 @@
                 } catch (error) {
                     statusEl.style.display = 'block';
                     statusEl.style.background = '#f44336';
-                    statusEl.textContent = '💾 Desktop Edition (Error)';
+                    statusEl.textContent = '💾 Error';
                     statusEl.title = 'Fout bij ophalen opslag info';
                 }
             } else {
                 statusEl.style.display = 'block';
                 statusEl.style.background = '#FF9800';
-                statusEl.textContent = '💾 Desktop Edition (Laden...)';
+                statusEl.textContent = '💾 Laden...';
                 statusEl.title = 'StorageManager wordt geladen...';
             }
         }
@@ -745,7 +745,7 @@
         // Vertalingen
         const appTranslations = {
             nl: {
-                appTitle: "Hondendatabase PWA - Desktop Edition",
+                appTitle: "Hondendatabase PWA",
                 logout: "Uitloggen",
                 menu: "Menu",
                 dataManagement: "Data Beheer",
@@ -761,9 +761,9 @@
                 photos: "Foto's",
                 refresh: "Vernieuwen",
                 dashboard: "Dashboard",
-                welcomeTitle: "Welkom bij de Hondendatabase PWA - Desktop Edition",
-                welcomeText: "Kies een optie uit het menu om te beginnen. Deze Desktop Edition ondersteunt File System API voor directe bestandsopslag.",
-                aboutApp: "Over deze Desktop Edition",
+                welcomeTitle: "Welkom bij de Hondendatabase PWA",
+                welcomeText: "Kies een optie uit het menu om te beginnen. Deze PWA slaat alle gegevens lokaal in uw browser op.",
+                aboutApp: "Over deze PWA",
                 appDescription: "Deze PWA (Progressive Web App) slaat alle data lokaal op in uw browser. U kunt:",
                 feature1: "Honden toevoegen en beheren",
                 feature2: "Data van honden bewerken",
@@ -807,7 +807,7 @@
                 installPWA: "Installeer App"
             },
             en: {
-                appTitle: "Dog Database PWA - Desktop Edition",
+                appTitle: "Dog Database PWA",
                 logout: "Logout",
                 menu: "Menu",
                 dataManagement: "Data Management",
@@ -823,9 +823,9 @@
                 photos: "Photos",
                 refresh: "Refresh",
                 dashboard: "Dashboard",
-                welcomeTitle: "Welcome to the Dog Database PWA - Desktop Edition",
-                welcomeText: "Choose an option from the menu to start. This Desktop Edition supports File System API for direct file storage.",
-                aboutApp: "About this Desktop Edition",
+                welcomeTitle: "Welcome to the Dog Database PWA",
+                welcomeText: "Choose an option from the menu to start. This PWA stores all data locally in your browser.",
+                aboutApp: "About this PWA",
                 appDescription: "This PWA (Progressive Web App) stores all data locally in your browser. You can:",
                 feature1: "Add and manage dogs",
                 feature2: "Edit dog data",
@@ -869,7 +869,7 @@
                 installPWA: "Install App"
             },
             de: {
-                appTitle: "Hundendatenbank PWA - Desktop Edition",
+                appTitle: "Hundendatenbank PWA",
                 logout: "Abmelden",
                 menu: "Menü",
                 dataManagement: "Datenverwaltung",
@@ -885,9 +885,9 @@
                 photos: "Fotos",
                 refresh: "Aktualisieren",
                 dashboard: "Dashboard",
-                welcomeTitle: "Willkommen bei der Hundendatenbank PWA - Desktop Edition",
-                welcomeText: "Wählen Sie eine option aus dem menü, um zu beginnen. Diese Desktop Edition unterstützt File System API für direkte Dateispeicherung.",
-                aboutApp: "Über diese Desktop Edition",
+                welcomeTitle: "Willkommen bei der Hundendatenbank PWA",
+                welcomeText: "Wählen Sie eine option aus dem menü, um zu beginnen. Diese PWA speichert alle Daten lokal in Ihrem Browser.",
+                aboutApp: "Über diese PWA",
                 appDescription: "Diese PWA (Progressive Web App) speichert alle Daten lokal in Ihrem Browser. Sie können:",
                 feature1: "Hunde hinzufügen en verwalten",
                 feature2: "Hundedaten bearbeiten",
@@ -909,7 +909,7 @@
                 backupNowDashboard: "Jetzt Backup erstellen",
                 dismissBackup: "Nicht meer anzeigen",
                 backupModalTitle: "Data Backup - Warum is das wichtig?",
-                backupRisksTitle: "Risiken zonder Backup",
+                backupRisksTitle: "Risiken ohne Backup",
                 backupRisksText1: "Diese App speichert alle Daten <strong>nur lokal in Ihrem Browser</strong>.",
                 backupRisksText2: "Ihre Daten kunnen verloren gehen, wenn Sie: ",
                 backupHowToTitle: "Wie man ein Backup erstellt",
@@ -923,7 +923,7 @@
                 backupStatusWarning: "⚠ Letztes Backup: vor {days} Tagen",
                 backupStatusDanger: "🚨 NOCH NIE gebackupt!",
                 dashboardWarningNever: "Sie haben noch nie ein Backup erstellt! Wenn Sie Browser-Daten löschen, verlieren Sie alle Ihre Hundeaufzeichnungen.",
-                dashboardWarningOld: "Ihr letztes Backup was vor {days} Tagen. Erwägen Sie, ein neues Backup te machen, om Datenverlust te vermeiden.",
+                dashboardWarningOld: "Ihr letztes Backup was vor {days} Tagen. Erwägen Sie, ein neues Backup te machen, um Datenverlust te vermeiden.",
                 
                 // NEUE Disclaimer Texte
                 disclaimerBtn: "Disclaimer/Information zur COI Berechnung",
@@ -1182,9 +1182,9 @@
             
             // Update pagina titel
             const titles = {
-                nl: "Hondendatabase PWA - Desktop Edition",
-                en: "Dog Database PWA - Desktop Edition",
-                de: "Hundendatenbank PWA - Desktop Edition"
+                nl: "Hondendatabase PWA",
+                en: "Dog Database PWA",
+                de: "Hundendatenbank PWA"
             };
             document.title = titles[lang] || titles.nl;
             
@@ -1635,4 +1635,4 @@
     
 
 </body>
-</html>                                        
+</html>                   
