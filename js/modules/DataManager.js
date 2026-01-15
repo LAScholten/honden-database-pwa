@@ -237,7 +237,7 @@ class DataManager extends BaseModule {
                 backupWarningText: "Letztes Backup war vor {days} Tagen",
                 backupDangerText: "Sie haben noch nie ein Backup erstellt!",
                 desktopStorage: "Desktop Edition Speicherung",
-                desktopStorageDesc: "Diese Desktop Edition unterstützt zwei Speichermethoden:",
+                desktopStorageDesc: "Diese Desktop Edition unterstützt twee Speichermethoden:",
                 fileStorage: "Dateispeicherung",
                 fileStorageDesc: "Speichern Sie Daten in echten Dateien auf Ihrem Computer.",
                 useFileStorage: "Verwenden",
@@ -250,23 +250,49 @@ class DataManager extends BaseModule {
                 switchToBrowser: "Zu Browser-Speicherung wechseln",
                 storageActive: "Aktiv",
                 storageInactive: "Inaktiv",
-                storageLoading: "Speicherstatus wird geladen...",
+                storageLoading: "Speicherstatus wordt geladen...",
                 storageSettings: "Speichereinstellungen",
                 storageFeaturesTitle: "💾 Vorteile der Dateispeicherung:",
                 storageFeature1: "📁 Wählen Sie Ihren eigenen Ordner auf dem Computer",
                 storageFeature2: "💾 Einfache Backups (nur Ordner kopieren)",
                 storageFeature3: "🔄 Synchronisation zwischen Geräten mogelijk",
-                storageFeature4: "🔒 Mehr Kontrolle über Ihre Daten",
+                storageFeature4: "🔒 Mehr Kontrole über Ihre Daten",
                 storageWarning: "⚠️ Wichtig:",
                 storageWarningText: "Bei Dateispeicherung müssen Sie einen Ordner auswählen. Die App wird Sie danach fragen."
             }
         };
         
-        if (window.db) {
+        // Initialiseer de database later, wanneer die beschikbaar is
+        this.db = null;
+        
+        // Wacht tot database beschikbaar is
+        this.waitForDatabase();
+    }
+    
+    async waitForDatabase() {
+        // Wacht maximaal 10 seconden op de database
+        for (let i = 0; i < 100; i++) {
+            if (window.db) {
+                this.db = window.db;
+                console.log('Database gevonden in DataManager');
+                break;
+            }
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        
+        if (!this.db) {
+            console.warn('Database nog niet beschikbaar, zal later worden geïnitialiseerd');
+            // Probeer het later opnieuw
+            setTimeout(() => {
+                this.checkDatabase();
+            }, 2000);
+        }
+    }
+    
+    async checkDatabase() {
+        if (window.db && !this.db) {
             this.db = window.db;
-        } else {
-            console.error('Database niet gevonden in window object');
-            this.db = window.hondenDatabase || window.database || db;
+            console.log('Database alsnog gevonden in DataManager');
         }
     }
     
@@ -657,10 +683,10 @@ class DataManager extends BaseModule {
                                     <div class="modal-body">
                                         <p>Selecteer opslagtype:</p>
                                         <div class="d-grid gap-2">
-                                            <button class="btn btn-success" onclick="switchToFileSystem()">
+                                            <button class="btn btn-success" onclick="window.dataManager?.switchToFileSystem()">
                                                 <i class="bi bi-folder"></i> Bestandsopslag
                                             </button>
-                                            <button class="btn btn-primary" onclick="switchToIndexedDB()">
+                                            <button class="btn btn-primary" onclick="window.dataManager?.switchToIndexedDB()">
                                                 <i class="bi bi-browser-chrome"></i> Browser Opslag
                                             </button>
                                         </div>
@@ -674,27 +700,6 @@ class DataManager extends BaseModule {
                     div.className = 'simple-storage-selector';
                     div.innerHTML = html;
                     document.body.appendChild(div);
-                    
-                    // Voeg functies toe aan window
-                    window.switchToFileSystem = async () => {
-                        try {
-                            await storageManager.initialize('filesystem');
-                            alert('Bestandsopslag geactiveerd! Selecteer een map.');
-                            location.reload();
-                        } catch (error) {
-                            alert('Fout: ' + error.message);
-                        }
-                    };
-                    
-                    window.switchToIndexedDB = async () => {
-                        try {
-                            await storageManager.initialize('indexeddb');
-                            alert('Browser opslag geactiveerd!');
-                            location.reload();
-                        } catch (error) {
-                            alert('Fout: ' + error.message);
-                        }
-                    };
                 }
             })();
         }
@@ -702,82 +707,14 @@ class DataManager extends BaseModule {
         const useFileSystemBtn = document.getElementById('useFileSystemBtn');
         if (useFileSystemBtn) {
             useFileSystemBtn.addEventListener('click', async () => {
-                console.log('FileSystem knop geklikt');
-                
-                useFileSystemBtn.disabled = true;
-                useFileSystemBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Bezig...';
-                
-                try {
-                    if (!window.storageManager) {
-                        throw new Error('Storage manager niet beschikbaar');
-                    }
-                    
-                    // Initialiseer FileSystem
-                    await storageManager.initialize('filesystem');
-                    
-                    // IMPORTANT: Migreer bestaande data
-                    await this.migrateToFileSystem();
-                    
-                    this.loadStorageStatus();
-                    
-                    if (window.uiHandler && window.uiHandler.showSuccess) {
-                        window.uiHandler.showSuccess('Bestandsopslag geactiveerd! Data is opgeslagen in de geselecteerde map.');
-                    }
-                    
-                    if (window.updateStorageStatus) {
-                        updateStorageStatus();
-                    }
-                    
-                } catch (error) {
-                    console.error('FileSystem init error:', error);
-                    
-                    if (window.uiHandler && window.uiHandler.showError) {
-                        window.uiHandler.showError('Kon bestandsopslag niet activeren: ' + error.message);
-                    }
-                    
-                } finally {
-                    useFileSystemBtn.disabled = false;
-                    useFileSystemBtn.innerHTML = '<i class="bi bi-check-circle"></i> ' + t('useFileStorage');
-                }
+                await this.switchToFileSystem(useFileSystemBtn);
             });
         }
         
         const useIndexedDBBtn = document.getElementById('useIndexedDBBtn');
         if (useIndexedDBBtn) {
             useIndexedDBBtn.addEventListener('click', async () => {
-                console.log('IndexedDB knop geklikt');
-                
-                useIndexedDBBtn.disabled = true;
-                useIndexedDBBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Bezig...';
-                
-                try {
-                    if (!window.storageManager) {
-                        throw new Error('Storage manager niet beschikbaar');
-                    }
-                    
-                    await storageManager.initialize('indexeddb');
-                    
-                    this.loadStorageStatus();
-                    
-                    if (window.uiHandler && window.uiHandler.showSuccess) {
-                        window.uiHandler.showSuccess('Browser opslag geactiveerd!');
-                    }
-                    
-                    if (window.updateStorageStatus) {
-                        updateStorageStatus();
-                    }
-                    
-                } catch (error) {
-                    console.error('IndexedDB init error:', error);
-                    
-                    if (window.uiHandler && window.uiHandler.showError) {
-                        window.uiHandler.showError('Kon browser opslag niet activeren: ' + error.message);
-                    }
-                    
-                } finally {
-                    useIndexedDBBtn.disabled = false;
-                    useIndexedDBBtn.innerHTML = '<i class="bi bi-arrow-left-right"></i> ' + t('useBrowserStorage');
-                }
+                await this.switchToIndexedDB(useIndexedDBBtn);
             });
         }
         
@@ -798,20 +735,136 @@ class DataManager extends BaseModule {
         this.loadStorageStatus();
     }
     
+    async switchToFileSystem(buttonElement) {
+        const t = this.t.bind(this);
+        
+        if (!buttonElement) {
+            buttonElement = document.getElementById('useFileSystemBtn');
+        }
+        
+        if (buttonElement) {
+            buttonElement.disabled = true;
+            buttonElement.innerHTML = '<i class="bi bi-hourglass-split"></i> Bezig...';
+        }
+        
+        try {
+            if (!window.storageManager) {
+                throw new Error('Storage manager niet beschikbaar');
+            }
+            
+            console.log('Initialiseer FileSystem...');
+            
+            // Initialiseer FileSystem - dit zal een map picker tonen
+            await storageManager.initialize('filesystem');
+            
+            console.log('FileSystem geïnitialiseerd, migreer data...');
+            
+            // Migreer bestaande data (wacht op database als nodig)
+            await this.ensureDatabase();
+            await this.migrateToFileSystem();
+            
+            this.loadStorageStatus();
+            
+            if (window.uiHandler && window.uiHandler.showSuccess) {
+                window.uiHandler.showSuccess('Bestandsopslag geactiveerd! Data is opgeslagen in de geselecteerde map.');
+            }
+            
+            if (window.updateStorageStatus) {
+                updateStorageStatus();
+            }
+            
+        } catch (error) {
+            console.error('FileSystem init error:', error);
+            
+            if (window.uiHandler && window.uiHandler.showError) {
+                window.uiHandler.showError('Kon bestandsopslag niet activeren: ' + error.message);
+            }
+            
+        } finally {
+            if (buttonElement) {
+                buttonElement.disabled = false;
+                buttonElement.innerHTML = '<i class="bi bi-check-circle"></i> ' + t('useFileStorage');
+            }
+        }
+    }
+    
+    async switchToIndexedDB(buttonElement) {
+        const t = this.t.bind(this);
+        
+        if (!buttonElement) {
+            buttonElement = document.getElementById('useIndexedDBBtn');
+        }
+        
+        if (buttonElement) {
+            buttonElement.disabled = true;
+            buttonElement.innerHTML = '<i class="bi bi-hourglass-split"></i> Bezig...';
+        }
+        
+        try {
+            if (!window.storageManager) {
+                throw new Error('Storage manager niet beschikbaar');
+            }
+            
+            await storageManager.initialize('indexeddb');
+            
+            this.loadStorageStatus();
+            
+            if (window.uiHandler && window.uiHandler.showSuccess) {
+                window.uiHandler.showSuccess('Browser opslag geactiveerd!');
+            }
+            
+            if (window.updateStorageStatus) {
+                updateStorageStatus();
+            }
+            
+        } catch (error) {
+            console.error('IndexedDB init error:', error);
+            
+            if (window.uiHandler && window.uiHandler.showError) {
+                window.uiHandler.showError('Kon browser opslag niet activeren: ' + error.message);
+            }
+            
+        } finally {
+            if (buttonElement) {
+                buttonElement.disabled = false;
+                buttonElement.innerHTML = '<i class="bi bi-arrow-left-right"></i> ' + t('useBrowserStorage');
+            }
+        }
+    }
+    
+    async ensureDatabase() {
+        // Wacht op database als die nog niet beschikbaar is
+        if (!this.db) {
+            await this.waitForDatabase();
+        }
+        
+        if (!this.db) {
+            throw new Error('Database niet beschikbaar voor migratie');
+        }
+        
+        return this.db;
+    }
+    
     async migrateToFileSystem() {
         try {
             console.log('Migreer bestaande data naar FileSystem...');
             
-            if (!window.db) {
-                throw new Error('Database niet beschikbaar');
-            }
+            // Zorg dat database beschikbaar is
+            const db = await this.ensureDatabase();
             
             if (!window.storageManager) {
                 throw new Error('StorageManager niet beschikbaar');
             }
             
+            // Controleer of FileSystem actief is
+            const storageInfo = storageManager.getStorageInfo();
+            if (storageInfo.current !== 'filesystem') {
+                console.log('FileSystem niet actief, migratie niet nodig');
+                return;
+            }
+            
             // Haal alle honden op
-            const honden = await this.db.getHonden();
+            const honden = await db.getHonden();
             console.log(`Migreer ${honden.length} honden naar FileSystem...`);
             
             // Sla elke hond op in FileSystem
@@ -824,9 +877,9 @@ class DataManager extends BaseModule {
             }
             
             // Haal foto's op (als de functie beschikbaar is)
-            if (typeof this.db.getAllFotos === 'function') {
+            if (typeof db.getAllFotos === 'function') {
                 try {
-                    const fotos = await this.db.getAllFotos();
+                    const fotos = await db.getAllFotos();
                     console.log(`Migreer ${fotos.length} foto's naar FileSystem...`);
                     
                     // Groepeer foto's per stamboomnr
@@ -850,9 +903,9 @@ class DataManager extends BaseModule {
             }
             
             // Haal privé info op (als de functie beschikbaar is)
-            if (typeof this.db.getAllPriveInfo === 'function') {
+            if (typeof db.getAllPriveInfo === 'function') {
                 try {
-                    const priveInfo = await this.db.getAllPriveInfo();
+                    const priveInfo = await db.getAllPriveInfo();
                     console.log(`Migreer ${priveInfo.length} privé records naar FileSystem...`);
                     
                     for (const prive of priveInfo) {
@@ -1159,13 +1212,12 @@ class DataManager extends BaseModule {
             let fotosCount = 0;
             let priveCount = 0;
             
-            if (!this.db) {
-                throw new Error('Database niet gevonden.');
-            }
+            // Zorg dat database beschikbaar is
+            const db = await this.ensureDatabase();
             
             if (exportData) {
                 try {
-                    const honden = await this.db.getHonden();
+                    const honden = await db.getHonden();
                     
                     const parentLookupMap = new Map();
                     honden.forEach(hond => {
@@ -1207,9 +1259,9 @@ class DataManager extends BaseModule {
             
             if (exportPhotos) {
                 try {
-                    if (typeof this.db.getAllFotos === 'function') {
+                    if (typeof db.getAllFotos === 'function') {
                         try {
-                            exportDataObj.fotos = await this.db.getAllFotos();
+                            exportDataObj.fotos = await db.getAllFotos();
                             fotosCount = exportDataObj.fotos.length;
                         } catch (fotoError) {
                             console.log('Kon foto\'s niet exporteren:', fotoError);
@@ -1226,9 +1278,9 @@ class DataManager extends BaseModule {
             
             if (exportPrivateInfo) {
                 try {
-                    if (typeof this.db.getAllPriveInfo === 'function') {
+                    if (typeof db.getAllPriveInfo === 'function') {
                         try {
-                            exportDataObj.priveInfo = await this.db.getAllPriveInfo();
+                            exportDataObj.priveInfo = await db.getAllPriveInfo();
                             priveCount = exportDataObj.priveInfo.length;
                         } catch (priveError) {
                             console.log('Geen rechten voor privé info export:', priveError);
@@ -1320,9 +1372,8 @@ class DataManager extends BaseModule {
         
         console.log('=== START IMPORT ===');
         
-        if (!this.db) {
-            throw new Error('Database niet gevonden.');
-        }
+        // Zorg dat database beschikbaar is
+        const db = await this.ensureDatabase();
         
         // === FASE 1: Importeer alle honden (indien aanwezig) ===
         const stamboomToIdMap = new Map();
@@ -1331,7 +1382,7 @@ class DataManager extends BaseModule {
         if (importData.honden && Array.isArray(importData.honden)) {
             console.log(`Fase 1: Importeer ${importData.honden.length} honden...`);
             
-            const existingHonden = await this.db.getHonden();
+            const existingHonden = await db.getHonden();
             const existingStamboomMap = new Map();
             existingHonden.forEach(hond => {
                 if (hond.stamboomnr) {
@@ -1381,7 +1432,7 @@ class DataManager extends BaseModule {
                         };
                         
                         try {
-                            const newId = await this.db.voegHondToe(hondZonderIds);
+                            const newId = await db.voegHondToe(hondZonderIds);
                             stamboomToIdMap.set(stamboomnr, newId);
                             result.honden.toegevoegd++;
                         } catch (addError) {
@@ -1416,7 +1467,7 @@ class DataManager extends BaseModule {
                         };
                         
                         try {
-                            await this.db.updateHond(updateData);
+                            await db.updateHond(updateData);
                             stamboomToIdMap.set(stamboomnr, existingHond.id);
                             result.honden.bijgewerkt++;
                         } catch (updateError) {
@@ -1476,7 +1527,7 @@ class DataManager extends BaseModule {
                         };
                         
                         try {
-                            await this.db.updateHond(updateData);
+                            await db.updateHond(updateData);
                             relatiesGemaakt++;
                         } catch (updateError) {
                             console.error(`Fout bij updaten relaties voor ${stamboomnr}:`, updateError);
@@ -1492,13 +1543,13 @@ class DataManager extends BaseModule {
         }
         
         // === FASE 3: Foto's (indien aanwezig) ===
-        if (importData.fotos && Array.isArray(importData.fotos) && typeof this.db.voegFotoToe === 'function') {
+        if (importData.fotos && Array.isArray(importData.fotos) && typeof db.voegFotoToe === 'function') {
             console.log(`Fase 3: Importeer ${importData.fotos.length} foto's...`);
             
             let existingFotos = [];
             try {
-                if (typeof this.db.getAllFotos === 'function') {
-                    existingFotos = await this.db.getAllFotos();
+                if (typeof db.getAllFotos === 'function') {
+                    existingFotos = await db.getAllFotos();
                 }
             } catch (error) {
                 console.log('Kon bestaande foto\'s niet ophalen:', error);
@@ -1533,7 +1584,7 @@ class DataManager extends BaseModule {
                                 geuploadDoor: foto.geuploadDoor || window.auth?.getCurrentUser()?.username || 'unknown'
                             };
                             
-                            await this.db.voegFotoToe(fotoZonderId);
+                            await db.voegFotoToe(fotoZonderId);
                             result.fotos.toegevoegd++;
                         }
                     }
@@ -1544,7 +1595,7 @@ class DataManager extends BaseModule {
         }
         
         // === FASE 4: Privé info (indien aanwezig) ===
-        if (importData.priveInfo && Array.isArray(importData.priveInfo) && typeof this.db.bewaarPriveInfo === 'function') {
+        if (importData.priveInfo && Array.isArray(importData.priveInfo) && typeof db.bewaarPriveInfo === 'function') {
             console.log(`Fase 4: Importeer ${importData.priveInfo.length} privé records...`);
             
             try {
@@ -1560,7 +1611,7 @@ class DataManager extends BaseModule {
                                 gewijzigdDoor: window.auth?.getCurrentUser()?.username || 'unknown'
                             };
                             
-                            await this.db.bewaarPriveInfo(priveZonderId);
+                            await db.bewaarPriveInfo(priveZonderId);
                             result.priveInfo.bijgewerkt++;
                         }
                     } catch (error) {
@@ -1879,12 +1930,14 @@ class DataManager extends BaseModule {
     
     async loadDatabaseStats() {
         try {
-            if (!this.db || typeof this.db.getStatistieken !== 'function') {
-                console.error('Database of getStatistieken functie niet beschikbaar');
+            const db = await this.ensureDatabase();
+            
+            if (typeof db.getStatistieken !== 'function') {
+                console.error('getStatistieken functie niet beschikbaar');
                 return;
             }
             
-            const stats = await this.db.getStatistieken();
+            const stats = await db.getStatistieken();
             
             const hondenElement = document.getElementById('statsHonden');
             const fotosElement = document.getElementById('statsFotos');
