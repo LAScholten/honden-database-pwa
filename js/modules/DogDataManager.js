@@ -323,7 +323,7 @@ class DogDataManager extends BaseModule {
                 
                 // Zugangskontrolle Popup Texte
                 insufficientPermissions: "Unzureichende Berechtigingen",
-                insufficientPermissionsText: "Sie haben keine Berechtigung, Hunde zu bearbeiten. Nur Administratoren können deze Funktion nutzen.",
+                insufficientPermissionsText: "Sie haben keine Berechtigung, Hunde zu bearbeiten. Nur Administratoren können diese Funktion nutzen.",
                 loggedInAs: "Sie sind eingeloggt als:",
                 user: "Benutzer",
                 availableFeatures: "Verfügbare Funktionen für Benutzer",
@@ -358,7 +358,7 @@ class DogDataManager extends BaseModule {
                 deleteFailed: "Fehler beim Löschen des Hundes: ",
                 photoError: "Fehler beim Hochladen des Fotos: ",
                 fieldsRequired: "Name, Stammbaum-Nummer en Rasse sind Pflichtfelder",
-                dogNotFound: "Hund nicht gefunden",
+                dogNotFound: "Hund niet gefonden",
                 adminOnly: "Nur Administratoren können Hunde bearbeiten",
                 invalidId: "Ungültige Hunde-ID",
                 dateFormatError: "Datum muss im Format TT-MM-JJJJ sein",
@@ -1293,21 +1293,25 @@ class DogDataManager extends BaseModule {
     }
     
     /**
-     * Zoekfunctionaliteit voor hoofdzoekveld
+     * Zoekfunctionaliteit voor hoofdzoekveld - GEWIJZIGD: Zoekt op naam + kennelnaam (zoals bij ouders) EN stamboomnummer
      */
     filterDogsForSearchField(searchTerm = '') {
-        // Filter ALLE honden waarvan de naam BEGINT met de zoekterm (case-insensitive)
+        // Filter honden zoals bij ouders: zoek in naam + kennelnaam EN stamboomnummer
         this.filteredSearchResults = this.allDogs.filter(dog => {
             const naam = dog.naam ? dog.naam.toLowerCase() : '';
+            const kennelnaam = dog.kennelnaam ? dog.kennelnaam.toLowerCase() : '';
             const stamboomnr = dog.stamboomnr ? dog.stamboomnr.toLowerCase() : '';
             
-            // Controleer of naam begint met de zoekterm
-            const naamMatch = naam.startsWith(searchTerm);
+            // Combineer naam en kennelnaam voor zoeken (zoals bij ouders)
+            const fullName = `${naam} ${kennelnaam}`.trim().toLowerCase();
             
-            // Controleer of stamboomnummer begint met de zoekterm
-            const stamboomMatch = stamboomnr.startsWith(searchTerm);
+            // Controleer op naam + kennelnaam (zoals bij ouders)
+            const nameMatch = fullName.includes(searchTerm);
             
-            return naamMatch || stamboomMatch;
+            // Controleer op stamboomnummer
+            const stamboomMatch = stamboomnr.includes(searchTerm);
+            
+            return nameMatch || stamboomMatch;
         });
         
         console.log(`Zoeken naar '${searchTerm}': ${this.filteredSearchResults.length} resultaten gevonden`);
@@ -1974,7 +1978,7 @@ class DogDataManager extends BaseModule {
     }
     
     /**
-     * Toon parent autocomplete - ENKEL MINIMALE AANPASSING: CONTROLEER OOK OP "INCLUDES" IN PLAATS VAN ALLEEN "STARTSWITH"
+     * Toon parent autocomplete - MET NEDERLANDSE ID OPSLAG EN CONSOLE LOGGING
      */
     showParentAutocomplete(searchTerm, parentField) {
         const input = document.getElementById(parentField);
@@ -1985,7 +1989,7 @@ class DogDataManager extends BaseModule {
         // Zoek de dropdown
         let dropdown = document.getElementById(`${parentField}Autocomplete`);
         
-        // Filter honden voor autocomplete - ALLEEN DIE BEGINT MET ZOEKTERM OF ZOEKTERM IN NAAM/KENNELNAAM BEVAT
+        // Filter honden voor autocomplete - ALLEEN DIE BEGINT MET ZOEKTERM
         const suggestions = this.allDogs.filter(dog => {
             const naam = dog.naam ? dog.naam.toLowerCase() : '';
             const kennelnaam = dog.kennelnaam ? dog.kennelnaam.toLowerCase() : '';
@@ -1993,8 +1997,8 @@ class DogDataManager extends BaseModule {
             // Combineer naam en kennelnaam voor zoeken
             const fullName = `${naam} ${kennelnaam}`.trim().toLowerCase();
             
-            // Controleer of de volledige naam begint met de zoekterm OF de zoekterm ergens in de volledige naam zit
-            const matchesSearch = fullName.startsWith(searchTerm) || fullName.includes(searchTerm);
+            // Controleer of de volledige naam begint met de zoekterm
+            const matchesSearch = fullName.startsWith(searchTerm);
             
             // Filter op geslacht
             if (parentField === 'father') {
