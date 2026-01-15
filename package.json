@@ -1,0 +1,15 @@
+{
+  "name": "honden-database-parallel",
+  "version": "1.0.0",
+  "description": "Parallelle PWA en Desktop Edition server",
+  "scripts": {
+    "start:original": "npx serve -l 3000",
+    "start:desktop": "npx serve modern-pwa -l 3001",
+    "start": "npm-run-all --parallel start:original start:desktop",
+    "dev": "npm run start"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5",
+    "serve": "^14.0.0"
+  }
+}
