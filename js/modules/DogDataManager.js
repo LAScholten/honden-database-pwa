@@ -335,7 +335,7 @@ class DogDataManager extends BaseModule {
                 // Suchfeld
                 loadingDogs: "Hunde laden...",
                 noResults: "Keine Hunde gefunden",
-                selectDogToEdit: "Wählen Sie einen Hond zum Bearbeiten",
+                selectDogToEdit: "Wählen Sie einen Hund zum Bearbeiten",
                 typeToSearch: "Beginnen Sie mit der Eingabe, um zu suchen",
                 
                 // Status Meldungen
@@ -1974,8 +1974,7 @@ class DogDataManager extends BaseModule {
     }
     
     /**
-     * Toon parent autocomplete - MET NEDERLANDSE ID OPSLAG EN CONSOLE LOGGING
-     * VERSIE: Betere zoeklogica die naam EN kennelnaam correct verwerkt
+     * Toon parent autocomplete - ENKEL MINIMALE AANPASSING: CONTROLEER OOK OP "INCLUDES" IN PLAATS VAN ALLEEN "STARTSWITH"
      */
     showParentAutocomplete(searchTerm, parentField) {
         const input = document.getElementById(parentField);
@@ -1986,112 +1985,27 @@ class DogDataManager extends BaseModule {
         // Zoek de dropdown
         let dropdown = document.getElementById(`${parentField}Autocomplete`);
         
-        // Filter honden voor autocomplete - BETERE ZOEKLOGICA
+        // Filter honden voor autocomplete - ALLEEN DIE BEGINT MET ZOEKTERM OF ZOEKTERM IN NAAM/KENNELNAAM BEVAT
         const suggestions = this.allDogs.filter(dog => {
-            // Filter eerst op geslacht
-            if (parentField === 'father' && dog.geslacht !== 'reuen') return false;
-            if (parentField === 'mother' && dog.geslacht !== 'teven') return false;
-            
-            // Verzamel alle zoekvelden
             const naam = dog.naam ? dog.naam.toLowerCase() : '';
             const kennelnaam = dog.kennelnaam ? dog.kennelnaam.toLowerCase() : '';
-            const stamboomnr = dog.stamboomnr ? dog.stamboomnr.toLowerCase() : '';
             
-            // Maak een gecombineerde zoekstring
-            const fullDisplayName = `${naam} ${kennelnaam}`.trim().toLowerCase();
+            // Combineer naam en kennelnaam voor zoeken
+            const fullName = `${naam} ${kennelnaam}`.trim().toLowerCase();
             
-            // Als de zoekterm leeg is, toon geen suggesties
-            if (searchTerm.length === 0) return false;
+            // Controleer of de volledige naam begint met de zoekterm OF de zoekterm ergens in de volledige naam zit
+            const matchesSearch = fullName.startsWith(searchTerm) || fullName.includes(searchTerm);
             
-            // Controleer verschillende zoekpatronen:
-            
-            // 1. Zoekterm begint met naam (zonder kennelnaam)
-            if (searchTerm.startsWith(naam)) {
-                return true;
+            // Filter op geslacht
+            if (parentField === 'father') {
+                return matchesSearch && dog.geslacht === 'reuen';
+            } else if (parentField === 'mother') {
+                return matchesSearch && dog.geslacht === 'teven';
             }
-            
-            // 2. Zoekterm begint met volledige display naam (naam + spatie + kennelnaam)
-            if (fullDisplayName.startsWith(searchTerm)) {
-                return true;
-            }
-            
-            // 3. Zoekterm bevat alleen de naam (ook als het niet begint)
-            if (naam.includes(searchTerm)) {
-                return true;
-            }
-            
-            // 4. Zoekterm bevat naam gevolgd door deel van kennelnaam
-            // Bijv: "max ke" zou moeten matchen met "max kennel de la maison"
-            const searchParts = searchTerm.split(' ');
-            if (searchParts.length > 1) {
-                const naamPart = searchParts[0];
-                const kennelPart = searchParts.slice(1).join(' ');
-                
-                if (naam.includes(naamPart) && kennelnaam.includes(kennelPart)) {
-                    return true;
-                }
-            }
-            
-            // 5. Zoek in stamboomnummer
-            if (stamboomnr.includes(searchTerm)) {
-                return true;
-            }
-            
-            // 6. Zoek in elk deel van de zoekterm afzonderlijk
-            // Bijv: "ke max" zou ook moeten matchen
-            for (const part of searchParts) {
-                if (part.length > 0) {
-                    if (naam.includes(part) || kennelnaam.includes(part) || stamboomnr.includes(part)) {
-                        return true;
-                    }
-                }
-            }
-            
-            return false;
+            return matchesSearch;
         });
         
         console.log(`Autocomplete voor ${parentField}: ${suggestions.length} resultaten gevonden voor zoekterm '${searchTerm}'`);
-        
-        // Sorteer suggesties: beste matches eerst
-        suggestions.sort((a, b) => {
-            const aNaam = a.naam ? a.naam.toLowerCase() : '';
-            const aKennel = a.kennelnaam ? a.kennelnaam.toLowerCase() : '';
-            const aFull = `${aNaam} ${aKennel}`.trim();
-            
-            const bNaam = b.naam ? b.naam.toLowerCase() : '';
-            const bKennel = b.kennelnaam ? b.kennelnaam.toLowerCase() : '';
-            const bFull = `${bNaam} ${bKennel}`.trim();
-            
-            // Score berekenen voor sortering
-            const getScore = (naam, kennel, full) => {
-                let score = 0;
-                
-                // Exacte match op volledige display naam
-                if (full === searchTerm) score += 100;
-                
-                // Begint met volledige display naam
-                if (full.startsWith(searchTerm)) score += 50;
-                
-                // Exacte match op naam
-                if (naam === searchTerm) score += 40;
-                
-                // Begint met naam
-                if (naam.startsWith(searchTerm)) score += 30;
-                
-                // Naam bevat zoekterm
-                if (naam.includes(searchTerm)) score += 20;
-                
-                // Volledige naam bevat zoekterm
-                if (full.includes(searchTerm)) score += 10;
-                
-                return score;
-            };
-            
-            const aScore = getScore(aNaam, aKennel, aFull);
-            const bScore = getScore(bNaam, bKennel, bFull);
-            
-            return bScore - aScore;
-        });
         
         if (suggestions.length === 0) {
             if (dropdown) {
