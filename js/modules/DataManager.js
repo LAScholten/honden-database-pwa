@@ -235,9 +235,9 @@ class DataManager extends BaseModule {
                 backupStatusWarning: "Backup empfohlen",
                 backupStatusDanger: "Wichtig",
                 backupWarningText: "Letztes Backup war vor {days} Tagen",
-                backupDangerText: "Sie haben noch nie ein Backup erstellt!",
+                backupDangerText: "Sie hebben noch nie ein Backup erstellt!",
                 desktopStorage: "Desktop Edition Speicherung",
-                desktopStorageDesc: "Diese Desktop Edition unterstützt twee Speichermethoden:",
+                desktopStorageDesc: "Diese Desktop Edition unterstützt zwei Speichermethoden:",
                 fileStorage: "Dateispeicherung",
                 fileStorageDesc: "Speichern Sie Daten in echten Dateien auf Ihrem Computer.",
                 useFileStorage: "Verwenden",
@@ -250,13 +250,13 @@ class DataManager extends BaseModule {
                 switchToBrowser: "Zu Browser-Speicherung wechseln",
                 storageActive: "Aktiv",
                 storageInactive: "Inaktiv",
-                storageLoading: "Speicherstatus wordt geladen...",
+                storageLoading: "Speicherstatus wird geladen...",
                 storageSettings: "Speichereinstellungen",
                 storageFeaturesTitle: "💾 Vorteile der Dateispeicherung:",
                 storageFeature1: "📁 Wählen Sie Ihren eigenen Ordner auf dem Computer",
                 storageFeature2: "💾 Einfache Backups (nur Ordner kopieren)",
                 storageFeature3: "🔄 Synchronisation zwischen Geräten mogelijk",
-                storageFeature4: "🔒 Mehr Kontrole über Ihre Daten",
+                storageFeature4: "🔒 Mehr Kontrolle über Ihre Daten",
                 storageWarning: "⚠️ Wichtig:",
                 storageWarningText: "Bei Dateispeicherung müssen Sie einen Ordner auswählen. Die App wird Sie danach fragen."
             }
@@ -264,16 +264,19 @@ class DataManager extends BaseModule {
         
         // Initialiseer de database later, wanneer die beschikbaar is
         this.db = null;
+        this.dbReady = false;
         
         // Wacht tot database beschikbaar is
-        this.waitForDatabase();
+        this.initDatabase();
     }
     
-    async waitForDatabase() {
+    async initDatabase() {
         // Wacht maximaal 10 seconden op de database
-        for (let i = 0; i < 100; i++) {
+        const maxAttempts = 100;
+        for (let i = 0; i < maxAttempts; i++) {
             if (window.db) {
                 this.db = window.db;
+                this.dbReady = true;
                 console.log('Database gevonden in DataManager');
                 break;
             }
@@ -281,19 +284,21 @@ class DataManager extends BaseModule {
         }
         
         if (!this.db) {
-            console.warn('Database nog niet beschikbaar, zal later worden geïnitialiseerd');
-            // Probeer het later opnieuw
-            setTimeout(() => {
-                this.checkDatabase();
-            }, 2000);
+            console.warn('Database nog niet beschikbaar');
+            // Probeer het later opnieuw wanneer de modal getoond wordt
         }
     }
     
-    async checkDatabase() {
-        if (window.db && !this.db) {
-            this.db = window.db;
-            console.log('Database alsnog gevonden in DataManager');
+    async ensureDatabase() {
+        if (!this.dbReady) {
+            await this.initDatabase();
         }
+        
+        if (!this.db) {
+            throw new Error('Database niet beschikbaar');
+        }
+        
+        return this.db;
     }
     
     t(key) {
@@ -662,48 +667,6 @@ class DataManager extends BaseModule {
             return;
         }
         
-        // Maak zeker dat storageSelector bestaat
-        if (!window.storageSelector) {
-            window.storageSelector = new (class {
-                async showSelectorModal() {
-                    console.log('Eenvoudige storage selector wordt getoond...');
-                    this.showSimpleSelector();
-                }
-                
-                showSimpleSelector() {
-                    const html = `
-                        <div class="modal-backdrop fade show"></div>
-                        <div class="modal fade show d-block" style="background-color: rgba(0,0,0,0.5);">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-header bg-primary text-white">
-                                        <h5 class="modal-title">Opslag Selector</h5>
-                                        <button type="button" class="btn-close btn-close-white" onclick="document.querySelector('.simple-storage-selector').remove(); document.querySelector('.modal-backdrop.fade.show:last-child').remove();"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <p>Selecteer opslagtype:</p>
-                                        <div class="d-grid gap-2">
-                                            <button class="btn btn-success" onclick="window.dataManager?.switchToFileSystem()">
-                                                <i class="bi bi-folder"></i> Bestandsopslag
-                                            </button>
-                                            <button class="btn btn-primary" onclick="window.dataManager?.switchToIndexedDB()">
-                                                <i class="bi bi-browser-chrome"></i> Browser Opslag
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    
-                    const div = document.createElement('div');
-                    div.className = 'simple-storage-selector';
-                    div.innerHTML = html;
-                    document.body.appendChild(div);
-                }
-            })();
-        }
-        
         const useFileSystemBtn = document.getElementById('useFileSystemBtn');
         if (useFileSystemBtn) {
             useFileSystemBtn.addEventListener('click', async () => {
@@ -721,18 +684,43 @@ class DataManager extends BaseModule {
         const openStorageSettingsBtn = document.getElementById('openStorageSettingsBtn');
         if (openStorageSettingsBtn) {
             openStorageSettingsBtn.addEventListener('click', () => {
-                if (window.storageSelector && window.storageSelector.showSelectorModal) {
-                    window.storageSelector.showSelectorModal();
-                } else {
-                    console.error('Storage selector niet beschikbaar');
-                    if (window.uiHandler && window.uiHandler.showError) {
-                        window.uiHandler.showError('Opslag selector niet beschikbaar');
-                    }
-                }
+                this.showSimpleStorageSelector();
             });
         }
         
         this.loadStorageStatus();
+    }
+    
+    showSimpleStorageSelector() {
+        const html = `
+            <div class="modal-backdrop fade show"></div>
+            <div class="modal fade show d-block" style="background-color: rgba(0,0,0,0.5);">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title">Opslag Selector</h5>
+                            <button type="button" class="btn-close btn-close-white" onclick="document.querySelector('.simple-storage-selector').remove(); document.querySelector('.modal-backdrop.fade.show:last-child').remove();"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Selecteer opslagtype:</p>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-success" onclick="window.dataManager.switchToFileSystem()">
+                                    <i class="bi bi-folder"></i> Bestandsopslag
+                                </button>
+                                <button class="btn btn-primary" onclick="window.dataManager.switchToIndexedDB()">
+                                    <i class="bi bi-browser-chrome"></i> Browser Opslag
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const div = document.createElement('div');
+        div.className = 'simple-storage-selector';
+        div.innerHTML = html;
+        document.body.appendChild(div);
     }
     
     async switchToFileSystem(buttonElement) {
@@ -759,8 +747,7 @@ class DataManager extends BaseModule {
             
             console.log('FileSystem geïnitialiseerd, migreer data...');
             
-            // Migreer bestaande data (wacht op database als nodig)
-            await this.ensureDatabase();
+            // Migreer bestaande data
             await this.migrateToFileSystem();
             
             this.loadStorageStatus();
@@ -832,19 +819,6 @@ class DataManager extends BaseModule {
         }
     }
     
-    async ensureDatabase() {
-        // Wacht op database als die nog niet beschikbaar is
-        if (!this.db) {
-            await this.waitForDatabase();
-        }
-        
-        if (!this.db) {
-            throw new Error('Database niet beschikbaar voor migratie');
-        }
-        
-        return this.db;
-    }
-    
     async migrateToFileSystem() {
         try {
             console.log('Migreer bestaande data naar FileSystem...');
@@ -867,12 +841,18 @@ class DataManager extends BaseModule {
             const honden = await db.getHonden();
             console.log(`Migreer ${honden.length} honden naar FileSystem...`);
             
-            // Sla elke hond op in FileSystem
+            // Sla elke hond op in FileSystem met veilige bestandsnaam
             for (const hond of honden) {
+                let filename = '';
                 if (hond.stamboomnr) {
-                    await storageManager.save(`hond_${hond.stamboomnr}`, hond);
+                    // Maak een veilige bestandsnaam
+                    filename = this.createSafeFilename(`hond_${hond.stamboomnr}`);
                 } else if (hond.id) {
-                    await storageManager.save(`hond_${hond.id}`, hond);
+                    filename = this.createSafeFilename(`hond_${hond.id}`);
+                }
+                
+                if (filename) {
+                    await storageManager.save(filename, hond);
                 }
             }
             
@@ -895,7 +875,8 @@ class DataManager extends BaseModule {
                     
                     // Sla gegroepeerde foto's op
                     for (const [stamboomnr, hondFotos] of Object.entries(fotosPerHond)) {
-                        await storageManager.save(`fotos_${stamboomnr}`, hondFotos);
+                        const filename = this.createSafeFilename(`fotos_${stamboomnr}`);
+                        await storageManager.save(filename, hondFotos);
                     }
                 } catch (fotoError) {
                     console.log('Foto migratie overslagen:', fotoError);
@@ -910,7 +891,8 @@ class DataManager extends BaseModule {
                     
                     for (const prive of priveInfo) {
                         if (prive.stamboomnr) {
-                            await storageManager.save(`prive_${prive.stamboomnr}`, prive);
+                            const filename = this.createSafeFilename(`prive_${prive.stamboomnr}`);
+                            await storageManager.save(filename, prive);
                         }
                     }
                 } catch (priveError) {
@@ -924,6 +906,22 @@ class DataManager extends BaseModule {
             console.error('Fout bij migratie naar FileSystem:', error);
             throw error;
         }
+    }
+    
+    createSafeFilename(baseName) {
+        // Verwijder ongeldige karakters voor bestandsnamen
+        let safeName = baseName.replace(/[<>:"/\\|?*]/g, '_');
+        
+        // Vervang spaties door underscores
+        safeName = safeName.replace(/\s+/g, '_');
+        
+        // Zorg dat de naam niet te lang is
+        if (safeName.length > 100) {
+            safeName = safeName.substring(0, 100);
+        }
+        
+        // Voeg .json extensie toe
+        return `${safeName}.json`;
     }
     
     async loadStorageStatus() {
@@ -1634,9 +1632,11 @@ class DataManager extends BaseModule {
                     console.log(`Sla ${importData.honden.length} honden op in FileSystem...`);
                     for (const hond of importData.honden) {
                         if (hond.stamboomnr) {
-                            await window.storageManager.save(`hond_${hond.stamboomnr}`, hond);
+                            const filename = this.createSafeFilename(`hond_${hond.stamboomnr}`);
+                            await window.storageManager.save(filename, hond);
                         } else if (hond.id) {
-                            await window.storageManager.save(`hond_${hond.id}`, hond);
+                            const filename = this.createSafeFilename(`hond_${hond.id}`);
+                            await window.storageManager.save(filename, hond);
                         }
                     }
                 }
@@ -1655,7 +1655,8 @@ class DataManager extends BaseModule {
                     });
                     
                     for (const [stamboomnr, fotos] of Object.entries(fotosPerHond)) {
-                        await window.storageManager.save(`fotos_${stamboomnr}`, fotos);
+                        const filename = this.createSafeFilename(`fotos_${stamboomnr}`);
+                        await window.storageManager.save(filename, fotos);
                     }
                 }
                 
@@ -1664,7 +1665,8 @@ class DataManager extends BaseModule {
                     console.log(`Sla ${importData.priveInfo.length} privé records op in FileSystem...`);
                     for (const prive of importData.priveInfo) {
                         if (prive.stamboomnr) {
-                            await window.storageManager.save(`prive_${prive.stamboomnr}`, prive);
+                            const filename = this.createSafeFilename(`prive_${prive.stamboomnr}`);
+                            await window.storageManager.save(filename, prive);
                         }
                     }
                 }
@@ -1681,7 +1683,8 @@ class DataManager extends BaseModule {
                     data: importData
                 };
                 
-                await window.storageManager.save(`import_backup_${new Date().toISOString().split('T')[0]}`, importBackup);
+                const backupFilename = this.createSafeFilename(`import_backup_${new Date().toISOString().split('T')[0]}`);
+                await window.storageManager.save(backupFilename, importBackup);
                 
                 console.log('Import data succesvol opgeslagen in FileSystem');
                 
