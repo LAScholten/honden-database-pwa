@@ -1,6 +1,6 @@
 /**
  * Storage Manager voor HondenDatabase Desktop Edition
- * WERKENDE VERSIE MET RELATIEHERSTEL
+ * WERKEND MET AUTOMATISCH LADEN EN DUBBELE BESCHERMING
  */
 
 class StorageManager {
@@ -11,6 +11,7 @@ class StorageManager {
         this.migrationInProgress = false;
         this.dbReady = false;
         this.isInitializing = false;
+        this.dataLoaded = false; // Voorkom herhaald laden
         
         console.log('StorageManager geïnitialiseerd:', this.availableTypes);
         
@@ -84,13 +85,27 @@ class StorageManager {
             
             console.log(`Initialiseren met opslagtype: ${typeToUse}`);
             
+            let success = false;
             if (typeToUse === 'filesystem' && this.availableTypes.filesystem) {
-                await this.initializeFileSystem();
+                success = await this.initializeFileSystem();
+                
+                // AUTOMATISCH LADEN NA INIT
+                if (success && !this.dataLoaded) {
+                    console.log('Automatisch laden data uit FileSystem...');
+                    setTimeout(() => {
+                        this.loadFromFileSystemToDatabase().catch(e => 
+                            console.log('Auto-load kon niet:', e.message)
+                        );
+                    }, 1000);
+                }
             } else {
-                this.initializeIndexedDB();
+                success = this.initializeIndexedDB();
             }
             
-            console.log(`✅ StorageManager geïnitialiseerd met: ${this.currentStorage.type}`);
+            if (success) {
+                console.log(`✅ StorageManager geïnitialiseerd met: ${this.currentStorage.type}`);
+            }
+            
             return this.currentStorage;
             
         } catch (error) {
@@ -112,12 +127,14 @@ class StorageManager {
         console.log('Initialiseren FileSystem backend...');
         
         try {
+            // Vraag gebruiker om map te selecteren
             const directoryHandle = await window.showDirectoryPicker({
                 id: 'hondenDatabaseFolder',
                 mode: 'readwrite',
                 startIn: 'documents'
             });
             
+            // Vraag permissie
             if ((await directoryHandle.queryPermission({ mode: 'readwrite' })) !== 'granted') {
                 const permission = await directoryHandle.requestPermission({ mode: 'readwrite' });
                 if (permission !== 'granted') {
@@ -125,7 +142,14 @@ class StorageManager {
                 }
             }
             
-            const appDirectory = await directoryHandle.getDirectoryHandle('HondenDatabase_PWA', { create: true });
+            // Open of maak app map aan
+            let appDirectory;
+            try {
+                appDirectory = await directoryHandle.getDirectoryHandle('HondenDatabase_PWA', { create: true });
+            } catch (error) {
+                console.log('Kan app map niet maken, gebruik hoofdmap');
+                appDirectory = directoryHandle;
+            }
             
             this.currentStorage = {
                 type: 'filesystem',
@@ -138,6 +162,7 @@ class StorageManager {
             
             console.log('Map geselecteerd:', directoryHandle.name);
             
+            // Sla config op
             this.saveConfig({
                 type: 'filesystem',
                 selectedPath: directoryHandle.name,
@@ -265,58 +290,14 @@ class StorageManager {
                 }
             }
             
-            // STAP 3: Migreer foto's
-            if (typeof window.db.getAllFotos === 'function') {
-                try {
-                    const fotos = await window.db.getAllFotos();
-                    console.log(`Migreer ${fotos.length} foto's...`);
-                    
-                    const fotosPerHond = {};
-                    fotos.forEach(foto => {
-                        if (foto.stamboomnr) {
-                            if (!fotosPerHond[foto.stamboomnr]) {
-                                fotosPerHond[foto.stamboomnr] = [];
-                            }
-                            fotosPerHond[foto.stamboomnr].push(foto);
-                        }
-                    });
-                    
-                    for (const [stamboomnr, hondFotos] of Object.entries(fotosPerHond)) {
-                        const filename = `fotos_${stamboomnr}`;
-                        await this.save(filename, hondFotos);
-                        console.log(`Foto's opgeslagen voor: ${stamboomnr}`);
-                    }
-                } catch (fotoError) {
-                    console.log('Foto migratie overslagen:', fotoError);
-                }
-            }
-            
-            // STAP 4: Migreer privé info
-            if (typeof window.db.getAllPriveInfo === 'function') {
-                try {
-                    const priveInfo = await window.db.getAllPriveInfo();
-                    console.log(`Migreer ${priveInfo.length} privé records...`);
-                    
-                    for (const prive of priveInfo) {
-                        if (prive.stamboomnr) {
-                            const filename = `prive_${prive.stamboomnr}`;
-                            await this.save(filename, prive);
-                            console.log(`Privé info opgeslagen voor: ${prive.stamboomnr}`);
-                        }
-                    }
-                } catch (priveError) {
-                    console.log('Privé info migratie overslagen:', priveError);
-                }
-            }
-            
-            // STAP 5: Sla mapping op voor later herstel
+            // STAP 3: Sla mapping op voor later herstel
             await this.save('relatie_mapping', {
                 idToStamboom: idToStamboomMap,
                 stamboomToId: stamboomToIdMap,
                 migrationDate: new Date().toISOString()
             });
             
-            // STAP 6: Sla config op
+            // STAP 4: Sla backup info op
             const backupConfig = {
                 backupDate: new Date().toISOString(),
                 hondenCount: honden.length,
@@ -339,15 +320,22 @@ class StorageManager {
     }
     
     async loadFromFileSystemToDatabase() {
+        // VOORKOM HERHAALD LADEN
+        if (this.dataLoaded) {
+            console.log('Data al geladen uit FileSystem, overslaan...');
+            return;
+        }
+        
         if (!this.currentStorage || this.currentStorage.type !== 'filesystem') {
             console.log('FileSystem niet actief, geen data te laden');
             return;
         }
         
         if (!window.db) {
-            for (let i = 0; i < 50; i++) {
+            console.log('Wacht op database...');
+            for (let i = 0; i < 30; i++) {
                 if (window.db) break;
-                await new Promise(resolve => setTimeout(resolve, 100));
+                await new Promise(resolve => setTimeout(resolve, 200));
             }
             
             if (!window.db) {
@@ -355,6 +343,8 @@ class StorageManager {
                 return;
             }
         }
+        
+        this.dataLoaded = true; // Markeer als geladen
         
         try {
             console.log('Laad data uit FileSystem naar database...');
@@ -387,41 +377,60 @@ class StorageManager {
             
             console.log(`${loadedHonden.length} honden gevonden in FileSystem`);
             
-            // STAP 2: Maak nieuwe mapping van laadproces
-            const nieuweStamboomToIdMap = {};
+            if (loadedHonden.length === 0) {
+                console.log('Geen honden gevonden om te laden');
+                return;
+            }
             
-            // STAP 3: Voeg honden toe aan database
+            // STAP 2: Haal bestaande honden op voor dubbele controle
+            const existingHonden = await window.db.getHonden();
+            const existingStamboomSet = new Set(existingHonden.map(h => h.stamboomnr).filter(Boolean));
+            
+            console.log(`${existingHonden.length} honden al in database`);
+            
+            // STAP 3: Voeg nieuwe honden toe (geen dubbele)
+            const nieuweStamboomToIdMap = {};
+            let nieuweHondenToegevoegd = 0;
+            let bestaandeHondenBijgewerkt = 0;
+            
             for (const hondData of loadedHonden) {
                 try {
+                    const stamboomnr = hondData.stamboomnr;
+                    if (!stamboomnr) continue;
+                    
                     const cleanHond = { ...hondData };
                     delete cleanHond.id;
                     
-                    const existingHonden = await window.db.getHonden();
-                    const exists = existingHonden.some(h => h.stamboomnr === cleanHond.stamboomnr);
-                    
-                    let hondId;
-                    if (!exists) {
-                        hondId = await window.db.voegHondToe(cleanHond);
-                        console.log(`Nieuwe hond toegevoegd: ${cleanHond.stamboomnr}`);
+                    // DUBBELE BESCHERMING: Controleer of hond al bestaat
+                    if (existingStamboomSet.has(stamboomnr)) {
+                        // Update bestaande hond
+                        const existingHond = existingHonden.find(h => h.stamboomnr === stamboomnr);
+                        if (existingHond) {
+                            await window.db.updateHond({ ...cleanHond, id: existingHond.id });
+                            nieuweStamboomToIdMap[stamboomnr] = existingHond.id;
+                            bestaandeHondenBijgewerkt++;
+                            console.log(`Bestaande hond bijgewerkt: ${stamboomnr}`);
+                        }
                     } else {
-                        const existingHond = existingHonden.find(h => h.stamboomnr === cleanHond.stamboomnr);
-                        await window.db.updateHond({ ...cleanHond, id: existingHond.id });
-                        hondId = existingHond.id;
-                        console.log(`Bestaande hond bijgewerkt: ${cleanHond.stamboomnr}`);
-                    }
-                    
-                    // Sla mapping op
-                    if (hondId && cleanHond.stamboomnr) {
-                        nieuweStamboomToIdMap[cleanHond.stamboomnr] = hondId;
+                        // Voeg nieuwe hond toe
+                        try {
+                            const hondId = await window.db.voegHondToe(cleanHond);
+                            nieuweStamboomToIdMap[stamboomnr] = hondId;
+                            nieuweHondenToegevoegd++;
+                            console.log(`Nieuwe hond toegevoegd: ${stamboomnr}`);
+                        } catch (addError) {
+                            console.error(`Fout bij toevoegen hond ${stamboomnr}:`, addError);
+                        }
                     }
                     
                 } catch (error) {
-                    console.error(`Fout bij toevoegen hond ${hondData.stamboomnr}:`, error);
+                    console.error(`Fout bij verwerken hond ${hondData.stamboomnr}:`, error);
                 }
             }
             
             // STAP 4: Update relaties met correcte IDs
             console.log('Update relaties tussen honden...');
+            let relatiesHersteld = 0;
             
             for (const hondData of loadedHonden) {
                 try {
@@ -436,21 +445,20 @@ class StorageManager {
                     // Herstel vader relatie
                     if (hondData.vader_stamboomnr && nieuweStamboomToIdMap[hondData.vader_stamboomnr]) {
                         updateData.vader_id = nieuweStamboomToIdMap[hondData.vader_stamboomnr];
-                        delete updateData.vader_stamboomnr;
                         needsUpdate = true;
-                        console.log(`Relatie hersteld: ${stamboomnr} -> vader ${hondData.vader_stamboomnr}`);
+                        console.log(`Vader relatie: ${stamboomnr} -> ${hondData.vader_stamboomnr}`);
                     }
                     
                     // Herstel moeder relatie
                     if (hondData.moeder_stamboomnr && nieuweStamboomToIdMap[hondData.moeder_stamboomnr]) {
                         updateData.moeder_id = nieuweStamboomToIdMap[hondData.moeder_stamboomnr];
-                        delete updateData.moeder_stamboomnr;
                         needsUpdate = true;
-                        console.log(`Relatie hersteld: ${stamboomnr} -> moeder ${hondData.moeder_stamboomnr}`);
+                        console.log(`Moeder relatie: ${stamboomnr} -> ${hondData.moeder_stamboomnr}`);
                     }
                     
                     if (needsUpdate) {
                         await window.db.updateHond(updateData);
+                        relatiesHersteld++;
                     }
                     
                 } catch (error) {
@@ -458,7 +466,7 @@ class StorageManager {
                 }
             }
             
-            // STAP 5: Laad foto's
+            // STAP 5: Laad foto's (optioneel)
             let fotosGeladen = 0;
             for (const file of files) {
                 if (file.type === 'file' && file.name.endsWith('.json') && file.name.startsWith('fotos_')) {
@@ -466,10 +474,14 @@ class StorageManager {
                         const fotosData = await this.load(file.name.replace('.json', ''));
                         if (Array.isArray(fotosData)) {
                             for (const foto of fotosData) {
-                                const cleanFoto = { ...foto };
-                                delete cleanFoto.id;
-                                await window.db.voegFotoToe(cleanFoto);
-                                fotosGeladen++;
+                                try {
+                                    const cleanFoto = { ...foto };
+                                    delete cleanFoto.id;
+                                    await window.db.voegFotoToe(cleanFoto);
+                                    fotosGeladen++;
+                                } catch (fotoError) {
+                                    console.error(`Fout bij foto:`, fotoError);
+                                }
                             }
                         }
                     } catch (error) {
@@ -478,7 +490,7 @@ class StorageManager {
                 }
             }
             
-            // STAP 6: Laad privé info
+            // STAP 6: Laad privé info (optioneel)
             let priveGeladen = 0;
             for (const file of files) {
                 if (file.type === 'file' && file.name.endsWith('.json') && file.name.startsWith('prive_')) {
@@ -495,19 +507,43 @@ class StorageManager {
                 }
             }
             
-            console.log(`✅ Data geladen: ${loadedHonden.length} honden, ${fotosGeladen} foto's, ${priveGeladen} privé records`);
+            console.log(`✅ Data geladen: ${nieuweHondenToegevoegd} nieuwe honden, ${bestaandeHondenBijgewerkt} bijgewerkt, ${relatiesHersteld} relaties, ${fotosGeladen} foto's, ${priveGeladen} privé records`);
             
-            if (window.refreshHondenLijst) {
-                setTimeout(() => window.refreshHondenLijst(), 500);
-            }
+            // Refresh UI
+            setTimeout(() => {
+                if (window.refreshHondenLijst) {
+                    window.refreshHondenLijst();
+                }
+                
+                if (window.loadInitialStats) {
+                    window.loadInitialStats();
+                }
+            }, 1000);
             
-            if (window.uiHandler && window.uiHandler.showSuccess && loadedHonden.length > 0) {
-                window.uiHandler.showSuccess(`${loadedHonden.length} honden geladen uit map (incl. relaties)`);
+            if (window.uiHandler && window.uiHandler.showSuccess) {
+                if (nieuweHondenToegevoegd > 0) {
+                    window.uiHandler.showSuccess(`${nieuweHondenToegevoegd} honden geladen uit map (${relatiesHersteld} relaties hersteld)`);
+                } else if (bestaandeHondenBijgewerkt > 0) {
+                    window.uiHandler.showSuccess(`${bestaandeHondenBijgewerkt} honden bijgewerkt uit map`);
+                }
             }
             
         } catch (error) {
             console.error('Fout bij laden data uit FileSystem:', error);
+            this.dataLoaded = false; // Reset bij fout
             throw error;
+        }
+    }
+    
+    async syncData() {
+        console.log('Start synchronisatie...');
+        
+        if (this.currentStorage.type === 'filesystem') {
+            try {
+                await this.loadFromFileSystemToDatabase();
+            } catch (error) {
+                console.error('Sync fout:', error);
+            }
         }
     }
     
@@ -692,12 +728,18 @@ class StorageManager {
             return false;
         }
     }
+    
+    resetDataLoaded() {
+        this.dataLoaded = false;
+        console.log('Data loaded flag gereset');
+    }
 }
 
 // Maak globale instance
 const storageManager = new StorageManager();
 window.storageManager = storageManager;
 
+// Export voor Node.js
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { StorageManager, storageManager };
 }
