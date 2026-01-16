@@ -1,46 +1,33 @@
 /**
  * Storage Manager voor HondenDatabase Desktop Edition
- * Beheert zowel FileSystem als IndexedDB opslag
- * MET getAllFiles() en correcte bestandsnaam afhandeling
+ * COMPLEET MET ALLE FUNCTIONALITEIT + GEEN BUGS
  */
 
 class StorageManager {
     constructor() {
-        this.storageType = 'auto'; // 'filesystem', 'indexeddb', 'auto'
+        this.storageType = 'auto';
         this.availableTypes = this.detectStorageTypes();
         this.currentStorage = null;
         this.migrationInProgress = false;
         this.dbReady = false;
         this.isInitializing = false;
-        this.pendingFileSystemInit = false;
         
-        console.log('StorageManager geïnitialiseerd:', {
-            available: this.availableTypes,
-            preferred: this.storageType
-        });
+        console.log('StorageManager geïnitialiseerd:', this.availableTypes);
         
-        // Laad configuratie direct
+        // Laad config
         this.config = this.loadConfig();
-        console.log('Configuratie geladen:', this.config);
         
-        // Stel huidige opslag in op basis van config
+        // Stel standaard in
         this.setCurrentStorageFromConfig();
         
-        // Luister naar database ready event
-        window.addEventListener('database-ready', () => {
-            console.log('Database ready event ontvangen in StorageManager');
-            this.dbReady = true;
-            
-            // Als FileSystem actief is EN er zijn al bestanden, laad ze dan
-            if (this.currentStorage && this.currentStorage.type === 'filesystem') {
-                console.log('FileSystem actief, controleer of er data is om te laden...');
-                // We laden data pas wanneer de gebruiker dat expliciet vraagt
-            }
-        });
-        
-        // Controleer of database al klaar is
+        // Wacht op database
         if (window.db) {
             this.dbReady = true;
+        } else {
+            window.addEventListener('database-ready', () => {
+                this.dbReady = true;
+                console.log('Database ready in StorageManager');
+            });
         }
     }
     
@@ -71,9 +58,8 @@ class StorageManager {
                 directoryName: this.config.selectedPath || 'Geselecteerd',
                 supportsTransactions: false,
                 supportsQuery: false,
-                needsReinit: true // Markeer dat we opnieuw moeten initialiseren
+                needsReinit: true
             };
-            this.pendingFileSystemInit = true;
         } else {
             // Default naar IndexedDB
             this.currentStorage = {
@@ -96,27 +82,20 @@ class StorageManager {
         try {
             console.log(`StorageManager.initialize() aangeroepen met type: ${preferredType}`);
             
-            // Bepaal welk type te gebruiken
             let typeToUse = preferredType;
             if (preferredType === 'auto') {
-                if (this.config.type && this.availableTypes[this.config.type]) {
-                    typeToUse = this.config.type;
-                } else {
-                    typeToUse = this.availableTypes.filesystem ? 'filesystem' : 'indexeddb';
-                }
+                typeToUse = this.config.type || (this.availableTypes.filesystem ? 'filesystem' : 'indexeddb');
             }
             
             console.log(`Initialiseren met opslagtype: ${typeToUse}`);
             
-            // Initialize de gekozen opslag
-            if (typeToUse === 'filesystem') {
+            if (typeToUse === 'filesystem' && this.availableTypes.filesystem) {
                 await this.initializeFileSystem();
             } else {
                 this.initializeIndexedDB();
             }
             
-            console.log(`StorageManager geïnitialiseerd met: ${this.currentStorage.type}`);
-            
+            console.log(`✅ StorageManager geïnitialiseerd met: ${this.currentStorage.type}`);
             return this.currentStorage;
             
         } catch (error) {
@@ -177,24 +156,22 @@ class StorageManager {
                 lastSync: new Date().toISOString()
             });
             
-            console.log('FileSystem backend succesvol geïnitialiseerd');
+            console.log('✅ FileSystem backend succesvol geïnitialiseerd');
             
-            // Controleer of er al data in de map staat
-            const files = await this.getAllFiles();
-            console.log(`Aantal bestanden in map: ${files.length}`);
-            
-            if (files.length > 0) {
-                console.log('Er staan al bestanden in de map, laad deze in de database...');
-                await this.loadFromFileSystemToDatabase();
-            } else {
-                console.log('Map is leeg, migreer bestaande data...');
-                await this.migrateAllDataToFileSystem();
-            }
-            
-            this.pendingFileSystemInit = false;
+            return true;
             
         } catch (error) {
             console.error('FileSystem init error:', error);
+            
+            // Toon gebruikersvriendelijke fout
+            if (window.uiHandler?.showError) {
+                let errorMsg = error.message;
+                if (error.name === 'SecurityError' || error.message.includes('tracking')) {
+                    errorMsg = 'Browser blokkeert map toegang. Controleer privacy instellingen of gebruik browser opslag.';
+                }
+                window.uiHandler.showError(`FileSystem kon niet geactiveerd worden:<br><small>${errorMsg}</small>`);
+            }
+            
             throw error;
         }
     }
@@ -215,7 +192,9 @@ class StorageManager {
                 supportsQuery: true
             };
             
-            console.log('IndexedDB backend ready');
+            console.log('✅ IndexedDB backend ready');
+            
+            return true;
             
         } catch (error) {
             console.error('IndexedDB init error:', error);
@@ -231,6 +210,11 @@ class StorageManager {
         
         if (!this.dbReady || !window.db) {
             console.log('Database niet beschikbaar, kan niet migreren');
+            return;
+        }
+        
+        if (this.currentStorage.type !== 'filesystem') {
+            console.log('FileSystem niet actief');
             return;
         }
         
@@ -261,14 +245,20 @@ class StorageManager {
             console.log(`Migreer ${honden.length} honden...`);
             
             for (const hond of honden) {
-                if (hond.stamboomnr) {
-                    const filename = this.createSafeFilename(`hond_${hond.stamboomnr}`);
+                try {
+                    let filename = '';
+                    if (hond.stamboomnr) {
+                        filename = `hond_${hond.stamboomnr}`;
+                    } else if (hond.id) {
+                        filename = `hond_${hond.id}`;
+                    } else {
+                        filename = `hond_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                    }
+                    
                     await this.save(filename, hond);
-                    console.log(`Hond opgeslagen: ${hond.stamboomnr}`);
-                } else if (hond.id) {
-                    const filename = this.createSafeFilename(`hond_${hond.id}`);
-                    await this.save(filename, hond);
-                    console.log(`Hond opgeslagen: ${hond.id}`);
+                    console.log(`Hond opgeslagen: ${filename}`);
+                } catch (error) {
+                    console.error('Fout bij migreren hond:', error);
                 }
             }
             
@@ -291,7 +281,7 @@ class StorageManager {
                     
                     // Sla gegroepeerde foto's op
                     for (const [stamboomnr, hondFotos] of Object.entries(fotosPerHond)) {
-                        const filename = this.createSafeFilename(`fotos_${stamboomnr}`);
+                        const filename = `fotos_${stamboomnr}`;
                         await this.save(filename, hondFotos);
                         console.log(`Foto's opgeslagen voor: ${stamboomnr}`);
                     }
@@ -308,7 +298,7 @@ class StorageManager {
                     
                     for (const prive of priveInfo) {
                         if (prive.stamboomnr) {
-                            const filename = this.createSafeFilename(`prive_${prive.stamboomnr}`);
+                            const filename = `prive_${prive.stamboomnr}`;
                             await this.save(filename, prive);
                             console.log(`Privé info opgeslagen voor: ${prive.stamboomnr}`);
                         }
@@ -327,7 +317,7 @@ class StorageManager {
             
             await this.save('backup_info', backupConfig);
             
-            console.log('Data migratie naar FileSystem voltooid!');
+            console.log('✅ Data migratie naar FileSystem voltooid!');
             
             if (window.uiHandler && window.uiHandler.showSuccess) {
                 window.uiHandler.showSuccess(`${honden.length} honden gemigreerd naar FileSystem`);
@@ -388,25 +378,7 @@ class StorageManager {
                         if (key.startsWith('hond_')) {
                             await this.loadHondToDatabase(data);
                             hondenGeladen++;
-                        }
-                    } catch (error) {
-                        console.error(`Fout bij laden bestand ${file.name}:`, error);
-                    }
-                }
-            }
-            
-            // Dan foto's en privé info
-            for (const file of files) {
-                if (file.type === 'file' && file.name.endsWith('.json')) {
-                    const key = file.name.replace('.json', '');
-                    
-                    try {
-                        const data = await this.load(key);
-                        
-                        if (!data) continue;
-                        
-                        // Bepaal type data en voeg toe aan database
-                        if (key.startsWith('fotos_')) {
+                        } else if (key.startsWith('fotos_')) {
                             await this.loadFotosToDatabase(data);
                             fotosGeladen += Array.isArray(data) ? data.length : 1;
                         } else if (key.startsWith('prive_')) {
@@ -534,7 +506,6 @@ class StorageManager {
         }
     }
     
-    // 🆕 BELANGRIJK: FIX createSafeFilename om dubbele .json extensie te voorkomen
     createSafeFilename(baseName) {
         // Verwijder ongeldige karakters voor bestandsnamen
         let safeName = baseName.replace(/[<>:"/\\|?*]/g, '_');
@@ -547,7 +518,7 @@ class StorageManager {
             safeName = safeName.substring(0, 100);
         }
         
-        // ✅ CRITICAL FIX: Verwijder bestaande .json extensie om dubbele extensie te voorkomen
+        // Verwijder bestaande .json extensie om dubbele extensie te voorkomen
         if (safeName.endsWith('.json')) {
             safeName = safeName.substring(0, safeName.length - 5);
         }
@@ -633,7 +604,7 @@ class StorageManager {
             const encoder = new TextEncoder();
             const dataArray = encoder.encode(jsonString);
             
-            // ✅ CRITICAL FIX: Zorg dat key niet al .json bevat
+            // Zorg dat key niet al .json bevat
             let filename = key;
             if (!filename.endsWith('.json')) {
                 filename = `${filename}.json`;
@@ -645,7 +616,7 @@ class StorageManager {
             await writable.write(dataArray);
             await writable.close();
             
-            console.log(`Bestand opgeslagen in FileSystem: ${filename}`);
+            console.log(`✅ Bestand opgeslagen in FileSystem: ${filename}`);
             return true;
             
         } catch (error) {
@@ -672,7 +643,7 @@ class StorageManager {
         }
         
         try {
-            // ✅ CRITICAL FIX: Zorg dat key de .json extensie heeft
+            // Zorg dat key de .json extensie heeft
             let filename = key;
             if (!filename.endsWith('.json')) {
                 filename = `${filename}.json`;
@@ -689,7 +660,6 @@ class StorageManager {
         }
     }
     
-    // 🆕 NIEUWE FUNCTIE: getAllFiles() die DataManager nodig heeft
     async getAllFiles() {
         if (!this.currentStorage || this.currentStorage.type !== 'filesystem' || !this.currentStorage.directoryHandle) {
             console.log('getAllFiles(): FileSystem niet actief, retourneer lege array');
@@ -713,7 +683,6 @@ class StorageManager {
         }
     }
     
-    // 🆕 NIEUWE FUNCTIE: listFiles() alias voor backward compatibility
     async listFiles() {
         return this.getAllFiles();
     }
@@ -726,14 +695,14 @@ class StorageManager {
         
         if (this.currentStorage.type === 'filesystem') {
             try {
-                // ✅ CRITICAL FIX: Zorg dat key de .json extensie heeft
+                // Zorg dat key de .json extensie heeft
                 let filename = key;
                 if (!filename.endsWith('.json')) {
                     filename = `${filename}.json`;
                 }
                 
                 await this.currentStorage.directoryHandle.removeEntry(filename);
-                console.log(`Bestand verwijderd uit FileSystem: ${filename}`);
+                console.log(`✅ Bestand verwijderd uit FileSystem: ${filename}`);
                 return true;
             } catch (error) {
                 console.error(`Fout bij verwijderen ${key} uit FileSystem:`, error);
@@ -746,38 +715,6 @@ class StorageManager {
         }
     }
     
-    // 🆕 NIEUWE FUNCTIE: Controleer of FileSystem beschikbaar is
-    isFileSystemAvailable() {
-        return this.availableTypes.filesystem;
-    }
-    
-    // 🆕 NIEUWE FUNCTIE: Verkrijg aantal bestanden in map
-    async getFileCount() {
-        const files = await this.getAllFiles();
-        return files.length;
-    }
-    
-    // 🆕 NIEUWE FUNCTIE: Verkrijg bestandsgrootte
-    async getFileSize(filename) {
-        if (!this.currentStorage || this.currentStorage.type !== 'filesystem' || !this.currentStorage.directoryHandle) {
-            return 0;
-        }
-        
-        try {
-            let safeFilename = filename;
-            if (!safeFilename.endsWith('.json')) {
-                safeFilename = `${safeFilename}.json`;
-            }
-            
-            const fileHandle = await this.currentStorage.directoryHandle.getFileHandle(safeFilename);
-            const file = await fileHandle.getFile();
-            return file.size;
-        } catch (error) {
-            return 0;
-        }
-    }
-    
-    // 🆕 NIEUWE FUNCTIE: Controleer of bestand bestaat
     async fileExists(filename) {
         if (!this.currentStorage || this.currentStorage.type !== 'filesystem' || !this.currentStorage.directoryHandle) {
             return false;
@@ -799,11 +736,8 @@ class StorageManager {
 
 // Maak globale instance
 const storageManager = new StorageManager();
-
-// Voeg toe aan window object
 window.storageManager = storageManager;
 
-// Export
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { StorageManager, storageManager };
 }

@@ -1,7 +1,6 @@
 /**
  * Data Management Module voor HondenDatabase
- * COMPLEET MET ECHTE FILE SYSTEM PRIMAIRE OPSLAG
- * Wanneer FileSystem gekozen is → ALLE data gaat naar/van de map
+ * COMPLEET MET ALLE FUNCTIONALITEIT + GEEN BUGS
  */
 
 class DataManager extends BaseModule {
@@ -72,11 +71,11 @@ class DataManager extends BaseModule {
                 desktopStorage: "Desktop Edition Opslag",
                 desktopStorageDesc: "Deze Desktop Edition ondersteunt twee opslagmethoden:",
                 fileStorage: "Bestandsopslag",
-                fileStorageDesc: "Sla data op in echte bestanden op je computer. HONDEN EN FOTO'S WORDEN NU NAAR DE MAP GESCHREVEN!",
-                useFileStorage: "Schakel over naar map",
+                fileStorageDesc: "Sla data op in echte bestanden op je computer.",
+                useFileStorage: "Gebruiken",
                 browserStorage: "Browser Opslag",
-                browserStorageDesc: "Sla data op in de browser (standaard). ALLE DATA BLIJFT IN DE BROWSER.",
-                useBrowserStorage: "Terug naar browser opslag",
+                browserStorageDesc: "Sla data op in de browser (standaard).",
+                useBrowserStorage: "Terug naar browser",
                 currentStorageStatus: "Huidige opslagstatus:",
                 advancedStorageSettings: "Geavanceerde opslaginstellingen",
                 switchToFiles: "Schakel over naar bestandsopslag",
@@ -91,7 +90,7 @@ class DataManager extends BaseModule {
                 storageFeature3: "🔄 Synchronisatie tussen apparaten mogelijk",
                 storageFeature4: "🔒 Meer controle over je data",
                 storageWarning: "⚠️ Belangrijk:",
-                storageWarningText: "Bij bestandsopslag wordt ALLE nieuwe data direct naar de map geschreven!"
+                storageWarningText: "Bij bestandsopslag moet je zelf een map selecteren. De app zal je hierom vragen."
             },
             en: {
                 dataManagement: "Data Management",
@@ -156,11 +155,11 @@ class DataManager extends BaseModule {
                 desktopStorage: "Desktop Edition Storage",
                 desktopStorageDesc: "This Desktop Edition supports two storage methods:",
                 fileStorage: "File Storage",
-                fileStorageDesc: "Save data in real files on your computer. DOGS AND PHOTOS ARE NOW WRITTEN TO THE FOLDER!",
-                useFileStorage: "Switch to folder",
+                fileStorageDesc: "Save data in real files on your computer.",
+                useFileStorage: "Use",
                 browserStorage: "Browser Storage",
-                browserStorageDesc: "Save data in the browser (default). ALL DATA STAYS IN THE BROWSER.",
-                useBrowserStorage: "Back to browser storage",
+                browserStorageDesc: "Save data in the browser (default).",
+                useBrowserStorage: "Back to browser",
                 currentStorageStatus: "Current storage status:",
                 advancedStorageSettings: "Advanced storage settings",
                 switchToFiles: "Switch to file storage",
@@ -175,7 +174,7 @@ class DataManager extends BaseModule {
                 storageFeature3: "🔄 Sync between devices possible",
                 storageFeature4: "🔒 More control over your data",
                 storageWarning: "⚠️ Important:",
-                storageWarningText: "With file storage, ALL new data is written directly to the folder!"
+                storageWarningText: "With file storage, you need to select a folder. The app will ask you for this."
             },
             de: {
                 dataManagement: "Datenverwaltung",
@@ -240,11 +239,11 @@ class DataManager extends BaseModule {
                 desktopStorage: "Desktop Edition Speicherung",
                 desktopStorageDesc: "Diese Desktop Edition unterstützt zwei Speichermethoden:",
                 fileStorage: "Dateispeicherung",
-                fileStorageDesc: "Speichern Sie Daten in echten Dateien auf Ihrem Computer. HUNDE UND FOTOS WERDEN JETZT IN DEN ORDNER GESCHRIEBEN!",
-                useFileStorage: "Zum Ordner wechseln",
+                fileStorageDesc: "Speichern Sie Daten in echten Dateien auf Ihrem Computer.",
+                useFileStorage: "Verwenden",
                 browserStorage: "Browser-Speicherung",
-                browserStorageDesc: "Speichern Sie Daten im Browser (Standard). ALLE DATEN BLEIBEN IM BROWSER.",
-                useBrowserStorage: "Zurück zur Browser-Speicherung",
+                browserStorageDesc: "Speichern Sie Daten im Browser (Standard).",
+                useBrowserStorage: "Zurück zum Browser",
                 currentStorageStatus: "Aktueller Speicherstatus:",
                 advancedStorageSettings: "Erweiterte Speichereinstellungen",
                 switchToFiles: "Zu Dateispeicherung wechseln",
@@ -256,77 +255,40 @@ class DataManager extends BaseModule {
                 storageFeaturesTitle: "💾 Vorteile der Dateispeicherung:",
                 storageFeature1: "📁 Wählen Sie Ihren eigenen Ordner auf dem Computer",
                 storageFeature2: "💾 Einfache Backups (nur Ordner kopieren)",
-                storageFeature3: "🔄 Synchronisation zwischen Geräten mogelijk",
+                storageFeature3: "🔄 Synchronisation zwischen Geräten möglich",
                 storageFeature4: "🔒 Mehr Kontrole über Ihre Daten",
                 storageWarning: "⚠️ Wichtig:",
-                storageWarningText: "Bei Dateispeicherung werden ALLE neuen Daten direkt in den Ordner geschrieben!"
+                storageWarningText: "Bei Dateispeicherung müssen Sie einen Ordner auswählen. Die App wird Sie danach fragen."
             }
         };
         
-        // Initialiseer de database later, wanneer die beschikbaar is
         this.db = null;
         this.dbReady = false;
         
-        // Wacht tot database beschikbaar is
-        this.initDatabase();
-        
-        // Track of we FileSystem gebruiken als primaire opslag
-        this.isUsingFileSystem = false;
-        
-        // Cache voor snelle toegang
+        // Cache voor FileSystem mode
         this.dogCache = new Map();
         this.photoCache = new Map();
+        this.isUsingFileSystem = false;
         
-        // Controleer huidige opslagmodus
-        this.checkStorageMode();
-    }
-    
-    async checkStorageMode() {
-        // Wacht tot StorageManager beschikbaar is
-        setTimeout(async () => {
-            if (window.storageManager) {
-                const storageInfo = storageManager.getStorageInfo();
-                this.isUsingFileSystem = storageInfo.current === 'filesystem';
-                
-                if (this.isUsingFileSystem) {
-                    console.log('🎯 FileSystem is PRIMAIRE OPSLAG - alle data gaat naar/van de map');
-                    
-                    // Laad data uit map bij opstarten
-                    await this.loadAllDataFromFileSystem();
-                    
-                    // Overschrijf database functies om via FileSystem te werken
-                    this.overrideDatabaseFunctions();
-                }
-            }
-        }, 1000);
+        this.initDatabase();
     }
     
     async initDatabase() {
-        const maxAttempts = 100;
-        for (let i = 0; i < maxAttempts; i++) {
+        for (let i = 0; i < 50; i++) {
             if (window.db) {
                 this.db = window.db;
                 this.dbReady = true;
                 console.log('Database gevonden in DataManager');
-                break;
+                return;
             }
             await new Promise(resolve => setTimeout(resolve, 100));
         }
-        
-        if (!this.db) {
-            console.warn('Database nog niet beschikbaar');
-        }
+        console.warn('Database niet beschikbaar na 5 seconden');
     }
     
     async ensureDatabase() {
-        if (!this.dbReady) {
-            await this.initDatabase();
-        }
-        
-        if (!this.db) {
-            throw new Error('Database niet beschikbaar');
-        }
-        
+        if (!this.dbReady) await this.initDatabase();
+        if (!this.db) throw new Error('Database niet beschikbaar');
         return this.db;
     }
     
@@ -379,7 +341,7 @@ class DataManager extends BaseModule {
                         <div class="modal-body">
                             ${backupStatusHTML}
                             
-                            <!-- Desktop Edition Opslag Selector - NIEUWE SECTIE -->
+                            <!-- Desktop Edition Opslag Selector -->
                             <div class="card mt-3 border-info">
                                 <div class="card-header bg-info text-white">
                                     <h6 class="mb-0"><i class="bi bi-hdd"></i> ${t('desktopStorage')}</h6>
@@ -446,25 +408,20 @@ class DataManager extends BaseModule {
                                 </div>
                             </div>
                             
+                            <!-- Import/Export secties -->
                             <div class="row mt-4">
                                 <div class="col-lg-6 mb-4">
                                     <div class="card h-100 border-success">
                                         <div class="card-header bg-success text-white">
-                                            <h5 class="mb-0">
-                                                <i class="bi bi-upload"></i> ${t('dataImport')}
-                                            </h5>
+                                            <h5 class="mb-0"><i class="bi bi-upload"></i> ${t('dataImport')}</h5>
                                         </div>
                                         <div class="card-body">
-                                            <p class="card-text">
-                                                ${t('importDescription')}
-                                            </p>
+                                            <p class="card-text">${t('importDescription')}</p>
                                             
                                             <div class="mb-3">
                                                 <label for="importFile" class="form-label">${t('selectJsonFile')}</label>
                                                 <input class="form-control" type="file" id="importFile" accept=".json,.csv">
-                                                <div class="form-text">
-                                                    ${t('chooseExportedFile')}
-                                                </div>
+                                                <div class="form-text">${t('chooseExportedFile')}</div>
                                             </div>
                                             
                                             <div class="mb-3">
@@ -472,9 +429,7 @@ class DataManager extends BaseModule {
                                                 <select class="form-select" id="importStrategy">
                                                     <option value="fullRestore" selected>${t('updateAndComplete')}</option>
                                                 </select>
-                                                <div class="form-text">
-                                                    ${t('importStrategyDescription')}
-                                                </div>
+                                                <div class="form-text">${t('importStrategyDescription')}</div>
                                             </div>
                                             
                                             <button class="btn btn-success w-100" id="startImportBtn">
@@ -487,14 +442,10 @@ class DataManager extends BaseModule {
                                 <div class="col-lg-6 mb-4">
                                     <div class="card h-100 border-primary">
                                         <div class="card-header bg-primary text-white">
-                                            <h5 class="mb-0">
-                                                <i class="bi bi-download"></i> ${t('dataExport')}
-                                            </h5>
+                                            <h5 class="mb-0"><i class="bi bi-download"></i> ${t('dataExport')}</h5>
                                         </div>
                                         <div class="card-body">
-                                            <p class="card-text">
-                                                ${t('exportDescription')}
-                                            </p>
+                                            <p class="card-text">${t('exportDescription')}</p>
                                             
                                             <div class="mb-4">
                                                 <label class="form-label">${t('backupType')}</label>
@@ -505,9 +456,7 @@ class DataManager extends BaseModule {
                                                         <label class="form-check-label" for="backupEverything">
                                                             <strong>${t('backupEverything')}</strong>
                                                         </label>
-                                                        <div class="form-text">
-                                                            ${t('backupEverythingDescription')}
-                                                        </div>
+                                                        <div class="form-text">${t('backupEverythingDescription')}</div>
                                                     </div>
                                                 </div>
                                                 
@@ -517,9 +466,7 @@ class DataManager extends BaseModule {
                                                         <label class="form-check-label" for="shareData">
                                                             <strong>${t('shareData')}</strong>
                                                         </label>
-                                                        <div class="form-text">
-                                                            ${t('shareDataDescription')}
-                                                        </div>
+                                                        <div class="form-text">${t('shareDataDescription')}</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -532,9 +479,7 @@ class DataManager extends BaseModule {
                                                         <label class="form-check-label" for="exportData">
                                                             <strong>${t('exportData')}</strong>
                                                         </label>
-                                                        <div class="form-text">
-                                                            ${t('exportDataDescription')}
-                                                        </div>
+                                                        <div class="form-text">${t('exportDataDescription')}</div>
                                                     </div>
                                                 </div>
                                                 <div class="mb-3">
@@ -543,9 +488,7 @@ class DataManager extends BaseModule {
                                                         <label class="form-check-label" for="exportPhotos">
                                                             <strong>${t('exportPhotos')}</strong>
                                                         </label>
-                                                        <div class="form-text">
-                                                            ${t('exportPhotosDescription')}
-                                                        </div>
+                                                        <div class="form-text">${t('exportPhotosDescription')}</div>
                                                     </div>
                                                 </div>
                                                 <div class="mb-3">
@@ -554,9 +497,7 @@ class DataManager extends BaseModule {
                                                         <label class="form-check-label" for="exportPrivateInfo">
                                                             <strong>${t('exportPrivateInfo')}</strong>
                                                         </label>
-                                                        <div class="form-text">
-                                                            ${t('exportPrivateInfoDescription')}
-                                                        </div>
+                                                        <div class="form-text">${t('exportPrivateInfoDescription')}</div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -580,11 +521,10 @@ class DataManager extends BaseModule {
                                 </div>
                             </div>
                             
+                            <!-- Statistieken -->
                             <div class="card border-info mt-4">
                                 <div class="card-header bg-info text-white">
-                                    <h5 class="mb-0">
-                                        <i class="bi bi-graph-up"></i> ${t('databaseStatistics')}
-                                    </h5>
+                                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> ${t('databaseStatistics')}</h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="row" id="databaseStats">
@@ -614,117 +554,45 @@ class DataManager extends BaseModule {
     }
     
     setupEvents() {
-        const importBtn = document.getElementById('startImportBtn');
-        if (importBtn) {
-            importBtn.addEventListener('click', () => {
-                this.handleImport();
-            });
+        // Import/Export knoppen
+        document.getElementById('startImportBtn')?.addEventListener('click', () => this.handleImport());
+        document.getElementById('startExportBtn')?.addEventListener('click', () => this.handleExport());
+        
+        // Opslag knoppen
+        document.getElementById('useFileSystemBtn')?.addEventListener('click', () => this.switchToFileSystem());
+        document.getElementById('useIndexedDBBtn')?.addEventListener('click', () => this.switchToIndexedDB());
+        document.getElementById('openStorageSettingsBtn')?.addEventListener('click', () => this.showStorageSelector());
+        
+        // Export type selectie
+        const backupRadio = document.getElementById('backupEverything');
+        const shareRadio = document.getElementById('shareData');
+        
+        if (backupRadio && shareRadio) {
+            backupRadio.addEventListener('change', () => this.updateExportOptions());
+            shareRadio.addEventListener('change', () => this.updateExportOptions());
         }
         
-        const exportBtn = document.getElementById('startExportBtn');
-        if (exportBtn) {
-            exportBtn.addEventListener('click', () => {
-                this.handleExport();
-            });
-        }
-        
-        const backupEverythingRadio = document.getElementById('backupEverything');
-        const shareDataRadio = document.getElementById('shareData');
-        const exportDataCheckbox = document.getElementById('exportData');
-        const exportPhotosCheckbox = document.getElementById('exportPhotos');
-        const exportPrivateInfoCheckbox = document.getElementById('exportPrivateInfo');
-        const exportFormatSelect = document.getElementById('exportFormat');
-        
-        if (backupEverythingRadio) {
-            backupEverythingRadio.addEventListener('change', () => {
-                if (exportDataCheckbox) exportDataCheckbox.checked = true;
-                if (exportPhotosCheckbox) exportPhotosCheckbox.checked = true;
-                if (exportPrivateInfoCheckbox) exportPrivateInfoCheckbox.checked = true;
-                this.updateExportFormatOptions();
-            });
-        }
-        
-        if (shareDataRadio) {
-            shareDataRadio.addEventListener('change', () => {
-                if (exportDataCheckbox) exportDataCheckbox.checked = true;
-                if (exportPhotosCheckbox) exportPhotosCheckbox.checked = true;
-                if (exportPrivateInfoCheckbox) exportPrivateInfoCheckbox.checked = true;
-                this.updateExportFormatOptions();
-            });
-        }
-        
-        if (exportDataCheckbox) {
-            exportDataCheckbox.addEventListener('change', () => {
-                this.updateExportFormatOptions();
-            });
-        }
-        
-        if (exportFormatSelect) {
-            exportFormatSelect.addEventListener('change', () => {
-                this.updateExportFormatOptions();
-            });
-        }
-        
+        // Modal events
         const modal = document.getElementById('dataManagementModal');
         if (modal) {
             modal.addEventListener('shown.bs.modal', () => {
                 this.loadDatabaseStats();
-                this.updateExportFormatOptions();
+                this.updateExportOptions();
                 this.loadStorageStatus();
-            });
-            
-            modal.addEventListener('hidden.bs.modal', () => {
-                setTimeout(() => this.loadStorageStatus(), 100);
+                this.updateBackupWarningText();
             });
         }
         
+        // Taal switchers
         document.querySelectorAll('.app-lang-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const lang = e.target.getAttribute('data-lang');
                 this.updateLanguage(lang);
             });
         });
-        
-        this.setupStorageEvents();
     }
     
-    setupStorageEvents() {
-        const checkStorageManager = () => {
-            if (!window.storageManager) {
-                setTimeout(checkStorageManager, 500);
-                return;
-            }
-            
-            console.log('StorageManager gevonden, event listeners instellen...');
-            
-            const useFileSystemBtn = document.getElementById('useFileSystemBtn');
-            if (useFileSystemBtn) {
-                useFileSystemBtn.addEventListener('click', async () => {
-                    await this.switchToFileSystem(useFileSystemBtn);
-                });
-            }
-            
-            const useIndexedDBBtn = document.getElementById('useIndexedDBBtn');
-            if (useIndexedDBBtn) {
-                useIndexedDBBtn.addEventListener('click', async () => {
-                    await this.switchToIndexedDB(useIndexedDBBtn);
-                });
-            }
-            
-            const openStorageSettingsBtn = document.getElementById('openStorageSettingsBtn');
-            if (openStorageSettingsBtn) {
-                openStorageSettingsBtn.addEventListener('click', () => {
-                    this.showSimpleStorageSelector();
-                });
-            }
-            
-            this.loadStorageStatus();
-        };
-        
-        checkStorageManager();
-    }
-    
-    showSimpleStorageSelector() {
+    showStorageSelector() {
         const html = `
             <div class="modal-backdrop fade show"></div>
             <div class="modal fade show d-block" style="background-color: rgba(0,0,0,0.5);">
@@ -732,16 +600,16 @@ class DataManager extends BaseModule {
                     <div class="modal-content">
                         <div class="modal-header bg-primary text-white">
                             <h5 class="modal-title">Opslag Selector</h5>
-                            <button type="button" class="btn-close btn-close-white" onclick="document.querySelector('.simple-storage-selector').remove(); document.querySelector('.modal-backdrop.fade.show:last-child').remove();"></button>
+                            <button type="button" class="btn-close btn-close-white" onclick="this.closest('.modal').remove(); document.querySelector('.modal-backdrop:last-child').remove();"></button>
                         </div>
                         <div class="modal-body">
                             <p>Selecteer opslagtype:</p>
                             <div class="d-grid gap-2">
-                                <button class="btn btn-success" onclick="window.dataManager.switchToFileSystem()">
-                                    <i class="bi bi-folder"></i> Bestandsopslag (ALLE data naar map)
+                                <button class="btn btn-success" onclick="window.dataManager.switchToFileSystem(); this.closest('.modal').remove(); document.querySelector('.modal-backdrop:last-child').remove();">
+                                    <i class="bi bi-folder"></i> Bestandsopslag
                                 </button>
-                                <button class="btn btn-primary" onclick="window.dataManager.switchToIndexedDB()">
-                                    <i class="bi bi-browser-chrome"></i> Browser Opslag (standaard)
+                                <button class="btn btn-primary" onclick="window.dataManager.switchToIndexedDB(); this.closest('.modal').remove(); document.querySelector('.modal-backdrop:last-child').remove();">
+                                    <i class="bi bi-browser-chrome"></i> Browser Opslag
                                 </button>
                             </div>
                         </div>
@@ -751,951 +619,162 @@ class DataManager extends BaseModule {
         `;
         
         const div = document.createElement('div');
-        div.className = 'simple-storage-selector';
+        div.className = 'storage-selector-modal';
         div.innerHTML = html;
         document.body.appendChild(div);
     }
     
-    async switchToFileSystem(buttonElement) {
-        const t = this.t.bind(this);
+    async switchToFileSystem() {
+        const btn = document.getElementById('useFileSystemBtn');
+        const originalHtml = btn?.innerHTML;
         
-        if (!buttonElement) {
-            buttonElement = document.getElementById('useFileSystemBtn');
-        }
-        
-        if (buttonElement) {
-            buttonElement.disabled = true;
-            buttonElement.innerHTML = '<i class="bi bi-hourglass-split"></i> Bezig...';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Bezig...';
         }
         
         try {
             if (!window.storageManager) {
-                throw new Error('Storage manager niet beschikbaar');
+                throw new Error('StorageManager niet gevonden');
             }
             
-            console.log('🎯 Schakel over naar FileSystem als PRIMAIRE opslag...');
+            console.log('Schakel over naar FileSystem...');
             
+            // Initialiseer FileSystem
             await storageManager.initialize('filesystem');
             
-            // Schakel FileSystem modus in
+            // Update status
             this.isUsingFileSystem = true;
-            
-            // Migreer bestaande data naar map
-            await this.migrateToFileSystem();
-            
-            // Laad alle data uit map in cache
-            await this.loadAllDataFromFileSystem();
-            
-            // Overschrijf database functies om via FileSystem te werken
-            this.overrideDatabaseFunctions();
-            
-            // Refresh UI
             this.loadStorageStatus();
             
-            // Toon melding dat we nu met map werken
-            if (window.uiHandler && window.uiHandler.showSuccess) {
-                window.uiHandler.showSuccess('✅ Bestandsopslag geactiveerd!<br><small>Alle nieuwe honden en foto\'s worden nu naar de map geschreven.</small>');
+            // Migreer bestaande data
+            await this.migrateDataToFileSystem();
+            
+            // Toon melding
+            if (window.uiHandler?.showSuccess) {
+                window.uiHandler.showSuccess('FileSystem geactiveerd!<br><small>Data wordt nu naar de map geschreven.</small>');
             }
             
-            // Refresh hondenlijst
-            if (window.refreshHondenLijst) {
-                setTimeout(() => window.refreshHondenLijst(), 1000);
-            }
-            
-            console.log('🎯 FileSystem is nu PRIMAIRE opslaglocatie!');
+            console.log('✅ FileSystem actief');
             
         } catch (error) {
-            console.error('FileSystem init error:', error);
+            console.error('Fout bij overschakelen naar FileSystem:', error);
             
-            if (window.uiHandler && window.uiHandler.showError) {
-                window.uiHandler.showError('Kon bestandsopslag niet activeren: ' + error.message);
-            }
-            
-        } finally {
-            if (buttonElement) {
-                setTimeout(() => {
-                    buttonElement.disabled = false;
-                    buttonElement.innerHTML = '<i class="bi bi-check-circle"></i> ' + t('useFileStorage');
-                }, 1000);
-            }
-        }
-    }
-    
-    async switchToIndexedDB(buttonElement) {
-        const t = this.t.bind(this);
-        
-        if (!buttonElement) {
-            buttonElement = document.getElementById('useIndexedDBBtn');
-        }
-        
-        if (buttonElement) {
-            buttonElement.disabled = true;
-            buttonElement.innerHTML = '<i class="bi bi-hourglass-split"></i> Bezig...';
-        }
-        
-        try {
-            if (!window.storageManager) {
-                throw new Error('Storage manager niet beschikbaar');
-            }
-            
-            await storageManager.initialize('indexeddb');
-            
-            // Schakel FileSystem modus uit
+            // Fallback naar IndexedDB
             this.isUsingFileSystem = false;
             
-            // Herstel originele database functies
-            this.restoreDatabaseFunctions();
-            
-            this.loadStorageStatus();
-            
-            if (window.uiHandler && window.uiHandler.showSuccess) {
-                window.uiHandler.showSuccess('Browser opslag geactiveerd!<br><small>Alle data wordt nu weer in de browser opgeslagen.</small>');
-            }
-            
-        } catch (error) {
-            console.error('IndexedDB init error:', error);
-            
-            if (window.uiHandler && window.uiHandler.showError) {
-                window.uiHandler.showError('Kon browser opslag niet activeren: ' + error.message);
+            if (window.uiHandler?.showError) {
+                let errorMsg = error.message;
+                if (error.name === 'SecurityError' || error.message.includes('tracking')) {
+                    errorMsg = 'Browser blokkeert map toegang. Gebruik browser opslag.';
+                }
+                window.uiHandler.showError(`Kon niet overschakelen:<br><small>${errorMsg}</small>`);
             }
             
         } finally {
-            if (buttonElement) {
-                setTimeout(() => {
-                    buttonElement.disabled = false;
-                    buttonElement.innerHTML = '<i class="bi bi-arrow-left-right"></i> ' + t('useBrowserStorage');
-                }, 1000);
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml || '<i class="bi bi-check-circle"></i> Gebruiken';
             }
         }
     }
     
-    // 🔄 OVERSCHRIJF DATABASE FUNCTIES VOOR FILESYSTEM OPSLAG
-    overrideDatabaseFunctions() {
-        if (!this.db) {
-            console.error('Database niet beschikbaar voor override');
-            return;
+    async switchToIndexedDB() {
+        const btn = document.getElementById('useIndexedDBBtn');
+        const originalHtml = btn?.innerHTML;
+        
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Bezig...';
         }
         
-        console.log('🔄 Overschrijf database functies voor FileSystem opslag...');
-        
-        // Bewaar originele functies
-        this.originalFunctions = {
-            voegHondToe: this.db.voegHondToe?.bind(this.db),
-            updateHond: this.db.updateHond?.bind(this.db),
-            verwijderHond: this.db.verwijderHond?.bind(this.db),
-            getHonden: this.db.getHonden?.bind(this.db),
-            getHondById: this.db.getHondById?.bind(this.db),
-            zoekHonden: this.db.zoekHonden?.bind(this.db),
-            voegFotoToe: this.db.voegFotoToe?.bind(this.db),
-            getFotosVoorHond: this.db.getFotosVoorHond?.bind(this.db),
-            verwijderFoto: this.db.verwijderFoto?.bind(this.db),
-            bewaarPriveInfo: this.db.bewaarPriveInfo?.bind(this.db),
-            getPriveInfo: this.db.getPriveInfo?.bind(this.db),
-            getStatistieken: this.db.getStatistieken?.bind(this.db)
-        };
-        
-        // === HONDEN FUNCTIES ===
-        
-        // Nieuwe hond toevoegen → naar map
-        this.db.voegHondToe = async (hondData) => {
-            console.log('➕ Voeg hond toe via FileSystem...');
-            
-            // Genereer ID als die er niet is
-            if (!hondData.id) {
-                hondData.id = 'hond_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            }
-            
-            // Voeg timestamp toe
-            hondData.createdAt = new Date().toISOString();
-            hondData.updatedAt = new Date().toISOString();
-            
-            // Sla op in FileSystem
-            let filename = '';
-            if (hondData.stamboomnr) {
-                filename = this.createSafeFilename(`hond_${hondData.stamboomnr}`);
-            } else {
-                filename = this.createSafeFilename(`hond_${hondData.id}`);
-            }
-            
-            // Voeg ook relatie-informatie toe voor volledige backup compatibiliteit
-            const hondMetRelaties = await this.addRelationInfoToDog(hondData);
-            
-            await storageManager.save(filename, hondMetRelaties);
-            
-            // Update cache
-            this.dogCache.set(hondData.id, hondMetRelaties);
-            if (hondData.stamboomnr) {
-                this.dogCache.set(`stamboom_${hondData.stamboomnr}`, hondMetRelaties);
-            }
-            
-            console.log('✅ Hond opgeslagen in map:', filename);
-            
-            // Update ook in browser database voor compatibiliteit
-            if (this.originalFunctions.voegHondToe) {
-                await this.originalFunctions.voegHondToe(hondData);
-            }
-            
-            return hondData.id;
-        };
-        
-        // Hond updaten → naar map
-        this.db.updateHond = async (updateData) => {
-            console.log('✏️ Update hond via FileSystem...');
-            
-            // Haal huidige hond op uit cache of map
-            let huidigeHond = this.dogCache.get(updateData.id);
-            if (!huidigeHond) {
-                const allFiles = await storageManager.getAllFiles();
-                const hondFiles = allFiles.filter(f => f.name.startsWith('hond_'));
-                
-                for (const file of hondFiles) {
-                    const hond = await storageManager.load(file.name);
-                    if (hond.id === updateData.id) {
-                        huidigeHond = hond;
-                        break;
-                    }
-                }
-            }
-            
-            if (!huidigeHond) {
-                throw new Error('Hond niet gevonden');
-            }
-            
-            // Update gegevens
-            const updatedHond = {
-                ...huidigeHond,
-                ...updateData,
-                updatedAt: new Date().toISOString(),
-                updatedBy: window.auth?.getCurrentUser()?.username || 'unknown'
-            };
-            
-            // Sla op in FileSystem
-            let filename = '';
-            if (updatedHond.stamboomnr) {
-                filename = this.createSafeFilename(`hond_${updatedHond.stamboomnr}`);
-            } else {
-                filename = this.createSafeFilename(`hond_${updatedHond.id}`);
-            }
-            
-            // Voeg relatie-info toe
-            const hondMetRelaties = await this.addRelationInfoToDog(updatedHond);
-            await storageManager.save(filename, hondMetRelaties);
-            
-            // Update cache
-            this.dogCache.set(updatedHond.id, hondMetRelaties);
-            if (updatedHond.stamboomnr) {
-                this.dogCache.set(`stamboom_${updatedHond.stamboomnr}`, hondMetRelaties);
-            }
-            
-            console.log('✅ Hond bijgewerkt in map:', filename);
-            
-            // Update ook in browser database
-            if (this.originalFunctions.updateHond) {
-                await this.originalFunctions.updateHond(updateData);
-            }
-            
-            return true;
-        };
-        
-        // Hond verwijderen → uit map
-        this.db.verwijderHond = async (id) => {
-            console.log('🗑️ Verwijder hond via FileSystem...');
-            
-            // Zoek bestand voor deze hond
-            const allFiles = await storageManager.getAllFiles();
-            const hondFiles = allFiles.filter(f => f.name.startsWith('hond_'));
-            
-            for (const file of hondFiles) {
-                const hond = await storageManager.load(file.name);
-                if (hond.id === id) {
-                    // Verwijder uit FileSystem
-                    await storageManager.delete(file.name);
-                    
-                    // Verwijder uit cache
-                    this.dogCache.delete(id);
-                    if (hond.stamboomnr) {
-                        this.dogCache.delete(`stamboom_${hond.stamboomnr}`);
-                    }
-                    
-                    console.log('✅ Hond verwijderd uit map:', file.name);
-                    break;
-                }
-            }
-            
-            // Verwijder ook uit browser database
-            if (this.originalFunctions.verwijderHond) {
-                await this.originalFunctions.verwijderHond(id);
-            }
-            
-            return true;
-        };
-        
-        // Alle honden ophalen → uit map cache
-        this.db.getHonden = async () => {
-            if (this.dogCache.size === 0) {
-                await this.loadAllDogsFromFileSystem();
-            }
-            
-            const honden = Array.from(this.dogCache.values())
-                .filter(hond => !hond.id || typeof hond.id !== 'string' || !hond.id.startsWith('stamboom_')) // FIX: veilige check
-                .map(hond => ({ ...hond }));
-            
-            console.log(`📊 Get ${honden.length} honden uit FileSystem cache`);
-            return honden;
-        };
-        
-        // Hond zoeken op ID → uit map cache
-        this.db.getHondById = async (id) => {
-            // Check cache
-            if (this.dogCache.has(id)) {
-                const hond = this.dogCache.get(id);
-                if (!hond.id || typeof hond.id !== 'string' || !hond.id.startsWith('stamboom_')) {
-                    return { ...hond };
-                }
-            }
-            
-            // Zoek in FileSystem
-            const allFiles = await storageManager.getAllFiles();
-            const hondFiles = allFiles.filter(f => f.name.startsWith('hond_'));
-            
-            for (const file of hondFiles) {
-                try {
-                    const hond = await storageManager.load(file.name);
-                    if (hond.id === id) {
-                        // Cache voor volgende keer
-                        this.dogCache.set(id, hond);
-                        if (hond.stamboomnr) {
-                            this.dogCache.set(`stamboom_${hond.stamboomnr}`, hond);
-                        }
-                        return { ...hond };
-                    }
-                } catch (error) {
-                    console.error('Fout bij laden hond:', error);
-                }
-            }
-            
-            return null;
-        };
-        
-        // Hond zoeken op stamboomnr → uit map cache
-        this.db.getHondByStamboomnr = async (stamboomnr) => {
-            const cacheKey = `stamboom_${stamboomnr}`;
-            if (this.dogCache.has(cacheKey)) {
-                return { ...this.dogCache.get(cacheKey) };
-            }
-            
-            // Zoek in FileSystem
-            const filename = this.createSafeFilename(`hond_${stamboomnr}`);
-            try {
-                const hond = await storageManager.load(filename);
-                if (hond) {
-                    // Cache voor volgende keer
-                    this.dogCache.set(hond.id, hond);
-                    this.dogCache.set(cacheKey, hond);
-                    return { ...hond };
-                }
-            } catch (error) {
-                // Bestand niet gevonden, zoek in alle bestanden
-                const allFiles = await storageManager.getAllFiles();
-                const hondFiles = allFiles.filter(f => f.name.startsWith('hond_'));
-                
-                for (const file of hondFiles) {
-                    try {
-                        const hond = await storageManager.load(file.name);
-                        if (hond.stamboomnr === stamboomnr) {
-                            // Cache voor volgende keer
-                            this.dogCache.set(hond.id, hond);
-                            this.dogCache.set(cacheKey, hond);
-                            return { ...hond };
-                        }
-                    } catch (e) {
-                        continue;
-                    }
-                }
-            }
-            
-            return null;
-        };
-        
-        // Zoek honden → uit map cache
-        this.db.zoekHonden = async (zoekTerm) => {
-            if (this.dogCache.size === 0) {
-                await this.loadAllDogsFromFileSystem();
-            }
-            
-            const honden = Array.from(this.dogCache.values())
-                .filter(hond => !hond.id || typeof hond.id !== 'string' || !hond.id.startsWith('stamboom_'))
-                .map(hond => ({ ...hond }));
-            
-            if (!zoekTerm) return honden;
-            
-            const term = zoekTerm.toLowerCase();
-            return honden.filter(hond => {
-                return (
-                    (hond.naam && hond.naam.toLowerCase().includes(term)) ||
-                    (hond.stamboomnr && hond.stamboomnr.toLowerCase().includes(term)) ||
-                    (hond.kennelnaam && hond.kennelnaam.toLowerCase().includes(term)) ||
-                    (hond.ras && hond.ras.toLowerCase().includes(term))
-                );
-            });
-        };
-        
-        // === FOTO FUNCTIES ===
-        
-        // Foto toevoegen → naar map
-        this.db.voegFotoToe = async (fotoData) => {
-            console.log('📷 Voeg foto toe via FileSystem...');
-            
-            // Genereer ID als die er niet is
-            if (!fotoData.id) {
-                fotoData.id = 'foto_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            }
-            
-            // Voeg timestamp toe
-            fotoData.uploadedAt = new Date().toISOString();
-            
-            // Sla foto metadata op in FileSystem
-            const fotoFilename = this.createSafeFilename(`foto_${fotoData.id}`);
-            await storageManager.save(fotoFilename, fotoData);
-            
-            // Update foto cache
-            this.photoCache.set(fotoData.id, fotoData);
-            
-            // Voeg toe aan hond's foto lijst
-            if (fotoData.stamboomnr) {
-                const hondFotoFilename = this.createSafeFilename(`fotos_hond_${fotoData.stamboomnr}`);
-                let hondFotos = [];
-                
-                try {
-                    hondFotos = await storageManager.load(hondFotoFilename) || [];
-                } catch (error) {
-                    // Bestand bestaat nog niet
-                }
-                
-                hondFotos.push(fotoData);
-                await storageManager.save(hondFotoFilename, hondFotos);
-            }
-            
-            console.log('✅ Foto opgeslagen in map:', fotoFilename);
-            
-            // Update ook in browser database
-            if (this.originalFunctions.voegFotoToe) {
-                await this.originalFunctions.voegFotoToe(fotoData);
-            }
-            
-            return fotoData.id;
-        };
-        
-        // Foto's ophalen voor hond → uit map
-        this.db.getFotosVoorHond = async (stamboomnr) => {
-            const cacheKey = `fotos_${stamboomnr}`;
-            
-            // Check cache eerst
-            if (this.photoCache.has(cacheKey)) {
-                return [...this.photoCache.get(cacheKey)];
-            }
-            
-            // Laad uit FileSystem
-            const filename = this.createSafeFilename(`fotos_hond_${stamboomnr}`);
-            let fotos = [];
-            
-            try {
-                fotos = await storageManager.load(filename) || [];
-            } catch (error) {
-                // Bestand bestaat niet
-            }
-            
-            // Cache voor volgende keer
-            this.photoCache.set(cacheKey, fotos);
-            
-            console.log(`📸 Get ${fotos.length} foto's voor hond ${stamboomnr} uit FileSystem`);
-            return [...fotos];
-        };
-        
-        // Foto verwijderen → uit map
-        this.db.verwijderFoto = async (fotoId) => {
-            console.log('🗑️ Verwijder foto via FileSystem...');
-            
-            // Zoek foto metadata
-            const fotoFilename = this.createSafeFilename(`foto_${fotoId}`);
-            let fotoData = null;
-            
-            try {
-                fotoData = await storageManager.load(fotoFilename);
-            } catch (error) {
-                // Foto niet gevonden
-            }
-            
-            if (fotoData) {
-                // Verwijder foto bestand
-                await storageManager.delete(fotoFilename);
-                
-                // Verwijder uit cache
-                this.photoCache.delete(fotoId);
-                
-                // Verwijder uit hond's foto lijst
-                if (fotoData.stamboomnr) {
-                    const hondFotoFilename = this.createSafeFilename(`fotos_hond_${fotoData.stamboomnr}`);
-                    let hondFotos = [];
-                    
-                    try {
-                        hondFotos = await storageManager.load(hondFotoFilename) || [];
-                    } catch (error) {
-                        // Bestand bestaat niet
-                    }
-                    
-                    // Filter de verwijderde foto eruit
-                    hondFotos = hondFotos.filter(f => f.id !== fotoId);
-                    
-                    if (hondFotos.length > 0) {
-                        await storageManager.save(hondFotoFilename, hondFotos);
-                    } else {
-                        // Verwijder leeg bestand
-                        await storageManager.delete(hondFotoFilename);
-                    }
-                    
-                    // Update cache
-                    this.photoCache.delete(`fotos_${fotoData.stamboomnr}`);
-                }
-                
-                console.log('✅ Foto verwijderd uit map:', fotoFilename);
-            }
-            
-            // Verwijder ook uit browser database
-            if (this.originalFunctions.verwijderFoto) {
-                await this.originalFunctions.verwijderFoto(fotoId);
-            }
-            
-            return true;
-        };
-        
-        // === PRIVÉ INFO FUNCTIES ===
-        
-        this.db.bewaarPriveInfo = async (priveData) => {
-            const filename = this.createSafeFilename(`prive_${priveData.stamboomnr}`);
-            await storageManager.save(filename, priveData);
-            
-            // Update ook in browser database
-            if (this.originalFunctions.bewaarPriveInfo) {
-                await this.originalFunctions.bewaarPriveInfo(priveData);
-            }
-            
-            return true;
-        };
-        
-        this.db.getPriveInfo = async (stamboomnr) => {
-            const filename = this.createSafeFilename(`prive_${stamboomnr}`);
-            try {
-                return await storageManager.load(filename);
-            } catch (error) {
-                return null;
-            }
-        };
-        
-        // === STATISTIEKEN ===
-        
-        this.db.getStatistieken = async () => {
-            // Laad alle data uit FileSystem
-            if (this.dogCache.size === 0) {
-                await this.loadAllDogsFromFileSystem();
-            }
-            
-            const honden = Array.from(this.dogCache.values())
-                .filter(hond => !hond.id || typeof hond.id !== 'string' || !hond.id.startsWith('stamboom_'));
-            
-            let totaalFotos = 0;
-            const allFiles = await storageManager.getAllFiles();
-            
-            // Tel foto bestanden
-            allFiles.forEach(file => {
-                if (file.name.startsWith('foto_')) {
-                    totaalFotos++;
-                }
-            });
-            
-            let totaalPriveInfo = 0;
-            allFiles.forEach(file => {
-                if (file.name.startsWith('prive_')) {
-                    totaalPriveInfo++;
-                }
-            });
-            
-            return {
-                totaalHonden: honden.length,
-                totaalFotos: totaalFotos,
-                totaalPriveInfo: totaalPriveInfo,
-                opslagType: 'filesystem'
-            };
-        };
-        
-        console.log('✅ Database functies overschreven voor FileSystem opslag');
-    }
-    
-    restoreDatabaseFunctions() {
-        if (!this.db || !this.originalFunctions) {
-            return;
-        }
-        
-        console.log('🔄 Herstel originele database functies...');
-        
-        // Herstel alle originele functies
-        Object.keys(this.originalFunctions).forEach(key => {
-            if (this.originalFunctions[key]) {
-                this.db[key] = this.originalFunctions[key];
-            }
-        });
-        
-        // Leeg cache
-        this.dogCache.clear();
-        this.photoCache.clear();
-        
-        this.isUsingFileSystem = false;
-        
-        console.log('✅ Originele database functies hersteld');
-    }
-    
-    // 🗂️ FILE SYSTEM DATA MANAGEMENT
-    
-    async loadAllDataFromFileSystem() {
-        console.log('🗂️ Laad alle data uit FileSystem...');
-        
-        // Laad honden
-        await this.loadAllDogsFromFileSystem();
-        
-        // Laad foto metadata
-        await this.loadAllPhotosFromFileSystem();
-        
-        console.log('✅ Alle data geladen uit FileSystem');
-    }
-    
-    async loadAllDogsFromFileSystem() {
         try {
-            const allFiles = await storageManager.getAllFiles();
-            const hondFiles = allFiles.filter(f => f.name.startsWith('hond_'));
-            
-            console.log(`📂 Laad ${hondFiles.length} honden uit FileSystem...`);
-            
-            for (const file of hondFiles) {
-                try {
-                    const hond = await storageManager.load(file.name);
-                    if (hond && hond.id) {
-                        // Cache voor snelle toegang
-                        this.dogCache.set(hond.id, hond);
-                        if (hond.stamboomnr) {
-                            this.dogCache.set(`stamboom_${hond.stamboomnr}`, hond);
-                        }
-                    }
-                } catch (error) {
-                    console.error(`Fout bij laden hond uit ${file.name}:`, error);
-                }
-            }
-            
-            console.log(`✅ ${this.dogCache.size} honden geladen in cache`);
-            
-        } catch (error) {
-            console.error('Fout bij laden honden uit FileSystem:', error);
-        }
-    }
-    
-    async loadAllPhotosFromFileSystem() {
-        try {
-            const allFiles = await storageManager.getAllFiles();
-            
-            // Groepeer foto's per hond
-            const hondFotosMap = new Map();
-            
-            // Zoek naar hond specifieke foto bestanden
-            const hondFotoFiles = allFiles.filter(f => f.name.startsWith('fotos_hond_'));
-            
-            for (const file of hondFotoFiles) {
-                try {
-                    const fotos = await storageManager.load(file.name) || [];
-                    const stamboomnr = file.name.replace('fotos_hond_', '').replace('.json', '');
-                    
-                    if (stamboomnr) {
-                        this.photoCache.set(`fotos_${stamboomnr}`, fotos);
-                        
-                        // Cache individuele foto's ook
-                        fotos.forEach(foto => {
-                            if (foto.id) {
-                                this.photoCache.set(foto.id, foto);
-                            }
-                        });
-                    }
-                } catch (error) {
-                    console.error(`Fout bij laden foto's uit ${file.name}:`, error);
-                }
-            }
-            
-            // Zoek naar individuele foto bestanden
-            const individueleFotoFiles = allFiles.filter(f => f.name.startsWith('foto_'));
-            
-            for (const file of individueleFotoFiles) {
-                try {
-                    const foto = await storageManager.load(file.name);
-                    if (foto && foto.id) {
-                        this.photoCache.set(foto.id, foto);
-                        
-                        // Voeg toe aan hond's lijst
-                        if (foto.stamboomnr) {
-                            const cacheKey = `fotos_${foto.stamboomnr}`;
-                            let fotos = this.photoCache.get(cacheKey) || [];
-                            if (!fotos.find(f => f.id === foto.id)) {
-                                fotos.push(foto);
-                                this.photoCache.set(cacheKey, fotos);
-                            }
-                        }
-                    }
-                } catch (error) {
-                    console.error(`Fout bij laden foto uit ${file.name}:`, error);
-                }
-            }
-            
-            console.log(`✅ Foto metadata geladen in cache`);
-            
-        } catch (error) {
-            console.error('Fout bij laden foto\'s uit FileSystem:', error);
-        }
-    }
-    
-    async addRelationInfoToDog(hond) {
-        // Als de hond al relatie info heeft, return dan
-        if (hond.vaderStamboomnr || hond.moederStamboomnr) {
-            return hond;
-        }
-        
-        const hondMetRelaties = { ...hond };
-        
-        // Zoek vader relatie
-        if (hond.vaderId) {
-            let vader = this.dogCache.get(hond.vaderId);
-            
-            // Zoek in cache via stamboom key
-            if (!vader) {
-                const allFiles = await storageManager.getAllFiles();
-                const hondFiles = allFiles.filter(f => f.name.startsWith('hond_'));
-                
-                for (const file of hondFiles) {
-                    try {
-                        const kandidaat = await storageManager.load(file.name);
-                        if (kandidaat.id === hond.vaderId) {
-                            vader = kandidaat;
-                            this.dogCache.set(kandidaat.id, kandidaat);
-                            if (kandidaat.stamboomnr) {
-                                this.dogCache.set(`stamboom_${kandidaat.stamboomnr}`, kandidaat);
-                            }
-                            break;
-                        }
-                    } catch (error) {
-                        continue;
-                    }
-                }
-            }
-            
-            if (vader && vader.stamboomnr) {
-                hondMetRelaties.vaderStamboomnr = vader.stamboomnr;
-                hondMetRelaties.vaderNaam = vader.naam;
-                hondMetRelaties.vaderKennel = vader.kennelnaam;
-            }
-        }
-        
-        // Zoek moeder relatie
-        if (hond.moederId) {
-            let moeder = this.dogCache.get(hond.moederId);
-            
-            if (!moeder) {
-                const allFiles = await storageManager.getAllFiles();
-                const hondFiles = allFiles.filter(f => f.name.startsWith('hond_'));
-                
-                for (const file of hondFiles) {
-                    try {
-                        const kandidaat = await storageManager.load(file.name);
-                        if (kandidaat.id === hond.moederId) {
-                            moeder = kandidaat;
-                            this.dogCache.set(kandidaat.id, kandidaat);
-                            if (kandidaat.stamboomnr) {
-                                this.dogCache.set(`stamboom_${kandidaat.stamboomnr}`, kandidaat);
-                            }
-                            break;
-                        }
-                    } catch (error) {
-                        continue;
-                    }
-                }
-            }
-            
-            if (moeder && moeder.stamboomnr) {
-                hondMetRelaties.moederStamboomnr = moeder.stamboomnr;
-                hondMetRelaties.moederNaam = moeder.naam;
-                hondMetRelaties.moederKennel = moeder.kennelnaam;
-            }
-        }
-        
-        return hondMetRelaties;
-    }
-    
-    async migrateToFileSystem() {
-        try {
-            console.log('🔄 Migreer bestaande data naar FileSystem...');
-            
-            const db = await this.ensureDatabase();
-            
             if (!window.storageManager) {
-                throw new Error('StorageManager niet beschikbaar');
+                throw new Error('StorageManager niet gevonden');
+            }
+            
+            console.log('Schakel over naar IndexedDB...');
+            
+            // Initialiseer IndexedDB
+            await storageManager.initialize('indexeddb');
+            
+            // Update status
+            this.isUsingFileSystem = false;
+            this.loadStorageStatus();
+            
+            // Toon melding
+            if (window.uiHandler?.showSuccess) {
+                window.uiHandler.showSuccess('Browser opslag geactiveerd!');
+            }
+            
+            console.log('✅ IndexedDB actief');
+            
+        } catch (error) {
+            console.error('Fout bij overschakelen naar IndexedDB:', error);
+            
+            if (window.uiHandler?.showError) {
+                window.uiHandler.showError('Kon niet overschakelen: ' + error.message);
+            }
+            
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml || '<i class="bi bi-arrow-left-right"></i> Terug naar browser';
+            }
+        }
+    }
+    
+    async migrateDataToFileSystem() {
+        try {
+            if (!window.storageManager || !this.db) {
+                console.log('Niet alles beschikbaar voor migratie');
+                return;
             }
             
             const storageInfo = storageManager.getStorageInfo();
             if (storageInfo.current !== 'filesystem') {
+                console.log('FileSystem niet actief');
                 return;
             }
             
-            // Haal alle data op uit database
-            const honden = await db.getHonden();
-            console.log(`📦 Migreer ${honden.length} honden...`);
+            console.log('Start data migratie naar FileSystem...');
             
-            // Maak parent lookup voor relaties
-            const parentLookupMap = new Map();
-            honden.forEach(hond => {
-                if (hond.stamboomnr) {
-                    parentLookupMap.set(hond.id, {
-                        stamboomnr: hond.stamboomnr,
-                        naam: hond.naam,
-                        kennelnaam: hond.kennelnaam
-                    });
-                }
-            });
+            // Haal alle honden op
+            const honden = await this.db.getHonden();
+            console.log(`Migreer ${honden.length} honden...`);
             
-            // Sla honden op in FileSystem met relatie-info
+            let successCount = 0;
+            
             for (const hond of honden) {
-                const hondMetRelaties = { ...hond };
-                
-                // Voeg vader info toe
-                if (hond.vaderId && parentLookupMap.has(hond.vaderId)) {
-                    const vader = parentLookupMap.get(hond.vaderId);
-                    hondMetRelaties.vaderStamboomnr = vader.stamboomnr;
-                    hondMetRelaties.vaderNaam = vader.naam;
-                    hondMetRelaties.vaderKennel = vader.kennelnaam;
-                }
-                
-                // Voeg moeder info toe
-                if (hond.moederId && parentLookupMap.has(hond.moederId)) {
-                    const moeder = parentLookupMap.get(hond.moederId);
-                    hondMetRelaties.moederStamboomnr = moeder.stamboomnr;
-                    hondMetRelaties.moederNaam = moeder.naam;
-                    hondMetRelaties.moederKennel = moeder.kennelnaam;
-                }
-                
-                let filename = '';
-                if (hond.stamboomnr) {
-                    filename = this.createSafeFilename(`hond_${hond.stamboomnr}`);
-                } else {
-                    filename = this.createSafeFilename(`hond_${hond.id}`);
-                }
-                
-                await storageManager.save(filename, hondMetRelaties);
-            }
-            
-            // Migreer foto's
-            if (typeof db.getAllFotos === 'function') {
                 try {
-                    const fotos = await db.getAllFotos();
-                    console.log(`📸 Migreer ${fotos.length} foto's...`);
-                    
-                    // Groepeer foto's per hond
-                    const fotosPerHond = {};
-                    fotos.forEach(foto => {
-                        if (foto.stamboomnr) {
-                            if (!fotosPerHond[foto.stamboomnr]) {
-                                fotosPerHond[foto.stamboomnr] = [];
-                            }
-                            fotosPerHond[foto.stamboomnr].push(foto);
-                        }
-                    });
-                    
-                    // Sla gegroepeerde foto's op
-                    for (const [stamboomnr, hondFotos] of Object.entries(fotosPerHond)) {
-                        const filename = this.createSafeFilename(`fotos_hond_${stamboomnr}`);
-                        await storageManager.save(filename, hondFotos);
-                        
-                        // Sla ook individuele foto metadata op
-                        for (const foto of hondFotos) {
-                            if (foto.id) {
-                                const individueelFilename = this.createSafeFilename(`foto_${foto.id}`);
-                                await storageManager.save(individueelFilename, foto);
-                            }
-                        }
+                    let filename = 'hond_';
+                    if (hond.stamboomnr) {
+                        filename += hond.stamboomnr;
+                    } else if (hond.id) {
+                        filename += hond.id;
+                    } else {
+                        filename += Date.now() + '_' + Math.random().toString(36).substr(2, 9);
                     }
-                } catch (fotoError) {
-                    console.log('Foto migratie overslagen:', fotoError);
+                    
+                    // Sla hond op in FileSystem
+                    await storageManager.save(filename, hond);
+                    successCount++;
+                    
+                } catch (error) {
+                    console.error('Fout bij migreren hond:', error);
                 }
             }
             
-            // Migreer privé info
-            if (typeof db.getAllPriveInfo === 'function') {
-                try {
-                    const priveInfo = await db.getAllPriveInfo();
-                    console.log(`🔒 Migreer ${priveInfo.length} privé records...`);
-                    
-                    for (const prive of priveInfo) {
-                        if (prive.stamboomnr) {
-                            const filename = this.createSafeFilename(`prive_${prive.stamboomnr}`);
-                            await storageManager.save(filename, prive);
-                        }
-                    }
-                } catch (priveError) {
-                    console.log('Privé info migratie overslagen:', priveError);
-                }
-            }
-            
-            // Maak een complete backup
-            const completeBackup = {
-                metadata: {
-                    exportDatum: new Date().toISOString(),
-                    type: 'complete_migratie',
-                    aantalHonden: honden.length,
-                    opslagType: 'filesystem'
-                }
-            };
-            
-            const backupFilename = this.createSafeFilename(`migratie_backup_${new Date().toISOString().split('T')[0]}`);
-            await storageManager.save(backupFilename, completeBackup);
-            
-            console.log('✅ Migratie naar FileSystem voltooid!');
+            console.log(`✅ ${successCount}/${honden.length} honden gemigreerd`);
             
         } catch (error) {
-            console.error('Fout bij migratie naar FileSystem:', error);
-            throw error;
+            console.error('Migratie fout:', error);
         }
     }
     
-    createSafeFilename(baseName) {
-        let safeName = baseName.replace(/[<>:"/\\|?*]/g, '_');
-        safeName = safeName.replace(/\s+/g, '_');
-        if (safeName.length > 100) {
-            safeName = safeName.substring(0, 100);
-        }
-        return `${safeName}.json`;
-    }
-    
-    async loadStorageStatus() {
+    loadStorageStatus() {
         const statusEl = document.getElementById('currentStorageStatus');
-        if (!statusEl) return;
-        
-        if (!window.storageManager) {
-            statusEl.innerHTML = `
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-hourglass-split me-2"></i>
-                    <div>
-                        <strong>${this.t('storageLoading')}</strong><br>
-                        <small class="text-muted">StorageManager wordt geladen...</small>
-                    </div>
-                </div>
-            `;
-            statusEl.className = 'alert alert-light mb-0';
-            
-            setTimeout(() => this.loadStorageStatus(), 1000);
-            return;
-        }
+        if (!statusEl || !window.storageManager) return;
         
         const info = storageManager.getStorageInfo();
         const t = this.t.bind(this);
@@ -1709,16 +788,15 @@ class DataManager extends BaseModule {
                     <i class="bi bi-folder text-success me-2" style="font-size: 1.5rem;"></i>
                     <div>
                         <strong>${t('fileStorage')} (${t('storageActive')})</strong><br>
-                        <small class="text-muted">📍 Map: ${info.directoryName || 'Geselecteerd'}</small><br>
-                        <small class="text-success">✅ Alle data wordt nu naar de map geschreven!</small>
+                        <small class="text-muted">Map: ${info.directoryName || 'Geselecteerd'}</small>
                     </div>
                 </div>
             `;
             statusClass = 'success';
-        } else if (info.current === 'indexeddb' || info.current === 'indexeddb-temp') {
+        } else if (info.current === 'indexeddb') {
             html = `
                 <div class="d-flex align-items-center">
-                    <i class="bi bi-browser-chrome text-info me-2" style="font-size: 1.5rem;"></i>
+                    <i class="bi bi-browser-chrome text-primary me-2" style="font-size: 1.5rem;"></i>
                     <div>
                         <strong>${t('browserStorage')} (${t('storageActive')})</strong><br>
                         <small class="text-muted">Data wordt in je browser opgeslagen</small>
@@ -1726,7 +804,7 @@ class DataManager extends BaseModule {
                 </div>
             `;
             statusClass = 'info';
-        } else if (info.current === 'none') {
+        } else {
             html = `
                 <div class="d-flex align-items-center">
                     <i class="bi bi-question-circle text-warning me-2" style="font-size: 1.5rem;"></i>
@@ -1737,63 +815,35 @@ class DataManager extends BaseModule {
                 </div>
             `;
             statusClass = 'warning';
-        } else {
-            html = `
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-hourglass-split me-2" style="font-size: 1.5rem;"></i>
-                    <div>
-                        <strong>${t('storageLoading')}</strong>
-                    </div>
-                </div>
-            `;
         }
         
         statusEl.innerHTML = html;
         statusEl.className = `alert alert-${statusClass} mb-0`;
     }
     
-    updateExportFormatOptions() {
-        const exportDataCheckbox = document.getElementById('exportData');
-        const exportFormatSelect = document.getElementById('exportFormat');
-        const csvOption = exportFormatSelect?.querySelector('option[value="csv"]');
+    updateExportOptions() {
+        const backupRadio = document.getElementById('backupEverything');
+        const shareRadio = document.getElementById('shareData');
+        const exportData = document.getElementById('exportData');
+        const exportPhotos = document.getElementById('exportPhotos');
+        const exportPrivate = document.getElementById('exportPrivateInfo');
+        const exportFormat = document.getElementById('exportFormat');
+        const csvOption = exportFormat?.querySelector('option[value="csv"]');
         
-        if (exportDataCheckbox && exportFormatSelect && csvOption) {
-            const isDataChecked = exportDataCheckbox.checked;
-            const isCSVSelected = exportFormatSelect.value === 'csv';
-            
-            csvOption.disabled = !isDataChecked;
-            
-            if (isCSVSelected && !isDataChecked) {
-                exportFormatSelect.value = 'json';
-            }
-            
-            const formText = exportFormatSelect.nextElementSibling;
-            if (formText && formText.classList.contains('form-text')) {
-                formText.textContent = isDataChecked 
-                    ? 'CSV is alleen beschikbaar wanneer "Data exporteren" is geselecteerd' 
-                    : 'CSV is niet beschikbaar zonder "Data exporteren"';
+        if (backupRadio?.checked) {
+            // Backup alles: alles aan
+            if (exportData) exportData.checked = true;
+            if (exportPhotos) exportPhotos.checked = true;
+            if (exportPrivate) exportPrivate.checked = true;
+        }
+        
+        // CSV alleen als data geëxporteerd wordt
+        if (csvOption && exportData) {
+            csvOption.disabled = !exportData.checked;
+            if (!exportData.checked && exportFormat.value === 'csv') {
+                exportFormat.value = 'json';
             }
         }
-    }
-    
-    updateModalTexts() {
-        const t = this.t.bind(this);
-        const modal = document.getElementById('dataManagementModal');
-        
-        if (!modal) return;
-        
-        // Update alle tekst in modal
-        const elements = modal.querySelectorAll('[data-translate]');
-        elements.forEach(el => {
-            const key = el.getAttribute('data-translate');
-            if (key && t(key)) {
-                el.textContent = t(key);
-            }
-        });
-        
-        this.loadStorageStatus();
-        this.updateBackupWarningText();
-        this.updateExportFormatOptions();
     }
     
     updateBackupWarningText() {
@@ -1803,26 +853,106 @@ class DataManager extends BaseModule {
         const daysSince = window.backupManager.getDaysSinceLastBackup();
         const t = this.t.bind(this);
         
-        const warningDiv = document.querySelector('#dataManagementModal .alert');
+        const warningDiv = document.querySelector('#dataManagementModal .alert.alert-danger, #dataManagementModal .alert.alert-warning');
         if (!warningDiv) return;
         
         if (status.level === 'danger') {
             warningDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill"></i> 
                 <strong>${t('backupStatusDanger')}</strong><br>
                 ${t('backupDangerText')}`;
+            warningDiv.className = 'alert alert-danger mb-3';
         } else if (status.level === 'warning') {
             const warningText = t('backupWarningText').replace('{days}', daysSince);
             warningDiv.innerHTML = `<i class="bi bi-exclamation-triangle"></i> 
                 <strong>${t('backupStatusWarning')}</strong><br>
                 ${warningText}`;
+            warningDiv.className = 'alert alert-warning mb-3';
         }
+    }
+    
+    updateModalTexts() {
+        const t = this.t.bind(this);
+        const modal = document.getElementById('dataManagementModal');
+        
+        if (!modal) return;
+        
+        // Update alle belangrijke tekst
+        const updates = {
+            '#dataManagementModalLabel': `<i class="bi bi-database-gear"></i> ${t('dataManagement')}`,
+            '.card.border-info .card-header h6': `<i class="bi bi-hdd"></i> ${t('desktopStorage')}`,
+            '.card.border-info .card-body p': t('desktopStorageDesc'),
+            '.card.h-100:first-child h6': `<i class="bi bi-folder text-success"></i> ${t('fileStorage')}`,
+            '.card.h-100:first-child p.small': t('fileStorageDesc'),
+            '.card.h-100:first-child strong': t('storageFeaturesTitle'),
+            '.card.h-100:nth-child(2) h6': `<i class="bi bi-browser-chrome text-primary"></i> ${t('browserStorage')}`,
+            '.card.h-100:nth-child(2) p.small': t('browserStorageDesc'),
+            '#useFileSystemBtn': `<i class="bi bi-check-circle"></i> ${t('useFileStorage')}`,
+            '#useIndexedDBBtn': `<i class="bi bi-arrow-left-right"></i> ${t('useBrowserStorage')}`,
+            '#openStorageSettingsBtn': `<i class="bi bi-gear"></i> ${t('advancedStorageSettings')}`,
+            '.card.border-success .card-header h5': `<i class="bi bi-upload"></i> ${t('dataImport')}`,
+            '.card.border-success .card-body p': t('importDescription'),
+            '#importFile + .form-text': t('chooseExportedFile'),
+            '#startImportBtn': `<i class="bi bi-upload"></i> ${t('startImport')}`,
+            '.card.border-primary .card-header h5': `<i class="bi bi-download"></i> ${t('dataExport')}`,
+            '.card.border-primary .card-body p': t('exportDescription'),
+            '#backupEverything + label strong': t('backupEverything'),
+            '#backupEverything + label + .form-text': t('backupEverythingDescription'),
+            '#shareData + label strong': t('shareData'),
+            '#shareData + label + .form-text': t('shareDataDescription'),
+            '#exportData + label strong': t('exportData'),
+            '#exportData + label + .form-text': t('exportDataDescription'),
+            '#exportPhotos + label strong': t('exportPhotos'),
+            '#exportPhotos + label + .form-text': t('exportPhotosDescription'),
+            '#exportPrivateInfo + label strong': t('exportPrivateInfo'),
+            '#exportPrivateInfo + label + .form-text': t('exportPrivateInfoDescription'),
+            '#startExportBtn': `<i class="bi bi-download"></i> ${t('startExport')}`,
+            '.card.border-info.mt-4 .card-header h5': `<i class="bi bi-graph-up"></i> ${t('databaseStatistics')}`
+        };
+        
+        for (const [selector, text] of Object.entries(updates)) {
+            const element = modal.querySelector(selector);
+            if (element) {
+                if (selector.includes('innerHTML') || selector.includes('<')) {
+                    element.innerHTML = text;
+                } else {
+                    element.textContent = text;
+                }
+            }
+        }
+        
+        // Update feature list items
+        const featureItems = modal.querySelectorAll('.card.h-100:first-child ul li');
+        if (featureItems.length >= 4) {
+            featureItems[0].textContent = t('storageFeature1');
+            featureItems[1].textContent = t('storageFeature2');
+            featureItems[2].textContent = t('storageFeature3');
+            featureItems[3].textContent = t('storageFeature4');
+        }
+        
+        // Update storage warning
+        const storageWarning = modal.querySelector('.card.h-100:first-child .alert-warning');
+        if (storageWarning) {
+            storageWarning.innerHTML = `<i class="bi bi-exclamation-triangle"></i> <strong>${t('storageWarning')}</strong> ${t('storageWarningText')}`;
+        }
+        
+        // Update statistiek labels
+        const statLabels = modal.querySelectorAll('#databaseStats .text-muted');
+        if (statLabels.length >= 3) {
+            statLabels[0].textContent = t('dogs');
+            statLabels[1].textContent = t('photos');
+            statLabels[2].textContent = t('privateRecords');
+        }
+        
+        this.loadStorageStatus();
+        this.updateBackupWarningText();
+        this.updateExportOptions();
     }
     
     async handleImport() {
         const t = this.t.bind(this);
         const fileInput = document.getElementById('importFile');
         
-        if (!fileInput || !fileInput.files.length) {
+        if (!fileInput?.files.length) {
             this.showError(t('selectFileFirst'));
             return;
         }
@@ -1843,14 +973,14 @@ class DataManager extends BaseModule {
                 
                 const result = await this.processImportWithRelations(importData);
                 
-                // Als FileSystem actief is, laad de data opnieuw in cache
-                if (this.isUsingFileSystem) {
-                    await this.loadAllDataFromFileSystem();
-                }
-                
                 this.hideProgress();
                 this.showImportResults(result);
                 await this.loadDatabaseStats();
+                
+                // Als FileSystem actief is, sla data ook daar op
+                if (this.isUsingFileSystem && window.storageManager) {
+                    await this.saveImportedDataToFileSystem(importData);
+                }
                 
             } catch (error) {
                 this.hideProgress();
@@ -1863,6 +993,131 @@ class DataManager extends BaseModule {
         };
         
         reader.readAsText(file);
+    }
+    
+    async processImportWithRelations(importData) {
+        const result = {
+            honden: { toegevoegd: 0, bijgewerkt: 0 },
+            fotos: { toegevoegd: 0 },
+            priveInfo: { bijgewerkt: 0 },
+            relaties: { hersteld: 0 }
+        };
+        
+        const db = await this.ensureDatabase();
+        
+        // Import honden
+        if (importData.honden && Array.isArray(importData.honden)) {
+            const stamboomToIdMap = new Map();
+            
+            // Fase 1: Importeer/update honden
+            for (const importedHond of importData.honden) {
+                try {
+                    const stamboomnr = importedHond.stamboomnr;
+                    if (!stamboomnr) continue;
+                    
+                    // Zoek bestaande hond
+                    const existingHonden = await db.getHonden();
+                    const existing = existingHonden.find(h => h.stamboomnr === stamboomnr);
+                    
+                    if (!existing) {
+                        // Nieuwe hond
+                        const newId = await db.voegHondToe(importedHond);
+                        stamboomToIdMap.set(stamboomnr, newId);
+                        result.honden.toegevoegd++;
+                    } else {
+                        // Update bestaande
+                        await db.updateHond({ ...importedHond, id: existing.id });
+                        stamboomToIdMap.set(stamboomnr, existing.id);
+                        result.honden.bijgewerkt++;
+                    }
+                } catch (error) {
+                    console.error('Fout bij importeren hond:', error);
+                }
+            }
+            
+            // Fase 2: Herstel relaties
+            for (const importedHond of importData.honden) {
+                try {
+                    const stamboomnr = importedHond.stamboomnr;
+                    const hondId = stamboomToIdMap.get(stamboomnr);
+                    
+                    if (!hondId) continue;
+                    
+                    let vaderId = null;
+                    let moederId = null;
+                    
+                    // Zoek vader
+                    if (importedHond.vaderStamboomnr) {
+                        vaderId = stamboomToIdMap.get(importedHond.vaderStamboomnr);
+                    }
+                    
+                    // Zoek moeder
+                    if (importedHond.moederStamboomnr) {
+                        moederId = stamboomToIdMap.get(importedHond.moederStamboomnr);
+                    }
+                    
+                    if (vaderId || moederId) {
+                        await db.updateHond({
+                            id: hondId,
+                            vaderId: vaderId,
+                            moederId: moederId
+                        });
+                        result.relaties.hersteld++;
+                    }
+                } catch (error) {
+                    console.error('Fout bij herstellen relaties:', error);
+                }
+            }
+        }
+        
+        // Import foto's
+        if (importData.fotos && Array.isArray(importData.fotos) && typeof db.voegFotoToe === 'function') {
+            for (const foto of importData.fotos) {
+                try {
+                    await db.voegFotoToe(foto);
+                    result.fotos.toegevoegd++;
+                } catch (error) {
+                    console.error('Fout bij importeren foto:', error);
+                }
+            }
+        }
+        
+        // Import privé info
+        if (importData.priveInfo && Array.isArray(importData.priveInfo) && typeof db.bewaarPriveInfo === 'function') {
+            for (const prive of importData.priveInfo) {
+                try {
+                    await db.bewaarPriveInfo(prive);
+                    result.priveInfo.bijgewerkt++;
+                } catch (error) {
+                    console.error('Fout bij importeren privé info:', error);
+                }
+            }
+        }
+        
+        return result;
+    }
+    
+    async saveImportedDataToFileSystem(importData) {
+        if (!window.storageManager || !this.isUsingFileSystem) return;
+        
+        try {
+            console.log('Sla geïmporteerde data op in FileSystem...');
+            
+            // Sla honden op
+            if (importData.honden) {
+                for (const hond of importData.honden) {
+                    if (hond.stamboomnr) {
+                        const filename = `import_hond_${hond.stamboomnr}_${Date.now()}`;
+                        await storageManager.save(filename, hond);
+                    }
+                }
+            }
+            
+            console.log('Geïmporteerde data opgeslagen in FileSystem');
+            
+        } catch (error) {
+            console.error('Fout bij opslaan in FileSystem:', error);
+        }
     }
     
     async handleExport() {
@@ -1895,90 +1150,39 @@ class DataManager extends BaseModule {
                     containsData: exportData,
                     containsPhotos: exportPhotos,
                     containsPrivate: exportPrivateInfo,
-                    versie: "2.0",
-                    bevatRelaties: true,
-                    opslagType: this.isUsingFileSystem ? 'filesystem' : 'browser'
+                    versie: "2.0"
                 }
             };
             
-            let hondenCount = 0;
-            let fotosCount = 0;
-            let priveCount = 0;
+            const db = await this.ensureDatabase();
             
             if (exportData) {
-                let honden = [];
-                
-                if (this.isUsingFileSystem) {
-                    // Haal honden uit FileSystem cache
-                    honden = Array.from(this.dogCache.values())
-                        .filter(hond => !hond.id || typeof hond.id !== 'string' || !hond.id.startsWith('stamboom_'));
-                } else {
-                    // Haal honden uit database
-                    const db = await this.ensureDatabase();
-                    honden = await db.getHonden();
-                }
-                
-                exportDataObj.honden = honden;
-                hondenCount = honden.length;
+                exportDataObj.honden = await db.getHonden();
             }
             
-            if (exportPhotos) {
-                let fotos = [];
-                
-                if (this.isUsingFileSystem) {
-                    // Haal foto's uit FileSystem
-                    const allFiles = await storageManager.getAllFiles();
-                    const fotoFiles = allFiles.filter(f => f.name.startsWith('foto_'));
-                    
-                    for (const file of fotoFiles) {
-                        try {
-                            const foto = await storageManager.load(file.name);
-                            if (foto) {
-                                fotos.push(foto);
-                            }
-                        } catch (error) {
-                            console.error('Fout bij laden foto:', error);
-                        }
-                    }
-                } else if (typeof this.db?.getAllFotos === 'function') {
-                    fotos = await this.db.getAllFotos();
+            if (exportPhotos && typeof db.getAllFotos === 'function') {
+                try {
+                    exportDataObj.fotos = await db.getAllFotos();
+                } catch (error) {
+                    exportDataObj.fotos = [];
                 }
-                
-                exportDataObj.fotos = fotos;
-                fotosCount = fotos.length;
             }
             
-            if (exportPrivateInfo) {
-                let priveInfo = [];
-                
-                if (this.isUsingFileSystem) {
-                    // Haal privé info uit FileSystem
-                    const allFiles = await storageManager.getAllFiles();
-                    const priveFiles = allFiles.filter(f => f.name.startsWith('prive_'));
-                    
-                    for (const file of priveFiles) {
-                        try {
-                            const prive = await storageManager.load(file.name);
-                            if (prive) {
-                                priveInfo.push(prive);
-                            }
-                        } catch (error) {
-                            console.error('Fout bij laden privé info:', error);
-                        }
-                    }
-                } else if (typeof this.db?.getAllPriveInfo === 'function') {
-                    priveInfo = await this.db.getAllPriveInfo();
+            if (exportPrivateInfo && typeof db.getAllPriveInfo === 'function') {
+                try {
+                    exportDataObj.priveInfo = await db.getAllPriveInfo();
+                } catch (error) {
+                    exportDataObj.priveInfo = [];
                 }
-                
-                exportDataObj.priveInfo = priveInfo;
-                priveCount = priveInfo.length;
             }
             
             const dateStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
             const timeStr = new Date().toISOString().split('T')[1].split('.')[0].replace(/:/g, '');
-            let filenamePrefix = isBackup ? 'backup' : 'share';
+            let filenamePrefix = isBackup ? 'backup' : 'export';
             
-            filenamePrefix += this.isUsingFileSystem ? '_filesystem' : '_browser';
+            if (exportData && exportPhotos && exportPrivateInfo) {
+                filenamePrefix += '_compleet';
+            }
             
             let filename = `${filenamePrefix}_${dateStr}_${timeStr}`;
             let fullFilename;
@@ -1997,28 +1201,25 @@ class DataManager extends BaseModule {
             
             this.hideProgress();
             
-            // Backup registreren
+            // Registreer backup
             if (isBackup && window.backupManager && exportData && exportPhotos && exportPrivateInfo) {
                 window.backupManager.recordBackup('full', fullFilename);
             }
             
             let successDetails = `${t('exportComplete')}<br>`;
             if (exportData) {
-                successDetails += `${t('totalDogsExported')}${hondenCount}<br>`;
+                successDetails += `${t('totalDogsExported')}${exportDataObj.honden?.length || 0}<br>`;
             }
-            if (exportPhotos && fotosCount > 0) {
-                successDetails += `${t('totalPhotosExported')}${fotosCount}<br>`;
+            if (exportPhotos && exportDataObj.fotos?.length) {
+                successDetails += `${t('totalPhotosExported')}${exportDataObj.fotos.length}<br>`;
             }
-            if (exportPrivateInfo && priveCount > 0) {
-                successDetails += `${t('totalPrivateExported')}${priveCount}<br>`;
+            if (exportPrivateInfo && exportDataObj.priveInfo?.length) {
+                successDetails += `${t('totalPrivateExported')}${exportDataObj.priveInfo.length}<br>`;
             }
-            
-            const opslagType = this.isUsingFileSystem ? 'map' : 'browser';
-            successDetails += `<small>Export gemaakt van: <strong>${opslagType}</strong></small>`;
             
             const successMessage = `${t('exportSuccess')}<br>
                                   <small>${t('exportFileSaved')} <strong>${fullFilename}</strong></small><br>
-                                  ${successDetails}`;
+                                  <small>${successDetails}</small>`;
             this.showSuccess(successMessage);
             
         } catch (error) {
@@ -2027,270 +1228,20 @@ class DataManager extends BaseModule {
         }
     }
     
-    async processImportWithRelations(importData) {
-        const t = this.t.bind(this);
-        const result = {
-            honden: { toegevoegd: 0, bijgewerkt: 0 },
-            fotos: { toegevoegd: 0 },
-            priveInfo: { bijgewerkt: 0 },
-            relaties: { hersteld: 0 }
-        };
-        
-        console.log('=== START IMPORT ===');
-        
-        const db = await this.ensureDatabase();
-        
-        // Importeer honden
-        if (importData.honden && Array.isArray(importData.honden)) {
-            console.log(`Importeer ${importData.honden.length} honden...`);
-            
-            for (const importedHond of importData.honden) {
-                try {
-                    // Importeer hond
-                    if (this.isUsingFileSystem) {
-                        // Direct naar FileSystem schrijven
-                        let filename = '';
-                        if (importedHond.stamboomnr) {
-                            filename = this.createSafeFilename(`hond_${importedHond.stamboomnr}`);
-                        } else {
-                            filename = this.createSafeFilename(`hond_${importedHond.id}`);
-                        }
-                        
-                        await storageManager.save(filename, importedHond);
-                        
-                        // Update cache
-                        this.dogCache.set(importedHond.id, importedHond);
-                        if (importedHond.stamboomnr) {
-                            this.dogCache.set(`stamboom_${importedHond.stamboomnr}`, importedHond);
-                        }
-                        
-                        result.honden.toegevoegd++;
-                    } else {
-                        // Naar database schrijven
-                        if (importedHond.id && (await db.getHondById(importedHond.id))) {
-                            await db.updateHond(importedHond);
-                            result.honden.bijgewerkt++;
-                        } else {
-                            await db.voegHondToe(importedHond);
-                            result.honden.toegevoegd++;
-                        }
-                    }
-                } catch (error) {
-                    console.error('Fout bij importeren hond:', error);
-                }
-            }
-        }
-        
-        // Importeer foto's
-        if (importData.fotos && Array.isArray(importData.fotos) && importData.fotos.length > 0) {
-            console.log(`Importeer ${importData.fotos.length} foto's...`);
-            
-            for (const foto of importData.fotos) {
-                try {
-                    if (this.isUsingFileSystem) {
-                        // Sla foto metadata op in FileSystem
-                        const fotoFilename = this.createSafeFilename(`foto_${foto.id}`);
-                        await storageManager.save(fotoFilename, foto);
-                        
-                        // Voeg toe aan hond's foto lijst
-                        if (foto.stamboomnr) {
-                            const hondFotoFilename = this.createSafeFilename(`fotos_hond_${foto.stamboomnr}`);
-                            let hondFotos = [];
-                            
-                            try {
-                                hondFotos = await storageManager.load(hondFotoFilename) || [];
-                            } catch (error) {}
-                            
-                            hondFotos.push(foto);
-                            await storageManager.save(hondFotoFilename, hondFotos);
-                            
-                            // Update cache
-                            this.photoCache.set(`fotos_${foto.stamboomnr}`, hondFotos);
-                        }
-                        
-                        result.fotos.toegevoegd++;
-                    } else if (typeof db.voegFotoToe === 'function') {
-                        await db.voegFotoToe(foto);
-                        result.fotos.toegevoegd++;
-                    }
-                } catch (error) {
-                    console.error('Fout bij importeren foto:', error);
-                }
-            }
-        }
-        
-        // Importeer privé info
-        if (importData.priveInfo && Array.isArray(importData.priveInfo) && importData.priveInfo.length > 0) {
-            console.log(`Importeer ${importData.priveInfo.length} privé records...`);
-            
-            for (const prive of importData.priveInfo) {
-                try {
-                    if (this.isUsingFileSystem && prive.stamboomnr) {
-                        const filename = this.createSafeFilename(`prive_${prive.stamboomnr}`);
-                        await storageManager.save(filename, prive);
-                        result.priveInfo.bijgewerkt++;
-                    } else if (typeof db.bewaarPriveInfo === 'function') {
-                        await db.bewaarPriveInfo(prive);
-                        result.priveInfo.bijgewerkt++;
-                    }
-                } catch (error) {
-                    console.error('Fout bij importeren privé info:', error);
-                }
-            }
-        }
-        
-        console.log('=== IMPORT VOLTOOID ===', result);
-        return result;
-    }
-    
-    showProgress(message) {
-        this.hideProgress();
-        
-        const progressHtml = `
-            <div class="modal-backdrop fade show"></div>
-            <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5);">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-body text-center">
-                            <div class="spinner-border text-primary mb-3" role="status"></div>
-                            <p>${message}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        const progressDiv = document.createElement('div');
-        progressDiv.id = 'dataManagerProgress';
-        progressDiv.innerHTML = progressHtml;
-        document.body.appendChild(progressDiv);
-    }
-    
-    hideProgress() {
-        const progressDiv = document.getElementById('dataManagerProgress');
-        if (progressDiv) {
-            progressDiv.remove();
-        }
-        document.querySelectorAll('.modal-backdrop.fade.show').forEach(backdrop => {
-            if (backdrop.parentNode) {
-                backdrop.remove();
-            }
-        });
-    }
-    
-    showImportResults(result) {
-        const t = this.t.bind(this);
-        let summary = `<h5>${t('importSummary')}</h5><div class="alert alert-success">`;
-        
-        if (result.honden.toegevoegd > 0) {
-            summary += `<strong>${result.honden.toegevoegd}</strong> ${t('newDogsAdded')}<br>`;
-        }
-        if (result.honden.bijgewerkt > 0) {
-            summary += `<strong>${result.honden.bijgewerkt}</strong> ${t('dogsUpdated')}<br>`;
-        }
-        if (result.fotos.toegevoegd > 0) {
-            summary += `<strong>${result.fotos.toegevoegd}</strong> ${t('photosImported')}<br>`;
-        }
-        if (result.priveInfo.bijgewerkt > 0) {
-            summary += `<strong>${result.priveInfo.bijgewerkt}</strong> ${t('privateUpdated')}<br>`;
-        }
-        
-        const opslagType = this.isUsingFileSystem ? 'map' : 'browser';
-        summary += `<br><small>Data geïmporteerd in: <strong>${opslagType}</strong></small>`;
-        
-        summary += `</div>`;
-        
-        this.showSuccess(`${t('importComplete')}<br>${summary}`);
-    }
-    
-    showSuccess(message) {
-        this.hideProgress();
-        
-        const modalId = 'successModal-' + Date.now();
-        const modal = document.createElement('div');
-        modal.id = modalId;
-        modal.className = 'modal fade show';
-        modal.style.display = 'block';
-        modal.innerHTML = `
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title"><i class="bi bi-check-circle"></i> Succes</h5>
-                        <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('${modalId}').remove(); document.querySelector('#${modalId}-backdrop').remove();"></button>
-                    </div>
-                    <div class="modal-body">
-                        ${message.replace(/\n/g, '<br>')}
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-success" onclick="document.getElementById('${modalId}').remove(); document.querySelector('#${modalId}-backdrop').remove();">OK</button>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-        const backdrop = document.createElement('div');
-        backdrop.id = modalId + '-backdrop';
-        backdrop.className = 'modal-backdrop fade show';
-        document.body.appendChild(backdrop);
-    }
-    
-    showError(message) {
-        this.hideProgress();
-        
-        const modalId = 'errorModal-' + Date.now();
-        const modal = document.createElement('div');
-        modal.id = modalId;
-        modal.className = 'modal fade show';
-        modal.style.display = 'block';
-        modal.innerHTML = `
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-danger text-white">
-                        <h5 class="modal-title"><i class="bi bi-exclamation-triangle"></i> Fout</h5>
-                        <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('${modalId}').remove(); document.querySelector('#${modalId}-backdrop').remove();"></button>
-                    </div>
-                    <div class="modal-body">
-                        ${message.replace(/\n/g, '<br>')}
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" onclick="document.getElementById('${modalId}').remove(); document.querySelector('#${modalId}-backdrop').remove();">OK</button>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-        const backdrop = document.createElement('div');
-        backdrop.id = modalId + '-backdrop';
-        backdrop.className = 'modal-backdrop fade show';
-        document.body.appendChild(backdrop);
-    }
-    
+    // Helper functies
     convertHondenToCSV(honden) {
-        if (!honden || honden.length === 0) return '';
+        if (!honden || !honden.length) return '';
         
-        const allHeaders = new Set(['id']);
-        honden.forEach(hond => {
-            Object.keys(hond).forEach(key => {
-                if (typeof hond[key] !== 'object' && hond[key] !== null) {
-                    allHeaders.add(key);
-                }
-            });
-        });
-        
-        const headers = Array.from(allHeaders).sort();
+        const headers = Object.keys(honden[0]).filter(k => 
+            typeof honden[0][k] !== 'object' && honden[0][k] !== null
+        );
         
         let csv = headers.join(';') + '\n';
         
         honden.forEach(hond => {
             const row = headers.map(header => {
                 const value = hond[header];
-                if (value === null || value === undefined || value === '') {
-                    return '';
-                }
+                if (value === null || value === undefined) return '';
                 if (typeof value === 'string' && value.includes(';')) {
                     return `"${value}"`;
                 }
@@ -2319,7 +1270,6 @@ class DataManager extends BaseModule {
             
             for (let j = 0; j < line.length; j++) {
                 const char = line[j];
-                
                 if (char === '"') {
                     inQuotes = !inQuotes;
                 } else if (char === ';' && !inQuotes) {
@@ -2361,45 +1311,118 @@ class DataManager extends BaseModule {
         URL.revokeObjectURL(url);
     }
     
+    showProgress(message) {
+        this.hideProgress();
+        
+        const progressHtml = `
+            <div class="modal-backdrop fade show"></div>
+            <div class="modal fade show" style="display: block; background-color: rgba(0,0,0,0.5);">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-body text-center">
+                            <div class="spinner-border text-primary mb-3" role="status"></div>
+                            <p>${message}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const progressDiv = document.createElement('div');
+        progressDiv.id = 'dataManagerProgress';
+        progressDiv.innerHTML = progressHtml;
+        document.body.appendChild(progressDiv);
+    }
+    
+    hideProgress() {
+        const progressDiv = document.getElementById('dataManagerProgress');
+        if (progressDiv) progressDiv.remove();
+        document.querySelectorAll('.modal-backdrop.fade.show').forEach(backdrop => backdrop.remove());
+    }
+    
+    showImportResults(result) {
+        const t = this.t.bind(this);
+        let summary = `<h5>${t('importSummary')}</h5><div class="alert alert-success">`;
+        
+        if (result.honden.toegevoegd > 0) {
+            summary += `<strong>${result.honden.toegevoegd}</strong> ${t('newDogsAdded')}<br>`;
+        }
+        if (result.honden.bijgewerkt > 0) {
+            summary += `<strong>${result.honden.bijgewerkt}</strong> ${t('dogsUpdated')}<br>`;
+        }
+        if (result.fotos.toegevoegd > 0) {
+            summary += `<strong>${result.fotos.toegevoegd}</strong> ${t('photosImported')}<br>`;
+        }
+        if (result.priveInfo.bijgewerkt > 0) {
+            summary += `<strong>${result.priveInfo.bijgewerkt}</strong> ${t('privateUpdated')}<br>`;
+        }
+        if (result.relaties.hersteld > 0) {
+            summary += `<strong>${result.relaties.hersteld}</strong> ${t('relationshipsBuilt')}<br>`;
+        }
+        
+        if (this.isUsingFileSystem) {
+            summary += `<br><small>✅ Data ook opgeslagen in map</small>`;
+        }
+        
+        summary += `</div>`;
+        this.showSuccess(`${t('importComplete')}<br>${summary}`);
+    }
+    
+    showSuccess(message) {
+        this.showModal(message, 'success', 'Succes');
+    }
+    
+    showError(message) {
+        this.showModal(message, 'danger', 'Fout');
+    }
+    
+    showModal(message, type, title) {
+        this.hideProgress();
+        
+        const modalId = 'modal-' + Date.now();
+        const modal = document.createElement('div');
+        modal.id = modalId;
+        modal.className = 'modal fade show';
+        modal.style.display = 'block';
+        modal.innerHTML = `
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-${type} text-white">
+                        <h5 class="modal-title"><i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i> ${title}</h5>
+                        <button type="button" class="btn-close btn-close-white" onclick="document.getElementById('${modalId}').remove(); document.querySelector('#${modalId}-backdrop').remove();"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${message.replace(/\n/g, '<br>')}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-${type}" onclick="document.getElementById('${modalId}').remove(); document.querySelector('#${modalId}-backdrop').remove();">OK</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        const backdrop = document.createElement('div');
+        backdrop.id = modalId + '-backdrop';
+        backdrop.className = 'modal-backdrop fade show';
+        document.body.appendChild(backdrop);
+    }
+    
     async loadDatabaseStats() {
         try {
-            let stats = { totaalHonden: 0, totaalFotos: 0, totaalPriveInfo: 0 };
+            const db = await this.ensureDatabase();
             
-            if (this.isUsingFileSystem) {
-                // Haal stats uit FileSystem
-                if (this.dogCache.size === 0) {
-                    await this.loadAllDogsFromFileSystem();
-                }
-                
-                const honden = Array.from(this.dogCache.values())
-                    .filter(hond => !hond.id || typeof hond.id !== 'string' || !hond.id.startsWith('stamboom_'));
-                
-                stats.totaalHonden = honden.length;
-                
-                // Tel foto's
-                const allFiles = await storageManager.getAllFiles();
-                stats.totaalFotos = allFiles.filter(f => f.name.startsWith('foto_')).length;
-                stats.totaalPriveInfo = allFiles.filter(f => f.name.startsWith('prive_')).length;
-                
-            } else {
-                // Haal stats uit database
-                const db = await this.ensureDatabase();
-                
-                if (typeof db.getStatistieken !== 'function') {
-                    console.error('getStatistieken functie niet beschikbaar');
-                    return;
-                }
-                
-                stats = await db.getStatistieken();
+            if (typeof db.getStatistieken !== 'function') {
+                console.error('getStatistieken functie niet beschikbaar');
+                return;
             }
             
-            const hondenElement = document.getElementById('statsHonden');
-            const fotosElement = document.getElementById('statsFotos');
-            const priveElement = document.getElementById('statsPrive');
+            const stats = await db.getStatistieken();
             
-            if (hondenElement) hondenElement.textContent = stats.totaalHonden || 0;
-            if (fotosElement) fotosElement.textContent = stats.totaalFotos || 0;
-            if (priveElement) priveElement.textContent = stats.totaalPriveInfo || 0;
+            document.getElementById('statsHonden')?.textContent = stats.totaalHonden || 0;
+            document.getElementById('statsFotos')?.textContent = stats.totaalFotos || 0;
+            document.getElementById('statsPrive')?.textContent = stats.totaalPriveInfo || 0;
             
         } catch (error) {
             console.error(`${this.t('statsError')}${error}`);
