@@ -17,19 +17,23 @@ class StorageManager {
         });
         
         // Luister naar database ready event
-        window.addEventListener('database-ready', () => {
+        window.addEventListener('database-ready', async () => {
             console.log('Database ready event ontvangen in StorageManager');
             this.dbReady = true;
             
-            // Als FileSystem actief is, migreer data
+            // Als FileSystem actief is, LAAD data terug in database
             if (this.currentStorage && this.currentStorage.type === 'filesystem') {
-                this.migrateAllDataToFileSystem();
+                await this.loadFromFileSystemToDatabase();
             }
         });
         
         // Controleer of database al klaar is
         if (window.db) {
             this.dbReady = true;
+            // Als FileSystem actief is, laad data onmiddellijk
+            if (this.currentStorage && this.currentStorage.type === 'filesystem') {
+                setTimeout(() => this.loadFromFileSystemToDatabase(), 100);
+            }
         }
     }
     
@@ -138,8 +142,8 @@ class StorageManager {
                 lastSync: new Date().toISOString()
             });
             
-            // Migreer bestaande data indien beschikbaar
-            await this.migrateAllDataToFileSystem();
+            // Laad data uit de map in de database
+            await this.loadFromFileSystemToDatabase();
             
         } catch (error) {
             console.error('FileSystem init error:', error);
@@ -186,6 +190,9 @@ class StorageManager {
                 };
                 
                 console.log('FileSystem backend hersteld uit configuratie');
+                
+                // Laad data uit de map in de database
+                await this.loadFromFileSystemToDatabase();
                 return;
             }
             
@@ -207,6 +214,9 @@ class StorageManager {
                 appDirectory: 'HondenDatabase_PWA',
                 lastSync: new Date().toISOString()
             });
+            
+            // Migreer bestaande data naar nieuwe map
+            await this.migrateAllDataToFileSystem();
             
         } catch (error) {
             console.error('Kon opgeslagen map niet openen:', error);
@@ -238,6 +248,161 @@ class StorageManager {
         } catch (error) {
             console.error('IndexedDB init error:', error);
             throw error;
+        }
+    }
+    
+    async loadFromFileSystemToDatabase() {
+        if (!window.db || !this.dbReady) {
+            console.log('Database niet beschikbaar, wacht...');
+            
+            // Wacht maximaal 5 seconden op database
+            for (let i = 0; i < 50; i++) {
+                if (window.db) {
+                    this.dbReady = true;
+                    break;
+                }
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            if (!window.db) {
+                console.error('Database niet beschikbaar na wachten');
+                return;
+            }
+        }
+        
+        try {
+            console.log('Laad data uit FileSystem naar database...');
+            
+            // Haal alle bestanden op uit de map
+            const files = await this.listFiles();
+            console.log('Bestanden gevonden in map:', files);
+            
+            let hondenGeladen = 0;
+            let fotosGeladen = 0;
+            let priveGeladen = 0;
+            
+            // Verwerk elk bestand
+            for (const file of files) {
+                if (file.type === 'file' && file.name.endsWith('.json')) {
+                    const key = file.name.replace('.json', '');
+                    
+                    try {
+                        const data = await this.load(key);
+                        
+                        if (!data) continue;
+                        
+                        // Bepaal type data en voeg toe aan database
+                        if (key.startsWith('hond_')) {
+                            await this.loadHondToDatabase(data);
+                            hondenGeladen++;
+                        } else if (key.startsWith('fotos_')) {
+                            await this.loadFotosToDatabase(data);
+                            fotosGeladen += Array.isArray(data) ? data.length : 1;
+                        } else if (key.startsWith('prive_')) {
+                            await this.loadPriveInfoToDatabase(data);
+                            priveGeladen++;
+                        } else if (key === 'config') {
+                            console.log('Configuratie bestand gevonden');
+                        }
+                    } catch (error) {
+                        console.error(`Fout bij laden bestand ${file.name}:`, error);
+                    }
+                }
+            }
+            
+            console.log(`Data geladen uit FileSystem: ${hondenGeladen} honden, ${fotosGeladen} foto's, ${priveGeladen} privé records`);
+            
+            // Refresh de UI als die bestaat
+            if (window.refreshHondenLijst) {
+                window.refreshHondenLijst();
+            }
+            
+            if (window.uiHandler && window.uiHandler.showSuccess) {
+                window.uiHandler.showSuccess(`Data geladen uit map: ${hondenGeladen} honden, ${fotosGeladen} foto's`);
+            }
+            
+        } catch (error) {
+            console.error('Fout bij laden data uit FileSystem:', error);
+        }
+    }
+    
+    async loadHondToDatabase(hondData) {
+        if (!window.db) return;
+        
+        try {
+            // Controleer of hond al bestaat
+            const existingHonden = await window.db.getHonden();
+            const exists = existingHonden.some(h => 
+                h.stamboomnr === hondData.stamboomnr || 
+                (hondData.id && h.id === hondData.id)
+            );
+            
+            if (!exists) {
+                // Voeg nieuwe hond toe
+                await window.db.voegHondToe(hondData);
+                console.log(`Hond toegevoegd: ${hondData.stamboomnr || hondData.naam}`);
+            } else {
+                // Update bestaande hond
+                const existingHond = existingHonden.find(h => 
+                    h.stamboomnr === hondData.stamboomnr || 
+                    (hondData.id && h.id === hondData.id)
+                );
+                
+                if (existingHond) {
+                    const updateData = { ...hondData, id: existingHond.id };
+                    await window.db.updateHond(updateData);
+                    console.log(`Hond bijgewerkt: ${hondData.stamboomnr || hondData.naam}`);
+                }
+            }
+        } catch (error) {
+            console.error(`Fout bij laden hond ${hondData.stamboomnr}:`, error);
+        }
+    }
+    
+    async loadFotosToDatabase(fotosData) {
+        if (!window.db || typeof window.db.voegFotoToe !== 'function') return;
+        
+        try {
+            const fotosArray = Array.isArray(fotosData) ? fotosData : [fotosData];
+            
+            for (const foto of fotosArray) {
+                try {
+                    // Controleer of foto al bestaat
+                    let fotoExists = false;
+                    
+                    if (typeof window.db.getAllFotos === 'function') {
+                        try {
+                            const existingFotos = await window.db.getAllFotos();
+                            fotoExists = existingFotos.some(f => 
+                                f.id === foto.id || 
+                                f.bestandsnaam === foto.bestandsnaam
+                            );
+                        } catch (e) {
+                            console.log('Kan bestaande foto\'s niet controleren:', e);
+                        }
+                    }
+                    
+                    if (!fotoExists) {
+                        await window.db.voegFotoToe(foto);
+                        console.log(`Foto toegevoegd: ${foto.bestandsnaam || foto.filename}`);
+                    }
+                } catch (fotoError) {
+                    console.error(`Fout bij laden foto:`, fotoError);
+                }
+            }
+        } catch (error) {
+            console.error('Fout bij laden foto\'s:', error);
+        }
+    }
+    
+    async loadPriveInfoToDatabase(priveData) {
+        if (!window.db || typeof window.db.bewaarPriveInfo !== 'function') return;
+        
+        try {
+            await window.db.bewaarPriveInfo(priveData);
+            console.log(`Privé info geladen voor: ${priveData.stamboomnr}`);
+        } catch (error) {
+            console.error(`Fout bij laden privé info ${priveData.stamboomnr}:`, error);
         }
     }
     

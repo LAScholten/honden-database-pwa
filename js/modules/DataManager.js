@@ -26,7 +26,7 @@ class DataManager extends BaseModule {
                 exportData: "Data exporteren",
                 exportDataDescription: "Alle hondengegevens zonder foto's",
                 exportPhotos: "Foto's exporteren",
-                exportPhotosDescription: "Foto metadata en relaties",
+                exportPhotosDescription: "Photo metadata en relaties",
                 exportPrivateInfo: "Privé informatie exporteren",
                 exportPrivateInfoDescription: "Vertrouwelijke notities en informatie",
                 exportFormat: "Export formaat",
@@ -235,7 +235,7 @@ class DataManager extends BaseModule {
                 backupStatusWarning: "Backup empfohlen",
                 backupStatusDanger: "Wichtig",
                 backupWarningText: "Letztes Backup war vor {days} Tagen",
-                backupDangerText: "Sie hebben noch nie ein Backup erstellt!",
+                backupDangerText: "Sie haben noch nie ein Backup erstellt!",
                 desktopStorage: "Desktop Edition Speicherung",
                 desktopStorageDesc: "Diese Desktop Edition unterstützt zwei Speichermethoden:",
                 fileStorage: "Dateispeicherung",
@@ -255,8 +255,8 @@ class DataManager extends BaseModule {
                 storageFeaturesTitle: "💾 Vorteile der Dateispeicherung:",
                 storageFeature1: "📁 Wählen Sie Ihren eigenen Ordner auf dem Computer",
                 storageFeature2: "💾 Einfache Backups (nur Ordner kopieren)",
-                storageFeature3: "🔄 Synchronisation zwischen Geräten mogelijk",
-                storageFeature4: "🔒 Mehr Kontrolle über Ihre Daten",
+                storageFeature3: "🔄 Synchronisation zwischen Geräten möglich",
+                storageFeature4: "🔒 Mehr Kontrole über Ihre Daten",
                 storageWarning: "⚠️ Wichtig:",
                 storageWarningText: "Bei Dateispeicherung müssen Sie einen Ordner auswählen. Die App wird Sie danach fragen."
             }
