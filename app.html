@@ -602,179 +602,6 @@
     })();
     </script>
     
-    <!-- Storage Manager Initialization -->
-    <script>
-    // Storage Manager initialisatie - ZORGT ERVOOR DAT HIJ BESCHIKBAAR IS VOOR ALLE MODULES
-    (function() {
-        console.log('📦 StorageManager initialization started...');
-        
-        function initializeStorageManager() {
-            // Check of StorageManager klasse beschikbaar is
-            if (typeof StorageManager === 'undefined') {
-                console.log('⏳ StorageManager class nog niet beschikbaar, wacht...');
-                setTimeout(initializeStorageManager, 500);
-                return;
-            }
-            
-            try {
-                console.log('✅ StorageManager class gevonden, initialiseren...');
-                
-                // Maak instance en zet in window
-                window.storageManager = new StorageManager();
-                console.log('📝 StorageManager instance created:', window.storageManager);
-                
-                // Bepaal opslagtype (standaard indexeddb)
-                const savedType = localStorage.getItem('desktop-edition-storage-type') || 'indexeddb';
-                console.log('🔧 Initializing with storage type:', savedType);
-                
-                // Initialiseer asynchroon
-                window.storageManager.initialize(savedType)
-                    .then(() => {
-                        console.log('✅ StorageManager succesvol geïnitialiseerd');
-                        console.log('💾 Storage info:', storageManager.getStorageInfo());
-                        
-                        // Update status indicator
-                        updateStorageStatus();
-                        
-                        // Dispatch event dat storage ready is
-                        const event = new CustomEvent('storage-manager-ready');
-                        window.dispatchEvent(event);
-                        
-                        // Log voor debugging
-                        console.log('📢 storage-manager-ready event dispatched');
-                        
-                        // Forceer DataManager om events opnieuw te setupen als die bestaat
-                        if (window.uiHandler && window.uiHandler.dataManager && window.uiHandler.dataManager.setupStorageEvents) {
-                            console.log('🔄 Forcing DataManager to re-setup storage events');
-                            window.uiHandler.dataManager.setupStorageEvents();
-                        }
-                    })
-                    .catch(error => {
-                        console.error('❌ StorageManager initialisatie fout:', error);
-                        
-                        // Fallback: maak een eenvoudige storageManager
-                        window.storageManager = {
-                            getStorageInfo: function() {
-                                return { current: 'none', available: ['indexeddb'] };
-                            },
-                            initialize: function(type) {
-                                console.log('🔄 Fallback initialize called with:', type);
-                                localStorage.setItem('desktop-edition-storage-type', type);
-                                return Promise.resolve();
-                            }
-                        };
-                        
-                        console.log('🛠️ Fallback storageManager created');
-                        updateStorageStatus();
-                    });
-                    
-            } catch (error) {
-                console.error('❌ Fout bij aanmaken StorageManager:', error);
-                
-                // Noodfallback
-                window.storageManager = {
-                    getStorageInfo: function() {
-                        return { current: 'error', available: [] };
-                    },
-                    initialize: function() {
-                        return Promise.reject(new Error('StorageManager not available'));
-                    }
-                };
-            }
-        }
-        
-        // Update storage status indicator
-        function updateStorageStatus() {
-            const statusEl = document.getElementById('storage-status');
-            if (!statusEl) return;
-            
-            if (window.storageManager) {
-                try {
-                    const info = storageManager.getStorageInfo();
-                    
-                    if (info.current === 'filesystem') {
-                        statusEl.style.display = 'block';
-                        statusEl.style.background = '#4CAF50';
-                        statusEl.textContent = '💾 Bestanden opslag';
-                        statusEl.title = `Opslag in map: ${info.directoryName || 'Geselecteerde map'}`;
-                    } else if (info.current === 'indexeddb' || info.current === 'indexeddb-temp') {
-                        statusEl.style.display = 'block';
-                        statusEl.style.background = '#2196F3';
-                        statusEl.textContent = '💾 Browser opslag';
-                        statusEl.title = 'Opslag in browser';
-                    } else if (info.current === 'none') {
-                        statusEl.style.display = 'block';
-                        statusEl.style.background = '#FF9800';
-                        statusEl.textContent = '💾 Bezig met laden...';
-                        statusEl.title = 'Initialiseren...';
-                    } else if (info.current === 'error') {
-                        statusEl.style.display = 'block';
-                        statusEl.style.background = '#f44336';
-                        statusEl.textContent = '💾 Opslag fout';
-                        statusEl.title = 'Opslag initialisatie fout';
-                    } else {
-                        statusEl.style.display = 'none';
-                    }
-                } catch (error) {
-                    statusEl.style.display = 'block';
-                    statusEl.style.background = '#f44336';
-                    statusEl.textContent = '💾 Error';
-                    statusEl.title = 'Fout bij ophalen opslag info';
-                }
-            } else {
-                statusEl.style.display = 'block';
-                statusEl.style.background = '#FF9800';
-                statusEl.textContent = '💾 Laden...';
-                statusEl.title = 'StorageManager wordt geladen...';
-            }
-        }
-        
-        // Start initialisatie
-        document.addEventListener('DOMContentLoaded', function() {
-            // Start storage manager initialisatie met vertraging
-            setTimeout(initializeStorageManager, 300);
-            
-            // Initialiseer ook periodic status update
-            setInterval(updateStorageStatus, 2000);
-        });
-        
-        // Maak functie globaal beschikbaar
-        window.updateStorageStatus = updateStorageStatus;
-        
-        // Functie om opslagtype te wisselen
-        window.switchStorageType = function(type) {
-            if (!window.storageManager) {
-                console.error('StorageManager niet beschikbaar');
-                return Promise.reject(new Error('StorageManager niet beschikbaar'));
-            }
-            
-            console.log('🔄 Switching storage type to:', type);
-            
-            return window.storageManager.initialize(type)
-                .then(() => {
-                    console.log('✅ Storage type gewijzigd naar:', type);
-                    localStorage.setItem('desktop-edition-storage-type', type);
-                    updateStorageStatus();
-                    return true;
-                })
-                .catch(err => {
-                    console.error('❌ Kon opslagtype niet wijzigen:', err);
-                    return Promise.reject(err);
-                });
-        };
-        
-    })();
-    </script>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            if (window.welcomeScreen) {
-                // Delay voor initialisatie andere componenten
-                setTimeout(() => welcomeScreen.show(), 1000);
-            }
-        });
-    </script>
-    
     <!-- App Initialization -->
     <script>
         // Laad taal uit localStorage
@@ -1291,15 +1118,9 @@
                     console.log('COICalculator is beschikbaar:', COICalculator);
                 }
                 
-                // Luister naar storage-manager-ready event
-                window.addEventListener('storage-manager-ready', function() {
-                    console.log('📢 storage-manager-ready event ontvangen in hoofdscript');
-                    
-                    // Forceer update van DataManager
-                    if (window.uiHandler && window.uiHandler.dataManager && window.uiHandler.dataManager.setupStorageEvents) {
-                        console.log('🔄 Forcing DataManager storage events setup');
-                        window.uiHandler.dataManager.setupStorageEvents();
-                    }
+                // Luister naar database-ready event
+                window.addEventListener('database-ready', function() {
+                    console.log('📢 database-ready event ontvangen in hoofdscript');
                 });
                 
                 // Initialiseer taal
@@ -1673,4 +1494,4 @@
     
 
 </body>
-</html>            
+</html>
