@@ -643,6 +643,11 @@ class DataManager extends BaseModule {
                 this.updateExportFormatOptions();
                 this.loadStorageStatus();
             });
+            
+            modal.addEventListener('hidden.bs.modal', () => {
+                // Herlaad storage status na sluiten
+                setTimeout(() => this.loadStorageStatus(), 100);
+            });
         }
         
         document.querySelectorAll('.app-lang-btn').forEach(btn => {
@@ -658,37 +663,41 @@ class DataManager extends BaseModule {
     setupStorageEvents() {
         const t = this.t.bind(this);
         
-        if (!window.storageManager) {
-            console.warn('StorageManager nog niet beschikbaar, event listeners worden uitgesteld');
+        // Controleer periodiek of StorageManager beschikbaar is
+        const checkStorageManager = () => {
+            if (!window.storageManager) {
+                console.warn('StorageManager nog niet beschikbaar, opnieuw proberen...');
+                setTimeout(checkStorageManager, 500);
+                return;
+            }
             
-            setTimeout(() => {
-                this.setupStorageEvents();
-            }, 1000);
-            return;
-        }
+            console.log('StorageManager gevonden, event listeners instellen...');
+            
+            const useFileSystemBtn = document.getElementById('useFileSystemBtn');
+            if (useFileSystemBtn) {
+                useFileSystemBtn.addEventListener('click', async () => {
+                    await this.switchToFileSystem(useFileSystemBtn);
+                });
+            }
+            
+            const useIndexedDBBtn = document.getElementById('useIndexedDBBtn');
+            if (useIndexedDBBtn) {
+                useIndexedDBBtn.addEventListener('click', async () => {
+                    await this.switchToIndexedDB(useIndexedDBBtn);
+                });
+            }
+            
+            const openStorageSettingsBtn = document.getElementById('openStorageSettingsBtn');
+            if (openStorageSettingsBtn) {
+                openStorageSettingsBtn.addEventListener('click', () => {
+                    this.showSimpleStorageSelector();
+                });
+            }
+            
+            this.loadStorageStatus();
+        };
         
-        const useFileSystemBtn = document.getElementById('useFileSystemBtn');
-        if (useFileSystemBtn) {
-            useFileSystemBtn.addEventListener('click', async () => {
-                await this.switchToFileSystem(useFileSystemBtn);
-            });
-        }
-        
-        const useIndexedDBBtn = document.getElementById('useIndexedDBBtn');
-        if (useIndexedDBBtn) {
-            useIndexedDBBtn.addEventListener('click', async () => {
-                await this.switchToIndexedDB(useIndexedDBBtn);
-            });
-        }
-        
-        const openStorageSettingsBtn = document.getElementById('openStorageSettingsBtn');
-        if (openStorageSettingsBtn) {
-            openStorageSettingsBtn.addEventListener('click', () => {
-                this.showSimpleStorageSelector();
-            });
-        }
-        
-        this.loadStorageStatus();
+        checkStorageManager();
     }
     
     showSimpleStorageSelector() {
@@ -750,14 +759,22 @@ class DataManager extends BaseModule {
             // Migreer bestaande data
             await this.migrateToFileSystem();
             
+            // Refresh de UI
             this.loadStorageStatus();
             
-            if (window.uiHandler && window.uiHandler.showSuccess) {
-                window.uiHandler.showSuccess('Bestandsopslag geactiveerd! Data is opgeslagen in de geselecteerde map.');
+            // Forceer een refresh van de hondenlijst
+            if (window.refreshHondenLijst) {
+                setTimeout(() => window.refreshHondenLijst(), 1000);
             }
             
+            // Toon succesmelding
+            if (window.uiHandler && window.uiHandler.showSuccess) {
+                window.uiHandler.showSuccess('Bestandsopslag geactiveerd! Data wordt nu opgeslagen in de geselecteerde map.');
+            }
+            
+            // Refresh storage status in andere modules
             if (window.updateStorageStatus) {
-                updateStorageStatus();
+                setTimeout(() => window.updateStorageStatus(), 500);
             }
             
         } catch (error) {
@@ -769,8 +786,10 @@ class DataManager extends BaseModule {
             
         } finally {
             if (buttonElement) {
-                buttonElement.disabled = false;
-                buttonElement.innerHTML = '<i class="bi bi-check-circle"></i> ' + t('useFileStorage');
+                setTimeout(() => {
+                    buttonElement.disabled = false;
+                    buttonElement.innerHTML = '<i class="bi bi-check-circle"></i> ' + t('useFileStorage');
+                }, 1000);
             }
         }
     }
@@ -801,7 +820,7 @@ class DataManager extends BaseModule {
             }
             
             if (window.updateStorageStatus) {
-                updateStorageStatus();
+                window.updateStorageStatus();
             }
             
         } catch (error) {
@@ -813,8 +832,10 @@ class DataManager extends BaseModule {
             
         } finally {
             if (buttonElement) {
-                buttonElement.disabled = false;
-                buttonElement.innerHTML = '<i class="bi bi-arrow-left-right"></i> ' + t('useBrowserStorage');
+                setTimeout(() => {
+                    buttonElement.disabled = false;
+                    buttonElement.innerHTML = '<i class="bi bi-arrow-left-right"></i> ' + t('useBrowserStorage');
+                }, 1000);
             }
         }
     }
@@ -926,18 +947,23 @@ class DataManager extends BaseModule {
     
     async loadStorageStatus() {
         const statusEl = document.getElementById('currentStorageStatus');
-        if (!statusEl || !window.storageManager) {
-            if (statusEl) {
-                statusEl.innerHTML = `
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-hourglass-split me-2"></i>
-                        <div>
-                            <strong>${this.t('storageLoading')}</strong>
-                        </div>
+        if (!statusEl) return;
+        
+        // Wacht even tot storageManager beschikbaar is
+        if (!window.storageManager) {
+            statusEl.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-hourglass-split me-2"></i>
+                    <div>
+                        <strong>${this.t('storageLoading')}</strong><br>
+                        <small class="text-muted">StorageManager wordt geladen...</small>
                     </div>
-                `;
-                statusEl.className = 'alert alert-light mb-0';
-            }
+                </div>
+            `;
+            statusEl.className = 'alert alert-light mb-0';
+            
+            // Probeer opnieuw over 1 seconde
+            setTimeout(() => this.loadStorageStatus(), 1000);
             return;
         }
         
@@ -953,7 +979,7 @@ class DataManager extends BaseModule {
                     <i class="bi bi-folder text-success me-2" style="font-size: 1.5rem;"></i>
                     <div>
                         <strong>${t('fileStorage')} (${t('storageActive')})</strong><br>
-                        <small class="text-muted">Map: ${info.directoryName || 'Niet geselecteerd'}</small>
+                        <small class="text-muted">Map: ${info.directoryName || 'Geselecteerd'}</small>
                     </div>
                 </div>
             `;
