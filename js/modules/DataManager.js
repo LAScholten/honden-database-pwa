@@ -1,6 +1,7 @@
 /**
  * Data Management Module voor HondenDatabase
  * COMPLEET MET ALLE FIXES + DESKTOP EDITION OPSLAG SELECTOR
+ * MET IDENTIEKE RELATIE-HANDLING VOOR MAP OPSLAG EN BACKUP
  */
 
 class DataManager extends BaseModule {
@@ -249,7 +250,7 @@ class DataManager extends BaseModule {
                 switchToFiles: "Zu Dateispeicherung wechseln",
                 switchToBrowser: "Zu Browser-Speicherung wechseln",
                 storageActive: "Aktiv",
-                storageInactive: "Inaktiv",
+                storageInactive: "Inactief",
                 storageLoading: "Speicherstatus wird geladen...",
                 storageSettings: "Speichereinstellungen",
                 storageFeaturesTitle: "💾 Vorteile der Dateispeicherung:",
@@ -756,7 +757,7 @@ class DataManager extends BaseModule {
             
             console.log('FileSystem geïnitialiseerd, migreer data...');
             
-            // Migreer bestaande data
+            // Migreer bestaande data MET RELATIE-HANDLING
             await this.migrateToFileSystem();
             
             // Refresh de UI
@@ -842,7 +843,7 @@ class DataManager extends BaseModule {
     
     async migrateToFileSystem() {
         try {
-            console.log('Migreer bestaande data naar FileSystem...');
+            console.log('Migreer bestaande data naar FileSystem MET RELATIE-HANDLING...');
             
             // Zorg dat database beschikbaar is
             const db = await this.ensureDatabase();
@@ -862,11 +863,318 @@ class DataManager extends BaseModule {
             const honden = await db.getHonden();
             console.log(`Migreer ${honden.length} honden naar FileSystem...`);
             
-            // Sla elke hond op in FileSystem met veilige bestandsnaam
+            // Maak een parent lookup map voor relatie-handling (net als in backup)
+            const parentLookupMap = new Map();
+            honden.forEach(hond => {
+                if (hond.stamboomnr) {
+                    parentLookupMap.set(hond.id, {
+                        stamboomnr: hond.stamboomnr,
+                        naam: hond.naam,
+                        kennelnaam: hond.kennelnaam
+                    });
+                }
+            });
+            
+            // Verwerk elke hond MET RELATIES (net als backup)
             for (const hond of honden) {
+                // Maak een hond-object met relatie-informatie (net als backup export)
+                const hondMetRelaties = { ...hond };
+                
+                // Voeg vader informatie toe als relatie bestaat
+                if (hond.vaderId && parentLookupMap.has(hond.vaderId)) {
+                    const vader = parentLookupMap.get(hond.vaderId);
+                    hondMetRelaties.vaderStamboomnr = vader.stamboomnr;
+                    hondMetRelaties.vaderNaam = vader.naam;
+                    hondMetRelaties.vaderKennel = vader.kennelnaam;
+                }
+                
+                // Voeg moeder informatie toe als relatie bestaat
+                if (hond.moederId && parentLookupMap.has(hond.moederId)) {
+                    const moeder = parentLookupMap.get(hond.moederId);
+                    hondMetRelaties.moederStamboomnr = moeder.stamboomnr;
+                    hondMetRelaties.moederNaam = moeder.naam;
+                    hondMetRelaties.moederKennel = moeder.kennelnaam;
+                }
+                
+                // Sla op met veilige bestandsnaam
                 let filename = '';
                 if (hond.stamboomnr) {
-                    // Maak een veilige bestandsnaam
+                    filename = this.createSafeFilename(`hond_${hond.stamboomnr}`);
+                } else if (hond.id) {
+                    filename = this.createSafeFilename(`hond_${hond.id}`);
+                }
+                
+                if (filename) {
+                    await storageManager.save(filename, hondMetRelaties);
+                }
+            }
+            
+            // Haal foto's op en sla ze op in geconsolideerd formaat
+            if (typeof db.getAllFotos === 'function') {
+                try {
+                    const fotos = await db.getAllFotos();
+                    console.log(`Migreer ${fotos.length} foto's naar FileSystem...`);
+                    
+                    // Sla complete foto lijst op (net als backup)
+                    const fotoFilename = 'fotos_compleet.json';
+                    await storageManager.save(fotoFilename, fotos);
+                } catch (fotoError) {
+                    console.log('Foto migratie overslagen:', fotoError);
+                }
+            }
+            
+            // Haal privé info op
+            if (typeof db.getAllPriveInfo === 'function') {
+                try {
+                    const priveInfo = await db.getAllPriveInfo();
+                    console.log(`Migreer ${priveInfo.length} privé records naar FileSystem...`);
+                    
+                    // Sla complete privé lijst op (net als backup)
+                    const priveFilename = 'prive_compleet.json';
+                    await storageManager.save(priveFilename, priveInfo);
+                } catch (priveError) {
+                    console.log('Privé info migratie overslagen:', priveError);
+                }
+            }
+            
+            // Maak een complete database backup bestand (net als backup export)
+            const completeData = {
+                metadata: {
+                    exportDatum: new Date().toISOString(),
+                    exportType: 'filesystem_migratie',
+                    versie: "2.0",
+                    bevatRelaties: true
+                },
+                honden: honden.map(hond => {
+                    const hondMetRelaties = { ...hond };
+                    
+                    if (hond.vaderId && parentLookupMap.has(hond.vaderId)) {
+                        const vader = parentLookupMap.get(hond.vaderId);
+                        hondMetRelaties.vaderStamboomnr = vader.stamboomnr;
+                        hondMetRelaties.vaderNaam = vader.naam;
+                        hondMetRelaties.vaderKennel = vader.kennelnaam;
+                    }
+                    
+                    if (hond.moederId && parentLookupMap.has(hond.moederId)) {
+                        const moeder = parentLookupMap.get(hond.moederId);
+                        hondMetRelaties.moederStamboomnr = moeder.stamboomnr;
+                        hondMetRelaties.moederNaam = moeder.naam;
+                        hondMetRelaties.moederKennel = moeder.kennelnaam;
+                    }
+                    
+                    return hondMetRelaties;
+                })
+            };
+            
+            // Voeg foto's toe indien beschikbaar
+            if (typeof db.getAllFotos === 'function') {
+                try {
+                    completeData.fotos = await db.getAllFotos();
+                } catch (e) {}
+            }
+            
+            // Voeg privé info toe indien beschikbaar
+            if (typeof db.getAllPriveInfo === 'function') {
+                try {
+                    completeData.priveInfo = await db.getAllPriveInfo();
+                } catch (e) {}
+            }
+            
+            // Sla complete backup op
+            const backupFilename = this.createSafeFilename(`complete_backup_${new Date().toISOString().split('T')[0]}`);
+            await storageManager.save(backupFilename, completeData);
+            
+            console.log('Data migratie naar FileSystem MET RELATIE-HANDLING voltooid!');
+            
+        } catch (error) {
+            console.error('Fout bij migratie naar FileSystem:', error);
+            throw error;
+        }
+    }
+    
+    async loadFromFileSystem() {
+        try {
+            if (!window.storageManager) {
+                throw new Error('StorageManager niet beschikbaar');
+            }
+            
+            const storageInfo = storageManager.getStorageInfo();
+            if (storageInfo.current !== 'filesystem') {
+                console.log('FileSystem niet actief, laden niet nodig');
+                return { honden: [], fotos: [], priveInfo: [] };
+            }
+            
+            console.log('Laad data uit FileSystem MET RELATIE-HANDLING...');
+            
+            // Zoek naar complete backup bestand eerst
+            const allFiles = await storageManager.getAllFiles();
+            let completeData = null;
+            let individualHonden = [];
+            
+            // Zoek naar complete backup
+            for (const file of allFiles) {
+                if (file.name.includes('complete_backup') || file.name.includes('backup_compleet')) {
+                    console.log('Complete backup gevonden:', file.name);
+                    completeData = await storageManager.load(file.name);
+                    break;
+                }
+            }
+            
+            // Als geen complete backup gevonden, laad individuele bestanden
+            if (!completeData) {
+                console.log('Geen complete backup gevonden, laad individuele bestanden...');
+                
+                // Laad alle honden bestanden
+                const hondenFiles = allFiles.filter(file => file.name.startsWith('hond_'));
+                for (const file of hondenFiles) {
+                    try {
+                        const hondData = await storageManager.load(file.name);
+                        if (hondData && hondData.stamboomnr) {
+                            individualHonden.push(hondData);
+                        }
+                    } catch (error) {
+                        console.error(`Fout bij laden hond uit ${file.name}:`, error);
+                    }
+                }
+                
+                // Laad foto's
+                let fotosData = [];
+                const fotosFile = allFiles.find(file => file.name === 'fotos_compleet.json');
+                if (fotosFile) {
+                    try {
+                        fotosData = await storageManager.load(fotosFile.name) || [];
+                    } catch (error) {
+                        console.error('Fout bij laden foto\'s:', error);
+                    }
+                }
+                
+                // Laad privé info
+                let priveData = [];
+                const priveFile = allFiles.find(file => file.name === 'prive_compleet.json');
+                if (priveFile) {
+                    try {
+                        priveData = await storageManager.load(priveFile.name) || [];
+                    } catch (error) {
+                        console.error('Fout bij laden privé info:', error);
+                    }
+                }
+                
+                completeData = {
+                    metadata: {
+                        exportDatum: new Date().toISOString(),
+                        exportType: 'individual_files',
+                        bevatRelaties: individualHonden.some(h => h.vaderStamboomnr || h.moederStamboomnr)
+                    },
+                    honden: individualHonden,
+                    fotos: fotosData,
+                    priveInfo: priveData
+                };
+            }
+            
+            // Herstel relaties (net als backup import)
+            if (completeData && completeData.honden) {
+                const result = await this.processImportWithRelations(completeData);
+                console.log('FileSystem data geladen en relaties hersteld:', result);
+                return result;
+            }
+            
+            return { honden: [], fotos: [], priveInfo: [] };
+            
+        } catch (error) {
+            console.error('Fout bij laden uit FileSystem:', error);
+            throw error;
+        }
+    }
+    
+    async saveToFileSystem() {
+        try {
+            if (!window.storageManager) {
+                throw new Error('StorageManager niet beschikbaar');
+            }
+            
+            const storageInfo = storageManager.getStorageInfo();
+            if (storageInfo.current !== 'filesystem') {
+                console.log('FileSystem niet actief, opslaan niet nodig');
+                return;
+            }
+            
+            console.log('Sla data op in FileSystem MET RELATIE-HANDLING...');
+            
+            // Zorg dat database beschikbaar is
+            const db = await this.ensureDatabase();
+            
+            // Haal alle honden op
+            const honden = await db.getHonden();
+            
+            // Maak parent lookup map voor relatie-handling (net als in backup)
+            const parentLookupMap = new Map();
+            honden.forEach(hond => {
+                if (hond.stamboomnr) {
+                    parentLookupMap.set(hond.id, {
+                        stamboomnr: hond.stamboomnr,
+                        naam: hond.naam,
+                        kennelnaam: hond.kennelnaam
+                    });
+                }
+            });
+            
+            // Maak een complete backup (net als backup export)
+            const completeData = {
+                metadata: {
+                    exportDatum: new Date().toISOString(),
+                    exportType: 'filesystem_sync',
+                    versie: "2.0",
+                    bevatRelaties: true
+                },
+                honden: honden.map(hond => {
+                    const hondMetRelaties = { ...hond };
+                    
+                    // Voeg vader informatie toe als relatie bestaat
+                    if (hond.vaderId && parentLookupMap.has(hond.vaderId)) {
+                        const vader = parentLookupMap.get(hond.vaderId);
+                        hondMetRelaties.vaderStamboomnr = vader.stamboomnr;
+                        hondMetRelaties.vaderNaam = vader.naam;
+                        hondMetRelaties.vaderKennel = vader.kennelnaam;
+                    }
+                    
+                    // Voeg moeder informatie toe als relatie bestaat
+                    if (hond.moederId && parentLookupMap.has(hond.moederId)) {
+                        const moeder = parentLookupMap.get(hond.moederId);
+                        hondMetRelaties.moederStamboomnr = moeder.stamboomnr;
+                        hondMetRelaties.moederNaam = moeder.naam;
+                        hondMetRelaties.moederKennel = moeder.kennelnaam;
+                    }
+                    
+                    return hondMetRelaties;
+                })
+            };
+            
+            // Voeg foto's toe indien beschikbaar
+            if (typeof db.getAllFotos === 'function') {
+                try {
+                    completeData.fotos = await db.getAllFotos();
+                } catch (e) {
+                    completeData.fotos = [];
+                }
+            }
+            
+            // Voeg privé info toe indien beschikbaar
+            if (typeof db.getAllPriveInfo === 'function') {
+                try {
+                    completeData.priveInfo = await db.getAllPriveInfo();
+                } catch (e) {
+                    completeData.priveInfo = [];
+                }
+            }
+            
+            // Sla complete backup op
+            const backupFilename = this.createSafeFilename(`sync_backup_${new Date().toISOString().replace(/[:.]/g, '-')}`);
+            await storageManager.save(backupFilename, completeData);
+            
+            // Sla ook individuele bestanden op voor compatibiliteit
+            for (const hond of completeData.honden) {
+                let filename = '';
+                if (hond.stamboomnr) {
                     filename = this.createSafeFilename(`hond_${hond.stamboomnr}`);
                 } else if (hond.id) {
                     filename = this.createSafeFilename(`hond_${hond.id}`);
@@ -877,54 +1185,22 @@ class DataManager extends BaseModule {
                 }
             }
             
-            // Haal foto's op (als de functie beschikbaar is)
-            if (typeof db.getAllFotos === 'function') {
-                try {
-                    const fotos = await db.getAllFotos();
-                    console.log(`Migreer ${fotos.length} foto's naar FileSystem...`);
-                    
-                    // Groepeer foto's per stamboomnr
-                    const fotosPerHond = {};
-                    fotos.forEach(foto => {
-                        if (foto.stamboomnr) {
-                            if (!fotosPerHond[foto.stamboomnr]) {
-                                fotosPerHond[foto.stamboomnr] = [];
-                            }
-                            fotosPerHond[foto.stamboomnr].push(foto);
-                        }
-                    });
-                    
-                    // Sla gegroepeerde foto's op
-                    for (const [stamboomnr, hondFotos] of Object.entries(fotosPerHond)) {
-                        const filename = this.createSafeFilename(`fotos_${stamboomnr}`);
-                        await storageManager.save(filename, hondFotos);
-                    }
-                } catch (fotoError) {
-                    console.log('Foto migratie overslagen:', fotoError);
-                }
+            // Sla foto's apart op
+            if (completeData.fotos && completeData.fotos.length > 0) {
+                const fotoFilename = 'fotos_compleet.json';
+                await storageManager.save(fotoFilename, completeData.fotos);
             }
             
-            // Haal privé info op (als de functie beschikbaar is)
-            if (typeof db.getAllPriveInfo === 'function') {
-                try {
-                    const priveInfo = await db.getAllPriveInfo();
-                    console.log(`Migreer ${priveInfo.length} privé records naar FileSystem...`);
-                    
-                    for (const prive of priveInfo) {
-                        if (prive.stamboomnr) {
-                            const filename = this.createSafeFilename(`prive_${prive.stamboomnr}`);
-                            await storageManager.save(filename, prive);
-                        }
-                    }
-                } catch (priveError) {
-                    console.log('Privé info migratie overslagen:', priveError);
-                }
+            // Sla privé info apart op
+            if (completeData.priveInfo && completeData.priveInfo.length > 0) {
+                const priveFilename = 'prive_compleet.json';
+                await storageManager.save(priveFilename, completeData.priveInfo);
             }
             
-            console.log('Data migratie naar FileSystem voltooid!');
+            console.log('Data succesvol opgeslagen in FileSystem MET RELATIE-HANDLING');
             
         } catch (error) {
-            console.error('Fout bij migratie naar FileSystem:', error);
+            console.error('Fout bij opslaan in FileSystem:', error);
             throw error;
         }
     }
@@ -979,7 +1255,8 @@ class DataManager extends BaseModule {
                     <i class="bi bi-folder text-success me-2" style="font-size: 1.5rem;"></i>
                     <div>
                         <strong>${t('fileStorage')} (${t('storageActive')})</strong><br>
-                        <small class="text-muted">Map: ${info.directoryName || 'Geselecteerd'}</small>
+                        <small class="text-muted">Map: ${info.directoryName || 'Geselecteerd'}</small><br>
+                        <small class="text-muted">✓ Relatie-handling actief</small>
                     </div>
                 </div>
             `;
@@ -1181,6 +1458,11 @@ class DataManager extends BaseModule {
                 console.log('Start import...');
                 const result = await this.processImportWithRelations(importData);
                 
+                // Als FileSystem actief is, sla ook daar op
+                if (window.storageManager && window.storageManager.getStorageInfo().current === 'filesystem') {
+                    await this.saveToFileSystem();
+                }
+                
                 this.hideProgress();
                 this.showImportResults(result);
                 await this.loadDatabaseStats();
@@ -1228,7 +1510,8 @@ class DataManager extends BaseModule {
                     containsData: exportData,
                     containsPhotos: exportPhotos,
                     containsPrivate: exportPrivateInfo,
-                    versie: "2.0"
+                    versie: "2.0",
+                    bevatRelaties: true
                 }
             };
             
@@ -1243,6 +1526,7 @@ class DataManager extends BaseModule {
                 try {
                     const honden = await db.getHonden();
                     
+                    // Maak parent lookup map voor relatie-handling (IDENTIEK aan backup logica)
                     const parentLookupMap = new Map();
                     honden.forEach(hond => {
                         if (hond.stamboomnr) {
@@ -1254,9 +1538,11 @@ class DataManager extends BaseModule {
                         }
                     });
                     
+                    // Exporteer honden MET RELATIES (IDENTIEK aan backup)
                     exportDataObj.honden = honden.map(hond => {
                         const exportHond = { ...hond };
                         
+                        // Voeg vader relatie informatie toe
                         if (hond.vaderId && parentLookupMap.has(hond.vaderId)) {
                             const vader = parentLookupMap.get(hond.vaderId);
                             exportHond.vaderStamboomnr = vader.stamboomnr;
@@ -1264,6 +1550,7 @@ class DataManager extends BaseModule {
                             exportHond.vaderKennel = vader.kennelnaam;
                         }
                         
+                        // Voeg moeder relatie informatie toe
                         if (hond.moederId && parentLookupMap.has(hond.moederId)) {
                             const moeder = parentLookupMap.get(hond.moederId);
                             exportHond.moederStamboomnr = moeder.stamboomnr;
@@ -1361,6 +1648,42 @@ class DataManager extends BaseModule {
                     'full',
                     fullFilename
                 );
+            }
+            
+            // Als FileSystem actief is, sla ook daar een backup op
+            if (window.storageManager && window.storageManager.getStorageInfo().current === 'filesystem') {
+                try {
+                    const filesystemBackup = {
+                        metadata: {
+                            ...exportDataObj.metadata,
+                            exportType: 'filesystem_sync_export'
+                        },
+                        honden: exportDataObj.honden,
+                        fotos: exportDataObj.fotos,
+                        priveInfo: exportDataObj.priveInfo
+                    };
+                    
+                    const fsFilename = this.createSafeFilename(`filesystem_backup_${new Date().toISOString().replace(/[:.]/g, '-')}`);
+                    await storageManager.save(fsFilename, filesystemBackup);
+                    
+                    // Sla ook individuele bestanden op
+                    for (const hond of exportDataObj.honden) {
+                        let individualFilename = '';
+                        if (hond.stamboomnr) {
+                            individualFilename = this.createSafeFilename(`hond_${hond.stamboomnr}`);
+                        } else if (hond.id) {
+                            individualFilename = this.createSafeFilename(`hond_${hond.id}`);
+                        }
+                        
+                        if (individualFilename) {
+                            await storageManager.save(individualFilename, hond);
+                        }
+                    }
+                    
+                    console.log('Export ook opgeslagen in FileSystem');
+                } catch (fsError) {
+                    console.error('Kon niet opslaan in FileSystem:', fsError);
+                }
             }
             
             let successDetails = `${t('exportComplete')}<br>`;
@@ -1524,6 +1847,7 @@ class DataManager extends BaseModule {
                     let vaderId = null;
                     let moederId = null;
                     
+                    // Gebruik vaderStamboomnr als beschikbaar (backup stijl)
                     if (importedHond.vaderStamboomnr) {
                         vaderId = stamboomToIdMap.get(importedHond.vaderStamboomnr);
                     } else if (importedHond.vaderId) {
@@ -1533,6 +1857,7 @@ class DataManager extends BaseModule {
                         }
                     }
                     
+                    // Gebruik moederStamboomnr als beschikbaar (backup stijl)
                     if (importedHond.moederStamboomnr) {
                         moederId = stamboomToIdMap.get(importedHond.moederStamboomnr);
                     } else if (importedHond.moederId) {
@@ -1647,76 +1972,106 @@ class DataManager extends BaseModule {
             }
         }
         
-        // === NIEUWE FASE: Sla geïmporteerde data ook op in FileSystem als dat actief is ===
+        // === FASE 5: Sla op in FileSystem MET RELATIE-HANDLING (net als backup) ===
         console.log('Fase 5: Controleer FileSystem opslag voor import...');
         if (window.storageManager && window.storageManager.getStorageInfo().current === 'filesystem') {
-            console.log('FileSystem actief - sla geïmporteerde data ook op in map');
+            console.log('FileSystem actief - sla geïmporteerde data op met relatie-handling');
             
             try {
-                // Sla honden op in FileSystem
-                if (importData.honden && importData.honden.length > 0) {
-                    console.log(`Sla ${importData.honden.length} honden op in FileSystem...`);
-                    for (const hond of importData.honden) {
-                        if (hond.stamboomnr) {
-                            const filename = this.createSafeFilename(`hond_${hond.stamboomnr}`);
-                            await window.storageManager.save(filename, hond);
-                        } else if (hond.id) {
-                            const filename = this.createSafeFilename(`hond_${hond.id}`);
-                            await window.storageManager.save(filename, hond);
-                        }
-                    }
-                }
+                // Bereid data voor met relatie-informatie (net als backup)
+                const exportDataObj = {
+                    metadata: {
+                        exportDatum: new Date().toISOString(),
+                        exportType: 'filesystem_import_backup',
+                        versie: "2.0",
+                        bevatRelaties: true
+                    },
+                    honden: [],
+                    fotos: importData.fotos || [],
+                    priveInfo: importData.priveInfo || []
+                };
                 
-                // Sla foto's op in FileSystem (gegroepeerd per hond)
-                if (importData.fotos && importData.fotos.length > 0) {
-                    console.log(`Sla ${importData.fotos.length} foto's op in FileSystem...`);
-                    const fotosPerHond = {};
-                    importData.fotos.forEach(foto => {
-                        if (foto.stamboomnr) {
-                            if (!fotosPerHond[foto.stamboomnr]) {
-                                fotosPerHond[foto.stamboomnr] = [];
-                            }
-                            fotosPerHond[foto.stamboomnr].push(foto);
+                // Voeg honden toe MET RELATIE-INFORMATIE
+                if (importData.honden && importData.honden.length > 0) {
+                    console.log(`Sla ${importData.honden.length} honden op in FileSystem MET RELATIES...`);
+                    
+                    // Maak parent lookup map voor relatie-handling
+                    const parentLookupMap = new Map();
+                    importData.honden.forEach(hond => {
+                        if (hond.stamboomnr) {
+                            parentLookupMap.set(hond.id, {
+                                stamboomnr: hond.stamboomnr,
+                                naam: hond.naam,
+                                kennelnaam: hond.kennelnaam
+                            });
                         }
                     });
                     
-                    for (const [stamboomnr, fotos] of Object.entries(fotosPerHond)) {
-                        const filename = this.createSafeFilename(`fotos_${stamboomnr}`);
-                        await window.storageManager.save(filename, fotos);
-                    }
-                }
-                
-                // Sla privé info op in FileSystem
-                if (importData.priveInfo && importData.priveInfo.length > 0) {
-                    console.log(`Sla ${importData.priveInfo.length} privé records op in FileSystem...`);
-                    for (const prive of importData.priveInfo) {
-                        if (prive.stamboomnr) {
-                            const filename = this.createSafeFilename(`prive_${prive.stamboomnr}`);
-                            await window.storageManager.save(filename, prive);
+                    exportDataObj.honden = importData.honden.map(hond => {
+                        const hondMetRelaties = { ...hond };
+                        
+                        // Voeg vader relatie informatie toe
+                        if (hond.vaderStamboomnr) {
+                            hondMetRelaties.vaderStamboomnr = hond.vaderStamboomnr;
+                            hondMetRelaties.vaderNaam = hond.vaderNaam;
+                            hondMetRelaties.vaderKennel = hond.vaderKennel;
+                        } else if (hond.vaderId && parentLookupMap.has(hond.vaderId)) {
+                            const vader = parentLookupMap.get(hond.vaderId);
+                            hondMetRelaties.vaderStamboomnr = vader.stamboomnr;
+                            hondMetRelaties.vaderNaam = vader.naam;
+                            hondMetRelaties.vaderKennel = vader.kennelnaam;
+                        }
+                        
+                        // Voeg moeder relatie informatie toe
+                        if (hond.moederStamboomnr) {
+                            hondMetRelaties.moederStamboomnr = hond.moederStamboomnr;
+                            hondMetRelaties.moederNaam = hond.moederNaam;
+                            hondMetRelaties.moederKennel = hond.moederKennel;
+                        } else if (hond.moederId && parentLookupMap.has(hond.moederId)) {
+                            const moeder = parentLookupMap.get(hond.moederId);
+                            hondMetRelaties.moederStamboomnr = moeder.stamboomnr;
+                            hondMetRelaties.moederNaam = moeder.naam;
+                            hondMetRelaties.moederKennel = moeder.kennelnaam;
+                        }
+                        
+                        return hondMetRelaties;
+                    });
+                    
+                    // Sla complete backup op
+                    const backupFilename = this.createSafeFilename(`import_backup_${new Date().toISOString().split('T')[0]}_relaties`);
+                    await window.storageManager.save(backupFilename, exportDataObj);
+                    
+                    // Sla ook individuele bestanden op
+                    for (const hond of exportDataObj.honden) {
+                        let filename = '';
+                        if (hond.stamboomnr) {
+                            filename = this.createSafeFilename(`hond_${hond.stamboomnr}`);
+                        } else if (hond.id) {
+                            filename = this.createSafeFilename(`hond_${hond.id}`);
+                        }
+                        
+                        if (filename) {
+                            await window.storageManager.save(filename, hond);
                         }
                     }
                 }
                 
-                // Maak een complete import backup
-                const importBackup = {
-                    metadata: {
-                        importDatum: new Date().toISOString(),
-                        type: 'import_backup',
-                        aantalHonden: importData.honden ? importData.honden.length : 0,
-                        aantalFotos: importData.fotos ? importData.fotos.length : 0,
-                        aantalPrive: importData.priveInfo ? importData.priveInfo.length : 0
-                    },
-                    data: importData
-                };
+                // Sla foto's op
+                if (exportDataObj.fotos && exportDataObj.fotos.length > 0) {
+                    const fotoFilename = 'fotos_compleet.json';
+                    await window.storageManager.save(fotoFilename, exportDataObj.fotos);
+                }
                 
-                const backupFilename = this.createSafeFilename(`import_backup_${new Date().toISOString().split('T')[0]}`);
-                await window.storageManager.save(backupFilename, importBackup);
+                // Sla privé info op
+                if (exportDataObj.priveInfo && exportDataObj.priveInfo.length > 0) {
+                    const priveFilename = 'prive_compleet.json';
+                    await window.storageManager.save(priveFilename, exportDataObj.priveInfo);
+                }
                 
-                console.log('Import data succesvol opgeslagen in FileSystem');
+                console.log('Import data succesvol opgeslagen in FileSystem MET RELATIE-HANDLING');
                 
             } catch (error) {
                 console.error('Fout bij opslaan import data in FileSystem:', error);
-                // Geen foutmelding naar gebruiker - import in database is al gelukt
             }
         }
         
@@ -1791,7 +2146,7 @@ class DataManager extends BaseModule {
         
         // Voeg FileSystem melding toe als actief
         if (window.storageManager && window.storageManager.getStorageInfo().current === 'filesystem') {
-            summary += `<br><strong>✅ Data ook opgeslagen in map</strong><br>`;
+            summary += `<br><strong>✅ Data opgeslagen in map MET RELATIE-HANDLING</strong><br>`;
         }
         
         summary += `</div>`;
