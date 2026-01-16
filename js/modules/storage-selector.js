@@ -485,98 +485,21 @@ class StorageManager {
     
     async listFiles() {
         if (!this.currentStorage || this.currentStorage.type !== 'filesystem') {
-            console.log('FileSystem niet actief, kan bestanden niet lijsten');
             return [];
         }
         
         try {
             const files = [];
-            const entries = [];
-            
-            // Probeer de directory te lezen
-            try {
-                // Deze methode werkt alleen in moderne browsers
-                for await (const entry of this.currentStorage.directoryHandle.values()) {
-                    entries.push(entry);
-                }
-            } catch (error) {
-                console.log('Kan directory niet lezen met values():', error);
-                // Fallback: probeer bekende bestanden
-                return this.listKnownFiles();
-            }
-            
-            // Verwerk de entries
-            for (const entry of entries) {
+            for await (const entry of this.currentStorage.directoryHandle.values()) {
                 files.push({
                     name: entry.name,
                     kind: entry.kind,
                     type: entry.kind === 'file' ? 'file' : 'directory'
                 });
             }
-            
-            console.log(`Gevonden ${files.length} bestanden in map`);
             return files;
-            
         } catch (error) {
             console.error('Fout bij lijsten van bestanden:', error);
-            return this.listKnownFiles();
-        }
-    }
-    
-    async listKnownFiles() {
-        console.log('Gebruik fallback: probeer bekende bestanden te vinden...');
-        const knownFiles = [];
-        
-        try {
-            // Probeer een paar bekende bestanden te vinden
-            const testFiles = ['config.json', 'hond_12345.json', 'fotos_12345.json'];
-            
-            for (const filename of testFiles) {
-                try {
-                    const fileHandle = await this.currentStorage.directoryHandle.getFileHandle(filename);
-                    const file = await fileHandle.getFile();
-                    if (file) {
-                        knownFiles.push({
-                            name: filename,
-                            kind: 'file',
-                            type: 'file'
-                        });
-                    }
-                } catch (e) {
-                    // Bestand bestaat niet, dat is ok
-                }
-            }
-            
-        } catch (error) {
-            console.log('Kon zelfs bekende bestanden niet vinden:', error);
-        }
-        
-        return knownFiles;
-    }
-    
-    async getAllFiles() {
-        try {
-            const files = await this.listFiles();
-            const allData = [];
-            
-            for (const file of files) {
-                if (file.name.endsWith('.json')) {
-                    const key = file.name.replace('.json', '');
-                    const data = await this.load(key);
-                    if (data) {
-                        allData.push({
-                            filename: file.name,
-                            key: key,
-                            data: data
-                        });
-                    }
-                }
-            }
-            
-            return allData;
-            
-        } catch (error) {
-            console.error('Fout bij ophalen alle bestanden:', error);
             return [];
         }
     }
