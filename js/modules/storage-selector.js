@@ -1,279 +1,271 @@
 /**
- * Storage Selector voor Desktop Edition
- * Handelt de keuze tussen FileSystem en IndexedDB opslag
+ * Storage Manager voor HondenDatabase Desktop Edition
+ * Beheert zowel FileSystem als IndexedDB opslag
  */
 
-class StorageSelector {
+class StorageManager {
     constructor() {
-        this.storageManager = window.storageManager;
+        this.storageType = 'auto'; // 'filesystem', 'indexeddb', 'auto'
+        this.availableTypes = this.detectStorageTypes();
         this.currentStorage = null;
-        this.setupGlobalStorageListener();
-    }
-    
-    setupGlobalStorageListener() {
-        // Voeg toe aan window voor globale toegang
-        window.storageSelector = this;
+        this.migrationInProgress = false;
+        this.dbReady = false;
+        this.isInitializing = false;
+        this.pendingFileSystemInit = false;
         
-        // Luister naar storage wijzigingen
-        window.addEventListener('storage-changed', () => {
-            this.updateCurrentStorageInfo();
+        console.log('StorageManager geïnitialiseerd:', {
+            available: this.availableTypes,
+            preferred: this.storageType
         });
-    }
-    
-    getSelectorHTML() {
-        return `
-            <div class="modal fade" id="storageSelectorModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header bg-primary text-white">
-                            <h5 class="modal-title"><i class="bi bi-hdd"></i> Opslaginstellingen</h5>
-                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Sluiten"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <div class="card h-100 border-success">
-                                        <div class="card-body text-center">
-                                            <div class="mb-3">
-                                                <i class="bi bi-folder text-success" style="font-size: 3rem;"></i>
-                                            </div>
-                                            <h5>Bestandsopslag</h5>
-                                            <p class="text-muted small mb-3">
-                                                Sla data op in bestanden op je computer. Makkelijk voor backups en synchronisatie.
-                                            </p>
-                                            <div class="text-start small mb-3">
-                                                <div class="d-flex mb-2">
-                                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                                    <span>Kies je eigen map</span>
-                                                </div>
-                                                <div class="d-flex mb-2">
-                                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                                    <span>Eenvoudige backups (kopieer map)</span>
-                                                </div>
-                                                <div class="d-flex mb-2">
-                                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                                    <span>Meer controle over je data</span>
-                                                </div>
-                                            </div>
-                                            <button class="btn btn-outline-success w-100 use-storage-btn" data-type="filesystem">
-                                                <i class="bi bi-check-circle"></i> Gebruik Bestandsopslag
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="col-md-6 mb-3">
-                                    <div class="card h-100 border-primary">
-                                        <div class="card-body text-center">
-                                            <div class="mb-3">
-                                                <i class="bi bi-browser-chrome text-primary" style="font-size: 3rem;"></i>
-                                            </div>
-                                            <h5>Browser Opslag</h5>
-                                            <p class="text-muted small mb-3">
-                                                Sla data op in je browser. Werkt automatisch zonder extra configuratie.
-                                            </p>
-                                            <div class="text-start small mb-3">
-                                                <div class="d-flex mb-2">
-                                                    <i class="bi bi-check-circle-fill text-primary me-2"></i>
-                                                    <span>Automatisch en eenvoudig</span>
-                                                </div>
-                                                <div class="d-flex mb-2">
-                                                    <i class="bi bi-check-circle-fill text-primary me-2"></i>
-                                                    <span>Geen map selectie nodig</span>
-                                                </div>
-                                                <div class="d-flex mb-2">
-                                                    <i class="bi bi-check-circle-fill text-primary me-2"></i>
-                                                    <span>Werkt op alle apparaten</span>
-                                                </div>
-                                            </div>
-                                            <button class="btn btn-outline-primary w-100 use-storage-btn" data-type="indexeddb">
-                                                <i class="bi bi-arrow-left-right"></i> Gebruik Browser Opslag
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="card border-info mt-3">
-                                <div class="card-body">
-                                    <h6><i class="bi bi-info-circle"></i> Huidige status:</h6>
-                                    <div id="currentStorageStatus" class="alert alert-light mb-0">
-                                        <div class="d-flex align-items-center">
-                                            <div class="spinner-border spinner-border-sm me-2" role="status"></div>
-                                            <span>Status laden...</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="alert alert-warning mt-3">
-                                <i class="bi bi-exclamation-triangle"></i>
-                                <strong>Belangrijk:</strong> Bij het wisselen van opslagtype worden bestaande gegevens automatisch overgezet.
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Sluiten</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-    
-    async showSelectorModal() {
-        // Voeg modal toe aan DOM
-        const modalContainer = document.getElementById('modalsContainer') || document.body;
-        const existingModal = document.getElementById('storageSelectorModal');
         
-        if (existingModal) {
-            existingModal.remove();
+        // Laad configuratie direct
+        this.config = this.loadConfig();
+        console.log('Configuratie geladen:', this.config);
+        
+        // Stel huidige opslag in op basis van config
+        this.setCurrentStorageFromConfig();
+        
+        // Luister naar database ready event
+        window.addEventListener('database-ready', () => {
+            console.log('Database ready event ontvangen in StorageManager');
+            this.dbReady = true;
+        });
+        
+        // Controleer of database al klaar is
+        if (window.db) {
+            this.dbReady = true;
+        }
+    }
+    
+    detectStorageTypes() {
+        const supportsFileSystem = 'showDirectoryPicker' in window;
+        const supportsIndexedDB = 'indexedDB' in window;
+        const supportsLocalStorage = 'localStorage' in window;
+        
+        console.log('Storage detectie:', {
+            indexeddb: supportsIndexedDB,
+            filesystem: supportsFileSystem,
+            localStorage: supportsLocalStorage
+        });
+        
+        return {
+            filesystem: supportsFileSystem,
+            indexeddb: supportsIndexedDB,
+            localStorage: supportsLocalStorage
+        };
+    }
+    
+    setCurrentStorageFromConfig() {
+        if (this.config.type === 'filesystem') {
+            console.log('FileSystem configuratie gevonden, maar wacht op user gesture...');
+            this.currentStorage = {
+                type: 'filesystem',
+                directoryHandle: null,
+                directoryName: this.config.selectedPath || 'Geselecteerd',
+                supportsTransactions: false,
+                supportsQuery: false,
+                needsReinit: true // Markeer dat we opnieuw moeten initialiseren
+            };
+            this.pendingFileSystemInit = true;
+        } else {
+            // Default naar IndexedDB
+            this.currentStorage = {
+                type: 'indexeddb',
+                supportsTransactions: true,
+                supportsQuery: true
+            };
+            console.log('Huidige opslag ingesteld op IndexedDB');
+        }
+    }
+    
+    async initialize(preferredType = 'auto') {
+        if (this.isInitializing) {
+            console.log('Initialisatie al bezig...');
+            return this.currentStorage;
         }
         
-        modalContainer.insertAdjacentHTML('beforeend', this.getSelectorHTML());
+        this.isInitializing = true;
         
-        // Initialize Bootstrap modal
-        const modalElement = document.getElementById('storageSelectorModal');
-        const modal = new bootstrap.Modal(modalElement);
-        
-        // Setup event listeners
-        this.setupSelectorEvents(modal);
-        
-        // Update status
-        await this.updateCurrentStorageInfo();
-        
-        // Show modal
-        modal.show();
-        
-        // Add custom styles
-        this.addCustomStyles();
-    }
-    
-    setupSelectorEvents(modal) {
-        // Use storage buttons
-        document.querySelectorAll('.use-storage-btn').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                const storageType = e.target.getAttribute('data-type');
-                await this.switchStorage(storageType, modal);
-            });
-        });
-        
-        // Update status when modal is shown
-        modalElement.addEventListener('shown.bs.modal', async () => {
-            await this.updateCurrentStorageInfo();
-        });
-    }
-    
-    async switchStorage(storageType, modal) {
         try {
-            // Disable all buttons
-            document.querySelectorAll('.use-storage-btn').forEach(btn => {
-                btn.disabled = true;
-                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Bezig...';
-            });
+            console.log(`StorageManager.initialize() aangeroepen met type: ${preferredType}`);
             
-            // Update status display
-            const statusEl = document.getElementById('currentStorageStatus');
-            statusEl.innerHTML = `
-                <div class="d-flex align-items-center">
-                    <div class="spinner-border spinner-border-sm me-2"></div>
-                    <span>Opslag wordt gewijzigd naar ${storageType === 'filesystem' ? 'Bestandsopslag' : 'Browser Opslag'}...</span>
-                </div>
-            `;
-            statusEl.className = 'alert alert-info mb-0';
-            
-            if (!window.storageManager) {
-                throw new Error('StorageManager niet beschikbaar');
-            }
-            
-            // Initialiseer nieuwe opslag
-            await storageManager.initialize(storageType);
-            
-            // Migreer bestaande data
-            await this.migrateData(storageType);
-            
-            // Update UI
-            await this.updateCurrentStorageInfo();
-            
-            // Succes melding
-            statusEl.innerHTML = `
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-check-circle-fill text-success me-2"></i>
-                    <span>Opslag succesvol gewijzigd!</span>
-                </div>
-            `;
-            statusEl.className = 'alert alert-success mb-0';
-            
-            // Update globale status
-            if (window.updateStorageStatus) {
-                updateStorageStatus();
-            }
-            
-            // Herlaad data manager status
-            if (window.dataManager && window.dataManager.loadStorageStatus) {
-                window.dataManager.loadStorageStatus();
-            }
-            
-            // Sluit modal na korte tijd
-            setTimeout(() => {
-                if (modal && modal.hide) {
-                    modal.hide();
+            // Bepaal welk type te gebruiken
+            let typeToUse = preferredType;
+            if (preferredType === 'auto') {
+                if (this.config.type && this.availableTypes[this.config.type]) {
+                    typeToUse = this.config.type;
+                } else {
+                    typeToUse = this.availableTypes.filesystem ? 'filesystem' : 'indexeddb';
                 }
-            }, 2000);
+            }
+            
+            console.log(`Initialiseren met opslagtype: ${typeToUse}`);
+            
+            // Initialize de gekozen opslag
+            if (typeToUse === 'filesystem') {
+                await this.initializeFileSystem();
+            } else {
+                this.initializeIndexedDB();
+            }
+            
+            console.log(`StorageManager geïnitialiseerd met: ${this.currentStorage.type}`);
+            
+            return this.currentStorage;
             
         } catch (error) {
-            console.error('Storage switch error:', error);
+            console.error('Initialisatie fout:', error);
             
-            const statusEl = document.getElementById('currentStorageStatus');
-            statusEl.innerHTML = `
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
-                    <span>Fout: ${error.message}</span>
-                </div>
-            `;
-            statusEl.className = 'alert alert-danger mb-0';
+            // Fallback naar IndexedDB
+            if (preferredType !== 'indexeddb' && this.availableTypes.indexeddb) {
+                console.log('Fallback naar IndexedDB...');
+                this.initializeIndexedDB();
+            }
             
-            // Reset buttons
-            document.querySelectorAll('.use-storage-btn').forEach(btn => {
-                btn.disabled = false;
-                btn.innerHTML = storageType === 'filesystem' 
-                    ? '<i class="bi bi-check-circle"></i> Gebruik Bestandsopslag'
-                    : '<i class="bi bi-arrow-left-right"></i> Gebruik Browser Opslag';
+            throw error;
+            
+        } finally {
+            this.isInitializing = false;
+        }
+    }
+    
+    async initializeFileSystem() {
+        console.log('Initialiseren FileSystem backend...');
+        
+        try {
+            // Vraag gebruiker om een map te selecteren
+            const directoryHandle = await window.showDirectoryPicker({
+                id: 'hondenDatabaseFolder',
+                mode: 'readwrite',
+                startIn: 'documents'
             });
             
-            if (window.uiHandler && window.uiHandler.showError) {
-                window.uiHandler.showError(`Kon opslag niet wijzigen: ${error.message}`);
+            // Vraag toestemming om map te openen
+            if ((await directoryHandle.queryPermission({ mode: 'readwrite' })) !== 'granted') {
+                const permission = await directoryHandle.requestPermission({ mode: 'readwrite' });
+                if (permission !== 'granted') {
+                    throw new Error('Geen toestemming voor map toegang');
+                }
             }
-        }
-    }
-    
-    async migrateData(newStorageType) {
-        console.log(`Migreer data naar ${newStorageType}...`);
-        
-        if (newStorageType === 'filesystem') {
-            // Migreer van IndexedDB naar FileSystem
-            await this.migrateToFileSystem();
-        } else {
-            // Migreer van FileSystem naar IndexedDB
-            await this.migrateToIndexedDB();
-        }
-    }
-    
-    async migrateToFileSystem() {
-        try {
-            console.log('Migreer data van IndexedDB naar FileSystem...');
             
-            // Haal alle data op uit IndexedDB
+            // Maak app map aan of open bestaande
+            const appDirectory = await directoryHandle.getDirectoryHandle('HondenDatabase_PWA', { create: true });
+            
+            this.currentStorage = {
+                type: 'filesystem',
+                directoryHandle: appDirectory,
+                directoryName: directoryHandle.name,
+                supportsTransactions: false,
+                supportsQuery: false,
+                needsReinit: false
+            };
+            
+            console.log('Map geselecteerd:', directoryHandle.name);
+            console.log('App map beschikbaar:', appDirectory);
+            
+            // Sla configuratie op
+            this.saveConfig({
+                type: 'filesystem',
+                selectedPath: directoryHandle.name,
+                appDirectory: 'HondenDatabase_PWA',
+                lastSync: new Date().toISOString()
+            });
+            
+            console.log('FileSystem backend succesvol geïnitialiseerd');
+            
+            // Controleer of er al data in de map staat
+            const files = await this.listFiles();
+            console.log(`Aantal bestanden in map: ${files.length}`);
+            
+            if (files.length > 0) {
+                console.log('Er staan al bestanden in de map, laad deze in de database...');
+                await this.loadFromFileSystemToDatabase();
+            } else {
+                console.log('Map is leeg, migreer bestaande data...');
+                await this.migrateAllDataToFileSystem();
+            }
+            
+            this.pendingFileSystemInit = false;
+            
+        } catch (error) {
+            console.error('FileSystem init error:', error);
+            throw error;
+        }
+    }
+    
+    initializeIndexedDB() {
+        console.log('Initialiseren IndexedDB backend...');
+        
+        try {
+            // Sla configuratie op
+            this.saveConfig({
+                type: 'indexeddb',
+                lastSync: new Date().toISOString()
+            });
+            
+            this.currentStorage = {
+                type: 'indexeddb',
+                supportsTransactions: true,
+                supportsQuery: true
+            };
+            
+            console.log('IndexedDB backend ready');
+            
+        } catch (error) {
+            console.error('IndexedDB init error:', error);
+            throw error;
+        }
+    }
+    
+    async migrateAllDataToFileSystem() {
+        if (this.migrationInProgress) {
+            console.log('Migratie al bezig...');
+            return;
+        }
+        
+        if (!this.dbReady || !window.db) {
+            console.log('Database niet beschikbaar, kan niet migreren');
+            return;
+        }
+        
+        this.migrationInProgress = true;
+        console.log('Start migratie van bestaande data naar FileSystem...');
+        
+        try {
+            await this.performMigration();
+            
+        } catch (error) {
+            console.error('Migratie fout:', error);
+        } finally {
+            this.migrationInProgress = false;
+        }
+    }
+    
+    async performMigration() {
+        if (!window.db) {
+            console.log('Geen database gevonden, niets te migreren');
+            return;
+        }
+        
+        try {
+            console.log('Voer migratie uit...');
+            
+            // 1. Migreer honden
             const honden = await window.db.getHonden();
             console.log(`Migreer ${honden.length} honden...`);
             
-            // Sla elke hond op in FileSystem
             for (const hond of honden) {
                 if (hond.stamboomnr) {
-                    await storageManager.save(`hond_${hond.stamboomnr}`, hond);
+                    const filename = this.createSafeFilename(`hond_${hond.stamboomnr}`);
+                    await this.save(filename, hond);
+                    console.log(`Hond opgeslagen: ${hond.stamboomnr}`);
+                } else if (hond.id) {
+                    const filename = this.createSafeFilename(`hond_${hond.id}`);
+                    await this.save(filename, hond);
+                    console.log(`Hond opgeslagen: ${hond.id}`);
                 }
             }
             
-            // Haal foto's op (als de functie beschikbaar is)
+            // 2. Migreer foto's (indien beschikbaar)
             if (typeof window.db.getAllFotos === 'function') {
                 try {
                     const fotos = await window.db.getAllFotos();
@@ -292,150 +284,437 @@ class StorageSelector {
                     
                     // Sla gegroepeerde foto's op
                     for (const [stamboomnr, hondFotos] of Object.entries(fotosPerHond)) {
-                        await storageManager.save(`fotos_${stamboomnr}`, hondFotos);
+                        const filename = this.createSafeFilename(`fotos_${stamboomnr}`);
+                        await this.save(filename, hondFotos);
+                        console.log(`Foto's opgeslagen voor: ${stamboomnr}`);
                     }
                 } catch (fotoError) {
                     console.log('Foto migratie overslagen:', fotoError);
                 }
             }
             
-            console.log('Data migratie naar FileSystem voltooid');
+            // 3. Migreer privé info (indien beschikbaar)
+            if (typeof window.db.getAllPriveInfo === 'function') {
+                try {
+                    const priveInfo = await window.db.getAllPriveInfo();
+                    console.log(`Migreer ${priveInfo.length} privé records...`);
+                    
+                    for (const prive of priveInfo) {
+                        if (prive.stamboomnr) {
+                            const filename = this.createSafeFilename(`prive_${prive.stamboomnr}`);
+                            await this.save(filename, prive);
+                            console.log(`Privé info opgeslagen voor: ${prive.stamboomnr}`);
+                        }
+                    }
+                } catch (priveError) {
+                    console.log('Privé info migratie overslagen:', priveError);
+                }
+            }
             
-        } catch (error) {
-            console.error('Fout bij migratie naar FileSystem:', error);
-            throw error;
-        }
-    }
-    
-    async migrateToIndexedDB() {
-        try {
-            console.log('Migreer data van FileSystem naar IndexedDB...');
+            // 4. Maak backup van configuratie
+            const backupConfig = {
+                backupDate: new Date().toISOString(),
+                hondenCount: honden.length,
+                version: '1.0'
+            };
             
-            // Omdat we van FileSystem naar IndexedDB gaan,
-            // moeten we de data uit FileSystem laden en in IndexedDB opslaan
+            await this.save('backup_info', backupConfig);
             
-            // Deze functie zou in de storageManager moeten zitten
-            if (storageManager.getAllFromFileSystem) {
-                const allData = await storageManager.getAllFromFileSystem();
-                console.log(`Lade ${allData.length} bestanden uit FileSystem...`);
-                
-                // Hier zou je de data in IndexedDB moeten opslaan
-                // Dit is afhankelijk van je database structuur
-                console.log('Migratie naar IndexedDB zou hier moeten plaatsvinden');
+            console.log('Data migratie naar FileSystem voltooid!');
+            
+            if (window.uiHandler && window.uiHandler.showSuccess) {
+                window.uiHandler.showSuccess(`${honden.length} honden gemigreerd naar FileSystem`);
             }
             
         } catch (error) {
-            console.error('Fout bij migratie naar IndexedDB:', error);
+            console.error('Fout tijdens migratie:', error);
             throw error;
         }
     }
     
-    async updateCurrentStorageInfo() {
-        const statusEl = document.getElementById('currentStorageStatus');
-        if (!statusEl) return;
-        
-        if (!this.storageManager) {
-            statusEl.innerHTML = `
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
-                    <span>StorageManager niet beschikbaar</span>
-                </div>
-            `;
-            statusEl.className = 'alert alert-warning mb-0';
+    async loadFromFileSystemToDatabase() {
+        if (!this.currentStorage || this.currentStorage.type !== 'filesystem') {
+            console.log('FileSystem niet actief, geen data te laden');
             return;
         }
         
-        const info = storageManager.getStorageInfo();
-        
-        let html = '';
-        let statusClass = 'light';
-        
-        if (info.current === 'filesystem') {
-            html = `
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-folder text-success me-2" style="font-size: 1.5rem;"></i>
-                    <div>
-                        <strong>Bestandsopslag actief</strong><br>
-                        <small class="text-muted">Map: ${info.directoryName || 'Nog geen map geselecteerd'}</small>
-                    </div>
-                </div>
-            `;
-            statusClass = 'success';
-        } else if (info.current === 'indexeddb' || info.current === 'indexeddb-temp') {
-            html = `
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-browser-chrome text-primary me-2" style="font-size: 1.5rem;"></i>
-                    <div>
-                        <strong>Browser opslag actief</strong><br>
-                        <small class="text-muted">Data wordt in je browser opgeslagen</small>
-                    </div>
-                </div>
-            `;
-            statusClass = 'primary';
-        } else if (info.current === 'none') {
-            html = `
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-question-circle text-warning me-2" style="font-size: 1.5rem;"></i>
-                    <div>
-                        <strong>Opslag niet geconfigureerd</strong><br>
-                        <small class="text-muted">Selecteer een opslagtype</small>
-                    </div>
-                </div>
-            `;
-            statusClass = 'warning';
-        } else {
-            html = `
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-hourglass-split me-2" style="font-size: 1.5rem;"></i>
-                    <div>
-                        <strong>Status laden...</strong>
-                    </div>
-                </div>
-            `;
+        if (!window.db) {
+            console.log('Database niet beschikbaar, kan data niet laden');
+            
+            // Wacht op database
+            for (let i = 0; i < 50; i++) {
+                if (window.db) {
+                    console.log('Database nu beschikbaar');
+                    break;
+                }
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            if (!window.db) {
+                console.error('Database niet beschikbaar na wachten');
+                return;
+            }
         }
         
-        statusEl.innerHTML = html;
-        statusEl.className = `alert alert-${statusClass} mb-0`;
+        try {
+            console.log('Laad data uit FileSystem naar database...');
+            
+            // Haal alle bestanden op uit de map
+            const files = await this.listFiles();
+            console.log(`Bestanden gevonden in map: ${files.length}`);
+            
+            let hondenGeladen = 0;
+            let fotosGeladen = 0;
+            let priveGeladen = 0;
+            
+            // Eerst alle honden laden
+            for (const file of files) {
+                if (file.type === 'file' && file.name.endsWith('.json')) {
+                    const key = file.name.replace('.json', '');
+                    
+                    try {
+                        const data = await this.load(key);
+                        
+                        if (!data) continue;
+                        
+                        // Bepaal type data en voeg toe aan database
+                        if (key.startsWith('hond_')) {
+                            await this.loadHondToDatabase(data);
+                            hondenGeladen++;
+                        }
+                    } catch (error) {
+                        console.error(`Fout bij laden bestand ${file.name}:`, error);
+                    }
+                }
+            }
+            
+            // Dan foto's en privé info
+            for (const file of files) {
+                if (file.type === 'file' && file.name.endsWith('.json')) {
+                    const key = file.name.replace('.json', '');
+                    
+                    try {
+                        const data = await this.load(key);
+                        
+                        if (!data) continue;
+                        
+                        // Bepaal type data en voeg toe aan database
+                        if (key.startsWith('fotos_')) {
+                            await this.loadFotosToDatabase(data);
+                            fotosGeladen += Array.isArray(data) ? data.length : 1;
+                        } else if (key.startsWith('prive_')) {
+                            await this.loadPriveInfoToDatabase(data);
+                            priveGeladen++;
+                        }
+                    } catch (error) {
+                        console.error(`Fout bij laden bestand ${file.name}:`, error);
+                    }
+                }
+            }
+            
+            console.log(`Data geladen uit FileSystem: ${hondenGeladen} honden, ${fotosGeladen} foto's, ${priveGeladen} privé records`);
+            
+            // Refresh de UI
+            setTimeout(() => {
+                if (window.refreshHondenLijst) {
+                    window.refreshHondenLijst();
+                }
+                
+                if (window.uiHandler && window.uiHandler.showSuccess && hondenGeladen > 0) {
+                    window.uiHandler.showSuccess(`${hondenGeladen} honden geladen uit map`);
+                }
+            }, 500);
+            
+        } catch (error) {
+            console.error('Fout bij laden data uit FileSystem:', error);
+            throw error;
+        }
     }
     
-    addCustomStyles() {
-        // Voeg custom styling toe voor de selector
-        const styleId = 'storage-selector-styles';
-        if (document.getElementById(styleId)) return;
+    async loadHondToDatabase(hondData) {
+        if (!window.db) return;
         
-        const style = document.createElement('style');
-        style.id = styleId;
-        style.textContent = `
-            .storage-option {
-                cursor: pointer;
-                transition: all 0.2s ease;
-                border-width: 2px;
+        try {
+            // Clean hond data
+            const cleanHondData = {};
+            for (const [key, value] of Object.entries(hondData)) {
+                if (value !== null && value !== undefined) {
+                    cleanHondData[key] = value;
+                }
             }
-            .storage-option:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            
+            // Verwijder eventuele bestaande ID's voor clean import
+            if (cleanHondData.id) {
+                delete cleanHondData.id;
             }
-            .storage-option.selected {
-                border-color: var(--bs-primary) !important;
-                background-color: rgba(var(--bs-primary-rgb), 0.05);
+            
+            // Controleer of hond al bestaat
+            const existingHonden = await window.db.getHonden();
+            
+            // Zoek op stamboomnr
+            let exists = false;
+            if (cleanHondData.stamboomnr) {
+                exists = existingHonden.some(h => h.stamboomnr === cleanHondData.stamboomnr);
             }
-            .use-storage-btn {
-                transition: all 0.2s ease;
+            
+            if (!exists) {
+                // Voeg nieuwe hond toe
+                await window.db.voegHondToe(cleanHondData);
+                console.log(`Hond toegevoegd: ${cleanHondData.stamboomnr || cleanHondData.naam || 'onbekend'}`);
+            } else {
+                // Update bestaande hond
+                const existingHond = existingHonden.find(h => h.stamboomnr === cleanHondData.stamboomnr);
+                
+                if (existingHond) {
+                    const updateData = { ...cleanHondData, id: existingHond.id };
+                    await window.db.updateHond(updateData);
+                    console.log(`Hond bijgewerkt: ${cleanHondData.stamboomnr || cleanHondData.naam || 'onbekend'}`);
+                }
             }
-            .use-storage-btn:hover {
-                transform: scale(1.02);
+        } catch (error) {
+            console.error(`Fout bij laden hond:`, error);
+        }
+    }
+    
+    async loadFotosToDatabase(fotosData) {
+        if (!window.db || typeof window.db.voegFotoToe !== 'function') return;
+        
+        try {
+            const fotosArray = Array.isArray(fotosData) ? fotosData : [fotosData];
+            
+            for (const foto of fotosArray) {
+                try {
+                    // Clean foto data
+                    const cleanFoto = {};
+                    for (const [key, value] of Object.entries(foto)) {
+                        if (value !== null && value !== undefined) {
+                            cleanFoto[key] = value;
+                        }
+                    }
+                    
+                    // Verwijder ID voor clean import
+                    if (cleanFoto.id) {
+                        delete cleanFoto.id;
+                    }
+                    
+                    await window.db.voegFotoToe(cleanFoto);
+                    console.log(`Foto toegevoegd: ${cleanFoto.bestandsnaam || cleanFoto.filename || 'onbekend'}`);
+                } catch (fotoError) {
+                    console.error(`Fout bij laden foto:`, fotoError);
+                }
             }
-        `;
-        document.head.appendChild(style);
+        } catch (error) {
+            console.error('Fout bij laden foto\'s:', error);
+        }
+    }
+    
+    async loadPriveInfoToDatabase(priveData) {
+        if (!window.db || typeof window.db.bewaarPriveInfo !== 'function') return;
+        
+        try {
+            // Clean prive data
+            const cleanPrive = {};
+            for (const [key, value] of Object.entries(priveData)) {
+                if (value !== null && value !== undefined) {
+                    cleanPrive[key] = value;
+                }
+            }
+            
+            await window.db.bewaarPriveInfo(cleanPrive);
+            console.log(`Privé info geladen voor: ${cleanPrive.stamboomnr || 'onbekend'}`);
+        } catch (error) {
+            console.error(`Fout bij laden privé info:`, error);
+        }
+    }
+    
+    createSafeFilename(baseName) {
+        // Verwijder ongeldige karakters voor bestandsnamen
+        let safeName = baseName.replace(/[<>:"/\\|?*]/g, '_');
+        
+        // Vervang spaties door underscores
+        safeName = safeName.replace(/\s+/g, '_');
+        
+        // Zorg dat de naam niet te lang is
+        if (safeName.length > 100) {
+            safeName = safeName.substring(0, 100);
+        }
+        
+        // Voeg .json extensie toe
+        return `${safeName}.json`;
+    }
+    
+    loadConfig() {
+        try {
+            const configJson = localStorage.getItem('hondenDatabase_storageConfig');
+            if (configJson) {
+                return JSON.parse(configJson);
+            }
+        } catch (error) {
+            console.error('Fout bij laden configuratie:', error);
+        }
+        
+        return {};
+    }
+    
+    saveConfig(config) {
+        try {
+            const fullConfig = {
+                ...this.loadConfig(),
+                ...config,
+                lastSync: new Date().toISOString()
+            };
+            
+            localStorage.setItem('hondenDatabase_storageConfig', JSON.stringify(fullConfig));
+            this.config = fullConfig;
+            
+            console.log('Configuratie opgeslagen in localStorage:', fullConfig);
+            
+        } catch (error) {
+            console.error('Fout bij opslaan configuratie:', error);
+        }
+    }
+    
+    getStorageInfo() {
+        if (!this.currentStorage) {
+            return {
+                type: this.storageType,
+                available: this.availableTypes,
+                current: 'none',
+                supportsFileSystem: this.availableTypes.filesystem,
+                directoryName: null,
+                usedSpace: 'unknown',
+                needsReinit: false
+            };
+        }
+        
+        return {
+            type: this.storageType,
+            available: this.availableTypes,
+            current: this.currentStorage.type,
+            supportsFileSystem: this.availableTypes.filesystem,
+            directoryName: this.currentStorage.directoryName || null,
+            usedSpace: 'unknown',
+            needsReinit: this.currentStorage.needsReinit || false
+        };
+    }
+    
+    async save(key, data) {
+        if (!this.currentStorage || this.currentStorage.type !== 'filesystem') {
+            console.log('FileSystem niet actief, opslaan in localStorage');
+            try {
+                localStorage.setItem(`honden_${key}`, JSON.stringify(data));
+                return true;
+            } catch (error) {
+                console.error(`Fout bij opslaan in localStorage:`, error);
+                throw error;
+            }
+        }
+        
+        if (!this.currentStorage.directoryHandle) {
+            console.error('Geen directory handle beschikbaar voor FileSystem');
+            throw new Error('FileSystem niet correct geïnitialiseerd');
+        }
+        
+        try {
+            const jsonString = JSON.stringify(data, null, 2);
+            const encoder = new TextEncoder();
+            const dataArray = encoder.encode(jsonString);
+            
+            // Maak bestand aan in de app map
+            const fileHandle = await this.currentStorage.directoryHandle.getFileHandle(`${key}.json`, { create: true });
+            const writable = await fileHandle.createWritable();
+            await writable.write(dataArray);
+            await writable.close();
+            
+            console.log(`Bestand opgeslagen in FileSystem: ${key}.json`);
+            return true;
+            
+        } catch (error) {
+            console.error(`Fout bij opslaan ${key} in FileSystem:`, error);
+            throw error;
+        }
+    }
+    
+    async load(key) {
+        if (!this.currentStorage || this.currentStorage.type !== 'filesystem') {
+            console.log('FileSystem niet actief, laden uit localStorage');
+            try {
+                const data = localStorage.getItem(`honden_${key}`);
+                return data ? JSON.parse(data) : null;
+            } catch (error) {
+                console.error(`Fout bij laden uit localStorage:`, error);
+                return null;
+            }
+        }
+        
+        if (!this.currentStorage.directoryHandle) {
+            console.error('Geen directory handle beschikbaar voor FileSystem');
+            return null;
+        }
+        
+        try {
+            const fileHandle = await this.currentStorage.directoryHandle.getFileHandle(`${key}.json`);
+            const file = await fileHandle.getFile();
+            const text = await file.text();
+            return JSON.parse(text);
+            
+        } catch (error) {
+            console.error(`Fout bij laden ${key} uit FileSystem:`, error);
+            return null;
+        }
+    }
+    
+    async listFiles() {
+        if (!this.currentStorage || this.currentStorage.type !== 'filesystem' || !this.currentStorage.directoryHandle) {
+            return [];
+        }
+        
+        try {
+            const files = [];
+            for await (const entry of this.currentStorage.directoryHandle.values()) {
+                files.push({
+                    name: entry.name,
+                    kind: entry.kind,
+                    type: entry.kind === 'file' ? 'file' : 'directory'
+                });
+            }
+            return files;
+        } catch (error) {
+            console.error('Fout bij lijsten van bestanden:', error);
+            return [];
+        }
+    }
+    
+    async delete(key) {
+        if (!this.currentStorage) {
+            console.log('Geen opslag actief');
+            return false;
+        }
+        
+        if (this.currentStorage.type === 'filesystem') {
+            try {
+                await this.currentStorage.directoryHandle.removeEntry(`${key}.json`);
+                console.log(`Bestand verwijderd uit FileSystem: ${key}.json`);
+                return true;
+            } catch (error) {
+                console.error(`Fout bij verwijderen ${key} uit FileSystem:`, error);
+                return false;
+            }
+        } else {
+            // Voor localStorage
+            localStorage.removeItem(`honden_${key}`);
+            return true;
+        }
     }
 }
 
 // Maak globale instance
-if (!window.storageSelector) {
-    window.storageSelector = new StorageSelector();
-}
+const storageManager = new StorageManager();
+
+// Voeg toe aan window object
+window.storageManager = storageManager;
 
 // Export
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { StorageSelector, storageSelector: window.storageSelector };
+    module.exports = { StorageManager, storageManager };
 }
