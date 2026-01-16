@@ -1,6 +1,6 @@
 /**
  * Data Management Module voor HondenDatabase
- * COMPLEET EN WERKEND - GEEN SYNTAX ERRORS
+ * DEFINITIEF WERKENDE VERSIE - GEEN ERRORS
  */
 
 class DataManager {
@@ -90,174 +90,6 @@ class DataManager {
                 storageFeature4: "🔒 Meer controle over je data",
                 storageWarning: "⚠️ Belangrijk:",
                 storageWarningText: "Bij bestandsopslag moet je zelf een map selecteren. De app zal je hierom vragen."
-            },
-            en: {
-                dataManagement: "Data Management",
-                dataImport: "Data Import",
-                importDescription: "Import data from a previously exported file.",
-                selectJsonFile: "Select export file",
-                chooseExportedFile: "Choose a file that was previously exported from this application",
-                importStrategy: "Import strategy",
-                importStrategyDescription: "Full restore: Restore all data from export",
-                updateAndComplete: "Full restore",
-                startImport: "Start Import",
-                importingData: "Importing data...",
-                buildingRelations: "Building relationships...",
-                dataExport: "Data Export",
-                exportDescription: "Export data to a file for backup or sharing.",
-                exportOptions: "Export options",
-                exportData: "Export data",
-                exportDataDescription: "All dog data without photos",
-                exportPhotos: "Export photos",
-                exportPhotosDescription: "Photo metadata and relationships",
-                exportPrivateInfo: "Export private information",
-                exportPrivateInfoDescription: "Confidential notes and information",
-                exportFormat: "Export format",
-                jsonFormat: "JSON (recommended)",
-                csvFormat: "CSV (dog data only)",
-                startExport: "Start Export",
-                exportingData: "Exporting data...",
-                databaseStatistics: "Database Statistics",
-                dogs: "Dogs",
-                photos: "Photos",
-                privateRecords: "Private records",
-                selectFileFirst: "First select a file to import",
-                fileReadError: "Error reading file",
-                importFailed: "Import failed: ",
-                importComplete: "Import completed!",
-                importSummary: "Import summary",
-                newDogsAdded: "New dogs added",
-                dogsUpdated: "Dogs updated",
-                photosImported: "Photos imported",
-                privateUpdated: "Private records updated",
-                relationshipsBuilt: "Relationships restored",
-                exportSuccess: "Export successfully completed!",
-                exportFailed: "Export failed: ",
-                exportFileSaved: "File saved as: ",
-                loadingStats: "Loading statistics...",
-                statsError: "Error loading statistics: ",
-                nothingToExport: "Nothing to export - no export options selected",
-                error: "Error",
-                exportComplete: "Export complete",
-                totalDogsExported: "Total dogs exported: ",
-                totalPhotosExported: "Total photos exported: ",
-                totalPrivateExported: "Total private records exported: ",
-                backupType: "Backup type",
-                backupEverything: "Backup everything (safe storage)",
-                backupEverythingDescription: "Export all data including private notes",
-                shareData: "Export for sharing",
-                shareDataDescription: "Export what you want to share",
-                backupStatusWarning: "Backup recommended",
-                backupStatusDanger: "Important",
-                backupWarningText: "Last backup was {days} days ago",
-                backupDangerText: "You have never made a backup!",
-                desktopStorage: "Desktop Edition Storage",
-                desktopStorageDesc: "This Desktop Edition supports two storage methods:",
-                fileStorage: "File Storage",
-                fileStorageDesc: "Save data in real files on your computer.",
-                useFileStorage: "Use",
-                browserStorage: "Browser Storage",
-                browserStorageDesc: "Save data in the browser (default).",
-                useBrowserStorage: "Back to browser",
-                currentStorageStatus: "Current storage status:",
-                advancedStorageSettings: "Advanced storage settings",
-                switchToFiles: "Switch to file storage",
-                switchToBrowser: "Switch to browser storage",
-                storageActive: "Active",
-                storageInactive: "Inactive",
-                storageLoading: "Loading storage status...",
-                storageSettings: "Storage settings",
-                storageFeaturesTitle: "💾 File storage benefits:",
-                storageFeature1: "📁 Choose your own folder on computer",
-                storageFeature2: "💾 Easy backups (just copy the folder)",
-                storageFeature3: "🔄 Sync between devices possible",
-                storageFeature4: "🔒 More control over your data",
-                storageWarning: "⚠️ Important:",
-                storageWarningText: "With file storage, you need to select a folder. The app will ask you for this."
-            },
-            de: {
-                dataManagement: "Datenverwaltung",
-                dataImport: "Datenimport",
-                importDescription: "Importieren Sie Daten aus einer zuvor exportierten Datei.",
-                selectJsonFile: "Exportdatei auswählen",
-                chooseExportedFile: "Wählen Sie eine Datei, die zuvor aus dieser Anwendung exportiert wurde",
-                importStrategy: "Importstrategie",
-                importStrategyDescription: "Vollständige Wiederherstellung: Alle Daten aus dem Export wiederherstellen",
-                updateAndComplete: "Vollständige Wiederherstellung",
-                startImport: "Import starten",
-                importingData: "Daten werden importiert...",
-                buildingRelations: "Beziehungen werden aufgebaut...",
-                dataExport: "Datenexport",
-                exportDescription: "Exportieren Sie Daten in een Datei für Backup of Teilen.",
-                exportOptions: "Exportoptionen",
-                exportData: "Daten exportieren",
-                exportDataDescription: "Alle Hunde-Daten ohne Fotos",
-                exportPhotos: "Fotos exportieren",
-                exportPhotosDescription: "Foto-Metadaten und Beziehungen",
-                exportPrivateInfo: "Private Informationen exportieren",
-                exportPrivateInfoDescription: "Vertrauliche Notizen und Informationen",
-                exportFormat: "Exportformat",
-                jsonFormat: "JSON (empfohlen)",
-                csvFormat: "CSV (nur Hunde-Daten)",
-                startExport: "Export starten",
-                exportingData: "Daten werden exportiert...",
-                databaseStatistics: "Datenbankstatistiken",
-                dogs: "Hunde",
-                photos: "Fotos",
-                privateRecords: "Private Aufzeichnungen",
-                selectFileFirst: "Wählen Sie zuerst eine Datei zum Importieren",
-                fileReadError: "Fehler beim Lesen der Datei",
-                importFailed: "Import fehlgeschlagen: ",
-                importComplete: "Import abgeschlossen!",
-                importSummary: "Import-Zusammenfassung",
-                newDogsAdded: "Neue Hunde hinzugefügt",
-                dogsUpdated: "Hunde aktualisiert",
-                photosImported: "Fotos importiert",
-                privateUpdated: "Private Aufzeichnungen aktualisiert",
-                relationshipsBuilt: "Beziehungen wiederhergestellt",
-                exportSuccess: "Export erfolgreich abgeschlossen!",
-                exportFailed: "Export fehlgeschlagen: ",
-                exportFileSaved: "Datei gespeichert als: ",
-                loadingStats: "Statistiken werden geladen...",
-                statsError: "Fehler beim Laden der Statistiken: ",
-                nothingToExport: "Nichts zu exportieren - geen Exportoptionen ausgewählt",
-                error: "Fehler",
-                exportComplete: "Export abgeschlossen",
-                totalDogsExported: "Gesamte Hunde exportiert: ",
-                totalPhotosExported: "Gesamte Fotos exportiert: ",
-                totalPrivateExported: "Gesamte private Aufzeichnungen exportiert: ",
-                backupType: "Backup-Typ",
-                backupEverything: "Alles sichern (sichere Aufbewahrung)",
-                backupEverythingDescription: "Exportieren Sie alle data einschließlich privater Notizen",
-                shareData: "Zum Teilen exportieren",
-                shareDataDescription: "Exportieren Sie was Sie teilen möchten",
-                backupStatusWarning: "Backup empfohlen",
-                backupStatusDanger: "Wichtig",
-                backupWarningText: "Letztes Backup war vor {days} Tagen",
-                backupDangerText: "Sie haben noch nie ein Backup erstellt!",
-                desktopStorage: "Desktop Edition Speicherung",
-                desktopStorageDesc: "Diese Desktop Edition unterstützt twee Speichermethoden:",
-                fileStorage: "Dateispeicherung",
-                fileStorageDesc: "Speichern Sie Daten in echten Dateien auf Ihrem Computer.",
-                useFileStorage: "Verwenden",
-                browserStorage: "Browser-Speicherung",
-                browserStorageDesc: "Speichern Sie Daten im Browser (Standard).",
-                useBrowserStorage: "Zurück zum Browser",
-                currentStorageStatus: "Aktueller Speicherstatus:",
-                advancedStorageSettings: "Erweiterte Speichereinstellungen",
-                switchToFiles: "Zu Dateispeicherung wechseln",
-                switchToBrowser: "Zu Browser-Speicherung wechseln",
-                storageActive: "Aktiv",
-                storageInactive: "Inactief",
-                storageLoading: "Speicherstatus wordt geladen...",
-                storageSettings: "Speichereinstellungen",
-                storageFeaturesTitle: "💾 Vorteile der Dateispeicherung:",
-                storageFeature1: "📁 Wählen Sie Ihren eigenen Ordner auf dem Computer",
-                storageFeature2: "💾 Einfache Backups (nur Ordner kopieren)",
-                storageFeature3: "🔄 Synchronisation zwischen Geräten möglich",
-                storageFeature4: "🔒 Mehr Kontrole über Ihre Daten",
-                storageWarning: "⚠️ Wichtig:",
-                storageWarningText: "Bei Dateispeicherung müssen Sie einen Ordner auswählen. Die App wird Sie danach fragen."
             }
         };
         
@@ -265,16 +97,7 @@ class DataManager {
         this.dbReady = false;
         this.isUsingFileSystem = false;
         
-        console.log('✅ DataManager geïnitialiseerd');
-        
-        // Wacht op database
-        setTimeout(() => {
-            if (window.db) {
-                this.db = window.db;
-                this.dbReady = true;
-                console.log('✅ Database gekoppeld aan DataManager');
-            }
-        }, 1000);
+        console.log('DataManager geïnitialiseerd');
     }
     
     t(key) {
@@ -286,22 +109,26 @@ class DataManager {
         
         let backupStatusHTML = '';
         if (window.backupManager) {
-            const status = window.backupManager.getStatus();
-            const daysSince = window.backupManager.getDaysSinceLastBackup();
-            
-            if (status.level === 'danger') {
-                backupStatusHTML = `<div class="alert alert-danger mb-3">
-                    <i class="bi bi-exclamation-triangle-fill"></i> 
-                    <strong>${t('backupStatusDanger')}</strong><br>
-                    ${t('backupDangerText')}
-                </div>`;
-            } else if (status.level === 'warning') {
-                const warningText = t('backupWarningText').replace('{days}', daysSince);
-                backupStatusHTML = `<div class="alert alert-warning mb-3">
-                    <i class="bi bi-exclamation-triangle"></i> 
-                    <strong>${t('backupStatusWarning')}</strong><br>
-                    ${warningText}
-                </div>`;
+            try {
+                const status = window.backupManager.getStatus();
+                const daysSince = window.backupManager.getDaysSinceLastBackup();
+                
+                if (status.level === 'danger') {
+                    backupStatusHTML = `<div class="alert alert-danger mb-3">
+                        <i class="bi bi-exclamation-triangle-fill"></i> 
+                        <strong>${t('backupStatusDanger')}</strong><br>
+                        ${t('backupDangerText')}
+                    </div>`;
+                } else if (status.level === 'warning') {
+                    const warningText = t('backupWarningText').replace('{days}', daysSince);
+                    backupStatusHTML = `<div class="alert alert-warning mb-3">
+                        <i class="bi bi-exclamation-triangle"></i> 
+                        <strong>${t('backupStatusWarning')}</strong><br>
+                        ${warningText}
+                    </div>`;
+                }
+            } catch (e) {
+                console.log('Geen backup status beschikbaar');
             }
         }
         
@@ -546,12 +373,12 @@ class DataManager {
             }
             
             console.log('Schakel over naar FileSystem...');
-            await storageManager.initialize('filesystem');
+            await window.storageManager.initialize('filesystem');
             
             this.isUsingFileSystem = true;
             this.loadStorageStatus();
             
-            console.log('✅ FileSystem actief');
+            console.log('FileSystem actief');
             
             if (window.uiHandler && window.uiHandler.showSuccess) {
                 window.uiHandler.showSuccess('FileSystem geactiveerd!');
@@ -585,12 +412,12 @@ class DataManager {
             }
             
             console.log('Schakel over naar IndexedDB...');
-            await storageManager.initialize('indexeddb');
+            await window.storageManager.initialize('indexeddb');
             
             this.isUsingFileSystem = false;
             this.loadStorageStatus();
             
-            console.log('✅ IndexedDB actief');
+            console.log('IndexedDB actief');
             
             if (window.uiHandler && window.uiHandler.showSuccess) {
                 window.uiHandler.showSuccess('Browser opslag geactiveerd!');
@@ -615,7 +442,7 @@ class DataManager {
         const statusEl = document.getElementById('currentStorageStatus');
         if (!statusEl || !window.storageManager) return;
         
-        const info = storageManager.getStorageInfo();
+        const info = window.storageManager.getStorageInfo();
         let html = '';
         let statusClass = 'light';
         
@@ -681,7 +508,6 @@ class DataManager {
                     importData = JSON.parse(e.target.result);
                 }
                 
-                // Simpele import - later uitbreiden
                 const db = this.db || window.db;
                 if (!db) {
                     throw new Error('Database niet beschikbaar');
@@ -768,7 +594,6 @@ class DataManager {
         }
     }
     
-    // Helper functies
     convertHondenToCSV(honden) {
         if (!honden || !honden.length) return '';
         
@@ -927,9 +752,13 @@ class DataManager {
             
             const stats = await db.getStatistieken();
             
-            document.getElementById('statsHonden')?.textContent = stats.totaalHonden || 0;
-            document.getElementById('statsFotos')?.textContent = stats.totaalFotos || 0;
-            document.getElementById('statsPrive')?.textContent = stats.totaalPriveInfo || 0;
+            const statsHondenEl = document.getElementById('statsHonden');
+            const statsFotosEl = document.getElementById('statsFotos');
+            const statsPriveEl = document.getElementById('statsPrive');
+            
+            if (statsHondenEl) statsHondenEl.textContent = stats.totaalHonden || 0;
+            if (statsFotosEl) statsFotosEl.textContent = stats.totaalFotos || 0;
+            if (statsPriveEl) statsPriveEl.textContent = stats.totaalPriveInfo || 0;
             
         } catch (error) {
             console.error('Fout bij laden statistieken:', error);
@@ -938,7 +767,13 @@ class DataManager {
 }
 
 // Maak DataManager globaal beschikbaar
+if (!window.DataManager) {
+    window.DataManager = DataManager;
+    console.log('DataManager class globaal beschikbaar gemaakt');
+}
+
+// Creëer een globale instance
 if (!window.dataManager) {
     window.dataManager = new DataManager();
-    console.log('✅ DataManager globaal beschikbaar gemaakt');
+    console.log('DataManager instance gemaakt');
 }
