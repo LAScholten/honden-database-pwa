@@ -235,7 +235,7 @@ class DataManager extends BaseModule {
                 backupStatusWarning: "Backup empfohlen",
                 backupStatusDanger: "Wichtig",
                 backupWarningText: "Letztes Backup war vor {days} Tagen",
-                backupDangerText: "Sie hebben noch nie ein Backup erstellt!",
+                backupDangerText: "Sie haben noch nie ein Backup erstellt!",
                 desktopStorage: "Desktop Edition Speicherung",
                 desktopStorageDesc: "Diese Desktop Edition unterstützt zwei Speichermethoden:",
                 fileStorage: "Dateispeicherung",
@@ -255,7 +255,7 @@ class DataManager extends BaseModule {
                 storageFeaturesTitle: "💾 Vorteile der Dateispeicherung:",
                 storageFeature1: "📁 Wählen Sie Ihren eigenen Ordner auf dem Computer",
                 storageFeature2: "💾 Einfache Backups (nur Ordner kopieren)",
-                storageFeature3: "🔄 Synchronisation zwischen Geräten mogelijk",
+                storageFeature3: "🔄 Synchronisation tussen Geräten mogelijk",
                 storageFeature4: "🔒 Mehr Kontrolle über Ihre Daten",
                 storageWarning: "⚠️ Wichtig:",
                 storageWarningText: "Bei Dateispeicherung müssen Sie einen Ordner auswählen. Die App wird Sie danach fragen."
@@ -268,6 +268,24 @@ class DataManager extends BaseModule {
         
         // Wacht tot database beschikbaar is
         this.initDatabase();
+        
+        // Luister naar storage wijzigingen
+        this.setupStorageListeners();
+    }
+    
+    setupStorageListeners() {
+        // Als FileSystem actief wordt, laad data terug
+        window.addEventListener('storage-changed', async () => {
+            if (window.storageManager) {
+                const info = storageManager.getStorageInfo();
+                if (info.current === 'filesystem') {
+                    // Wacht even zodat database zeker beschikbaar is
+                    setTimeout(async () => {
+                        await this.loadFromFileSystem();
+                    }, 1000);
+                }
+            }
+        });
     }
     
     async initDatabase() {
@@ -278,6 +296,9 @@ class DataManager extends BaseModule {
                 this.db = window.db;
                 this.dbReady = true;
                 console.log('Database gevonden in DataManager');
+                
+                // Controleer of we data moeten laden uit FileSystem
+                await this.checkFileSystemData();
                 break;
             }
             await new Promise(resolve => setTimeout(resolve, 100));
@@ -285,7 +306,16 @@ class DataManager extends BaseModule {
         
         if (!this.db) {
             console.warn('Database nog niet beschikbaar');
-            // Probeer het later opnieuw wanneer de modal getoond wordt
+        }
+    }
+    
+    async checkFileSystemData() {
+        if (!window.storageManager) return;
+        
+        const info = storageManager.getStorageInfo();
+        if (info.current === 'filesystem') {
+            console.log('FileSystem actief, laad data terug...');
+            await this.loadFromFileSystem();
         }
     }
     
@@ -411,9 +441,14 @@ class DataManager extends BaseModule {
                                         <i class="bi bi-hourglass-split"></i> ${t('storageLoading')}
                                     </div>
                                     
-                                    <button class="btn btn-info btn-sm w-100" id="openStorageSettingsBtn">
-                                        <i class="bi bi-gear"></i> ${t('advancedStorageSettings')}
-                                    </button>
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-info btn-sm" id="openStorageSettingsBtn">
+                                            <i class="bi bi-gear"></i> ${t('advancedStorageSettings')}
+                                        </button>
+                                        <button class="btn btn-warning btn-sm" id="loadFromFileSystemBtn">
+                                            <i class="bi bi-arrow-clockwise"></i> Data terugzetten uit map
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                             
@@ -636,6 +671,14 @@ class DataManager extends BaseModule {
             });
         }
         
+        // Nieuwe knop: Laad data terug uit FileSystem
+        const loadFromFileSystemBtn = document.getElementById('loadFromFileSystemBtn');
+        if (loadFromFileSystemBtn) {
+            loadFromFileSystemBtn.addEventListener('click', async () => {
+                await this.loadFromFileSystem();
+            });
+        }
+        
         const modal = document.getElementById('dataManagementModal');
         if (modal) {
             modal.addEventListener('shown.bs.modal', () => {
@@ -750,10 +793,13 @@ class DataManager extends BaseModule {
             // Migreer bestaande data
             await this.migrateToFileSystem();
             
+            // Laad data terug in database
+            await this.loadFromFileSystem();
+            
             this.loadStorageStatus();
             
             if (window.uiHandler && window.uiHandler.showSuccess) {
-                window.uiHandler.showSuccess('Bestandsopslag geactiveerd! Data is opgeslagen in de geselecteerde map.');
+                window.uiHandler.showSuccess('Bestandsopslag geactiveerd! Data is opgeslagen in de geselecteerde map en teruggezet in de app.');
             }
             
             if (window.updateStorageStatus) {
@@ -905,6 +951,144 @@ class DataManager extends BaseModule {
         } catch (error) {
             console.error('Fout bij migratie naar FileSystem:', error);
             throw error;
+        }
+    }
+    
+    async loadFromFileSystem() {
+        try {
+            console.log('Laad data terug uit FileSystem...');
+            
+            // Zorg dat database beschikbaar is
+            const db = await this.ensureDatabase();
+            
+            if (!window.storageManager) {
+                throw new Error('StorageManager niet beschikbaar');
+            }
+            
+            // Controleer of FileSystem actief is
+            const storageInfo = storageManager.getStorageInfo();
+            if (storageInfo.current !== 'filesystem') {
+                console.log('FileSystem niet actief, kan data niet laden');
+                return;
+            }
+            
+            this.showProgress('Data laden uit map...');
+            
+            // Probeer bestanden te lijsten
+            let files = [];
+            try {
+                files = await storageManager.listFiles();
+                console.log(`Gevonden bestanden: ${files.length}`);
+            } catch (listError) {
+                console.log('Kon bestanden niet lijsten:', listError);
+                files = [];
+            }
+            
+            let hondenCount = 0;
+            let fotosCount = 0;
+            let priveCount = 0;
+            
+            // Filter en laad honden bestanden
+            const hondFiles = files.filter(file => file.name.startsWith('hond_') && file.name.endsWith('.json'));
+            console.log(`Gevonden ${hondFiles.length} honden bestanden`);
+            
+            for (const fileInfo of hondFiles) {
+                try {
+                    // Verwijder .json extensie voor de key
+                    const key = fileInfo.name.replace('.json', '');
+                    const hond = await storageManager.load(key);
+                    
+                    if (hond && hond.id) {
+                        // Controleer of hond al bestaat
+                        const existingHonden = await db.getHonden();
+                        const exists = existingHonden.some(existing => 
+                            existing.id === hond.id || 
+                            (hond.stamboomnr && existing.stamboomnr === hond.stamboomnr)
+                        );
+                        
+                        if (!exists) {
+                            // Voeg hond toe aan database
+                            await db.voegHondToe(hond);
+                            hondenCount++;
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Fout bij laden hond bestand ${fileInfo.name}:`, error);
+                }
+            }
+            
+            // Probeer foto bestanden te laden
+            const fotoFiles = files.filter(file => file.name.startsWith('fotos_') && file.name.endsWith('.json'));
+            console.log(`Gevonden ${fotoFiles.length} foto bestanden`);
+            
+            for (const fileInfo of fotoFiles) {
+                try {
+                    const key = fileInfo.name.replace('.json', '');
+                    const fotos = await storageManager.load(key);
+                    
+                    if (Array.isArray(fotos) && fotos.length > 0 && typeof db.voegFotoToe === 'function') {
+                        for (const foto of fotos) {
+                            try {
+                                await db.voegFotoToe(foto);
+                                fotosCount++;
+                            } catch (fotoError) {
+                                console.log('Foto toevoegen mislukt:', fotoError);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Fout bij laden foto bestand ${fileInfo.name}:`, error);
+                }
+            }
+            
+            // Probeer privé bestanden te laden
+            const priveFiles = files.filter(file => file.name.startsWith('prive_') && file.name.endsWith('.json'));
+            console.log(`Gevonden ${priveFiles.length} privé bestanden`);
+            
+            for (const fileInfo of priveFiles) {
+                try {
+                    const key = fileInfo.name.replace('.json', '');
+                    const prive = await storageManager.load(key);
+                    
+                    if (prive && prive.stamboomnr && typeof db.bewaarPriveInfo === 'function') {
+                        try {
+                            await db.bewaarPriveInfo(prive);
+                            priveCount++;
+                        } catch (priveError) {
+                            console.log('Privé info toevoegen mislukt:', priveError);
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Fout bij laden privé bestand ${fileInfo.name}:`, error);
+                }
+            }
+            
+            this.hideProgress();
+            
+            // Toon resultaat
+            let message = `✅ Data succesvol geladen uit map!<br>`;
+            if (hondenCount > 0) message += `✅ ${hondenCount} honden geladen<br>`;
+            if (fotosCount > 0) message += `✅ ${fotosCount} foto's geladen<br>`;
+            if (priveCount > 0) message += `✅ ${priveCount} privé records geladen<br>`;
+            
+            if (hondenCount === 0 && fotosCount === 0 && priveCount === 0) {
+                message = '⚠️ Geen nieuwe data gevonden in de map.';
+            }
+            
+            if (window.uiHandler && window.uiHandler.showSuccess) {
+                window.uiHandler.showSuccess(message);
+            }
+            
+            // Update statistieken
+            await this.loadDatabaseStats();
+            
+        } catch (error) {
+            console.error('Fout bij laden data uit FileSystem:', error);
+            this.hideProgress();
+            
+            if (window.uiHandler && window.uiHandler.showError) {
+                window.uiHandler.showError('Kon data niet laden uit map: ' + error.message);
+            }
         }
     }
     
