@@ -1,161 +1,285 @@
-// storage-manager.js - Abstracte storage laag voor Desktop Edition
+/**
+ * Storage Manager voor HondenDatabase Desktop Edition
+ * Beheert zowel FileSystem als IndexedDB opslag
+ */
+
 class StorageManager {
     constructor() {
-        this.storageType = 'auto';
-        this.availableTypes = this.detectAvailableStorage();
+        this.storageType = 'auto'; // 'filesystem', 'indexeddb', 'auto'
+        this.availableTypes = this.detectStorageTypes();
         this.currentStorage = null;
         this.migrationInProgress = false;
         this.dbReady = false;
-        this.directoryHandle = null;
-        this.config = null;
-        this.configFileName = 'honden-config.json';
+        this.isInitializing = false;
+        this.pendingFileSystemInit = false;
         
         console.log('StorageManager geïnitialiseerd:', {
             available: this.availableTypes,
             preferred: this.storageType
         });
         
-        this.loadConfig();
+        // Laad configuratie direct
+        this.config = this.loadConfig();
+        console.log('Configuratie geladen:', this.config);
+        
+        // Stel huidige opslag in op basis van config
+        this.setCurrentStorageFromConfig();
+        
+        // Luister naar database ready event
+        window.addEventListener('database-ready', () => {
+            console.log('Database ready event ontvangen in StorageManager');
+            this.dbReady = true;
+            
+            // Als FileSystem actief is EN er zijn al bestanden, laad ze dan
+            if (this.currentStorage && this.currentStorage.type === 'filesystem') {
+                console.log('FileSystem actief, controleer of er data is om te laden...');
+                // We laden data pas wanneer de gebruiker dat expliciet vraagt
+            }
+        });
+        
+        // Controleer of database al klaar is
+        if (window.db) {
+            this.dbReady = true;
+        }
     }
     
-    detectAvailableStorage() {
-        const available = {
-            indexeddb: 'indexedDB' in window,
-            filesystem: 'showDirectoryPicker' in window,
-            localStorage: 'localStorage' in window
-        };
+    detectStorageTypes() {
+        const supportsFileSystem = 'showDirectoryPicker' in window;
+        const supportsIndexedDB = 'indexedDB' in window;
+        const supportsLocalStorage = 'localStorage' in window;
         
-        console.log('Storage detectie:', available);
-        return available;
+        console.log('Storage detectie:', {
+            indexeddb: supportsIndexedDB,
+            filesystem: supportsFileSystem,
+            localStorage: supportsLocalStorage
+        });
+        
+        return {
+            filesystem: supportsFileSystem,
+            indexeddb: supportsIndexedDB,
+            localStorage: supportsLocalStorage
+        };
+    }
+    
+    setCurrentStorageFromConfig() {
+        if (this.config.type === 'filesystem') {
+            console.log('FileSystem configuratie gevonden, maar wacht op user gesture...');
+            this.currentStorage = {
+                type: 'filesystem',
+                directoryHandle: null,
+                directoryName: this.config.selectedPath || 'Geselecteerd',
+                supportsTransactions: false,
+                supportsQuery: false,
+                needsReinit: true // Markeer dat we opnieuw moeten initialiseren
+            };
+            this.pendingFileSystemInit = true;
+        } else {
+            // Default naar IndexedDB
+            this.currentStorage = {
+                type: 'indexeddb',
+                supportsTransactions: true,
+                supportsQuery: true
+            };
+            console.log('Huidige opslag ingesteld op IndexedDB');
+        }
     }
     
     async initialize(preferredType = 'auto') {
-        this.storageType = preferredType;
+        if (this.isInitializing) {
+            console.log('Initialisatie al bezig...');
+            return this.currentStorage;
+        }
         
-        if (this.config && this.config.type === 'filesystem') {
-            try {
-                await this.initializeFileSystemWithPath();
-                return this.currentStorage;
-            } catch (error) {
-                console.warn('Kon opgeslagen map niet openen:', error);
+        this.isInitializing = true;
+        
+        try {
+            console.log(`StorageManager.initialize() aangeroepen met type: ${preferredType}`);
+            
+            // Bepaal welk type te gebruiken
+            let typeToUse = preferredType;
+            if (preferredType === 'auto') {
+                if (this.config.type && this.availableTypes[this.config.type]) {
+                    typeToUse = this.config.type;
+                } else {
+                    typeToUse = this.availableTypes.filesystem ? 'filesystem' : 'indexeddb';
+                }
             }
+            
+            console.log(`Initialiseren met opslagtype: ${typeToUse}`);
+            
+            // Initialize de gekozen opslag
+            if (typeToUse === 'filesystem') {
+                await this.initializeFileSystem();
+            } else {
+                this.initializeIndexedDB();
+            }
+            
+            console.log(`StorageManager geïnitialiseerd met: ${this.currentStorage.type}`);
+            
+            return this.currentStorage;
+            
+        } catch (error) {
+            console.error('Initialisatie fout:', error);
+            
+            // Fallback naar IndexedDB
+            if (preferredType !== 'indexeddb' && this.availableTypes.indexeddb) {
+                console.log('Fallback naar IndexedDB...');
+                this.initializeIndexedDB();
+            }
+            
+            throw error;
+            
+        } finally {
+            this.isInitializing = false;
         }
-        
-        if (preferredType === 'filesystem' && this.availableTypes.filesystem) {
-            await this.initializeFileSystem();
-        } else if (this.availableTypes.indexeddb) {
-            await this.initializeIndexedDB();
-        } else {
-            throw new Error('Geen geschikte storage backend beschikbaar');
-        }
-        
-        console.log('StorageManager geïnitialiseerd met:', this.storageType);
-        return this.currentStorage;
     }
     
     async initializeFileSystem() {
-        console.log('Initializing FileSystem backend...');
+        console.log('Initialiseren FileSystem backend...');
         
         try {
-            this.directoryHandle = await window.showDirectoryPicker({
+            // Vraag gebruiker om een map te selecteren
+            const directoryHandle = await window.showDirectoryPicker({
+                id: 'hondenDatabaseFolder',
                 mode: 'readwrite',
                 startIn: 'documents'
             });
             
-            console.log('Map geselecteerd:', this.directoryHandle.name);
-            
-            const appDirName = 'HondenDatabase_PWA';
-            try {
-                this.appDirectoryHandle = await this.directoryHandle.getDirectoryHandle(appDirName, { create: true });
-                console.log('App map beschikbaar:', appDirName);
-            } catch (error) {
-                console.error('Kon app map niet maken:', error);
-                this.appDirectoryHandle = this.directoryHandle;
+            // Vraag toestemming om map te openen
+            if ((await directoryHandle.queryPermission({ mode: 'readwrite' })) !== 'granted') {
+                const permission = await directoryHandle.requestPermission({ mode: 'readwrite' });
+                if (permission !== 'granted') {
+                    throw new Error('Geen toestemming voor map toegang');
+                }
             }
             
-            await this.saveConfig({
-                type: 'filesystem',
-                selectedPath: await this.getDirectoryPath(this.directoryHandle),
-                lastSync: new Date().toISOString(),
-                appDirectory: appDirName
-            });
-            
-            // MIGREER ALLE BESTAANDE DATA DIRECT
-            console.log('Start migratie van alle bestaande data...');
-            await this.migrateAllExistingData();
+            // Maak app map aan of open bestaande
+            const appDirectory = await directoryHandle.getDirectoryHandle('HondenDatabase_PWA', { create: true });
             
             this.currentStorage = {
                 type: 'filesystem',
-                save: async (key, data) => {
-                    return this.saveToFileSystem(key, data);
-                },
-                load: async (key) => {
-                    return this.loadFromFileSystem(key);
-                },
-                delete: async (key) => {
-                    return this.deleteFromFileSystem(key);
-                },
-                list: async () => {
-                    return this.listFilesInFileSystem();
-                },
-                directory: this.appDirectoryHandle
+                directoryHandle: appDirectory,
+                directoryName: directoryHandle.name,
+                supportsTransactions: false,
+                supportsQuery: false,
+                needsReinit: false
             };
             
-            this.storageType = 'filesystem';
-            console.log('FileSystem backend ready, alle data gemigreerd');
+            console.log('Map geselecteerd:', directoryHandle.name);
+            console.log('App map beschikbaar:', appDirectory);
+            
+            // Sla configuratie op
+            this.saveConfig({
+                type: 'filesystem',
+                selectedPath: directoryHandle.name,
+                appDirectory: 'HondenDatabase_PWA',
+                lastSync: new Date().toISOString()
+            });
+            
+            console.log('FileSystem backend succesvol geïnitialiseerd');
+            
+            // Controleer of er al data in de map staat
+            const files = await this.listFiles();
+            console.log(`Aantal bestanden in map: ${files.length}`);
+            
+            if (files.length > 0) {
+                console.log('Er staan al bestanden in de map, laad deze in de database...');
+                await this.loadFromFileSystemToDatabase();
+            } else {
+                console.log('Map is leeg, migreer bestaande data...');
+                await this.migrateAllDataToFileSystem();
+            }
+            
+            this.pendingFileSystemInit = false;
             
         } catch (error) {
-            console.error('FileSystem initialisatie mislukt:', error);
-            throw new Error('Kon geen map selecteren voor opslag');
+            console.error('FileSystem init error:', error);
+            throw error;
         }
     }
     
-    async migrateAllExistingData() {
+    initializeIndexedDB() {
+        console.log('Initialiseren IndexedDB backend...');
+        
         try {
-            // Check of er een database is
-            if (!window.db) {
-                console.log('Geen database gevonden, niets te migreren');
-                return;
-            }
+            // Sla configuratie op
+            this.saveConfig({
+                type: 'indexeddb',
+                lastSync: new Date().toISOString()
+            });
             
-            const migrationData = {
-                metadata: {
-                    migratieDatum: new Date().toISOString(),
-                    type: 'volledige_migratie',
-                    bron: 'IndexedDB',
-                    bestemming: 'FileSystem'
-                }
+            this.currentStorage = {
+                type: 'indexeddb',
+                supportsTransactions: true,
+                supportsQuery: true
             };
             
+            console.log('IndexedDB backend ready');
+            
+        } catch (error) {
+            console.error('IndexedDB init error:', error);
+            throw error;
+        }
+    }
+    
+    async migrateAllDataToFileSystem() {
+        if (this.migrationInProgress) {
+            console.log('Migratie al bezig...');
+            return;
+        }
+        
+        if (!this.dbReady || !window.db) {
+            console.log('Database niet beschikbaar, kan niet migreren');
+            return;
+        }
+        
+        this.migrationInProgress = true;
+        console.log('Start migratie van bestaande data naar FileSystem...');
+        
+        try {
+            await this.performMigration();
+            
+        } catch (error) {
+            console.error('Migratie fout:', error);
+        } finally {
+            this.migrationInProgress = false;
+        }
+    }
+    
+    async performMigration() {
+        if (!window.db) {
+            console.log('Geen database gevonden, niets te migreren');
+            return;
+        }
+        
+        try {
+            console.log('Voer migratie uit...');
+            
             // 1. Migreer honden
-            try {
-                if (typeof window.db.getHonden === 'function') {
-                    migrationData.honden = await window.db.getHonden();
-                    console.log(`${migrationData.honden.length} honden gevonden om te migreren`);
-                    
-                    // Sla honden op per stuk voor betere structuur
-                    for (let i = 0; i < migrationData.honden.length; i++) {
-                        const hond = migrationData.honden[i];
-                        if (hond.stamboomnr) {
-                            await this.saveToFileSystem(`hond_${hond.stamboomnr}`, hond);
-                        } else {
-                            await this.saveToFileSystem(`hond_${hond.id}`, hond);
-                        }
-                    }
+            const honden = await window.db.getHonden();
+            console.log(`Migreer ${honden.length} honden...`);
+            
+            for (const hond of honden) {
+                if (hond.stamboomnr) {
+                    const filename = this.createSafeFilename(`hond_${hond.stamboomnr}`);
+                    await this.save(filename, hond);
+                    console.log(`Hond opgeslagen: ${hond.stamboomnr}`);
+                } else if (hond.id) {
+                    const filename = this.createSafeFilename(`hond_${hond.id}`);
+                    await this.save(filename, hond);
+                    console.log(`Hond opgeslagen: ${hond.id}`);
                 }
-            } catch (error) {
-                console.error('Fout bij migreren honden:', error);
             }
             
-            // 2. Migreer foto's
-            try {
-                if (typeof window.db.getAllFotos === 'function') {
-                    migrationData.fotos = await window.db.getAllFotos();
-                    console.log(`${migrationData.fotos.length} foto's gevonden om te migreren`);
+            // 2. Migreer foto's (indien beschikbaar)
+            if (typeof window.db.getAllFotos === 'function') {
+                try {
+                    const fotos = await window.db.getAllFotos();
+                    console.log(`Migreer ${fotos.length} foto's...`);
                     
-                    // Groepeer foto's per hond
+                    // Groepeer foto's per stamboomnr
                     const fotosPerHond = {};
-                    migrationData.fotos.forEach(foto => {
+                    fotos.forEach(foto => {
                         if (foto.stamboomnr) {
                             if (!fotosPerHond[foto.stamboomnr]) {
                                 fotosPerHond[foto.stamboomnr] = [];
@@ -164,476 +288,439 @@ class StorageManager {
                         }
                     });
                     
-                    // Sla foto's per hond op
-                    for (const [stamboomnr, fotos] of Object.entries(fotosPerHond)) {
-                        await this.saveToFileSystem(`fotos_${stamboomnr}`, fotos);
+                    // Sla gegroepeerde foto's op
+                    for (const [stamboomnr, hondFotos] of Object.entries(fotosPerHond)) {
+                        const filename = this.createSafeFilename(`fotos_${stamboomnr}`);
+                        await this.save(filename, hondFotos);
+                        console.log(`Foto's opgeslagen voor: ${stamboomnr}`);
                     }
+                } catch (fotoError) {
+                    console.log('Foto migratie overslagen:', fotoError);
                 }
-            } catch (error) {
-                console.error('Fout bij migreren foto\'s:', error);
             }
             
-            // 3. Migreer privé info
-            try {
-                if (typeof window.db.getAllPriveInfo === 'function') {
-                    migrationData.priveInfo = await window.db.getAllPriveInfo();
-                    console.log(`${migrationData.priveInfo.length} privé records gevonden om te migreren`);
+            // 3. Migreer privé info (indien beschikbaar)
+            if (typeof window.db.getAllPriveInfo === 'function') {
+                try {
+                    const priveInfo = await window.db.getAllPriveInfo();
+                    console.log(`Migreer ${priveInfo.length} privé records...`);
                     
-                    // Sla privé info per hond op
-                    for (const prive of migrationData.priveInfo) {
+                    for (const prive of priveInfo) {
                         if (prive.stamboomnr) {
-                            await this.saveToFileSystem(`prive_${prive.stamboomnr}`, prive);
+                            const filename = this.createSafeFilename(`prive_${prive.stamboomnr}`);
+                            await this.save(filename, prive);
+                            console.log(`Privé info opgeslagen voor: ${prive.stamboomnr}`);
                         }
                     }
+                } catch (priveError) {
+                    console.log('Privé info migratie overslagen:', priveError);
                 }
-            } catch (error) {
-                console.error('Fout bij migreren privé info:', error);
             }
             
-            // 4. Sla complete migratie backup op
-            await this.saveToFileSystem('migratie_backup_compleet', migrationData);
-            
-            console.log('Migratie voltooid! Alle data staat nu in de map');
-            
-        } catch (error) {
-            console.error('Migratie mislukt:', error);
-            throw error;
-        }
-    }
-    
-    async initializeFileSystemWithPath() {
-        console.log('Probeer opgeslagen map te openen...');
-        
-        if (!this.config || this.config.type !== 'filesystem') {
-            throw new Error('Geen geldige filesystem configuratie gevonden');
-        }
-        
-        try {
-            const directoryHandle = await window.showDirectoryPicker({
-                mode: 'readwrite',
-                startIn: 'documents',
-                id: this.config.selectedPath
-            });
-            
-            this.directoryHandle = directoryHandle;
-            
-            const appDirName = this.config.appDirectory || 'HondenDatabase_PWA';
-            try {
-                this.appDirectoryHandle = await this.directoryHandle.getDirectoryHandle(appDirName, { create: true });
-                console.log('App map geopend:', appDirName);
-            } catch (error) {
-                console.error('Kon app map niet openen:', error);
-                this.appDirectoryHandle = this.directoryHandle;
-            }
-            
-            try {
-                const configFile = await this.appDirectoryHandle.getFileHandle(this.configFileName);
-                console.log('Configuratiebestand gevonden in map');
-            } catch (error) {
-                console.warn('Configuratiebestand niet gevonden, maak nieuw aan');
-                await this.saveConfig(this.config);
-            }
-            
-            this.config.lastSync = new Date().toISOString();
-            await this.saveConfig(this.config);
-            
-            this.currentStorage = {
-                type: 'filesystem',
-                save: async (key, data) => {
-                    return this.saveToFileSystem(key, data);
-                },
-                load: async (key) => {
-                    return this.loadFromFileSystem(key);
-                },
-                delete: async (key) => {
-                    return this.deleteFromFileSystem(key);
-                },
-                list: async () => {
-                    return this.listFilesInFileSystem();
-                },
-                directory: this.appDirectoryHandle
+            // 4. Maak backup van configuratie
+            const backupConfig = {
+                backupDate: new Date().toISOString(),
+                hondenCount: honden.length,
+                version: '1.0'
             };
             
-            this.storageType = 'filesystem';
-            console.log('FileSystem backend hersteld uit configuratie');
+            await this.save('backup_info', backupConfig);
+            
+            console.log('Data migratie naar FileSystem voltooid!');
+            
+            if (window.uiHandler && window.uiHandler.showSuccess) {
+                window.uiHandler.showSuccess(`${honden.length} honden gemigreerd naar FileSystem`);
+            }
             
         } catch (error) {
-            console.error('Kon opgeslagen map niet openen:', error);
+            console.error('Fout tijdens migratie:', error);
             throw error;
         }
     }
     
-    async initializeIndexedDB() {
-        console.log('Initializing IndexedDB backend...');
-        
-        await this.saveConfig({
-            type: 'indexeddb',
-            lastSync: new Date().toISOString()
-        });
+    async loadFromFileSystemToDatabase() {
+        if (!this.currentStorage || this.currentStorage.type !== 'filesystem') {
+            console.log('FileSystem niet actief, geen data te laden');
+            return;
+        }
         
         if (!window.db) {
-            console.warn('Database nog niet beschikbaar, gebruik localStorage als tijdelijke cache');
+            console.log('Database niet beschikbaar, kan data niet laden');
             
-            this.currentStorage = {
-                type: 'indexeddb-temp',
-                save: async (key, data) => {
-                    localStorage.setItem(`temp_${key}`, JSON.stringify(data));
-                    return { success: true, temporary: true, key };
-                },
-                load: async (key) => {
-                    const data = localStorage.getItem(`temp_${key}`);
-                    return data ? JSON.parse(data) : null;
-                },
-                delete: async (key) => {
-                    localStorage.removeItem(`temp_${key}`);
-                    return { success: true };
-                },
-                list: async () => {
-                    const keys = [];
-                    for (let i = 0; i < localStorage.length; i++) {
-                        const key = localStorage.key(i);
-                        if (key.startsWith('temp_')) {
-                            keys.push(key.replace('temp_', ''));
-                        }
-                    }
-                    return keys;
+            // Wacht op database
+            for (let i = 0; i < 50; i++) {
+                if (window.db) {
+                    console.log('Database nu beschikbaar');
+                    break;
                 }
-            };
-        } else {
-            this.currentStorage = {
-                type: 'indexeddb',
-                save: async (key, data) => {
-                    return window.db.saveData(key, data);
-                },
-                load: async (key) => {
-                    return window.db.loadData(key);
-                },
-                delete: async (key) => {
-                    return window.db.deleteData(key);
-                },
-                list: async () => {
-                    return window.db.getAllKeys();
-                }
-            };
-        }
-        
-        this.storageType = 'indexeddb';
-        console.log('IndexedDB backend ready');
-    }
-    
-    async loadConfig() {
-        try {
-            const localStorageConfig = localStorage.getItem('honden-storage-config');
-            if (localStorageConfig) {
-                this.config = JSON.parse(localStorageConfig);
-                console.log('Configuratie geladen uit localStorage:', this.config);
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            
+            if (!window.db) {
+                console.error('Database niet beschikbaar na wachten');
                 return;
             }
+        }
+        
+        try {
+            console.log('Laad data uit FileSystem naar database...');
             
-            this.config = null;
+            // Haal alle bestanden op uit de map
+            const files = await this.listFiles();
+            console.log(`Bestanden gevonden in map: ${files.length}`);
+            
+            let hondenGeladen = 0;
+            let fotosGeladen = 0;
+            let priveGeladen = 0;
+            
+            // Eerst alle honden laden
+            for (const file of files) {
+                if (file.type === 'file' && file.name.endsWith('.json')) {
+                    const key = file.name.replace('.json', '');
+                    
+                    try {
+                        const data = await this.load(key);
+                        
+                        if (!data) continue;
+                        
+                        // Bepaal type data en voeg toe aan database
+                        if (key.startsWith('hond_')) {
+                            await this.loadHondToDatabase(data);
+                            hondenGeladen++;
+                        }
+                    } catch (error) {
+                        console.error(`Fout bij laden bestand ${file.name}:`, error);
+                    }
+                }
+            }
+            
+            // Dan foto's en privé info
+            for (const file of files) {
+                if (file.type === 'file' && file.name.endsWith('.json')) {
+                    const key = file.name.replace('.json', '');
+                    
+                    try {
+                        const data = await this.load(key);
+                        
+                        if (!data) continue;
+                        
+                        // Bepaal type data en voeg toe aan database
+                        if (key.startsWith('fotos_')) {
+                            await this.loadFotosToDatabase(data);
+                            fotosGeladen += Array.isArray(data) ? data.length : 1;
+                        } else if (key.startsWith('prive_')) {
+                            await this.loadPriveInfoToDatabase(data);
+                            priveGeladen++;
+                        }
+                    } catch (error) {
+                        console.error(`Fout bij laden bestand ${file.name}:`, error);
+                    }
+                }
+            }
+            
+            console.log(`Data geladen uit FileSystem: ${hondenGeladen} honden, ${fotosGeladen} foto's, ${priveGeladen} privé records`);
+            
+            // Refresh de UI
+            setTimeout(() => {
+                if (window.refreshHondenLijst) {
+                    window.refreshHondenLijst();
+                }
+                
+                if (window.uiHandler && window.uiHandler.showSuccess && hondenGeladen > 0) {
+                    window.uiHandler.showSuccess(`${hondenGeladen} honden geladen uit map`);
+                }
+            }, 500);
             
         } catch (error) {
-            console.warn('Kon configuratie niet laden:', error);
-            this.config = null;
+            console.error('Fout bij laden data uit FileSystem:', error);
+            throw error;
         }
     }
     
-    async saveConfig(configData) {
+    async loadHondToDatabase(hondData) {
+        if (!window.db) return;
+        
         try {
-            this.config = configData;
+            // Clean hond data
+            const cleanHondData = {};
+            for (const [key, value] of Object.entries(hondData)) {
+                if (value !== null && value !== undefined) {
+                    cleanHondData[key] = value;
+                }
+            }
             
-            localStorage.setItem('honden-storage-config', JSON.stringify(configData));
+            // Verwijder eventuele bestaande ID's voor clean import
+            if (cleanHondData.id) {
+                delete cleanHondData.id;
+            }
             
-            if (configData.type === 'filesystem' && this.appDirectoryHandle) {
-                try {
-                    const fileHandle = await this.appDirectoryHandle.getFileHandle(this.configFileName, { create: true });
-                    const writable = await fileHandle.createWritable();
-                    await writable.write(JSON.stringify(configData, null, 2));
-                    await writable.close();
-                    console.log('Configuratie opgeslagen in map');
-                } catch (error) {
-                    console.warn('Kon configuratie niet in map opslaan:', error);
+            // Controleer of hond al bestaat
+            const existingHonden = await window.db.getHonden();
+            
+            // Zoek op stamboomnr
+            let exists = false;
+            if (cleanHondData.stamboomnr) {
+                exists = existingHonden.some(h => h.stamboomnr === cleanHondData.stamboomnr);
+            }
+            
+            if (!exists) {
+                // Voeg nieuwe hond toe
+                await window.db.voegHondToe(cleanHondData);
+                console.log(`Hond toegevoegd: ${cleanHondData.stamboomnr || cleanHondData.naam || 'onbekend'}`);
+            } else {
+                // Update bestaande hond
+                const existingHond = existingHonden.find(h => h.stamboomnr === cleanHondData.stamboomnr);
+                
+                if (existingHond) {
+                    const updateData = { ...cleanHondData, id: existingHond.id };
+                    await window.db.updateHond(updateData);
+                    console.log(`Hond bijgewerkt: ${cleanHondData.stamboomnr || cleanHondData.naam || 'onbekend'}`);
                 }
             }
         } catch (error) {
-            console.error('Kon configuratie niet opslaan:', error);
+            console.error(`Fout bij laden hond:`, error);
         }
     }
     
-    async getConfigFromFileSystem() {
-        if (!this.appDirectoryHandle) return null;
+    async loadFotosToDatabase(fotosData) {
+        if (!window.db || typeof window.db.voegFotoToe !== 'function') return;
         
         try {
-            const fileHandle = await this.appDirectoryHandle.getFileHandle(this.configFileName);
-            const file = await fileHandle.getFile();
-            const content = await file.text();
-            return JSON.parse(content);
+            const fotosArray = Array.isArray(fotosData) ? fotosData : [fotosData];
+            
+            for (const foto of fotosArray) {
+                try {
+                    // Clean foto data
+                    const cleanFoto = {};
+                    for (const [key, value] of Object.entries(foto)) {
+                        if (value !== null && value !== undefined) {
+                            cleanFoto[key] = value;
+                        }
+                    }
+                    
+                    // Verwijder ID voor clean import
+                    if (cleanFoto.id) {
+                        delete cleanFoto.id;
+                    }
+                    
+                    await window.db.voegFotoToe(cleanFoto);
+                    console.log(`Foto toegevoegd: ${cleanFoto.bestandsnaam || cleanFoto.filename || 'onbekend'}`);
+                } catch (fotoError) {
+                    console.error(`Fout bij laden foto:`, fotoError);
+                }
+            }
         } catch (error) {
-            if (error.name === 'NotFoundError') {
-                return null;
-            }
-            throw error;
+            console.error('Fout bij laden foto\'s:', error);
         }
     }
     
-    async getDirectoryPath(handle) {
-        return handle.name;
-    }
-    
-    async saveToFileSystem(key, data) {
-        if (!this.appDirectoryHandle) {
-            throw new Error('Geen map geselecteerd voor opslag');
-        }
+    async loadPriveInfoToDatabase(priveData) {
+        if (!window.db || typeof window.db.bewaarPriveInfo !== 'function') return;
         
         try {
-            const fileName = `${key}.json`;
-            const fileHandle = await this.appDirectoryHandle.getFileHandle(fileName, { create: true });
-            const writable = await fileHandle.createWritable();
-            
-            await writable.write(JSON.stringify(data, null, 2));
-            await writable.close();
-            
-            console.log('Bestand opgeslagen:', fileName);
-            
-            if (this.config) {
-                this.config.lastSync = new Date().toISOString();
-                await this.saveConfig(this.config);
+            // Clean prive data
+            const cleanPrive = {};
+            for (const [key, value] of Object.entries(priveData)) {
+                if (value !== null && value !== undefined) {
+                    cleanPrive[key] = value;
+                }
             }
             
-            return { 
-                success: true, 
-                type: 'filesystem', 
-                key, 
-                fileName,
-                path: await this.getFilePath(fileHandle)
+            await window.db.bewaarPriveInfo(cleanPrive);
+            console.log(`Privé info geladen voor: ${cleanPrive.stamboomnr || 'onbekend'}`);
+        } catch (error) {
+            console.error(`Fout bij laden privé info:`, error);
+        }
+    }
+    
+    createSafeFilename(baseName) {
+        // Verwijder ongeldige karakters voor bestandsnamen
+        let safeName = baseName.replace(/[<>:"/\\|?*]/g, '_');
+        
+        // Vervang spaties door underscores
+        safeName = safeName.replace(/\s+/g, '_');
+        
+        // Zorg dat de naam niet te lang is
+        if (safeName.length > 100) {
+            safeName = safeName.substring(0, 100);
+        }
+        
+        // Voeg .json extensie toe
+        return `${safeName}.json`;
+    }
+    
+    loadConfig() {
+        try {
+            const configJson = localStorage.getItem('hondenDatabase_storageConfig');
+            if (configJson) {
+                return JSON.parse(configJson);
+            }
+        } catch (error) {
+            console.error('Fout bij laden configuratie:', error);
+        }
+        
+        return {};
+    }
+    
+    saveConfig(config) {
+        try {
+            const fullConfig = {
+                ...this.loadConfig(),
+                ...config,
+                lastSync: new Date().toISOString()
             };
             
-        } catch (error) {
-            console.error('Opslaan naar bestand mislukt:', error);
-            throw error;
-        }
-    }
-    
-    async loadFromFileSystem(key) {
-        if (!this.appDirectoryHandle) {
-            return null;
-        }
-        
-        try {
-            const fileName = `${key}.json`;
-            const fileHandle = await this.appDirectoryHandle.getFileHandle(fileName);
-            const file = await fileHandle.getFile();
-            const content = await file.text();
+            localStorage.setItem('hondenDatabase_storageConfig', JSON.stringify(fullConfig));
+            this.config = fullConfig;
             
-            console.log('Bestand geladen:', fileName);
-            return JSON.parse(content);
+            console.log('Configuratie opgeslagen in localStorage:', fullConfig);
             
         } catch (error) {
-            if (error.name === 'NotFoundError') {
-                console.log('Bestand niet gevonden:', key);
-                return null;
-            }
-            console.error('Laden van bestand mislukt:', error);
-            throw error;
+            console.error('Fout bij opslaan configuratie:', error);
         }
-    }
-    
-    async deleteFromFileSystem(key) {
-        if (!this.appDirectoryHandle) {
-            return { success: false, error: 'Geen map geselecteerd' };
-        }
-        
-        try {
-            const fileName = `${key}.json`;
-            await this.appDirectoryHandle.removeEntry(fileName);
-            console.log('Bestand verwijderd:', fileName);
-            
-            if (this.config) {
-                this.config.lastSync = new Date().toISOString();
-                await this.saveConfig(this.config);
-            }
-            
-            return { success: true, key, fileName };
-            
-        } catch (error) {
-            console.error('Verwijderen van bestand mislukt:', error);
-            return { success: false, error: error.message };
-        }
-    }
-    
-    async listFilesInFileSystem() {
-        if (!this.appDirectoryHandle) {
-            return [];
-        }
-        
-        const keys = [];
-        for await (const [name, handle] of this.appDirectoryHandle.entries()) {
-            if (handle.kind === 'file' && name.endsWith('.json')) {
-                keys.push(name.replace('.json', ''));
-            }
-        }
-        
-        return keys;
-    }
-    
-    async getFilePath(fileHandle) {
-        return fileHandle.name;
-    }
-    
-    async requestDirectoryAccess() {
-        if (!this.availableTypes.filesystem) {
-            throw new Error('FileSystem API niet ondersteund door deze browser');
-        }
-        
-        try {
-            console.log('Requesting directory access...');
-            const directoryHandle = await window.showDirectoryPicker({
-                mode: 'readwrite',
-                startIn: 'documents'
-            });
-            
-            console.log('Directory access granted:', directoryHandle);
-            return directoryHandle;
-        } catch (error) {
-            console.error('Directory access error:', error);
-            throw error;
-        }
-    }
-    
-    async save(key, data) {
-        if (!this.currentStorage) {
-            await this.initialize();
-        }
-        return this.currentStorage.save(key, data);
-    }
-    
-    async load(key) {
-        if (!this.currentStorage) {
-            await this.initialize();
-        }
-        return this.currentStorage.load(key);
-    }
-    
-    async delete(key) {
-        if (!this.currentStorage) {
-            await this.initialize();
-        }
-        return this.currentStorage.delete(key);
-    }
-    
-    async list() {
-        if (!this.currentStorage) {
-            await this.initialize();
-        }
-        return this.currentStorage.list();
-    }
-    
-    async migrate(fromType, toType) {
-        if (this.migrationInProgress) {
-            throw new Error('Migratie al in progress');
-        }
-        
-        this.migrationInProgress = true;
-        console.log(`Start migratie van ${fromType} naar ${toType}`);
-        
-        this.migrationInProgress = false;
-        return { success: true, message: 'Migratie voltooid' };
     }
     
     getStorageInfo() {
-        const hasConfig = this.config !== null;
-        const configType = hasConfig ? this.config.type : 'none';
+        if (!this.currentStorage) {
+            return {
+                type: this.storageType,
+                available: this.availableTypes,
+                current: 'none',
+                supportsFileSystem: this.availableTypes.filesystem,
+                directoryName: null,
+                usedSpace: 'unknown',
+                needsReinit: false
+            };
+        }
         
         return {
             type: this.storageType,
             available: this.availableTypes,
-            current: this.currentStorage ? this.currentStorage.type : 'none',
+            current: this.currentStorage.type,
             supportsFileSystem: this.availableTypes.filesystem,
-            directoryName: this.directoryHandle ? this.directoryHandle.name : null,
-            hasSavedConfig: hasConfig,
-            configType: configType,
-            lastSync: hasConfig ? this.config.lastSync : null
+            directoryName: this.currentStorage.directoryName || null,
+            usedSpace: 'unknown',
+            needsReinit: this.currentStorage.needsReinit || false
         };
     }
     
-    async exportAllDataToDirectory() {
-        if (!this.availableTypes.filesystem) {
-            throw new Error('FileSystem API niet ondersteund');
+    async save(key, data) {
+        if (!this.currentStorage || this.currentStorage.type !== 'filesystem') {
+            console.log('FileSystem niet actief, opslaan in localStorage');
+            try {
+                localStorage.setItem(`honden_${key}`, JSON.stringify(data));
+                return true;
+            } catch (error) {
+                console.error(`Fout bij opslaan in localStorage:`, error);
+                throw error;
+            }
+        }
+        
+        if (!this.currentStorage.directoryHandle) {
+            console.error('Geen directory handle beschikbaar voor FileSystem');
+            throw new Error('FileSystem niet correct geïnitialiseerd');
         }
         
         try {
-            const exportHandle = await window.showDirectoryPicker({
-                mode: 'readwrite',
-                startIn: 'documents'
-            });
+            const jsonString = JSON.stringify(data, null, 2);
+            const encoder = new TextEncoder();
+            const dataArray = encoder.encode(jsonString);
             
-            const exportDirName = `HondenDatabase_Export_${new Date().toISOString().split('T')[0]}`;
-            const exportDir = await exportHandle.getDirectoryHandle(exportDirName, { create: true });
+            // Maak bestand aan in de app map
+            const fileHandle = await this.currentStorage.directoryHandle.getFileHandle(`${key}.json`, { create: true });
+            const writable = await fileHandle.createWritable();
+            await writable.write(dataArray);
+            await writable.close();
             
-            const configData = {
-                type: 'export',
-                exportDate: new Date().toISOString(),
-                source: this.getStorageInfo(),
-                note: 'Export van HondenDatabase'
-            };
-            
-            const configFile = await exportDir.getFileHandle('export-config.json', { create: true });
-            const configWritable = await configFile.createWritable();
-            await configWritable.write(JSON.stringify(configData, null, 2));
-            await configWritable.close();
-            
-            if (this.currentStorage && typeof this.currentStorage.list === 'function') {
-                const keys = await this.currentStorage.list();
-                for (const key of keys) {
-                    const data = await this.currentStorage.load(key);
-                    if (data) {
-                        const dataFile = await exportDir.getFileHandle(`${key}.json`, { create: true });
-                        const dataWritable = await dataFile.createWritable();
-                        await dataWritable.write(JSON.stringify(data, null, 2));
-                        await dataWritable.close();
-                    }
-                }
-            }
-            
-            return {
-                success: true,
-                directory: exportDirName,
-                exportedFiles: await this.listFilesInDirectory(exportDir)
-            };
+            console.log(`Bestand opgeslagen in FileSystem: ${key}.json`);
+            return true;
             
         } catch (error) {
-            console.error('Export mislukt:', error);
+            console.error(`Fout bij opslaan ${key} in FileSystem:`, error);
             throw error;
         }
     }
     
-    async listFilesInDirectory(directoryHandle) {
-        const files = [];
-        for await (const [name, handle] of directoryHandle.entries()) {
-            if (handle.kind === 'file') {
-                files.push(name);
-            }
-        }
-        return files;
-    }
-    
-    async autoDetectConfiguration() {
-        if (this.config && this.config.type === 'filesystem') {
+    async load(key) {
+        if (!this.currentStorage || this.currentStorage.type !== 'filesystem') {
+            console.log('FileSystem niet actief, laden uit localStorage');
             try {
-                await this.initializeFileSystemWithPath();
-                return { type: 'filesystem', success: true };
+                const data = localStorage.getItem(`honden_${key}`);
+                return data ? JSON.parse(data) : null;
             } catch (error) {
-                console.warn('Auto-detect mislukt:', error);
-                return { type: 'unknown', success: false };
+                console.error(`Fout bij laden uit localStorage:`, error);
+                return null;
             }
         }
         
-        return { type: 'none', success: false };
+        if (!this.currentStorage.directoryHandle) {
+            console.error('Geen directory handle beschikbaar voor FileSystem');
+            return null;
+        }
+        
+        try {
+            const fileHandle = await this.currentStorage.directoryHandle.getFileHandle(`${key}.json`);
+            const file = await fileHandle.getFile();
+            const text = await file.text();
+            return JSON.parse(text);
+            
+        } catch (error) {
+            console.error(`Fout bij laden ${key} uit FileSystem:`, error);
+            return null;
+        }
+    }
+    
+    async listFiles() {
+        if (!this.currentStorage || this.currentStorage.type !== 'filesystem' || !this.currentStorage.directoryHandle) {
+            return [];
+        }
+        
+        try {
+            const files = [];
+            for await (const entry of this.currentStorage.directoryHandle.values()) {
+                files.push({
+                    name: entry.name,
+                    kind: entry.kind,
+                    type: entry.kind === 'file' ? 'file' : 'directory'
+                });
+            }
+            return files;
+        } catch (error) {
+            console.error('Fout bij lijsten van bestanden:', error);
+            return [];
+        }
+    }
+    
+    async delete(key) {
+        if (!this.currentStorage) {
+            console.log('Geen opslag actief');
+            return false;
+        }
+        
+        if (this.currentStorage.type === 'filesystem') {
+            try {
+                await this.currentStorage.directoryHandle.removeEntry(`${key}.json`);
+                console.log(`Bestand verwijderd uit FileSystem: ${key}.json`);
+                return true;
+            } catch (error) {
+                console.error(`Fout bij verwijderen ${key} uit FileSystem:`, error);
+                return false;
+            }
+        } else {
+            // Voor localStorage
+            localStorage.removeItem(`honden_${key}`);
+            return true;
+        }
     }
 }
 
+// Maak globale instance
 const storageManager = new StorageManager();
 
+// Voeg toe aan window object
+window.storageManager = storageManager;
+
+// Export
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { StorageManager, storageManager };
 }
