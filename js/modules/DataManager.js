@@ -256,7 +256,7 @@ class DataManager extends BaseModule {
                 storageFeaturesTitle: "💾 Vorteile der Dateispeicherung:",
                 storageFeature1: "📁 Wählen Sie Ihren eigenen Ordner auf dem Computer",
                 storageFeature2: "💾 Einfache Backups (nur Ordner kopieren)",
-                storageFeature3: "🔄 Synchronisation zwischen Geräten möglich",
+                storageFeature3: "🔄 Synchronisation zwischen Geräten mogelijk",
                 storageFeature4: "🔒 Mehr Kontrole über Ihre Daten",
                 storageWarning: "⚠️ Wichtig:",
                 storageWarningText: "Bei Dateispeicherung werden ALLE neuen Daten direkt in den Ordner geschrieben!"
@@ -1037,7 +1037,7 @@ class DataManager extends BaseModule {
             }
             
             const honden = Array.from(this.dogCache.values())
-                .filter(hond => !hond.id.startsWith('stamboom_')) // Filter cache keys
+                .filter(hond => !hond.id || typeof hond.id !== 'string' || !hond.id.startsWith('stamboom_')) // FIX: veilige check
                 .map(hond => ({ ...hond }));
             
             console.log(`📊 Get ${honden.length} honden uit FileSystem cache`);
@@ -1049,7 +1049,7 @@ class DataManager extends BaseModule {
             // Check cache
             if (this.dogCache.has(id)) {
                 const hond = this.dogCache.get(id);
-                if (!hond.id.startsWith('stamboom_')) {
+                if (!hond.id || typeof hond.id !== 'string' || !hond.id.startsWith('stamboom_')) {
                     return { ...hond };
                 }
             }
@@ -1124,7 +1124,7 @@ class DataManager extends BaseModule {
             }
             
             const honden = Array.from(this.dogCache.values())
-                .filter(hond => !hond.id.startsWith('stamboom_'))
+                .filter(hond => !hond.id || typeof hond.id !== 'string' || !hond.id.startsWith('stamboom_'))
                 .map(hond => ({ ...hond }));
             
             if (!zoekTerm) return honden;
@@ -1301,7 +1301,7 @@ class DataManager extends BaseModule {
             }
             
             const honden = Array.from(this.dogCache.values())
-                .filter(hond => !hond.id.startsWith('stamboom_'));
+                .filter(hond => !hond.id || typeof hond.id !== 'string' || !hond.id.startsWith('stamboom_'));
             
             let totaalFotos = 0;
             const allFiles = await storageManager.getAllFiles();
@@ -1911,7 +1911,7 @@ class DataManager extends BaseModule {
                 if (this.isUsingFileSystem) {
                     // Haal honden uit FileSystem cache
                     honden = Array.from(this.dogCache.values())
-                        .filter(hond => !hond.id.startsWith('stamboom_'));
+                        .filter(hond => !hond.id || typeof hond.id !== 'string' || !hond.id.startsWith('stamboom_'));
                 } else {
                     // Haal honden uit database
                     const db = await this.ensureDatabase();
@@ -2372,7 +2372,7 @@ class DataManager extends BaseModule {
                 }
                 
                 const honden = Array.from(this.dogCache.values())
-                    .filter(hond => !hond.id.startsWith('stamboom_'));
+                    .filter(hond => !hond.id || typeof hond.id !== 'string' || !hond.id.startsWith('stamboom_'));
                 
                 stats.totaalHonden = honden.length;
                 
